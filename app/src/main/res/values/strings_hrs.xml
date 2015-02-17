@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2015, Nordic Semiconductor
+  ~ All rights reserved.
+  ~
+  ~ Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+  ~
+  ~ 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+  ~
+  ~ 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the
+  ~ documentation and/or other materials provided with the distribution.
+  ~
+  ~ 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this
+  ~ software without specific prior written permission.
+  ~
+  ~ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ~ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ~ HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ~ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+  ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+  ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  -->
+<resources>
+    <string name="hrs_feature_title">HRM</string>
+    
+    <string name="hrs_feature_title_long">HEART RATE MONITOR</string>
+    <dimen name="hrs_feature_title_long_margin">-152dp</dimen>
+    
+    <string name="hrs_default_name">DEFAULT HRM</string>
+    <string name="hrs_value_unit">bpm</string>
+    <string name="hrs_position_label">sensor position</string>
+    
+    <string-array name="hrs_locations">
+        <item>Other</item>
+        <item>Chest</item>
+        <item>Wrist</item>
+        <item>Finger</item>
+        <item>Hand</item>
+        <item>Ear Lobe</item>
+        <item>Foot</item>
+    </string-array>
+    <string name="hrs_location_other">Reserved</string>
+    
+    <string name="hrs_about_text">HRM (Heart Rate Monitor) profile allows you to connect to your Heart Rate sensor (f.e. a belt). 
+        It shows you the current rate, location of the sensor and a historic data on the graph.</string>
+</resources>

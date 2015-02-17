@@ -1,0 +1,117 @@
+<!--
+  ~ Copyright (c) 2015, Nordic Semiconductor
+  ~ All rights reserved.
+  ~
+  ~ Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+  ~
+  ~ 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+  ~
+  ~ 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the
+  ~ documentation and/or other materials provided with the distribution.
+  ~
+  ~ 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this
+  ~ software without specific prior written permission.
+  ~
+  ~ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ~ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ~ HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ~ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+  ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+  ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="Widget" />
+    
+    <style name="Widget.List">
+        <item name="android:background">@color/backgroundColor</item>
+        <item name="android:gravity">center_horizontal</item>
+    </style>
+
+    <style name="Widget.ListTitle">
+        <item name="android:background">@color/headerBackgroundColor</item>
+        <item name="android:textColor">@color/headerTextColor</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="Widget.ScannerSubtitle">
+        <item name="android:textColor">?attr/colorAccent</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Widget.Button" parent="@android:style/Widget.Holo.Light.Button">
+        <item name="android:minWidth">160dip</item>
+    </style>
+
+    <style name="Widget.Connect" parent="@android:style/Widget.Holo.Light.Button">
+        <item name="android:background">@drawable/button</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:paddingLeft">40dp</item>
+        <item name="android:paddingRight">40dp</item>
+    </style>
+
+    <style name="TextAppearanceDialog" parent="@style/TextAppearance.AppCompat.Subhead">
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
+    </style>
+
+    <style name="TextAppearanceListItem" parent="@style/TextAppearance.AppCompat.Subhead">
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
+    </style>
+    
+    <style name="TextAppearanceButton" parent="@android:style/TextAppearance.Holo.Widget.Button">
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
+    </style>
+    
+    <style name="TextAppearanceTitle" parent="@style/TextAppearance.AppCompat.Caption">
+        <item name="android:textColor">?attr/colorAccent</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    
+    <style name="TextAppearanceLarge" parent="@style/TextAppearance.AppCompat.Large">
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    
+    <style name="PopupMenuTextAppearanceSmall" parent="@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Small">
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
+	</style>
+	<style name="PopupMenuTextAppearanceLarge" parent="@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Large">
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
+	</style>
+
+    <!-- Application theme. -->
+    <style name="AppThemeBase" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+       <item name="android:windowBackground">@drawable/background</item>
+       <item name="actionBarPopupTheme">@style/Theme.AppCompat.Light.DarkActionBar</item>
+        <item name="android:buttonStyle">@style/Widget.Button</item>
+        <item name="android:textAppearanceListItem">@style/TextAppearanceListItem</item>
+        <item name="android:textAppearanceLarge">@style/TextAppearanceLarge</item>
+        <item name="android:textAppearanceButton">@style/TextAppearanceButton</item>
+        <item name="colorPrimary">@color/actionBarColor</item>
+        <item name="colorPrimaryDark">@color/actionBarColorDark</item>
+        <item name="colorAccent">@color/actionBarColorDark</item>
+        <item name="editTextColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColorPrimary">#FFFFFFFF</item>
+        <item name="android:textColorPrimaryInverse">@color/text_color_primary</item>
+	    <item name="android:textAppearanceLargePopupMenu">@style/PopupMenuTextAppearanceLarge</item>
+	    <item name="android:textAppearanceSmallPopupMenu">@style/PopupMenuTextAppearanceSmall</item>
+    </style>
+    
+    <style name="AppTheme" parent="@style/AppThemeBase">
+       <!-- Empty -->
+    </style>
+    
+    <style name="AppTheme.Translucent">
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
+    </style>
+
+    <style name="AppTheme.Fullscreen" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/background</item>
+    </style>
+
+</resources>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2015, Nordic Semiconductor
+  ~ All rights reserved.
+  ~
+  ~ Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+  ~
+  ~ 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+  ~
+  ~ 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the
+  ~ documentation and/or other materials provided with the distribution.
+  ~
+  ~ 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this
+  ~ software without specific prior written permission.
+  ~
+  ~ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ~ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ~ HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ~ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+  ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+  ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  -->
+<resources>
+    <string name="bpm_feature_title">BPM</string>
+    
+    <string name="bpm_feature_title_long">BLOOD PRESSURE</string>
+    <dimen name="bpm_feature_title_long_margin">-115dp</dimen>
+    
+    <string name="bpm_section_bp_header">BLOOD PRESSURE</string>
+    <string name="bpm_systolic">SYSTOLIC</string>
+    <string name="bpm_diastolic">DIASTOLIC</string>
+    <string name="bpm_mean_ap">MEAN AP</string>
+    <string name="bpm_unit_mmhg">mmHg</string>
+    <string name="bpm_unit_kpa">kPa</string>
+    
+    <string name="bpm_section_pulse_header">PULSE RATE</string>
+    <string name="bpm_pulse">PULSE</string>
+    <string name="bpm_unit_bpm">bpm</string>
+    
+    <string name="bpm_section_timestamp_header">TIME &amp; DATE</string>
+    <string name="bpm_timestamp">%1$tT %1$te.%1$tm.%1$tY</string>
+    
+    <string name="bpm_default_name">DEFAULT BPM</string>
+    
+    <string name="bpm_about_text">BPM (Blood Pressure Monitor) profile allows you to connect to your Blood Pressure device. 
+        It supports the cuff pressure notifications and displays systolic, diastolic and mean arterial pulse values as well as the pulse after blood pressure reading is completed. 
+        The implementation supports bondable devices.</string>
+</resources>

@@ -1,0 +1,110 @@
+<!--
+  ~ Copyright (c) 2015, Nordic Semiconductor
+  ~ All rights reserved.
+  ~
+  ~ Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+  ~
+  ~ 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+  ~
+  ~ 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the
+  ~ documentation and/or other materials provided with the distribution.
+  ~
+  ~ 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this
+  ~ software without specific prior written permission.
+  ~
+  ~ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ~ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ~ HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ~ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+  ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+  ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ProximityActivity" >
+
+    <!-- The size of text below must be fixed, therefore dp are used instead of sp -->
+
+    <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/proximity_feature_title_long_margin"
+        android:rotation="270"
+        android:text="@string/proximity_feature_title_long"
+        android:textColor="@color/darkGray"
+        android:textSize="32dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/battery"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="@dimen/feature_horizontal_margin"
+        android:layout_marginTop="@dimen/feature_device_name_margin_top"
+        android:background="@drawable/battery"
+        android:freezesText="true"
+        android:gravity="center"
+        android:text="@string/not_available"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp" />
+
+    <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+        android:id="@+id/device_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="@dimen/feature_device_name_margin_top"
+        android:layout_toRightOf="@+id/battery"
+        android:ellipsize="end"
+        android:freezesText="true"
+        android:maxLines="1"
+        android:text="@string/proximity_default_name"
+        android:textAllCaps="true"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <ImageView
+        android:id="@+id/imageLock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/device_name"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:contentDescription="@string/proximity_lock_image_description"
+        android:src="@drawable/proximity_lock_closed" />
+
+    <Button
+        android:id="@+id/action_findme"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/imageLock"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:enabled="false"
+        android:onClick="onFindMeClicked"
+        android:text="@string/proximity_action_findme" />
+
+    <CheckBox
+        android:id="@+id/option"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/action_connect"
+        android:layout_centerHorizontal="true"
+        android:checked="true"
+        android:text="@string/proximity_enable_server" />
+
+    <Button
+        android:id="@+id/action_connect"
+        style="@style/Widget.Connect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
+        android:onClick="onConnectClicked"
+        android:text="@string/action_connect" />
+
+</RelativeLayout>
