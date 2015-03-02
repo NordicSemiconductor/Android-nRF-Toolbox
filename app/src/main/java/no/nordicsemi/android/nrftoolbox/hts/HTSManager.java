@@ -169,11 +169,7 @@ public class HTSManager implements BleManager<HTSManagerCallbacks> {
 					gatt.disconnect();
 					return;
 				}
-				if (mBatteryCharacteristic != null) {
-					readBatteryLevel();
-				} else {
-					enableHTIndication();
-				}
+				enableHTIndication();
 			} else {
 				mCallbacks.onError(ERROR_DISCOVERY_SERVICE, status);
 			}
@@ -185,8 +181,6 @@ public class HTSManager implements BleManager<HTSManagerCallbacks> {
 				if (characteristic.getUuid().equals(BATTERY_LEVEL_CHARACTERISTIC)) {
 					int batteryValue = characteristic.getValue()[0];
 					mCallbacks.onBatteryValueReceived(batteryValue);
-
-					enableHTIndication();
 				}
 			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
@@ -213,7 +207,7 @@ public class HTSManager implements BleManager<HTSManagerCallbacks> {
 		@Override
 		public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
 			if (status == BluetoothGatt.GATT_SUCCESS) {
-				// HT indications has been enabled
+				readBatteryLevel();
 			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 				if (gatt.getDevice().getBondState() == BluetoothDevice.BOND_NONE) {
 					mCallbacks.onBondingRequired();

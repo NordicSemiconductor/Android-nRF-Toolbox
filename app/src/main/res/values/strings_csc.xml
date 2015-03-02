@@ -29,21 +29,25 @@
     
     <string name="csc_section_csc_header">SPEED AND CADENCE</string>
     <string name="csc_speed">SPEED</string>
-    <string name="csc_speed_unit">km/h</string>
+    <string name="csc_speed_unit_m_s">m/s</string>
+	<string name="csc_speed_unit_km_h">km/h</string>
+	<string name="csc_speed_unit_mph">mph</string>
     <string name="csc_cadence">CADENCE</string>
     <string name="csc_cadence_unit">RPM</string>
     <string name="csc_distance">DISTANCE</string>
     <string name="csc_distance_unit_m">m</string>
     <string name="csc_distance_unit_km">km</string>
+	<string name="csc_distance_unit_yd">yd</string>
+	<string name="csc_distance_unit_mile">mile</string>
     <string name="csc_total_distance">TOTAL DISTANCE</string>
-    <string name="csc_total_distance_unit">km</string>
+    <string name="csc_total_distance_unit_km">km</string>
+	<string name="csc_total_distance_unit_mile">mile</string>
     <string name="csc_gear_ratio">GEAR RATIO</string>
     
     <string name="csc_default_name">DEFAULT CSC</string>
     <string name="csc_notification_action_disconnect">Disconnect</string> 
     <string name="csc_notification_connected_message">%s is connected.</string>
     
-    <string name="csc_settings_wheel_diameter">Wheel size</string>
     <string name="csc_settings_wheel_diameter_title">Wheel size</string>
     <string name="csc_settings_wheel_diameter_summary">Wheel circumference: %s mm</string>
     <string-array name="csc_settings_wheel_diameters">
@@ -151,6 +155,19 @@
 		<item>1282</item>
 		<item>1272</item>
     </string-array>
+
+	<string name="csc_settings_units_title">Units</string>
+	<string name="csc_settings_units_summary">%s</string>
+	<string-array name="csc_settings_units">
+		<item>m/s</item>
+		<item>km/h</item>
+		<item>mph</item>
+	</string-array>
+	<string-array name="csc_settings_units_values">
+		<item>0</item>
+		<item>1</item>
+		<item>2</item>
+	</string-array>
     
     <string name="csc_about_text">CSC (Cycling Speed and Cadence) profile allows you to connect to your bike activity sensor.
         \nIt reads wheel and crank data if they are supported by the sensor and calculates speed, cadence, total and trip distance and gear ratio. Set up your wheel size in the settings to get correct readings. 

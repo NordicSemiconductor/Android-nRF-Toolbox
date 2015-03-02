@@ -79,6 +79,7 @@
         android:textSize="80sp" />
 
     <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+		android:id="@+id/text_hts_unit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true" 

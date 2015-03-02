@@ -25,14 +25,20 @@ import java.text.DecimalFormat;
 import java.util.UUID;
 
 import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.hts.settings.SettingsFragment;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileServiceReadyActivity;
+import no.nordicsemi.android.nrftoolbox.hts.settings.SettingsActivity;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.view.Menu;
 import android.widget.TextView;
 
 /**
@@ -43,17 +49,34 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.RSCBi
 	@SuppressWarnings("unused")
 	private final String TAG = "HTSActivity";
 
+	private static final String VALUE = "value";
+	private static final DecimalFormat mFormattedTemp = new DecimalFormat("#0.00");
 	private TextView mHTSValue;
+	private TextView mHTSUnit;
+	private Double mValueC;
 
 	@Override
-	protected void onCreateView(Bundle savedInstanceState) {
+	protected void onCreateView(final Bundle savedInstanceState) {
 		setContentView(R.layout.activity_feature_hts);
 		setGUI();
 	}
 
 	@Override
+	protected void onSaveInstanceState(final Bundle outState) {
+		super.onSaveInstanceState(outState);
+
+		if (mValueC != null)
+			outState.putDouble(VALUE, mValueC);
+	}
+
+	@Override
 	protected void onInitialize(final Bundle savedInstanceState) {
 		LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, makeIntentFilter());
+
+		if (savedInstanceState != null) {
+			if (savedInstanceState.containsKey(VALUE))
+				mValueC = savedInstanceState.getDouble(VALUE);
+		}
 	}
 
 	@Override
@@ -64,6 +87,43 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.RSCBi
 
 	private void setGUI() {
 		mHTSValue = (TextView) findViewById(R.id.text_hts_value);
+		mHTSUnit = (TextView) findViewById(R.id.text_hts_unit);
+
+		if (mValueC != null)
+			mHTSValue.setText(String.valueOf(mValueC));
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		setUnits();
+	}
+
+	@Override
+	protected void setDefaultUI() {
+		mValueC = null;
+		mHTSValue.setText(R.string.not_available_value);
+
+		setUnits();
+	}
+
+	private void setUnits() {
+		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		final int unit = Integer.parseInt(preferences.getString(SettingsFragment.SETTINGS_UNIT, String.valueOf(SettingsFragment.SETTINGS_UNIT_DEFAULT)));
+
+		switch (unit) {
+			case SettingsFragment.SETTINGS_UNIT_C:
+				mHTSUnit.setText(R.string.hts_unit_celsius);
+				break;
+			case SettingsFragment.SETTINGS_UNIT_F:
+				mHTSUnit.setText(R.string.hts_unit_fahrenheit);
+				break;
+			case SettingsFragment.SETTINGS_UNIT_K:
+				mHTSUnit.setText(R.string.hts_unit_kelvin);
+				break;
+		}
+		if (mValueC != null)
+			setHTSValueOnView(mValueC);
 	}
 
 	@Override
@@ -79,6 +139,23 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.RSCBi
 	@Override
 	protected int getAboutTextId() {
 		return R.string.hts_about_text;
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(final Menu menu) {
+		getMenuInflater().inflate(R.menu.settings_and_about, menu);
+		return true;
+	}
+
+	@Override
+	protected boolean onOptionsItemSelected(final int itemId) {
+		switch (itemId) {
+			case R.id.action_settings:
+				final Intent intent = new Intent(this, SettingsActivity.class);
+				startActivity(intent);
+				break;
+		}
+		return true;
 	}
 
 	@Override
@@ -101,14 +178,22 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.RSCBi
 		// this may notify user or show some views
 	}
 
-	private void setHTSValueOnView(final double value) {
-		DecimalFormat formattedTemp = new DecimalFormat("#0.00");
-		mHTSValue.setText(formattedTemp.format(value));
-	}
+	private void setHTSValueOnView(double value) {
+		mValueC = value;
+		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		final int unit = Integer.parseInt(preferences.getString(SettingsFragment.SETTINGS_UNIT, String.valueOf(SettingsFragment.SETTINGS_UNIT_DEFAULT)));
 
-	@Override
-	protected void setDefaultUI() {
-		mHTSValue.setText(R.string.not_available_value);
+		switch (unit) {
+			case SettingsFragment.SETTINGS_UNIT_F:
+				value = value * 1.8 + 32;
+				break;
+			case SettingsFragment.SETTINGS_UNIT_K:
+				value += 273.15;
+				break;
+			case SettingsFragment.SETTINGS_UNIT_C:
+				break;
+		}
+		mHTSValue.setText(mFormattedTemp.format(value));
 	}
 
 	private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {

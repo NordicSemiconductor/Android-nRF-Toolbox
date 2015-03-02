@@ -190,22 +190,22 @@ public class RSCManager implements BleManager<RSCManagerCallbacks> {
 			final boolean tdPreset = (flags & TOTAL_DISTANCE_PRESENT) > 0;
 			final boolean running = (flags & WALKING_OR_RUNNING_STATUS_BITS) > 0;
 
-			final float instantaneousSpeed = (float) characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset) / 256.0f * 3.6f; // 1/256 m/s in km/h
+			final float instantaneousSpeed = (float) characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset) / 256.0f; // 1/256 m/s in [m/s]
 			offset += 2;
 
-			final int instantaneousCadence = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
+			final int instantaneousCadence = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset); // [SPM]
 			offset += 1;
 
 			float instantaneousStrideLength = RSCManagerCallbacks.NOT_AVAILABLE;
 			if (islmPresent) {
-				instantaneousStrideLength = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+				instantaneousStrideLength = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset); // [cm]
 				offset += 2;
 			}
 
 			float totalDistance = RSCManagerCallbacks.NOT_AVAILABLE;
 			if (tdPreset) {
-				totalDistance = (float) characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset) / 10.0f;
-				offset += 4;
+				totalDistance = (float) characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset) / 10.0f; // 1/10 m in [m]
+				//offset += 4;
 			}
 
 			// Notify listener about the new measurement

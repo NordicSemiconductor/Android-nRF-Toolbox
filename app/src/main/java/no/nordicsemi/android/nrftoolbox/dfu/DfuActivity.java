@@ -417,7 +417,7 @@ public class DfuActivity extends ActionBarActivity implements LoaderCallbacks<Cu
 
 	@Override
 	public boolean onCreateOptionsMenu(final Menu menu) {
-		getMenuInflater().inflate(R.menu.dfu_menu, menu);
+		getMenuInflater().inflate(R.menu.settings_and_about, menu);
 		return true;
 	}
 

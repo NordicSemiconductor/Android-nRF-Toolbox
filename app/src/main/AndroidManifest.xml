@@ -23,8 +23,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	package="no.nordicsemi.android.nrftoolbox"
 	android:installLocation="auto"
-	android:versionCode="27"
-	android:versionName="1.11.4" >
+	android:versionCode="28"
+	android:versionName="1.11.5" >
 
 	<uses-sdk
 		android:minSdkVersion="18"
@@ -97,6 +97,9 @@
 			</intent-filter>
 		</activity>
 		<activity
+			android:name="no.nordicsemi.android.nrftoolbox.hts.settings.SettingsActivity"
+			android:label="@string/hts_settings_title" />
+		<activity
 			android:name="no.nordicsemi.android.nrftoolbox.bpm.BPMActivity"
 			android:icon="@drawable/ic_bpm_feature"
 			android:label="@string/bpm_feature_title" >
@@ -139,6 +142,9 @@
 			</intent-filter>
 		</activity>
 		<activity
+			android:name="no.nordicsemi.android.nrftoolbox.rsc.settings.SettingsActivity"
+			android:label="@string/rsc_settings_title" />
+		<activity
 			android:name="no.nordicsemi.android.nrftoolbox.csc.CSCActivity"
 			android:icon="@drawable/ic_csc_feature"
 			android:label="@string/csc_feature_title"
@@ -149,6 +155,9 @@
 				<category android:name="no.nordicsemi.android.nrftoolbox.LAUNCHER" />
 			</intent-filter>
 		</activity>
+		<activity
+			android:name="no.nordicsemi.android.nrftoolbox.csc.settings.SettingsActivity"
+			android:label="@string/csc_settings_title" />
 		<activity
 			android:name="no.nordicsemi.android.nrftoolbox.uart.UARTActivity"
 			android:icon="@drawable/ic_uart_feature"
@@ -161,9 +170,6 @@
 				<category android:name="no.nordicsemi.android.nrftoolbox.LAUNCHER" />
 			</intent-filter>
 		</activity>
-		<activity
-			android:name="no.nordicsemi.android.nrftoolbox.csc.settings.SettingsActivity"
-			android:label="@string/csc_settings_title" />
 
 		<service
 			android:name="no.nordicsemi.android.nrftoolbox.proximity.ProximityService"

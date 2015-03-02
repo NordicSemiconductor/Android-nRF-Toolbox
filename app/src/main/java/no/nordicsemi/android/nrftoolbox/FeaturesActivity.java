@@ -50,6 +50,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class FeaturesActivity extends ActionBarActivity {
+	private static final String MCP_CATEGORY = "no.nordicsemi.android.nrftoolbox.LAUNCHER";
 	private static final String UTILS_CATEGORY = "no.nordicsemi.android.nrftoolbox.UTILS";
 	private static final String MCP_PACKAGE = "no.nordicsemi.android.mcp";
 	private static final String MCP_CLASS = MCP_PACKAGE + ".DeviceListActivity";
@@ -127,6 +128,7 @@ public class FeaturesActivity extends ActionBarActivity {
 
 		// look for Master Control Panel
 		final Intent mcpIntent = new Intent(Intent.ACTION_MAIN);
+		mcpIntent.addCategory(MCP_CATEGORY);
 		mcpIntent.setClassName(MCP_PACKAGE, MCP_CLASS);
 		final ResolveInfo mcpInfo = pm.resolveActivity(mcpIntent, 0);
 
@@ -136,7 +138,7 @@ public class FeaturesActivity extends ActionBarActivity {
 			mcpItem.setTextColor(Color.GRAY);
 			ColorMatrix grayscale = new ColorMatrix();
 			grayscale.setSaturation(0.0f);
-			mcpItem.getCompoundDrawables()[0].setColorFilter(new ColorMatrixColorFilter(grayscale));
+			mcpItem.getCompoundDrawables()[0].mutate().setColorFilter(new ColorMatrixColorFilter(grayscale));
 		}
 		mcpItem.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -145,6 +147,7 @@ public class FeaturesActivity extends ActionBarActivity {
 				if (mcpInfo == null)
 					action = new Intent(Intent.ACTION_VIEW, Uri.parse(MCP_MARKET_URI));
 				action.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+				action.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				try {
 					startActivity(action);
 				} catch (final ActivityNotFoundException e) {
@@ -172,6 +175,7 @@ public class FeaturesActivity extends ActionBarActivity {
 					final Intent intent = new Intent();
 					intent.setComponent(new ComponentName(info.activityInfo.packageName, info.activityInfo.name));
 					intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 					startActivity(intent);
 					mDrawerLayout.closeDrawers();
 				}

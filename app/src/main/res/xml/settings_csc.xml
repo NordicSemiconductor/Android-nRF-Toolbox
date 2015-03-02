@@ -23,13 +23,19 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <PreferenceCategory android:title="@string/csc_settings_wheel_diameter" >
-        <ListPreference
-            android:title="@string/csc_settings_wheel_diameter_title"
-            android:defaultValue="2340"
-            android:entries="@array/csc_settings_wheel_diameters"
-            android:entryValues="@array/csc_settings_wheel_diameter_values"
-            android:key="settings_wheel_size" />
-    </PreferenceCategory>
+	<ListPreference
+		android:title="@string/csc_settings_units_title"
+		android:summary="@string/csc_settings_units_summary"
+		android:defaultValue="1"
+		android:entries="@array/csc_settings_units"
+		android:entryValues="@array/csc_settings_units_values"
+		android:key="settings_csc_unit" />
+
+	<ListPreference
+		android:title="@string/csc_settings_wheel_diameter_title"
+		android:defaultValue="2340"
+		android:entries="@array/csc_settings_wheel_diameters"
+		android:entryValues="@array/csc_settings_wheel_diameter_values"
+		android:key="settings_wheel_size" />
 
 </PreferenceScreen>

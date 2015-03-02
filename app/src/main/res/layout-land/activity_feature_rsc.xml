@@ -119,11 +119,12 @@
                         android:textSize="36sp" />
 
                     <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						android:id="@+id/speed_unit"
                         android:layout_width="45dp"
                         android:layout_height="match_parent"
                         android:freezesText="true"
                         android:gravity="bottom"
-                        android:text="@string/rsc_speed_unit" />
+                        android:text="@string/rsc_speed_unit_km_h" />
                 </TableRow>
 
                 <TableRow
@@ -234,11 +235,12 @@
                         android:textSize="36sp" />
 
                     <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						android:id="@+id/total_distance_unit"
                         android:layout_width="45dp"
                         android:layout_height="match_parent"
                         android:freezesText="true"
                         android:gravity="bottom"
-                        android:text="@string/rsc_total_distance_unit" />
+                        android:text="@string/rsc_total_distance_unit_km" />
                 </TableRow>
 
                 <TableRow

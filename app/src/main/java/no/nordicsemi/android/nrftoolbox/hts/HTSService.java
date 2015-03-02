@@ -66,7 +66,7 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 
 	@Override
 	protected BleManager<HTSManagerCallbacks> initializeManager() {
-		return mManager = new HTSManager();
+		return mManager = HTSManager.getHTSManager();
 	}
 
 	@Override

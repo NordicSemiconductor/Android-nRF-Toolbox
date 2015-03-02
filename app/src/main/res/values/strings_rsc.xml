@@ -22,21 +22,27 @@
   -->
 <resources>
     <string name="rsc_feature_title">RSC</string>
+	<string name="rsc_settings_title">RSC Settings</string>
     
     <string name="rsc_feature_title_long">RUNNING SPEED &amp; CADENCE</string>
     <dimen name="rsc_feature_title_long_margin">-192dp</dimen>
     
     <string name="rsc_section_rsc_header">SPEED AND CADENCE</string>
     <string name="rsc_speed">SPEED</string>
-    <string name="rsc_speed_unit">km/h</string>
+	<string name="rsc_speed_unit_m_s">km/h</string>
+    <string name="rsc_speed_unit_km_h">km/h</string>
+	<string name="rsc_speed_unit_mph">mph</string>
     <string name="rsc_cadence">CADENCE</string>
     <string name="rsc_cadence_unit">SPM</string>
     <string name="rsc_distance">DISTANCE</string>
     <string name="rsc_distance_unit_m">m</string>
     <string name="rsc_distance_unit_km">km</string>
+	<string name="rsc_distance_unit_yd">yd</string>
+	<string name="rsc_distance_unit_mile">mile</string>
     <string name="rsc_section_strides_header"></string>
     <string name="rsc_total_distance">TOTAL DISTANCE</string>
-    <string name="rsc_total_distance_unit">km</string>
+    <string name="rsc_total_distance_unit_km">km</string>
+	<string name="rsc_total_distance_unit_mile">mile</string>
     <string name="rsc_strides">STEPS</string>
     
     <string name="rsc_section_activity_header">ACTIVITY</string>
@@ -46,6 +52,19 @@
     <string name="rsc_default_name">DEFAULT RSC</string>
     <string name="rsc_notification_action_disconnect">Disconnect</string> 
     <string name="rsc_notification_connected_message">%s is connected.</string>
+
+	<string name="rsc_settings_units_title">Units</string>
+	<string name="rsc_settings_units_summary">%s</string>
+	<string-array name="rsc_settings_units">
+		<item>m/s</item>
+		<item>km/h</item>
+		<item>mph</item>
+	</string-array>
+	<string-array name="rsc_settings_units_values">
+		<item>0</item>
+		<item>1</item>
+		<item>2</item>
+	</string-array>
     
     <string name="rsc_about_text">RSC (Running Speed and Cadence) profile allows you to connect to your activity sensor.
         \nIt reads speed and cadence values from the sensor and calculates trip distance if stride length is supported. Strides count is calculated basing on the cadence and the time.

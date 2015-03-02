@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright (c) 2015, Nordic Semiconductor
   ~ All rights reserved.
@@ -20,34 +19,19 @@
   ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
-<resources>
-    <string name="hts_feature_title">HTM</string>
-	<string name="hts_settings_title">HTM Settings</string>
-    
-    <string name="hts_feature_title_long">HEALTH THERMOMETER MONITOR</string>
-    <dimen name="hts_feature_title_long_margin">-236dp</dimen>
-    
-    <string name="hts_default_name">DEFAULT HTM</string>
-    <string name="hts_unit_celsius">°C</string>
-	<string name="hts_unit_fahrenheit">°F</string>
-	<string name="hts_unit_kelvin">°K</string>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto" >
 
-	<string name="hts_notification_action_disconnect">Disconnect</string>
-    <string name="hts_notification_connected_message">%s is connected.</string>
-
-	<string name="hts_settings_units_title">Units</string>
-	<string name="hts_settings_units_summary">%s</string>
-	<string-array name="hts_settings_units">
-		<item>Celsius</item>
-		<item>Fahrenheit</item>
-		<item>Kelvin</item>
-	</string-array>
-	<string-array name="hts_settings_units_values">
-		<item>0</item>
-		<item>1</item>
-		<item>2</item>
-	</string-array>
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ic_menu_settings"
+        app:showAsAction="always"
+        android:title="@string/action_settings"/>
     
-    <string name="hts_about_text">HTM (Health Thermometer Monitor) profile allows you to connect to your Health Thermometer sensor. 
-        It shows you the temperature value in Celsius.</string>
-</resources>
+    <item
+        android:id="@+id/action_about"
+        android:icon="@drawable/ic_menu_about"
+        app:showAsAction="always"
+        android:title="@string/action_about"/>    
+    
+</menu>
