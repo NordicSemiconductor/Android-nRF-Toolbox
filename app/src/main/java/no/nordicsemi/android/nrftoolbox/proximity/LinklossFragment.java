@@ -21,11 +21,12 @@
  */
 package no.nordicsemi.android.nrftoolbox.proximity;
 
-import no.nordicsemi.android.nrftoolbox.R;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.os.Bundle;
+
+import no.nordicsemi.android.nrftoolbox.R;
 
 public class LinklossFragment extends DialogFragment {
 	private static final String ARG_NAME = "name";

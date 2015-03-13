@@ -68,7 +68,7 @@ import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
  * </p>
  */
 public abstract class BleProfileServiceReadyActivity<E extends BleProfileService.LocalBinder> extends ActionBarActivity implements
-		ScannerFragment.OnDeviceSelectedListener {
+		ScannerFragment.OnDeviceSelectedListener, BleManagerCallbacks {
 	private static final String TAG = "BleProfileServiceReadyActivity";
 
 	private static final String DEVICE_NAME = "device_name";
@@ -89,59 +89,73 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 		public void onReceive(final Context context, final Intent intent) {
 			final String action = intent.getAction();
 
-			if (BleProfileService.BROADCAST_CONNECTION_STATE.equals(action)) {
-				final int state = intent.getIntExtra(BleProfileService.EXTRA_CONNECTION_STATE, BleProfileService.STATE_DISCONNECTED);
+			switch (action) {
+				case BleProfileService.BROADCAST_CONNECTION_STATE: {
+					final int state = intent.getIntExtra(BleProfileService.EXTRA_CONNECTION_STATE, BleProfileService.STATE_DISCONNECTED);
 
-				switch (state) {
-					case BleProfileService.STATE_CONNECTED: {
-						mDeviceName = intent.getStringExtra(BleProfileService.EXTRA_DEVICE_NAME);
-						onDeviceConnected();
-						break;
+					switch (state) {
+						case BleProfileService.STATE_CONNECTED: {
+							mDeviceName = intent.getStringExtra(BleProfileService.EXTRA_DEVICE_NAME);
+							onDeviceConnected();
+							break;
+						}
+						case BleProfileService.STATE_DISCONNECTED: {
+							onDeviceDisconnected();
+							mDeviceName = null;
+							break;
+						}
+						case BleProfileService.STATE_LINK_LOSS: {
+							onLinklossOccur();
+							break;
+						}
+						case BleProfileService.STATE_CONNECTING:
+						case BleProfileService.STATE_DISCONNECTING:
+							// current implementation does nothing in this states
+						default:
+							// there should be no other actions
+							break;
 					}
-					case BleProfileService.STATE_DISCONNECTED: {
-						onDeviceDisconnected();
-						mDeviceName = null;
-						break;
-					}
-					case BleProfileService.STATE_LINK_LOSS: {
-						onLinklossOccur();
-						break;
-					}
-					case BleProfileService.STATE_CONNECTING:
-					case BleProfileService.STATE_DISCONNECTING:
-						// current implementation does nothing in this states
-					default:
-						// there should be no other actions
-						break;
+					break;
+				}
+				case BleProfileService.BROADCAST_SERVICES_DISCOVERED: {
+					final boolean primaryService = intent.getBooleanExtra(BleProfileService.EXTRA_SERVICE_PRIMARY, false);
+					final boolean secondaryService = intent.getBooleanExtra(BleProfileService.EXTRA_SERVICE_SECONDARY, false);
 
+					if (primaryService) {
+						onServicesDiscovered(secondaryService);
+					} else {
+						onDeviceNotSupported();
+					}
+					break;
 				}
-			} else if (BleProfileService.BROADCAST_SERVICES_DISCOVERED.equals(action)) {
-				final boolean primaryService = intent.getBooleanExtra(BleProfileService.EXTRA_SERVICE_PRIMARY, false);
-				final boolean secondaryService = intent.getBooleanExtra(BleProfileService.EXTRA_SERVICE_SECONDARY, false);
-
-				if (primaryService) {
-					onServicesDiscovered(secondaryService);
-				} else {
-					onDeviceNotSupported();
+				case BleProfileService.BROADCAST_DEVICE_READY: {
+					onDeviceReady();
+					break;
 				}
-			} else if (BleProfileService.BROADCAST_BOND_STATE.equals(action)) {
-				final int state = intent.getIntExtra(BleProfileService.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
-				switch (state) {
-					case BluetoothDevice.BOND_BONDING:
-						onBondingRequired();
-						break;
-					case BluetoothDevice.BOND_BONDED:
-						onBonded();
-						break;
+				case BleProfileService.BROADCAST_BOND_STATE: {
+					final int state = intent.getIntExtra(BleProfileService.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
+					switch (state) {
+						case BluetoothDevice.BOND_BONDING:
+							onBondingRequired();
+							break;
+						case BluetoothDevice.BOND_BONDED:
+							onBonded();
+							break;
+					}
+					break;
 				}
-			} else if (BleProfileService.BROADCAST_BATTERY_LEVEL.equals(action)) {
-				final int value = intent.getIntExtra(BleProfileService.EXTRA_BATTERY_LEVEL, -1);
-				if (value > 0)
-					onBatteryValueReceived(value);
-			} else if (BleProfileService.BROADCAST_ERROR.equals(action)) {
-				final String message = intent.getStringExtra(BleProfileService.EXTRA_ERROR_MESSAGE);
-				final int errorCode = intent.getIntExtra(BleProfileService.EXTRA_ERROR_CODE, 0);
-				onError(message, errorCode);
+				case BleProfileService.BROADCAST_BATTERY_LEVEL: {
+					final int value = intent.getIntExtra(BleProfileService.EXTRA_BATTERY_LEVEL, -1);
+					if (value > 0)
+						onBatteryValueReceived(value);
+					break;
+				}
+				case BleProfileService.BROADCAST_ERROR: {
+					final String message = intent.getStringExtra(BleProfileService.EXTRA_ERROR_MESSAGE);
+					final int errorCode = intent.getIntExtra(BleProfileService.EXTRA_ERROR_CODE, 0);
+					onError(message, errorCode);
+					break;
+				}
 			}
 		}
 	};
@@ -209,7 +223,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 		super.onStart();
 
 		/*
-		 * If the service has not been started before the following lines will not start it. However, if it's running, the Activity will be binded to it and
+		 * If the service has not been started before, the following lines will not start it. However, if it's running, the Activity will be binded to it and
 		 * notified via mServiceConnection.
 		 */
 		final Intent service = new Intent(this, getServiceClass());
@@ -217,8 +231,8 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 			Logger.d(mLogSession, "Binding to the service..."); // (* - see the comment below)
 
 		/*
-		 * * - When user exited the UARTActivity while being connected the log session is kept in the service. We may not get it before binding to it so in this
-		 * case this event will not be logged. It will, however, be logged after the orientation changes.
+		 * * - When user exited the UARTActivity while being connected, the log session is kept in the service. We may not get it before binding to it so in this
+		 * case this event will not be logged (mLogSession is null until onServiceConnected(..) is called). It will, however, be logged after the orientation changes.
 		 */
 	}
 
@@ -227,6 +241,11 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 		super.onStop();
 
 		try {
+			// We don't want to perform some operations (e.g. disable Battery Level notifications) in the service if we are just rotating the screen.
+			// However, when the activity is finishing, we may want to disable some device features to reduce the battery consumption.
+			if (mService != null)
+				mService.setActivityIsFinishing(isFinishing());
+
 			Logger.d(mLogSession, "Unbinding from the service...");
 			unbindService(mServiceConnection);
 			mService = null;
@@ -251,6 +270,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 		final IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(BleProfileService.BROADCAST_CONNECTION_STATE);
 		intentFilter.addAction(BleProfileService.BROADCAST_SERVICES_DISCOVERED);
+		intentFilter.addAction(BleProfileService.BROADCAST_DEVICE_READY);
 		intentFilter.addAction(BleProfileService.BROADCAST_BOND_STATE);
 		intentFilter.addAction(BleProfileService.BROADCAST_BATTERY_LEVEL);
 		intentFilter.addAction(BleProfileService.BROADCAST_ERROR);
@@ -282,7 +302,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	 *
 	 * @return the service binder or <code>null</code>
 	 */
-	protected BleProfileService.LocalBinder getService() {
+	protected E getService() {
 		return mService;
 	}
 
@@ -372,6 +392,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 				showDeviceScanningDialog(getFilterUUID(), isDiscoverableRequired());
 			} else {
 				Logger.v(mLogSession, "Disconnecting...");
+				onDeviceDisconnecting();
 				mService.disconnect();
 			}
 		} else {
@@ -436,6 +457,11 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 		mConnectButton.setText(R.string.action_disconnect);
 	}
 
+	@Override
+	public void onDeviceDisconnecting() {
+	// do nothing
+	}
+
 	/**
 	 * Called when the device has disconnected (when the callback returned
 	 * {@link BluetoothGattCallback#onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int)} with state DISCONNECTED.
@@ -479,6 +505,13 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	public abstract void onServicesDiscovered(final boolean optionalServicesFound);
 
 	/**
+	 * Called when the initialization process in completed.
+	 */
+	public void onDeviceReady() {
+		// empty default implementation
+	}
+
+	/**
 	 * Called when the device has started bonding process
 	 */
 	public void onBondingRequired() {
@@ -517,11 +550,8 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	 * @param errorCode the error code
 	 */
 	public void onError(final String message, final int errorCode) {
-		DebugLogger.e(TAG, "Error occured: " + message + ",  error code: " + errorCode);
+		DebugLogger.e(TAG, "Error occurred: " + message + ",  error code: " + errorCode);
 		showToast(message + " (" + errorCode + ")");
-
-		// refresh UI when connection failed
-		onDeviceDisconnected();
 	}
 
 	/**

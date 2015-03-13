@@ -22,12 +22,6 @@
 
 package no.nordicsemi.android.nrftoolbox.csc;
 
-import no.nordicsemi.android.log.Logger;
-import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
-import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.csc.settings.SettingsFragment;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
-import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -36,9 +30,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
+
+import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
+import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.csc.settings.SettingsFragment;
+import no.nordicsemi.android.nrftoolbox.profile.BleManager;
+import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 
 public class CSCService extends BleProfileService implements CSCManagerCallbacks {
 	private static final String TAG = "CSCService";
@@ -57,7 +57,6 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 	private static final String ACTION_DISCONNECT = "no.nordicsemi.android.nrftoolbox.csc.ACTION_DISCONNECT";
 
 	private CSCManager mManager;
-	private boolean mBinded;
 
 	private int mFirstWheelRevolutions = -1;
 	private int mLastWheelRevolutions = -1;
@@ -73,7 +72,7 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 	private final LocalBinder mBinder = new CSCBinder();
 
 	/**
-	 * This local binder is an interface for the binded activity to operate with the RSC sensor
+	 * This local binder is an interface for the bonded activity to operate with the RSC sensor
 	 */
 	public class CSCBinder extends LocalBinder {
 		// empty
@@ -108,28 +107,15 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 	}
 
 	@Override
-	public IBinder onBind(final Intent intent) {
-		mBinded = true;
-		return super.onBind(intent);
-	}
-
-	@Override
-	public void onRebind(final Intent intent) {
-		mBinded = true;
+	protected void onRebind() {
 		// when the activity rebinds to the service, remove the notification
 		cancelNotification();
-
-		// read the battery level when back in the Activity
-		if (isConnected())
-			mManager.readBatteryLevel();
 	}
 
 	@Override
-	public boolean onUnbind(final Intent intent) {
-		mBinded = false;
-		// when the activity closes we need to show the notification that user is connected to the sensor  
+	protected void onUnbind() {
+		// when the activity closes we need to show the notification that user is connected to the sensor
 		createNotification(R.string.csc_notification_connected_message, 0);
-		return super.onUnbind(intent);
 	}
 
 	@Override
@@ -140,6 +126,8 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 
 	@Override
 	public void onWheelMeasurementReceived(final int wheelRevolutions, final int lastWheelEventTime) {
+		Logger.a(getLogSession(), "Wheel rev: " + wheelRevolutions + "\nLast wheel event time: " + lastWheelEventTime + " ms");
+
 		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		final int circumference = Integer.parseInt(preferences.getString(SettingsFragment.SETTINGS_WHEEL_SIZE, String.valueOf(SettingsFragment.SETTINGS_WHEEL_SIZE_DEFAULT))); // [mm]
 
@@ -173,6 +161,8 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 
 	@Override
 	public void onCrankMeasurementReceived(int crankRevolutions, int lastCrankEventTime) {
+		Logger.a(getLogSession(), "Crank rev: " + crankRevolutions + "\nLast crank event time: " + lastCrankEventTime + " ms");
+
 		if (mLastCrankEventTime == lastCrankEventTime)
 			return;
 
@@ -241,7 +231,7 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 	private final BroadcastReceiver mDisconnectActionBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
-			Logger.i(getLogSession(), "[CSC] Disconnect action pressed");
+			Logger.i(getLogSession(), "[Notification] Disconnect action pressed");
 			if (isConnected())
 				getBinder().disconnect();
 			else

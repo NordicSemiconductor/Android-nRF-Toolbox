@@ -21,9 +21,6 @@
  */
 package no.nordicsemi.android.nrftoolbox;
 
-import java.util.List;
-
-import no.nordicsemi.android.nrftoolbox.adapter.AppAdapter;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -48,6 +45,10 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.List;
+
+import no.nordicsemi.android.nrftoolbox.adapter.AppAdapter;
 
 public class FeaturesActivity extends ActionBarActivity {
 	private static final String MCP_CATEGORY = "no.nordicsemi.android.nrftoolbox.LAUNCHER";

@@ -21,8 +21,9 @@
  */
 package no.nordicsemi.android.nrftoolbox.utility;
 
-import no.nordicsemi.android.nrftoolbox.BuildConfig;
 import android.util.Log;
+
+import no.nordicsemi.android.nrftoolbox.BuildConfig;
 
 public class DebugLogger {
 	public static void v(final String tag, final String text) {
@@ -30,7 +31,7 @@ public class DebugLogger {
 			Log.v(tag, text);
 	}
 
-	public static void d(String tag, String text) {
+	public static void d(final String tag, final String text) {
 		if (BuildConfig.DEBUG) {
 			Log.d(tag, text);
 		}
@@ -41,7 +42,7 @@ public class DebugLogger {
 			Log.i(tag, text);
 	}
 
-	public static void w(String tag, String text) {
+	public static void w(final String tag, final String text) {
 		if (BuildConfig.DEBUG) {
 			Log.w(tag, text);
 		}
@@ -52,9 +53,20 @@ public class DebugLogger {
 			Log.e(tag, text);
 	}
 
-	public static void wtf(String tag, String text) {
+	public static void e(final String tag, final String text, final Throwable e) {
+		if (BuildConfig.DEBUG)
+			Log.e(tag, text, e);
+	}
+
+	public static void wtf(final String tag, final String text) {
 		if (BuildConfig.DEBUG) {
 			Log.wtf(tag, text);
+		}
+	}
+
+	public static void wtf(final String tag, final String text, final Throwable e) {
+		if (BuildConfig.DEBUG) {
+			Log.wtf(tag, text, e);
 		}
 	}
 }

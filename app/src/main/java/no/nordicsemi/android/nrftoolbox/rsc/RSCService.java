@@ -22,11 +22,6 @@
 
 package no.nordicsemi.android.nrftoolbox.rsc;
 
-import no.nordicsemi.android.log.Logger;
-import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
-import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
-import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -35,8 +30,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
-import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+
+import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
+import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.profile.BleManager;
+import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 
 public class RSCService extends BleProfileService implements RSCManagerCallbacks {
 	private static final String TAG = "RSCService";
@@ -54,7 +54,6 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 	private final static String ACTION_DISCONNECT = "no.nordicsemi.android.nrftoolbox.rsc.ACTION_DISCONNECT";
 
 	private RSCManager mManager;
-	private boolean mBinded;
 
 	/** The last value of a cadence */
 	private float mCadence;
@@ -109,28 +108,15 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 	}
 
 	@Override
-	public IBinder onBind(final Intent intent) {
-		mBinded = true;
-		return super.onBind(intent);
-	}
-
-	@Override
-	public void onRebind(final Intent intent) {
-		mBinded = true;
+	protected void onRebind() {
 		// when the activity rebinds to the service, remove the notification
 		cancelNotification();
-
-		// read the battery level when back in the Activity
-		if (isConnected())
-			mManager.readBatteryLevel();
 	}
 
 	@Override
-	public boolean onUnbind(final Intent intent) {
-		mBinded = false;
-		// when the activity closes we need to show the notification that user is connected to the sensor  
+	protected void onUnbind() {
+		// when the activity closes we need to show the notification that user is connected to the sensor
 		createNotifcation(R.string.rsc_notification_connected_message, 0);
-		return super.onUnbind(intent);
 	}
 
 	@Override
@@ -184,7 +170,7 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 	/**
 	 * Creates the notification
 	 * 
-	 * @param messageResIdthe
+	 * @param messageResId
 	 *            message resource id. The message must have one String parameter,<br />
 	 *            f.e. <code>&lt;string name="name"&gt;%s is connected&lt;/string&gt;</code>
 	 * @param defaults
@@ -225,7 +211,7 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 	private final BroadcastReceiver mDisconnectActionBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
-			Logger.i(getLogSession(), "[RSC] Disconnect action pressed");
+			Logger.i(getLogSession(), "[Notification] Disconnect action pressed");
 			if (isConnected())
 				getBinder().disconnect();
 			else

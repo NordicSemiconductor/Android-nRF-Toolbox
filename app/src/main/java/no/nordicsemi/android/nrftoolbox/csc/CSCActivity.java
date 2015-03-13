@@ -22,13 +22,6 @@
 
 package no.nordicsemi.android.nrftoolbox.csc;
 
-import java.util.UUID;
-
-import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.csc.settings.SettingsActivity;
-import no.nordicsemi.android.nrftoolbox.csc.settings.SettingsFragment;
-import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
-import no.nordicsemi.android.nrftoolbox.profile.BleProfileServiceReadyActivity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -39,6 +32,14 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.Menu;
 import android.widget.TextView;
+
+import java.util.UUID;
+
+import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.csc.settings.SettingsActivity;
+import no.nordicsemi.android.nrftoolbox.csc.settings.SettingsFragment;
+import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
+import no.nordicsemi.android.nrftoolbox.profile.BleProfileServiceReadyActivity;
 
 public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBinder> {
 	private TextView mSpeedView;

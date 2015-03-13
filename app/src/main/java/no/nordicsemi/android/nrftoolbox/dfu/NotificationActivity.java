@@ -22,10 +22,11 @@
 
 package no.nordicsemi.android.nrftoolbox.dfu;
 
-import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+
+import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 
 public class NotificationActivity extends Activity {
 	@Override

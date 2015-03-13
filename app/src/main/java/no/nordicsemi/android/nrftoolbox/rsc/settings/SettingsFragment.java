@@ -22,10 +22,8 @@
 
 package no.nordicsemi.android.nrftoolbox.rsc.settings;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceScreen;
 
 import no.nordicsemi.android.nrftoolbox.R;
 

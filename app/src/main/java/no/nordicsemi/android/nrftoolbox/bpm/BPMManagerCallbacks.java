@@ -30,16 +30,6 @@ public interface BPMManagerCallbacks extends BleManagerCallbacks {
 	public static final int UNIT_kPa = 1;
 
 	/**
-	 * Called when the Blood Pressure Measurement characteristic indication has been enabled
-	 */
-	public void onBloodPressureMeasurementIndicationsEnabled();
-
-	/**
-	 * Called when the Intermediate Cuff Pressure characteristic notification has been enabled
-	 */
-	public void onIntermediateCuffPressureNotificationEnabled();
-
-	/**
 	 * Called when new BPM value has been obtained from the sensor
 	 * 
 	 * @param systolic

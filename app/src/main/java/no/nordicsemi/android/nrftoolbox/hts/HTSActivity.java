@@ -21,15 +21,6 @@
  */
 package no.nordicsemi.android.nrftoolbox.hts;
 
-import java.text.DecimalFormat;
-import java.util.UUID;
-
-import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.hts.settings.SettingsFragment;
-import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
-import no.nordicsemi.android.nrftoolbox.profile.BleProfileServiceReadyActivity;
-import no.nordicsemi.android.nrftoolbox.hts.settings.SettingsActivity;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +31,15 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.Menu;
 import android.widget.TextView;
+
+import java.text.DecimalFormat;
+import java.util.UUID;
+
+import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.hts.settings.SettingsActivity;
+import no.nordicsemi.android.nrftoolbox.hts.settings.SettingsFragment;
+import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
+import no.nordicsemi.android.nrftoolbox.profile.BleProfileServiceReadyActivity;
 
 /**
  * HTSActivity is the main Health Thermometer activity. It implements {@link HTSManagerCallbacks} to receive callbacks from {@link HTSManager} class. The activity supports portrait and landscape
@@ -134,6 +134,11 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.RSCBi
 	@Override
 	protected void onServiceUnbinded() {
 		// not used
+	}
+
+	@Override
+	protected int getLoggerProfileTitle() {
+		return R.string.hts_feature_title;
 	}
 
 	@Override

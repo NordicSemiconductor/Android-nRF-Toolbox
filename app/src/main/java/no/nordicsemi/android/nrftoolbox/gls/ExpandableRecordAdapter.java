@@ -21,7 +21,6 @@
  */
 package no.nordicsemi.android.nrftoolbox.gls;
 
-import no.nordicsemi.android.nrftoolbox.R;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.Pair;
@@ -30,6 +29,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
+
+import no.nordicsemi.android.nrftoolbox.R;
 
 public class ExpandableRecordAdapter extends BaseExpandableListAdapter {
 	private final GlucoseManager mGlucoseManager;

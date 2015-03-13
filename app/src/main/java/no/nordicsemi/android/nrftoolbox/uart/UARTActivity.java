@@ -22,11 +22,6 @@
 
 package no.nordicsemi.android.nrftoolbox.uart;
 
-import java.util.UUID;
-
-import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
-import no.nordicsemi.android.nrftoolbox.profile.BleProfileServiceReadyActivity;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
@@ -39,6 +34,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.widget.SlidingPaneLayout;
 import android.view.View;
+
+import java.util.UUID;
+
+import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
+import no.nordicsemi.android.nrftoolbox.profile.BleProfileServiceReadyActivity;
 
 public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UARTBinder> implements UARTControlFragment.ControlFragmentListener, UARTInterface {
 	private final static String SIS_EDIT_MODE = "sis_edit_mode";
@@ -236,5 +237,4 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			}
 		}
 	}
-
 }

@@ -53,6 +53,8 @@ set INIT_FILE=
 set INIT_PATH=
 set E_INIT_FILE=
 set TYPE=0
+rem Modify this in order to keep the bond information
+set KEEP_BOND=false
 
 rem ==================================================================================
 rem Check ADB
@@ -195,6 +197,7 @@ if "%ADDRESS%"=="" (
 	echo|set /p=Starting DFU Initiator activity...
 	call adb %S_DEVICE% shell am start -a no.nordicsemi.android.action.DFU_UPLOAD^
  --ei no.nordicsemi.android.dfu.extra.EXTRA_FILE_TYPE %TYPE%^
+ --ez no.nordicsemi.android.dfu.extra.EXTRA_KEEP_BOND %KEEP_BOND%^
  -e no.nordicsemi.android.dfu.extra.EXTRA_FILE_PATH "/sdcard/Nordic Semiconductor/Upload/%HEX_FILE%" %E_INIT_FILE% | find "Error" > nul 2>&1
 ) else (
 	rem Start DFU service on the device
@@ -203,6 +206,7 @@ if "%ADDRESS%"=="" (
  -e no.nordicsemi.android.dfu.extra.EXTRA_DEVICE_ADDRESS %ADDRESS%^
  -e no.nordicsemi.android.dfu.extra.EXTRA_DEVICE_NAME %NAME%^
  --ei no.nordicsemi.android.dfu.extra.EXTRA_FILE_TYPE %TYPE%^
+ --ez no.nordicsemi.android.dfu.extra.EXTRA_KEEP_BOND %KEEP_BOND%^
  -e no.nordicsemi.android.dfu.extra.EXTRA_FILE_PATH "/sdcard/Nordic Semiconductor/Upload/%HEX_FILE%" %E_INIT_FILE% | find "Error" > nul 2>&1
  )
 

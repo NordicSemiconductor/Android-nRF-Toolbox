@@ -22,7 +22,6 @@
 
 package no.nordicsemi.android.nrftoolbox.uart;
 
-import no.nordicsemi.android.nrftoolbox.R;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -31,6 +30,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+
+import no.nordicsemi.android.nrftoolbox.R;
 
 public class UARTButtonAdapter extends BaseAdapter {
 	public final static String PREFS_BUTTON_ENABLED = "prefs_uart_enabled_";

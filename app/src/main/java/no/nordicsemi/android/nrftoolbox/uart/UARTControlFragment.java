@@ -22,7 +22,6 @@
 
 package no.nordicsemi.android.nrftoolbox.uart;
 
-import no.nordicsemi.android.nrftoolbox.R;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.SharedPreferences;
@@ -37,6 +36,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+
+import no.nordicsemi.android.nrftoolbox.R;
 
 public class UARTControlFragment extends Fragment implements GridView.OnItemClickListener {
 	private final static String TAG = "UARTControlFragment";

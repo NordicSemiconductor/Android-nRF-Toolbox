@@ -22,8 +22,9 @@
 
 package no.nordicsemi.android.nrftoolbox.uart;
 
-import no.nordicsemi.android.log.localprovider.LocalLogContentProvider;
 import android.net.Uri;
+
+import no.nordicsemi.android.log.localprovider.LocalLogContentProvider;
 
 public class UARTLocalLogContentProvider extends LocalLogContentProvider {
 	/** The authority for the contacts provider. */

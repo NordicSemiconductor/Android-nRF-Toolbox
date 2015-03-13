@@ -21,11 +21,11 @@
  */
 package no.nordicsemi.android.nrftoolbox.scanner;
 
-import java.io.UnsupportedEncodingException;
-import java.util.UUID;
-
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
+
+import java.io.UnsupportedEncodingException;
+import java.util.UUID;
 
 /**
  * ScannerServiceParser is responsible to parse scanning data and it check if scanned device has required service in it.

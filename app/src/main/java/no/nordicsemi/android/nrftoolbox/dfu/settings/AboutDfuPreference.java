@@ -22,13 +22,14 @@
 
 package no.nordicsemi.android.nrftoolbox.dfu.settings;
 
-import no.nordicsemi.android.nrftoolbox.R;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.preference.Preference;
 import android.util.AttributeSet;
 import android.widget.Toast;
+
+import no.nordicsemi.android.nrftoolbox.R;
 
 public class AboutDfuPreference extends Preference {
 
@@ -43,7 +44,7 @@ public class AboutDfuPreference extends Preference {
 	@Override
 	protected void onClick() {
 		final Context context = getContext();
-		final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://developer.nordicsemi.com/nRF51_SDK/doc/7.1.0/s110/html/a00062.html"));
+		final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://developer.nordicsemi.com/nRF51_SDK/doc/8.0.0/s110/html/a00078.html"));
 		intent.addCategory(Intent.CATEGORY_DEFAULT);
 		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 

@@ -27,6 +27,7 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,6 +38,9 @@ import android.widget.Toast;
 
 import java.util.UUID;
 
+import no.nordicsemi.android.log.ILogSession;
+import no.nordicsemi.android.log.LocalLogSession;
+import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.AppHelpFragment;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.app.ExpandableListActivity;
@@ -55,6 +59,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	private TextView mDeviceNameView;
 	private TextView mBatteryLevelView;
 	private Button mConnectButton;
+	private ILogSession mLogSession;
 
 	private boolean mDeviceConnected = false;
 	private String mDeviceName;
@@ -184,10 +189,38 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 		}
 	}
 
+	/**
+	 * Returns the title resource id that will be used to create logger session. If 0 is returned (default) logger will not be used.
+	 *
+	 * @return the title resource id
+	 */
+	protected int getLoggerProfileTitle() {
+		return 0;
+	}
+
+	/**
+	 * This method may return the local log content provider authority if local log sessions are supported.
+	 *
+	 * @return local log session content provider URI
+	 */
+	protected Uri getLocalAuthorityLogger() {
+		return null;
+	}
+
 	@Override
 	public void onDeviceSelected(final BluetoothDevice device, final String name) {
+		final int titleId = getLoggerProfileTitle();
+		if (titleId > 0) {
+			mLogSession = Logger.newSession(getApplicationContext(), getString(titleId), device.getAddress(), name);
+			// If nRF Logger is not installed we may want to use local logger
+			if (mLogSession == null && getLocalAuthorityLogger() != null) {
+				mLogSession = LocalLogSession.newSession(getApplicationContext(), getLocalAuthorityLogger(), device.getAddress(), name);
+			}
+		}
+		mBleManager.setLogger(mLogSession);
 		mDeviceNameView.setText(mDeviceName = name);
-		mBleManager.connect(getApplicationContext(), device);
+		mConnectButton.setText(R.string.action_disconnect);
+		mBleManager.connect(device);
 	}
 
 	@Override
@@ -207,9 +240,14 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	}
 
 	@Override
+	public void onDeviceDisconnecting() {
+		// do nothing
+	}
+
+	@Override
 	public void onDeviceDisconnected() {
 		mDeviceConnected = false;
-		mBleManager.closeBluetoothGatt();
+		mBleManager.close();
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -234,6 +272,18 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	}
 
 	@Override
+	public void onServicesDiscovered(boolean optionalServicesFound) {
+		// this may notify user or show some views
+	}
+
+	/**
+	 * Called when the initialization process in completed.
+	 */
+	public void onDeviceReady() {
+		// empty default implementation
+	}
+
+	@Override
 	public void onBatteryValueReceived(final int value) {
 		runOnUiThread(new Runnable() {
 			@Override
@@ -255,11 +305,8 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 
 	@Override
 	public void onError(final String message, final int errorCode) {
-		DebugLogger.e(TAG, "Error occured: " + message + ",  error code: " + errorCode);
+		DebugLogger.e(TAG, "Error occurred: " + message + ",  error code: " + errorCode);
 		showToast(message + " (" + errorCode + ")");
-
-		// refresh UI when connection failed
-		onDeviceDisconnected();
 	}
 
 	@Override

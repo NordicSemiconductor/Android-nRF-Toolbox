@@ -24,5 +24,7 @@ package no.nordicsemi.android.nrftoolbox.proximity;
 import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
 
 public interface ProximityManagerCallbacks extends BleManagerCallbacks {
-	// no additional methods
+	public void onAlarmTriggered();
+
+	public void onAlarmStopped();
 }

@@ -72,6 +72,7 @@ import no.nordicsemi.android.nrftoolbox.dfu.adapter.FileBrowserAppsAdapter;
 import no.nordicsemi.android.nrftoolbox.dfu.fragment.UploadCancelFragment;
 import no.nordicsemi.android.nrftoolbox.dfu.fragment.ZipInfoFragment;
 import no.nordicsemi.android.nrftoolbox.dfu.settings.SettingsActivity;
+import no.nordicsemi.android.nrftoolbox.dfu.settings.SettingsFragment;
 import no.nordicsemi.android.nrftoolbox.scanner.ScannerFragment;
 import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
 
@@ -85,7 +86,7 @@ public class DfuActivity extends ActionBarActivity implements LoaderCallbacks<Cu
 	private static final String TAG = "DfuActivity";
 
 	private static final String PREFS_SAMPLES_VERSION = "no.nordicsemi.android.nrftoolbox.dfu.PREFS_SAMPLES_VERSION";
-	private static final int CURRENT_SAMPLES_VERSION = 2;
+	private static final int CURRENT_SAMPLES_VERSION = 3;
 
 	private static final String PREFS_DEVICE_NAME = "no.nordicsemi.android.nrftoolbox.dfu.PREFS_DEVICE_NAME";
 	private static final String PREFS_FILE_NAME = "no.nordicsemi.android.nrftoolbox.dfu.PREFS_FILE_NAME";
@@ -168,7 +169,7 @@ public class DfuActivity extends ActionBarActivity implements LoaderCallbacks<Cu
 		ensureSamplesExist();
 
 		// restore saved state
-		mFileType = DfuService.TYPE_APPLICATION; // Default
+		mFileType = DfuService.TYPE_AUTO; // Default
 		if (savedInstanceState != null) {
 			mFileType = savedInstanceState.getInt(DATA_FILE_TYPE);
 			mFileTypeTmp = savedInstanceState.getInt(DATA_FILE_TYPE_TMP);
@@ -307,9 +308,10 @@ public class DfuActivity extends ActionBarActivity implements LoaderCallbacks<Cu
 		new File(root, "ble_app_rscs_s110_v7_0_0.hex").delete();
 		new File(root, "blinky_arm_s110_v7_0_0.hex").delete();
 		new File(root, "dfu_2_0.bat").delete(); // This file has been migrated to 3.0
-		new File(root, "dfu_3_0.bat").delete(); // This file has been modified - bug fixed
+		new File(root, "dfu_3_0.bat").delete(); // This file has been migrated to 3.1
 		new File(root, "dfu_2_0.sh").delete(); // This file has been migrated to 3.0
-		new File(root, "README.txt").delete(); // This file has been modified to match v.3.0
+		new File(root, "dfu_3_0.sh").delete(); // This file has been migrated to 3.1
+		new File(root, "README.txt").delete(); // This file has been modified to match v.3.0+
 
 		boolean oldCopied = false;
 		boolean newCopied = false;
@@ -361,6 +363,11 @@ public class DfuActivity extends ActionBarActivity implements LoaderCallbacks<Cu
 			copyRawResource(R.raw.ble_app_hrs_dfu_s110_v7_1_0_ext_init, f);
 			oldCopied = true;
 		}
+		f = new File(pca10028, "ble_app_hrs_dfu_s110_v8_0_0.zip");
+		if (!f.exists()) {
+			copyRawResource(R.raw.ble_app_hrs_dfu_s110_v8_0_0, f);
+			newCopied = true;
+		}
 
 		if (oldCopied)
 			Toast.makeText(this, R.string.dfu_example_files_created, Toast.LENGTH_SHORT).show();
@@ -369,14 +376,14 @@ public class DfuActivity extends ActionBarActivity implements LoaderCallbacks<Cu
 
 		// Scripts
 		newCopied = false;
-		f = new File(root, "dfu_3_0.bat");
+		f = new File(root, "dfu_3_1.bat");
 		if (!f.exists()) {
-			copyRawResource(R.raw.dfu_win_3_0, f);
+			copyRawResource(R.raw.dfu_win_3_1, f);
 			newCopied = true;
 		}
-		f = new File(root, "dfu_3_0.sh");
+		f = new File(root, "dfu_3_1.sh");
 		if (!f.exists()) {
-			copyRawResource(R.raw.dfu_mac_3_0, f);
+			copyRawResource(R.raw.dfu_mac_3_1, f);
 			newCopied = true;
 		}
 		f = new File(root, "README.txt");
@@ -568,16 +575,16 @@ public class DfuActivity extends ActionBarActivity implements LoaderCallbacks<Cu
 	private void updateFileInfo(final String fileName, final long fileSize, final int fileType) {
 		mFileNameView.setText(fileName);
 		switch (fileType) {
-			case DfuService.TYPE_SOFT_DEVICE:
+			case DfuService.TYPE_AUTO:
 				mFileTypeView.setText(getResources().getStringArray(R.array.dfu_file_type)[0]);
 				break;
-			case DfuService.TYPE_BOOTLOADER:
+			case DfuService.TYPE_SOFT_DEVICE:
 				mFileTypeView.setText(getResources().getStringArray(R.array.dfu_file_type)[1]);
 				break;
-			case DfuService.TYPE_APPLICATION:
+			case DfuService.TYPE_BOOTLOADER:
 				mFileTypeView.setText(getResources().getStringArray(R.array.dfu_file_type)[2]);
 				break;
-			case DfuService.TYPE_AUTO:
+			case DfuService.TYPE_APPLICATION:
 				mFileTypeView.setText(getResources().getStringArray(R.array.dfu_file_type)[3]);
 				break;
 		}
@@ -625,20 +632,20 @@ public class DfuActivity extends ActionBarActivity implements LoaderCallbacks<Cu
 	 */
 	public void onSelectFileClicked(final View view) {
 		mFileTypeTmp = mFileType;
-		int index = 2;
+		int index = 0;
 		switch (mFileType) {
-			case DfuService.TYPE_SOFT_DEVICE:
+			case DfuService.TYPE_AUTO:
 				index = 0;
 				break;
+			case DfuService.TYPE_SOFT_DEVICE:
+			index = 1;
+			break;
 			case DfuService.TYPE_BOOTLOADER:
-				index = 1;
-				break;
+			index = 2;
+			break;
 			case DfuService.TYPE_APPLICATION:
-				index = 2;
-				break;
-			case DfuService.TYPE_AUTO:
-				index = 3;
-				break;
+			index = 3;
+			break;
 		}
 		// Show a dialog with file types
 		new AlertDialog.Builder(this).setTitle(R.string.dfu_file_type_title)
@@ -647,16 +654,16 @@ public class DfuActivity extends ActionBarActivity implements LoaderCallbacks<Cu
 					public void onClick(final DialogInterface dialog, final int which) {
 						switch (which) {
 							case 0:
-								mFileTypeTmp = DfuService.TYPE_SOFT_DEVICE;
+								mFileTypeTmp = DfuService.TYPE_AUTO;
 								break;
 							case 1:
-								mFileTypeTmp = DfuService.TYPE_BOOTLOADER;
+								mFileTypeTmp = DfuService.TYPE_SOFT_DEVICE;
 								break;
 							case 2:
-								mFileTypeTmp = DfuService.TYPE_APPLICATION;
+								mFileTypeTmp = DfuService.TYPE_BOOTLOADER;
 								break;
 							case 3:
-								mFileTypeTmp = DfuService.TYPE_AUTO;
+								mFileTypeTmp = DfuService.TYPE_APPLICATION;
 								break;
 						}
 					}
@@ -734,6 +741,8 @@ public class DfuActivity extends ActionBarActivity implements LoaderCallbacks<Cu
 
 		showProgressBar();
 
+		final boolean keepBond = preferences.getBoolean(SettingsFragment.SETTINGS_KEEP_BOND, false);
+
 		final Intent service = new Intent(this, DfuService.class);
 		service.putExtra(DfuService.EXTRA_DEVICE_ADDRESS, mSelectedDevice.getAddress());
 		service.putExtra(DfuService.EXTRA_DEVICE_NAME, mSelectedDevice.getName());
@@ -743,6 +752,7 @@ public class DfuActivity extends ActionBarActivity implements LoaderCallbacks<Cu
 		service.putExtra(DfuService.EXTRA_FILE_URI, mFileStreamUri);
 		service.putExtra(DfuService.EXTRA_INIT_FILE_PATH, mInitFilePath);
 		service.putExtra(DfuService.EXTRA_INIT_FILE_URI, mInitFileStreamUri);
+		service.putExtra(DfuService.EXTRA_KEEP_BOND, keepBond);
 		startService(service);
 	}
 

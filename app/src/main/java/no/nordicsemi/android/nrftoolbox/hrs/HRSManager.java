@@ -21,231 +21,132 @@
  */
 package no.nordicsemi.android.nrftoolbox.hrs;
 
-import java.util.List;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
+import android.content.Context;
+
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.UUID;
 
+import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.parser.BodySensorLocationParser;
+import no.nordicsemi.android.nrftoolbox.parser.HeartRateMeasurementParser;
 import no.nordicsemi.android.nrftoolbox.profile.BleManager;
-import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothProfile;
-import android.content.Context;
 
 /**
  * HRSManager class performs BluetoothGatt operations for connection, service discovery, enabling notification and reading characteristics. All operations required to connect to device with BLE HR
  * Service and reading heart rate values are performed here. HRSActivity implements HRSManagerCallbacks in order to receive callbacks of BluetoothGatt operations
  */
-public class HRSManager implements BleManager<HRSManagerCallbacks> {
-	private final String TAG = "HRSManager";
-	private HRSManagerCallbacks mCallbacks;
-	private BluetoothGatt mBluetoothGatt;
-	private Context mContext;
-
+public class HRSManager extends BleManager<HRSManagerCallbacks> {
 	public final static UUID HR_SERVICE_UUID = UUID.fromString("0000180D-0000-1000-8000-00805f9b34fb");
 	private static final UUID HR_SENSOR_LOCATION_CHARACTERISTIC_UUID = UUID.fromString("00002A38-0000-1000-8000-00805f9b34fb");
-
 	private static final UUID HR_CHARACTERISTIC_UUID = UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb");
-	private static final UUID CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
-	private final static UUID BATTERY_SERVICE = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb");
-	private final static UUID BATTERY_LEVEL_CHARACTERISTIC = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb");
-
-	private final static String ERROR_CONNECTION_STATE_CHANGE = "Error on connection state change";
-	private final static String ERROR_DISCOVERY_SERVICE = "Error on discovering services";
-	private final static String ERROR_WRITE_DESCRIPTOR = "Error on writing descriptor";
-	private final static String ERROR_READ_CHARACTERISTIC = "Error on reading characteristic";
-
-	private BluetoothGattCharacteristic mHRCharacteristic, mHRLocationCharacteristic, mBatteryCharacteristic;
-	private static final int FIRST_BITMASK = 0x01;
+	private BluetoothGattCharacteristic mHRCharacteristic, mHRLocationCharacteristic;
 
 	private static HRSManager managerInstance = null;
 
 	/**
 	 * singleton implementation of HRSManager class
 	 */
-	public static synchronized HRSManager getInstance(Context context) {
+	public static synchronized HRSManager getInstance(final Context context) {
 		if (managerInstance == null) {
-			managerInstance = new HRSManager();
+			managerInstance = new HRSManager(context);
 		}
-		managerInstance.mContext = context;
 		return managerInstance;
 	}
 
-	/**
-	 * callbacks for activity {HRSActivity} that implements HRSManagerCallbacks interface activity use this method to register itself for receiving callbacks
-	 */
-	@Override
-	public void setGattCallbacks(HRSManagerCallbacks callbacks) {
-		mCallbacks = callbacks;
+	public HRSManager(final Context context) {
+		super(context);
 	}
 
 	@Override
-	public void connect(Context context, BluetoothDevice device) {
-		DebugLogger.d(TAG, "Connecting to device...");
-		mBluetoothGatt = device.connectGatt(context, false, mGattCallback);
-	}
-
-	/**
-	 * Disable HR notification first and then disconnect to HR device
-	 */
-	@Override
-	public void disconnect() {
-		DebugLogger.d(TAG, "Disconnecting device...");
-		if (mBluetoothGatt != null) {
-			mBluetoothGatt.disconnect();
-		}
+	protected BleManagerGattCallback getGattCallback() {
+		return mGattCallback;
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving notification, etc
 	 */
-	private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
+	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
+
 		@Override
-		public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-			if (status == BluetoothGatt.GATT_SUCCESS) {
-				if (newState == BluetoothProfile.STATE_CONNECTED) {
-					DebugLogger.d(TAG, "Device connected");
-					mBluetoothGatt.discoverServices();
-					//This will send callback to HRSActivity when device get connected
-					mCallbacks.onDeviceConnected();
-				} else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-					DebugLogger.d(TAG, "Device disconnected");
-					//This will send callback to HRSActivity when device get disconnected
-					mCallbacks.onDeviceDisconnected();
-				}
-			} else {
-				mCallbacks.onError(ERROR_CONNECTION_STATE_CHANGE, status);
-			}
+		protected Queue<Request> initGatt(final BluetoothGatt gatt) {
+			final LinkedList<Request> requests = new LinkedList<>();
+			if (mHRLocationCharacteristic != null)
+				requests.push(Request.newReadRequest(mHRLocationCharacteristic));
+			requests.push(Request.newEnableNotificationsRequest(mHRCharacteristic));
+			return requests;
 		}
 
 		@Override
-		public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-			if (status == BluetoothGatt.GATT_SUCCESS) {
-				List<BluetoothGattService> services = gatt.getServices();
-				for (BluetoothGattService service : services) {
-					if (service.getUuid().equals(HR_SERVICE_UUID)) {
-						mHRCharacteristic = service.getCharacteristic(HR_CHARACTERISTIC_UUID);
-						mHRLocationCharacteristic = service.getCharacteristic(HR_SENSOR_LOCATION_CHARACTERISTIC_UUID);
-					} else if (service.getUuid().equals(BATTERY_SERVICE)) {
-						mBatteryCharacteristic = service.getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC);
-					}
-				}
-				if (mHRCharacteristic != null) {
-					//This will send callback to HRSActivity when HR Service is found in device
-					mCallbacks.onServicesDiscovered(false);
-					readHRSensorLocation();
-				} else {
-					mCallbacks.onDeviceNotSupported();
-					gatt.disconnect();
-				}
-			} else {
-				mCallbacks.onError(ERROR_DISCOVERY_SERVICE, status);
+		protected boolean isRequiredServiceSupported(final BluetoothGatt gatt) {
+			final BluetoothGattService service = gatt.getService(HR_SERVICE_UUID);
+			if (service != null) {
+				mHRCharacteristic = service.getCharacteristic(HR_CHARACTERISTIC_UUID);
 			}
+			return mHRCharacteristic != null;
 		}
 
 		@Override
-		public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-			if (status == BluetoothGatt.GATT_SUCCESS) {
-				if (characteristic.getUuid().equals(HR_SENSOR_LOCATION_CHARACTERISTIC_UUID)) {
-					final String sensorPosition = getBodySensorPosition(characteristic.getValue()[0]);
-					//This will send callback to HRSActivity when HR sensor position on body is found in HR device
-					mCallbacks.onHRSensorPositionFound(sensorPosition);
-
-					if (mBatteryCharacteristic != null) {
-						readBatteryLevel();
-					} else {
-						enableHRNotification();
-					}
-				}
-				if (characteristic.getUuid().equals(BATTERY_LEVEL_CHARACTERISTIC)) {
-					int batteryValue = characteristic.getValue()[0];
-					//This will send callback to HRSActivity when Battery value is received from HR device
-					mCallbacks.onBatteryValueReceived(batteryValue);
-
-					enableHRNotification();
-				}
-			} else {
-				mCallbacks.onError(ERROR_READ_CHARACTERISTIC, status);
+		protected boolean isOptionalServiceSupported(final BluetoothGatt gatt) {
+			final BluetoothGattService service = gatt.getService(HR_SERVICE_UUID);
+			if (service != null) {
+				mHRLocationCharacteristic = service.getCharacteristic(HR_SENSOR_LOCATION_CHARACTERISTIC_UUID);
 			}
+			return mHRLocationCharacteristic != null;
 		}
 
 		@Override
-		public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+		public void onCharacteristicRead(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+			if (mLogSession != null)
+				Logger.a(mLogSession, BodySensorLocationParser.parse(characteristic));
+
+			final String sensorPosition = getBodySensorPosition(characteristic.getValue()[0]);
+			//This will send callback to HRSActivity when HR sensor position on body is found in HR device
+			mCallbacks.onHRSensorPositionFound(sensorPosition);
+		}
+
+		@Override
+		protected void onDeviceDisconnected() {
+			mHRLocationCharacteristic = null;
+			mHRCharacteristic = null;
+		}
+
+		@Override
+		public void onCharacteristicNotified(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+			if (mLogSession != null)
+				Logger.a(mLogSession, HeartRateMeasurementParser.parse(characteristic));
+
 			int hrValue;
-			//This will check if HR value is in 8 bits or 16 bits. 
-			if (characteristic.getUuid().equals(HR_CHARACTERISTIC_UUID)) {
-				if (isHeartRateInUINT16(characteristic.getValue()[0])) {
-					hrValue = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 1);
-				} else {
-					hrValue = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 1);
-				}
-				//This will send callback to HRSActivity when new HR value is received from HR device
-				mCallbacks.onHRValueReceived(hrValue);
-			}
-		}
-
-		@Override
-		public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
-			if (status == BluetoothGatt.GATT_SUCCESS) {
-				//This will send callback to HRSActivity when HR notification is enabled
-				mCallbacks.onHRNotificationEnabled();
+			if (isHeartRateInUINT16(characteristic.getValue()[0])) {
+				hrValue = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 1);
 			} else {
-				mCallbacks.onError(ERROR_WRITE_DESCRIPTOR, status);
+				hrValue = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 1);
 			}
+			//This will send callback to HRSActivity when new HR value is received from HR device
+			mCallbacks.onHRValueReceived(hrValue);
 		}
 	};
-
-	private void readBatteryLevel() {
-		if (mBatteryCharacteristic != null) {
-			mBluetoothGatt.readCharacteristic(mBatteryCharacteristic);
-		}
-	}
-
-	private void readHRSensorLocation() {
-		if (mHRLocationCharacteristic != null) {
-			mBluetoothGatt.readCharacteristic(mHRLocationCharacteristic);
-		}
-	}
 
 	/**
 	 * This method will decode and return Heart rate sensor position on body
 	 */
-	private String getBodySensorPosition(byte bodySensorPositionValue) {
-		String[] locations = mContext.getResources().getStringArray(R.array.hrs_locations);
+	private String getBodySensorPosition(final byte bodySensorPositionValue) {
+		final String[] locations = getContext().getResources().getStringArray(R.array.hrs_locations);
 		if (bodySensorPositionValue > locations.length)
-			return mContext.getString(R.string.hrs_location_other);
+			return getContext().getString(R.string.hrs_location_other);
 		return locations[bodySensorPositionValue];
 	}
 
 	/**
 	 * This method will check if Heart rate value is in 8 bits or 16 bits
 	 */
-	private boolean isHeartRateInUINT16(byte value) {
-		return ((value & FIRST_BITMASK) != 0);
-	}
-
-	/**
-	 * Enabling notification on Heart Rate Characteristic
-	 */
-	private void enableHRNotification() {
-		DebugLogger.d(TAG, "Enabling heart rate notifications");
-		mBluetoothGatt.setCharacteristicNotification(mHRCharacteristic, true);
-		BluetoothGattDescriptor descriptor = mHRCharacteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
-		descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-		mBluetoothGatt.writeDescriptor(descriptor);
-	}
-
-	@Override
-	public void closeBluetoothGatt() {
-		if (mBluetoothGatt != null) {
-			mBluetoothGatt.close();
-			mBluetoothGatt = null;
-		}
+	private boolean isHeartRateInUINT16(final byte value) {
+		return ((value & 0x01) != 0);
 	}
 
 }

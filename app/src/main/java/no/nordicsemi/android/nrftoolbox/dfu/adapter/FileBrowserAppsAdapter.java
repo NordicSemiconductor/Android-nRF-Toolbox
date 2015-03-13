@@ -21,7 +21,6 @@
  */
 package no.nordicsemi.android.nrftoolbox.dfu.adapter;
 
-import no.nordicsemi.android.nrftoolbox.R;
 import android.content.Context;
 import android.content.res.Resources;
 import android.view.LayoutInflater;
@@ -29,6 +28,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import no.nordicsemi.android.nrftoolbox.R;
 
 /**
  * This adapter displays some file browser applications that can be used to select HEX file. It is used when there is no such app already installed on the device. The hardcoded apps and Google Play

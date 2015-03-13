@@ -41,6 +41,10 @@
 	        android:key="settings_mbr_size"
 	        android:dialogTitle="@string/dfu_settings_dfu_mbr_size_title"
 	        android:title="@string/dfu_settings_dfu_mbr_size" />
+		<SwitchPreference
+			android:defaultValue="false"
+			android:key="settings_keep_bond"
+			android:title="@string/dfu_settings_dfu_keep_bond" />
 
         <no.nordicsemi.android.nrftoolbox.dfu.settings.AboutDfuPreference
             android:summary="@string/dfu_settings_dfu_about_summary"

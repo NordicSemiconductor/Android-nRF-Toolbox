@@ -21,15 +21,17 @@
  */
 package no.nordicsemi.android.nrftoolbox.bpm;
 
+import android.os.Bundle;
+import android.widget.TextView;
+
 import java.util.Calendar;
 import java.util.UUID;
 
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileActivity;
-import android.os.Bundle;
-import android.widget.TextView;
 
+// TODO The BPMActivity should be rewritten to use the service approach, like other do.
 public class BPMActivity extends BleProfileActivity implements BPMManagerCallbacks {
 	@SuppressWarnings("unused")
 	private static final String TAG = "BPMActivity";
@@ -61,6 +63,11 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 	}
 
 	@Override
+	protected int getLoggerProfileTitle() {
+		return R.string.bpm_feature_title;
+	}
+
+	@Override
 	protected int getDefaultDeviceName() {
 		return R.string.bpm_default_name;
 	}
@@ -77,7 +84,7 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 
 	@Override
 	protected BleManager<BPMManagerCallbacks> initializeManager() {
-		final BPMManager manager = BPMManager.getBPMManager();
+		final BPMManager manager = BPMManager.getBPMManager(getApplicationContext());
 		manager.setGattCallbacks(this);
 		return manager;
 	}
@@ -100,12 +107,7 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 	}
 
 	@Override
-	public void onBloodPressureMeasurementIndicationsEnabled() {
-		// this may notify user
-	}
-
-	@Override
-	public void onIntermediateCuffPressureNotificationEnabled() {
+	public void onDeviceReady() {
 		// this may notify user
 	}
 

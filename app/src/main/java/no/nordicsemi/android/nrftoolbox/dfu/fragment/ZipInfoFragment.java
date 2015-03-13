@@ -21,13 +21,14 @@
  */
 package no.nordicsemi.android.nrftoolbox.dfu.fragment;
 
-import no.nordicsemi.android.nrftoolbox.R;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+
+import no.nordicsemi.android.nrftoolbox.R;
 
 public class ZipInfoFragment extends DialogFragment {
 

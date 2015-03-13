@@ -21,35 +21,36 @@
  */
 package no.nordicsemi.android.nrftoolbox.hrs;
 
-import java.util.UUID;
-
-import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
-import no.nordicsemi.android.nrftoolbox.profile.BleProfileActivity;
-
-import org.achartengine.GraphicalView;
-
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import org.achartengine.GraphicalView;
+
+import java.util.UUID;
+
+import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.profile.BleManager;
+import no.nordicsemi.android.nrftoolbox.profile.BleProfileActivity;
+
 /**
  * HRSActivity is the main Heart rate activity. It implements HRSManagerCallbacks to receive callbacks from HRSManager class. The activity supports portrait and landscape orientations. The activity
  * uses external library AChartEngine to show real time graph of HR values.
  */
+// TODO The HRSActivity should be rewritten to use the service approach, like other do.
 public class HRSActivity extends BleProfileActivity implements HRSManagerCallbacks {
 	@SuppressWarnings("unused")
 	private final String TAG = "HRSActivity";
 
-	private static final String GRAPH_STATUS = "graph_status";
-	private static final String GRAPH_COUNTER = "graph_counter";
-	private static final String HR_VALUE = "hr_value";
+	private final static String GRAPH_STATUS = "graph_status";
+	private final static String GRAPH_COUNTER = "graph_counter";
+	private final static String HR_VALUE = "hr_value";
 
-	private final int MAX_HR_VALUE = 65535;
-	private final int MIN_POSITIVE_VALUE = 0;
-	private final int REFRESH_INTERVAL = 1000; // 1 second interval
+	private final static int MAX_HR_VALUE = 65535;
+	private final static int MIN_POSITIVE_VALUE = 0;
+	private final static int REFRESH_INTERVAL = 1000; // 1 second interval
 
 	private Handler mHandler = new Handler();
 
@@ -63,7 +64,7 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 	private int mCounter = 0;
 
 	@Override
-	protected void onCreateView(Bundle savedInstanceState) {
+	protected void onCreateView(final Bundle savedInstanceState) {
 		setContentView(R.layout.activity_feature_hrs);
 		setGUI();
 	}
@@ -82,7 +83,7 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 	}
 
 	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+	protected void onRestoreInstanceState(final Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 
 		if (savedInstanceState != null) {
@@ -96,7 +97,7 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 	}
 
 	@Override
-	protected void onSaveInstanceState(Bundle outState) {
+	protected void onSaveInstanceState(final Bundle outState) {
 		super.onSaveInstanceState(outState);
 
 		outState.putBoolean(GRAPH_STATUS, isGraphInProgress);
@@ -109,6 +110,11 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 		super.onDestroy();
 
 		stopShowGraph();
+	}
+
+	@Override
+	protected int getLoggerProfileTitle() {
+		return R.string.hrs_feature_title;
 	}
 
 	@Override
@@ -154,7 +160,7 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 
 	@Override
 	protected BleManager<HRSManagerCallbacks> initializeManager() {
-		HRSManager manager = HRSManager.getInstance(this);
+		final HRSManager manager = HRSManager.getInstance(getApplicationContext());
 		manager.setGattCallbacks(this);
 		return manager;
 	}
@@ -186,18 +192,18 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 	}
 
 	@Override
-	public void onServicesDiscovered(boolean optionalServicesFound) {
+	public void onServicesDiscovered(final boolean optionalServicesFound) {
 		// this may notify user or show some views
 	}
 
 	@Override
-	public void onHRSensorPositionFound(String position) {
-		setHRSPositionOnView(position);
+	public void onDeviceReady() {
+		startShowGraph();
 	}
 
 	@Override
-	public void onHRNotificationEnabled() {
-		startShowGraph();
+	public void onHRSensorPositionFound(final String position) {
+		setHRSPositionOnView(position);
 	}
 
 	@Override

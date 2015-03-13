@@ -55,6 +55,8 @@ INIT_FILE=""
 INIT_PATH=""
 E_INIT_FILE=""
 TYPE=0
+# Modify this in order to keep the bond information after application upgrade
+KEEP_BOND=false
 
 # ==================================================================================
 # Common methods
@@ -186,11 +188,11 @@ fi
 if [ "$ADDRESS" = "" ] ; then
 	# Start DFU Initiator activity if no target device specified
     printf "Starting DFU Initiator activity..."
-    adb $S_DEVICE shell am start -a no.nordicsemi.android.action.DFU_UPLOAD --ei no.nordicsemi.android.dfu.extra.EXTRA_FILE_TYPE $TYPE -e no.nordicsemi.android.dfu.extra.EXTRA_FILE_PATH "/sdcard/Nordic Semiconductor/Upload/$HEX_FILE" $E_INIT_FILE | grep "Error" > /dev/null 2>&1
+    adb $S_DEVICE shell am start -a no.nordicsemi.android.action.DFU_UPLOAD --ei no.nordicsemi.android.dfu.extra.EXTRA_FILE_TYPE $TYPE --ez no.nordicsemi.android.dfu.extra.EXTRA_KEEP_BOND $KEEP_BOND -e no.nordicsemi.android.dfu.extra.EXTRA_FILE_PATH "/sdcard/Nordic Semiconductor/Upload/$HEX_FILE" $E_INIT_FILE | grep "Error" > /dev/null 2>&1
 else
 	# Start the DFU service directly
     printf "Starting DFU service..."
-    adb $S_DEVICE shell am startservice -n no.nordicsemi.android.nrftoolbox/.dfu.DfuService -a no.nordicsemi.android.action.DFU_UPLOAD --ei no.nordicsemi.android.dfu.extra.EXTRA_FILE_TYPE $TYPE -e no.nordicsemi.android.dfu.extra.EXTRA_DEVICE_ADDRESS $ADDRESS -e no.nordicsemi.android.dfu.extra.EXTRA_DEVICE_NAME $NAME -e no.nordicsemi.android.dfu.extra.EXTRA_FILE_PATH "/sdcard/Nordic Semiconductor/Upload/$HEX_FILE" $E_INIT_FILE | grep "Error" > /dev/null 2>&1
+    adb $S_DEVICE shell am startservice -n no.nordicsemi.android.nrftoolbox/.dfu.DfuService -a no.nordicsemi.android.action.DFU_UPLOAD --ei no.nordicsemi.android.dfu.extra.EXTRA_FILE_TYPE --ez no.nordicsemi.android.dfu.extra.EXTRA_KEEP_BOND $KEEP_BOND -e no.nordicsemi.android.dfu.extra.EXTRA_DEVICE_ADDRESS $ADDRESS -e no.nordicsemi.android.dfu.extra.EXTRA_DEVICE_NAME $NAME -e no.nordicsemi.android.dfu.extra.EXTRA_FILE_PATH "/sdcard/Nordic Semiconductor/Upload/$HEX_FILE" $E_INIT_FILE | grep "Error" > /dev/null 2>&1
 fi
 
 if [ "$?" = "0" ] ; then

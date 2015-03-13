@@ -21,15 +21,17 @@
  */
 package no.nordicsemi.android.nrftoolbox.dfu.settings;
 
-import no.nordicsemi.android.dfu.DfuSettingsConstants;
-import no.nordicsemi.android.nrftoolbox.R;
 import android.app.AlertDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 
+import no.nordicsemi.android.dfu.DfuSettingsConstants;
+import no.nordicsemi.android.nrftoolbox.R;
+
 public class SettingsFragment extends PreferenceFragment implements DfuSettingsConstants, SharedPreferences.OnSharedPreferenceChangeListener {
+	public static final String SETTINGS_KEEP_BOND = "settings_keep_bond";
 
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {

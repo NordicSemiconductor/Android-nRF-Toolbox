@@ -27,12 +27,6 @@ public interface GlucoseManagerCallbacks extends BleManagerCallbacks {
 	public static final int UNIT_mmHG = 0;
 	public static final int UNIT_kPa = 1;
 
-	public void onGlucoseMeasurementNotificationEnabled();
-
-	public void onGlucoseMeasurementContextNotificationEnabled();
-
-	public void onRecordAccessControlPointIndicationsEnabled();
-
 	public void onOperationStarted();
 
 	public void onOperationCompleted();

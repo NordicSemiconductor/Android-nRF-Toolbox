@@ -33,6 +33,11 @@ public interface BleManagerCallbacks {
 	public void onDeviceConnected();
 
 	/**
+	 * Called when user pressed the DISCONNECT button.
+	 */
+	public void onDeviceDisconnecting();
+
+	/**
 	 * Called when the device has disconnected (when the callback returned {@link BluetoothGattCallback#onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int)} with state DISCONNECTED.
 	 */
 	public void onDeviceDisconnected();
@@ -52,6 +57,11 @@ public interface BleManagerCallbacks {
 	 *            if <code>true</code> the secondary services were also found on the device.
 	 */
 	public void onServicesDiscovered(final boolean optionalServicesFound);
+
+	/**
+	 * Method called when all initialization requests has been completed.
+	 */
+	public void onDeviceReady();
 
 	/**
 	 * Called when battery value has been received from the device

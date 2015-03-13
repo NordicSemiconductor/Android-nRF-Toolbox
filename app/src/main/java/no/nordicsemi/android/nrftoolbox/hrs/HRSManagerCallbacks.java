@@ -26,11 +26,6 @@ import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
 public interface HRSManagerCallbacks extends BleManagerCallbacks {
 
 	/**
-	 * Called when Heart Rate notifications has been enabled
-	 */
-	public void onHRNotificationEnabled();
-
-	/**
 	 * Called when the sensor position information has been obtained from the sensor
 	 * 
 	 * @param position

@@ -22,11 +22,6 @@
 
 package no.nordicsemi.android.nrftoolbox.hts;
 
-import no.nordicsemi.android.log.Logger;
-import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
-import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
-import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -34,8 +29,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+
+import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
+import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.profile.BleManager;
+import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 
 public class HTSService extends BleProfileService implements HTSManagerCallbacks {
 	public static final String BROADCAST_HTS_MEASUREMENT = "no.nordicsemi.android.nrftoolbox.hts.BROADCAST_HTS_MEASUREMENT";
@@ -48,12 +48,11 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	private final static int DISCONNECT_REQ = 1;
 
 	private HTSManager mManager;
-	private boolean mBinded;
 
 	private final LocalBinder mBinder = new RSCBinder();
 
 	/**
-	 * This local binder is an interface for the binded activity to operate with the HTS sensor
+	 * This local binder is an interface for the bonded activity to operate with the HTS sensor
 	 */
 	public class RSCBinder extends LocalBinder {
 		// empty
@@ -66,7 +65,7 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 
 	@Override
 	protected BleManager<HTSManagerCallbacks> initializeManager() {
-		return mManager = HTSManager.getHTSManager();
+		return mManager = new HTSManager(this);
 	}
 
 	@Override
@@ -88,28 +87,21 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	}
 
 	@Override
-	public IBinder onBind(final Intent intent) {
-		mBinded = true;
-		return super.onBind(intent);
-	}
-
-	@Override
-	public void onRebind(final Intent intent) {
-		mBinded = true;
+	protected void onRebind() {
 		// when the activity rebinds to the service, remove the notification
 		cancelNotification();
-
-		// read the battery level when back in the Activity
-		if (isConnected())
-			mManager.readBatteryLevel();
 	}
 
 	@Override
-	public boolean onUnbind(final Intent intent) {
-		mBinded = false;
-		// when the activity closes we need to show the notification that user is connected to the sensor  
-		createNotifcation(R.string.hts_notification_connected_message, 0);
-		return super.onUnbind(intent);
+	protected void onUnbind() {
+		// when the activity closes we need to show the notification that user is connected to the sensor
+		createNotification(R.string.hts_notification_connected_message, 0);
+	}
+
+	@Override
+	protected void onServiceStarted() {
+		// logger is now available. Assign it to the manager
+		mManager.setLogger(getLogSession());
 	}
 
 	@Override
@@ -117,6 +109,11 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 		final Intent broadcast = new Intent(BROADCAST_HTS_MEASUREMENT);
 		broadcast.putExtra(EXTRA_TEMPERATURE, value);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
+
+		if (!mBinded) {
+			// Here we may update the notification to display the current temperature.
+			// TODO modify the notification here
+		}
 	}
 
 	/**
@@ -128,7 +125,7 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	 * @param defaults
 	 *            signals that will be used to notify the user
 	 */
-	private void createNotifcation(final int messageResId, final int defaults) {
+	private void createNotification(final int messageResId, final int defaults) {
 		final Intent parentIntent = new Intent(this, FeaturesActivity.class);
 		parentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		final Intent targetIntent = new Intent(this, HTSActivity.class);
@@ -163,7 +160,7 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	private final BroadcastReceiver mDisconnectActionBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
-			Logger.i(getLogSession(), "[HTS] Disconnect action pressed");
+			Logger.i(getLogSession(), "[Notification] Disconnect action pressed");
 			if (isConnected())
 				getBinder().disconnect();
 			else

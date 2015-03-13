@@ -21,11 +21,6 @@
  */
 package no.nordicsemi.android.nrftoolbox.gls;
 
-import java.util.UUID;
-
-import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
-import no.nordicsemi.android.nrftoolbox.profile.BleProfileExpandableListActivity;
 import android.os.Bundle;
 import android.util.SparseArray;
 import android.view.MenuInflater;
@@ -35,6 +30,13 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import java.util.UUID;
+
+import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.profile.BleManager;
+import no.nordicsemi.android.nrftoolbox.profile.BleProfileExpandableListActivity;
+
+// TODO The GlucoseActivity should be rewritten to use the service approach, like other do.
 public class GlucoseActivity extends BleProfileExpandableListActivity implements PopupMenu.OnMenuItemClickListener, GlucoseManagerCallbacks {
 	@SuppressWarnings("unused")
 	private static final String TAG = "GlucoseActivity";
@@ -95,7 +97,7 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 
 	@Override
 	protected BleManager<GlucoseManagerCallbacks> initializeManager() {
-		GlucoseManager manager = mGlucoseManager = GlucoseManager.getGlucoseManager();
+		GlucoseManager manager = mGlucoseManager = GlucoseManager.getGlucoseManager(getApplicationContext());
 		manager.setGattCallbacks(this);
 		return manager;
 	}
@@ -117,6 +119,11 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 			break;
 		}
 		return true;
+	}
+
+	@Override
+	protected int getLoggerProfileTitle() {
+		return R.string.gls_feature_title;
 	}
 
 	@Override
@@ -151,23 +158,9 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 	}
 
 	@Override
-	public void onServicesDiscovered(boolean optionalServicesFound) {
-		// this may notify user or show some views
-	}
-
-	@Override
-	public void onGlucoseMeasurementNotificationEnabled() {
-		// this may notify user or show some views
-	}
-
-	@Override
-	public void onGlucoseMeasurementContextNotificationEnabled() {
-		// this may notify user or show some views
-	}
-
-	@Override
-	public void onRecordAccessControlPointIndicationsEnabled() {
-		// this may notify user or show some views
+	public void onDeviceDisconnected() {
+		super.onDeviceDisconnected();
+		setOperationInProgress(false);
 	}
 
 	@Override
@@ -195,6 +188,12 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 	public void onOperationFailed() {
 		setOperationInProgress(false);
 		showToast(R.string.gls_operation_failed);
+	}
+
+	@Override
+	public void onError(final String message, final int errorCode) {
+		super.onError(message, errorCode);
+		onOperationFailed();
 	}
 
 	@Override

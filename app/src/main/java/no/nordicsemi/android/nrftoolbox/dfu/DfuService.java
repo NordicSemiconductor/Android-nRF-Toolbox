@@ -22,8 +22,9 @@
 
 package no.nordicsemi.android.nrftoolbox.dfu;
 
-import no.nordicsemi.android.dfu.DfuBaseService;
 import android.app.Activity;
+
+import no.nordicsemi.android.dfu.DfuBaseService;
 
 public class DfuService extends DfuBaseService {
 

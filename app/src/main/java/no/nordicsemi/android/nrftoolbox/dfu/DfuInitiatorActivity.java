@@ -22,11 +22,12 @@
 
 package no.nordicsemi.android.nrftoolbox.dfu;
 
-import no.nordicsemi.android.nrftoolbox.scanner.ScannerFragment;
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
+
+import no.nordicsemi.android.nrftoolbox.scanner.ScannerFragment;
 
 /**
  * The activity is started only by a remote connected computer using ADB. It shows a list of DFU-supported devices in range and allows user to select target device. The HEX file will be uploaded to
@@ -58,6 +59,7 @@ public class DfuInitiatorActivity extends Activity implements ScannerFragment.On
 		final String address = device.getAddress();
 		final String finalName = overwrittenName == null ? name : overwrittenName;
 		final int type = intent.getIntExtra(DfuService.EXTRA_FILE_TYPE, DfuService.TYPE_AUTO);
+		final boolean keepBond = intent.getBooleanExtra(DfuService.EXTRA_KEEP_BOND, false);
 
 		// Start DFU service with data provided in the intent
 		final Intent service = new Intent(this, DfuService.class);
@@ -67,6 +69,7 @@ public class DfuInitiatorActivity extends Activity implements ScannerFragment.On
 		service.putExtra(DfuService.EXTRA_FILE_PATH, path);
 		if (intent.hasExtra(DfuService.EXTRA_INIT_FILE_PATH))
 			service.putExtra(DfuService.EXTRA_INIT_FILE_PATH, initPath);
+		service.putExtra(DfuService.EXTRA_KEEP_BOND, keepBond);
 		startService(service);
 		finish();
 	}

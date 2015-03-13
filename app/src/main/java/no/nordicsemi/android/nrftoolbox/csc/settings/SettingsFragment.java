@@ -22,11 +22,12 @@
 
 package no.nordicsemi.android.nrftoolbox.csc.settings;
 
-import no.nordicsemi.android.nrftoolbox.R;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
+
+import no.nordicsemi.android.nrftoolbox.R;
 
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 	public static final String SETTINGS_WHEEL_SIZE = "settings_wheel_size";

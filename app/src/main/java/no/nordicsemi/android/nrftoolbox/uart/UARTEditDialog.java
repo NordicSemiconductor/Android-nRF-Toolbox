@@ -22,7 +22,6 @@
 
 package no.nordicsemi.android.nrftoolbox.uart;
 
-import no.nordicsemi.android.nrftoolbox.R;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -41,6 +40,8 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
+
+import no.nordicsemi.android.nrftoolbox.R;
 
 public class UARTEditDialog extends DialogFragment implements View.OnClickListener, GridView.OnItemClickListener {
 	private final static String TAG = "UARTEditDialog";

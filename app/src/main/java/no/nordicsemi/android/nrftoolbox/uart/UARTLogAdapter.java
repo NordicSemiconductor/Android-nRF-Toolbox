@@ -22,10 +22,6 @@
 
 package no.nordicsemi.android.nrftoolbox.uart;
 
-import java.util.Calendar;
-
-import no.nordicsemi.android.log.LogContract.Log.Level;
-import no.nordicsemi.android.nrftoolbox.R;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -35,6 +31,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
+
+import java.util.Calendar;
+
+import no.nordicsemi.android.log.LogContract.Log.Level;
+import no.nordicsemi.android.nrftoolbox.R;
 
 public class UARTLogAdapter extends CursorAdapter {
 	private static final SparseIntArray mColors = new SparseIntArray();

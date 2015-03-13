@@ -21,48 +21,33 @@
  */
 package no.nordicsemi.android.nrftoolbox.hts;
 
-import java.util.List;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
+import android.content.Context;
+
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.UUID;
 
+import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.nrftoolbox.parser.TemperatureMeasurementParser;
 import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothProfile;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 
 /**
  * HTSManager class performs BluetoothGatt operations for connection, service discovery, enabling indication and reading characteristics. All operations required to connect to device with BLE HT
  * Service and reading health thermometer values are performed here. HTSActivity implements HTSManagerCallbacks in order to receive callbacks of BluetoothGatt operations
  */
-public class HTSManager implements BleManager<HTSManagerCallbacks> {
-	private final String TAG = "HTSManager";
-	private HTSManagerCallbacks mCallbacks;
-	private BluetoothGatt mBluetoothGatt;
-	private Context mContext;
+public class HTSManager extends BleManager<HTSManagerCallbacks> {
+	private static final String TAG = "HTSManager";
 
+	/** Health Thermometer service UUID */
 	public final static UUID HT_SERVICE_UUID = UUID.fromString("00001809-0000-1000-8000-00805f9b34fb");
-
+	/** Health Thermometer Measurement characteristic UUID */
 	private static final UUID HT_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A1C-0000-1000-8000-00805f9b34fb");
-	private static final UUID CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
-	private final static UUID BATTERY_SERVICE = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb");
-	private final static UUID BATTERY_LEVEL_CHARACTERISTIC = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb");
-
-	private final static String ERROR_CONNECTION_STATE_CHANGE = "Error on connection state change";
-	private final static String ERROR_DISCOVERY_SERVICE = "Error on discovering services";
-	private final static String ERROR_READ_CHARACTERISTIC = "Error on reading characteristic";
-	private final static String ERROR_WRITE_DESCRIPTOR = "Error on writing descriptor";
-	private final static String ERROR_AUTH_ERROR_WHILE_BONDED = "Phone has lost bonding information";
-
-	private BluetoothGattCharacteristic mHTCharacteristic, mBatteryCharacteristic;
+	private BluetoothGattCharacteristic mHTCharacteristic;
 
 	private final static int HIDE_MSB_8BITS_OUT_OF_32BITS = 0x00FFFFFF;
 	private final static int HIDE_MSB_8BITS_OUT_OF_16BITS = 0x00FF;
@@ -71,177 +56,54 @@ public class HTSManager implements BleManager<HTSManagerCallbacks> {
 	private final static int GET_BIT24 = 0x00400000;
 	private final static int FIRST_BIT_MASK = 0x01;
 
-	private static HTSManager managerInstance = null;
-
-	/**
-	 * singleton implementation of HTSManager class
-	 */
-	public static synchronized HTSManager getHTSManager() {
-		if (managerInstance == null) {
-			managerInstance = new HTSManager();
-		}
-		return managerInstance;
-	}
-
-	/**
-	 * callbacks for activity {HTSActivity} that implements HTSManagerCallbacks interface activity use this method to register itself for receiving callbacks
-	 */
-	@Override
-	public void setGattCallbacks(HTSManagerCallbacks callbacks) {
-		mCallbacks = callbacks;
+	public HTSManager(final Context context) {
+		super(context);
 	}
 
 	@Override
-	public void connect(Context context, BluetoothDevice device) {
-		mBluetoothGatt = device.connectGatt(context, false, mGattCallback);
-		mContext = context;
+	protected BleManagerGattCallback getGattCallback() {
+		return mGattCallback;
 	}
-
-	@Override
-	public void disconnect() {
-		DebugLogger.d(TAG, "Disconnecting device");
-		if (mBluetoothGatt != null) {
-			mBluetoothGatt.disconnect();
-		}
-	}
-
-	private BroadcastReceiver mBondingBroadcastReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(final Context context, final Intent intent) {
-			final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-			final int bondState = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1);
-			final int previousBondState = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, -1);
-
-			DebugLogger.d(TAG, "Bond state changed for: " + device.getAddress() + " new state: " + bondState + " previous: " + previousBondState);
-
-			// skip other devices
-			if (!device.getAddress().equals(mBluetoothGatt.getDevice().getAddress()))
-				return;
-
-			if (bondState == BluetoothDevice.BOND_BONDED) {
-				// We've read Battery Level, now enabling HT indications 
-				if (mHTCharacteristic != null) {
-					enableHTIndication();
-				}
-				mContext.unregisterReceiver(this);
-				mCallbacks.onBonded();
-			}
-		}
-	};
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving indication, etc
 	 */
-	private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
+	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
+
 		@Override
-		public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-			if (status == BluetoothGatt.GATT_SUCCESS) {
-				if (newState == BluetoothProfile.STATE_CONNECTED) {
-					DebugLogger.d(TAG, "Device connected");
-					mBluetoothGatt.discoverServices();
-					//This will send callback to HTSActivity when device get connected
-					mCallbacks.onDeviceConnected();
-				} else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-					DebugLogger.d(TAG, "Device disconnected");
-					//This will send callback to HTSActivity when device get disconnected
-					mCallbacks.onDeviceDisconnected();
-				}
-			} else {
-				mCallbacks.onError(ERROR_CONNECTION_STATE_CHANGE, status);
-			}
+		protected Queue<Request> initGatt(final BluetoothGatt gatt) {
+			final LinkedList<Request> requests = new LinkedList<>();
+			requests.push(Request.newEnableIndicationsRequest(mHTCharacteristic));
+			return requests;
 		}
 
 		@Override
-		public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-			if (status == BluetoothGatt.GATT_SUCCESS) {
-				List<BluetoothGattService> services = gatt.getServices();
-				for (BluetoothGattService service : services) {
-					if (service.getUuid().equals(HT_SERVICE_UUID)) {
-						mHTCharacteristic = service.getCharacteristic(HT_MEASUREMENT_CHARACTERISTIC_UUID);
-					} else if (service.getUuid().equals(BATTERY_SERVICE)) {
-						mBatteryCharacteristic = service.getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC);
-					}
-				}
-				if (mHTCharacteristic != null) {
-					mCallbacks.onServicesDiscovered(false);
-				} else {
-					mCallbacks.onDeviceNotSupported();
-					gatt.disconnect();
-					return;
-				}
-				enableHTIndication();
-			} else {
-				mCallbacks.onError(ERROR_DISCOVERY_SERVICE, status);
+		protected boolean isRequiredServiceSupported(final BluetoothGatt gatt) {
+			final BluetoothGattService service = gatt.getService(HT_SERVICE_UUID);
+			if (service != null) {
+				mHTCharacteristic = service.getCharacteristic(HT_MEASUREMENT_CHARACTERISTIC_UUID);
 			}
+			return mHTCharacteristic != null;
 		}
 
 		@Override
-		public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-			if (status == BluetoothGatt.GATT_SUCCESS) {
-				if (characteristic.getUuid().equals(BATTERY_LEVEL_CHARACTERISTIC)) {
-					int batteryValue = characteristic.getValue()[0];
-					mCallbacks.onBatteryValueReceived(batteryValue);
-				}
-			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
-				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
-					DebugLogger.w(TAG, ERROR_AUTH_ERROR_WHILE_BONDED);
-					mCallbacks.onError(ERROR_AUTH_ERROR_WHILE_BONDED, status);
-				}
-			} else {
-				mCallbacks.onError(ERROR_READ_CHARACTERISTIC, status);
-			}
+		protected void onDeviceDisconnected() {
+			mHTCharacteristic = null;
 		}
 
 		@Override
-		public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-			if (characteristic.getUuid().equals(HT_MEASUREMENT_CHARACTERISTIC_UUID)) {
-				try {
-					double tempValue = decodeTemperature(characteristic.getValue());
-					mCallbacks.onHTValueReceived(tempValue);
-				} catch (Exception e) {
-					DebugLogger.e(TAG, "invalid temperature value");
-				}
-			}
-		}
+		public void onCharacteristicIndicated(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+			if (mLogSession != null)
+				Logger.a(mLogSession, TemperatureMeasurementParser.parse(characteristic));
 
-		@Override
-		public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
-			if (status == BluetoothGatt.GATT_SUCCESS) {
-				readBatteryLevel();
-			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
-				if (gatt.getDevice().getBondState() == BluetoothDevice.BOND_NONE) {
-					mCallbacks.onBondingRequired();
-
-					final IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-					mContext.registerReceiver(mBondingBroadcastReceiver, filter);
-				} else {
-					DebugLogger.w(TAG, ERROR_AUTH_ERROR_WHILE_BONDED);
-					mCallbacks.onError(ERROR_AUTH_ERROR_WHILE_BONDED, status);
-				}
-			} else {
-				DebugLogger.e(TAG, ERROR_WRITE_DESCRIPTOR + " (" + status + ")");
-				mCallbacks.onError(ERROR_WRITE_DESCRIPTOR, status);
+			try {
+				final double tempValue = decodeTemperature(characteristic.getValue());
+				mCallbacks.onHTValueReceived(tempValue);
+			} catch (Exception e) {
+				DebugLogger.e(TAG, "Invalid temperature value", e);
 			}
 		}
 	};
-
-	public void readBatteryLevel() {
-		if (mBatteryCharacteristic != null) {
-			mBluetoothGatt.readCharacteristic(mBatteryCharacteristic);
-		} else {
-			DebugLogger.e(TAG, "Battery Level Characteristic is null");
-		}
-	}
-
-	/**
-	 * enable Health Thermometer indication on Health Thermometer Measurement characteristic
-	 */
-	private void enableHTIndication() {
-		mBluetoothGatt.setCharacteristicNotification(mHTCharacteristic, true);
-		BluetoothGattDescriptor descriptor = mHTCharacteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
-		descriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
-		mBluetoothGatt.writeDescriptor(descriptor);
-	}
 
 	/**
 	 * This method decode temperature value received from Health Thermometer device First byte {0} of data is flag and first bit of flag shows unit information of temperature. if bit 0 has value 1
@@ -257,6 +119,7 @@ public class HTSManager implements BleManager<HTSManagerCallbacks> {
 		int mantissa = ((thirdOctet << SHIFT_LEFT_16BITS) | (secondOctet << SHIFT_LEFT_8BITS) | (firstOctet)) & HIDE_MSB_8BITS_OUT_OF_32BITS;
 		mantissa = getTwosComplimentOfNegativeMantissa(mantissa);
 		temperatureValue = (mantissa * Math.pow(10, exponential));
+
 		/*
 		 * Conversion of temperature unit from Fahrenheit to Celsius if unit is in Fahrenheit
 		 * Celsius = (98.6*Fahrenheit -32) 5/9
@@ -280,21 +143,6 @@ public class HTSManager implements BleManager<HTSManagerCallbacks> {
 			return ((((~mantissa) & HIDE_MSB_8BITS_OUT_OF_32BITS) + 1) * (-1));
 		} else {
 			return mantissa;
-		}
-	}
-
-	@Override
-	public void closeBluetoothGatt() {
-		try {
-			mContext.unregisterReceiver(mBondingBroadcastReceiver);
-		} catch (Exception e) {
-			// the receiver must have been not registered or unregistered before
-		}
-		if (mBluetoothGatt != null) {
-			mBluetoothGatt.close();
-			mBluetoothGatt = null;
-			mBatteryCharacteristic = null;
-			mHTCharacteristic = null;
 		}
 	}
 }

@@ -21,9 +21,6 @@
  */
 package no.nordicsemi.android.nrftoolbox.profile;
 
-import no.nordicsemi.android.log.ILogSession;
-import no.nordicsemi.android.log.Logger;
-import no.nordicsemi.android.nrftoolbox.R;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -36,12 +33,17 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
 
+import no.nordicsemi.android.log.ILogSession;
+import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.nrftoolbox.R;
+
 public abstract class BleProfileService extends Service implements BleManagerCallbacks {
 	@SuppressWarnings("unused")
 	private static final String TAG = "BleProfileService";
 
 	public static final String BROADCAST_CONNECTION_STATE = "no.nordicsemi.android.nrftoolbox.BROADCAST_CONNECTION_STATE";
 	public static final String BROADCAST_SERVICES_DISCOVERED = "no.nordicsemi.android.nrftoolbox.BROADCAST_SERVICES_DISCOVERED";
+	public static final String BROADCAST_DEVICE_READY = "no.nordicsemi.android.nrftoolbox.DEVICE_READY";
 	public static final String BROADCAST_BOND_STATE = "no.nordicsemi.android.nrftoolbox.BROADCAST_BOND_STATE";
 	public static final String BROADCAST_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.BROADCAST_BATTERY_LEVEL";
 	public static final String BROADCAST_ERROR = "no.nordicsemi.android.nrftoolbox.BROADCAST_ERROR";
@@ -68,6 +70,8 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	private BleManager<BleManagerCallbacks> mBleManager;
 	private Handler mHandler;
 
+	protected boolean mBinded;
+	private boolean mActivityFinished;
 	private boolean mConnected;
 	private String mDeviceAddress;
 	private String mDeviceName;
@@ -78,17 +82,27 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 		 * Disconnects from the sensor.
 		 */
 		public final void disconnect() {
+			onDeviceDisconnecting();
 			if (!mConnected) {
+				mBleManager.close();
 				onDeviceDisconnected();
 				return;
 			}
 
-			// notify user about changing the state to DISCONNECTING
+			// Notify user about changing the state to DISCONNECTING
 			final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
 			broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_DISCONNECTING);
 			LocalBroadcastManager.getInstance(BleProfileService.this).sendBroadcast(broadcast);
 
 			mBleManager.disconnect();
+		}
+
+		/**
+		 * Sets whether the binded activity if finishing or not. If <code>true</code>, we will turn off battery level notifications in onUnbind(..) method below.
+		 * @param finishing true if the binded activity is finishing
+		 */
+		public void setActivityIsFinishing(final boolean finishing) {
+			mActivityFinished = finishing;
 		}
 
 		/**
@@ -129,14 +143,9 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 		}
 	}
 
-	@Override
-	public IBinder onBind(final Intent intent) {
-		return getBinder();
-	}
-
 	/**
 	 * Returns the binder implementation. This must return class implementing the additional manager interface that may be used in the binded activity.
-	 * 
+	 *
 	 * @return the service binder
 	 */
 	protected LocalBinder getBinder() {
@@ -145,9 +154,53 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
-	public boolean onUnbind(Intent intent) {
+	public IBinder onBind(final Intent intent) {
+		mBinded = true;
+		return getBinder();
+	}
+
+	@Override
+	public final void onRebind(final Intent intent) {
+		mBinded = true;
+
+		if (mActivityFinished)
+			onRebind();
+
+		if (mActivityFinished && mConnected) {
+			mActivityFinished = false;
+			// This method will read the Battery Level value, if possible and then try to enable battery notifications (if it has NOTIFY property).
+			// If the Battery Level characteristic has only the NOTIFY property, it will only try to enable notifications.
+			mBleManager.readBatteryLevel();
+		}
+	}
+
+	/**
+	 * Called when the activity has rebinded to the service after being recreated. This method is not called when the activity was killed and recreated just to change the phone orientation.
+	 */
+	protected void onRebind() {
+		// empty
+	}
+
+	@Override
+	public final boolean onUnbind(final Intent intent) {
+		mBinded = false;
+
+		if (mActivityFinished)
+			onUnbind();
+
+		// When we are connected, but the application is not open, we are not really interested in battery level notifications. But we will still be receiving other values, if enabled.
+		if (mActivityFinished && mConnected)
+			mBleManager.setBatteryNotifications(false);
+
 		// we must allow to rebind to the same service
 		return true;
+	}
+
+	/**
+	 * Called when the activity has unbinded from the service before being finished. This method is not called when the activity is killed to be recreated just to change the phone orientation.
+	 */
+	protected void onUnbind() {
+		// empty
 	}
 
 	@SuppressWarnings("unchecked")
@@ -187,8 +240,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 		mDeviceName = device.getName();
 		onServiceStarted();
 
-		Logger.v(mLogSession, "Connecting...");
-		mBleManager.connect(BleProfileService.this, device);
+		mBleManager.connect(device);
 		return START_REDELIVER_INTENT;
 	}
 
@@ -204,7 +256,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 		super.onDestroy();
 
 		// shutdown the manager
-		mBleManager.closeBluetoothGatt();
+		mBleManager.close();
 		Logger.i(mLogSession, "Service destroyed");
 		mBleManager = null;
 		mDeviceAddress = null;
@@ -215,7 +267,6 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 	@Override
 	public void onDeviceConnected() {
-		Logger.i(mLogSession, "Connected to " + mDeviceAddress);
 		mConnected = true;
 
 		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
@@ -226,8 +277,12 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
+	public void onDeviceDisconnecting() {
+		// do nothing
+	}
+
+	@Override
 	public void onDeviceDisconnected() {
-		Logger.i(mLogSession, "Disconnected");
 		mConnected = false;
 		mDeviceAddress = null;
 		mDeviceName = null;
@@ -243,7 +298,6 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 	@Override
 	public void onLinklossOccur() {
-		Logger.w(mLogSession, "Connection lost");
 		mConnected = false;
 
 		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
@@ -253,11 +307,6 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 	@Override
 	public void onServicesDiscovered(final boolean optionalServicesFound) {
-		Logger.i(mLogSession, "Services Discovered");
-		Logger.v(mLogSession, "Primary service found");
-		if (optionalServicesFound)
-			Logger.v(mLogSession, "Secondary service found");
-
 		final Intent broadcast = new Intent(BROADCAST_SERVICES_DISCOVERED);
 		broadcast.putExtra(EXTRA_SERVICE_PRIMARY, true);
 		broadcast.putExtra(EXTRA_SERVICE_SECONDARY, optionalServicesFound);
@@ -265,10 +314,13 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
-	public void onDeviceNotSupported() {
-		Logger.i(mLogSession, "Services Discovered");
-		Logger.w(mLogSession, "Device is not supported");
+	public void onDeviceReady() {
+		final Intent broadcast = new Intent(BROADCAST_DEVICE_READY);
+		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
+	}
 
+	@Override
+	public void onDeviceNotSupported() {
 		final Intent broadcast = new Intent(BROADCAST_SERVICES_DISCOVERED);
 		broadcast.putExtra(EXTRA_SERVICE_PRIMARY, false);
 		broadcast.putExtra(EXTRA_SERVICE_SECONDARY, false);
@@ -279,8 +331,6 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 	@Override
 	public void onBatteryValueReceived(final int value) {
-		Logger.i(mLogSession, "Battery level received: " + value + "%");
-
 		final Intent broadcast = new Intent(BROADCAST_BATTERY_LEVEL);
 		broadcast.putExtra(EXTRA_BATTERY_LEVEL, value);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
@@ -288,7 +338,6 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 	@Override
 	public void onBondingRequired() {
-		Logger.v(mLogSession, "Bond state: Bonding...");
 		showToast(R.string.bonding);
 
 		final Intent broadcast = new Intent(BROADCAST_BOND_STATE);
@@ -298,7 +347,6 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 	@Override
 	public void onBonded() {
-		Logger.i(mLogSession, "Bond state: Bonded");
 		showToast(R.string.bonded);
 
 		final Intent broadcast = new Intent(BROADCAST_BOND_STATE);
@@ -308,8 +356,6 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 	@Override
 	public void onError(final String message, final int errorCode) {
-		Logger.e(mLogSession, message + " (" + errorCode + ")");
-
 		final Intent broadcast = new Intent(BROADCAST_ERROR);
 		broadcast.putExtra(EXTRA_ERROR_MESSAGE, message);
 		broadcast.putExtra(EXTRA_ERROR_CODE, errorCode);

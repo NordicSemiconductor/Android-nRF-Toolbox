@@ -27,8 +27,8 @@
     <dimen name="proximity_feature_title_long_margin">-142dp</dimen>
     
     <string name="proximity_default_name">DEFAULT PROXIMITY</string>      
-    <string name="proximity_action_findme">FindMe</string>
-    <string name="proximity_action_silentme">SilentMe</string>
+    <string name="proximity_action_findme">Find Me</string>
+    <string name="proximity_action_silentme">Silent Me</string>
     <string name="proximity_lock_image_description">LOCK Image</string>   
     <string name="proximity_notification_action_disconnect">Disconnect</string> 
     <string name="proximity_notification_linkloss_alert">%s is getting away!</string>

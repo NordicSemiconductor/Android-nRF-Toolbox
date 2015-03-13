@@ -22,12 +22,6 @@
 
 package no.nordicsemi.android.nrftoolbox.uart;
 
-import no.nordicsemi.android.log.ILogSession;
-import no.nordicsemi.android.log.Logger;
-import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
-import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
-import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -35,8 +29,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+
+import no.nordicsemi.android.log.ILogSession;
+import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
+import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.profile.BleManager;
+import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 
 public class UARTService extends BleProfileService implements UARTManagerCallbacks {
 	public static final String BROADCAST_UART_TX = "no.nordicsemi.android.nrftoolbox.uart.BROADCAST_UART_TX";
@@ -50,7 +50,6 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	private final static int DISCONNECT_REQ = 97; // random
 
 	private UARTManager mManager;
-	private boolean mBinded;
 
 	private final LocalBinder mBinder = new UARTBinder();
 
@@ -95,24 +94,21 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	}
 
 	@Override
-	public IBinder onBind(final Intent intent) {
-		mBinded = true;
-		return super.onBind(intent);
-	}
-
-	@Override
-	public void onRebind(final Intent intent) {
-		mBinded = true;
+	protected void onRebind() {
 		// when the activity rebinds to the service, remove the notification
 		cancelNotification();
 	}
 
 	@Override
-	public boolean onUnbind(final Intent intent) {
-		mBinded = false;
-		// when the activity closes we need to show the notification that user is connected to the sensor  
-		createNotifcation(R.string.uart_notification_connected_message, 0);
-		return super.onUnbind(intent);
+	protected void onUnbind() {
+		// when the activity closes we need to show the notification that user is connected to the sensor
+		createNotification(R.string.uart_notification_connected_message, 0);
+	}
+
+	@Override
+	protected void onServiceStarted() {
+		// logger is now available. Assign it to the manager
+		mManager.setLogger(getLogSession());
 	}
 
 	@Override
@@ -142,7 +138,7 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	 * @param defaults
 	 *            signals that will be used to notify the user
 	 */
-	private void createNotifcation(final int messageResId, final int defaults) {
+	private void createNotification(final int messageResId, final int defaults) {
 		final Intent parentIntent = new Intent(this, FeaturesActivity.class);
 		parentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		final Intent targetIntent = new Intent(this, UARTActivity.class);
@@ -177,7 +173,7 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	private final BroadcastReceiver mDisconnectActionBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
-			Logger.i(getLogSession(), "Disconnect action pressed");
+			Logger.i(getLogSession(), "[Notification] Disconnect action pressed");
 			if (isConnected())
 				getBinder().disconnect();
 			else

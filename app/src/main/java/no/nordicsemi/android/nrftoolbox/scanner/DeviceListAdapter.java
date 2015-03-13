@@ -21,9 +21,6 @@
  */
 package no.nordicsemi.android.nrftoolbox.scanner;
 
-import java.util.ArrayList;
-
-import no.nordicsemi.android.nrftoolbox.R;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +28,10 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+
+import no.nordicsemi.android.nrftoolbox.R;
 
 /**
  * DeviceListAdapter class is list adapter for showing scanned Devices name, address and RSSI image based on RSSI values.

@@ -21,8 +21,6 @@
  */
 package no.nordicsemi.android.nrftoolbox.dfu.fragment;
 
-import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.dfu.DfuService;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -32,6 +30,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
+import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.dfu.DfuService;
 
 /**
  * When cancel button is pressed during uploading this fragment shows uploading cancel dialog

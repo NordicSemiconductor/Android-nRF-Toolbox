@@ -16,10 +16,6 @@
 
 package no.nordicsemi.android.nrftoolbox.app;
 
-import java.util.List;
-import java.util.Map;
-
-import no.nordicsemi.android.nrftoolbox.R;
 import android.app.Activity;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -32,6 +28,11 @@ import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.SimpleCursorTreeAdapter;
 import android.widget.SimpleExpandableListAdapter;
+
+import java.util.List;
+import java.util.Map;
+
+import no.nordicsemi.android.nrftoolbox.R;
 
 /**
  * An activity that displays an expandable list of items by binding to a data source implementing the ExpandableListAdapter, and exposes event handlers when the

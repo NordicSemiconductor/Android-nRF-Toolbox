@@ -21,51 +21,39 @@
  */
 package no.nordicsemi.android.nrftoolbox.gls;
 
-import java.util.Calendar;
-import java.util.UUID;
-
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
-import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothProfile;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Handler;
 import android.util.SparseArray;
 
+import java.util.Calendar;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.UUID;
+
+import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.nrftoolbox.parser.GlucoseMeasurementContextParser;
+import no.nordicsemi.android.nrftoolbox.parser.GlucoseMeasurementParser;
+import no.nordicsemi.android.nrftoolbox.parser.RecordAccessControlPointParser;
+import no.nordicsemi.android.nrftoolbox.profile.BleManager;
+import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
+
 @SuppressWarnings("unused")
-public class GlucoseManager implements BleManager<GlucoseManagerCallbacks> {
+public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 	private static final String TAG = "GlucoseManager";
 
-	private GlucoseManagerCallbacks mCallbacks;
-	private BluetoothGatt mBluetoothGatt;
-	private Context mContext;
-	private Handler mHandler;
-	private boolean mAbort;
-
-	private final SparseArray<GlucoseRecord> mRecords = new SparseArray<>();
-
+	/** Glucose service UUID */
 	public final static UUID GLS_SERVICE_UUID = UUID.fromString("00001808-0000-1000-8000-00805f9b34fb");
-	public final static UUID BATTERY_SERVICE = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb");
-	/** Glucose Measurement characteristic */
+	/** Glucose Measurement characteristic UUID */
 	private final static UUID GM_CHARACTERISTIC = UUID.fromString("00002A18-0000-1000-8000-00805f9b34fb");
-	/** Glucose Measurement Context characteristic */
+	/** Glucose Measurement Context characteristic UUID */
 	private final static UUID GM_CONTEXT_CHARACTERISTIC = UUID.fromString("00002A34-0000-1000-8000-00805f9b34fb");
-	/** Glucose Feature characteristic */
+	/** Glucose Feature characteristic UUID */
 	private final static UUID GF_CHARACTERISTIC = UUID.fromString("00002A51-0000-1000-8000-00805f9b34fb");
-	/** Record Access Control Point characteristic */
+	/** Record Access Control Point characteristic UUID */
 	private final static UUID RACP_CHARACTERISTIC = UUID.fromString("00002A52-0000-1000-8000-00805f9b34fb");
-	/** Battery Level characteristic */
-	private final static UUID BATTERY_LEVEL_CHARACTERISTIC = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb");
-	/** Client configuration descriptor that will allow us to enable notifications and indications */
-	private static final UUID CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
 	private final static int OP_CODE_REPORT_STORED_RECORDS = 1;
 	private final static int OP_CODE_DELETE_STORED_RECORDS = 2;
@@ -105,314 +93,80 @@ public class GlucoseManager implements BleManager<GlucoseManagerCallbacks> {
 	private final static int RESPONSE_PROCEDURE_NOT_COMPLETED = 8;
 	private final static int RESPONSE_OPERAND_NOT_SUPPORTED = 9;
 
-	private final static String ERROR_CONNECTION_STATE_CHANGE = "Error on connection state change";
-	private final static String ERROR_DISCOVERY_SERVICE = "Error on discovering services";
-	private final static String ERROR_WRITE_DESCRIPTOR = "Error on writing descriptor";
-	private final static String ERROR_WRITE_CHARACTERISTIC = "Error on writing characteristic";
-	private final static String ERROR_AUTH_ERROR_WHILE_BONDED = "Phone has lost bonding information";
-
 	private BluetoothGattCharacteristic mGlucoseMeasurementCharacteristic;
-	private BluetoothGattCharacteristic mGlucoseFeatureCharacteristic;
 	private BluetoothGattCharacteristic mGlucoseMeasurementContextCharacteristic;
 	private BluetoothGattCharacteristic mRecordAccessControlPointCharacteristic;
-	private BluetoothGattCharacteristic mBatteryLevelCharacteristic;
 
+	private final SparseArray<GlucoseRecord> mRecords = new SparseArray<>();
+	private boolean mAbort;
+	private Handler mHandler;
 	private static GlucoseManager mInstance;
 
 	/**
 	 * Returns the singleton implementation of GlucoseManager
 	 */
-	public static GlucoseManager getGlucoseManager() {
+	public static GlucoseManager getGlucoseManager(final Context context) {
 		if (mInstance == null)
-			mInstance = new GlucoseManager();
+			mInstance = new GlucoseManager(context);
 		return mInstance;
 	}
 
-	/**
-	 * Callbacks for activity {@link GlucoseActivity} that implements {@link GlucoseManagerCallbacks} interface activity use this method to register itself for receiving callbacks
-	 */
-	@Override
-	public void setGattCallbacks(final GlucoseManagerCallbacks callbacks) {
-		mCallbacks = callbacks;
-	}
-
-	/**
-	 * Returns all records as a sparse array where sequence number is the key.
-	 * 
-	 * @return the records list
-	 */
-	public SparseArray<GlucoseRecord> getRecords() {
-		return mRecords;
+	public GlucoseManager(final Context context) {
+		super(context);
+		mHandler = new Handler();
 	}
 
 	@Override
-	public void connect(final Context context, final BluetoothDevice device) {
-		if (mHandler == null)
-			mHandler = new Handler();
-		mContext = context;
-
-		// Register bonding broadcast receiver
-		final IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-		context.registerReceiver(mBondingBroadcastReceiver, filter);
-
-		mBluetoothGatt = device.connectGatt(context, false, mGattCallback);
+	protected BleManagerGattCallback getGattCallback() {
+		return mGattCallback;
 	}
-
-	/**
-	 * Disable HR notification first and then disconnect to HR device
-	 */
-	@Override
-	public void disconnect() {
-		if (mBluetoothGatt != null) {
-			mBluetoothGatt.disconnect();
-		}
-	}
-
-	/**
-	 * Clears the records list locally
-	 */
-	public void clear() {
-		mRecords.clear();
-		mCallbacks.onDatasetChanged();
-	}
-
-	/**
-	 * Sends the request to obtain the last (most recent) record from glucose device. The data will be returned to Glucose Measurement characteristic as a notification followed by Record Access
-	 * Control Point indication with status code ({@link #RESPONSE_SUCCESS} or other in case of error.
-	 */
-	public void getLastRecord() {
-		if (mBluetoothGatt == null || mRecordAccessControlPointCharacteristic == null)
-			return;
-
-		clear();
-		mCallbacks.onOperationStarted();
-
-		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
-		setOpCode(characteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_LAST_RECORD);
-		mBluetoothGatt.writeCharacteristic(characteristic);
-	}
-
-	/**
-	 * Sends the request to obtain the first (oldest) record from glucose device. The data will be returned to Glucose Measurement characteristic as a notification followed by Record Access Control
-	 * Point indication with status code ({@link #RESPONSE_SUCCESS} or other in case of error.
-	 */
-	public void getFirstRecord() {
-		if (mBluetoothGatt == null || mRecordAccessControlPointCharacteristic == null)
-			return;
-
-		clear();
-		mCallbacks.onOperationStarted();
-
-		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
-		setOpCode(characteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_FIRST_RECORD);
-		mBluetoothGatt.writeCharacteristic(characteristic);
-	}
-
-	/**
-	 * Sends the request to obtain all records from glucose device. Initially we want to notify him/her about the number of the records so the {@link #OP_CODE_REPORT_NUMBER_OF_RECORDS} is send. The
-	 * data will be returned to Glucose Measurement characteristic as a notification followed by Record Access Control Point indication with status code ({@link #RESPONSE_SUCCESS} or other in case of
-	 * error.
-	 */
-	public void getAllRecords() {
-		if (mBluetoothGatt == null || mRecordAccessControlPointCharacteristic == null)
-			return;
-
-		clear();
-		mCallbacks.onOperationStarted();
-
-		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
-		setOpCode(characteristic, OP_CODE_REPORT_NUMBER_OF_RECORDS, OPERATOR_ALL_RECORDS);
-		mBluetoothGatt.writeCharacteristic(characteristic);
-	}
-
-	/**
-	 * Sends the request to obtain from the glucose device all records newer than the newest one from local storage. The data will be returned to Glucose Measurement characteristic as a notification
-	 * followed by Record Access Control Point indication with status code ({@link #RESPONSE_SUCCESS} or other in case of error.
-	 * <p>
-	 * Refresh button will not download records older than the oldest in the local memory. F.e. if you have pressed Last and then Refresh, than it will try to get only newer records. However if there
-	 * are no records, it will download all existing (using {@link #getAllRecords()}).
-	 * </p>
-	 */
-	public void refreshRecords() {
-		if (mBluetoothGatt == null || mRecordAccessControlPointCharacteristic == null)
-			return;
-
-		if (mRecords.size() == 0) {
-			getAllRecords();
-		} else {
-			mCallbacks.onOperationStarted();
-
-			// obtain the last sequence number
-			final int sequenceNumber = mRecords.keyAt(mRecords.size() - 1) + 1;
-
-			final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
-			setOpCode(characteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_GREATER_THEN_OR_EQUAL, sequenceNumber);
-			mBluetoothGatt.writeCharacteristic(characteristic);
-			// Info:
-			// Operators OPERATOR_LESS_THEN_OR_EQUAL and OPERATOR_RANGE are not supported by Nordic Semiconductor Glucose Service in SDK 4.4.2.
-		}
-	}
-
-	/**
-	 * Sends abort operation signal to the device
-	 */
-	public void abort() {
-		if (mBluetoothGatt == null || mRecordAccessControlPointCharacteristic == null)
-			return;
-
-		mAbort = true;
-		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
-		setOpCode(characteristic, OP_CODE_ABORT_OPERATION, OPERATOR_NULL);
-		mBluetoothGatt.writeCharacteristic(characteristic);
-	}
-
-	/**
-	 * Sends the request to delete all data from the device. A Record Access Control Point indication with status code ({@link #RESPONSE_SUCCESS} (or other in case of error) will be send.
-	 * 
-	 * @FIXME This method is not supported by Nordic Semiconductor Glucose Service in SDK 4.4.2.
-	 */
-	public void deleteAllRecords() {
-		if (mBluetoothGatt == null || mRecordAccessControlPointCharacteristic == null)
-			return;
-
-		clear();
-		mCallbacks.onOperationStarted();
-
-		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
-		setOpCode(characteristic, OP_CODE_DELETE_STORED_RECORDS, OPERATOR_ALL_RECORDS);
-		mBluetoothGatt.writeCharacteristic(characteristic);
-	}
-
-	private BroadcastReceiver mBondingBroadcastReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(final Context context, final Intent intent) {
-			final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-			final int bondState = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1);
-			final int previousBondState = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, -1);
-
-			DebugLogger.d(TAG, "Bond state changed for: " + device.getAddress() + " new state: " + bondState + " previous: " + previousBondState);
-
-			// skip other devices
-			if (!device.getAddress().equals(mBluetoothGatt.getDevice().getAddress()))
-				return;
-
-			if (bondState == BluetoothDevice.BOND_BONDING) {
-				mCallbacks.onBondingRequired();
-			} else if (bondState == BluetoothDevice.BOND_BONDED) {
-				// We've read Battery Level, now let'so enable notifications and indication
-				enableGlucoseMeasurementNotification(mBluetoothGatt);
-				mCallbacks.onBonded();
-			}
-		}
-	};
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving notification, etc
 	 */
-	private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
+	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
+
 		@Override
-		public void onConnectionStateChange(final BluetoothGatt gatt, final int status, final int newState) {
-			if (status == BluetoothGatt.GATT_SUCCESS) {
-				if (newState == BluetoothProfile.STATE_CONNECTED) {
-					mCallbacks.onDeviceConnected();
-					// start discovering services
-					gatt.discoverServices();
-				} else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-					mCallbacks.onDeviceDisconnected();
-					gatt.close();
-				}
-			} else {
-				DebugLogger.e(TAG, "onConnectionStateChange error " + status);
-				mCallbacks.onError(ERROR_CONNECTION_STATE_CHANGE, status);
-			}
+		protected Queue<Request> initGatt(final BluetoothGatt gatt) {
+			final LinkedList<Request> requests = new LinkedList<>();
+			requests.push(Request.newEnableNotificationsRequest(mGlucoseMeasurementCharacteristic));
+			if (mGlucoseMeasurementContextCharacteristic != null)
+				requests.push(Request.newEnableNotificationsRequest(mGlucoseMeasurementContextCharacteristic));
+			requests.push(Request.newEnableIndicationsRequest(mRecordAccessControlPointCharacteristic));
+			return requests;
 		}
 
 		@Override
-		public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-			if (status == BluetoothGatt.GATT_SUCCESS) {
-				for (BluetoothGattService service : gatt.getServices()) {
-					if (GLS_SERVICE_UUID.equals(service.getUuid())) {
-						mGlucoseMeasurementCharacteristic = service.getCharacteristic(GM_CHARACTERISTIC);
-						mGlucoseMeasurementContextCharacteristic = service.getCharacteristic(GM_CONTEXT_CHARACTERISTIC);
-						mGlucoseFeatureCharacteristic = service.getCharacteristic(GF_CHARACTERISTIC);
-						mRecordAccessControlPointCharacteristic = service.getCharacteristic(RACP_CHARACTERISTIC);
-					} else if (BATTERY_SERVICE.equals(service.getUuid())) {
-						mBatteryLevelCharacteristic = service.getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC);
-					}
-				}
-				// Validate the device for required characteristics
-				if (mGlucoseMeasurementCharacteristic == null || mRecordAccessControlPointCharacteristic == null) {
-					mCallbacks.onDeviceNotSupported();
-					gatt.disconnect();
-					return;
-				}
-				mCallbacks.onServicesDiscovered(mGlucoseMeasurementContextCharacteristic != null);
-
-				// We have discovered services, let's start notifications and indications, one by one: read battery, enable GM, GMP (if exists) and RACP
-				if (mBatteryLevelCharacteristic != null) {
-					readBatteryLevel(gatt);
-				} else {
-					// this characteristic is mandatory
-					enableGlucoseMeasurementNotification(gatt);
-				}
-			} else {
-				DebugLogger.e(TAG, "onServicesDiscovered error " + status);
-				mCallbacks.onError(ERROR_DISCOVERY_SERVICE, status);
+		public boolean isRequiredServiceSupported(final BluetoothGatt gatt) {
+			final BluetoothGattService service = gatt.getService(GLS_SERVICE_UUID);
+			if (service != null) {
+				mGlucoseMeasurementCharacteristic = service.getCharacteristic(GM_CHARACTERISTIC);
+				mGlucoseMeasurementContextCharacteristic = service.getCharacteristic(GM_CONTEXT_CHARACTERISTIC);
+				mRecordAccessControlPointCharacteristic = service.getCharacteristic(RACP_CHARACTERISTIC);
 			}
+			return mGlucoseMeasurementCharacteristic != null && mRecordAccessControlPointCharacteristic != null;
 		}
 
 		@Override
-		public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-			if (status == BluetoothGatt.GATT_SUCCESS) {
-				if (BATTERY_LEVEL_CHARACTERISTIC.equals(characteristic.getUuid())) {
-					final int batteryValue = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
-					mCallbacks.onBatteryValueReceived(batteryValue);
-
-					// We've read Battery Level, now let'so enable ICP notifications or BPM indications 
-					enableGlucoseMeasurementNotification(gatt);
-				}
-			} else {
-				DebugLogger.e(TAG, "onCharacteristicRead error " + status);
-				mCallbacks.onError(ERROR_DISCOVERY_SERVICE, status);
-			}
+		protected boolean isOptionalServiceSupported(BluetoothGatt gatt) {
+			return mGlucoseMeasurementContextCharacteristic != null;
 		}
 
 		@Override
-		public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
-			if (status == BluetoothGatt.GATT_SUCCESS) {
-				if (GM_CHARACTERISTIC.equals(descriptor.getCharacteristic().getUuid())) {
-					mCallbacks.onGlucoseMeasurementNotificationEnabled();
-
-					if (mGlucoseMeasurementContextCharacteristic != null) {
-						enableGlucoseMeasurementContextNotification(gatt);
-					} else {
-						enableRecordAccessControlPointIndication(gatt);
-					}
-				}
-
-				if (GM_CONTEXT_CHARACTERISTIC.equals(descriptor.getCharacteristic().getUuid())) {
-					mCallbacks.onGlucoseMeasurementContextNotificationEnabled();
-					enableRecordAccessControlPointIndication(gatt);
-				}
-
-				if (RACP_CHARACTERISTIC.equals(descriptor.getCharacteristic().getUuid())) {
-					mCallbacks.onRecordAccessControlPointIndicationsEnabled();
-				}
-			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
-				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
-					DebugLogger.w(TAG, ERROR_AUTH_ERROR_WHILE_BONDED);
-					mCallbacks.onError(ERROR_AUTH_ERROR_WHILE_BONDED, status);
-				}
-			} else {
-				DebugLogger.e(TAG, "onDescriptorWrite error " + status);
-				mCallbacks.onError(ERROR_WRITE_DESCRIPTOR, status);
-			}
+		protected void onDeviceDisconnected() {
+			mGlucoseMeasurementCharacteristic = null;
+			mGlucoseMeasurementContextCharacteristic = null;
+			mRecordAccessControlPointCharacteristic = null;
 		}
 
 		@Override
-		public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+		public void onCharacteristicNotified(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
 			final UUID uuid = characteristic.getUuid();
+
 			if (GM_CHARACTERISTIC.equals(uuid)) {
+				if (mLogSession != null)
+					Logger.a(mLogSession, GlucoseMeasurementParser.parse(characteristic));
+
 				int offset = 0;
 				final int flags = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
 				offset += 1;
@@ -487,6 +241,9 @@ public class GlucoseManager implements BleManager<GlucoseManagerCallbacks> {
 					}
 				});
 			} else if (GM_CONTEXT_CHARACTERISTIC.equals(uuid)) {
+				if (mLogSession != null)
+					Logger.a(mLogSession, GlucoseMeasurementContextParser.parse(characteristic));
+
 				int offset = 0;
 				final int flags = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
 				offset += 1;
@@ -552,91 +309,61 @@ public class GlucoseManager implements BleManager<GlucoseManagerCallbacks> {
 
 				// notify callback about the new record
 				mCallbacks.onDatasetChanged();
-			} else { // Record Access Control Point characteristic
-				int offset = 0;
-				final int opCode = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
-				offset += 2; // skip the operator
-
-				if (opCode == OP_CODE_NUMBER_OF_STORED_RECORDS_RESPONSE) {
-					// We've obtained the number of all records 
-					final int number = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
-
-					mCallbacks.onNumberOfRecordsRequested(number);
-
-					// Request the records
-					final BluetoothGattCharacteristic racpCharacteristic = mRecordAccessControlPointCharacteristic;
-					setOpCode(racpCharacteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_ALL_RECORDS);
-					mBluetoothGatt.writeCharacteristic(racpCharacteristic);
-				} else if (opCode == OP_CODE_RESPONSE_CODE) {
-					final int requestedOpCode = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
-					final int responseCode = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 1);
-					DebugLogger.d(TAG, "Response result for: " + requestedOpCode + " is: " + responseCode);
-
-					switch (responseCode) {
-					case RESPONSE_SUCCESS:
-						if (!mAbort)
-							mCallbacks.onOperationCompleted();
-						else
-							mCallbacks.onOperationAborted();
-						break;
-					case RESPONSE_NO_RECORDS_FOUND:
-						mCallbacks.onOperationCompleted();
-						break;
-					case RESPONSE_OP_CODE_NOT_SUPPORTED:
-						mCallbacks.onOperationNotSupported();
-						break;
-					case RESPONSE_PROCEDURE_NOT_COMPLETED:
-					case RESPONSE_ABORT_UNSUCCESSFUL:
-					default:
-						mCallbacks.onOperationFailed();
-						break;
-					}
-					mAbort = false;
-				}
 			}
 		}
 
-		/**
-		 * Reads battery level on the device
-		 */
-		private void readBatteryLevel(final BluetoothGatt gatt) {
-			DebugLogger.d(TAG, "readBatteryLevel()");
-			gatt.readCharacteristic(mBatteryLevelCharacteristic);
+		@Override
+		protected void onCharacteristicIndicated(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+			if (mLogSession != null)
+				Logger.a(mLogSession, RecordAccessControlPointParser.parse(characteristic));
+
+			// Record Access Control Point characteristic
+			int offset = 0;
+			final int opCode = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
+			offset += 2; // skip the operator
+
+			if (opCode == OP_CODE_NUMBER_OF_STORED_RECORDS_RESPONSE) {
+				// We've obtained the number of all records
+				final int number = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+
+				mCallbacks.onNumberOfRecordsRequested(number);
+
+				// Request the records
+				if (number > 0) {
+					final BluetoothGattCharacteristic racpCharacteristic = mRecordAccessControlPointCharacteristic;
+					setOpCode(racpCharacteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_ALL_RECORDS);
+					writeCharacteristic(racpCharacteristic);
+				} else {
+					mCallbacks.onOperationCompleted();
+				}
+			} else if (opCode == OP_CODE_RESPONSE_CODE) {
+				final int requestedOpCode = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
+				final int responseCode = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 1);
+				DebugLogger.d(TAG, "Response result for: " + requestedOpCode + " is: " + responseCode);
+
+				switch (responseCode) {
+				case RESPONSE_SUCCESS:
+					if (!mAbort)
+						mCallbacks.onOperationCompleted();
+					else
+						mCallbacks.onOperationAborted();
+					break;
+				case RESPONSE_NO_RECORDS_FOUND:
+					mCallbacks.onOperationCompleted();
+					break;
+				case RESPONSE_OP_CODE_NOT_SUPPORTED:
+					mCallbacks.onOperationNotSupported();
+					break;
+				case RESPONSE_PROCEDURE_NOT_COMPLETED:
+				case RESPONSE_ABORT_UNSUCCESSFUL:
+				default:
+					mCallbacks.onOperationFailed();
+					break;
+				}
+				mAbort = false;
+			}
 		}
 	};
-
-	/**
-	 * Enabling notification on Glucose Measurement Characteristic
-	 */
-	private void enableGlucoseMeasurementNotification(final BluetoothGatt gatt) {
-		DebugLogger.d(TAG, "enableGlucoseMeasurementNotification()");
-		gatt.setCharacteristicNotification(mGlucoseMeasurementCharacteristic, true);
-		final BluetoothGattDescriptor descriptor = mGlucoseMeasurementCharacteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
-		descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-		gatt.writeDescriptor(descriptor);
-	}
-
-	/**
-	 * Enabling notification on Glucose Measurement Context Characteristic. This characteristic is optional
-	 */
-	private void enableGlucoseMeasurementContextNotification(final BluetoothGatt gatt) {
-		DebugLogger.d(TAG, "enableGlucoseMeasurementContextNotification()");
-		gatt.setCharacteristicNotification(mGlucoseMeasurementContextCharacteristic, true);
-		final BluetoothGattDescriptor descriptor = mGlucoseMeasurementContextCharacteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
-		descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-		gatt.writeDescriptor(descriptor);
-	}
-
-	/**
-	 * Enabling indications on Record Access Control Point Characteristic
-	 */
-	private void enableRecordAccessControlPointIndication(final BluetoothGatt gatt) {
-		DebugLogger.d(TAG, "enableGlucoseMeasurementContextNotification()");
-		gatt.setCharacteristicNotification(mRecordAccessControlPointCharacteristic, true);
-		final BluetoothGattDescriptor descriptor = mRecordAccessControlPointCharacteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
-		descriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
-		gatt.writeDescriptor(descriptor);
-	}
 
 	/**
 	 * Writes given operation parameters to the characteristic
@@ -675,24 +402,127 @@ public class GlucoseManager implements BleManager<GlucoseManagerCallbacks> {
 			}
 		}
 	}
+	/**
+	 * Returns all records as a sparse array where sequence number is the key.
+	 *
+	 * @return the records list
+	 */
+	public SparseArray<GlucoseRecord> getRecords() {
+		return mRecords;
+	}
 
-	@Override
-	public void closeBluetoothGatt() {
-		try {
-			mContext.unregisterReceiver(mBondingBroadcastReceiver);
-		} catch (Exception e) {
-			// the receiver must have been not registered or unregistered before
-		}
+	/**
+	 * Clears the records list locally
+	 */
+	public void clear() {
+		mRecords.clear();
+		mCallbacks.onDatasetChanged();
+	}
 
-		if (mBluetoothGatt != null) {
-			mBluetoothGatt.close();
-			mRecords.clear();
-			mGlucoseMeasurementCharacteristic = null;
-			mGlucoseMeasurementContextCharacteristic = null;
-			mGlucoseFeatureCharacteristic = null;
-			mRecordAccessControlPointCharacteristic = null;
-			mBatteryLevelCharacteristic = null;
-			mBluetoothGatt = null;
+	/**
+	 * Sends the request to obtain the last (most recent) record from glucose device. The data will be returned to Glucose Measurement characteristic as a notification followed by Record Access
+	 * Control Point indication with status code ({@link #RESPONSE_SUCCESS} or other in case of error.
+	 */
+	public void getLastRecord() {
+		if (mRecordAccessControlPointCharacteristic == null)
+			return;
+
+		clear();
+		mCallbacks.onOperationStarted();
+
+		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
+		setOpCode(characteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_LAST_RECORD);
+		writeCharacteristic(characteristic);
+	}
+
+	/**
+	 * Sends the request to obtain the first (oldest) record from glucose device. The data will be returned to Glucose Measurement characteristic as a notification followed by Record Access Control
+	 * Point indication with status code ({@link #RESPONSE_SUCCESS} or other in case of error.
+	 */
+	public void getFirstRecord() {
+		if (mRecordAccessControlPointCharacteristic == null)
+			return;
+
+		clear();
+		mCallbacks.onOperationStarted();
+
+		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
+		setOpCode(characteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_FIRST_RECORD);
+		writeCharacteristic(characteristic);
+	}
+
+	/**
+	 * Sends the request to obtain all records from glucose device. Initially we want to notify him/her about the number of the records so the {@link #OP_CODE_REPORT_NUMBER_OF_RECORDS} is send. The
+	 * data will be returned to Glucose Measurement characteristic as a notification followed by Record Access Control Point indication with status code ({@link #RESPONSE_SUCCESS} or other in case of
+	 * error.
+	 */
+	public void getAllRecords() {
+		if (mRecordAccessControlPointCharacteristic == null)
+			return;
+
+		clear();
+		mCallbacks.onOperationStarted();
+
+		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
+		setOpCode(characteristic, OP_CODE_REPORT_NUMBER_OF_RECORDS, OPERATOR_ALL_RECORDS);
+		writeCharacteristic(characteristic);
+	}
+
+	/**
+	 * Sends the request to obtain from the glucose device all records newer than the newest one from local storage. The data will be returned to Glucose Measurement characteristic as a notification
+	 * followed by Record Access Control Point indication with status code ({@link #RESPONSE_SUCCESS} or other in case of error.
+	 * <p>
+	 * Refresh button will not download records older than the oldest in the local memory. F.e. if you have pressed Last and then Refresh, than it will try to get only newer records. However if there
+	 * are no records, it will download all existing (using {@link #getAllRecords()}).
+	 * </p>
+	 */
+	public void refreshRecords() {
+		if (mRecordAccessControlPointCharacteristic == null)
+			return;
+
+		if (mRecords.size() == 0) {
+			getAllRecords();
+		} else {
+			mCallbacks.onOperationStarted();
+
+			// obtain the last sequence number
+			final int sequenceNumber = mRecords.keyAt(mRecords.size() - 1) + 1;
+
+			final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
+			setOpCode(characteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_GREATER_THEN_OR_EQUAL, sequenceNumber);
+			writeCharacteristic(characteristic);
+			// Info:
+			// Operators OPERATOR_LESS_THEN_OR_EQUAL and OPERATOR_RANGE are not supported by Nordic Semiconductor Glucose Service in SDK 4.4.2.
 		}
+	}
+
+	/**
+	 * Sends abort operation signal to the device
+	 */
+	public void abort() {
+		if (mRecordAccessControlPointCharacteristic == null)
+			return;
+
+		mAbort = true;
+		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
+		setOpCode(characteristic, OP_CODE_ABORT_OPERATION, OPERATOR_NULL);
+		writeCharacteristic(characteristic);
+	}
+
+	/**
+	 * Sends the request to delete all data from the device. A Record Access Control Point indication with status code ({@link #RESPONSE_SUCCESS} (or other in case of error) will be send.
+	 *
+	 * @FIXME This method is not supported by Nordic Semiconductor Glucose Service in SDK 4.4.2.
+	 */
+	public void deleteAllRecords() {
+		if (mRecordAccessControlPointCharacteristic == null)
+			return;
+
+		clear();
+		mCallbacks.onOperationStarted();
+
+		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
+		setOpCode(characteristic, OP_CODE_DELETE_STORED_RECORDS, OPERATOR_ALL_RECORDS);
+		writeCharacteristic(characteristic);
 	}
 }

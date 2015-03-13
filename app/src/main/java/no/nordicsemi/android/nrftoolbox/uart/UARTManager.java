@@ -22,166 +22,85 @@
 
 package no.nordicsemi.android.nrftoolbox.uart;
 
-import java.util.List;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
+import android.content.Context;
+
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.UUID;
 
 import no.nordicsemi.android.nrftoolbox.profile.BleManager;
-import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothProfile;
-import android.content.Context;
 
-public class UARTManager implements BleManager<UARTManagerCallbacks> {
-	private final static String TAG = "UARTManager";
-
+public class UARTManager extends BleManager<UARTManagerCallbacks> {
+	/** Nordic UART Service UUID */
 	private final static UUID UART_SERVICE_UUID = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E");
-	/** TX characteristic */
+	/** TX characteristic UUID */
 	private final static UUID UART_TX_CHARACTERISTIC_UUID = UUID.fromString("6E400002-B5A3-F393-E0A9-E50E24DCCA9E");
-	/** RX characteristic */
+	/** RX characteristic UUID */
 	private final static UUID UART_RX_CHARACTERISTIC_UUID = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E");
-	/** Client configuration descriptor that will allow us to enable notifications and indications */
-	private static final UUID CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
-
-	private final static String ERROR_CONNECTION_STATE_CHANGE = "Error on connection state change";
-	private final static String ERROR_DISCOVERY_SERVICE = "Error on discovering services";
-	private final static String ERROR_WRITE_DESCRIPTOR = "Error on writing descriptor";
 
 	private BluetoothGattCharacteristic mTXCharacteristic, mRXCharacteristic;
 
-	private UARTManagerCallbacks mCallbacks;
-	private BluetoothGatt mBluetoothGatt;
-	private final Context mContext;
-
 	public UARTManager(final Context context) {
-		mContext = context;
+		super(context);
 	}
 
 	@Override
-	public void setGattCallbacks(final UARTManagerCallbacks callbacks) {
-		mCallbacks = callbacks;
-	}
-
-	@Override
-	public void connect(final Context context, final BluetoothDevice device) {
-		if (mBluetoothGatt == null) {
-			mBluetoothGatt = device.connectGatt(mContext, true, mGattCallback);
-		} else {
-			mBluetoothGatt.connect();
-		}
-	}
-
-	@Override
-	public void disconnect() {
-		if (mBluetoothGatt != null) {
-			mBluetoothGatt.disconnect();
-		}
-	}
-
-	public void send(final String text) {
-		if (mTXCharacteristic != null) {
-			mTXCharacteristic.setValue(text);
-			mBluetoothGatt.writeCharacteristic(mTXCharacteristic);
-		}
+	protected BleManagerGattCallback getGattCallback() {
+		return mGattCallback;
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving indication, etc
 	 */
-	private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
-		@Override
-		public void onConnectionStateChange(final BluetoothGatt gatt, final int status, final int newState) {
-			if (status == BluetoothGatt.GATT_SUCCESS) {
-				if (newState == BluetoothProfile.STATE_CONNECTED) {
-					DebugLogger.d(TAG, "Device connected");
-					mBluetoothGatt.discoverServices();
-					//This will send callback to RSCActivity when device get connected
-					mCallbacks.onDeviceConnected();
-				} else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-					DebugLogger.d(TAG, "Device disconnected");
+	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 
-					mCallbacks.onDeviceDisconnected();
-					closeBluetoothGatt();
-				}
-			} else {
-				mCallbacks.onError(ERROR_CONNECTION_STATE_CHANGE, status);
-			}
+		@Override
+		protected Queue<Request> initGatt(final BluetoothGatt gatt) {
+			final LinkedList<Request> requests = new LinkedList<>();
+			requests.push(Request.newEnableNotificationsRequest(mRXCharacteristic));
+			return requests;
 		}
 
 		@Override
-		public void onServicesDiscovered(final BluetoothGatt gatt, final int status) {
-			if (status == BluetoothGatt.GATT_SUCCESS) {
-				final List<BluetoothGattService> services = gatt.getServices();
-				for (BluetoothGattService service : services) {
-					if (service.getUuid().equals(UART_SERVICE_UUID)) {
-						DebugLogger.d(TAG, "UART service is found");
-						mTXCharacteristic = service.getCharacteristic(UART_TX_CHARACTERISTIC_UUID);
-						mRXCharacteristic = service.getCharacteristic(UART_RX_CHARACTERISTIC_UUID);
-					}
-				}
-				if (mTXCharacteristic == null || mRXCharacteristic == null) {
-					mCallbacks.onDeviceNotSupported();
-					gatt.disconnect();
-				} else {
-					mCallbacks.onServicesDiscovered(false /* more characteristics not supported */);
-
-					// We have discovered services, let's start notifications on RX characteristics
-					enableRXNotification(gatt);
-				}
-			} else {
-				mCallbacks.onError(ERROR_DISCOVERY_SERVICE, status);
+		public boolean isRequiredServiceSupported(final BluetoothGatt gatt) {
+			final BluetoothGattService service = gatt.getService(UART_SERVICE_UUID);
+			if (service != null) {
+				mTXCharacteristic = service.getCharacteristic(UART_TX_CHARACTERISTIC_UUID);
+				mRXCharacteristic = service.getCharacteristic(UART_RX_CHARACTERISTIC_UUID);
 			}
+			return mTXCharacteristic != null && mRXCharacteristic != null;
 		}
 
 		@Override
-		public void onDescriptorWrite(final BluetoothGatt gatt, final BluetoothGattDescriptor descriptor, final int status) {
-			if (status == BluetoothGatt.GATT_SUCCESS) {
-				// do nothing
-			} else {
-				mCallbacks.onError(ERROR_WRITE_DESCRIPTOR, status);
-			}
+		protected void onDeviceDisconnected() {
+			mTXCharacteristic = null;
+			mRXCharacteristic = null;
 		}
 
 		@Override
-		public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-			if (status == BluetoothGatt.GATT_SUCCESS) {
-				final String data = characteristic.getStringValue(0);
-				mCallbacks.onDataSent(data);
-			} else {
-				mCallbacks.onError(ERROR_WRITE_DESCRIPTOR, status);
-			}
+		public void onCharacteristicWrite(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+			final String data = characteristic.getStringValue(0);
+			mCallbacks.onDataSent(data);
 		}
 
 		@Override
-		public void onCharacteristicChanged(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		public void onCharacteristicNotified(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
 			final String data = characteristic.getStringValue(0);
 			mCallbacks.onDataReceived(data);
 		}
 	};
 
 	/**
-	 * Enabling notification on RX Characteristic
+	 * Sends the given text to TH characteristic.
+	 * @param text the text to be sent
 	 */
-	private void enableRXNotification(final BluetoothGatt gatt) {
-		gatt.setCharacteristicNotification(mRXCharacteristic, true);
-		final BluetoothGattDescriptor descriptor = mRXCharacteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
-		descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-		gatt.writeDescriptor(descriptor);
-	}
-
-	@Override
-	public void closeBluetoothGatt() {
-		if (mBluetoothGatt != null) {
-			mBluetoothGatt.close();
-			mBluetoothGatt = null;
-			mTXCharacteristic = null;
-			mRXCharacteristic = null;
+	public void send(final String text) {
+		if (mTXCharacteristic != null) {
+			mTXCharacteristic.setValue(text);
+			writeCharacteristic(mTXCharacteristic);
 		}
-		mCallbacks = null;
 	}
-
 }

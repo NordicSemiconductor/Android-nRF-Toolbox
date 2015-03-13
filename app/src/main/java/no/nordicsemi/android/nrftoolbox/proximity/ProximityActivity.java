@@ -21,12 +21,6 @@
  */
 package no.nordicsemi.android.nrftoolbox.proximity;
 
-import java.util.UUID;
-
-import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
-import no.nordicsemi.android.nrftoolbox.profile.BleProfileServiceReadyActivity;
-import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
 import android.app.FragmentManager;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -37,12 +31,17 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 
+import java.util.UUID;
+
+import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
+import no.nordicsemi.android.nrftoolbox.profile.BleProfileServiceReadyActivity;
+import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
+
 public class ProximityActivity extends BleProfileServiceReadyActivity<ProximityService.ProximityBinder> {
 	private static final String TAG = "ProximityActivity";
 
 	public static final String PREFS_GATT_SERVER_ENABLED = "prefs_gatt_server_enabled";
-	private static final String IMMEDIATE_ALERT_STATUS = "immediate_alert_status";
-	private boolean isImmediateAlertOn = false;
 
 	private Button mFindMeButton;
 	private ImageView mLockImage;
@@ -64,29 +63,9 @@ public class ProximityActivity extends BleProfileServiceReadyActivity<ProximityS
 		mGattServerSwitch.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(final CompoundButton buttonView, final boolean isChecked) {
-				preferences.edit().putBoolean(PREFS_GATT_SERVER_ENABLED, isChecked).commit();
+				preferences.edit().putBoolean(PREFS_GATT_SERVER_ENABLED, isChecked).apply();
 			}
 		});
-	}
-
-	@Override
-	protected void onSaveInstanceState(final Bundle outState) {
-		super.onSaveInstanceState(outState);
-		outState.putBoolean(IMMEDIATE_ALERT_STATUS, isImmediateAlertOn);
-	}
-
-	@Override
-	protected void onRestoreInstanceState(final Bundle savedInstanceState) {
-		super.onRestoreInstanceState(savedInstanceState);
-
-		isImmediateAlertOn = savedInstanceState.getBoolean(IMMEDIATE_ALERT_STATUS);
-		if (isDeviceConnected()) {
-			showOpenLock();
-
-			if (isImmediateAlertOn) {
-				showSilentMeOnButton();
-			}
-		}
 	}
 
 	@Override
@@ -96,7 +75,15 @@ public class ProximityActivity extends BleProfileServiceReadyActivity<ProximityS
 
 	@Override
 	protected void onServiceBinded(final ProximityService.ProximityBinder binder) {
-		// you may get the binder instance here 
+		mGattServerSwitch.setEnabled(false);
+
+		if (binder.isConnected()) {
+			showOpenLock();
+
+			if (binder.isImmediateAlertOn()) {
+				showSilentMeOnButton();
+			}
+		}
 	}
 
 	@Override
@@ -131,14 +118,10 @@ public class ProximityActivity extends BleProfileServiceReadyActivity<ProximityS
 		if (isBLEEnabled()) {
 			if (!isDeviceConnected()) {
 				// do nothing
-			} else if (!isImmediateAlertOn) {
+			} else if (getService().toggleImmediateAlert()) {
 				showSilentMeOnButton();
-				((ProximityService.ProximityBinder) getService()).startImmediateAlert();
-				isImmediateAlertOn = true;
 			} else {
 				showFindMeOnButton();
-				((ProximityService.ProximityBinder) getService()).stopImmediateAlert();
-				isImmediateAlertOn = false;
 			}
 		} else {
 			showBLEDialog();
@@ -147,13 +130,8 @@ public class ProximityActivity extends BleProfileServiceReadyActivity<ProximityS
 
 	@Override
 	protected void setDefaultUI() {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				mFindMeButton.setText(R.string.proximity_action_findme);
-				mLockImage.setImageResource(R.drawable.proximity_lock_closed);
-			}
-		});
+		mFindMeButton.setText(R.string.proximity_action_findme);
+		mLockImage.setImageResource(R.drawable.proximity_lock_closed);
 	}
 
 	@Override
@@ -162,10 +140,8 @@ public class ProximityActivity extends BleProfileServiceReadyActivity<ProximityS
 	}
 
 	@Override
-	public void onDeviceConnected() {
-		super.onDeviceConnected();
+	public void onDeviceReady() {
 		showOpenLock();
-		mGattServerSwitch.setEnabled(false);
 	}
 
 	@Override
@@ -202,7 +178,6 @@ public class ProximityActivity extends BleProfileServiceReadyActivity<ProximityS
 	}
 
 	private void resetForLinkloss() {
-		isImmediateAlertOn = false;
 		setDefaultUI();
 	}
 

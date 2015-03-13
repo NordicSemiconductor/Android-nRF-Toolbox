@@ -21,18 +21,13 @@
  */
 package no.nordicsemi.android.nrftoolbox.profile;
 
-import java.util.UUID;
-
-import no.nordicsemi.android.nrftoolbox.AppHelpFragment;
-import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.scanner.ScannerFragment;
-import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -41,6 +36,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.UUID;
+
+import no.nordicsemi.android.log.ILogSession;
+import no.nordicsemi.android.log.LocalLogSession;
+import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.nrftoolbox.AppHelpFragment;
+import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.scanner.ScannerFragment;
+import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
 
 public abstract class BleProfileActivity extends ActionBarActivity implements BleManagerCallbacks, ScannerFragment.OnDeviceSelectedListener {
 	private static final String TAG = "BaseProfileActivity";
@@ -54,6 +59,7 @@ public abstract class BleProfileActivity extends ActionBarActivity implements Bl
 	private TextView mDeviceNameView;
 	private TextView mBatteryLevelView;
 	private Button mConnectButton;
+	private ILogSession mLogSession;
 
 	private boolean mDeviceConnected = false;
 	private String mDeviceName;
@@ -185,10 +191,38 @@ public abstract class BleProfileActivity extends ActionBarActivity implements Bl
 		}
 	}
 
+	/**
+	 * Returns the title resource id that will be used to create logger session. If 0 is returned (default) logger will not be used.
+	 *
+	 * @return the title resource id
+	 */
+	protected int getLoggerProfileTitle() {
+		return 0;
+	}
+
+	/**
+	 * This method may return the local log content provider authority if local log sessions are supported.
+	 *
+	 * @return local log session content provider URI
+	 */
+	protected Uri getLocalAuthorityLogger() {
+		return null;
+	}
+
 	@Override
 	public void onDeviceSelected(final BluetoothDevice device, final String name) {
+		final int titleId = getLoggerProfileTitle();
+		if (titleId > 0) {
+			mLogSession = Logger.newSession(getApplicationContext(), getString(titleId), device.getAddress(), name);
+			// If nRF Logger is not installed we may want to use local logger
+			if (mLogSession == null && getLocalAuthorityLogger() != null) {
+				mLogSession = LocalLogSession.newSession(getApplicationContext(), getLocalAuthorityLogger(), device.getAddress(), name);
+			}
+		}
+		mBleManager.setLogger(mLogSession);
 		mDeviceNameView.setText(mDeviceName = name);
-		mBleManager.connect(getApplicationContext(), device);
+		mConnectButton.setText(R.string.action_disconnect);
+		mBleManager.connect(device);
 	}
 
 	@Override
@@ -208,9 +242,14 @@ public abstract class BleProfileActivity extends ActionBarActivity implements Bl
 	}
 
 	@Override
+	public void onDeviceDisconnecting() {
+		// do nothing
+	}
+
+	@Override
 	public void onDeviceDisconnected() {
 		mDeviceConnected = false;
-		mBleManager.closeBluetoothGatt();
+		mBleManager.close();
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -256,11 +295,8 @@ public abstract class BleProfileActivity extends ActionBarActivity implements Bl
 
 	@Override
 	public void onError(final String message, final int errorCode) {
-		DebugLogger.e(TAG, "Error occured: " + message + ",  error code: " + errorCode);
+		DebugLogger.e(TAG, "Error occurred: " + message + ",  error code: " + errorCode);
 		showToast(message + " (" + errorCode + ")");
-
-		// refresh UI when connection failed
-		onDeviceDisconnected();
 	}
 
 	@Override

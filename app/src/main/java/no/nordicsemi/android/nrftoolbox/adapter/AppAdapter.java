@@ -21,11 +21,6 @@
  */
 package no.nordicsemi.android.nrftoolbox.adapter;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-
-import no.nordicsemi.android.nrftoolbox.R;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -37,6 +32,12 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+
+import no.nordicsemi.android.nrftoolbox.R;
 
 public class AppAdapter extends BaseAdapter {
 	private static final String CATEGORY = "no.nordicsemi.android.nrftoolbox.LAUNCHER";
