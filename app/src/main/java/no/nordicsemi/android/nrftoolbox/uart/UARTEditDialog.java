@@ -123,7 +123,7 @@ public class UARTEditDialog extends DialogFragment implements View.OnClickListen
 		editor.putString(UARTButtonAdapter.PREFS_BUTTON_COMMAND + index, command);
 		editor.putBoolean(UARTButtonAdapter.PREFS_BUTTON_ENABLED + index, active);
 		editor.putInt(UARTButtonAdapter.PREFS_BUTTON_ICON + index, mActiveIcon);
-		editor.commit();
+		editor.apply();
 
 		dismiss();
 		final UARTControlFragment parent = (UARTControlFragment) getParentFragment();

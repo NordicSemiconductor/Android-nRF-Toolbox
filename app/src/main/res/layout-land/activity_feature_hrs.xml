@@ -67,6 +67,7 @@
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <LinearLayout
+		android:baselineAligned="false"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/action_connect"

@@ -73,8 +73,8 @@
 		<item></item>
 		<item>Sample Location value not available</item>
     </string-array>
-    <string name="gls_status_annunciatioin_title">Sensor Status Annunciation</string>
-    <string-array name="gls_status_annunciatioin">
+    <string name="gls_status_annunciation_title">Sensor Status Annunciation</string>
+    <string-array name="gls_status_annunciation">
         <item>Device battery low at time of measurement</item>
 	    <item>Sensor malfunction or faulting at time of measurement</item>
 	    <item>Sample size for blood or control solution insufficient at time of measurement</item>

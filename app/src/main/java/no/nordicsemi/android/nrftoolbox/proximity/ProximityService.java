@@ -225,7 +225,7 @@ public class ProximityService extends BleProfileService implements ProximityMana
 			secondAction = PendingIntent.getBroadcast(this, FIND_ME_REQ, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		}
 
-		// both activities above have launchMode="singleTask" in the AndoridManifest.xml file, so if the task is already running, it will be resumed
+		// both activities above have launchMode="singleTask" in the AndroidManifest.xml file, so if the task is already running, it will be resumed
 		final PendingIntent pendingIntent = PendingIntent.getActivities(this, OPEN_ACTIVITY_REQ, new Intent[] { parentIntent, targetIntent }, PendingIntent.FLAG_UPDATE_CURRENT);
 		final Notification.Builder builder = new Notification.Builder(this).setContentIntent(pendingIntent);
 		builder.setContentTitle(getString(R.string.app_name)).setContentText(getString(messageResId, getDeviceName()));

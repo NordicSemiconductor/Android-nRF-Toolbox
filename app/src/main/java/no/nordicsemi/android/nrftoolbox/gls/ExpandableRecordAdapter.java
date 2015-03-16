@@ -130,13 +130,13 @@ public class ExpandableRecordAdapter extends BaseExpandableListAdapter {
 			final int status = record.status;
 			for (int i = 0; i < 12; ++i)
 				if ((status & (1 << i)) > 0)
-					builder.append(resources.getStringArray(R.array.gls_status_annunciatioin)[i]).append("\n");
+					builder.append(resources.getStringArray(R.array.gls_status_annunciation)[i]).append("\n");
 			builder.setLength(builder.length() - 1);
-			return new Pair<>(resources.getString(R.string.gls_status_annunciatioin_title), builder.toString());
+			return new Pair<>(resources.getString(R.string.gls_status_annunciation_title), builder.toString());
 		}
 		case 2: { // carbohydrate id and unit
 			final StringBuilder builder = new StringBuilder();
-			builder.append(resources.getStringArray(R.array.gls_context_carbohydrare)[record.context.carbohydrateId]).append(" (" + record.context.carbohydrateUnits + " kg)");
+			builder.append(resources.getStringArray(R.array.gls_context_carbohydrare)[record.context.carbohydrateId]).append(" (").append(record.context.carbohydrateUnits).append(" kg)");
 			return new Pair<>(resources.getString(R.string.gls_context_carbohydrare_title), builder.toString());
 		}
 		case 3: { // meal

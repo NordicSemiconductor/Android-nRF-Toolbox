@@ -116,7 +116,7 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 	@Override
 	protected void onUnbind() {
 		// when the activity closes we need to show the notification that user is connected to the sensor
-		createNotifcation(R.string.rsc_notification_connected_message, 0);
+		createNotification(R.string.rsc_notification_connected_message, 0);
 	}
 
 	@Override
@@ -176,7 +176,7 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 	 * @param defaults
 	 *            signals that will be used to notify the user
 	 */
-	private void createNotifcation(final int messageResId, final int defaults) {
+	private void createNotification(final int messageResId, final int defaults) {
 		final Intent parentIntent = new Intent(this, FeaturesActivity.class);
 		parentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		final Intent targetIntent = new Intent(this, RSCActivity.class);
@@ -184,7 +184,7 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 		final Intent disconnect = new Intent(ACTION_DISCONNECT);
 		final PendingIntent disconnectAction = PendingIntent.getBroadcast(this, DISCONNECT_REQ, disconnect, PendingIntent.FLAG_UPDATE_CURRENT);
 
-		// both activities above have launchMode="singleTask" in the AndoridManifest.xml file, so if the task is already running, it will be resumed
+		// both activities above have launchMode="singleTask" in the AndroidManifest.xml file, so if the task is already running, it will be resumed
 		final PendingIntent pendingIntent = PendingIntent.getActivities(this, OPEN_ACTIVITY_REQ, new Intent[] { parentIntent, targetIntent }, PendingIntent.FLAG_UPDATE_CURRENT);
 		final Notification.Builder builder = new Notification.Builder(this).setContentIntent(pendingIntent);
 		builder.setContentTitle(getString(R.string.app_name)).setContentText(getString(messageResId, getDeviceName()));

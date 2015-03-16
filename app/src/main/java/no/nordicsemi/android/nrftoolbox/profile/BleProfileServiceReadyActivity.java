@@ -487,7 +487,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	}
 
 	/**
-	 * Some profiles may use this method to notify user that the link was lost. You must call this method in youe Ble Manager instead of
+	 * Some profiles may use this method to notify user that the link was lost. You must call this method in your Ble Manager instead of
 	 * {@link #onDeviceDisconnected()} while you discover disconnection not initiated by the user.
 	 */
 	public void onLinklossOccur() {

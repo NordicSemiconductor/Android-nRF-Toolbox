@@ -57,7 +57,7 @@ public class RSCMeasurementParser {
 		}
 
 		final StringBuilder builder = new StringBuilder();
-		builder.append(String.format("Speed: %.2f m/s, Candence: %d RPM,\n", instantaneousSpeed, instantaneousCadence));
+		builder.append(String.format("Speed: %.2f m/s, Cadence: %d RPM,\n", instantaneousSpeed, instantaneousCadence));
 		if (islmPresent)
 			builder.append(String.format("Instantaneous Stride Length: %.2f m,\n", instantaneousStrideLength));
 		if (tdPreset)

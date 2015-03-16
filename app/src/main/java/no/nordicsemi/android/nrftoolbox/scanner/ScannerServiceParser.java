@@ -47,7 +47,7 @@ public class ScannerServiceParser {
 	private static final byte LE_GENERAL_DISCOVERABLE_MODE = 0x02;
 
 	/**
-	 * Checks if device is connectable (as Android cannot get this information directly we just check if it has GENERAL DISCOVERABLE or LIMITED DISCOVERABLE flag set) and has required service UUID in
+	 * Checks if device is connectible (as Android cannot get this information directly we just check if it has GENERAL DISCOVERABLE or LIMITED DISCOVERABLE flag set) and has required service UUID in
 	 * the advertising packet. The service UUID may be <code>null</code>.
 	 * <p>
 	 * For further details on parsing BLE advertisement packet data see https://developer.bluetooth.org/Pages/default.aspx Bluetooth Core Specifications Volume 3, Part C, and Section 8
