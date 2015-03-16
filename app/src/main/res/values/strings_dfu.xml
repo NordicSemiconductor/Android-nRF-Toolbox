@@ -93,8 +93,7 @@
     <string name="dfu_file_init_message">Do you want to select the Init packet file?\n
 		The Init packet file (*.dat) should contain the device type and revision, application version, list of supported Soft Devices and the firmware CRC
 		in binary format or, with old versions of the DFU bootloader, only the CRC (CRC-CCITT-16).
-		With the new version of the bootloader the extended Init packet is <b>required</b>.
-</string>
+		With the new version of the bootloader the extended Init packet is <b>required</b>.</string>
     
     <string name="dfu_unknown_name">unnamed device</string>
     <string name="dfu_uploading_percentage_label">0%</string>

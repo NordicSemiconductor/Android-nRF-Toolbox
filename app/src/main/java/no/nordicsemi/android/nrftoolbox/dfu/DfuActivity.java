@@ -638,14 +638,14 @@ public class DfuActivity extends ActionBarActivity implements LoaderCallbacks<Cu
 				index = 0;
 				break;
 			case DfuService.TYPE_SOFT_DEVICE:
-			index = 1;
-			break;
+				index = 1;
+				break;
 			case DfuService.TYPE_BOOTLOADER:
-			index = 2;
-			break;
+				index = 2;
+				break;
 			case DfuService.TYPE_APPLICATION:
-			index = 3;
-			break;
+				index = 3;
+				break;
 		}
 		// Show a dialog with file types
 		new AlertDialog.Builder(this).setTitle(R.string.dfu_file_type_title)
