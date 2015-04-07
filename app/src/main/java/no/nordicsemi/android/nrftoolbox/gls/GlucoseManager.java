@@ -183,7 +183,7 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 				offset += 2;
 
 				final int year = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
-				final int month = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 2) + 1; // months are 1-based
+				final int month = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 2) - 1; // months are 1-based
 				final int day = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 3);
 				final int hours = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 4);
 				final int minutes = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 5);
