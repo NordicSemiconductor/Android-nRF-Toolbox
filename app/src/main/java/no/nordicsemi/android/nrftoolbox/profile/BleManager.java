@@ -64,16 +64,6 @@ import no.nordicsemi.android.nrftoolbox.utility.ParserUtils;
 public abstract class BleManager<E extends BleManagerCallbacks> {
 	private final static String TAG = "BleManager";
 
-	// Please see https://android.googlesource.com/platform/external/bluetooth/bluedroid/+/android-5.1.0_r1/stack/include/gatt_api.h for more information (line 107)
-	private static final int GATT_CONN_L2C_FAILURE = 0x01;
-	private static final int GATT_CONN_TIMEOUT = 0x08;
-	private static final int GATT_CONN_TERMINATE_PEER_USER = 0x13;
-	private static final int GATT_CONN_TERMINATE_LOCAL_HOST = 0x16;
-	private static final int GATT_CONN_FAIL_ESTABLISH = 0x3E;
-	private static final int GATT_CONN_LMP_TIMEOUT = 0x22;
-	private static final int GATT_CONN_CANCEL = 0x0100;
-	private static final int GATT_ERROR = 0x85; // Device not reachable
-
 	private static final UUID CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
 	private final static UUID BATTERY_SERVICE = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb");
@@ -110,15 +100,15 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 			if (mBluetoothGatt == null || !device.getAddress().equals(mBluetoothGatt.getDevice().getAddress()))
 				return;
 
+			Logger.d(mLogSession, "[Broadcast] Action received: " + BluetoothDevice.ACTION_BOND_STATE_CHANGED + ", bond state changed to: " + bondStateToString(bondState) + " (" + bondState + ")");
 			DebugLogger.i(TAG, "Bond state changed for: " + device.getName() + " new state: " + bondState + " previous: " + previousBondState);
 
 			switch (bondState) {
 				case BluetoothDevice.BOND_BONDING:
-					Logger.v(mLogSession, "Bond state: Bonding...");
 					mCallbacks.onBondingRequired();
 					break;
 				case BluetoothDevice.BOND_BONDED:
-					Logger.i(mLogSession, "Bond state: Bonded");
+					Logger.i(mLogSession, "Device bonded");
 					mCallbacks.onBonded();
 
 					// Start initializing again.
@@ -131,14 +121,36 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 		}
 	};
 
+	private final BroadcastReceiver mPairingRequestBroadcastReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(final Context context, final Intent intent) {
+			final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+			// Skip other devices
+			if (mBluetoothGatt == null || !device.getAddress().equals(mBluetoothGatt.getDevice().getAddress()))
+				return;
+
+			// String values are used as the constants are not available for Android 4.3.
+			final int variant = intent.getIntExtra("android.bluetooth.device.extra.PAIRING_VARIANT"/*BluetoothDevice.EXTRA_PAIRING_VARIANT*/, 0);
+			Logger.d(mLogSession, "[Broadcast] Action received: android.bluetooth.device.action.PAIRING_REQUEST"/*BluetoothDevice.ACTION_PAIRING_REQUEST*/ +
+					", pairing variant: " + pairingVariantToString(variant) + " (" + variant + ")");
+
+			// The API below is available for Android 4.4 or newer.
+
+			// An app may set the PIN here or set pairing confirmation (depending on the variant) using:
+			// device.setPin(new byte[] { '1', '2', '3', '4', '5', '6' });
+			// device.setPairingConfirmation(true);
+		}
+	};
+
 	public BleManager(final Context context) {
 		mContext = context;
 		mHandler = new Handler();
 		mUserDisconnected = false;
 
 		// Register bonding broadcast receiver
-		final IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-		context.registerReceiver(mBondingBroadcastReceiver, filter);
+		context.registerReceiver(mBondingBroadcastReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
+		context.registerReceiver(mPairingRequestBroadcastReceiver, new IntentFilter("android.bluetooth.device.action.PAIRING_REQUEST"/*BluetoothDevice.ACTION_PAIRING_REQUEST*/));
 	}
 
 	/**
@@ -209,6 +221,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 	public void close() {
 		try {
 			mContext.unregisterReceiver(mBondingBroadcastReceiver);
+			mContext.unregisterReceiver(mPairingRequestBroadcastReceiver);
 		} catch (Exception e) {
 			// the receiver must have been not registered or unregistered before
 		}
@@ -860,6 +873,48 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 				default:
 					return "DISCONNECTED";
 			}
+		}
+	}
+
+	private static final int PAIRING_VARIANT_PIN = 0;
+	private static final int PAIRING_VARIANT_PASSKEY = 1;
+	private static final int PAIRING_VARIANT_PASSKEY_CONFIRMATION = 2;
+	private static final int PAIRING_VARIANT_CONSENT = 3;
+	private static final int PAIRING_VARIANT_DISPLAY_PASSKEY = 4;
+	private static final int PAIRING_VARIANT_DISPLAY_PIN = 5;
+	private static final int PAIRING_VARIANT_OOB_CONSENT = 6;
+
+	private String pairingVariantToString(final int variant) {
+		switch (variant) {
+			case PAIRING_VARIANT_PIN:
+				return "PAIRING_VARIANT_PIN";
+			case PAIRING_VARIANT_PASSKEY:
+				return "PAIRING_VARIANT_PASSKEY";
+			case PAIRING_VARIANT_PASSKEY_CONFIRMATION:
+				return "PAIRING_VARIANT_PASSKEY_CONFIRMATION";
+			case PAIRING_VARIANT_CONSENT:
+				return "PAIRING_VARIANT_CONSENT";
+			case PAIRING_VARIANT_DISPLAY_PASSKEY:
+				return "PAIRING_VARIANT_DISPLAY_PASSKEY";
+			case PAIRING_VARIANT_DISPLAY_PIN:
+				return "PAIRING_VARIANT_DISPLAY_PIN";
+			case PAIRING_VARIANT_OOB_CONSENT:
+				return "PAIRING_VARIANT_OOB_CONSENT";
+			default:
+				return "UNKNOWN";
+		}
+	}
+
+	private String bondStateToString(final int state) {
+		switch (state) {
+			case BluetoothDevice.BOND_NONE:
+				return "BOND_NONE";
+			case BluetoothDevice.BOND_BONDING:
+				return "BOND_BONDING";
+			case BluetoothDevice.BOND_BONDED:
+				return "BOND_BONDED";
+			default:
+				return "UNKNOWN";
 		}
 	}
 }
