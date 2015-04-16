@@ -24,11 +24,11 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
 	<ListPreference
-		android:title="@string/hts_settings_units_title"
-		android:summary="@string/hts_settings_units_summary"
+		android:title="@string/template_settings_units_title"
+		android:summary="@string/template_settings_units_summary"
 		android:defaultValue="0"
-		android:entries="@array/hts_settings_units"
-		android:entryValues="@array/hts_settings_units_values"
-		android:key="settings_hts_unit" />
+		android:entries="@array/template_settings_units"
+		android:entryValues="@array/template_settings_units_values"
+		android:key="settings_template_data" />
 
 </PreferenceScreen>

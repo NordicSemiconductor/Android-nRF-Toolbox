@@ -23,8 +23,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	package="no.nordicsemi.android.nrftoolbox"
 	android:installLocation="auto"
-	android:versionCode="30"
-	android:versionName="1.12.1" >
+	android:versionCode="31"
+	android:versionName="1.13.0" >
 
 	<uses-sdk
 		android:minSdkVersion="18"
@@ -59,6 +59,26 @@
 			android:label="@string/app_name"
 			android:launchMode="singleTask" >
 		</activity>
+
+		<!-- Template plugin activities -->
+		<!-- Remember to add your plug-in Activities to the Android Manifest file. -->
+		<activity
+			android:name="no.nordicsemi.android.nrftoolbox.template.TemplateActivity"
+			android:icon="@drawable/ic_template_feature"
+			android:label="@string/template_feature_title" >
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+
+				<category android:name="no.nordicsemi.android.nrftoolbox.LAUNCHER" />
+			</intent-filter>
+		</activity>
+		<activity
+			android:name="no.nordicsemi.android.nrftoolbox.template.settings.SettingsActivity"
+			android:label="@string/template_settings_title" />
+		<service
+			android:name="no.nordicsemi.android.nrftoolbox.template.TemplateService"
+			android:label="@string/template_feature_title" />
+
 		<!-- Plug-in activities -->
 		<activity
 			android:name="no.nordicsemi.android.nrftoolbox.dfu.DfuActivity"
