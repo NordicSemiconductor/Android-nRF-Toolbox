@@ -43,6 +43,11 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	public static final String BROADCAST_UART_RX = "no.nordicsemi.android.nrftoolbox.uart.BROADCAST_UART_RX";
 	public static final String EXTRA_DATA = "no.nordicsemi.android.nrftoolbox.uart.EXTRA_DATA";
 
+	/** A broadcast message with this action and the message in {@link Intent#EXTRA_TEXT} will be sent t the UART device. */
+	private final static String ACTION_SEND = "no.nordicsemi.android.nrftoolbox.uart.ACTION_SEND";
+	/** A broadcast message with this action is triggered when a message is received from the UART device. */
+	private final static String ACTION_RECEIVE = "no.nordicsemi.android.nrftoolbox.uart.ACTION_RECEIVE";
+	/** Action send when user press the DISCONNECT button on the notification. */
 	private final static String ACTION_DISCONNECT = "no.nordicsemi.android.nrftoolbox.uart.ACTION_DISCONNECT";
 
 	private final static int NOTIFICATION_ID = 349; // random
@@ -79,9 +84,8 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	public void onCreate() {
 		super.onCreate();
 
-		final IntentFilter filter = new IntentFilter();
-		filter.addAction(ACTION_DISCONNECT);
-		registerReceiver(mDisconnectActionBroadcastReceiver, filter);
+		registerReceiver(mDisconnectActionBroadcastReceiver, new IntentFilter(ACTION_DISCONNECT));
+		registerReceiver(mIntentBroadcastReceiver, new IntentFilter(ACTION_SEND));
 	}
 
 	@Override
@@ -89,6 +93,7 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 		// when user has disconnected from the sensor, we have to cancel the notification that we've created some milliseconds before using unbindService
 		cancelNotification();
 		unregisterReceiver(mDisconnectActionBroadcastReceiver);
+		unregisterReceiver(mIntentBroadcastReceiver);
 
 		super.onDestroy();
 	}
@@ -118,10 +123,15 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 		final Intent broadcast = new Intent(BROADCAST_UART_RX);
 		broadcast.putExtra(EXTRA_DATA, data);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
+
+		// send the data received to other apps, e.g. the Tasker
+		final Intent globalBroadcast = new Intent(ACTION_RECEIVE);
+		globalBroadcast.putExtra(Intent.EXTRA_TEXT, data);
+		sendBroadcast(globalBroadcast);
 	}
 
 	@Override
-	public void onDataSent(String data) {
+	public void onDataSent(final String data) {
 		Logger.a(getLogSession(), "\"" + data + "\" sent");
 
 		final Intent broadcast = new Intent(BROADCAST_UART_TX);
@@ -178,6 +188,18 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 				getBinder().disconnect();
 			else
 				stopSelf();
+		}
+	};
+
+	/**
+	 * Broadcast receiver that listens for {@link #ACTION_SEND} from other apps. Sends the String content of the {@link Intent#EXTRA_TEXT} extra to the remote device.
+	 */
+	private BroadcastReceiver mIntentBroadcastReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(final Context context, final Intent intent) {
+			Logger.i(getLogSession(), "[Broadcast] Disconnect action pressed");
+			final String message = intent.getStringExtra(Intent.EXTRA_TEXT);
+			mManager.send(message);
 		}
 	};
 
