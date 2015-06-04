@@ -23,8 +23,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	package="no.nordicsemi.android.nrftoolbox"
 	android:installLocation="auto"
-	android:versionCode="32"
-	android:versionName="1.13.1" >
+	android:versionCode="33"
+	android:versionName="1.14.1" >
 
 	<uses-sdk
 		android:minSdkVersion="18"
@@ -57,6 +57,7 @@
 		<activity
 			android:name="no.nordicsemi.android.nrftoolbox.FeaturesActivity"
 			android:label="@string/app_name"
+            android:theme="@style/AppTheme.TranslucentStatusBar"
 			android:launchMode="singleTask" >
 		</activity>
 

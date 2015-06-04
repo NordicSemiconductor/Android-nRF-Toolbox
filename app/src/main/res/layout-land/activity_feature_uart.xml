@@ -23,35 +23,43 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:baselineAligned="false"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     tools:context=".UARTActivity" >
 
-    <fragment
-        android:id="@+id/fragment_control"
-        android:name="no.nordicsemi.android.nrftoolbox.uart.UARTControlFragment"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="8"
-        tools:layout="@layout/fragment_feature_uart_control" />
+    <include layout="@layout/toolbar"
+        android:id="@+id/toolbar_actionbar"/>
 
-    <FrameLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="6" >
+    <no.nordicsemi.android.nrftoolbox.widget.ForegroundLinearLayout
+        style="@style/HeaderShadow"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <fragment
-            android:id="@+id/fragment_log"
-            android:name="no.nordicsemi.android.nrftoolbox.uart.UARTLogFragment"
-            android:layout_width="match_parent"
+            android:id="@+id/fragment_control"
+            android:name="no.nordicsemi.android.nrftoolbox.uart.UARTControlFragment"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            tools:layout="@layout/fragment_feature_uart_log" />
+            android:layout_weight="8"
+            tools:layout="@layout/fragment_feature_uart_control" />
 
-        <ImageView
-            android:layout_width="wrap_content"
+        <FrameLayout
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:scaleType="fitXY"
-            android:src="@drawable/shadow_l" />
-    </FrameLayout>
+            android:layout_weight="6" >
+
+            <fragment
+                android:id="@+id/fragment_log"
+                android:name="no.nordicsemi.android.nrftoolbox.uart.UARTLogFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:layout="@layout/fragment_feature_uart_log" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:scaleType="fitXY"
+                android:src="@drawable/shadow_l" />
+        </FrameLayout>
+    </no.nordicsemi.android.nrftoolbox.widget.ForegroundLinearLayout>
 
 </LinearLayout>

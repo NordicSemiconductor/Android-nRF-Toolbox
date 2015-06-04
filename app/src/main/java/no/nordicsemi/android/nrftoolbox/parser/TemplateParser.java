@@ -23,9 +23,6 @@ package no.nordicsemi.android.nrftoolbox.parser;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 
-import java.util.ArrayList;
-import java.util.List;
-
 // TODO this method may be used for developing purposes to log the data from your device using the nRF Logger application.
 public class TemplateParser {
 	// TODO add some flags, if needed

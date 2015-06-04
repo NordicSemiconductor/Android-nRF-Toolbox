@@ -34,8 +34,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -50,7 +51,7 @@ import java.util.List;
 
 import no.nordicsemi.android.nrftoolbox.adapter.AppAdapter;
 
-public class FeaturesActivity extends ActionBarActivity {
+public class FeaturesActivity extends AppCompatActivity {
 	private static final String MCP_CATEGORY = "no.nordicsemi.android.nrftoolbox.LAUNCHER";
 	private static final String UTILS_CATEGORY = "no.nordicsemi.android.nrftoolbox.UTILS";
 	private static final String MCP_PACKAGE = "no.nordicsemi.android.mcp";
@@ -65,6 +66,9 @@ public class FeaturesActivity extends ActionBarActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_features);
 
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        setSupportActionBar(toolbar);
+
 		// ensure that Bluetooth exists
 		if (!ensureBLEExists())
 			finish();
@@ -73,7 +77,13 @@ public class FeaturesActivity extends ActionBarActivity {
 		drawer.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
 		// Set the drawer toggle as the DrawerListener
-		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close);
+		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
+            @Override
+            public void onDrawerSlide(final View drawerView, final float slideOffset) {
+                // Disable the Hamburger icon animation
+                super.onDrawerSlide(drawerView, 0);
+            }
+        };
 		drawer.setDrawerListener(mDrawerToggle);
 
 		// setup plug-ins in the drawer
@@ -117,7 +127,7 @@ public class FeaturesActivity extends ActionBarActivity {
 		switch (item.getItemId()) {
 		case R.id.action_about:
 			final AppHelpFragment fragment = AppHelpFragment.getInstance(R.string.about_text, true);
-			fragment.show(getFragmentManager(), null);
+			fragment.show(getSupportFragmentManager(), null);
 			break;
 		}
 		return true;

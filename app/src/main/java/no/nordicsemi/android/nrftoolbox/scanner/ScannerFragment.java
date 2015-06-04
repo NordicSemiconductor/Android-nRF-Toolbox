@@ -22,9 +22,7 @@
 package no.nordicsemi.android.nrftoolbox.scanner;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -33,6 +31,9 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelUuid;
+import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -144,7 +145,8 @@ public class ScannerFragment extends DialogFragment {
 	/**
 	 * When dialog is created then set AlertDialog with list and button views.
 	 */
-	@Override
+	@NonNull
+    @Override
 	public Dialog onCreateDialog(final Bundle savedInstanceState) {
 		final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		final View dialogView = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_device_selection, null);

@@ -19,25 +19,40 @@
   ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
-<android.support.v4.widget.SlidingPaneLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/sliding_pane"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".UARTActivity" >
 
-    <fragment
-        android:id="@+id/fragment_log"
-        android:name="no.nordicsemi.android.nrftoolbox.uart.UARTLogFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout="@layout/fragment_feature_uart_log" />
-    
-    <fragment
-        android:id="@+id/fragment_control"
-        android:name="no.nordicsemi.android.nrftoolbox.uart.UARTControlFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout="@layout/fragment_feature_uart_control" />
+    <include layout="@layout/toolbar"
+        android:id="@+id/toolbar_actionbar"/>
 
-</android.support.v4.widget.SlidingPaneLayout>
+    <FrameLayout
+        style="@style/HeaderShadow"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v4.widget.SlidingPaneLayout
+            android:id="@+id/sliding_pane"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <fragment
+                android:id="@+id/fragment_log"
+                android:name="no.nordicsemi.android.nrftoolbox.uart.UARTLogFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:layout="@layout/fragment_feature_uart_log" />
+
+            <fragment
+                android:id="@+id/fragment_control"
+                android:name="no.nordicsemi.android.nrftoolbox.uart.UARTControlFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:layout="@layout/fragment_feature_uart_control" />
+
+        </android.support.v4.widget.SlidingPaneLayout>
+    </FrameLayout>
+</LinearLayout>

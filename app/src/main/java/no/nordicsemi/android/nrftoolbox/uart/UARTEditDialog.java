@@ -22,12 +22,13 @@
 
 package no.nordicsemi.android.nrftoolbox.uart;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -62,7 +63,8 @@ public class UARTEditDialog extends DialogFragment implements View.OnClickListen
 		return fragment;
 	}
 
-	@Override
+	@NonNull
+    @Override
 	public Dialog onCreateDialog(final Bundle savedInstanceState) {
 		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 		final LayoutInflater inflater = LayoutInflater.from(getActivity());

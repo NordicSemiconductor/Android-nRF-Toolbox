@@ -36,8 +36,10 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -67,7 +69,7 @@ import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
  * listens for it. When entering back to the activity, activity will to bind to the service and refresh UI.
  * </p>
  */
-public abstract class BleProfileServiceReadyActivity<E extends BleProfileService.LocalBinder> extends ActionBarActivity implements
+public abstract class BleProfileServiceReadyActivity<E extends BleProfileService.LocalBinder> extends AppCompatActivity implements
 		ScannerFragment.OnDeviceSelectedListener, BleManagerCallbacks {
 	private static final String TAG = "BleProfileServiceReadyActivity";
 
@@ -213,6 +215,10 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 		 */
 		onInitialize(savedInstanceState);
 		onCreateView(savedInstanceState);
+
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        setSupportActionBar(toolbar);
+        
 		onViewCreated(savedInstanceState);
 
 		LocalBroadcastManager.getInstance(this).registerReceiver(mCommonBroadcastReceiver, makeIntentFilter());
@@ -343,7 +349,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	}
 
 	@Override
-	protected void onRestoreInstanceState(final Bundle savedInstanceState) {
+	protected void onRestoreInstanceState(@NonNull final Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 		mDeviceName = savedInstanceState.getString(DEVICE_NAME);
 	}
@@ -374,7 +380,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 				break;
 			case R.id.action_about:
 				final AppHelpFragment fragment = AppHelpFragment.getInstance(getAboutTextId());
-				fragment.show(getFragmentManager(), "help_fragment");
+				fragment.show(getSupportFragmentManager(), "help_fragment");
 				break;
 			default:
 				return onOptionsItemSelected(id);
@@ -643,7 +649,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	 */
 	private void showDeviceScanningDialog(final UUID filter, final boolean discoverableRequired) {
 		final ScannerFragment dialog = ScannerFragment.getInstance(BleProfileServiceReadyActivity.this, filter, discoverableRequired);
-		dialog.show(getFragmentManager(), "scan_fragment");
+		dialog.show(getSupportFragmentManager(), "scan_fragment");
 	}
 
 	/**

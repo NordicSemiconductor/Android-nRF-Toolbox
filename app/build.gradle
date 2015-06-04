@@ -7,8 +7,8 @@ android {
         applicationId "no.nordicsemi.android.nrftoolbox"
         minSdkVersion 18
         targetSdkVersion 22
-        versionCode 32
-        versionName "1.13.1"
+        versionCode 33
+        versionName "1.14.0"
     }
     buildTypes {
         release {
@@ -20,7 +20,8 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:22.1.1'
+    compile 'com.android.support:appcompat-v7:22.2.0'
+    compile 'com.android.support:design:22.2.0'
     compile project(':..:DFULibrary:dfu')
     compile files('libs/achartengine-1.1.0.jar')
     compile files('libs/nrf-logger-v2.0.jar')

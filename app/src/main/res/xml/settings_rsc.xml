@@ -24,8 +24,8 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
 	<ListPreference
-		android:title="@string/csc_settings_units_title"
-		android:summary="@string/csc_settings_units_summary"
+		android:title="@string/rsc_settings_units_title"
+		android:summary="@string/rsc_settings_units_summary"
 		android:defaultValue="1"
 		android:entries="@array/rsc_settings_units"
 		android:entryValues="@array/rsc_settings_units_values"

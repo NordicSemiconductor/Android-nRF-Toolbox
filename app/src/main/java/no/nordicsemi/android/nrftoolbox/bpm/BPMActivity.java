@@ -46,7 +46,7 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 	private TextView mTimestampView;
 
 	@Override
-	protected void onCreateView(Bundle savedInstanceState) {
+	protected void onCreateView(final Bundle savedInstanceState) {
 		setContentView(R.layout.activity_feature_bpm);
 		setGUI();
 	}

@@ -24,14 +24,14 @@
 
     <item
         android:id="@+id/action_settings"
-        android:icon="@drawable/ic_menu_settings"
-        app:showAsAction="always"
+        android:orderInCategory="99"
+        app:showAsAction="never"
         android:title="@string/action_settings"/>
     
     <item
         android:id="@+id/action_about"
-        android:icon="@drawable/ic_menu_about"
-        app:showAsAction="always"
+        android:orderInCategory="100"
+        app:showAsAction="never"
         android:title="@string/action_about"/>    
     
 </menu>

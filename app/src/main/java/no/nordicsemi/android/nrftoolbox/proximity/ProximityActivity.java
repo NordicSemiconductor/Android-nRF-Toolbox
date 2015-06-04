@@ -21,7 +21,6 @@
  */
 package no.nordicsemi.android.nrftoolbox.proximity;
 
-import android.app.FragmentManager;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -201,9 +200,8 @@ public class ProximityActivity extends BleProfileServiceReadyActivity<ProximityS
 
 	private void showLinklossDialog(final String name) {
 		try {
-			FragmentManager fm = getFragmentManager();
-			LinklossFragment dialog = LinklossFragment.getInstance(name);
-			dialog.show(fm, "scan_fragment");
+			final LinklossFragment dialog = LinklossFragment.getInstance(name);
+			dialog.show(getSupportFragmentManager(), "scan_fragment");
 		} catch (final Exception e) {
 			// the activity must have been destroyed
 		}

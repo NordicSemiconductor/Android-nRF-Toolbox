@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (c) 2015, Nordic Semiconductor
   ~ All rights reserved.
@@ -20,9 +20,9 @@
   ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:drawable="@drawable/item_background_light_p" android:state_pressed="true"/>
-    <item android:drawable="@drawable/item_background_light_n"/>
-
-</selector>
+<resources>
+    <declare-styleable name="ForegroundRelativeLayout">
+        <attr name="foreground" format="reference|color" />
+    </declare-styleable>
+</resources>

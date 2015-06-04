@@ -26,9 +26,6 @@
     <string name="font_path">fonts/trebucbd.ttf</string>
     <string name="normal_font_path">fonts/trebuc.ttf</string>
     
-    <string name="permission_log_label">read and write log</string>
-    <string name="permission_log_description">Allows the app to write and read from Nordic Semiconductor Event log</string>
-    
     <string name="ok">OK</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>

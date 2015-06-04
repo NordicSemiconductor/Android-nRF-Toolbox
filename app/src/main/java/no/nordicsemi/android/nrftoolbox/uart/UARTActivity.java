@@ -32,6 +32,7 @@ import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.widget.SlidingPaneLayout;
 import android.view.View;
 
@@ -76,7 +77,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 				@Override
 				public void onPanelClosed(final View panel) {
 					// Close the keyboard
-					final UARTLogFragment logFragment = (UARTLogFragment) getFragmentManager().findFragmentById(R.id.fragment_log);
+					final UARTLogFragment logFragment = (UARTLogFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_log);
 					logFragment.onFragmentHidden();
 				}
 			});
@@ -84,7 +85,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	}
 
 	@Override
-	protected void onRestoreInstanceState(final Bundle savedInstanceState) {
+	protected void onRestoreInstanceState(final @NonNull Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 
 		mEditMode = savedInstanceState.getBoolean(SIS_EDIT_MODE);
@@ -134,7 +135,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 		super.onDeviceSelected(device, name);
 
 		// Notify the log fragment about it
-		final UARTLogFragment logFragment = (UARTLogFragment) getFragmentManager().findFragmentById(R.id.fragment_log);
+		final UARTLogFragment logFragment = (UARTLogFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_log);
 		logFragment.onServiceStarted();
 	}
 
@@ -176,7 +177,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			return;
 		}
 		if (mEditMode) {
-			final UARTControlFragment fragment = (UARTControlFragment) getFragmentManager().findFragmentById(R.id.fragment_control);
+			final UARTControlFragment fragment = (UARTControlFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_control);
 			fragment.setEditMode(false);
 			return;
 		}

@@ -20,53 +20,52 @@
   ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="290dp"
-    android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    android:clickable="true"
-    android:orientation="vertical"
-    android:paddingTop="8dp" >
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:src="@drawable/nordic_logo_horiz" />
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:orientation="vertical">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+		<ImageView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="8dp"
+			android:background="@color/actionBarColorDark"
+			android:paddingBottom="30dp"
+			android:paddingTop="@dimen/navdrawer_padding_top"
+			android:src="@drawable/nordic_logo_horiz_dark"/>
 
-        <LinearLayout
-            android:id="@+id/plugin_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" >
+		<LinearLayout
+			android:id="@+id/plugin_container"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical">
 
-            <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-	            android:paddingStart="16dp"
-	            android:paddingEnd="16dp"
-                android:text="@string/drawer_plugins"
-                android:textAppearance="@style/TextAppearanceTitle" />
+			<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:gravity="center_vertical"
+				android:paddingEnd="16dp"
+				android:paddingStart="16dp"
+				android:text="@string/drawer_plugins"
+				android:textAppearance="@style/TextAppearanceTitle"/>
 
-            <TextView
-			    android:id="@+id/link_mcp"
-			    android:layout_width="match_parent"
-			    android:layout_height="?android:attr/listPreferredItemHeightSmall"
-			    android:background="?android:selectableItemBackground"
-			    android:text="@string/drawer_plugin_mcp"
-			    android:drawablePadding="12dp"
-	            android:paddingStart="16dp"
-	            android:paddingEnd="16dp"
-			    android:drawableLeft="@drawable/ic_mcp_feature_small"
-			    android:gravity="center_vertical"
-			    android:textAppearance="?android:attr/textAppearanceInverse" />
-            
-        </LinearLayout>
-    </ScrollView>
+			<TextView
+				android:id="@+id/link_mcp"
+                style="@style/DrawerItem"
+				android:layout_width="match_parent"
+				android:layout_height="48dp"
+				android:background="?android:selectableItemBackground"
+				android:drawableLeft="@drawable/ic_mcp_feature_small"
+				android:drawablePadding="24dp"
+				android:paddingEnd="@dimen/navdrawer_padding_horiz"
+				android:paddingStart="@dimen/navdrawer_padding_horiz"
+				android:text="@string/drawer_plugin_mcp"/>
 
-</LinearLayout>
+		</LinearLayout>
+
+	</LinearLayout>
+</ScrollView>

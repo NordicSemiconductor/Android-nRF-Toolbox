@@ -21,10 +21,11 @@
  */
 package no.nordicsemi.android.nrftoolbox.proximity;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 
 import no.nordicsemi.android.nrftoolbox.R;
 
@@ -50,7 +51,8 @@ public class LinklossFragment extends DialogFragment {
 		mName = getArguments().getString(ARG_NAME);
 	}
 
-	@Override
+	@NonNull
+    @Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		return new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.app_name)).setMessage(getString(R.string.proximity_notification_linkloss_alert, mName))
 				.setPositiveButton(R.string.ok, null).create();

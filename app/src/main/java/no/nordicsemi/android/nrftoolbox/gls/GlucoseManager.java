@@ -512,7 +512,7 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 	/**
 	 * Sends the request to delete all data from the device. A Record Access Control Point indication with status code ({@link #RESPONSE_SUCCESS} (or other in case of error) will be send.
 	 *
-	 * @FIXME This method is not supported by Nordic Semiconductor Glucose Service in SDK 4.4.2.
+	 * FIXME This method is not supported by Nordic Semiconductor Glucose Service in SDK 4.4.2.
 	 */
 	public void deleteAllRecords() {
 		if (mRecordAccessControlPointCharacteristic == null)

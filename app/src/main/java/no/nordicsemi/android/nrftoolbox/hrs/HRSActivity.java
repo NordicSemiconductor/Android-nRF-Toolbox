@@ -24,6 +24,7 @@ package no.nordicsemi.android.nrftoolbox.hrs;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -83,7 +84,7 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 	}
 
 	@Override
-	protected void onRestoreInstanceState(final Bundle savedInstanceState) {
+	protected void onRestoreInstanceState(@NonNull final Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 
 		if (savedInstanceState != null) {

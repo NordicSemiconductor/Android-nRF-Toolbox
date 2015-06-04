@@ -22,19 +22,19 @@
 
 package no.nordicsemi.android.nrftoolbox.uart;
 
-import android.app.ListFragment;
-import android.app.LoaderManager.LoaderCallbacks;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.Loader;
 import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.ListFragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -53,7 +53,7 @@ import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 
-public class UARTLogFragment extends ListFragment implements LoaderCallbacks<Cursor> {
+public class UARTLogFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 	private static final String SIS_LOG_SCROLL_POSITION = "sis_scroll_position";
 	private static final int LOG_SCROLL_NULL = -1;
 	private static final int LOG_SCROLLED_TO_BOTTOM = -2;

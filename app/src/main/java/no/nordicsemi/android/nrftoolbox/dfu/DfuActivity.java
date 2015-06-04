@@ -23,8 +23,6 @@ package no.nordicsemi.android.nrftoolbox.dfu;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
-import android.app.AlertDialog;
-import android.app.FragmentManager;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.app.NotificationManager;
 import android.bluetooth.BluetoothAdapter;
@@ -47,8 +45,9 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -81,7 +80,7 @@ import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
  * DeviceScannerFragment.OnDeviceSelectedListener callback to receive callback when device is selected from scanning dialog The activity supports portrait and
  * landscape orientations
  */
-public class DfuActivity extends ActionBarActivity implements LoaderCallbacks<Cursor>, ScannerFragment.OnDeviceSelectedListener,
+public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cursor>, ScannerFragment.OnDeviceSelectedListener,
 		UploadCancelFragment.CancelFragmentListener {
 	private static final String TAG = "DfuActivity";
 
@@ -197,8 +196,9 @@ public class DfuActivity extends ActionBarActivity implements LoaderCallbacks<Cu
 	}
 
 	private void setGUI() {
-		final ActionBar actionBar = getSupportActionBar();
-		actionBar.setDisplayHomeAsUpEnabled(true);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        setSupportActionBar(toolbar);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		mDeviceNameView = (TextView) findViewById(R.id.device_name);
 		mFileNameView = (TextView) findViewById(R.id.file_name);
@@ -270,9 +270,8 @@ public class DfuActivity extends ActionBarActivity implements LoaderCallbacks<Cu
 	}
 
 	private void showDeviceScanningDialog() {
-		final FragmentManager fm = getFragmentManager();
 		final ScannerFragment dialog = ScannerFragment.getInstance(DfuActivity.this, null, false); // Device that is advertising directly does not have the GENERAL_DISCOVERABLE nor LIMITED_DISCOVERABLE flag set.
-		dialog.show(fm, "scan_fragment");
+		dialog.show(getSupportFragmentManager(), "scan_fragment");
 	}
 
 	private void ensureSamplesExist() {
@@ -436,7 +435,7 @@ public class DfuActivity extends ActionBarActivity implements LoaderCallbacks<Cu
 				break;
 			case R.id.action_about:
 				final AppHelpFragment fragment = AppHelpFragment.getInstance(R.string.dfu_about_text);
-				fragment.show(getFragmentManager(), "help_fragment");
+				fragment.show(getSupportFragmentManager(), "help_fragment");
 				break;
 			case R.id.action_settings:
 				final Intent intent = new Intent(this, SettingsActivity.class);
@@ -676,7 +675,7 @@ public class DfuActivity extends ActionBarActivity implements LoaderCallbacks<Cu
 			@Override
 			public void onClick(final DialogInterface dialog, final int which) {
 				final ZipInfoFragment fragment = new ZipInfoFragment();
-				fragment.show(getFragmentManager(), "help_fragment");
+				fragment.show(getSupportFragmentManager(), "help_fragment");
 			}
 		}).setNegativeButton(R.string.cancel, null).show();
 	}
@@ -763,7 +762,7 @@ public class DfuActivity extends ActionBarActivity implements LoaderCallbacks<Cu
 		manager.sendBroadcast(pauseAction);
 
 		final UploadCancelFragment fragment = UploadCancelFragment.getInstance();
-		fragment.show(getFragmentManager(), TAG);
+		fragment.show(getSupportFragmentManager(), TAG);
 	}
 
 	/**

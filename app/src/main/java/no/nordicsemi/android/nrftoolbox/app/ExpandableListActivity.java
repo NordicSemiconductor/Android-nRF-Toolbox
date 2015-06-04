@@ -19,7 +19,8 @@ package no.nordicsemi.android.nrftoolbox.app;
 import android.app.Activity;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View;
@@ -132,7 +133,7 @@ import no.nordicsemi.android.nrftoolbox.R;
  * @see #setListAdapter
  * @see android.widget.ExpandableListView
  */
-public class ExpandableListActivity extends ActionBarActivity implements
+public class ExpandableListActivity extends AppCompatActivity implements
 		OnCreateContextMenuListener,
 		ExpandableListView.OnChildClickListener, ExpandableListView.OnGroupCollapseListener,
 		ExpandableListView.OnGroupExpandListener {
@@ -182,7 +183,7 @@ public class ExpandableListActivity extends ActionBarActivity implements
 	 * @see Activity#onRestoreInstanceState(Bundle)
 	 */
 	@Override
-	protected void onRestoreInstanceState(Bundle state) {
+	protected void onRestoreInstanceState(@NonNull Bundle state) {
 		ensureList();
 		super.onRestoreInstanceState(state);
 	}
@@ -190,10 +191,10 @@ public class ExpandableListActivity extends ActionBarActivity implements
 	/**
 	 * Updates the screen state (current list and other views) when the content changes.
 	 * 
-	 * @see ActionBarActivity#onSupportContentChanged()
+	 * @see android.support.v7.app.AppCompatActivity#onContentChanged()
 	 */
 	@Override
-	public void onSupportContentChanged() {
+	public void onContentChanged() {
 		super.onContentChanged();
 		View emptyView = findViewById(R.id.empty);
 		mList = (ExpandableListView) findViewById(R.id.list);

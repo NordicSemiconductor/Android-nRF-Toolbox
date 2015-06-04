@@ -105,19 +105,19 @@ public class RSCActivity extends BleProfileServiceReadyActivity<RSCService.RSCBi
 
 		switch (unit) {
 			case SettingsFragment.SETTINGS_UNIT_M_S: // [m/s]
-				mSpeedUnitView.setText(R.string.csc_speed_unit_m_s);
-				mDistanceUnitView.setText(R.string.csc_distance_unit_m);
-				mTotalDistanceUnitView.setText(R.string.csc_total_distance_unit_km);
+				mSpeedUnitView.setText(R.string.rsc_speed_unit_m_s);
+				mDistanceUnitView.setText(R.string.rsc_distance_unit_m);
+				mTotalDistanceUnitView.setText(R.string.rsc_total_distance_unit_km);
 				break;
 			case SettingsFragment.SETTINGS_UNIT_KM_H: // [km/h]
-				mSpeedUnitView.setText(R.string.csc_speed_unit_km_h);
-				mDistanceUnitView.setText(R.string.csc_distance_unit_m);
-				mTotalDistanceUnitView.setText(R.string.csc_total_distance_unit_km);
+				mSpeedUnitView.setText(R.string.rsc_speed_unit_km_h);
+				mDistanceUnitView.setText(R.string.rsc_distance_unit_m);
+				mTotalDistanceUnitView.setText(R.string.rsc_total_distance_unit_km);
 				break;
 			case SettingsFragment.SETTINGS_UNIT_MPH: // [mph]
-				mSpeedUnitView.setText(R.string.csc_speed_unit_mph);
-				mDistanceUnitView.setText(R.string.csc_distance_unit_yd);
-				mTotalDistanceUnitView.setText(R.string.csc_total_distance_unit_mile);
+				mSpeedUnitView.setText(R.string.rsc_speed_unit_mph);
+				mDistanceUnitView.setText(R.string.rsc_distance_unit_yd);
+				mTotalDistanceUnitView.setText(R.string.rsc_total_distance_unit_mile);
 				break;
 		}
 	}

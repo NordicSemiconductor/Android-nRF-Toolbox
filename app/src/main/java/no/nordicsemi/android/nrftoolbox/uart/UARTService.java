@@ -192,14 +192,32 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	};
 
 	/**
-	 * Broadcast receiver that listens for {@link #ACTION_SEND} from other apps. Sends the String content of the {@link Intent#EXTRA_TEXT} extra to the remote device.
+	 * Broadcast receiver that listens for {@link #ACTION_SEND} from other apps. Sends the String or int content of the {@link Intent#EXTRA_TEXT} extra to the remote device.
+	 * The integer content will be sent as String (65 -> "65", not 65 -> "A").
 	 */
 	private BroadcastReceiver mIntentBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
-			Logger.i(getLogSession(), "[Broadcast] Disconnect action pressed");
-			final String message = intent.getStringExtra(Intent.EXTRA_TEXT);
-			mManager.send(message);
+			final boolean hasMessage = intent.hasExtra(Intent.EXTRA_TEXT);
+			if (hasMessage) {
+				String message = intent.getStringExtra(Intent.EXTRA_TEXT);
+				if (message == null) {
+					final int intValue = intent.getIntExtra(Intent.EXTRA_TEXT, Integer.MIN_VALUE); // how big is the chance of such data?
+					if (intValue != Integer.MIN_VALUE)
+						message = String.valueOf(intValue);
+				}
+
+				if (message != null) {
+					Logger.i(getLogSession(), "[Broadcast] " + ACTION_SEND + " broadcast received with data: \"" + message + "\"");
+					mManager.send(message);
+					return;
+				}
+			}
+			// No data od incompatible type of EXTRA_TEXT
+			if (!hasMessage)
+				Logger.i(getLogSession(), "[Broadcast] " + ACTION_SEND + " broadcast received no data.");
+			else
+				Logger.i(getLogSession(), "[Broadcast] " + ACTION_SEND + " broadcast received incompatible data type. Only String and int are supported.");
 		}
 	};
 

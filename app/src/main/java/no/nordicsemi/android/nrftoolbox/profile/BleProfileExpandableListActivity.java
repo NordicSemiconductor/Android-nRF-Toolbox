@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -82,6 +83,10 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 		mBleManager = initializeManager();
 		onInitialize(savedInstanceState);
 		onCreateView(savedInstanceState);
+
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        setSupportActionBar(toolbar);
+
 		onViewCreated(savedInstanceState);
 	}
 
@@ -165,7 +170,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 				break;
 			case R.id.action_about:
 				final AppHelpFragment fragment = AppHelpFragment.getInstance(getAboutTextId());
-				fragment.show(getFragmentManager(), "help_fragment");
+				fragment.show(getSupportFragmentManager(), "help_fragment");
 				break;
 			default:
 				return onOptionsItemSelected(id);
@@ -413,7 +418,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 			@Override
 			public void run() {
 				final ScannerFragment dialog = ScannerFragment.getInstance(BleProfileExpandableListActivity.this, filter, discoverableRequired);
-				dialog.show(getFragmentManager(), "scan_fragment");
+				dialog.show(getSupportFragmentManager(), "scan_fragment");
 			}
 		});
 	}
