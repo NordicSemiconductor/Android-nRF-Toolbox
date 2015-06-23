@@ -137,10 +137,11 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 				final int progress = intent.getIntExtra(DfuService.EXTRA_DATA, 0);
 				final int currentPart = intent.getIntExtra(DfuService.EXTRA_PART_CURRENT, 1);
 				final int totalParts = intent.getIntExtra(DfuService.EXTRA_PARTS_TOTAL, 1);
-				updateProgressBar(progress, currentPart, totalParts, false);
+				updateProgressBar(progress, currentPart, totalParts, false, false);
 			} else if (DfuService.BROADCAST_ERROR.equals(action)) {
 				final int error = intent.getIntExtra(DfuService.EXTRA_DATA, 0);
-				updateProgressBar(error, 0, 0, true);
+				final boolean connectionStateError = intent.getIntExtra(DfuService.EXTRA_ERROR_TYPE, DfuService.ERROR_TYPE_OTHER) == DfuService.ERROR_TYPE_COMMUNICATION_STATE;
+				updateProgressBar(error, 0, 0, true, connectionStateError);
 
 				// We have to wait a bit before canceling notification. This is called before DfuService creates the last notification.
 				new Handler().postDelayed(new Runnable() {
@@ -788,7 +789,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		// do nothing
 	}
 
-	private void updateProgressBar(final int progress, final int part, final int total, final boolean error) {
+	private void updateProgressBar(final int progress, final int part, final int total, final boolean error, final boolean connectionError) {
 		switch (progress) {
 			case DfuService.PROGRESS_CONNECTING:
 				mProgressBar.setIndeterminate(true);
@@ -841,7 +842,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 			default:
 				mProgressBar.setIndeterminate(false);
 				if (error) {
-					showErrorMessage(progress);
+					showErrorMessage(progress, connectionError);
 				} else {
 					mProgressBar.setProgress(progress);
 					mTextPercentage.setText(getString(R.string.progress, progress));
@@ -883,9 +884,12 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		mTextPercentage.setText(null);
 	}
 
-	private void showErrorMessage(final int code) {
+	private void showErrorMessage(final int code, final boolean connectionError) {
 		clearUI(false);
-		showToast("Upload failed: " + GattError.parse(code) + " (" + (code & ~(DfuService.ERROR_MASK | DfuService.ERROR_REMOTE_MASK)) + ")");
+		if (connectionError)
+			showToast("Upload failed: " + GattError.parseConnectionError(code));
+		else
+			showToast("Upload failed: " + GattError.parse(code));
 	}
 
 	private void clearUI(final boolean clearDevice) {
