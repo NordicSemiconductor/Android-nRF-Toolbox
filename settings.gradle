@@ -1,1 +1,4 @@
-include ':app', '..:DFULibrary:dfu'
+include ':app'
+
+include ':dfu'
+project(':dfu').projectDir = file('../DFULibrary/dfu')

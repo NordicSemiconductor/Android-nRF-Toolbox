@@ -8,8 +8,6 @@
         <option name="gradleHome" value="C:\Program Files\Android\Android Studio\gradle\gradle-2.2.1" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$/.." />
-            <option value="$PROJECT_DIR$/../DFULibrary" />
             <option value="$PROJECT_DIR$/../DFULibrary/dfu" />
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
