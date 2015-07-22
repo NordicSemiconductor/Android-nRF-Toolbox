@@ -28,12 +28,10 @@ import android.app.NotificationManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -64,7 +62,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import no.nordicsemi.android.error.GattError;
+import no.nordicsemi.android.dfu.DfuProgressListener;
+import no.nordicsemi.android.dfu.DfuProgressListenerAdapter;
+import no.nordicsemi.android.dfu.DfuServiceListenerHelper;
+import no.nordicsemi.android.dfu.DfuServiceInitiator;
 import no.nordicsemi.android.nrftoolbox.AppHelpFragment;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.dfu.adapter.FileBrowserAppsAdapter;
@@ -127,32 +128,93 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 	private int mFileTypeTmp; // This value is being used when user is selecting a file not to overwrite the old value (in case he/she will cancel selecting file)
 	private boolean mStatusOk;
 
-	private final BroadcastReceiver mDfuUpdateReceiver = new BroadcastReceiver() {
+	private final DfuProgressListener mDfuProgressListener = new DfuProgressListenerAdapter() {
 		@Override
-		public void onReceive(final Context context, final Intent intent) {
-			// DFU is in progress or an error occurred
-			final String action = intent.getAction();
+		public void onDeviceConnecting(final String deviceAddress) {
+			mProgressBar.setIndeterminate(true);
+			mTextPercentage.setText(R.string.dfu_status_connecting);
+		}
 
-			if (DfuService.BROADCAST_PROGRESS.equals(action)) {
-				final int progress = intent.getIntExtra(DfuService.EXTRA_DATA, 0);
-				final int currentPart = intent.getIntExtra(DfuService.EXTRA_PART_CURRENT, 1);
-				final int totalParts = intent.getIntExtra(DfuService.EXTRA_PARTS_TOTAL, 1);
-				updateProgressBar(progress, currentPart, totalParts, false, false);
-			} else if (DfuService.BROADCAST_ERROR.equals(action)) {
-				final int error = intent.getIntExtra(DfuService.EXTRA_DATA, 0);
-				final boolean connectionStateError = intent.getIntExtra(DfuService.EXTRA_ERROR_TYPE, DfuService.ERROR_TYPE_OTHER) == DfuService.ERROR_TYPE_COMMUNICATION_STATE;
-				updateProgressBar(error, 0, 0, true, connectionStateError);
+		@Override
+		public void onDfuProcessStarting(final String deviceAddress) {
+			mProgressBar.setIndeterminate(true);
+			mTextPercentage.setText(R.string.dfu_status_starting);
+		}
 
-				// We have to wait a bit before canceling notification. This is called before DfuService creates the last notification.
-				new Handler().postDelayed(new Runnable() {
-					@Override
-					public void run() {
-						// if this activity is still open and upload process was completed, cancel the notification
-						final NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-						manager.cancel(DfuService.NOTIFICATION_ID);
-					}
-				}, 200);
-			}
+		@Override
+		public void onEnablingDfuMode(final String deviceAddress) {
+			mProgressBar.setIndeterminate(true);
+			mTextPercentage.setText(R.string.dfu_status_switching_to_dfu);
+		}
+
+		@Override
+		public void onFirmwareValidating(final String deviceAddress) {
+			mProgressBar.setIndeterminate(true);
+			mTextPercentage.setText(R.string.dfu_status_validating);
+		}
+
+		@Override
+		public void onDeviceDisconnecting(final String deviceAddress) {
+			mProgressBar.setIndeterminate(true);
+			mTextPercentage.setText(R.string.dfu_status_disconnecting);
+		}
+
+		@Override
+		public void onDfuCompleted(final String deviceAddress) {
+			mTextPercentage.setText(R.string.dfu_status_completed);
+			// let's wait a bit until we cancel the notification. When canceled immediately it will be recreated by service again.
+			new Handler().postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					onTransferCompleted();
+
+					// if this activity is still open and upload process was completed, cancel the notification
+					final NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+					manager.cancel(DfuService.NOTIFICATION_ID);
+				}
+			}, 200);
+		}
+
+		@Override
+		public void onDfuAborted(final String deviceAddress) {
+			mTextPercentage.setText(R.string.dfu_status_aborted);
+			// let's wait a bit until we cancel the notification. When canceled immediately it will be recreated by service again.
+			new Handler().postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					onUploadCanceled();
+
+					// if this activity is still open and upload process was completed, cancel the notification
+					final NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+					manager.cancel(DfuService.NOTIFICATION_ID);
+				}
+			}, 200);
+		}
+
+		@Override
+		public void onProgressChanged(final String deviceAddress, final int percent, final float speed, final float avgSpeed, final int currentPart, final int partsTotal) {
+			mProgressBar.setIndeterminate(false);
+			mProgressBar.setProgress(percent);
+			mTextPercentage.setText(getString(R.string.progress, percent));
+			if (partsTotal > 1)
+				mTextUploading.setText(getString(R.string.dfu_status_uploading_part, currentPart, partsTotal));
+			else
+				mTextUploading.setText(R.string.dfu_status_uploading);
+		}
+
+		@Override
+		public void onError(final String deviceAddress, final int error, final int errorType, final String message) {
+			showErrorMessage(message);
+
+			// We have to wait a bit before canceling notification. This is called before DfuService creates the last notification.
+			new Handler().postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					// if this activity is still open and upload process was completed, cancel the notification
+					final NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+					manager.cancel(DfuService.NOTIFICATION_ID);
+				}
+			}, 200);
 		}
 	};
 
@@ -231,25 +293,14 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 	protected void onResume() {
 		super.onResume();
 
-		// We are using LocalBroadcastReceiver instead of normal BroadcastReceiver for optimization purposes
-		final LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
-		broadcastManager.registerReceiver(mDfuUpdateReceiver, makeDfuUpdateIntentFilter());
+		DfuServiceListenerHelper.registerProgressListener(this, mDfuProgressListener);
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
 
-		final LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
-		broadcastManager.unregisterReceiver(mDfuUpdateReceiver);
-	}
-
-	private static IntentFilter makeDfuUpdateIntentFilter() {
-		final IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction(DfuService.BROADCAST_PROGRESS);
-		intentFilter.addAction(DfuService.BROADCAST_ERROR);
-		intentFilter.addAction(DfuService.BROADCAST_LOG);
-		return intentFilter;
+		DfuServiceListenerHelper.unregisterProgressListener(this, mDfuProgressListener);
 	}
 
 	private void isBLESupported() {
@@ -743,17 +794,15 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 
 		final boolean keepBond = preferences.getBoolean(SettingsFragment.SETTINGS_KEEP_BOND, false);
 
-		final Intent service = new Intent(this, DfuService.class);
-		service.putExtra(DfuService.EXTRA_DEVICE_ADDRESS, mSelectedDevice.getAddress());
-		service.putExtra(DfuService.EXTRA_DEVICE_NAME, mSelectedDevice.getName());
-		service.putExtra(DfuService.EXTRA_FILE_MIME_TYPE, mFileType == DfuService.TYPE_AUTO ? DfuService.MIME_TYPE_ZIP : DfuService.MIME_TYPE_OCTET_STREAM);
-		service.putExtra(DfuService.EXTRA_FILE_TYPE, mFileType);
-		service.putExtra(DfuService.EXTRA_FILE_PATH, mFilePath);
-		service.putExtra(DfuService.EXTRA_FILE_URI, mFileStreamUri);
-		service.putExtra(DfuService.EXTRA_INIT_FILE_PATH, mInitFilePath);
-		service.putExtra(DfuService.EXTRA_INIT_FILE_URI, mInitFileStreamUri);
-		service.putExtra(DfuService.EXTRA_KEEP_BOND, keepBond);
-		startService(service);
+		final DfuServiceInitiator starter = new DfuServiceInitiator(mSelectedDevice.getAddress())
+				.setDeviceName(mSelectedDevice.getName())
+				.setKeepBond(keepBond);
+		if (mFileType == DfuService.TYPE_AUTO)
+			starter.setZip(mFileStreamUri, mFilePath);
+		else {
+			starter.setBinOrHex(mFileType, mFileStreamUri, mFilePath).setInitFile(mInitFileStreamUri, mInitFilePath);
+		}
+		starter.start(this, DfuService.class);
 	}
 
 	private void showUploadCancelDialog() {
@@ -789,72 +838,6 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		// do nothing
 	}
 
-	private void updateProgressBar(final int progress, final int part, final int total, final boolean error, final boolean connectionError) {
-		switch (progress) {
-			case DfuService.PROGRESS_CONNECTING:
-				mProgressBar.setIndeterminate(true);
-				mTextPercentage.setText(R.string.dfu_status_connecting);
-				break;
-			case DfuService.PROGRESS_STARTING:
-				mProgressBar.setIndeterminate(true);
-				mTextPercentage.setText(R.string.dfu_status_starting);
-				break;
-			case DfuService.PROGRESS_ENABLING_DFU_MODE:
-				mProgressBar.setIndeterminate(true);
-				mTextPercentage.setText(R.string.dfu_status_switching_to_dfu);
-				break;
-			case DfuService.PROGRESS_VALIDATING:
-				mProgressBar.setIndeterminate(true);
-				mTextPercentage.setText(R.string.dfu_status_validating);
-				break;
-			case DfuService.PROGRESS_DISCONNECTING:
-				mProgressBar.setIndeterminate(true);
-				mTextPercentage.setText(R.string.dfu_status_disconnecting);
-				break;
-			case DfuService.PROGRESS_COMPLETED:
-				mTextPercentage.setText(R.string.dfu_status_completed);
-				// let's wait a bit until we cancel the notification. When canceled immediately it will be recreated by service again.
-				new Handler().postDelayed(new Runnable() {
-					@Override
-					public void run() {
-						onTransferCompleted();
-
-						// if this activity is still open and upload process was completed, cancel the notification
-						final NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-						manager.cancel(DfuService.NOTIFICATION_ID);
-					}
-				}, 200);
-				break;
-			case DfuService.PROGRESS_ABORTED:
-				mTextPercentage.setText(R.string.dfu_status_aborted);
-				// let's wait a bit until we cancel the notification. When canceled immediately it will be recreated by service again.
-				new Handler().postDelayed(new Runnable() {
-					@Override
-					public void run() {
-						onUploadCanceled();
-
-						// if this activity is still open and upload process was completed, cancel the notification
-						final NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-						manager.cancel(DfuService.NOTIFICATION_ID);
-					}
-				}, 200);
-				break;
-			default:
-				mProgressBar.setIndeterminate(false);
-				if (error) {
-					showErrorMessage(progress, connectionError);
-				} else {
-					mProgressBar.setProgress(progress);
-					mTextPercentage.setText(getString(R.string.progress, progress));
-					if (total > 1)
-						mTextUploading.setText(getString(R.string.dfu_status_uploading_part, part, total));
-					else
-						mTextUploading.setText(R.string.dfu_status_uploading);
-				}
-				break;
-		}
-	}
-
 	private void showProgressBar() {
 		mProgressBar.setVisibility(View.VISIBLE);
 		mTextPercentage.setVisibility(View.VISIBLE);
@@ -884,12 +867,9 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		mTextPercentage.setText(null);
 	}
 
-	private void showErrorMessage(final int code, final boolean connectionError) {
+	private void showErrorMessage(final String message) {
 		clearUI(false);
-		if (connectionError)
-			showToast("Upload failed: " + GattError.parseConnectionError(code));
-		else
-			showToast("Upload failed: " + GattError.parse(code));
+		showToast("Upload failed: " + message);
 	}
 
 	private void clearUI(final boolean clearDevice) {

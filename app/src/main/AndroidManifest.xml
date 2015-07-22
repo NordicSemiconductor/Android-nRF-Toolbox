@@ -23,8 +23,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	package="no.nordicsemi.android.nrftoolbox"
 	android:installLocation="auto"
-	android:versionCode="34"
-	android:versionName="1.14.1" >
+	android:versionCode="35"
+	android:versionName="1.14.2" >
 
 	<uses-sdk
 		android:minSdkVersion="18"

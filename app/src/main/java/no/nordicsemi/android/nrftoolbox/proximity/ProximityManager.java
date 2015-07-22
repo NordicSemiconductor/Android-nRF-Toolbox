@@ -230,9 +230,10 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 	}
 
 	@Override
-	public void disconnect() {
-		super.disconnect();
+	public boolean disconnect() {
+		final boolean result = super.disconnect();
 		closeGattServer();
+		return result;
 	}
 
 	@Override

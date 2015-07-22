@@ -33,7 +33,7 @@ public interface BleManagerCallbacks {
 	public void onDeviceConnected();
 
 	/**
-	 * Called when user pressed the DISCONNECT button.
+	 * Called when user initialized disconnection.
 	 */
 	public void onDeviceDisconnecting();
 
@@ -43,8 +43,8 @@ public interface BleManagerCallbacks {
 	public void onDeviceDisconnected();
 
 	/**
-	 * Some profiles may use this method to notify user that the link was lost. You must call this method in your Ble Manager instead of {@link #onDeviceDisconnected()} while you discover
-	 * disconnection not initiated by the user.
+	 * This callback is invoked when the Ble Manager lost connection to a device that has been connected with autoConnect option. Otherwise a {@link #onDeviceDisconnected()}
+	 * method will be called on such event.
 	 */
 	public void onLinklossOccur();
 
@@ -64,7 +64,7 @@ public interface BleManagerCallbacks {
 	public void onDeviceReady();
 
 	/**
-	 * Called when battery value has been received from the device
+	 * Called when battery value has been received from the device.
 	 * 
 	 * @param value
 	 *            the battery value in percent
@@ -77,7 +77,7 @@ public interface BleManagerCallbacks {
 	public void onBondingRequired();
 
 	/**
-	 * Called when the device has been successfully bonded
+	 * Called when the device has been successfully bonded.
 	 */
 	public void onBonded();
 
@@ -92,7 +92,7 @@ public interface BleManagerCallbacks {
 	public void onError(final String message, final int errorCode);
 
 	/**
-	 * Called when service discovery has finished but the main services were not found on the device. This may occur when connecting to bonded device that does not support required services.
+	 * Called when service discovery has finished but the main services were not found on the device.
 	 */
 	public void onDeviceNotSupported();
 }

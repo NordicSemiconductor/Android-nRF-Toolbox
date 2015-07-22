@@ -204,15 +204,19 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 
 	/**
 	 * Disconnects from the device. Does nothing if not connected.
+	 * @return true if device is to be disconnected. False if it was already disconnected.
 	 */
-	public void disconnect() {
+	public boolean disconnect() {
 		mUserDisconnected = true;
 
 		if (mConnected && mBluetoothGatt != null) {
 			Logger.v(mLogSession, "Disconnecting...");
+			mCallbacks.onDeviceDisconnecting();
 			Logger.d(mLogSession, "gatt.disconnect()");
 			mBluetoothGatt.disconnect();
+			return true;
 		}
+		return false;
 	}
 
 	/**
@@ -618,7 +622,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 
 		@Override
 		public final void onConnectionStateChange(final BluetoothGatt gatt, final int status, final int newState) {
-			Logger.v(mLogSession, "[Callback] Connection state changed with status: " + status + " and new state: " + newState + " (" + stateToString(newState) + ")");
+			Logger.d(mLogSession, "[Callback] Connection state changed with status: " + status + " and new state: " + newState + " (" + stateToString(newState) + ")");
 
 			if (status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothProfile.STATE_CONNECTED) {
 				// Notify the parent activity/service

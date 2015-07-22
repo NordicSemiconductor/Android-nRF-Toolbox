@@ -82,17 +82,11 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 		 * Disconnects from the sensor.
 		 */
 		public final void disconnect() {
-			onDeviceDisconnecting();
 			if (!mConnected) {
 				mBleManager.close();
 				onDeviceDisconnected();
 				return;
 			}
-
-			// Notify user about changing the state to DISCONNECTING
-			final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
-			broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_DISCONNECTING);
-			LocalBroadcastManager.getInstance(BleProfileService.this).sendBroadcast(broadcast);
 
 			mBleManager.disconnect();
 		}
@@ -278,7 +272,10 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 	@Override
 	public void onDeviceDisconnecting() {
-		// do nothing
+		// Notify user about changing the state to DISCONNECTING
+		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
+		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_DISCONNECTING);
+		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	@Override
