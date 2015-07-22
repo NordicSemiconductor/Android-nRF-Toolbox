@@ -86,7 +86,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 	private static final String TAG = "DfuActivity";
 
 	private static final String PREFS_SAMPLES_VERSION = "no.nordicsemi.android.nrftoolbox.dfu.PREFS_SAMPLES_VERSION";
-	private static final int CURRENT_SAMPLES_VERSION = 3;
+	private static final int CURRENT_SAMPLES_VERSION = 4;
 
 	private static final String PREFS_DEVICE_NAME = "no.nordicsemi.android.nrftoolbox.dfu.PREFS_DEVICE_NAME";
 	private static final String PREFS_FILE_NAME = "no.nordicsemi.android.nrftoolbox.dfu.PREFS_FILE_NAME";
@@ -414,9 +414,20 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 			copyRawResource(R.raw.ble_app_hrs_dfu_s110_v7_1_0_ext_init, f);
 			oldCopied = true;
 		}
-		f = new File(pca10028, "ble_app_hrs_dfu_s110_v8_0_0.zip");
+		new File(root, "ble_app_hrs_dfu_s110_v8_0_0.zip").delete(); // name changed
+		f = new File(pca10028, "ble_app_hrs_dfu_s110_v8_0_0_sdk_v8_0.zip");
 		if (!f.exists()) {
-			copyRawResource(R.raw.ble_app_hrs_dfu_s110_v8_0_0, f);
+			copyRawResource(R.raw.ble_app_hrs_dfu_s110_v8_0_0_sdk_v8_0, f);
+			newCopied = true;
+		}
+		f = new File(pca10028, "ble_app_hrs_dfu_s110_v8_0_0_sdk_v9_0.zip");
+		if (!f.exists()) {
+			copyRawResource(R.raw.ble_app_hrs_dfu_s110_v8_0_0_sdk_v9_0, f);
+			newCopied = true;
+		}
+		f = new File(pca10028, "ble_app_hrs_dfu_all_in_one_sdk_v9_0.zip");
+		if (!f.exists()) {
+			copyRawResource(R.raw.ble_app_hrs_dfu_all_in_one_sdk_v9_0, f);
 			newCopied = true;
 		}
 
