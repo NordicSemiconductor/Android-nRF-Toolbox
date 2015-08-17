@@ -108,7 +108,7 @@
     </style>
 
     <style name="AppThemeBase" parent="@style/Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowBackground">@drawable/background</item>
+        <item name="android:windowBackground">@drawable/background_image</item>
         <item name="actionMenuTextColor">@color/actionBarMenuTextColor</item>
         <item name="alertDialogTheme">@style/AppTheme.DialogTheme</item>
         <item name="colorPrimary">@color/actionBarColor</item>
@@ -135,7 +135,7 @@
     </style>
 
     <style name="AppTheme.Fullscreen" parent="@style/Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowBackground">@drawable/background</item>
+        <item name="android:windowBackground">@drawable/background_image</item>
     </style>
 
 </resources>

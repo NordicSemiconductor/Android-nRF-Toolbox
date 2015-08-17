@@ -340,6 +340,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 		if ((properties & BluetoothGattCharacteristic.PROPERTY_NOTIFY) == 0)
 			return false;
 
+		Logger.d(mLogSession, "gatt.setCharacteristicNotification(" + characteristic.getUuid() + ", true)");
 		gatt.setCharacteristicNotification(characteristic, true);
 		final BluetoothGattDescriptor descriptor = characteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
 		if (descriptor != null) {
@@ -366,6 +367,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 		if ((properties & BluetoothGattCharacteristic.PROPERTY_INDICATE) == 0)
 			return false;
 
+		Logger.d(mLogSession, "gatt.setCharacteristicNotification(" + characteristic.getUuid() + ", true)");
 		gatt.setCharacteristicNotification(characteristic, true);
 		final BluetoothGattDescriptor descriptor = characteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
 		if (descriptor != null) {
@@ -414,7 +416,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 		if ((properties & (BluetoothGattCharacteristic.PROPERTY_WRITE | BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE)) == 0)
 			return false;
 
-		Logger.v(mLogSession, "Writing characteristic " + characteristic.getUuid());
+		Logger.v(mLogSession, "Writing characteristic " + characteristic.getUuid() + " (" + getWriteType(characteristic.getWriteType()) + ")");
 		Logger.d(mLogSession, "gatt.writeCharacteristic(" + characteristic.getUuid() + ")");
 		return gatt.writeCharacteristic(characteristic);
 	}
@@ -919,6 +921,19 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 				return "BOND_BONDED";
 			default:
 				return "UNKNOWN";
+		}
+	}
+
+	private String getWriteType(final int type) {
+		switch (type) {
+			case BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT:
+				return "WRITE REQUEST";
+			case BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE:
+				return "WRITE COMMAND";
+			case BluetoothGattCharacteristic.WRITE_TYPE_SIGNED:
+				return "WRITE SIGNED";
+			default:
+				return "UNKNOWN: " + type;
 		}
 	}
 }

@@ -23,6 +23,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background_image"
     android:orientation="vertical" >
 
     <!-- The size of text below must be fixed, therefore dp are used instead of sp -->
@@ -90,5 +91,13 @@
         android:layout_width="wrap_content"
         android:layout_height="@dimen/activity_vertical_margin_bottom"
         android:layout_alignParentBottom="true" />
+
+	<ImageView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:src="@drawable/background_title"
+		android:layout_alignParentBottom="true"
+		android:layout_centerHorizontal="true"
+		android:layout_marginBottom="6dp"/>
 
 </RelativeLayout>
