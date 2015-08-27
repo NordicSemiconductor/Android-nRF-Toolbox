@@ -21,245 +21,246 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".DfuActivity" >
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical"
+	tools:context=".DfuActivity">
 
-    <include layout="@layout/toolbar"
-        android:id="@+id/toolbar_actionbar"/>
+	<include
+		android:id="@+id/toolbar_actionbar"
+		layout="@layout/toolbar"/>
 
-    <no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout
-        style="@style/HeaderShadow"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+	<no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout
+		style="@style/HeaderShadow"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
 
-        <!-- The size of text below must be fixed, therefore dp are used instead of sp -->
+		<!-- The size of text below must be fixed, therefore dp are used instead of sp -->
 
-        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/dfu_feature_title_long_margin"
-            android:rotation="270"
-            android:text="@string/dfu_feature_title_long"
-            android:textColor="@color/darkGray"
-            android:textSize="32dp"
-            android:textStyle="bold" />
+		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_centerVertical="true"
+			android:layout_marginLeft="@dimen/dfu_feature_title_long_margin"
+			android:rotation="270"
+			android:text="@string/dfu_feature_title_long"
+			android:textColor="@color/darkGray"
+			android:textSize="32dp"
+			android:textStyle="bold"/>
 
-        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-            android:id="@+id/device_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginLeft="5dp"
-            android:layout_marginTop="@dimen/feature_device_name_margin_top"
-            android:ellipsize="end"
-            android:freezesText="true"
-            android:maxLines="1"
-            android:text="@string/dfu_default_name"
-            android:textAllCaps="true"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+			android:id="@+id/device_name"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_centerHorizontal="true"
+			android:layout_marginLeft="5dp"
+			android:layout_marginTop="@dimen/feature_device_name_margin_top"
+			android:ellipsize="end"
+			android:freezesText="true"
+			android:maxLines="1"
+			android:text="@string/dfu_default_name"
+			android:textAllCaps="true"
+			android:textAppearance="?android:attr/textAppearanceLarge"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:gravity="center_horizontal"
-            android:orientation="vertical" >
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_centerHorizontal="true"
+			android:gravity="center_horizontal"
+			android:orientation="vertical">
 
-            <!-- Application section -->
+			<!-- Application section -->
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/feature_horizontal_margin"
-                android:layout_marginRight="@dimen/feature_horizontal_margin"
-                android:layout_marginTop="@dimen/feature_vertical_margin_top"
-                style="@style/Widget.List"
-                android:orientation="vertical" >
+			<LinearLayout
+				style="@style/Widget.List"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="@dimen/feature_horizontal_margin"
+				android:layout_marginRight="@dimen/feature_horizontal_margin"
+				android:layout_marginTop="@dimen/feature_vertical_margin_top"
+				android:orientation="vertical">
 
-                <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
-                    style="@style/Widget.ListTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/dfu_section_application_header" />
+				<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+					style="@style/Widget.ListTitle"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:text="@string/dfu_section_application_header"/>
 
-                <TableLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="@dimen/feature_section_padding" >
+				<TableLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:padding="@dimen/feature_section_padding">
 
-                    <TableRow
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" >
+					<TableRow
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content">
 
-                        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/dfu_file_name_label" />
+						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="@string/dfu_file_name_label"/>
 
-                        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
-                            android:id="@+id/file_name"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="5dp"
-                            android:freezesText="true" />
-                    </TableRow>
+						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+							android:id="@+id/file_name"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginLeft="5dp"
+							android:freezesText="true"/>
+					</TableRow>
 
-                    <TableRow
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" >
+					<TableRow
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content">
 
-                        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/dfu_file_type_label" />
+						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="@string/dfu_file_type_label"/>
 
-                        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
-                            android:id="@+id/file_type"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="5dp"
-                            android:freezesText="true" />
-                    </TableRow>
+						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+							android:id="@+id/file_type"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginLeft="5dp"
+							android:freezesText="true"/>
+					</TableRow>
 
-                    <TableRow
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" >
+					<TableRow
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content">
 
-                        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/dfu_file_size_label" />
+						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="@string/dfu_file_size_label"/>
 
-                        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
-                            android:id="@+id/file_size"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="5dp"
-                            android:freezesText="true" />
-                    </TableRow>
+						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+							android:id="@+id/file_size"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginLeft="5dp"
+							android:freezesText="true"/>
+					</TableRow>
 
-                    <TableRow
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" >
+					<TableRow
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content">
 
-                        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/dfu_file_status_label" />
+						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="@string/dfu_file_status_label"/>
 
-                        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
-                            android:id="@+id/file_status"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="5dp"
-                            android:freezesText="true"
-                            android:text="@string/dfu_file_status_no_file" />
-                    </TableRow>
-                </TableLayout>
+						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+							android:id="@+id/file_status"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginLeft="5dp"
+							android:freezesText="true"
+							android:text="@string/dfu_file_status_no_file"/>
+					</TableRow>
+				</TableLayout>
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/feature_section_padding"
-                    android:layout_marginTop="4dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingLeft="42dp" >
+				<LinearLayout
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginBottom="@dimen/feature_section_padding"
+					android:layout_marginTop="4dp"
+					android:gravity="center_vertical"
+					android:orientation="horizontal"
+					android:paddingLeft="42dp">
 
-                    <Button
-                        android:id="@+id/action_select_file"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:onClick="onSelectFileClicked"
-                        android:text="@string/dfu_action_select_file" />
+					<Button
+						android:id="@+id/action_select_file"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:onClick="onSelectFileClicked"
+						android:text="@string/dfu_action_select_file"/>
 
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:onClick="onSelectFileHelpClicked"
-                        android:src="@drawable/ic_help" />
-                </LinearLayout>
-            </LinearLayout>
+					<ImageView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginLeft="10dp"
+						android:onClick="onSelectFileHelpClicked"
+						android:src="@drawable/ic_help"/>
+				</LinearLayout>
+			</LinearLayout>
 
-            <!-- DFU section -->
+			<!-- DFU section -->
 
-            <LinearLayout
-                android:id="@+id/dfu_pane"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
-                android:layout_marginLeft="@dimen/feature_horizontal_margin"
-                android:layout_marginRight="@dimen/feature_horizontal_margin"
-                style="@style/Widget.List"
-                android:orientation="vertical" >
+			<LinearLayout
+				android:id="@+id/dfu_pane"
+				style="@style/Widget.List"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
+				android:layout_marginLeft="@dimen/feature_horizontal_margin"
+				android:layout_marginRight="@dimen/feature_horizontal_margin"
+				android:layout_marginTop="15dp"
+				android:orientation="vertical">
 
-                <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
-                    style="@style/Widget.ListTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/dfu_section_dfu_header" />
+				<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+					style="@style/Widget.ListTitle"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:text="@string/dfu_section_dfu_header"/>
 
-                <Button
-                    android:id="@+id/action_upload"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/feature_section_padding"
-                    android:enabled="false"
-                    android:onClick="onUploadClicked"
-                    android:text="@string/dfu_action_upload" />
+				<Button
+					android:id="@+id/action_upload"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_margin="@dimen/feature_section_padding"
+					android:enabled="false"
+					android:onClick="onUploadClicked"
+					android:text="@string/dfu_action_upload"/>
 
-                <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-                    android:id="@+id/textviewUploading"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/feature_section_padding"
-                    android:text="@string/dfu_status_uploading"
-                    android:freezesText="true"
-                    android:visibility="invisible" />
+				<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+					android:id="@+id/textviewUploading"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_margin="@dimen/feature_section_padding"
+					android:freezesText="true"
+					android:text="@string/dfu_status_uploading"
+					android:visibility="invisible"/>
 
-                <ProgressBar
-                    android:id="@+id/progressbar_file"
-                    style="@android:style/Widget.Holo.ProgressBar.Horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:max="100"
-                    android:visibility="invisible" />
+				<ProgressBar
+					android:id="@+id/progressbar_file"
+					style="@android:style/Widget.Holo.ProgressBar.Horizontal"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:max="100"
+					android:visibility="invisible"/>
 
-                <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-                    android:id="@+id/textviewProgress"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/feature_section_padding"
-                    android:text="@string/dfu_uploading_percentage_label"
-                    android:freezesText="true"
-                    android:visibility="invisible" />
-            </LinearLayout>
-        </LinearLayout>
+				<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+					android:id="@+id/textviewProgress"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_margin="@dimen/feature_section_padding"
+					android:freezesText="true"
+					android:text="@string/dfu_uploading_percentage_label"
+					android:visibility="invisible"/>
+			</LinearLayout>
+		</LinearLayout>
 
-        <Button
-            android:id="@+id/action_connect"
-            style="@style/Widget.Connect"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
-            android:onClick="onConnectClicked"
-            android:text="@string/action_select" />
+		<Button
+			android:id="@+id/action_connect"
+			style="@style/Widget.Connect"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentBottom="true"
+			android:layout_centerHorizontal="true"
+			android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
+			android:onClick="onConnectClicked"
+			android:text="@string/action_select"/>
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/background_title"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="6dp"/>
+		<ImageView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentBottom="true"
+			android:layout_centerHorizontal="true"
+			android:layout_marginBottom="6dp"
+			android:src="@drawable/background_title"/>
 
-    </no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout>
+	</no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout>
 </LinearLayout>

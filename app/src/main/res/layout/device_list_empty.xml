@@ -21,7 +21,7 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="?android:attr/listPreferredItemHeightSmall"
-    android:gravity="center_vertical"
-    android:text="@string/scanner_empty" />
+	android:layout_width="match_parent"
+	android:layout_height="?android:attr/listPreferredItemHeightSmall"
+	android:gravity="center_vertical"
+	android:text="@string/scanner_empty"/>

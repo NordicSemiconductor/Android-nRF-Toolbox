@@ -36,12 +36,6 @@
     <dimen name="navdrawer_padding_top">30dp</dimen>
     <dimen name="navdrawer_padding_horiz">16dp</dimen>
 
-    <!-- On Android 5 the background is drawn behind the navigation bar. In order to put the 'Wireless by Nordic' text in the middle on phones in landscape mode we must set the margin. -->
-    <dimen name="navigation_bar_height">10dp</dimen>
-    <dimen name="navigation_bar_width">0dp</dimen>
-    <dimen name="navigation_bar_fix">0dp</dimen>
-    <dimen name="navigation_toolbar_fix">-81dp</dimen>
-
     <dimen name="alert_dialog_padding">24dp</dimen>
     <dimen name="alert_dialog_padding_top">18dp</dimen>
     <dimen name="alert_dialog_padding_bottom">0dp</dimen>

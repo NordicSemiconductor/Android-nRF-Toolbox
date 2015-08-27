@@ -139,6 +139,10 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 	 * @param text the text to be sent
 	 */
 	public void send(final String text) {
+		// Are we connected?
+		if (mRXCharacteristic == null)
+			return;
+
 		// An outgoing buffer may not be null if there is already another packet being sent. We do nothing in this case.
 		if (!TextUtils.isEmpty(text) && mOutgoingBuffer == null) {
 			final byte[] buffer = mOutgoingBuffer = text.getBytes();

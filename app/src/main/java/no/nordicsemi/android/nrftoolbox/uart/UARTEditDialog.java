@@ -43,21 +43,25 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.uart.domain.Command;
 
 public class UARTEditDialog extends DialogFragment implements View.OnClickListener, GridView.OnItemClickListener {
-	private final static String TAG = "UARTEditDialog";
 	private final static String ARG_INDEX = "index";
+	private final static String ARG_COMMAND = "command";
+	private final static String ARG_ICON_INDEX = "iconIndex";
 	private int mActiveIcon;
 
 	private EditText mField;
 	private CheckBox mCheckBox;
 	private IconAdapter mIconAdapter;
 
-	public static UARTEditDialog getInstance(final int index) {
+	public static UARTEditDialog getInstance(final int index, final Command command) {
 		final UARTEditDialog fragment = new UARTEditDialog();
 
 		final Bundle args = new Bundle();
 		args.putInt(ARG_INDEX, index);
+		args.putString(ARG_COMMAND, command.getCommand());
+		args.putInt(ARG_ICON_INDEX, command.getIconIndex());
 		fragment.setArguments(args);
 
 		return fragment;
@@ -66,15 +70,15 @@ public class UARTEditDialog extends DialogFragment implements View.OnClickListen
 	@NonNull
     @Override
 	public Dialog onCreateDialog(final Bundle savedInstanceState) {
-		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 		final LayoutInflater inflater = LayoutInflater.from(getActivity());
 
 		// Read button configuration
 		final Bundle args = getArguments();
 		final int index = args.getInt(ARG_INDEX);
-		final String command = preferences.getString(UARTButtonAdapter.PREFS_BUTTON_COMMAND + index, null);
-		final boolean active = true;//preferences.getBoolean(UARTButtonAdapter.PREFS_BUTTON_ENABLED + index, false);
-		mActiveIcon = preferences.getInt(UARTButtonAdapter.PREFS_BUTTON_ICON + index, 0);
+		final String command = args.getString(ARG_COMMAND);
+		final int iconIndex = args.getInt(ARG_ICON_INDEX);
+		final boolean active = true; // change to active by default
+		mActiveIcon = iconIndex;
 
 		// Create view
 		final View view = inflater.inflate(R.layout.feature_uart_dialog_edit, null);
@@ -120,16 +124,9 @@ public class UARTEditDialog extends DialogFragment implements View.OnClickListen
 		final Bundle args = getArguments();
 		final int index = args.getInt(ARG_INDEX);
 
-		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		final SharedPreferences.Editor editor = preferences.edit();
-		editor.putString(UARTButtonAdapter.PREFS_BUTTON_COMMAND + index, command);
-		editor.putBoolean(UARTButtonAdapter.PREFS_BUTTON_ENABLED + index, active);
-		editor.putInt(UARTButtonAdapter.PREFS_BUTTON_ICON + index, mActiveIcon);
-		editor.apply();
-
 		dismiss();
-		final UARTControlFragment parent = (UARTControlFragment) getParentFragment();
-		parent.onConfigurationChanged();
+		final UARTActivity parent = (UARTActivity) getActivity();
+		parent.onCommandChanged(index, command, active, mActiveIcon);
 	}
 
 	@Override
@@ -167,6 +164,5 @@ public class UARTEditDialog extends DialogFragment implements View.OnClickListen
 			image.setActivated(position == mActiveIcon && mCheckBox.isChecked());
 			return view;
 		}
-
 	}
 }

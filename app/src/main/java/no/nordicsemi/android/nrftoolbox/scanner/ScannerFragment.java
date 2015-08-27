@@ -21,6 +21,7 @@
  */
 package no.nordicsemi.android.nrftoolbox.scanner;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
@@ -28,35 +29,46 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
+import no.nordicsemi.android.support.v18.scanner.BluetoothLeScannerCompat;
+import no.nordicsemi.android.support.v18.scanner.ScanCallback;
+import no.nordicsemi.android.support.v18.scanner.ScanFilter;
+import no.nordicsemi.android.support.v18.scanner.ScanResult;
+import no.nordicsemi.android.support.v18.scanner.ScanSettings;
 
 /**
- * ScannerFragment class scan required BLE devices and shows them in a list. This class scans and filter devices with standard BLE Service UUID and devices with custom BLE Service UUID It contains a
- * list and a button to scan/cancel. There is a interface {@link OnDeviceSelectedListener} which is implemented by activity in order to receive selected device. The scanning will continue for 5
- * seconds and then stop
+ * ScannerFragment class scan required BLE devices and shows them in a list. This class scans and filter devices with standard BLE Service UUID and devices with custom BLE Service UUID. It contains a
+ * list and a button to scan/cancel. There is a interface {@link OnDeviceSelectedListener} which is implemented by activity in order to receive selected device. The scanning will continue to scan
+ * for 5 seconds and then stop.
  */
 public class ScannerFragment extends DialogFragment {
 	private final static String TAG = "ScannerFragment";
 
 	private final static String PARAM_UUID = "param_uuid";
-	private final static String DISCOVERABLE_REQUIRED = "discoverable_required";
 	private final static long SCAN_DURATION = 5000;
+
+	private final static int REQUEST_PERMISSION_REQ_CODE = 34; // any 8-bit number
 
 	private BluetoothAdapter mBluetoothAdapter;
 	private OnDeviceSelectedListener mListener;
@@ -64,25 +76,18 @@ public class ScannerFragment extends DialogFragment {
 	private final Handler mHandler = new Handler();
 	private Button mScanButton;
 
-	private boolean mDiscoverableRequired;
-	private UUID mUuid;
+	private View mPermissionRationale;
+
+	private ParcelUuid mUuid;
 
 	private boolean mIsScanning = false;
 
-	private static final boolean DEVICE_IS_BONDED = true;
-	private static final boolean DEVICE_NOT_BONDED = false;
-	/* package */static final int NO_RSSI = -1000;
-
-	/**
-	 * Static implementation of fragment so that it keeps data when phone orientation is changed For standard BLE Service UUID, we can filter devices using normal android provided command
-	 * startScanLe() with required BLE Service UUID For custom BLE Service UUID, we will use class ScannerServiceParser to filter out required device.
-	 */
-	public static ScannerFragment getInstance(final Context context, final UUID uuid, final boolean discoverableRequired) {
+	public static ScannerFragment getInstance(final UUID uuid) {
 		final ScannerFragment fragment = new ScannerFragment();
 
 		final Bundle args = new Bundle();
-		args.putParcelable(PARAM_UUID, new ParcelUuid(uuid));
-		args.putBoolean(DISCOVERABLE_REQUIRED, discoverableRequired);
+		if (uuid != null)
+			args.putParcelable(PARAM_UUID, new ParcelUuid(uuid));
 		fragment.setArguments(args);
 		return fragment;
 	}
@@ -127,10 +132,8 @@ public class ScannerFragment extends DialogFragment {
 
 		final Bundle args = getArguments();
 		if (args.containsKey(PARAM_UUID)) {
-			final ParcelUuid pu = args.getParcelable(PARAM_UUID);
-			mUuid = pu.getUuid();
+			mUuid = args.getParcelable(PARAM_UUID);
 		}
-		mDiscoverableRequired = args.getBoolean(DISCOVERABLE_REQUIRED);
 
 		final BluetoothManager manager = (BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
 		mBluetoothAdapter = manager.getAdapter();
@@ -142,9 +145,6 @@ public class ScannerFragment extends DialogFragment {
 		super.onDestroyView();
 	}
 
-	/**
-	 * When dialog is created then set AlertDialog with list and button views.
-	 */
 	@NonNull
     @Override
 	public Dialog onCreateDialog(final Bundle savedInstanceState) {
@@ -166,6 +166,8 @@ public class ScannerFragment extends DialogFragment {
 				mListener.onDeviceSelected(d.device, d.name);
 			}
 		});
+
+		mPermissionRationale = dialogView.findViewById(R.id.permission_rationale); // this is not null only on API23+
 
 		mScanButton = (Button) dialogView.findViewById(R.id.action_cancel);
 		mScanButton.setOnClickListener(new View.OnClickListener() {
@@ -194,16 +196,54 @@ public class ScannerFragment extends DialogFragment {
 		mListener.onDialogCanceled();
 	}
 
+	@Override
+	public void onRequestPermissionsResult(final int requestCode, final @NonNull String[] permissions, final @NonNull int[] grantResults) {
+		switch (requestCode) {
+			case REQUEST_PERMISSION_REQ_CODE: {
+				if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+					// We have been granted the Manifest.permission.ACCESS_COARSE_LOCATION permission. Now we may proceed with scanning.
+					startScan();
+				} else {
+					mPermissionRationale.setVisibility(View.VISIBLE);
+					Toast.makeText(getActivity(), R.string.no_required_permission, Toast.LENGTH_SHORT).show();
+				}
+				break;
+			}
+		}
+	}
+
 	/**
 	 * Scan for 5 seconds and then stop scanning when a BluetoothLE device is found then mLEScanCallback is activated This will perform regular scan for custom BLE Service UUID and then filter out.
 	 * using class ScannerServiceParser
 	 */
 	private void startScan() {
+		// Since Android 6.0 we need to obtain either Manifest.permission.ACCESS_COARSE_LOCATION or Manifest.permission.ACCESS_FINE_LOCATION to be able to scan for
+		// Bluetooth LE devices. This is related to beacons as proximity devices.
+		// On API older than Marshmallow the following code does nothing.
+		if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+			// When user pressed Deny and still wants to use this functionality, show the rationale
+			if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) && mPermissionRationale.getVisibility() == View.GONE) {
+				mPermissionRationale.setVisibility(View.VISIBLE);
+				return;
+			}
+
+			requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION_REQ_CODE);
+			return;
+		}
+
+		// Hide the rationale message, we don't need it anymore.
+		if (mPermissionRationale != null)
+			mPermissionRationale.setVisibility(View.GONE);
+
 		mAdapter.clearDevices();
 		mScanButton.setText(R.string.scanner_action_cancel);
 
-		// Samsung Note II with Android 4.3 build JSS15J.N7100XXUEMK9 is not filtering by UUID at all. We must parse UUIDs manually
-		mBluetoothAdapter.startLeScan(mLEScanCallback);
+		final BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
+		final ScanSettings settings = new ScanSettings.Builder()
+				.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).setReportDelay(1000).setUseHardwareBatchingIfSupported(false).build();
+		final List<ScanFilter> filters = new ArrayList<>();
+		filters.add(new ScanFilter.Builder().setServiceUuid(mUuid).build());
+		scanner.startScan(filters, settings, scanCallback);
 
 		mIsScanning = true;
 		mHandler.postDelayed(new Runnable() {
@@ -217,68 +257,38 @@ public class ScannerFragment extends DialogFragment {
 	}
 
 	/**
-	 * Stop scan if user tap Cancel button.
+	 * Stop scan if user tap Cancel button
 	 */
 	private void stopScan() {
 		if (mIsScanning) {
 			mScanButton.setText(R.string.scanner_action_scan);
-			mBluetoothAdapter.stopLeScan(mLEScanCallback);
+
+			final BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
+			scanner.stopScan(scanCallback);
+
 			mIsScanning = false;
 		}
 	}
 
-	private void addBondedDevices() {
-		final Set<BluetoothDevice> devices = mBluetoothAdapter.getBondedDevices();
-		for (BluetoothDevice device : devices) {
-			mAdapter.addBondedDevice(new ExtendedBluetoothDevice(device, device.getName(), NO_RSSI, DEVICE_IS_BONDED));
-		}
-	}
-
-	/**
-	 * if scanned device already in the list then update it otherwise add as a new device
-	 */
-	private void addScannedDevice(final BluetoothDevice device, final String name, final int rssi, final boolean isBonded) {
-		if (getActivity() != null)
-			getActivity().runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					mAdapter.addOrUpdateDevice(new ExtendedBluetoothDevice(device, name, rssi, isBonded));
-				}
-			});
-	}
-
-	/**
-	 * if scanned device already in the list then update it otherwise add as a new device.
-	 */
-	private void updateScannedDevice(final BluetoothDevice device, final int rssi) {
-		if (getActivity() != null)
-			getActivity().runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					mAdapter.updateRssiOfBondedDevice(device.getAddress(), rssi);
-				}
-			});
-	}
-
-	/**
-	 * Callback for scanned devices class {@link ScannerServiceParser} will be used to filter devices with custom BLE service UUID then the device will be added in a list.
-	 */
-	private final BluetoothAdapter.LeScanCallback mLEScanCallback = new BluetoothAdapter.LeScanCallback() {
+	private ScanCallback scanCallback = new ScanCallback() {
 		@Override
-		public void onLeScan(final BluetoothDevice device, final int rssi, final byte[] scanRecord) {
-			if (device != null) {
-				updateScannedDevice(device, rssi);
-				try {
-					if (ScannerServiceParser.decodeDeviceAdvData(scanRecord, mUuid, mDiscoverableRequired)) {
-						// On some devices device.getName() is always null. We have to parse the name manually :(
-						// This bug has been found on Sony Xperia Z1 (C6903) with Android 4.3.
-						// https://devzone.nordicsemi.com/index.php/cannot-see-device-name-in-sony-z1
-						addScannedDevice(device, ScannerServiceParser.decodeDeviceName(scanRecord), rssi, DEVICE_NOT_BONDED);
-					}
-				} catch (Exception e) {
-					DebugLogger.e(TAG, "Invalid data in Advertisement packet " + e.toString());
-				}
-			}
+		public void onScanResult(final int callbackType, final ScanResult result) {
+			// do nothing
+		}
+
+		@Override
+		public void onBatchScanResults(final List<ScanResult> results) {
+			mAdapter.update(results);
+		}
+
+		@Override
+		public void onScanFailed(final int errorCode) {
+			// should never be called
 		}
 	};
+
+	private void addBondedDevices() {
+		final Set<BluetoothDevice> devices = mBluetoothAdapter.getBondedDevices();
+		mAdapter.addBondedDevices(devices);
+	}
 }

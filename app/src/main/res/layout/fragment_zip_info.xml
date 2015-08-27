@@ -21,17 +21,17 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content" >
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:drawableBottom="@drawable/zip"
-        android:paddingTop="@dimen/alert_dialog_padding_top"
-        android:paddingBottom="@dimen/alert_dialog_padding_bottom"
-        android:paddingStart="@dimen/alert_dialog_padding"
-        android:paddingEnd="@dimen/alert_dialog_padding"
-        android:text="@string/dfu_zip_info_text" />
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:drawableBottom="@drawable/zip"
+		android:paddingBottom="@dimen/alert_dialog_padding_bottom"
+		android:paddingEnd="@dimen/alert_dialog_padding"
+		android:paddingStart="@dimen/alert_dialog_padding"
+		android:paddingTop="@dimen/alert_dialog_padding_top"
+		android:text="@string/dfu_zip_info_text"/>
 
 </ScrollView>

@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.scanner.ScannerFragment;
 
 /**
@@ -45,7 +46,7 @@ public class DfuInitiatorActivity extends AppCompatActivity implements ScannerFr
 			finish();
 
 		if (savedInstanceState == null) {
-			final ScannerFragment fragment = ScannerFragment.getInstance(this, null, false); // Device that is advertising directly does not have the GENERAL_DISCOVERABLE nor LIMITED_DISCOVERABLE flag set.
+			final ScannerFragment fragment = ScannerFragment.getInstance(null); // Device that is advertising directly does not have the GENERAL_DISCOVERABLE nor LIMITED_DISCOVERABLE flag set.
 			fragment.show(getSupportFragmentManager(), null);
 		}
 	}
@@ -57,7 +58,7 @@ public class DfuInitiatorActivity extends AppCompatActivity implements ScannerFr
 		final String path = intent.getStringExtra(DfuService.EXTRA_FILE_PATH);
 		final String initPath = intent.getStringExtra(DfuService.EXTRA_INIT_FILE_PATH);
 		final String address = device.getAddress();
-		final String finalName = overwrittenName == null ? name : overwrittenName;
+		final String finalName = overwrittenName == null ? (name != null ? name : getString(R.string.not_available)) : overwrittenName;
 		final int type = intent.getIntExtra(DfuService.EXTRA_FILE_TYPE, DfuService.TYPE_AUTO);
 		final boolean keepBond = intent.getBooleanExtra(DfuService.EXTRA_KEEP_BOND, false);
 

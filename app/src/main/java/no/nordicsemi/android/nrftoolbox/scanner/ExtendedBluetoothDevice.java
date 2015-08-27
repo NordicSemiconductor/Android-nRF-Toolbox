@@ -23,43 +23,31 @@ package no.nordicsemi.android.nrftoolbox.scanner;
 
 import android.bluetooth.BluetoothDevice;
 
+import no.nordicsemi.android.support.v18.scanner.ScanResult;
+
 public class ExtendedBluetoothDevice {
+	/* package */ static final int NO_RSSI = -1000;
 	public final BluetoothDevice device;
 	/** The name is not parsed by some Android devices, f.e. Sony Xperia Z1 with Android 4.3 (C6903). It needs to be parsed manually. */
 	public String name;
 	public int rssi;
 	public boolean isBonded;
 
-	public ExtendedBluetoothDevice(BluetoothDevice device, String name, int rssi, boolean isBonded) {
+	public ExtendedBluetoothDevice(final ScanResult scanResult) {
+		this.device = scanResult.getDevice();
+		this.name = scanResult.getScanRecord() != null ? scanResult.getScanRecord().getDeviceName() : null;
+		this.rssi = scanResult.getRssi();
+		this.isBonded = false;
+	}
+
+	public ExtendedBluetoothDevice(final BluetoothDevice device) {
 		this.device = device;
-		this.name = name;
-		this.rssi = rssi;
-		this.isBonded = isBonded;
+		this.name = device.getName();
+		this.rssi = NO_RSSI;
+		this.isBonded = true;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (o instanceof ExtendedBluetoothDevice) {
-			final ExtendedBluetoothDevice that = (ExtendedBluetoothDevice) o;
-			return device.getAddress().equals(that.device.getAddress());
-		}
-		return super.equals(o);
-	}
-
-	/**
-	 * Class used as a temporary comparator to find the device in the List of {@link ExtendedBluetoothDevice}s. This must be done this way, because List#indexOf and List#contains use the parameter's
-	 * equals method, not the object's from list. See {@link DeviceListAdapter#updateRssiOfBondedDevice(String, int)} for example
-	 */
-	public static class AddressComparator {
-		public String address;
-
-		@Override
-		public boolean equals(Object o) {
-			if (o instanceof ExtendedBluetoothDevice) {
-				final ExtendedBluetoothDevice that = (ExtendedBluetoothDevice) o;
-				return address.equals(that.device.getAddress());
-			}
-			return super.equals(o);
-		}
+	public boolean matches(final ScanResult scanResult) {
+		return device.getAddress().equals(scanResult.getDevice().getAddress());
 	}
 }

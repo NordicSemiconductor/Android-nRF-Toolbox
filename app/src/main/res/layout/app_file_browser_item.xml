@@ -19,17 +19,17 @@
   ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
-<CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@android:id/text1"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:checkMark="?android:attr/listChoiceIndicatorSingle"
-    android:drawableStart="@drawable/app_file_browser"
-    android:drawablePadding="10dp"
-    android:ellipsize="marquee"
-    android:gravity="center_vertical"
-    android:minHeight="?android:attr/listPreferredItemHeightSmall"
-    android:paddingEnd="16dip"
-    android:paddingStart="16dip"
-    android:textAppearance="?android:attr/textAppearanceMedium"
-    android:textColor="?android:attr/textColorAlertDialogListItem" />
+<CheckedTextView android:id="@android:id/text1"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:checkMark="?android:attr/listChoiceIndicatorSingle"
+	android:drawablePadding="10dp"
+	android:drawableStart="@drawable/app_file_browser"
+	android:ellipsize="marquee"
+	android:gravity="center_vertical"
+	android:minHeight="?android:attr/listPreferredItemHeightSmall"
+	android:paddingEnd="16dip"
+	android:paddingStart="16dip"
+	android:textAppearance="?android:attr/textAppearanceMedium"
+	android:textColor="?android:attr/textColorAlertDialogListItem"/>

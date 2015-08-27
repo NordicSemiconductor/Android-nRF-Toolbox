@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.NotificationCompat;
 
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
@@ -141,11 +142,12 @@ public class TemplateService extends BleProfileService implements TemplateManage
 
 		// both activities above have launchMode="singleTask" in the AndroidManifest.xml file, so if the task is already running, it will be resumed
 		final PendingIntent pendingIntent = PendingIntent.getActivities(this, OPEN_ACTIVITY_REQ, new Intent[] { parentIntent, targetIntent }, PendingIntent.FLAG_UPDATE_CURRENT);
-		final Notification.Builder builder = new Notification.Builder(this).setContentIntent(pendingIntent);
+		final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+		builder.setContentIntent(pendingIntent);
 		builder.setContentTitle(getString(R.string.app_name)).setContentText(getString(messageResId, getDeviceName()));
 		builder.setSmallIcon(R.drawable.ic_stat_notify_template);
 		builder.setShowWhen(defaults != 0).setDefaults(defaults).setAutoCancel(true).setOngoing(true);
-		builder.addAction(R.drawable.ic_action_bluetooth, getString(R.string.template_notification_action_disconnect), disconnectAction);
+		builder.addAction(new NotificationCompat.Action(R.drawable.ic_action_bluetooth, getString(R.string.template_notification_action_disconnect), disconnectAction));
 
 		final Notification notification = builder.build();
 		final NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

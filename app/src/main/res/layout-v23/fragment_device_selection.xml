@@ -20,10 +20,41 @@
   ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
-<resources>
+<LinearLayout
+	style="?android:attr/buttonBarStyle"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:animateLayoutChanges="true"
+	android:orientation="vertical"
+	android:paddingTop="10dp">
 
-    <!-- On Android 5 the background is drawn behind the navigation bar. In order to put the 'Wireless by Nordic' text in the middle on phones in landscape mode we must set the margin. -->
-    <dimen name="navigation_bar_height">6dp</dimen>
-    <dimen name="navigation_bar_width">42dp</dimen>
-    
-</resources>
+	<TextView
+		android:id="@+id/permission_rationale"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="8dp"
+		android:paddingEnd="26dp"
+		android:paddingStart="26dp"
+		android:text="@string/scanner_permission_rationale"
+		android:visibility="gone"/>
+
+	<ListView
+		android:id="@android:id/list"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1"
+		android:paddingEnd="26dp"
+		android:paddingStart="26dp"
+		android:scrollbarStyle="outsideOverlay"
+		tools:listitem="@layout/device_list_row"/>
+
+	<Button
+		android:id="@+id/action_cancel"
+		style="?android:attr/buttonBarNeutralButtonStyle"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="@string/scanner_action_scan"/>
+
+</LinearLayout>

@@ -32,6 +32,7 @@ import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.support.v7.app.NotificationCompat;
 
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
@@ -227,13 +228,14 @@ public class ProximityService extends BleProfileService implements ProximityMana
 
 		// both activities above have launchMode="singleTask" in the AndroidManifest.xml file, so if the task is already running, it will be resumed
 		final PendingIntent pendingIntent = PendingIntent.getActivities(this, OPEN_ACTIVITY_REQ, new Intent[] { parentIntent, targetIntent }, PendingIntent.FLAG_UPDATE_CURRENT);
-		final Notification.Builder builder = new Notification.Builder(this).setContentIntent(pendingIntent);
+		final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+		builder.setContentIntent(pendingIntent);
 		builder.setContentTitle(getString(R.string.app_name)).setContentText(getString(messageResId, getDeviceName()));
 		builder.setSmallIcon(R.drawable.ic_stat_notify_proximity);
 		builder.setShowWhen(defaults != 0).setDefaults(defaults).setAutoCancel(true).setOngoing(true);
-		builder.addAction(R.drawable.ic_action_bluetooth, getString(R.string.proximity_notification_action_disconnect), disconnectAction);
+		builder.addAction(new NotificationCompat.Action(R.drawable.ic_action_bluetooth, getString(R.string.proximity_notification_action_disconnect), disconnectAction));
 		if (isConnected())
-			builder.addAction(R.drawable.ic_stat_notify_proximity, getString(isImmediateAlertOn ? R.string.proximity_action_silentme : R.string.proximity_action_findme), secondAction);
+			builder.addAction(new NotificationCompat.Action(R.drawable.ic_stat_notify_proximity, getString(isImmediateAlertOn ? R.string.proximity_action_silentme : R.string.proximity_action_findme), secondAction));
 
 		final Notification notification = builder.build();
 		final NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

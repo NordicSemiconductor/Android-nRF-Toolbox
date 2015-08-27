@@ -55,7 +55,7 @@
 
 			<TextView
 				android:id="@+id/link_mcp"
-                style="@style/DrawerItem"
+				style="@style/DrawerItem"
 				android:layout_width="match_parent"
 				android:layout_height="48dp"
 				android:background="?android:selectableItemBackground"

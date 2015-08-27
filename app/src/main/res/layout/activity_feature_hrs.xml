@@ -20,135 +20,136 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".HRSActivity" >
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical"
+	tools:context=".HRSActivity">
 
-    <include layout="@layout/toolbar"
-        android:id="@+id/toolbar_actionbar"/>
+	<include
+		android:id="@+id/toolbar_actionbar"
+		layout="@layout/toolbar"/>
 
-    <no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout
-        style="@style/HeaderShadow"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    
-        <!-- The size of text below must be fixed, therefore dp are used instead of sp -->
+	<no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout
+		style="@style/HeaderShadow"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
 
-        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/hrs_feature_title_long_margin"
-            android:rotation="270"
-            android:text="@string/hrs_feature_title_long"
-            android:textColor="@color/darkGray"
-            android:textSize="32dp"
-            android:textStyle="bold" />
+		<!-- The size of text below must be fixed, therefore dp are used instead of sp -->
 
-        <TextView
-            android:id="@+id/battery"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="@dimen/feature_horizontal_margin"
-            android:layout_marginTop="@dimen/feature_device_name_margin_top"
-            android:background="@drawable/battery"
-            android:freezesText="true"
-            android:gravity="center"
-            android:text="@string/not_available"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp" />
+		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_centerVertical="true"
+			android:layout_marginLeft="@dimen/hrs_feature_title_long_margin"
+			android:rotation="270"
+			android:text="@string/hrs_feature_title_long"
+			android:textColor="@color/darkGray"
+			android:textSize="32dp"
+			android:textStyle="bold"/>
 
-        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-            android:id="@+id/device_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_toRightOf="@+id/battery"
-            android:layout_marginTop="@dimen/feature_device_name_margin_top"
-            android:ellipsize="end"
-            android:freezesText="true"
-            android:maxLines="1"
-            android:text="@string/hrs_default_name"
-            android:textAllCaps="true"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+		<TextView
+			android:id="@+id/battery"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentLeft="true"
+			android:layout_marginLeft="@dimen/feature_horizontal_margin"
+			android:layout_marginTop="@dimen/feature_device_name_margin_top"
+			android:background="@drawable/battery"
+			android:freezesText="true"
+			android:gravity="center"
+			android:text="@string/not_available"
+			android:textColor="#FFFFFF"
+			android:textSize="12sp"/>
 
-        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-            android:id="@+id/text_hrs_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="@dimen/feature_horizontal_margin"
-            android:layout_marginTop="80dp"
-            android:ellipsize="end"
-            android:freezesText="true"
-            android:maxLines="1"
-            android:text="@string/not_available_value"
-            android:textSize="45sp" />
+		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+			android:id="@+id/device_name"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="10dp"
+			android:layout_marginTop="@dimen/feature_device_name_margin_top"
+			android:layout_toRightOf="@+id/battery"
+			android:ellipsize="end"
+			android:freezesText="true"
+			android:maxLines="1"
+			android:text="@string/hrs_default_name"
+			android:textAllCaps="true"
+			android:textAppearance="?android:attr/textAppearanceLarge"/>
 
-        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_below="@id/text_hrs_value"
-            android:layout_marginRight="@dimen/feature_horizontal_margin"
-            android:layout_marginTop="-10dp"
-            android:text="@string/hrs_value_unit"
-            android:textSize="16sp" />
+		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+			android:id="@+id/text_hrs_value"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentRight="true"
+			android:layout_marginRight="@dimen/feature_horizontal_margin"
+			android:layout_marginTop="80dp"
+			android:ellipsize="end"
+			android:freezesText="true"
+			android:maxLines="1"
+			android:text="@string/not_available_value"
+			android:textSize="45sp"/>
 
-        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-            android:id="@+id/text_hrs_position"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="@dimen/feature_horizontal_margin"
-            android:layout_marginTop="80dp"
-            android:ellipsize="end"
-            android:freezesText="true"
-            android:maxLines="1"
-            android:text="@string/not_available"
-            android:textSize="35sp" />
+		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentRight="true"
+			android:layout_below="@id/text_hrs_value"
+			android:layout_marginRight="@dimen/feature_horizontal_margin"
+			android:layout_marginTop="-10dp"
+			android:text="@string/hrs_value_unit"
+			android:textSize="16sp"/>
 
-        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-            android:id="@+id/text_hrs_position_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@id/text_hrs_value"
-            android:layout_marginLeft="@dimen/feature_horizontal_margin"
-            android:layout_marginTop="-10dp"
-            android:text="@string/hrs_position_label"
-            android:textSize="16sp" />
+		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+			android:id="@+id/text_hrs_position"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentLeft="true"
+			android:layout_marginLeft="@dimen/feature_horizontal_margin"
+			android:layout_marginTop="80dp"
+			android:ellipsize="end"
+			android:freezesText="true"
+			android:maxLines="1"
+			android:text="@string/not_available"
+			android:textSize="35sp"/>
 
-        <FrameLayout
-            android:id="@+id/graph_hrs"
-            android:layout_width="match_parent"
-            android:layout_height="220dp"
-            android:layout_below="@id/text_hrs_position_label"
-            android:layout_marginLeft="@dimen/feature_horizontal_margin"
-            android:layout_marginRight="@dimen/feature_horizontal_margin"
-            android:layout_marginTop="10dp" />
+		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+			android:id="@+id/text_hrs_position_label"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentLeft="true"
+			android:layout_below="@id/text_hrs_value"
+			android:layout_marginLeft="@dimen/feature_horizontal_margin"
+			android:layout_marginTop="-10dp"
+			android:text="@string/hrs_position_label"
+			android:textSize="16sp"/>
 
-        <Button
-            android:id="@+id/action_connect"
-            style="@style/Widget.Connect"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
-            android:onClick="onConnectClicked"
-            android:text="@string/action_connect" />
+		<FrameLayout
+			android:id="@+id/graph_hrs"
+			android:layout_width="match_parent"
+			android:layout_height="220dp"
+			android:layout_below="@id/text_hrs_position_label"
+			android:layout_marginLeft="@dimen/feature_horizontal_margin"
+			android:layout_marginRight="@dimen/feature_horizontal_margin"
+			android:layout_marginTop="10dp"/>
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/background_title"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="6dp"/>
+		<Button
+			android:id="@+id/action_connect"
+			style="@style/Widget.Connect"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentBottom="true"
+			android:layout_centerHorizontal="true"
+			android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
+			android:onClick="onConnectClicked"
+			android:text="@string/action_connect"/>
 
-    </no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout>
+		<ImageView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentBottom="true"
+			android:layout_centerHorizontal="true"
+			android:layout_marginBottom="6dp"
+			android:src="@drawable/background_title"/>
+
+	</no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout>
 </LinearLayout>

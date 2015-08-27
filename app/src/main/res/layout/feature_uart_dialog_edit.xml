@@ -21,40 +21,43 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="8dp" >
-    
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-	
-	    <EditText
-	        android:id="@+id/field"
-	        android:layout_width="0dp"
-	        android:layout_weight="1"
-	        android:singleLine="true"
-	        android:layout_height="wrap_content"
-	        android:hint="@string/uart_edit_command_hint" />
-	
-	    <CheckBox
-	        android:id="@+id/active"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="@string/uart_edit_active" />
-    </LinearLayout>
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical"
+	android:padding="8dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/uart_edit_select" />
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal">
 
-    <GridView
-        android:id="@+id/grid"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:horizontalSpacing="4dp"
-        android:numColumns="5"
-        android:verticalSpacing="4dp" />
+		<EditText
+			android:id="@+id/field"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:hint="@string/uart_edit_command_hint"
+			android:maxLines="3"/>
+
+		<CheckBox
+			android:id="@+id/active"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/uart_edit_active"/>
+	</LinearLayout>
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="8dp"
+		android:text="@string/uart_edit_select"/>
+
+	<GridView
+		android:id="@+id/grid"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:horizontalSpacing="4dp"
+		android:numColumns="5"
+		android:verticalSpacing="4dp"/>
 
 </LinearLayout>

@@ -20,11 +20,12 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto" >
+	xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item
-        android:id="@+id/action_configure"
-        app:showAsAction="always"
-        android:title="@string/uart_action_configure"/>
-    
+	<item
+		android:id="@+id/action_configure"
+		android:orderInCategory="1"
+		android:title="@string/uart_action_configure"
+		app:showAsAction="ifRoom"/>
+
 </menu>

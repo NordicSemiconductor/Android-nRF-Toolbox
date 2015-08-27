@@ -21,8 +21,8 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:scaleType="center"
-    android:src="@drawable/uart_button_small"
-    android:background="@drawable/uart_dialog_button_background" />
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:background="@drawable/uart_dialog_button_background"
+	android:scaleType="center"
+	android:src="@drawable/uart_button_small"/>

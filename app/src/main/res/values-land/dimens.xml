@@ -26,8 +26,4 @@
     <dimen name="feature_vertical_margin_top">40dp</dimen>
     <dimen name="feature_uart_buttons_pane_width">238dp</dimen>
     <dimen name="feature_uart_buttons_pane_height">178dp</dimen>
-            
-    <!-- On Android 5 the background is drawn behind the navigation bar. In order to put the 'Wireless by Nordic' text in the middle on phones in landscape mode we must set the margin. -->
-    <dimen name="navigation_bar_height">6dp</dimen>
-    <dimen name="navigation_bar_width">0dp</dimen>
 </resources>

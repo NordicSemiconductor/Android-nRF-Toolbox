@@ -21,25 +21,25 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="48dp"
+	android:layout_width="match_parent"
+	android:layout_height="48dp"
 	android:background="?android:selectableItemBackground"
-    android:gravity="center_vertical"
-    android:paddingStart="@dimen/navdrawer_padding_horiz"
-    android:paddingEnd="@dimen/navdrawer_padding_horiz"
-    android:orientation="horizontal" >
+	android:gravity="center_vertical"
+	android:orientation="horizontal"
+	android:paddingEnd="@dimen/navdrawer_padding_horiz"
+	android:paddingStart="@dimen/navdrawer_padding_horiz">
 
-    <ImageView
-        android:id="@android:id/icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:background="@drawable/ic_feature_small_bg" />
+	<ImageView
+		android:id="@android:id/icon"
+		android:layout_width="24dp"
+		android:layout_height="24dp"
+		android:background="@drawable/ic_feature_small_bg"/>
 
-    <TextView
-        android:id="@android:id/text1"
-        style="@style/DrawerItem"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="24dp" />
+	<TextView
+		android:id="@android:id/text1"
+		style="@style/DrawerItem"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="24dp"/>
 
 </LinearLayout>

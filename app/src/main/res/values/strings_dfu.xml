@@ -65,14 +65,13 @@
     
     <string name="dfu_section_dfu_header">DEVICE FIRMWARE UPDATE</string>
     <string name="dfu_action_upload">UPLOAD</string>
-    <string name="dfu_action_upload_help">\?</string>
     <string name="dfu_action_upload_cancel">CANCEL</string>
     
     <string name="dfu_settings_dfu">DFU options</string>
     <string name="dfu_settings_dfu_packets_receipt_notification_label">Packets receipt notification procedure</string>
     <string name="dfu_settings_dfu_number_of_packets_label">Number of packets</string>
     <string name="dfu_settings_dfu_mbr_size">MBR size</string>
-    <string name="dfu_settings_dfu_mbr_size_title">MBR size (default 4096 = 0x1000)</string>
+    <string name="dfu_settings_dfu_mbr_size_title">MBR size (4096 on nRF51, 12288 on nRF52)</string>
 	<string name="dfu_settings_dfu_keep_bond">Keep bond information</string>
     <string name="dfu_settings_dfu_about">About DFU</string>
     <string name="dfu_settings_dfu_about_summary">DFU documentation on Nordic\'s Developer Zone</string>
@@ -100,7 +99,6 @@
     <string name="dfu_uploading_percentage">%d%%</string>
     <string name="dfu_default_name">DEFAULT DFU</string>
     <string name="dfu_confirmation_dialog_title">Application Uploading</string>
-    <string name="dfu_confirmation_dialog_exit_message">Are you sure to exit?</string>
     <string name="dfu_upload_dialog_cancel_message">Are you sure to cancel upload?</string>
     <string name="dfu_success">Application has been transferred successfully.</string>
     <string name="dfu_aborted">Uploading of the application has been canceled.</string>

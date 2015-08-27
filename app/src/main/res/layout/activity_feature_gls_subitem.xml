@@ -21,26 +21,26 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingBottom="2dp"
-    android:paddingStart="?android:attr/expandableListPreferredItemPaddingLeft"
-    android:paddingTop="2dp" >
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical"
+	android:paddingBottom="2dp"
+	android:paddingStart="?android:attr/expandableListPreferredItemPaddingLeft"
+	android:paddingTop="2dp">
 
-    <TextView
-        android:id="@android:id/text1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textStyle="bold" />
+	<TextView
+		android:id="@android:id/text1"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:textStyle="bold"/>
 
-    <TextView
-        android:id="@android:id/text2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textSize="12sp" />
+	<TextView
+		android:id="@android:id/text2"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="2dp"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:textSize="12sp"/>
 
 </LinearLayout>

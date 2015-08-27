@@ -20,15 +20,18 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto" >
+	xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item
-        android:id="@+id/action_configure"
-        app:showAsAction="always"
-        android:title="@string/uart_action_configure"/>
-    
-    <item android:id="@+id/action_show_log"
-        app:showAsAction="never"
-        android:title="@string/uart_action_show_log"/>
-    
+	<item
+		android:id="@+id/action_configure"
+		android:orderInCategory="11"
+		android:title="@string/uart_action_configure"
+		app:showAsAction="ifRoom"/>
+
+	<item
+		android:id="@+id/action_show_log"
+		android:orderInCategory="2"
+		android:title="@string/uart_action_show_log"
+		app:showAsAction="never"/>
+
 </menu>

@@ -21,24 +21,24 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:gravity="center_horizontal"
-    android:paddingTop="7dp"
-    android:orientation="vertical" >
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:gravity="center_horizontal"
+	android:orientation="vertical"
+	android:paddingTop="7dp">
 
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-	    android:layout_margin="3dp"
-        android:background="@drawable/ic_feature_bg" />
+	<ImageView
+		android:id="@+id/icon"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_margin="3dp"
+		android:background="@drawable/ic_feature_bg"/>
 
-    <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
-        android:id="@+id/label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textColor="@color/featureTitleColor" />
+	<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+		android:id="@+id/label"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:gravity="center"
+		android:textColor="@color/featureTitleColor"/>
 
 </LinearLayout>

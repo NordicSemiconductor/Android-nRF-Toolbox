@@ -21,6 +21,7 @@
  */
 package no.nordicsemi.android.nrftoolbox.dfu;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.LoaderManager.LoaderCallbacks;
@@ -38,10 +39,11 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -58,15 +60,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 import no.nordicsemi.android.dfu.DfuProgressListener;
 import no.nordicsemi.android.dfu.DfuProgressListenerAdapter;
-import no.nordicsemi.android.dfu.DfuServiceListenerHelper;
 import no.nordicsemi.android.dfu.DfuServiceInitiator;
+import no.nordicsemi.android.dfu.DfuServiceListenerHelper;
 import no.nordicsemi.android.nrftoolbox.AppHelpFragment;
+import no.nordicsemi.android.nrftoolbox.PermissionRationaleFragment;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.dfu.adapter.FileBrowserAppsAdapter;
 import no.nordicsemi.android.nrftoolbox.dfu.fragment.UploadCancelFragment;
@@ -74,7 +74,7 @@ import no.nordicsemi.android.nrftoolbox.dfu.fragment.ZipInfoFragment;
 import no.nordicsemi.android.nrftoolbox.dfu.settings.SettingsActivity;
 import no.nordicsemi.android.nrftoolbox.dfu.settings.SettingsFragment;
 import no.nordicsemi.android.nrftoolbox.scanner.ScannerFragment;
-import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
+import no.nordicsemi.android.nrftoolbox.utility.FileHelper;
 
 /**
  * DfuActivity is the main DFU activity It implements DFUManagerCallbacks to receive callbacks from DFUManager class It implements
@@ -82,11 +82,8 @@ import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
  * landscape orientations
  */
 public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cursor>, ScannerFragment.OnDeviceSelectedListener,
-		UploadCancelFragment.CancelFragmentListener {
+		UploadCancelFragment.CancelFragmentListener, PermissionRationaleFragment.PermissionDialogListener {
 	private static final String TAG = "DfuActivity";
-
-	private static final String PREFS_SAMPLES_VERSION = "no.nordicsemi.android.nrftoolbox.dfu.PREFS_SAMPLES_VERSION";
-	private static final int CURRENT_SAMPLES_VERSION = 4;
 
 	private static final String PREFS_DEVICE_NAME = "no.nordicsemi.android.nrftoolbox.dfu.PREFS_DEVICE_NAME";
 	private static final String PREFS_FILE_NAME = "no.nordicsemi.android.nrftoolbox.dfu.PREFS_FILE_NAME";
@@ -104,6 +101,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 
 	private static final String EXTRA_URI = "uri";
 
+	private static final int PERMISSION_REQ = 25;
 	private static final int ENABLE_BT_REQ = 0;
 	private static final int SELECT_FILE_REQ = 1;
 	private static final int SELECT_INIT_FILE_REQ = 2;
@@ -195,7 +193,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		public void onProgressChanged(final String deviceAddress, final int percent, final float speed, final float avgSpeed, final int currentPart, final int partsTotal) {
 			mProgressBar.setIndeterminate(false);
 			mProgressBar.setProgress(percent);
-			mTextPercentage.setText(getString(R.string.progress, percent));
+			mTextPercentage.setText(getString(R.string.dfu_uploading_percentage, percent));
 			if (partsTotal > 1)
 				mTextUploading.setText(getString(R.string.dfu_status_uploading_part, currentPart, partsTotal));
 			else
@@ -228,7 +226,15 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		}
 		setGUI();
 
-		ensureSamplesExist();
+		// Try to create sample files
+		if (FileHelper.newSamplesAvailable(this)) {
+			if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+				FileHelper.createSamples(this);
+			} else {
+				final DialogFragment dialog = PermissionRationaleFragment.getInstance(R.string.permission_sd_text, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+				dialog.show(getSupportFragmentManager(), null);
+			}
+		}
 
 		// restore saved state
 		mFileType = DfuService.TYPE_AUTO; // Default
@@ -303,6 +309,27 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		DfuServiceListenerHelper.unregisterProgressListener(this, mDfuProgressListener);
 	}
 
+	@Override
+	public void onRequestPermission(final String permission) {
+		ActivityCompat.requestPermissions(this, new String[] { permission }, PERMISSION_REQ);
+	}
+
+	@Override
+	public void onRequestPermissionsResult(final int requestCode, final String[] permissions, final int[] grantResults) {
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+		switch (requestCode) {
+			case PERMISSION_REQ: {
+				if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+					// We have been granted the Manifest.permission.WRITE_EXTERNAL_STORAGE permission. Now we may proceed with exporting.
+					FileHelper.createSamples(this);
+				} else {
+					Toast.makeText(this, R.string.no_required_permission, Toast.LENGTH_SHORT).show();
+				}
+				break;
+			}
+		}
+	}
+
 	private void isBLESupported() {
 		if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
 			showToast(R.string.no_ble);
@@ -322,166 +349,8 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 	}
 
 	private void showDeviceScanningDialog() {
-		final ScannerFragment dialog = ScannerFragment.getInstance(DfuActivity.this, null, false); // Device that is advertising directly does not have the GENERAL_DISCOVERABLE nor LIMITED_DISCOVERABLE flag set.
+		final ScannerFragment dialog = ScannerFragment.getInstance(null); // Device that is advertising directly does not have the GENERAL_DISCOVERABLE nor LIMITED_DISCOVERABLE flag set.
 		dialog.show(getSupportFragmentManager(), "scan_fragment");
-	}
-
-	private void ensureSamplesExist() {
-		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-		final int version = preferences.getInt(PREFS_SAMPLES_VERSION, 0);
-		if (version == CURRENT_SAMPLES_VERSION)
-			return;
-
-		/*
-		 * Copy example HEX files to the external storage. Files will be copied if the DFU Applications folder is missing
-		 */
-		final File root = new File(Environment.getExternalStorageDirectory(), "Nordic Semiconductor");
-		if (!root.exists()) {
-			root.mkdir();
-		}
-		final File board = new File(root, "Board");
-		if (!board.exists()) {
-			board.mkdir();
-		}
-		final File nrf6310 = new File(board, "nrf6310");
-		if (!nrf6310.exists()) {
-			nrf6310.mkdir();
-		}
-		final File pca10028 = new File(board, "pca10028");
-		if (!pca10028.exists()) {
-			pca10028.mkdir();
-		}
-
-		// Remove old files. Those will be moved to a new folder structure
-		new File(root, "ble_app_hrs_s110_v6_0_0.hex").delete();
-		new File(root, "ble_app_rscs_s110_v6_0_0.hex").delete();
-		new File(root, "ble_app_hrs_s110_v7_0_0.hex").delete();
-		new File(root, "ble_app_rscs_s110_v7_0_0.hex").delete();
-		new File(root, "blinky_arm_s110_v7_0_0.hex").delete();
-		new File(root, "dfu_2_0.bat").delete(); // This file has been migrated to 3.0
-		new File(root, "dfu_3_0.bat").delete(); // This file has been migrated to 3.1
-		new File(root, "dfu_2_0.sh").delete(); // This file has been migrated to 3.0
-		new File(root, "dfu_3_0.sh").delete(); // This file has been migrated to 3.1
-		new File(root, "README.txt").delete(); // This file has been modified to match v.3.0+
-
-		boolean oldCopied = false;
-		boolean newCopied = false;
-
-		// nrf6310 files
-		File f = new File(nrf6310, "ble_app_hrs_s110_v6_0_0.hex");
-		if (!f.exists()) {
-			copyRawResource(R.raw.ble_app_hrs_s110_v6_0_0, f);
-			oldCopied = true;
-		}
-		f = new File(nrf6310, "ble_app_rscs_s110_v6_0_0.hex");
-		if (!f.exists()) {
-			copyRawResource(R.raw.ble_app_rscs_s110_v6_0_0, f);
-			oldCopied = true;
-		}
-		f = new File(nrf6310, "ble_app_hrs_s110_v7_0_0.hex");
-		if (!f.exists()) {
-			copyRawResource(R.raw.ble_app_hrs_s110_v7_0_0, f);
-			oldCopied = true;
-		}
-		f = new File(nrf6310, "ble_app_rscs_s110_v7_0_0.hex");
-		if (!f.exists()) {
-			copyRawResource(R.raw.ble_app_rscs_s110_v7_0_0, f);
-			oldCopied = true;
-		}
-		f = new File(nrf6310, "blinky_arm_s110_v7_0_0.hex");
-		if (!f.exists()) {
-			copyRawResource(R.raw.blinky_arm_s110_v7_0_0, f);
-			oldCopied = true;
-		}
-		// PCA10028 files
-		f = new File(pca10028, "blinky_s110_v7_1_0.hex");
-		if (!f.exists()) {
-			copyRawResource(R.raw.blinky_s110_v7_1_0, f);
-			oldCopied = true;
-		}
-		f = new File(pca10028, "blinky_s110_v7_1_0_ext_init.dat");
-		if (!f.exists()) {
-			copyRawResource(R.raw.blinky_s110_v7_1_0_ext_init, f);
-			oldCopied = true;
-		}
-		f = new File(pca10028, "ble_app_hrs_dfu_s110_v7_1_0.hex");
-		if (!f.exists()) {
-			copyRawResource(R.raw.ble_app_hrs_dfu_s110_v7_1_0, f);
-			oldCopied = true;
-		}
-		f = new File(pca10028, "ble_app_hrs_dfu_s110_v7_1_0_ext_init.dat");
-		if (!f.exists()) {
-			copyRawResource(R.raw.ble_app_hrs_dfu_s110_v7_1_0_ext_init, f);
-			oldCopied = true;
-		}
-		new File(root, "ble_app_hrs_dfu_s110_v8_0_0.zip").delete(); // name changed
-		f = new File(pca10028, "ble_app_hrs_dfu_s110_v8_0_0_sdk_v8_0.zip");
-		if (!f.exists()) {
-			copyRawResource(R.raw.ble_app_hrs_dfu_s110_v8_0_0_sdk_v8_0, f);
-			newCopied = true;
-		}
-		f = new File(pca10028, "ble_app_hrs_dfu_s110_v8_0_0_sdk_v9_0.zip");
-		if (!f.exists()) {
-			copyRawResource(R.raw.ble_app_hrs_dfu_s110_v8_0_0_sdk_v9_0, f);
-			newCopied = true;
-		}
-		f = new File(pca10028, "ble_app_hrs_dfu_all_in_one_sdk_v9_0.zip");
-		if (!f.exists()) {
-			copyRawResource(R.raw.ble_app_hrs_dfu_all_in_one_sdk_v9_0, f);
-			newCopied = true;
-		}
-
-		if (oldCopied)
-			Toast.makeText(this, R.string.dfu_example_files_created, Toast.LENGTH_SHORT).show();
-		else if (newCopied)
-			Toast.makeText(this, R.string.dfu_example_new_files_created, Toast.LENGTH_SHORT).show();
-
-		// Scripts
-		newCopied = false;
-		f = new File(root, "dfu_3_1.bat");
-		if (!f.exists()) {
-			copyRawResource(R.raw.dfu_win_3_1, f);
-			newCopied = true;
-		}
-		f = new File(root, "dfu_3_1.sh");
-		if (!f.exists()) {
-			copyRawResource(R.raw.dfu_mac_3_1, f);
-			newCopied = true;
-		}
-		f = new File(root, "README.txt");
-		if (!f.exists()) {
-			copyRawResource(R.raw.readme, f);
-		}
-		if (newCopied)
-			Toast.makeText(this, R.string.dfu_scripts_created, Toast.LENGTH_SHORT).show();
-
-		// Save the current version
-		preferences.edit().putInt(PREFS_SAMPLES_VERSION, CURRENT_SAMPLES_VERSION).apply();
-	}
-
-	/**
-	 * Copies the file from res/raw with given id to given destination file. If dest does not exist it will be created.
-	 *
-	 * @param rawResId the resource id
-	 * @param dest     destination file
-	 */
-	private void copyRawResource(final int rawResId, final File dest) {
-		try {
-			final InputStream is = getResources().openRawResource(rawResId);
-			final FileOutputStream fos = new FileOutputStream(dest);
-
-			final byte[] buf = new byte[1024];
-			int read;
-			try {
-				while ((read = is.read(buf)) > 0)
-					fos.write(buf, 0, read);
-			} finally {
-				is.close();
-				fos.close();
-			}
-		} catch (final IOException e) {
-			DebugLogger.e(TAG, "Error while copying HEX file " + e.toString());
-		}
 	}
 
 	@Override
@@ -841,7 +710,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 	public void onDeviceSelected(final BluetoothDevice device, final String name) {
 		mSelectedDevice = device;
 		mUploadButton.setEnabled(mStatusOk);
-		mDeviceNameView.setText(name);
+		mDeviceNameView.setText(name != null ? name : getString(R.string.not_available));
 	}
 
 	@Override

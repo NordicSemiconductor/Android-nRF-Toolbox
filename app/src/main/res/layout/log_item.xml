@@ -21,20 +21,20 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal" >
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/time"
-        android:layout_width="90dp"
-        android:layout_height="wrap_content"
-        android:textColor="#555555" />
+	<TextView
+		android:id="@+id/time"
+		android:layout_width="90dp"
+		android:layout_height="wrap_content"
+		android:textColor="#555555"/>
 
-    <TextView
-        android:id="@+id/data"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1" />
+	<TextView
+		android:id="@+id/data"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_weight="1"/>
 
 </LinearLayout>

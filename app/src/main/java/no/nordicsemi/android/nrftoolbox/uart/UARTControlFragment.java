@@ -23,6 +23,7 @@
 package no.nordicsemi.android.nrftoolbox.uart;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -38,46 +39,41 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 
 import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.uart.domain.Command;
+import no.nordicsemi.android.nrftoolbox.uart.domain.UartConfiguration;
 
-public class UARTControlFragment extends Fragment implements GridView.OnItemClickListener {
+public class UARTControlFragment extends Fragment implements GridView.OnItemClickListener, UARTActivity.ConfigurationListener {
 	private final static String TAG = "UARTControlFragment";
 	private final static String SIS_EDIT_MODE = "sis_edit_mode";
 
-	private ControlFragmentListener mListener;
-	private SharedPreferences mPreferences;
+	private UartConfiguration mConfiguration;
 	private UARTButtonAdapter mAdapter;
 	private boolean mEditMode;
 
-	public static interface ControlFragmentListener {
-		public void setEditMode(final boolean editMode);
-	}
-
 	@Override
-	public void onAttach(final Activity activity) {
-		super.onAttach(activity);
+	public void onAttach(final Context context) {
+		super.onAttach(context);
 
 		try {
-			mListener = (ControlFragmentListener) activity;
+			((UARTActivity)context).setConfigurationListener(this);
 		} catch (final ClassCastException e) {
 			Log.e(TAG, "The parent activity must implement EditModeListener");
 		}
 	}
 
 	@Override
-	public void onDetach() {
-		super.onDetach();
-		mListener = null;
-	}
-
-	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		mPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
 		if (savedInstanceState != null) {
 			mEditMode = savedInstanceState.getBoolean(SIS_EDIT_MODE);
 		}
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		((UARTActivity)getActivity()).setConfigurationListener(null);
 	}
 
 	@Override
@@ -90,49 +86,42 @@ public class UARTControlFragment extends Fragment implements GridView.OnItemClic
 		final View view = inflater.inflate(R.layout.fragment_feature_uart_control, container, false);
 
 		final GridView grid = (GridView) view.findViewById(R.id.grid);
-		grid.setAdapter(mAdapter = new UARTButtonAdapter(getActivity()));
+		grid.setAdapter(mAdapter = new UARTButtonAdapter(mConfiguration));
 		grid.setOnItemClickListener(this);
 		mAdapter.setEditMode(mEditMode);
 
-		setHasOptionsMenu(true);
 		return view;
 	}
 
 	@Override
 	public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
 		if (mEditMode) {
-			final UARTEditDialog dialog = UARTEditDialog.getInstance(position);
+			Command command = mConfiguration.getCommands()[position];
+			if (command == null)
+				mConfiguration.getCommands()[position] = command = new Command();
+			final UARTEditDialog dialog = UARTEditDialog.getInstance(position, command);
 			dialog.show(getChildFragmentManager(), null);
 		} else {
+			final String command = ((Command)mAdapter.getItem(position)).getCommand();
 			final UARTInterface uart = (UARTInterface) getActivity();
-			uart.send(mPreferences.getString(UARTButtonAdapter.PREFS_BUTTON_COMMAND + position, ""));
+			uart.send(command);
 		}
 	}
 
 	@Override
-	public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
-		inflater.inflate(mEditMode ? R.menu.uart_menu_config : R.menu.uart_menu, menu);
+	public void onConfigurationModified() {
+		mAdapter.notifyDataSetChanged();
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(final MenuItem item) {
-		final int itemId = item.getItemId();
-		switch (itemId) {
-		case R.id.action_configure:
-			setEditMode(!mEditMode);
-			return true;
-		}
-		return false;
+	public void onConfigurationChanged(final UartConfiguration configuration) {
+		mConfiguration = configuration;
+		mAdapter.setConfiguration(configuration);
 	}
 
+	@Override
 	public void setEditMode(final boolean editMode) {
 		mEditMode = editMode;
 		mAdapter.setEditMode(mEditMode);
-		getActivity().invalidateOptionsMenu();
-		mListener.setEditMode(mEditMode);
-	}
-
-	public void onConfigurationChanged() {
-		mAdapter.notifyDataSetChanged();
 	}
 }

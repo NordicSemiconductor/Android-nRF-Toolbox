@@ -21,23 +21,23 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical" >
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical">
 
-    <TextView
-        style="?android:attr/textAppearanceMedium"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="8dip"
-        android:paddingEnd="16dip"
-        android:paddingStart="16dip"
-        android:paddingTop="8dip"
-        android:text="@string/dfu_alert_no_filebrowser_message" />
+	<TextView
+		style="?android:attr/textAppearanceMedium"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:paddingBottom="8dip"
+		android:paddingEnd="16dip"
+		android:paddingStart="16dip"
+		android:paddingTop="8dip"
+		android:text="@string/dfu_alert_no_filebrowser_message"/>
 
-    <ListView
-        android:id="@android:id/list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+	<ListView
+		android:id="@android:id/list"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"/>
 
 </LinearLayout>

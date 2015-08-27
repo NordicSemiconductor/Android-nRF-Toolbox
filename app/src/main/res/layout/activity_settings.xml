@@ -27,22 +27,22 @@
 	android:orientation="vertical">
 
 	<include
-		layout="@layout/toolbar"
-		android:id="@+id/toolbar_actionbar"/>
+		android:id="@+id/toolbar_actionbar"
+		layout="@layout/toolbar"/>
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/background_title"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="6dp"/>
+	<ImageView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentBottom="true"
+		android:layout_centerHorizontal="true"
+		android:layout_marginBottom="6dp"
+		android:src="@drawable/background_title"/>
 
 	<FrameLayout
-		style="@style/HeaderShadow"
 		android:id="@+id/content"
-        android:layout_below="@+id/toolbar_actionbar"
+		style="@style/HeaderShadow"
 		android:layout_width="match_parent"
-		android:layout_height="match_parent" />
+		android:layout_height="match_parent"
+		android:layout_below="@+id/toolbar_actionbar"/>
 
 </RelativeLayout>

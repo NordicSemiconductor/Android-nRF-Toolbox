@@ -44,7 +44,7 @@ public class AboutDfuPreference extends Preference {
 	@Override
 	protected void onClick() {
 		final Context context = getContext();
-		final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://developer.nordicsemi.com/nRF51_SDK/doc/8.0.0/s110/html/a00078.html"));
+		final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.sdk52.v0.9.1%2Fexamples_ble_dfu.html&cp=4_0_0_4_2"));
 		intent.addCategory(Intent.CATEGORY_DEFAULT);
 		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 

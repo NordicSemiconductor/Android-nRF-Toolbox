@@ -20,245 +20,246 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".CSCActivity" >
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical"
+	tools:context=".CSCActivity">
 
-    <include layout="@layout/toolbar"
-        android:id="@+id/toolbar_actionbar"/>
+	<include
+		android:id="@+id/toolbar_actionbar"
+		layout="@layout/toolbar"/>
 
-    <no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout
-        style="@style/HeaderShadow"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+	<no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout
+		style="@style/HeaderShadow"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
 
-        <!-- The size of text below must be fixed, therefore dp are used instead of sp -->
+		<!-- The size of text below must be fixed, therefore dp are used instead of sp -->
 
-        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/csc_feature_title_long_margin"
-            android:rotation="270"
-            android:text="@string/csc_feature_title_long"
-            android:textColor="@color/darkGray"
-            android:textSize="32dp"
-            android:textStyle="bold" />
+		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_centerVertical="true"
+			android:layout_marginLeft="@dimen/csc_feature_title_long_margin"
+			android:rotation="270"
+			android:text="@string/csc_feature_title_long"
+			android:textColor="@color/darkGray"
+			android:textSize="32dp"
+			android:textStyle="bold"/>
 
-        <TextView
-            android:id="@+id/battery"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="@dimen/feature_horizontal_margin"
-            android:layout_marginTop="@dimen/feature_device_name_margin_top"
-            android:background="@drawable/battery"
-            android:freezesText="true"
-            android:gravity="center"
-            android:text="@string/not_available"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp" />
+		<TextView
+			android:id="@+id/battery"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentLeft="true"
+			android:layout_marginLeft="@dimen/feature_horizontal_margin"
+			android:layout_marginTop="@dimen/feature_device_name_margin_top"
+			android:background="@drawable/battery"
+			android:freezesText="true"
+			android:gravity="center"
+			android:text="@string/not_available"
+			android:textColor="#FFFFFF"
+			android:textSize="12sp"/>
 
-        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-            android:id="@+id/device_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="@dimen/feature_device_name_margin_top"
-            android:layout_toRightOf="@+id/battery"
-            android:ellipsize="end"
-            android:freezesText="true"
-            android:maxLines="1"
-            android:text="@string/csc_default_name"
-            android:textAllCaps="true"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+			android:id="@+id/device_name"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="10dp"
+			android:layout_marginTop="@dimen/feature_device_name_margin_top"
+			android:layout_toRightOf="@+id/battery"
+			android:ellipsize="end"
+			android:freezesText="true"
+			android:maxLines="1"
+			android:text="@string/csc_default_name"
+			android:textAllCaps="true"
+			android:textAppearance="?android:attr/textAppearanceLarge"/>
 
-        <!-- Application section -->
+		<!-- Application section -->
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
-            android:layout_marginLeft="@dimen/feature_horizontal_margin"
-            android:layout_marginRight="@dimen/feature_horizontal_margin"
-            android:layout_marginTop="@dimen/feature_vertical_margin_top"
-            style="@style/Widget.List"
-            android:orientation="vertical" >
+		<LinearLayout
+			style="@style/Widget.List"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
+			android:layout_marginLeft="@dimen/feature_horizontal_margin"
+			android:layout_marginRight="@dimen/feature_horizontal_margin"
+			android:layout_marginTop="@dimen/feature_vertical_margin_top"
+			android:orientation="vertical">
 
-            <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
-                style="@style/Widget.ListTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/csc_section_csc_header" />
+			<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+				style="@style/Widget.ListTitle"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="@string/csc_section_csc_header"/>
 
-            <TableLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="@dimen/feature_section_padding" >
+			<TableLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:padding="@dimen/feature_section_padding">
 
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
+				<TableRow
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content">
 
-                    <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center_vertical"
-                        android:text="@string/csc_speed" />
+					<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						android:layout_width="0dp"
+						android:layout_height="match_parent"
+						android:layout_weight="1"
+						android:gravity="center_vertical"
+						android:text="@string/csc_speed"/>
 
-                    <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
-                        android:id="@+id/speed"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:freezesText="true"
-                        android:gravity="right"
-                        android:text="@string/not_available_value"
-                        android:textSize="36sp" />
+					<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+						android:id="@+id/speed"
+						android:layout_width="wrap_content"
+						android:layout_height="match_parent"
+						android:freezesText="true"
+						android:gravity="right"
+						android:text="@string/not_available_value"
+						android:textSize="36sp"/>
 
-                    <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-                        android:id="@+id/speed_unit"
-                        android:layout_width="45dp"
-                        android:layout_height="match_parent"
-                        android:freezesText="true"
-                        android:gravity="bottom"
-                        android:text="@string/csc_speed_unit_km_h" />
-                </TableRow>
+					<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						android:id="@+id/speed_unit"
+						android:layout_width="45dp"
+						android:layout_height="match_parent"
+						android:freezesText="true"
+						android:gravity="bottom"
+						android:text="@string/csc_speed_unit_km_h"/>
+				</TableRow>
 
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp" >
+				<TableRow
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="4dp">
 
-                    <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center_vertical"
-                        android:text="@string/csc_cadence" />
+					<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						android:layout_width="0dp"
+						android:layout_height="match_parent"
+						android:layout_weight="1"
+						android:gravity="center_vertical"
+						android:text="@string/csc_cadence"/>
 
-                    <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
-                        android:id="@+id/cadence"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:freezesText="true"
-                        android:gravity="right"
-                        android:text="@string/not_available_value"
-                        android:textSize="36sp" />
+					<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+						android:id="@+id/cadence"
+						android:layout_width="wrap_content"
+						android:layout_height="match_parent"
+						android:freezesText="true"
+						android:gravity="right"
+						android:text="@string/not_available_value"
+						android:textSize="36sp"/>
 
-                    <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-                        android:layout_width="45dp"
-                        android:layout_height="match_parent"
-                        android:freezesText="true"
-                        android:gravity="bottom"
-                        android:text="@string/csc_cadence_unit" />
-                </TableRow>
+					<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						android:layout_width="45dp"
+						android:layout_height="match_parent"
+						android:freezesText="true"
+						android:gravity="bottom"
+						android:text="@string/csc_cadence_unit"/>
+				</TableRow>
 
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp" >
+				<TableRow
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="4dp">
 
-                    <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center_vertical"
-                        android:text="@string/csc_distance" />
+					<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						android:layout_width="0dp"
+						android:layout_height="match_parent"
+						android:layout_weight="1"
+						android:gravity="center_vertical"
+						android:text="@string/csc_distance"/>
 
-                    <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
-                        android:id="@+id/distance"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:freezesText="true"
-                        android:gravity="right"
-                        android:text="@string/not_available_value"
-                        android:textSize="36sp" />
+					<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+						android:id="@+id/distance"
+						android:layout_width="wrap_content"
+						android:layout_height="match_parent"
+						android:freezesText="true"
+						android:gravity="right"
+						android:text="@string/not_available_value"
+						android:textSize="36sp"/>
 
-                    <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-                        android:id="@+id/distance_unit"
-                        android:layout_width="45dp"
-                        android:layout_height="match_parent"
-                        android:freezesText="true"
-                        android:gravity="bottom"
-                        android:text="@string/csc_distance_unit_m" />
-                </TableRow>
+					<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						android:id="@+id/distance_unit"
+						android:layout_width="45dp"
+						android:layout_height="match_parent"
+						android:freezesText="true"
+						android:gravity="bottom"
+						android:text="@string/csc_distance_unit_m"/>
+				</TableRow>
 
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp" >
+				<TableRow
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="4dp">
 
-                    <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center_vertical"
-                        android:text="@string/csc_total_distance" />
+					<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						android:layout_width="0dp"
+						android:layout_height="match_parent"
+						android:layout_weight="1"
+						android:gravity="center_vertical"
+						android:text="@string/csc_total_distance"/>
 
-                    <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
-                        android:id="@+id/distance_total"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:freezesText="true"
-                        android:gravity="right"
-                        android:text="@string/not_available_value"
-                        android:textSize="36sp" />
+					<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+						android:id="@+id/distance_total"
+						android:layout_width="wrap_content"
+						android:layout_height="match_parent"
+						android:freezesText="true"
+						android:gravity="right"
+						android:text="@string/not_available_value"
+						android:textSize="36sp"/>
 
-                    <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-                        android:id="@+id/distance_total_unit"
-                        android:layout_width="45dp"
-                        android:layout_height="match_parent"
-                        android:freezesText="true"
-                        android:gravity="bottom"
-                        android:text="@string/csc_total_distance_unit_km" />
-                </TableRow>
+					<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						android:id="@+id/distance_total_unit"
+						android:layout_width="45dp"
+						android:layout_height="match_parent"
+						android:freezesText="true"
+						android:gravity="bottom"
+						android:text="@string/csc_total_distance_unit_km"/>
+				</TableRow>
 
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp" >
+				<TableRow
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="4dp">
 
-                    <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center_vertical"
-                        android:text="@string/csc_gear_ratio" />
+					<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						android:layout_width="0dp"
+						android:layout_height="match_parent"
+						android:layout_weight="1"
+						android:gravity="center_vertical"
+						android:text="@string/csc_gear_ratio"/>
 
-                    <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
-                        android:id="@+id/ratio"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_marginRight="45dp"
-                        android:freezesText="true"
-                        android:gravity="right"
-                        android:text="@string/not_available_value"
-                        android:textSize="36sp" />
-                </TableRow>
-            </TableLayout>
-        </LinearLayout>
+					<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+						android:id="@+id/ratio"
+						android:layout_width="wrap_content"
+						android:layout_height="match_parent"
+						android:layout_marginRight="45dp"
+						android:freezesText="true"
+						android:gravity="right"
+						android:text="@string/not_available_value"
+						android:textSize="36sp"/>
+				</TableRow>
+			</TableLayout>
+		</LinearLayout>
 
-        <Button
-            android:id="@+id/action_connect"
-            style="@style/Widget.Connect"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
-            android:onClick="onConnectClicked"
-            android:text="@string/action_connect" />
+		<Button
+			android:id="@+id/action_connect"
+			style="@style/Widget.Connect"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentBottom="true"
+			android:layout_centerHorizontal="true"
+			android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
+			android:onClick="onConnectClicked"
+			android:text="@string/action_connect"/>
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/background_title"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="6dp"/>
+		<ImageView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentBottom="true"
+			android:layout_centerHorizontal="true"
+			android:layout_marginBottom="6dp"
+			android:src="@drawable/background_title"/>
 
-    </no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout>
+	</no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout>
 </LinearLayout>

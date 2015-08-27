@@ -20,30 +20,30 @@
   ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    style="?android:attr/buttonBarStyle"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+<LinearLayout style="?android:attr/buttonBarStyle"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical">
 
-    <ListView
-        android:id="@android:id/list"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:paddingBottom="@dimen/alert_dialog_padding_bottom"
-        android:paddingEnd="@dimen/alert_dialog_padding"
-        android:paddingStart="@dimen/alert_dialog_padding"
-        android:paddingTop="@dimen/alert_dialog_padding_top"
-        android:scrollbarStyle="outsideOverlay"
-        tools:listitem="@layout/device_list_row" />
+	<ListView
+		android:id="@android:id/list"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1"
+		android:paddingBottom="@dimen/alert_dialog_padding_bottom"
+		android:paddingEnd="@dimen/alert_dialog_padding"
+		android:paddingStart="@dimen/alert_dialog_padding"
+		android:paddingTop="@dimen/alert_dialog_padding_top"
+		android:scrollbarStyle="outsideOverlay"
+		tools:listitem="@layout/device_list_row"/>
 
-    <Button
-        android:id="@+id/action_cancel"
-        style="?android:attr/buttonBarButtonStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/scanner_action_scan" />
+	<Button
+		android:id="@+id/action_cancel"
+		style="?android:attr/buttonBarButtonStyle"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="@string/scanner_action_scan"/>
 
 </LinearLayout>

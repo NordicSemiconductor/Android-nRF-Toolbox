@@ -20,50 +20,50 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    android:orientation="vertical" >
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="#FFFFFF"
+	android:orientation="vertical">
 
-    <ListView
-        android:id="@android:id/list"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:divider="@null"
-        android:dividerHeight="0dp"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp" />
+	<ListView
+		android:id="@android:id/list"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1"
+		android:divider="@null"
+		android:dividerHeight="0dp"
+		android:paddingLeft="8dp"
+		android:paddingRight="8dp"/>
 
-    <TextView
-        android:id="@android:id/empty"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:text="@string/uart_empty" />
+	<TextView
+		android:id="@android:id/empty"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1"
+		android:gravity="center"
+		android:text="@string/uart_empty"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal">
 
-        <EditText
-            android:id="@+id/field"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="@string/uart_action_send_hint"
-            android:enabled="false"
-            android:imeOptions="actionSend"
-            android:inputType="textMultiLine" />
+		<EditText
+			android:id="@+id/field"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:enabled="false"
+			android:hint="@string/uart_action_send_hint"
+			android:imeOptions="actionSend"
+			android:inputType="textMultiLine"/>
 
-        <Button
-            android:id="@+id/action_send"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:text="@string/uart_action_send" />
-    </LinearLayout>
+		<Button
+			android:id="@+id/action_send"
+			android:layout_width="100dp"
+			android:layout_height="wrap_content"
+			android:enabled="false"
+			android:text="@string/uart_action_send"/>
+	</LinearLayout>
 
 </LinearLayout>
