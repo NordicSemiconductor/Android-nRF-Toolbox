@@ -31,8 +31,8 @@ import java.util.Queue;
 import java.util.UUID;
 
 import no.nordicsemi.android.log.Logger;
-import no.nordicsemi.android.nrftoolbox.parser.TemplateParser;
 import no.nordicsemi.android.nrftoolbox.profile.BleManager;
+import no.nordicsemi.android.nrftoolbox.parser.TemplateParser;
 
 /**
  * Modify to template manager to match your requirements.

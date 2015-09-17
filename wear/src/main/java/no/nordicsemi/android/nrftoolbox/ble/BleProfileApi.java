@@ -19,54 +19,45 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package no.nordicsemi.android.nrftoolbox.utility;
 
-import android.util.Log;
+package no.nordicsemi.android.nrftoolbox.ble;
 
-import no.nordicsemi.android.nrftoolbox.BuildConfig;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.content.Context;
 
-public class DebugLogger {
-	public static void v(final String tag, final String text) {
-		if (BuildConfig.DEBUG)
-			Log.v(tag, text);
-	}
+public interface BleProfileApi {
+	/**
+	 * Returns the context.
+	 */
+	public Context getContext();
 
-	public static void d(final String tag, final String text) {
-		if (BuildConfig.DEBUG) {
-			Log.d(tag, text);
-		}
-	}
+	/**
+	 * Enables notifications on given characteristic
+	 *
+	 * @return true is the request has been sent, false if one of the arguments was <code>null</code> or the characteristic does not have the CCCD.
+	 */
+	public boolean enableNotifications(final BluetoothGattCharacteristic characteristic);
 
-	public static void i(final String tag, final String text) {
-		if (BuildConfig.DEBUG)
-			Log.i(tag, text);
-	}
+	/**
+	 * Enables indications on given characteristic
+	 *
+	 * @return true is the request has been sent, false if one of the arguments was <code>null</code> or the characteristic does not have the CCCD.
+	 */
+	public boolean enableIndications(final BluetoothGattCharacteristic characteristic);
 
-	public static void w(final String tag, final String text) {
-		if (BuildConfig.DEBUG) {
-			Log.w(tag, text);
-		}
-	}
+	/**
+	 * Sends the read request to the given characteristic.
+	 *
+	 * @param characteristic the characteristic to read
+	 * @return true if request has been sent
+	 */
+	public boolean readCharacteristic(final BluetoothGattCharacteristic characteristic);
 
-	public static void e(final String tag, final String text) {
-		if (BuildConfig.DEBUG)
-			Log.e(tag, text);
-	}
-
-	public static void e(final String tag, final String text, final Throwable e) {
-		if (BuildConfig.DEBUG)
-			Log.e(tag, text, e);
-	}
-
-	public static void wtf(final String tag, final String text) {
-		if (BuildConfig.DEBUG) {
-			Log.wtf(tag, text);
-		}
-	}
-
-	public static void wtf(final String tag, final String text, final Throwable e) {
-		if (BuildConfig.DEBUG) {
-			Log.wtf(tag, text, e);
-		}
-	}
+	/**
+	 * Writes the characteristic value to the given characteristic.
+	 *
+	 * @param characteristic the characteristic to write to
+	 * @return true if request has been sent
+	 */
+	public boolean writeCharacteristic(final BluetoothGattCharacteristic characteristic);
 }

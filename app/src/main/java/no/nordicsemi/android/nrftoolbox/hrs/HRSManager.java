@@ -32,9 +32,9 @@ import java.util.UUID;
 
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.parser.BodySensorLocationParser;
 import no.nordicsemi.android.nrftoolbox.parser.HeartRateMeasurementParser;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 
 /**
  * HRSManager class performs BluetoothGatt operations for connection, service discovery, enabling notification and reading characteristics. All operations required to connect to device with BLE HR

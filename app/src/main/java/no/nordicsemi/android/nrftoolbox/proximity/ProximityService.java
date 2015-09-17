@@ -32,6 +32,7 @@ import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.NotificationCompat;
 
 import no.nordicsemi.android.log.Logger;
@@ -232,13 +233,13 @@ public class ProximityService extends BleProfileService implements ProximityMana
 		builder.setContentIntent(pendingIntent);
 		builder.setContentTitle(getString(R.string.app_name)).setContentText(getString(messageResId, getDeviceName()));
 		builder.setSmallIcon(R.drawable.ic_stat_notify_proximity);
-		builder.setShowWhen(defaults != 0).setDefaults(defaults).setAutoCancel(true).setOngoing(true);
+		builder.setShowWhen(defaults != 0).setDefaults(defaults).setAutoCancel(true).setOngoing(defaults == 0); // an ongoing notification would not be shown on Android Wear
 		builder.addAction(new NotificationCompat.Action(R.drawable.ic_action_bluetooth, getString(R.string.proximity_notification_action_disconnect), disconnectAction));
 		if (isConnected())
 			builder.addAction(new NotificationCompat.Action(R.drawable.ic_stat_notify_proximity, getString(isImmediateAlertOn ? R.string.proximity_action_silentme : R.string.proximity_action_findme), secondAction));
 
 		final Notification notification = builder.build();
-		final NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		final NotificationManagerCompat nm = NotificationManagerCompat.from(this);
 		nm.notify(NOTIFICATION_ID, notification);
 	}
 

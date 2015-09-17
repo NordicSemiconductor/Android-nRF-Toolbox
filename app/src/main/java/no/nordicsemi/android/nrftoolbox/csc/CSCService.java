@@ -37,9 +37,9 @@ import android.support.v7.app.NotificationCompat;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.csc.settings.SettingsFragment;
 import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
+import no.nordicsemi.android.nrftoolbox.csc.settings.SettingsFragment;
 
 public class CSCService extends BleProfileService implements CSCManagerCallbacks {
 	private static final String TAG = "CSCService";

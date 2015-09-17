@@ -32,8 +32,8 @@ import java.util.Queue;
 import java.util.UUID;
 
 import no.nordicsemi.android.log.Logger;
-import no.nordicsemi.android.nrftoolbox.parser.CSCMeasurementParser;
 import no.nordicsemi.android.nrftoolbox.profile.BleManager;
+import no.nordicsemi.android.nrftoolbox.parser.CSCMeasurementParser;
 
 public class CSCManager extends BleManager<CSCManagerCallbacks> {
 	/** Cycling Speed and Cadence service UUID */

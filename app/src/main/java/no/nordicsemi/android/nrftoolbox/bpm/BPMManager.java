@@ -32,9 +32,9 @@ import java.util.Queue;
 import java.util.UUID;
 
 import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.parser.BloodPressureMeasurementParser;
 import no.nordicsemi.android.nrftoolbox.parser.IntermediateCuffPressureParser;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 
 public class BPMManager extends BleManager<BPMManagerCallbacks> {
 	/** Blood Pressure service UUID */

@@ -2,13 +2,14 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '23.0.0'
+    buildToolsVersion '23.0.1'
+
     defaultConfig {
         applicationId "no.nordicsemi.android.nrftoolbox"
         minSdkVersion 18
         targetSdkVersion 23
-        versionCode 37
-        versionName "1.15.0"
+        versionCode 39
+        versionName "1.16.0"
     }
     buildTypes {
         release {
@@ -20,14 +21,17 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:23.0.0'
-    compile 'com.android.support:design:23.0.0'
+    compile 'com.google.android.gms:play-services-wearable:7.8.0'
+    compile 'com.android.support:appcompat-v7:23.0.1'
+    compile 'com.android.support:design:23.0.1'
     compile 'no.nordicsemi.android.support.v18:scanner:0.1.1'
+    compile 'no.nordicsemi.android:log:2.0.0'
     compile('org.simpleframework:simple-xml:2.7.1') {
         exclude group: 'stax', module: 'stax-api'
         exclude group: 'xpp3', module: 'xpp3'
     }
-    compile project(':dfu')
     compile files('libs/achartengine-1.1.0.jar')
-    compile files('libs/nrf-logger-v2.0.jar')
+    compile project(':dfu')
+    compile project(':common')
+    wearApp project(':wear')
 }

@@ -34,10 +34,10 @@ import java.util.Queue;
 import java.util.UUID;
 
 import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.parser.GlucoseMeasurementContextParser;
 import no.nordicsemi.android.nrftoolbox.parser.GlucoseMeasurementParser;
 import no.nordicsemi.android.nrftoolbox.parser.RecordAccessControlPointParser;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
 
 @SuppressWarnings("unused")

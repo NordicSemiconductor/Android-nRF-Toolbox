@@ -37,9 +37,9 @@ import android.os.Handler;
 import java.util.Queue;
 import java.util.UUID;
 
-import no.nordicsemi.android.error.GattError;
 import no.nordicsemi.android.log.ILogSession;
 import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.nrftoolbox.error.GattError;
 import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
 import no.nordicsemi.android.nrftoolbox.utility.ParserUtils;
 
@@ -52,7 +52,7 @@ import no.nordicsemi.android.nrftoolbox.utility.ParserUtils;
  * leaving this to the developers.</li>
  * <li>The manager tries to read the Battery Level characteristic. No matter the result of this operation (for example the Battery Level characteristic may not have the READ property)
  * it tries to enable Battery Level notifications, to get battery updates from the device.</li>
- * <li>Afterwards, the manager initializes the device using given queue of commands. See {@link BleManagerGattCallback#initGatt(android.bluetooth.BluetoothGatt)} method for more details.</li>
+ * <li>Afterwards, the manager initializes the device using given queue of commands. See {@link BleManagerGattCallback#initGatt(BluetoothGatt)} method for more details.</li>
  * <li>When initialization complete, the {@link BleManagerCallbacks#onDeviceReady()} callback is called.</li>
  * </ol>The manager also is responsible for parsing the Battery Level values and calling {@link BleManagerCallbacks#onBatteryValueReceived(int)} method.</p>
  * <p>Events from all profiles are being logged into the nRF Logger application,
@@ -830,7 +830,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 			final Queue<Request> requests = mInitQueue;
 
 			// Get the first request from the queue
-			final Request request = requests.poll();
+			final Request request = requests != null ? requests.poll() : null;
 
 			// Are we done?
 			if (request == null) {

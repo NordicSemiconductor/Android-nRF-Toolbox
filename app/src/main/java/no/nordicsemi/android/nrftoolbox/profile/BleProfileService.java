@@ -35,7 +35,6 @@ import android.widget.Toast;
 
 import no.nordicsemi.android.log.ILogSession;
 import no.nordicsemi.android.log.Logger;
-import no.nordicsemi.android.nrftoolbox.R;
 
 public abstract class BleProfileService extends Service implements BleManagerCallbacks {
 	@SuppressWarnings("unused")
@@ -132,7 +131,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 		 * 
 		 * @return the log session
 		 */
-		protected ILogSession getLogSession() {
+		public ILogSession getLogSession() {
 			return mLogSession;
 		}
 	}
@@ -278,6 +277,15 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
+	/**
+	 * This method should return false if the service needs to do some asynchronous work after if has disconnected from the device.
+	 * In that case the {@link #stopService()} method must be called when done.
+	 * @return true (default) to automatically stop the service when device is disconnected. False otherwise.
+	 */
+	protected boolean stopWhenDisconnected() {
+		return true;
+	}
+
 	@Override
 	public void onDeviceDisconnected() {
 		mConnected = false;
@@ -288,6 +296,11 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_DISCONNECTED);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 
+		if (stopWhenDisconnected())
+			stopService();
+	}
+
+	protected void stopService() {
 		// user requested disconnection. We must stop the service
 		Logger.v(mLogSession, "Stopping service...");
 		stopSelf();
@@ -335,7 +348,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 	@Override
 	public void onBondingRequired() {
-		showToast(R.string.bonding);
+		showToast(no.nordicsemi.android.nrftoolbox.common.R.string.bonding);
 
 		final Intent broadcast = new Intent(BROADCAST_BOND_STATE);
 		broadcast.putExtra(EXTRA_BOND_STATE, BluetoothDevice.BOND_BONDING);
@@ -344,7 +357,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 	@Override
 	public void onBonded() {
-		showToast(R.string.bonded);
+		showToast(no.nordicsemi.android.nrftoolbox.common.R.string.bonded);
 
 		final Intent broadcast = new Intent(BROADCAST_BOND_STATE);
 		broadcast.putExtra(EXTRA_BOND_STATE, BluetoothDevice.BOND_BONDED);

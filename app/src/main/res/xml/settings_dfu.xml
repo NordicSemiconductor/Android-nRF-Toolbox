@@ -45,6 +45,10 @@
 			android:defaultValue="false"
 			android:key="settings_keep_bond"
 			android:title="@string/dfu_settings_dfu_keep_bond" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="settings_assume_dfu_mode"
+            android:title="@string/dfu_settings_dfu_assume_dfu_mode" />
 
         <no.nordicsemi.android.nrftoolbox.dfu.settings.AboutDfuPreference
             android:summary="@string/dfu_settings_dfu_about_summary"

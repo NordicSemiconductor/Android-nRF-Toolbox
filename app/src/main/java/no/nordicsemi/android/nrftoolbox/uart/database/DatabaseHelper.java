@@ -42,6 +42,7 @@ public class DatabaseHelper {
     private static final String[] ID_PROJECTION = new String[] { BaseColumns._ID };
 	private static final String[] NAME_PROJECTION = new String[] { BaseColumns._ID, NameColumns.NAME };
 	private static final String[] XML_PROJECTION = new String[] { BaseColumns._ID, ConfigurationContract.Configuration.XML };
+	private static final String[] CONFIGURATION_PROJECTION = new String[] { BaseColumns._ID, NameColumns.NAME, ConfigurationContract.Configuration.XML };
 
 	private static final String ID_SELECTION = BaseColumns._ID + "=?";
 	private static final String NAME_SELECTION = NameColumns.NAME + "=?";
@@ -73,10 +74,18 @@ public class DatabaseHelper {
 	}
 
 	/**
+	 * Returns the list of all saved configurations.
+	 * @return cursor
+	 */
+	public Cursor getConfigurations() {
+		return mDatabase.query(Tables.CONFIGURATIONS, CONFIGURATION_PROJECTION, NOT_DELETED_SELECTION, null, null, null, ConfigurationContract.Configuration.NAME + " ASC");
+	}
+
+	/**
 	 * Returns the list of names of all saved configurations.
 	 * @return cursor
 	 */
-	public Cursor getServerConfigurationsNames() {
+	public Cursor getConfigurationsNames() {
 		return mDatabase.query(Tables.CONFIGURATIONS, NAME_PROJECTION, NOT_DELETED_SELECTION, null, null, null, ConfigurationContract.Configuration.NAME + " ASC");
 	}
 
@@ -132,26 +141,50 @@ public class DatabaseHelper {
 	/**
 	 * Marks the configuration with given name as deleted. If may be restored or removed permanently afterwards.
 	 * @param name the configuration name
-	 * @return number of rows affected
+	 * @return id of the deleted configuration
 	 */
-	public int deleteConfiguration(final String name) {
+	public long deleteConfiguration(final String name) {
 		mSingleArg[0] = name;
 
 		final ContentValues values = mValues;
 		values.clear();
 		values.put(ConfigurationContract.Configuration.DELETED, 1);
-		return mDatabase.update(Tables.CONFIGURATIONS, values, NAME_SELECTION, mSingleArg);
+		mDatabase.update(Tables.CONFIGURATIONS, values, NAME_SELECTION, mSingleArg);
+
+		final Cursor cursor = mDatabase.query(Tables.CONFIGURATIONS, ID_PROJECTION, NAME_SELECTION, mSingleArg, null, null, null);
+		try {
+			if (cursor.moveToNext())
+				return cursor.getLong(0 /* _ID */);
+			return -1;
+		} finally {
+			cursor.close();
+		}
 	}
 
 	public int removeDeletedServerConfigurations() {
 		return mDatabase.delete(Tables.CONFIGURATIONS, DELETED_SELECTION, null);
 	}
 
-	public int restoreDeletedServerConfigurations() {
+	/**
+	 * Restores deleted configuration. Returns the ID of the first one.
+	 * @return the DI of the restored configuration.
+	 */
+	public long restoreDeletedServerConfiguration(final String name) {
+		mSingleArg[0] = name;
+
 		final ContentValues values = mValues;
 		values.clear();
 		values.put(ConfigurationContract.Configuration.DELETED, 0);
-		return mDatabase.update(Tables.CONFIGURATIONS, values, null, null);
+		mDatabase.update(Tables.CONFIGURATIONS, values, NAME_SELECTION, mSingleArg);
+
+		final Cursor cursor = mDatabase.query(Tables.CONFIGURATIONS, ID_PROJECTION, NAME_SELECTION, mSingleArg, null, null, null);
+		try {
+			if (cursor.moveToNext())
+				return cursor.getLong(0 /* _ID */);
+			return -1;
+		} finally {
+			cursor.close();
+		}
 	}
 
 	/**

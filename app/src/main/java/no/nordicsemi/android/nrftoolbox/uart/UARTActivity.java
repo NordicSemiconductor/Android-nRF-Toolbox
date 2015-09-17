@@ -37,6 +37,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.TransitionDrawable;
@@ -59,6 +60,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
@@ -84,27 +87,34 @@ import java.io.StringWriter;
 import java.util.UUID;
 
 import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.dfu.adapter.FileBrowserAppsAdapter;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
+import no.nordicsemi.android.nrftoolbox.dfu.adapter.FileBrowserAppsAdapter;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileServiceReadyActivity;
 import no.nordicsemi.android.nrftoolbox.uart.database.DatabaseHelper;
 import no.nordicsemi.android.nrftoolbox.uart.domain.Command;
 import no.nordicsemi.android.nrftoolbox.uart.domain.UartConfiguration;
+import no.nordicsemi.android.nrftoolbox.uart.wearable.UARTConfigurationSynchronizer;
 import no.nordicsemi.android.nrftoolbox.utility.FileHelper;
 import no.nordicsemi.android.nrftoolbox.widget.ClosableSpinner;
 
 public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UARTBinder> implements UARTInterface,
-		UARTNewConfigurationDialogFragment.NewConfigurationDialogListener, UARTConfigurationsAdapter.ActionListener, AdapterView.OnItemSelectedListener {
+		UARTNewConfigurationDialogFragment.NewConfigurationDialogListener, UARTConfigurationsAdapter.ActionListener, AdapterView.OnItemSelectedListener,
+		GoogleApiClient.ConnectionCallbacks {
 	private final static String TAG = "UARTActivity";
 
 	private final static String PREFS_BUTTON_ENABLED = "prefs_uart_enabled_";
 	private final static String PREFS_BUTTON_COMMAND = "prefs_uart_command_";
 	private final static String PREFS_BUTTON_ICON = "prefs_uart_icon_";
+	/** This preference keeps the ID of the selected configuration. */
 	private final static String PREFS_CONFIGURATION = "configuration_id";
+	/** This preference is set to true when initial data synchronization for wearables has been completed. */
+	private final static String PREFS_WEAR_SYNCED = "prefs_uart_synced";
 	private final static String SIS_EDIT_MODE = "sis_edit_mode";
 
 	private final static int SELECT_FILE_REQ = 2678; // random
 	private final static int PERMISSION_REQ = 24; // random, 8-bit
+
+	UARTConfigurationSynchronizer mWearableSynchronizer;
 
 	/** The current configuration. */
 	private UartConfiguration mConfiguration;
@@ -162,7 +172,57 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 		mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		mDatabaseHelper = new DatabaseHelper(this);
 		ensureFirstConfiguration(mDatabaseHelper);
-		mConfigurationsAdapter = new UARTConfigurationsAdapter(this, this, mDatabaseHelper.getServerConfigurationsNames());
+		mConfigurationsAdapter = new UARTConfigurationsAdapter(this, this, mDatabaseHelper.getConfigurationsNames());
+
+		// Initialize Wearable synchronizer
+		mWearableSynchronizer = UARTConfigurationSynchronizer.from(this, this);
+	}
+
+	/**
+	 * Method called when Google API Client connects to Wearable.API.
+	 */
+	@Override
+	public void onConnected(final Bundle bundle) {
+		if (!mPreferences.getBoolean(PREFS_WEAR_SYNCED, false)) {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					final Cursor cursor = mDatabaseHelper.getConfigurations();
+					try {
+						while (cursor.moveToNext()) {
+							final long id = cursor.getLong(0 /* _ID */);
+							try {
+								final String xml = cursor.getString(2 /* XML */);
+								final Format format = new Format(new HyphenStyle());
+								final Serializer serializer = new Persister(format);
+								final UartConfiguration configuration = serializer.read(UartConfiguration.class, xml);
+								mWearableSynchronizer.onConfigurationAddedOrEdited(id, configuration).await();
+							} catch (final Exception e) {
+								Log.w(TAG, "Deserializing configuration with id " + id + " failed", e);
+							}
+						}
+						mPreferences.edit().putBoolean(PREFS_WEAR_SYNCED, true).apply();
+					} finally {
+						cursor.close();
+					}
+				}
+			}).start();
+		}
+	}
+
+	/**
+	 * Method called then Google API client connection was suspended.
+	 * @param cause the cause of suspension
+	 */
+	@Override
+	public void onConnectionSuspended(final int cause) {
+		// dp nothing
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		mWearableSynchronizer.close();
 	}
 
 	@Override
@@ -322,13 +382,18 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			}
 			case R.id.action_remove: {
 				mDatabaseHelper.removeDeletedServerConfigurations(); // just to be sure nothing has left
-				mDatabaseHelper.deleteConfiguration(name);
+				final UartConfiguration removedConfiguration = mConfiguration;
+				final long id = mDatabaseHelper.deleteConfiguration(name);
+				if (id >= 0)
+					mWearableSynchronizer.onConfigurationDeleted(id);
 				refreshConfigurations();
 
 				final Snackbar snackbar = Snackbar.make(mSlider, R.string.uart_configuration_deleted, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_undo, new View.OnClickListener() {
 					@Override
 					public void onClick(final View v) {
-						mDatabaseHelper.restoreDeletedServerConfigurations();
+						final long id = mDatabaseHelper.restoreDeletedServerConfiguration(name);
+						if (id >= 0)
+							mWearableSynchronizer.onConfigurationAddedOrEdited(id, removedConfiguration);
 						refreshConfigurations();
 					}
 				});
@@ -521,6 +586,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			final String xml = writer.toString();
 
 			final long id = mDatabaseHelper.addConfiguration(name, xml);
+			mWearableSynchronizer.onConfigurationAddedOrEdited(id, configuration);
 			refreshConfigurations();
 			selectConfiguration(mConfigurationsAdapter.getItemPosition(id));
 		} catch (final Exception e) {
@@ -548,6 +614,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			final String xml = writer.toString();
 
 			mDatabaseHelper.renameConfiguration(oldName, newName, xml);
+			mWearableSynchronizer.onConfigurationAddedOrEdited(mPreferences.getLong(PREFS_CONFIGURATION, 0), mConfiguration);
 			refreshConfigurations();
 		} catch (final Exception e) {
 			Log.e(TAG, "Error while renaming configuration", e);
@@ -555,7 +622,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	}
 
 	private void refreshConfigurations() {
-		mConfigurationsAdapter.swapCursor(mDatabaseHelper.getServerConfigurationsNames());
+		mConfigurationsAdapter.swapCursor(mDatabaseHelper.getConfigurationsNames());
 		mConfigurationsAdapter.notifyDataSetChanged();
 		invalidateOptionsMenu();
 	}
@@ -634,6 +701,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			final String xml = writer.toString();
 
 			mDatabaseHelper.updateConfiguration(configuration.getName(), xml);
+			mWearableSynchronizer.onConfigurationAddedOrEdited(mPreferences.getLong(PREFS_CONFIGURATION, 0), configuration);
 		} catch (final Exception e) {
 			Log.e(TAG, "Error while creating a new configuration", e);
 		}
@@ -659,6 +727,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			final String name = configuration.getName();
 			if (!mDatabaseHelper.configurationExists(name)) {
 				final long id = mDatabaseHelper.addConfiguration(name, xml);
+				mWearableSynchronizer.onConfigurationAddedOrEdited(id, configuration);
 				refreshConfigurations();
 				new Handler().post(new Runnable() {
 					@Override

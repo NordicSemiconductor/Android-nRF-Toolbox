@@ -120,6 +120,7 @@
 		<item name="colorPrimaryDark">@color/actionBarColorDark</item>
 		<item name="colorAccent">@color/actionBarColorDark</item>
 		<item name="buttonStyle">@style/Widget.Button</item>
+		<item name="android:spinnerStyle">@style/Widget.AppCompat.Spinner</item> <!-- Required on pre-Lollipop to draw new spinner. -->
 	</style>
 
 	<style name="AppTheme" parent="@style/AppThemeBase">

@@ -36,9 +36,9 @@ import java.text.DecimalFormat;
 import java.util.UUID;
 
 import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 import no.nordicsemi.android.nrftoolbox.hts.settings.SettingsActivity;
 import no.nordicsemi.android.nrftoolbox.hts.settings.SettingsFragment;
-import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileServiceReadyActivity;
 
 /**

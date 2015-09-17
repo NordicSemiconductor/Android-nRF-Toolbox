@@ -43,7 +43,7 @@
     <string name="uart_empty">No data to display.</string>
 
 	<string name="uart_rename_configuration_title">Rename configuration</string>
-	<string name="uart_new_configuration_title">New GATT configuration</string>
+	<string name="uart_new_configuration_title">New configuration</string>
 	<string name="uart_new_configuration_hint">Configuration name</string>
 	<string name="uart_new_configuration_text">Please, provide a unique configuration name:</string>
 	<string name="uart_empty_name_error">Name must not be empty.</string>

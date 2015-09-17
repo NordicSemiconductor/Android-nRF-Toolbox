@@ -38,7 +38,7 @@ public interface BleManagerCallbacks {
 	public void onDeviceDisconnecting();
 
 	/**
-	 * Called when the device has disconnected (when the callback returned {@link BluetoothGattCallback#onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int)} with state DISCONNECTED.
+	 * Called when the device has disconnected (when the callback returned {@link BluetoothGattCallback#onConnectionStateChange(BluetoothGatt, int, int)} with state DISCONNECTED.
 	 */
 	public void onDeviceDisconnected();
 
