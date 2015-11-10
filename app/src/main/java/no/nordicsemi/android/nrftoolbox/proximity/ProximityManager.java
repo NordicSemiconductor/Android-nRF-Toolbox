@@ -39,6 +39,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.UUID;
 
+import no.nordicsemi.android.error.GattError;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.parser.AlertLevelParser;
@@ -102,7 +103,7 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 		 * This method must be called in UI thread. It works fine on Nexus devices but if called from other thread (f.e. from onServiceAdded in gatt server callback) it hangs the app. 
 		 */
 		final BluetoothGattCharacteristic linklossAlertLevel = new BluetoothGattCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID, BluetoothGattCharacteristic.PROPERTY_WRITE
-				| BluetoothGattCharacteristic.PROPERTY_READ, BluetoothGattCharacteristic.PERMISSION_WRITE);
+				| BluetoothGattCharacteristic.PROPERTY_READ, BluetoothGattCharacteristic.PERMISSION_WRITE | BluetoothGattCharacteristic.PERMISSION_READ);
 		linklossAlertLevel.setValue(HIGH_ALERT);
 		final BluetoothGattService linklossService = new BluetoothGattService(LINKLOSS_SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY);
 		linklossService.addCharacteristic(linklossAlertLevel);
@@ -122,7 +123,7 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 					if (IMMEDIATE_ALERT_SERVICE_UUID.equals(service.getUuid()))
 						addLinklossService();
 					else {
-						Logger.i(mLogSession, "[Proximity Server] Gatt server started");
+						Logger.i(mLogSession, "[Server] Gatt server started");
 						ProximityManager.super.connect(mDeviceToConnect);
 						mDeviceToConnect = null;
 					}
@@ -132,32 +133,56 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 
 		@Override
 		public void onConnectionStateChange(final BluetoothDevice device, final int status, final int newState) {
-			if (status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothGatt.STATE_CONNECTED) {
-				Logger.i(mLogSession, "[Server] Device with address " + device.getAddress() + " connected");
-			} else {
-				if (newState == BluetoothGatt.STATE_DISCONNECTED) {
-					Logger.i(mLogSession, "[Server] Device disconnected");
+			Logger.d(mLogSession, "[Server callback] Connection state changed with status: " + status + " and new state: " + stateToString(newState) + " (" + newState + ")");
+			if (status == BluetoothGatt.GATT_SUCCESS) {
+				if (newState == BluetoothGatt.STATE_CONNECTED) {
+					Logger.i(mLogSession, "[Server] Device with address " + device.getAddress() + " connected");
 				} else {
-					Logger.e(mLogSession, "[Server] Connection state changed with error " + status);
+					Logger.i(mLogSession, "[Server] Device disconnected");
 				}
+			} else {
+				Logger.e(mLogSession, "[Server] Error " + status + " (0x" + Integer.toHexString(status) + "): " + GattError.parseConnectionError(status));
 			}
 		}
 
 		@Override
 		public void onCharacteristicReadRequest(final BluetoothDevice device, final int requestId, final int offset, final BluetoothGattCharacteristic characteristic) {
-			Logger.i(mLogSession, "[Server] Read request for characteristic " + characteristic.getUuid() + " (requestId = " + requestId + ", offset = " + offset + ")");
-			Logger.v(mLogSession, "[Server] Sending response: SUCCESS");
-			Logger.d(mLogSession, "[Server] sendResponse(GATT_SUCCESS, " + ParserUtils.parse(characteristic.getValue()) + ")");
-			mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, characteristic.getValue());
+			Logger.d(mLogSession, "[Server callback] Read request for characteristic " + characteristic.getUuid() + " (requestId=" + requestId + ", offset=" + offset + ")");
+			Logger.i(mLogSession, "[Server] READ request for characteristic " + characteristic.getUuid() + " received");
+
+			byte[] value = characteristic.getValue();
+			if (value != null && offset > 0) {
+				byte[] offsetValue = new byte[value.length - offset];
+				System.arraycopy(value, offset, offsetValue, 0, offsetValue.length);
+				value = offsetValue;
+			}
+			if (value != null)
+				Logger.d(mLogSession, "server.sendResponse(GATT_SUCCESS, value=" + ParserUtils.parse(value) + ")");
+			else
+				Logger.d(mLogSession, "server.sendResponse(GATT_SUCCESS, value=null)");
+			mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
+			Logger.v(mLogSession, "[Server] Response sent");
 		}
 
 		@Override
 		public void onCharacteristicWriteRequest(final BluetoothDevice device, final int requestId, final BluetoothGattCharacteristic characteristic, final boolean preparedWrite,
 												 final boolean responseNeeded, final int offset, final byte[] value) {
-			Logger.i(mLogSession, "[Server] Write request to characteristic " + characteristic.getUuid() + " (requestId = " + requestId + ", value = " + ParserUtils.parse(value) + ", offset = " + offset + ")");
-			characteristic.setValue(value);
+			Logger.d(mLogSession, "[Server callback] Write request to characteristic " + characteristic.getUuid()
+					+ " (requestId=" + requestId + ", prepareWrite=" + preparedWrite + ", responseNeeded=" + responseNeeded + ", offset=" + offset + ", value=" + ParserUtils.parse(value) + ")");
+			final String writeType = !responseNeeded ? "WRITE NO RESPONSE" : "WRITE COMMAND";
+			Logger.i(mLogSession, "[Server] " + writeType + " request for characteristic " + characteristic.getUuid() + " received, value: " + ParserUtils.parse(value));
 
-			if (value != null && value.length == 1) { // small validation
+			if (offset == 0) {
+				characteristic.setValue(value);
+			} else {
+				final byte[] currentValue = characteristic.getValue();
+				final byte[] newValue = new byte[currentValue.length + value.length];
+				System.arraycopy(currentValue, 0, newValue, 0, currentValue.length);
+				System.arraycopy(value, 0, newValue, offset, value.length);
+				characteristic.setValue(newValue);
+			}
+
+			if (!preparedWrite && value != null && value.length == 1) { // small validation
 				if (value[0] != NO_ALERT[0]) {
 					Logger.a(mLogSession, "[Server] Immediate alarm request received: " + AlertLevelParser.parse(characteristic));
 					mCallbacks.onAlarmTriggered();
@@ -166,39 +191,44 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 					mCallbacks.onAlarmStopped();
 				}
 			}
-			if (responseNeeded) {
-				Logger.v(mLogSession, "[Server] Sending response: SUCCESS");
-				Logger.d(mLogSession, "[Server] sendResponse(GATT_SUCCESS)");
-				mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, null);
-			}
+
+			Logger.d(mLogSession, "server.sendResponse(GATT_SUCCESS, offset=" + offset + ", value=" + ParserUtils.parse(value) + ")");
+			mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, null);
+			Logger.v(mLogSession, "[Server] Response sent");
 		}
 
 		@Override
 		public void onDescriptorReadRequest(final BluetoothDevice device, final int requestId, final int offset, final BluetoothGattDescriptor descriptor) {
-			Logger.i(mLogSession, "[Server] Write request to descriptor " + descriptor.getUuid() + " (requestId = " + requestId + ", offset = " + offset + ")");
+			Logger.d(mLogSession, "[Server callback] Write request to descriptor " + descriptor.getUuid() + " (requestId=" + requestId + ", offset=" + offset + ")");
+			Logger.i(mLogSession, "[Server] READ request for descriptor " + descriptor.getUuid() + " received");
 			// This method is not supported
-			Logger.v(mLogSession, "[Server] Sending response: REQUEST_NOT_SUPPORTED");
-			Logger.d(mLogSession, "[Server] sendResponse(GATT_REQUEST_NOT_SUPPORTED)");
+			Logger.w(mLogSession, "[Server] Operation not supported");
+			Logger.d(mLogSession, "[Server] server.sendResponse(GATT_REQUEST_NOT_SUPPORTED)");
 			mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_REQUEST_NOT_SUPPORTED, offset, null);
+			Logger.v(mLogSession, "[Server] Response sent");
 		}
 
 		@Override
 		public void onDescriptorWriteRequest(final BluetoothDevice device, final int requestId, final BluetoothGattDescriptor descriptor, final boolean preparedWrite,
 											 final boolean responseNeeded, final int offset, final byte[] value) {
-			Logger.i(mLogSession, "[Server] Write request to descriptor " + descriptor.getUuid() + " (requestId = " + requestId + ", value = " + ParserUtils.parse(value) + ", offset = " + offset + ")");
+			Logger.d(mLogSession, "[Server callback] Write request to descriptor " + descriptor.getUuid()
+					+ " (requestId=" + requestId + ", prepareWrite=" + preparedWrite + ", responseNeeded=" + responseNeeded + ", offset=" + offset + ", value=" + ParserUtils.parse(value) + ")");
+			Logger.i(mLogSession, "[Server] READ request for descriptor " + descriptor.getUuid() + " received");
 			// This method is not supported
-			Logger.v(mLogSession, "[Server] Sending response: REQUEST_NOT_SUPPORTED");
-			Logger.d(mLogSession, "[Server] sendResponse(GATT_REQUEST_NOT_SUPPORTED)");
+			Logger.w(mLogSession, "[Server] Operation not supported");
+			Logger.d(mLogSession, "[Server] server.sendResponse(GATT_REQUEST_NOT_SUPPORTED)");
 			mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_REQUEST_NOT_SUPPORTED, offset, null);
+			Logger.v(mLogSession, "[Server] Response sent");
 		}
 
 		@Override
 		public void onExecuteWrite(final BluetoothDevice device, final int requestId, final boolean execute) {
-			Logger.i(mLogSession, "[Server] Execute write request (requestId = " + requestId + ")");
+			Logger.d(mLogSession, "[Server callback] Execute write request (requestId=" + requestId + ", execute=" + execute + ")");
 			// This method is not supported
-			Logger.v(mLogSession, "[Server] Sending response: REQUEST_NOT_SUPPORTED");
-			Logger.d(mLogSession, "[Server] sendResponse(GATT_REQUEST_NOT_SUPPORTED)");
+			Logger.w(mLogSession, "[Server] Operation not supported");
+			Logger.d(mLogSession, "[Server] server.sendResponse(GATT_REQUEST_NOT_SUPPORTED)");
 			mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_REQUEST_NOT_SUPPORTED, 0, null);
+			Logger.v(mLogSession, "[Server] Response sent");
 		}
 	};
 

@@ -862,24 +862,6 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 				}
 			}
 		}
-
-		/**
-		 * Converts the connection state to String value
-		 * @param state the connection state
-		 * @return state as String
-		 */
-		private String stateToString(final int state) {
-			switch (state) {
-				case BluetoothProfile.STATE_CONNECTED:
-					return "CONNECTED";
-				case BluetoothProfile.STATE_CONNECTING:
-					return "CONNECTING";
-				case BluetoothProfile.STATE_DISCONNECTING:
-					return "DISCONNECTING";
-				default:
-					return "DISCONNECTED";
-			}
-		}
 	}
 
 	private static final int PAIRING_VARIANT_PIN = 0;
@@ -890,7 +872,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 	private static final int PAIRING_VARIANT_DISPLAY_PIN = 5;
 	private static final int PAIRING_VARIANT_OOB_CONSENT = 6;
 
-	private String pairingVariantToString(final int variant) {
+	protected String pairingVariantToString(final int variant) {
 		switch (variant) {
 			case PAIRING_VARIANT_PIN:
 				return "PAIRING_VARIANT_PIN";
@@ -911,7 +893,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 		}
 	}
 
-	private String bondStateToString(final int state) {
+	protected String bondStateToString(final int state) {
 		switch (state) {
 			case BluetoothDevice.BOND_NONE:
 				return "BOND_NONE";
@@ -924,7 +906,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 		}
 	}
 
-	private String getWriteType(final int type) {
+	protected String getWriteType(final int type) {
 		switch (type) {
 			case BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT:
 				return "WRITE REQUEST";
@@ -934,6 +916,24 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 				return "WRITE SIGNED";
 			default:
 				return "UNKNOWN: " + type;
+		}
+	}
+
+	/**
+	 * Converts the connection state to String value
+	 * @param state the connection state
+	 * @return state as String
+	 */
+	protected String stateToString(final int state) {
+		switch (state) {
+			case BluetoothProfile.STATE_CONNECTED:
+				return "CONNECTED";
+			case BluetoothProfile.STATE_CONNECTING:
+				return "CONNECTING";
+			case BluetoothProfile.STATE_DISCONNECTING:
+				return "DISCONNECTING";
+			default:
+				return "DISCONNECTED";
 		}
 	}
 }
