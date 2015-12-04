@@ -9,7 +9,7 @@ android {
         minSdkVersion 18
         targetSdkVersion 23
         versionCode 41
-        versionName "1.16.2"
+        versionName "1.16.2 - DFU"
     }
     buildTypes {
         release {
@@ -25,14 +25,12 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
     compile 'no.nordicsemi.android.support.v18:scanner:0.1.1'
-    compile 'no.nordicsemi.android:log:2.0.0'
     compile('org.simpleframework:simple-xml:2.7.1') {
         exclude group: 'stax', module: 'stax-api'
         exclude group: 'xpp3', module: 'xpp3'
     }
     compile files('libs/achartengine-1.1.0.jar')
     compile project(':common')
-    wearApp project(':wear')
 
     // The DFU Library is imported automatically from jcenter.
     compile 'no.nordicsemi.android:dfu:0.6.1'

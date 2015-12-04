@@ -21,16 +21,6 @@
   -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-	<!-- Style ot the Toolbar -->
-	<style name="HeaderBar">
-		<item name="android:background">?colorPrimary</item>
-	</style>
-
-	<style name="HeaderShadow">
-		<item name="android:foreground">@drawable/action_bar_shadow</item>
-		<item name="foreground">@drawable/action_bar_shadow</item>
-	</style>
-
 	<!-- Style used by the Toolbar -->
 	<style name="ActionBarThemeOverlay" parent="@style/ThemeOverlay.AppCompat.ActionBar">
 		<item name="android:textColorPrimary">#000</item>

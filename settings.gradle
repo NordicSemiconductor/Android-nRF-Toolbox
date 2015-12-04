@@ -1,4 +1,4 @@
-include ':app', ':wear', ':common'
+include ':app', ':common'
 
 // Uncomment these lines if you want to import the DFULibrary as a project, not from jcenter
 // include ':dfu'

@@ -22,7 +22,7 @@
   -->
 <resources>
 
-	<string name="app_name">nRF Toolbox</string>
+	<string name="app_name">nRF Toolbox DFU</string>
 	<string name="font_path">fonts/trebucbd.ttf</string>
 	<string name="normal_font_path">fonts/trebuc.ttf</string>
 	
@@ -66,6 +66,6 @@
 	<string name="permission_sd_text">nRF Toolbox would like to copy some sample applications, that may be uploaded onto your nRF51 device using the DFU (Device Firmware Update), to the memory of this device. If you agree, you will be asked to give the application permission to access files on your device.</string>
 	<string name="about_title">About</string>
 	<string name="about_version">\n\nVersion: %s</string>
-	<string name="about_text">The nRF Toolbox is a container application that stores your Nordic Semiconductor apps in one location.</string>
+	<string name="about_text">The nRF Toolbox DFU is a stripped version of the nRF Toolbox app. It contains only the DFU profile.</string>
 
 </resources>

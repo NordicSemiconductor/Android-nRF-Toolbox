@@ -40,7 +40,7 @@ import java.util.Locale;
 import no.nordicsemi.android.nrftoolbox.R;
 
 public class AppAdapter extends BaseAdapter {
-	private static final String CATEGORY = "no.nordicsemi.android.nrftoolbox.LAUNCHER";
+	private static final String CATEGORY = "no.nordicsemi.android.nrftoolbox.dfu.LAUNCHER";
 	private static final String MCP_PACKAGE = "no.nordicsemi.android.mcp";
 
 	private final Context mContext;
