@@ -13,6 +13,8 @@ It contains applications demonstrating Bluetooth Smart profiles:
 
 Since version 1.10.0 the *nRF Toolbox* also supports the **Nordic UART Service** which may be used for bidirectional text communication between devices. 
 
+**Note:** To get a smaller version, with only the DFU profile, switch to the *only_dfu* branch.
+
 ### Nordic UART Service
 
 The UART profile allows for fast prototyping of devices. The service itself it very simple, having just 2 characteristics, one for sending data and one for receiving. The data may be any byte array but it is very often used with just text. Each UART configuration in the nRF Toolbox consists of 9 programmable buttons. Each of them, when pressed, will send the stored command to the device. You may export your configuration to XML and share between other devices. Swipe the screen to right to show the log with all events.
