@@ -122,10 +122,10 @@ public class HTSManager extends BleManager<HTSManagerCallbacks> {
 
 		/*
 		 * Conversion of temperature unit from Fahrenheit to Celsius if unit is in Fahrenheit
-		 * Celsius = (98.6*Fahrenheit -32) 5/9
+		 * Celsius = (Fahrenheit -32) 5/9
 		 */
 		if ((flag & FIRST_BIT_MASK) != 0) {
-			temperatureValue = (float) ((98.6 * temperatureValue - 32) * (5 / 9.0));
+			temperatureValue = (float) ((temperatureValue - 32) * (5 / 9.0));
 		}
 		return temperatureValue;
 	}
