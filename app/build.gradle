@@ -8,8 +8,8 @@ android {
         applicationId "no.nordicsemi.android.nrftoolbox"
         minSdkVersion 18
         targetSdkVersion 23
-        versionCode 41
-        versionName "1.16.2"
+        versionCode 42
+        versionName "1.16.3"
     }
     buildTypes {
         release {
@@ -35,7 +35,7 @@ dependencies {
     wearApp project(':wear')
 
     // The DFU Library is imported automatically from jcenter.
-    compile 'no.nordicsemi.android:dfu:0.6.1'
+    compile 'no.nordicsemi.android:dfu:0.6.2'
     // If you want to make some changes in the DFU Library, clone the https://github.com/NordicSemiconductor/Android-DFU-Library project into DFULibrary folder,
     // add it as a module in Project Structure and uncomment the following line:
 
