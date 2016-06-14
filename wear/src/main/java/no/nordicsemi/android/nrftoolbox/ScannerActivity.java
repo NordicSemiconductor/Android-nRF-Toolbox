@@ -22,6 +22,7 @@
 
 package no.nordicsemi.android.nrftoolbox;
 
+import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -29,9 +30,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.content.PermissionChecker;
 import android.support.wearable.view.WearableListView;
 import android.util.Log;
 import android.view.View;
@@ -42,6 +48,8 @@ import no.nordicsemi.android.nrftoolbox.uart.UARTConfigurationsActivity;
 
 public class ScannerActivity extends Activity {
 	private static final String TAG = "ScannerActivity";
+
+	private static final int PERMISSION_REQUEST_LOCATION = 1;
 
 	private DevicesAdapter mDeviceAdapter;
 	private View mHeader;
@@ -109,8 +117,29 @@ public class ScannerActivity extends Activity {
 	}
 
 	@Override
+	public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
+		switch (requestCode) {
+			case PERMISSION_REQUEST_LOCATION:
+				if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+					mDeviceAdapter.startLeScan();
+				} else {
+					Toast.makeText(ScannerActivity.this, "Location permission required", Toast.LENGTH_SHORT).show();
+					finish();
+				}
+				break;
+		}
+	}
+
+	@Override
 	protected void onResume() {
 		super.onResume();
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+				requestPermissions(new String[] { Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_LOCATION);
+				return;
+			}
+		}
 		mDeviceAdapter.startLeScan();
 	}
 

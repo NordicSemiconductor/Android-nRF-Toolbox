@@ -50,9 +50,21 @@ public class Command {
 		NUMBER_8(18),
 		NUMBER_9(19);
 
-		public int index;
+		public final int index;
 
-		private Icon(final int index) {
+		Icon(final int index) {
+			this.index = index;
+		}
+	}
+
+	public enum Eol {
+		LF(0),
+		CR(1),
+		CR_LF(2);
+
+		public final int index;
+
+		Eol(final int index) {
 			this.index = index;
 		}
 	}
@@ -62,6 +74,9 @@ public class Command {
 
 	@Attribute(required = false)
 	private boolean active = false;
+
+	@Attribute(required = false)
+	private Eol eol = Eol.LF;
 
 	@Attribute(required = false)
 	private Icon icon = Icon.LEFT;
@@ -78,8 +93,16 @@ public class Command {
 	 * Sets whether the command is active.
 	 * @param active true to make it active
 	 */
-	public void setActive(boolean active) {
+	public void setActive(final boolean active) {
 		this.active = active;
+	}
+
+	/**
+	 * Sets the new line type.
+	 * @param eol end of line terminator
+	 */
+	public void setEol(final int eol) {
+		this.eol = Eol.values()[eol];
 	}
 
 	/**
@@ -107,10 +130,25 @@ public class Command {
 	}
 
 	/**
+	 * Returns the new line type.
+	 * @return end of line terminator
+	 */
+	public Eol getEol() {
+		return eol;
+	}
+
+	/**
 	 * Returns the icon index.
 	 * @return the icon index
 	 */
 	public int getIconIndex() {
 		return icon.index;
+	}
+	/**
+	 * Returns the EOL index.
+	 * @return the EOL index
+	 */
+	public int getEolIndex() {
+		return eol.index;
 	}
 }

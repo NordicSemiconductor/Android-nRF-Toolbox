@@ -57,13 +57,17 @@
     
     <string name="uart_edit_title">Configure button</string>
     <string name="uart_edit_command_hint">Enter command</string>
-    <string name="uart_edit_command_error">Command must not be empty</string>
     <string name="uart_edit_active">Active</string>
     <string name="uart_edit_select">Select icon:</string>
     
     <string name="uart_notification_action_disconnect">Disconnect</string> 
     <string name="uart_notification_connected_message">%s is connected.</string>
-    
+
+	<string name="uart_eol">EOL:</string>
+	<string name="uart_eol_cr_lf">CR+LF</string>
+	<string name="uart_eol_lf">LF</string>
+	<string name="uart_eol_cr">CR</string>
+
     <string name="uart_about_text">UART profile (Universal Asynchronous Receiver and Transmitter) is a Bluetooth Smart implementation of the UART standard. It allows for bidirectional 
         text based communication that is often used for debugging and control. 
         \nEach configuration contains 9 programmable buttons that may send commands to the UART TX characteristic. Click on the EDIT menu item to edit buttons actions.

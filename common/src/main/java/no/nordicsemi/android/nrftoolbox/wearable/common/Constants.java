@@ -60,6 +60,7 @@ public final class Constants {
 			public static final class Command {
 				public static final String ICON_ID = "icon_id";
 				public static final String MESSAGE = "message";
+				public static final String EOL = "eol";
 			}
 		}
 	}

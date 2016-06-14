@@ -28,6 +28,7 @@
 
 	<uses-permission android:name="android.permission.BLUETOOTH"/>
 	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
 	<application
 		android:allowBackup="true"
@@ -66,7 +67,9 @@
 		<!-- Service for handling Android Wear synchronization events. -->
 		<service android:name=".wearable.MainWearableListenerService">
 			<intent-filter>
-				<action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
+				<action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+				<action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+				<data android:scheme="wear" android:host="*" android:pathPrefix="/nrftoolbox" />
 			</intent-filter>
 		</service>
 	</application>

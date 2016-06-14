@@ -128,9 +128,9 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	private boolean mEditMode;
 
 	public interface ConfigurationListener {
-		public void onConfigurationModified();
-		public void onConfigurationChanged(final UartConfiguration configuration);
-		public void setEditMode(final boolean editMode);
+		void onConfigurationModified();
+		void onConfigurationChanged(final UartConfiguration configuration);
+		void setEditMode(final boolean editMode);
 	}
 
 	public void setConfigurationListener(final ConfigurationListener listener) {
@@ -318,8 +318,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			return;
 		}
 		if (mEditMode) {
-			final UARTControlFragment fragment = (UARTControlFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_control);
-			fragment.setEditMode(false);
+			setEditMode(false);
 			return;
 		}
 		super.onBackPressed();
@@ -554,11 +553,12 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 		}
 	}
 
-	public void onCommandChanged(final int index, final String message, final boolean active, final int iconIndex) {
+	public void onCommandChanged(final int index, final String message, final boolean active, final int eol, final int iconIndex) {
 		final Command command = mConfiguration.getCommands()[index];
 
 		command.setCommand(message);
 		command.setActive(active);
+		command.setEol(eol);
 		command.setIconIndex(iconIndex);
 		mConfigurationListener.onConfigurationModified();
 		saveConfiguration();
@@ -808,6 +808,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 					final Command command = new Command();
 					command.setCommand(cmd);
 					command.setActive(mPreferences.getBoolean(PREFS_BUTTON_ENABLED + i, false));
+					command.setEol(0); // default one
 					command.setIconIndex(mPreferences.getInt(PREFS_BUTTON_ICON + i, 0));
 					commands[i] = command;
 				}

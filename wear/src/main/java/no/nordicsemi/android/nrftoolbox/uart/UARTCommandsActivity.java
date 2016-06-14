@@ -190,7 +190,7 @@ public class UARTCommandsActivity extends Activity implements UARTCommandsAdapte
 	}
 
 	@Override
-	public void onConnectionFailed(final ConnectionResult connectionResult) {
+	public void onConnectionFailed(@NonNull final ConnectionResult connectionResult) {
 		finish();
 	}
 
@@ -248,10 +248,21 @@ public class UARTCommandsActivity extends Activity implements UARTCommandsAdapte
 	@Override
 	public void onCommandSelected(final Command command) {
 		// Send command to handheld if the watch is not connected directly to the UART device.
+		final Command.Eol eol = command.getEol();
+		String text = command.getCommand();
+		switch (eol) {
+			case CR_LF:
+				text = text.replaceAll("\n", "\r\n");
+				break;
+			case CR:
+				text = text.replaceAll("\n", "\r");
+				break;
+		}
+
 		if (mProfile != null)
-			mProfile.send(command.getCommand());
+			mProfile.send(text);
 		else
-			sendMessageToHandheld(this, command.getCommand());
+			sendMessageToHandheld(this, text);
 	}
 
 	/**

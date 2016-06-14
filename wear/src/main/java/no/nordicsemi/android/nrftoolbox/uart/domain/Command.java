@@ -54,22 +54,37 @@ public class Command implements Parcelable {
 
 		public int index;
 
-		private Icon(final int index) {
+		Icon(final int index) {
 			this.index = index;
 		}
 	}
 
+	public enum Eol {
+		LF(0),
+		CR(1),
+		CR_LF(2);
+
+		public final int index;
+
+		Eol(final int index) {
+			this.index = index;
+		}
+	}
+
+	private Eol eol = Eol.LF;
 	private Icon icon = Icon.LEFT;
 	private String command;
 
 	/* package */ Command(final DataMap dataMap) {
 		icon = Icon.values()[dataMap.getInt(Constants.UART.Configuration.Command.ICON_ID)];
 		command = dataMap.getString(Constants.UART.Configuration.Command.MESSAGE);
+		eol = Eol.values()[dataMap.getInt(Constants.UART.Configuration.Command.EOL)];
 	}
 
 	private Command(final Parcel in) {
 		icon = (Icon) in.readSerializable();
 		command = in.readString();
+		eol = (Eol) in.readSerializable();
 	}
 
 	/**
@@ -78,6 +93,14 @@ public class Command implements Parcelable {
 	 */
 	/* package */ void setCommand(final String command) {
 		this.command = command;
+	}
+
+	/**
+	 * Sets the new line type.
+	 * @param eol end of line terminator
+	 */
+	/* package */ void setEol(final int eol) {
+		this.eol = Eol.values()[eol];
 	}
 
 	/**
@@ -94,6 +117,14 @@ public class Command implements Parcelable {
 	 */
 	public String getCommand() {
 		return command;
+	}
+
+	/**
+	 * Returns the new line type.
+	 * @return end of line terminator
+	 */
+	public Eol getEol() {
+		return eol;
 	}
 
 	/**
@@ -125,5 +156,6 @@ public class Command implements Parcelable {
 	public void writeToParcel(final Parcel dest, int flags) {
 		dest.writeSerializable(icon);
 		dest.writeString(command);
+		dest.writeSerializable(eol);
 	}
 }

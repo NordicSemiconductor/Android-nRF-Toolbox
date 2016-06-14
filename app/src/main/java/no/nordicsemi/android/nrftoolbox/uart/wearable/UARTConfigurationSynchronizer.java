@@ -99,6 +99,7 @@ public class UARTConfigurationSynchronizer {
 				final DataMap item = new DataMap();
 				item.putInt(Constants.UART.Configuration.Command.ICON_ID, command.getIconIndex());
 				item.putString(Constants.UART.Configuration.Command.MESSAGE, command.getCommand());
+				item.putInt(Constants.UART.Configuration.Command.EOL, command.getEolIndex());
 				commands.add(item);
 			}
 		}
