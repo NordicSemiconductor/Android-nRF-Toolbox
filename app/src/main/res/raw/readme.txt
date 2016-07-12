@@ -38,7 +38,7 @@ The peripheral must be programmed with DFU bootloader. Since the DFU_3_0 the but
 
 Execute dfu -? in the command line for usage.
 
-Android 4.3+ device with nRF Toolbox (1.11.0+) or nRF Master Control Panel (2.1.0+) is required.
+Android 4.3+ device with nRF Toolbox (1.11.0+) or nRF Connect (2.1.0+) (formerly known as nRF Master Control Panel) is required.
 The script runs on Windows OS.
 
 2. DFU_3_0.SH

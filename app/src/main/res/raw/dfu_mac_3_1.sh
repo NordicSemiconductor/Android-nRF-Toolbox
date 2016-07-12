@@ -29,7 +29,7 @@
 # -------------
 # 1. Android device with Android version 4.3+ connected by USB cable with the PC
 # 2. The path to Android platform-tools directory must be added to %PATH% environment variable
-# 3. nRF Toolbox (1.11.0+) or nRF Master Control Panel (2.1.0+) application installed on the Android device
+# 3. nRF Toolbox (1.11.0+) or nRF Connect (2.1.0+) (formerly known as nRF Master Control Panel) application installed on the Android device
 # 4. "Developer options" and "USB debugging" must be enabled on the Android device
 #
 # Usage:

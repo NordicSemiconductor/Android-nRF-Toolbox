@@ -28,7 +28,7 @@ rem Requirements:
 rem -------------
 rem 1. Android device with Android version 4.3+ connected by USB cable with the PC
 rem 2. The path to Android platform-tools directory must be added to %PATH% environment variable, f.e: C:\Program Files\Android ADT Bundle\sdk\platform-tools
-rem 3. nRF Toolbox (1.6.0+) or nRF Master Control Panel (1.8.0+) application installed on the Android device
+rem 3. nRF Toolbox (1.6.0+) or nRF Connect (1.8.0+) (formerly known as nRF Master Control Panel) application installed on the Android device
 rem 4. "Developer options" and "USB debugging" must be enabled on the Android device
 rem
 rem Usage:

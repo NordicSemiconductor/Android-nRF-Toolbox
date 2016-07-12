@@ -59,11 +59,11 @@
 				android:layout_width="match_parent"
 				android:layout_height="48dp"
 				android:background="?android:selectableItemBackground"
-				android:drawableLeft="@drawable/ic_mcp_feature_small"
+				android:drawableLeft="@drawable/ic_nrf_connect_feature_small"
 				android:drawablePadding="24dp"
 				android:paddingEnd="@dimen/navdrawer_padding_horiz"
 				android:paddingStart="@dimen/navdrawer_padding_horiz"
-				android:text="@string/drawer_plugin_mcp"/>
+				android:text="@string/drawer_plugin_nrf_connect"/>
 
 		</LinearLayout>
 

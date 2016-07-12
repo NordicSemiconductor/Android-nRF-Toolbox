@@ -52,11 +52,11 @@ import java.util.List;
 import no.nordicsemi.android.nrftoolbox.adapter.AppAdapter;
 
 public class FeaturesActivity extends AppCompatActivity {
-	private static final String MCP_CATEGORY = "no.nordicsemi.android.nrftoolbox.LAUNCHER";
+	private static final String NRF_CONNECT_CATEGORY = "no.nordicsemi.android.nrftoolbox.LAUNCHER";
 	private static final String UTILS_CATEGORY = "no.nordicsemi.android.nrftoolbox.UTILS";
-	private static final String MCP_PACKAGE = "no.nordicsemi.android.mcp";
-	private static final String MCP_CLASS = MCP_PACKAGE + ".DeviceListActivity";
-	private static final String MCP_MARKET_URI = "market://details?id=no.nordicsemi.android.mcp";
+	private static final String NRF_CONNECT_PACKAGE = "no.nordicsemi.android.mcp";
+	private static final String NRF_CONNECT_CLASS = NRF_CONNECT_PACKAGE + ".DeviceListActivity";
+	private static final String NRF_CONNECT_MARKET_URI = "market://details?id=no.nordicsemi.android.mcp";
 
 	private DrawerLayout mDrawerLayout;
 	private ActionBarDrawerToggle mDrawerToggle;
@@ -137,26 +137,26 @@ public class FeaturesActivity extends AppCompatActivity {
 		final LayoutInflater inflater = LayoutInflater.from(this);
 		final PackageManager pm = getPackageManager();
 
-		// look for Master Control Panel
-		final Intent mcpIntent = new Intent(Intent.ACTION_MAIN);
-		mcpIntent.addCategory(MCP_CATEGORY);
-		mcpIntent.setClassName(MCP_PACKAGE, MCP_CLASS);
-		final ResolveInfo mcpInfo = pm.resolveActivity(mcpIntent, 0);
+		// look for nRF Connect
+		final Intent nrfConnectIntent = new Intent(Intent.ACTION_MAIN);
+		nrfConnectIntent.addCategory(NRF_CONNECT_CATEGORY);
+		nrfConnectIntent.setClassName(NRF_CONNECT_PACKAGE, NRF_CONNECT_CLASS);
+		final ResolveInfo nrfConnectInfo = pm.resolveActivity(nrfConnectIntent, 0);
 
-		// configure link to Master Control Panel
-		final TextView mcpItem = (TextView) container.findViewById(R.id.link_mcp);
-		if (mcpInfo == null) {
-			mcpItem.setTextColor(Color.GRAY);
+		// configure link to nRF Connect
+		final TextView nrfConnectItem = (TextView) container.findViewById(R.id.link_mcp);
+		if (nrfConnectInfo == null) {
+			nrfConnectItem.setTextColor(Color.GRAY);
 			ColorMatrix grayscale = new ColorMatrix();
 			grayscale.setSaturation(0.0f);
-			mcpItem.getCompoundDrawables()[0].mutate().setColorFilter(new ColorMatrixColorFilter(grayscale));
+			nrfConnectItem.getCompoundDrawables()[0].mutate().setColorFilter(new ColorMatrixColorFilter(grayscale));
 		}
-		mcpItem.setOnClickListener(new View.OnClickListener() {
+		nrfConnectItem.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(final View v) {
-				Intent action = mcpIntent;
-				if (mcpInfo == null)
-					action = new Intent(Intent.ACTION_VIEW, Uri.parse(MCP_MARKET_URI));
+				Intent action = nrfConnectIntent;
+				if (nrfConnectInfo == null)
+					action = new Intent(Intent.ACTION_VIEW, Uri.parse(NRF_CONNECT_MARKET_URI));
 				action.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 				action.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				try {

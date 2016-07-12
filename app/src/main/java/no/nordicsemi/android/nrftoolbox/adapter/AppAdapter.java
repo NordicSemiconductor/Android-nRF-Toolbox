@@ -41,7 +41,7 @@ import no.nordicsemi.android.nrftoolbox.R;
 
 public class AppAdapter extends BaseAdapter {
 	private static final String CATEGORY = "no.nordicsemi.android.nrftoolbox.LAUNCHER";
-	private static final String MCP_PACKAGE = "no.nordicsemi.android.mcp";
+	private static final String NRF_CONNECT_PACKAGE = "no.nordicsemi.android.mcp";
 
 	private final Context mContext;
 	private final PackageManager mPackageManager;
@@ -60,7 +60,7 @@ public class AppAdapter extends BaseAdapter {
 		final List<ResolveInfo> appList = mApplications = pm.queryIntentActivities(intent, 0);
 		// TODO remove the following loop after some time, when there will be no more MCP 1.1 at the market.
 		for (final ResolveInfo info : appList) {
-			if (MCP_PACKAGE.equals(info.activityInfo.packageName)) {
+			if (NRF_CONNECT_PACKAGE.equals(info.activityInfo.packageName)) {
 				appList.remove(info);
 				break;
 			}

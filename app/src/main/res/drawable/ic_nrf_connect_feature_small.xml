@@ -22,5 +22,5 @@
   -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@drawable/ic_feature_small_bg" />
-    <item android:drawable="@drawable/ic_mcp_feature_fg" />
+    <item android:drawable="@drawable/ic_nrf_connect_feature_fg" />
 </layer-list>

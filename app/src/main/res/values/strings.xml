@@ -40,7 +40,7 @@
 	<string name="drawer_open">Open</string>
 	<string name="drawer_close">Close</string>
 	<string name="drawer_plugins">PLUGINS</string>
-	<string name="drawer_plugin_mcp">nRF Master Control Panel</string>
+	<string name="drawer_plugin_nrf_connect">nRF Connect</string>
 	
 	<string name="battery">%d%%</string>
 	<string name="not_available">n/a</string>
