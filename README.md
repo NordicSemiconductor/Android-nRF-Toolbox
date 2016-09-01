@@ -33,7 +33,7 @@ The wearable application may work in 2 modes: as a remote control of the phone, 
 
 ### Device Firmware Update
 
-The **Device Firmware Update (DFU)** profile allows you to update the application, bootloader and/or the Soft Device image over-the-air (OTA). It is compatible with Nordic Semiconductor nRF51822 devices that have the S110 SoftDevice and bootloader enabled. From version 1.11.0 onward, the nRF Toolbox has allowed to send the required init packet. More information about the init packet may be found here: [init packet handling](https://github.com/NordicSemiconductor/nRF-Master-Control-Panel/tree/master/init%20packet%20handling).
+The **Device Firmware Update (DFU)** profile allows you to update the application, bootloader and/or the Soft Device image over-the-air (OTA). It is compatible with Nordic Semiconductor nRF5 devices that have the SoftDevice and DFU Bootloader flashed. From version 1.11.0 onward, the nRF Toolbox has allowed to send the init packet (required since SDK 7.0). More information about the init packet may be found here: [init packet handling](https://github.com/NordicSemiconductor/Android-nRF-Connect/tree/master/init%20packet%20handling).
 
 The DFU has the following features:
 - Scans for devices that are in DFU mode.
@@ -43,6 +43,7 @@ The DFU has the following features:
 - Pause, resume, and cancel file uploads.
 - Works in portrait and landscape orientation.
 - Includes pre-installed examples that consist of the Bluetooth Smart heart rate service and running speed and cadence service.
+- **Secure DFU** is supported since nRF Toolbox 1.17.0.
 
 #### DFU Settings
 
@@ -50,7 +51,9 @@ To open the DFU settings click the *Settings* button in the top toolbar when on 
 
 **Packet receipt notification procedure** - This switch allows you to turn on and off the packet receipt notification procedure. During the DFU operation the phone sends 20-bytes size packets to the DFU target. It may be configured that once every N packets the phone stops sending and awaits for the Packet Receipt Notification from the device. This feature is required by Android to sync sending data with the remote device, as the callback `onCharacteristicWrite(...)` that follows calling method `gatt.writeCharacteristic(...)` is invoked when the packet is written to the outgoing queue, not when physically transmitted. With this procedure disabled it may happen that the outgoing buffer will be overloaded and the communication stops. The same error may happen when the N number is too big, about 300-400. The receipt notification ensures that the outgoing queue is empty and the DFU target received all packets successfully.
 
-**Number of packets** - This field allows you to set the N number describe above. By default it is set to 10. Depending on the phone model, devices may send and receive different number of packets in each connection interval. Nexus 4, for instance, may send just 1 packet (and receive 3 notifications) while Nexus 5 or 6 send and receive up to 4 packets. By customizing this value you may check which value allows for the fastest transmission on your phone/tablet.
+*Note:* Android 6.0 and newer does not require this option to be enabled. The buffer overflow is now handled correctly and the upload speed is much higher with this option disabled.
+
+**Number of packets** - This field allows you to set the N number describe above. By default it is set to 12. Depending on the phone model, devices may send and receive different number of packets in each connection interval. Nexus 4, for instance, may send just 1 packet (and receive 3 notifications) while Nexus 5 or 6 send and receive up to 4 packets. By customizing this value you may check which value allows for the fastest transmission on your phone/tablet.
 
 **MBR size** - This value is used only to convert HEX files into BIN files. If your packet is already in the BIN format, this value is ignored. The data from addresses lower then this value are being skipped while converting HEX to BIN. This is to prevent from sending the MBR (Master Boot Record) part from the HEX file that contains the Soft Device. The compiled Soft Device contains data that starts at address 0x0000 and contains the MBR. It is followed by the jump to address 0x1000 (default MBR size) where the Soft Device firmware starts. Only the Soft Device part must be sent over DFU.
 
