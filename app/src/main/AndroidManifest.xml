@@ -28,6 +28,7 @@
 	<uses-permission android:name="android.permission.BLUETOOTH" />
 	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+	<uses-permission android:name="android.permission.NFC" />
 	<uses-permission android:name="no.nordicsemi.android.LOG" />
 
 	<uses-feature
@@ -53,6 +54,14 @@
 				<action android:name="android.intent.action.MAIN" />
 
 				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+			<intent-filter>
+				<action android:name="android.nfc.action.NDEF_DISCOVERED" />
+
+				<category android:name="android.intent.category.DEFAULT" />
+
+				<data android:mimeType="application/vnd.no.nordicsemi.type.app"/>
+				<data android:mimeType="application/vnd.no.nordicsemi.type.address"/>
 			</intent-filter>
 		</activity>
 		<activity

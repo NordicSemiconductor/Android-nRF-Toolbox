@@ -228,7 +228,8 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 		mDeviceName = name;
 		mBleManager.setLogger(mLogSession);
 		mDeviceNameView.setText(name != null ? name : getString(R.string.not_available));
-		mConnectButton.setText(R.string.action_disconnect);
+		mConnectButton.setText(R.string.action_connecting);
+		mConnectButton.setEnabled(false);
 		mBleManager.connect(device);
 	}
 
@@ -244,6 +245,7 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 			@Override
 			public void run() {
 				mConnectButton.setText(R.string.action_disconnect);
+				mConnectButton.setEnabled(true);
 			}
 		});
 	}

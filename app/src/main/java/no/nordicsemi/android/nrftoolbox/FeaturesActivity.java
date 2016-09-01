@@ -50,6 +50,7 @@ import android.widget.Toast;
 import java.util.List;
 
 import no.nordicsemi.android.nrftoolbox.adapter.AppAdapter;
+import no.nordicsemi.android.nrftoolbox.hrs.HRSActivity;
 
 public class FeaturesActivity extends AppCompatActivity {
 	private static final String NRF_CONNECT_CATEGORY = "no.nordicsemi.android.nrftoolbox.LAUNCHER";
@@ -57,6 +58,10 @@ public class FeaturesActivity extends AppCompatActivity {
 	private static final String NRF_CONNECT_PACKAGE = "no.nordicsemi.android.mcp";
 	private static final String NRF_CONNECT_CLASS = NRF_CONNECT_PACKAGE + ".DeviceListActivity";
 	private static final String NRF_CONNECT_MARKET_URI = "market://details?id=no.nordicsemi.android.mcp";
+
+	// Extras that can be passed from NFC (see SplashscreenActivity)
+	public static final String EXTRA_APP = "application/vnd.no.nordicsemi.type.app";
+	public static final String EXTRA_ADDRESS = "application/vnd.no.nordicsemi.type.address";
 
 	private DrawerLayout mDrawerLayout;
 	private ActionBarDrawerToggle mDrawerToggle;
@@ -84,7 +89,7 @@ public class FeaturesActivity extends AppCompatActivity {
                 super.onDrawerSlide(drawerView, 0);
             }
         };
-		drawer.setDrawerListener(mDrawerToggle);
+		drawer.addDrawerListener(mDrawerToggle);
 
 		// setup plug-ins in the drawer
 		setupPluginsInDrawer((ViewGroup) drawer.findViewById(R.id.plugin_container));
@@ -95,6 +100,22 @@ public class FeaturesActivity extends AppCompatActivity {
 		grid.setEmptyView(findViewById(android.R.id.empty));
 
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+		final Intent intent = getIntent();
+		if (intent.hasExtra(EXTRA_APP) && intent.hasExtra(EXTRA_ADDRESS)) {
+			final String app = intent.getStringExtra(EXTRA_APP);
+			switch (app) {
+				case "HRM":
+					final Intent newIntent = new Intent(this, HRSActivity.class);
+					newIntent.putExtra(EXTRA_ADDRESS, intent.getByteArrayExtra(EXTRA_ADDRESS));
+					newIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+					startActivity(newIntent);
+					break;
+				default:
+					// other are not supported yet
+					break;
+			}
+		}
 	}
 
 	@Override

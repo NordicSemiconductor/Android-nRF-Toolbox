@@ -21,6 +21,9 @@
  */
 package no.nordicsemi.android.nrftoolbox.hrs;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,6 +35,7 @@ import org.achartengine.GraphicalView;
 
 import java.util.UUID;
 
+import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileActivity;
@@ -84,17 +88,30 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 	}
 
 	@Override
+	protected void onStart() {
+		super.onStart();
+
+		final Intent intent = getIntent();
+		if (!isDeviceConnected() && intent.hasExtra(FeaturesActivity.EXTRA_ADDRESS)) {
+			final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+			final BluetoothDevice device = bluetoothAdapter.getRemoteDevice(getIntent().getByteArrayExtra(FeaturesActivity.EXTRA_ADDRESS));
+			onDeviceSelected(device, device.getName());
+
+			intent.removeExtra(FeaturesActivity.EXTRA_APP);
+			intent.removeExtra(FeaturesActivity.EXTRA_ADDRESS);
+		}
+	}
+
+	@Override
 	protected void onRestoreInstanceState(@NonNull final Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 
-		if (savedInstanceState != null) {
-			isGraphInProgress = savedInstanceState.getBoolean(GRAPH_STATUS);
-			mCounter = savedInstanceState.getInt(GRAPH_COUNTER);
-			mHrmValue = savedInstanceState.getInt(HR_VALUE);
+		isGraphInProgress = savedInstanceState.getBoolean(GRAPH_STATUS);
+		mCounter = savedInstanceState.getInt(GRAPH_COUNTER);
+		mHrmValue = savedInstanceState.getInt(HR_VALUE);
 
-			if (isGraphInProgress)
-				startShowGraph();
-		}
+		if (isGraphInProgress)
+			startShowGraph();
 	}
 
 	@Override

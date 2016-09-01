@@ -443,7 +443,8 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 		}
 		mDeviceName = name;
 		mDeviceNameView.setText(name != null ? name : getString(R.string.not_available));
-		mConnectButton.setText(R.string.action_disconnect);
+		mConnectButton.setText(R.string.action_connecting);
+		mConnectButton.setEnabled(false);
 
 		// The device may not be in the range but the service will try to connect to it if it reach it
 		Logger.d(mLogSession, "Creating service...");
@@ -469,6 +470,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	public void onDeviceConnected() {
 		mDeviceNameView.setText(mDeviceName);
 		mConnectButton.setText(R.string.action_disconnect);
+		mConnectButton.setEnabled(true);
 	}
 
 	@Override
