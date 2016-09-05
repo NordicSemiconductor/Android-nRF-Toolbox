@@ -265,6 +265,7 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 				mConnectButton.setText(R.string.action_connect);
 				mDeviceNameView.setText(getDefaultDeviceName());
 				mBatteryLevelView.setText(R.string.not_available);
+				mConnectButton.setEnabled(true);
 			}
 		});
 	}

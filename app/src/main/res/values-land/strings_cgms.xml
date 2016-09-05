@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2015, Nordic Semiconductor
+  ~ Copyright (c) 2016, Nordic Semiconductor
   ~ All rights reserved.
   ~
   ~ Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -19,48 +20,10 @@
   ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:tools="http://schemas.android.com/tools"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:orientation="vertical"
-	tools:context=".uart.UARTActivity">
 
-	<include
-		android:id="@+id/toolbar_actionbar"
-		layout="@layout/toolbar_w_spinner"/>
-
-	<no.nordicsemi.android.nrftoolbox.widget.ForegroundLinearLayout
-		style="@style/HeaderShadow"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent">
-
-		<fragment
-			android:id="@+id/fragment_control"
-			android:name="no.nordicsemi.android.nrftoolbox.uart.UARTControlFragment"
-			android:layout_width="0dp"
-			android:layout_height="match_parent"
-			android:layout_weight="8"
-			tools:layout="@layout/fragment_feature_uart_control"/>
-
-		<FrameLayout
-			android:layout_width="0dp"
-			android:layout_height="match_parent"
-			android:layout_weight="6">
-
-			<fragment
-				android:id="@+id/fragment_log"
-				android:name="no.nordicsemi.android.nrftoolbox.uart.UARTLogFragment"
-				android:layout_width="match_parent"
-				android:layout_height="match_parent"
-				tools:layout="@layout/fragment_feature_uart_log"/>
-
-			<ImageView
-				android:layout_width="wrap_content"
-				android:layout_height="match_parent"
-				android:scaleType="fitXY"
-				android:src="@drawable/shadow_l"/>
-		</FrameLayout>
-	</no.nordicsemi.android.nrftoolbox.widget.ForegroundLinearLayout>
-
-</LinearLayout>
+<resources>
+    <string name="cgms_feature_title_long">CGMS</string>
+    <string name="text_cgms_interval">GCM updates are notified every minute</string>
+    <string name="cgms_item_summary">Glucose concentration level</string>
+    <dimen name="cgms_feature_title_long_margin">-16dp</dimen>
+</resources>

@@ -9,6 +9,7 @@ It contains applications demonstrating Bluetooth Smart profiles:
 * **Blood Pressure Monitor**, 
 * **Health Thermometer Monitor**, 
 * **Glucose Monitor**,
+* **Continuous Glucose Monitor**,
 * **Proximity Monitor**.
 
 Since version 1.10.0 the *nRF Toolbox* also supports the **Nordic UART Service** which may be used for bidirectional text communication between devices. 

@@ -44,6 +44,13 @@
 			android:layout_height="0dp"
 			android:layout_weight="1">
 
+			<ImageView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="bottom|center"
+				android:layout_marginBottom="6dp"
+				android:src="@drawable/background_title"/>
+
 			<GridView
 				android:id="@+id/grid"
 				android:layout_width="match_parent"
@@ -59,13 +66,6 @@
 				android:paddingTop="@dimen/feature_grid_margin_top"
 				android:scrollbarStyle="outsideOverlay"
 				android:stretchMode="columnWidth"/>
-
-			<ImageView
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_gravity="bottom|center"
-				android:layout_marginBottom="6dp"
-				android:src="@drawable/background_title"/>
 
 			<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
 				android:id="@android:id/empty"

@@ -24,7 +24,7 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:orientation="vertical"
-	tools:context=".HRSActivity">
+	tools:context=".hrs.HRSActivity">
 
 	<include
 		android:id="@+id/toolbar_actionbar"

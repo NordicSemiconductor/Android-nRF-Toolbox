@@ -37,7 +37,7 @@
 	<string name="action_select">SELECT DEVICE</string>
 	<string name="action_connecting">CONNECTING…</string>
 	<string name="action_disconnect">DISCONNECT</string>
-	
+
 	<string name="drawer_open">Open</string>
 	<string name="drawer_close">Close</string>
 	<string name="drawer_plugins">PLUGINS</string>

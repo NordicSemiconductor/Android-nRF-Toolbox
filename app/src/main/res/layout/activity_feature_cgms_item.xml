@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright (c) 2015, Nordic Semiconductor
   ~ All rights reserved.
@@ -20,47 +21,51 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:orientation="vertical"
-	tools:context=".uart.UARTActivity">
+	android:layout_height="?android:attr/listPreferredItemHeightSmall"
+	android:paddingBottom="2dp"
+	android:paddingEnd="4dp"
+	android:paddingStart="?android:attr/listPreferredItemPaddingLeft"
+	android:paddingTop="2dp"
+	android:orientation="horizontal">
 
-	<include
-		android:id="@+id/toolbar_actionbar"
-		layout="@layout/toolbar_w_spinner"/>
+	<LinearLayout
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:orientation="vertical">
 
-	<no.nordicsemi.android.nrftoolbox.widget.ForegroundLinearLayout
-		style="@style/HeaderShadow"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent">
+		<TextView
+			android:id="@+id/time"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textAppearance="?android:attr/textAppearanceListItem"/>
 
-		<fragment
-			android:id="@+id/fragment_control"
-			android:name="no.nordicsemi.android.nrftoolbox.uart.UARTControlFragment"
-			android:layout_width="0dp"
-			android:layout_height="match_parent"
-			android:layout_weight="8"
-			tools:layout="@layout/fragment_feature_uart_control"/>
+		<TextView
+			android:id="@+id/details"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="2dp"
+			android:textAppearance="?android:attr/textAppearanceSmall"
+			android:textSize="12sp"
+			android:text="@string/cgms_item_summary"/>
+	</LinearLayout>
 
-		<FrameLayout
-			android:layout_width="0dp"
-			android:layout_height="match_parent"
-			android:layout_weight="6">
+	<TextView
+		android:id="@+id/cgms_concentration"
+		android:layout_width="0dp"
+		android:layout_height="match_parent"
+		android:layout_weight="1"
+		android:layout_centerVertical="true"
+		android:gravity="right"
+		android:textAppearance="?android:attr/textAppearanceLarge"
+		android:paddingEnd="?android:attr/listPreferredItemPaddingLeft"/>
 
-			<fragment
-				android:id="@+id/fragment_log"
-				android:name="no.nordicsemi.android.nrftoolbox.uart.UARTLogFragment"
-				android:layout_width="match_parent"
-				android:layout_height="match_parent"
-				tools:layout="@layout/fragment_feature_uart_log"/>
-
-			<ImageView
-				android:layout_width="wrap_content"
-				android:layout_height="match_parent"
-				android:scaleType="fitXY"
-				android:src="@drawable/shadow_l"/>
-		</FrameLayout>
-	</no.nordicsemi.android.nrftoolbox.widget.ForegroundLinearLayout>
+	<TextView
+		android:id="@+id/cgms_unit"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:text="@string/cgms_value_unit"/>
 
 </LinearLayout>
