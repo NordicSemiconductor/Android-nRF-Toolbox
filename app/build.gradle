@@ -8,8 +8,8 @@ android {
         applicationId "no.nordicsemi.android.nrftoolbox"
         minSdkVersion 18
         targetSdkVersion 24
-        versionCode 47
-        versionName "1.18.0"
+        versionCode 48
+        versionName "1.18.1"
     }
     buildTypes {
         release {
@@ -22,8 +22,8 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.google.android.gms:play-services-wearable:9.2.0'
-    compile 'com.android.support:appcompat-v7:24.2.0'
-    compile 'com.android.support:design:24.2.0'
+    compile 'com.android.support:appcompat-v7:24.2.1'
+    compile 'com.android.support:design:24.2.1'
     compile 'no.nordicsemi.android.support.v18:scanner:0.2.0'
     compile 'no.nordicsemi.android:log:2.0.0'
     compile('org.simpleframework:simple-xml:2.7.1') {
@@ -35,7 +35,7 @@ dependencies {
     wearApp project(':wear')
 
     // The DFU Library is imported automatically from jcenter.
-    compile 'no.nordicsemi.android:dfu:1.0.0'
+    compile 'no.nordicsemi.android:dfu:1.0.1'
     // If you want to make some changes in the DFU Library, clone the https://github.com/NordicSemiconductor/Android-DFU-Library project into DFULibrary folder,
     // add it as a module in Project Structure and uncomment the following line:
 
