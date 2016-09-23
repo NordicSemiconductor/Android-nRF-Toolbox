@@ -8,8 +8,8 @@ android {
         applicationId "no.nordicsemi.android.nrftoolbox"
         minSdkVersion 20
         targetSdkVersion 24
-        versionCode 49
-        versionName "1.18.2"
+        versionCode 50
+        versionName "1.18.3"
     }
     buildTypes {
         release {
