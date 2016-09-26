@@ -46,4 +46,9 @@ public class DfuService extends DfuBaseService {
 		return NotificationActivity.class;
 	}
 
+	@Override
+	protected boolean isDebug() {
+		// return BuildConfig.DEBUG;
+		return true;
+	}
 }

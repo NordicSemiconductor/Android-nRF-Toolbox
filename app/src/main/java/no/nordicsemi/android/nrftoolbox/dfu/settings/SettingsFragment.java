@@ -22,6 +22,7 @@
 package no.nordicsemi.android.nrftoolbox.dfu.settings;
 
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
@@ -67,7 +68,7 @@ public class SettingsFragment extends PreferenceFragment implements DfuSettingsC
 
 		if (SETTINGS_PACKET_RECEIPT_NOTIFICATION_ENABLED.equals(key)) {
 			final boolean disabled = !preferences.getBoolean(SETTINGS_PACKET_RECEIPT_NOTIFICATION_ENABLED, true);
-			if (disabled) {
+			if (disabled && Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
 				new AlertDialog.Builder(getActivity()).setMessage(R.string.dfu_settings_dfu_number_of_packets_info).setTitle(R.string.dfu_settings_dfu_information)
 						.setPositiveButton(R.string.ok, null).show();
 			}
@@ -95,7 +96,7 @@ public class SettingsFragment extends PreferenceFragment implements DfuSettingsC
         screen.findPreference(SETTINGS_NUMBER_OF_PACKETS).setSummary(value);
 
 		final int valueInt = Integer.parseInt(value);
-		if (valueInt > 200) {
+		if (valueInt > 200 && Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
 			new AlertDialog.Builder(getActivity()).setMessage(R.string.dfu_settings_dfu_number_of_packets_info).setTitle(R.string.dfu_settings_dfu_information)
 					.setPositiveButton(R.string.ok, null)
 					.show();

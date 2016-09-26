@@ -38,6 +38,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -673,10 +674,22 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		showProgressBar();
 
 		final boolean keepBond = preferences.getBoolean(SettingsFragment.SETTINGS_KEEP_BOND, false);
+		final boolean forceDfu = preferences.getBoolean(SettingsFragment.SETTINGS_ASSUME_DFU_NODE, false);
+		final boolean enablePRNs = preferences.getBoolean(SettingsFragment.SETTINGS_PACKET_RECEIPT_NOTIFICATION_ENABLED, Build.VERSION.SDK_INT < Build.VERSION_CODES.M);
+		String value = preferences.getString(SettingsFragment.SETTINGS_NUMBER_OF_PACKETS, String.valueOf(DfuServiceInitiator.DEFAULT_PRN_VALUE));
+		int numberOfPackets;
+		try {
+			numberOfPackets = Integer.parseInt(value);
+		} catch (final NumberFormatException e) {
+			numberOfPackets = DfuServiceInitiator.DEFAULT_PRN_VALUE;
+		}
 
 		final DfuServiceInitiator starter = new DfuServiceInitiator(mSelectedDevice.getAddress())
 				.setDeviceName(mSelectedDevice.getName())
-				.setKeepBond(keepBond);
+				.setKeepBond(keepBond)
+				.setForceDfu(forceDfu)
+				.setPacketsReceiptNotificationsEnabled(enablePRNs)
+				.setPacketsReceiptNotificationsValue(numberOfPackets);
 		if (mFileType == DfuService.TYPE_AUTO)
 			starter.setZip(mFileStreamUri, mFilePath);
 		else {
