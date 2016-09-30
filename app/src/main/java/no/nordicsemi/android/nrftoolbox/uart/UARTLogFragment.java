@@ -36,6 +36,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,11 +48,18 @@ import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.eclipse.paho.client.mqttv3.MqttException;
 
 import no.nordicsemi.android.log.ILogSession;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.iot.IoTClient;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
+import no.nordicsemi.android.nrftoolbox.utils.Constants;
+import no.nordicsemi.android.nrftoolbox.utils.MyIoTActionListener;
+import no.nordicsemi.android.nrftoolbox.utils.MyIoTCallbacks;
 
 public class UARTLogFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 	private static final String SIS_LOG_SCROLL_POSITION = "sis_scroll_position";
@@ -70,6 +78,9 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 
 	private EditText mField;
 	private Button mSendButton;
+
+	private IoTClient iotClient;
+	private MyIoTCallbacks myIoTCallbacks;
 
 	/** The last list view position. */
 	private int mLogScrollPosition;
@@ -104,6 +115,20 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 		}
 	};
 
+	private BroadcastReceiver mDataReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.i("data receiver","data received"+intent.getStringExtra(UARTService.EXTRA_DATA));
+			MyIoTActionListener listener = new MyIoTActionListener(context, Constants.ActionStateStatus.PUBLISH);
+			try {
+				iotClient.publishEvent(Constants.ACCEL_EVENT, "json", intent.getStringExtra(UARTService.EXTRA_DATA), 0, false, listener);
+				Log.i("data receiver","data published"+intent.getStringExtra(UARTService.EXTRA_DATA));
+			} catch (MqttException e) {
+				e.printStackTrace();
+			}
+		}
+	};
+
 	private ServiceConnection mServiceConnection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(final ComponentName name, final IBinder service) {
@@ -133,6 +158,21 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 		super.onCreate(savedInstanceState);
 
 		LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mCommonBroadcastReceiver, makeIntentFilter());
+
+		iotClient = IoTClient.getInstance(getActivity(), "9iybos", "emulator", "Android", "*rX@lR)ABD3A443_1r");
+		myIoTCallbacks = MyIoTCallbacks.getInstance(getActivity());
+		MyIoTActionListener listener = new MyIoTActionListener(getActivity(), Constants.ActionStateStatus.CONNECTING);
+		try {
+			iotClient.connectDevice(myIoTCallbacks,listener,null);
+			Log.i("data receiver", "iotclient connected");
+		} catch (MqttException e) {
+			Log.e("iotclient connect fail", e.getMessage());
+			e.printStackTrace();
+		}
+
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(UARTService.BROADCAST_UART_RX);
+		LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mDataReceiver, intentFilter);
 
 		// Load the last log list view scroll position
 		if (savedInstanceState != null) {
@@ -179,6 +219,15 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 		super.onDestroy();
 
 		LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mCommonBroadcastReceiver);
+		LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mDataReceiver);
+
+		MyIoTActionListener listener = new MyIoTActionListener(getActivity(), Constants.ActionStateStatus.DISCONNECTING);
+		try {
+			iotClient.disconnectDevice(listener);
+			Log.i("data receiver", "iotclient disconnected");
+		} catch (MqttException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override

@@ -52,4 +52,6 @@ dependencies {
     // compile project(':dfu')
 
     // Also uncomment selected lines in settings.gradle
+    compile files('libs/org.eclipse.paho.android.service.jar')
+    compile files('libs/org.eclipse.paho.client.mqttv3.jar')
 }

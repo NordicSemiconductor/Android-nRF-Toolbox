@@ -31,6 +31,11 @@
 	<uses-permission android:name="android.permission.NFC" />
 	<uses-permission android:name="no.nordicsemi.android.LOG" />
 
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+	<uses-permission android:name="android.permission.WAKE_LOCK" />
+
 	<uses-feature
 		android:name="android.hardware.bluetooth_le"
 		android:required="true" />
@@ -260,6 +265,8 @@
 				<data android:scheme="wear" android:host="*" android:pathPrefix="/nrftoolbox" />
 			</intent-filter>
 		</service>
+
+		<service android:name="org.eclipse.paho.android.service.MqttService" />
 
 		<provider android:name="no.nordicsemi.android.nrftoolbox.uart.UARTLocalLogContentProvider"
 			android:authorities="no.nordicsemi.android.nrftoolbox.uart.log"

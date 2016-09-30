@@ -18,8 +18,9 @@ package no.nordicsemi.android.nrftoolbox.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import com.ibm.iot.android.iotstarter.IoTStarterApplication;
-import com.ibm.iot.android.iotstarter.iot.IoTCallbacks;
+
+import no.nordicsemi.android.nrftoolbox.iot.IoTCallbacks;
+
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONException;
@@ -30,11 +31,11 @@ import org.json.JSONException;
 public class MyIoTCallbacks implements IoTCallbacks {
     private final static String TAG = MyIoTCallbacks.class.getName();
     private final Context context;
-    private final IoTStarterApplication app;
+//    private final IoTStarterApplication app;
     private static MyIoTCallbacks myIoTCallbacks;
 
     public MyIoTCallbacks(Context context) {
-        this.app = (IoTStarterApplication) context;
+//        this.app = (IoTStarterApplication) context;
         this.context = context;
     }
 
@@ -57,13 +58,13 @@ public class MyIoTCallbacks implements IoTCallbacks {
             throwable.printStackTrace();
         }
 
-        app.setConnected(false);
+//        app.setConnected(false);
 
         //String runningActivity = app.getCurrentRunningActivity();
         //if (runningActivity != null && runningActivity.equals(LoginPagerFragment.class.getName())) {
-            Intent actionIntent = new Intent(Constants.APP_ID + Constants.INTENT_LOGIN);
-            actionIntent.putExtra(Constants.INTENT_DATA, Constants.INTENT_DATA_DISCONNECT);
-            context.sendBroadcast(actionIntent);
+//            Intent actionIntent = new Intent(Constants.APP_ID + Constants.INTENT_LOGIN);
+//            actionIntent.putExtra(Constants.INTENT_DATA, Constants.INTENT_DATA_DISCONNECT);
+//            context.sendBroadcast(actionIntent);
         //}
     }
 
@@ -78,26 +79,26 @@ public class MyIoTCallbacks implements IoTCallbacks {
     public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
         Log.d(TAG, ".messageArrived() entered");
 
-        int receiveCount = app.getReceiveCount();
-        app.setReceiveCount(++receiveCount);
+//        int receiveCount = app.getReceiveCount();
+//        app.setReceiveCount(++receiveCount);
         //String runningActivity = app.getCurrentRunningActivity();
         //if (runningActivity != null && runningActivity.equals(IoTPagerFragment.class.getName())) {
-            Intent actionIntent = new Intent(Constants.APP_ID + Constants.INTENT_IOT);
-            actionIntent.putExtra(Constants.INTENT_DATA, Constants.INTENT_DATA_RECEIVED);
-            context.sendBroadcast(actionIntent);
+//            Intent actionIntent = new Intent(Constants.APP_ID + Constants.INTENT_IOT);
+//            actionIntent.putExtra(Constants.INTENT_DATA, Constants.INTENT_DATA_RECEIVED);
+//            context.sendBroadcast(actionIntent);
         //}
 
         String payload = new String(mqttMessage.getPayload());
         Log.d(TAG, ".messageArrived - Message received on topic " + topic
                 + ": message is " + payload);
         // TODO: Process message
-        try {
-            // send the message through the application logic
-            MessageConductor.getInstance(context).steerMessage(payload, topic);
-        } catch (JSONException e) {
-            Log.e(TAG, ".messageArrived() - Exception caught while steering a message", e.getCause());
-            e.printStackTrace();
-        }
+//        try {
+//            // send the message through the application logic
+//            MessageConductor.getInstance(context).steerMessage(payload, topic);
+//        } catch (JSONException e) {
+//            Log.e(TAG, ".messageArrived() - Exception caught while steering a message", e.getCause());
+//            e.printStackTrace();
+//        }
     }
 
     /**

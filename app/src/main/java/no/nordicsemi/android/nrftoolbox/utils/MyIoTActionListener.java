@@ -18,9 +18,10 @@ package no.nordicsemi.android.nrftoolbox.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import com.ibm.iot.android.iotstarter.IoTStarterApplication;
-import com.ibm.iot.android.iotstarter.iot.IoTActionListener;
-import com.ibm.iot.android.iotstarter.iot.IoTClient;
+
+import no.nordicsemi.android.nrftoolbox.iot.IoTActionListener;
+import no.nordicsemi.android.nrftoolbox.iot.IoTClient;
+
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
@@ -34,12 +35,12 @@ public class MyIoTActionListener implements IoTActionListener {
 
     private final Context context;
     private final Constants.ActionStateStatus action;
-    private final IoTStarterApplication app;
+//    private final IoTStarterApplication app;
 
     public MyIoTActionListener(Context context, Constants.ActionStateStatus action) {
         this.context = context;
         this.action = action;
-        app = (IoTStarterApplication) context.getApplicationContext();
+//        app = (IoTStarterApplication) context.getApplicationContext();
     }
 
     /**
@@ -107,9 +108,9 @@ public class MyIoTActionListener implements IoTActionListener {
     private void handleConnectSuccess() {
         Log.d(TAG, ".handleConnectSuccess() entered");
 
-        app.setConnected(true);
+//        app.setConnected(true);
 
-        if (app.getConnectionType() != Constants.ConnectionType.QUICKSTART) {
+//        if (app.getConnectionType() != Constants.ConnectionType.QUICKSTART) {
             // create ActionListener to handle message published results
             try {
                 MyIoTActionListener listener = new MyIoTActionListener(context, Constants.ActionStateStatus.PUBLISH);
@@ -118,13 +119,13 @@ public class MyIoTActionListener implements IoTActionListener {
             } catch (MqttException e) {
                 Log.d(TAG, ".handleConnectSuccess() received exception on subscribeToCommand()");
             }
-        }
+//        }
 
-        String runningActivity = app.getCurrentRunningActivity();
+//        String runningActivity = app.getCurrentRunningActivity();
         //if (runningActivity != null && runningActivity.equals(LoginPagerFragment.class.getName())) {
-            Intent actionIntent = new Intent(Constants.APP_ID + Constants.INTENT_LOGIN);
-            actionIntent.putExtra(Constants.INTENT_DATA, Constants.INTENT_DATA_CONNECT);
-            context.sendBroadcast(actionIntent);
+//            Intent actionIntent = new Intent(Constants.APP_ID + Constants.INTENT_LOGIN);
+//            actionIntent.putExtra(Constants.INTENT_DATA, Constants.INTENT_DATA_CONNECT);
+//            context.sendBroadcast(actionIntent);
         //}
     }
 
@@ -148,7 +149,7 @@ public class MyIoTActionListener implements IoTActionListener {
     private void handleDisconnectSuccess() {
         Log.d(TAG, ".handleDisconnectSuccess() entered");
 
-        app.setConnected(false);
+//        app.setConnected(false);
 
         //String runningActivity = app.getCurrentRunningActivity();
         //if (runningActivity != null && runningActivity.equals(LoginPagerFragment.class.getName())) {
@@ -167,13 +168,13 @@ public class MyIoTActionListener implements IoTActionListener {
         Log.e(TAG, ".handleConnectFailure() - Failed with exception", throwable.getCause());
         throwable.printStackTrace();
 
-        app.setConnected(false);
+//        app.setConnected(false);
 
         //String runningActivity = app.getCurrentRunningActivity();
         //if (runningActivity != null && runningActivity.equals(LoginPagerFragment.class.getName())) {
-            Intent actionIntent = new Intent(Constants.APP_ID + Constants.INTENT_LOGIN);
-            actionIntent.putExtra(Constants.INTENT_DATA, Constants.INTENT_DATA_DISCONNECT);
-            context.sendBroadcast(actionIntent);
+//            Intent actionIntent = new Intent(Constants.APP_ID + Constants.INTENT_LOGIN);
+//            actionIntent.putExtra(Constants.INTENT_DATA, Constants.INTENT_DATA_DISCONNECT);
+//            context.sendBroadcast(actionIntent);
         //}
     }
 
