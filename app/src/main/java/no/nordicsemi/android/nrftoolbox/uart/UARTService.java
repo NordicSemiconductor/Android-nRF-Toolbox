@@ -172,7 +172,7 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	}
 
 	@Override
-	public void onDataReceived(final String data) {
+	public void onDataReceived(final byte[] data) {
 		Logger.a(getLogSession(), "\"" + data + "\" received");
 
 		final Intent broadcast = new Intent(BROADCAST_UART_RX);

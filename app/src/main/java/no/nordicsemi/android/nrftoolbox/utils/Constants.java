@@ -47,6 +47,9 @@ public class Constants {
     public final static String DEVICE_TYPE = "Android";
 
     // IoT events and commands
+    public final static String PACK1_EVENT = "pack1";
+    public final static String PACK2_EVENT = "pack2";
+    public final static String PACK3_EVENT = "pack3";
     public final static String ACCEL_EVENT = "accel";
     public final static String COLOR_EVENT = "color";
     public final static String TOUCH_EVENT = "touchmove";

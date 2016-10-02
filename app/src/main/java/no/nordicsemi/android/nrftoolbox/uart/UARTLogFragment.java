@@ -57,7 +57,10 @@ import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.iot.IoTClient;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
+import no.nordicsemi.android.nrftoolbox.utility.ParserUtils;
 import no.nordicsemi.android.nrftoolbox.utils.Constants;
+import no.nordicsemi.android.nrftoolbox.utils.Decoder;
+import no.nordicsemi.android.nrftoolbox.utils.MessageFactory;
 import no.nordicsemi.android.nrftoolbox.utils.MyIoTActionListener;
 import no.nordicsemi.android.nrftoolbox.utils.MyIoTCallbacks;
 
@@ -118,11 +121,27 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 	private BroadcastReceiver mDataReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			Log.i("data receiver","data received"+intent.getStringExtra(UARTService.EXTRA_DATA));
+			byte[] data = intent.getByteArrayExtra(UARTService.EXTRA_DATA);
+			String text = ParserUtils.parse(data);
+			Log.i("data receiver","data received "+text+" size "+data.length);
 			MyIoTActionListener listener = new MyIoTActionListener(context, Constants.ActionStateStatus.PUBLISH);
+			String msg = Decoder.decode(data);
 			try {
-				iotClient.publishEvent(Constants.ACCEL_EVENT, "json", intent.getStringExtra(UARTService.EXTRA_DATA), 0, false, listener);
-				Log.i("data receiver","data published"+intent.getStringExtra(UARTService.EXTRA_DATA));
+				String eventType=Constants.ACCEL_EVENT;
+				if (data[2] == 0x01)
+				{
+					eventType = Constants.PACK1_EVENT;
+				}
+				else if (data[2] == 0x02)
+				{
+					eventType = Constants.PACK2_EVENT;
+				}
+				else if (data[2] == 0x03)
+				{
+					eventType = Constants.PACK3_EVENT;
+				}
+				iotClient.publishEvent(eventType, "json", msg, 0, false, listener);
+				Log.i("data receiver","data published"+text);
 			} catch (MqttException e) {
 				e.printStackTrace();
 			}

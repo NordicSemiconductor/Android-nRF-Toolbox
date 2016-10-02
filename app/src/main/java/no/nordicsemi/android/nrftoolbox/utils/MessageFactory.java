@@ -21,6 +21,12 @@ package no.nordicsemi.android.nrftoolbox.utils;
  */
 public class MessageFactory {
 
+    public static String getPack1Message( String msg ){
+        return "{ \"d\": {" +
+                "\"all\":" + msg + ", " +
+                "} }";
+    }
+
     /**
      * Construct a JSON formatted string accel event message
      * @param G Float array with accelerometer x, y, z data

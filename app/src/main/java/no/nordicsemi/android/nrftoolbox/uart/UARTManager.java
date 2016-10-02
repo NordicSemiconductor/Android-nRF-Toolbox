@@ -34,6 +34,7 @@ import java.util.Queue;
 import java.util.UUID;
 
 import no.nordicsemi.android.nrftoolbox.profile.BleManager;
+import no.nordicsemi.android.nrftoolbox.utility.ParserUtils;
 
 public class UARTManager extends BleManager<UARTManagerCallbacks> {
 	/** Nordic UART Service UUID */
@@ -123,7 +124,8 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 
 		@Override
 		public void onCharacteristicNotified(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
-			final String data = characteristic.getStringValue(0);
+//			final String data = characteristic.getStringValue(0);
+			final byte[] data = characteristic.getValue();
 			mCallbacks.onDataReceived(data);
 		}
 	};
