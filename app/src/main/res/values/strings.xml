@@ -37,8 +37,11 @@
 	<string name="action_connecting">正在连接…</string>
 	<string name="action_disconnect">断开</string>
 
-	<string name="label_user">用户</string>
+	<string name="label_user">用户名</string>
 	<string name="label_token">密码</string>
+	<string name="label_power">Powered by</string>
+	<string name="label_bluemix">IBM Bluemix</string>
+	<string name="label_cloudant">IBM Cloudant</string>
 
 	<string name="drawer_open">Open</string>
 	<string name="drawer_close">Close</string>
@@ -55,12 +58,12 @@
 	<string name="no_uri_application">There is no application that can open this URI.</string>
 	<string name="no_application_play">Google Play not installed.</string>
 	<string name="no_required_permission">Permission denied.</string>
-	<string name="scanner_title">Select device:</string>
-	<string name="scanner_empty">No device found</string>
-	<string name="scanner_action_scan">Scan</string>
-	<string name="scanner_action_cancel">Cancel</string>
-	<string name="scanner_subtitle_bonded">BONDED DEVICES:</string>
-	<string name="scanner_subtitle_not_bonded">AVAILABLE DEVICES:</string>
+	<string name="scanner_title">请选择设备:</string>
+	<string name="scanner_empty">没有发现设备</string>
+	<string name="scanner_action_scan">扫描</string>
+	<string name="scanner_action_cancel">取消</string>
+	<string name="scanner_subtitle_bonded">已绑定设备:</string>
+	<string name="scanner_subtitle_not_bonded">可用设备:</string>
 	<string name="scanner_permission_rationale">Since Android 6.0 Marshmallow system requires granting access to device\'s location in order to scan for Bluetooth Smart devices. Bluetooth beacons may be used to determine the phone\'s and user\'s location.</string>
 
 	<string name="log" formatted="false">%1$tR:%1$tS.%1$tL</string>
