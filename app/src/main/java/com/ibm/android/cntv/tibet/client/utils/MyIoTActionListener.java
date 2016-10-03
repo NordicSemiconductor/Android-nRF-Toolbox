@@ -106,6 +106,7 @@ public class MyIoTActionListener implements IoTActionListener {
      */
     private void handleConnectSuccess() {
         Log.d(TAG, ".handleConnectSuccess() entered");
+//        connected = true;
 
 //        app.setConnected(true);
 

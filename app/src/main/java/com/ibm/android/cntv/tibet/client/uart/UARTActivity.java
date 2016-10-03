@@ -25,7 +25,10 @@ package com.ibm.android.cntv.tibet.client.uart;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -33,6 +36,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -68,6 +72,7 @@ import java.io.StringWriter;
 import java.util.UUID;
 
 import com.ibm.android.cntv.tibet.client.R;
+import com.ibm.android.cntv.tibet.client.iot.IoTDataService;
 import com.ibm.android.cntv.tibet.client.profile.BleProfileService;
 import com.ibm.android.cntv.tibet.client.profile.BleProfileServiceReadyActivity;
 import com.ibm.android.cntv.tibet.client.uart.database.DatabaseHelper;
@@ -273,14 +278,17 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 	@Override
 	public void onConnectClicked(View view) {
-		super.onConnectClicked(view);
+		if(mService==null) {
+			mUser = ((EditText) findViewById(R.id.value_user)).getText().toString();
+			mPreferences.edit().putString("iot_user", mUser).apply();
+			mToken = ((EditText) findViewById(R.id.value_token)).getText().toString();
+			mPreferences.edit().putString("iot_token", mToken).apply();
 
-//		SharedPreferences pref = getApplicationContext().getSharedPreferences("iot", MODE_PRIVATE);
-		mUser = ((EditText)findViewById(R.id.value_user)).getText().toString();
-		mPreferences.edit().putString("iot_user", mUser).apply();
-		mToken = ((EditText)findViewById(R.id.value_token)).getText().toString();
-		mPreferences.edit().putString("iot_token", mToken).apply();
-//		mPreferences.edit().commit();
+			if (mIoTDataServiceBinder != null)
+				mIoTDataServiceBinder.updateUserToken(mUser, mToken);
+		}
+
+		super.onConnectClicked(view);
 	}
 
 	@Override

@@ -116,44 +116,44 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 		}
 	};
 
-	private BroadcastReceiver mDataReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			byte[] data = intent.getByteArrayExtra(UARTService.EXTRA_DATA);
-			String text = ParserUtils.parse(data);
-			Log.i("data receiver","data received "+text+" size "+data.length);
-			if(data.length!=20){
-				Log.w("data receiver","incorrect message length! "+text+" size "+data.length);
-				return;
-			}
-			MyIoTActionListener listener = new MyIoTActionListener(context, Constants.ActionStateStatus.PUBLISH);
-			String msg = Decoder.decode(data);
-			try {
-				String eventType="";
-				if (data[2] == 0x01)
-				{
-					eventType = Constants.PACK1_EVENT;
-				}
-				else if (data[2] == 0x02)
-				{
-					eventType = Constants.PACK2_EVENT;
-				}
-				else if (data[2] == 0x03)
-				{
-					eventType = Constants.PACK3_EVENT;
-				}
-				if(eventType.length()>0) {
-					iotClient.publishEvent(eventType, "json", msg, 0, false, listener);
-					Log.i("data receiver", "data published" + text);
-				}
-				else {
-					Log.w("data receiver", "unknown message type! data not published" + text);
-				}
-			} catch (MqttException e) {
-				e.printStackTrace();
-			}
-		}
-	};
+//	private BroadcastReceiver mDataReceiver = new BroadcastReceiver() {
+//		@Override
+//		public void onReceive(Context context, Intent intent) {
+//			byte[] data = intent.getByteArrayExtra(UARTService.EXTRA_DATA);
+//			String text = ParserUtils.parse(data);
+//			Log.i("data receiver","data received "+text+" size "+data.length);
+//			if(data.length!=20){
+//				Log.w("data receiver","incorrect message length! "+text+" size "+data.length);
+//				return;
+//			}
+//			MyIoTActionListener listener = new MyIoTActionListener(context, Constants.ActionStateStatus.PUBLISH);
+//			String msg = Decoder.decode(data);
+//			try {
+//				String eventType="";
+//				if (data[2] == 0x01)
+//				{
+//					eventType = Constants.PACK1_EVENT;
+//				}
+//				else if (data[2] == 0x02)
+//				{
+//					eventType = Constants.PACK2_EVENT;
+//				}
+//				else if (data[2] == 0x03)
+//				{
+//					eventType = Constants.PACK3_EVENT;
+//				}
+//				if(eventType.length()>0) {
+//					iotClient.publishEvent(eventType, "json", msg, 0, false, listener);
+//					Log.i("data receiver", "data published" + text);
+//				}
+//				else {
+//					Log.w("data receiver", "unknown message type! data not published" + text);
+//				}
+//			} catch (MqttException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//	};
 
 	private ServiceConnection mServiceConnection = new ServiceConnection() {
 		@Override
@@ -185,20 +185,20 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 
 		LocalBroadcastManager.getInstance(getContext()).registerReceiver(mCommonBroadcastReceiver, makeIntentFilter());
 
-		iotClient = IoTClient.getInstance(getContext(), "9iybos", "emulator", "Android", "*rX@lR)ABD3A443_1r");
-		myIoTCallbacks = MyIoTCallbacks.getInstance(getContext());
-		MyIoTActionListener listener = new MyIoTActionListener(getContext(), Constants.ActionStateStatus.CONNECTING);
-		try {
-			iotClient.connectDevice(myIoTCallbacks,listener,null);
-			Log.i("data receiver", "iotclient connected");
-		} catch (MqttException e) {
-			Log.e("iotclient connect fail", e.getMessage());
-			e.printStackTrace();
-		}
-
-		IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction(UARTService.BROADCAST_UART_RX);
-		LocalBroadcastManager.getInstance(getContext()).registerReceiver(mDataReceiver, intentFilter);
+//		iotClient = IoTClient.getInstance(getContext(), "9iybos", "emulator", "Android", "*rX@lR)ABD3A443_1r");
+//		myIoTCallbacks = MyIoTCallbacks.getInstance(getContext());
+//		MyIoTActionListener listener = new MyIoTActionListener(getContext(), Constants.ActionStateStatus.CONNECTING);
+//		try {
+//			iotClient.connectDevice(myIoTCallbacks,listener,null);
+//			Log.i("data receiver", "iotclient connected");
+//		} catch (MqttException e) {
+//			Log.e("iotclient connect fail", e.getMessage());
+//			e.printStackTrace();
+//		}
+//
+//		IntentFilter intentFilter = new IntentFilter();
+//		intentFilter.addAction(UARTService.BROADCAST_UART_RX);
+//		LocalBroadcastManager.getInstance(getContext()).registerReceiver(mDataReceiver, intentFilter);
 
 		// Load the last log list view scroll position
 		if (savedInstanceState != null) {
@@ -245,15 +245,15 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 		super.onDestroy();
 
 		LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mCommonBroadcastReceiver);
-		LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mDataReceiver);
-
-		MyIoTActionListener listener = new MyIoTActionListener(getActivity(), Constants.ActionStateStatus.DISCONNECTING);
-		try {
-			iotClient.disconnectDevice(listener);
-			Log.i("data receiver", "iotclient disconnected");
-		} catch (MqttException e) {
-			e.printStackTrace();
-		}
+//		LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mDataReceiver);
+//
+//		MyIoTActionListener listener = new MyIoTActionListener(getActivity(), Constants.ActionStateStatus.DISCONNECTING);
+//		try {
+//			iotClient.disconnectDevice(listener);
+//			Log.i("data receiver", "iotclient disconnected");
+//		} catch (MqttException e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	@Override

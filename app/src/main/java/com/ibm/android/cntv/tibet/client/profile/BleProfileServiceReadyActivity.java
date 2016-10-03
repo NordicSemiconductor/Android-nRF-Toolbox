@@ -54,6 +54,7 @@ import no.nordicsemi.android.log.LocalLogSession;
 import no.nordicsemi.android.log.Logger;
 import com.ibm.android.cntv.tibet.client.AppHelpFragment;
 import com.ibm.android.cntv.tibet.client.R;
+import com.ibm.android.cntv.tibet.client.iot.IoTDataService;
 import com.ibm.android.cntv.tibet.client.scanner.ScannerFragment;
 import com.ibm.android.cntv.tibet.client.utility.DebugLogger;
 
@@ -77,7 +78,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	private static final String LOG_URI = "log_uri";
 	protected static final int REQUEST_ENABLE_BT = 2;
 
-	private E mService;
+	protected E mService;
 
 //	private TextView mDeviceNameView;
 	private TextView mBatteryLevelView;
@@ -85,6 +86,20 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 
 	private ILogSession mLogSession;
 	private String mDeviceName;
+
+	protected IoTDataService.IoTDataServiceBinder mIoTDataServiceBinder;
+
+	private ServiceConnection mIoTDataServiceConn = new ServiceConnection() {
+		@Override
+		public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+			mIoTDataServiceBinder = (IoTDataService.IoTDataServiceBinder)iBinder;
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName componentName) {
+			mIoTDataServiceBinder = null;
+		}
+	};
 
 	private final BroadcastReceiver mCommonBroadcastReceiver = new BroadcastReceiver() {
 		@Override
@@ -223,6 +238,10 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 		onViewCreated(savedInstanceState);
 
 		LocalBroadcastManager.getInstance(this).registerReceiver(mCommonBroadcastReceiver, makeIntentFilter());
+
+		final Intent iotservice = new Intent(this, IoTDataService.class);
+		startService(iotservice);
+		bindService(iotservice, mIoTDataServiceConn, 0);
 	}
 
 	@Override
@@ -236,6 +255,9 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 		final Intent service = new Intent(this, getServiceClass());
 		if (bindService(service, mServiceConnection, 0)) // we pass 0 as a flag so the service will not be created if not exists
 			Logger.d(mLogSession, "Binding to the service..."); // (* - see the comment below)
+
+		Intent iotservice = new Intent(this, IoTDataService.class);
+		bindService(iotservice, mIoTDataServiceConn, 0);
 
 		/*
 		 * * - When user exited the UARTActivity while being connected, the log session is kept in the service. We may not get it before binding to it so in this
@@ -255,6 +277,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 
 			Logger.d(mLogSession, "Unbinding from the service...");
 			unbindService(mServiceConnection);
+			unbindService(mIoTDataServiceConn);
 			mService = null;
 
 			Logger.d(mLogSession, "Activity unbinded from the service");
