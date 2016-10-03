@@ -59,6 +59,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -121,12 +122,15 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	private UartConfiguration mConfiguration;
 	private DatabaseHelper mDatabaseHelper;
 	private SharedPreferences mPreferences;
-	private UARTConfigurationsAdapter mConfigurationsAdapter;
-	private ClosableSpinner mConfigurationSpinner;
+//	private UARTConfigurationsAdapter mConfigurationsAdapter;
+//	private ClosableSpinner mConfigurationSpinner;
 	private SlidingPaneLayout mSlider;
 	private UARTService.UARTBinder mServiceBinder;
 	private ConfigurationListener mConfigurationListener;
-	private boolean mEditMode;
+//	private boolean mEditMode;
+
+	private String mUser;
+	private String mToken;
 
 	public interface ConfigurationListener {
 		void onConfigurationModified();
@@ -173,7 +177,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 		mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		mDatabaseHelper = new DatabaseHelper(this);
 		ensureFirstConfiguration(mDatabaseHelper);
-		mConfigurationsAdapter = new UARTConfigurationsAdapter(this, this, mDatabaseHelper.getConfigurationsNames());
+//		mConfigurationsAdapter = new UARTConfigurationsAdapter(this, this, mDatabaseHelper.getConfigurationsNames());
 
 		// Initialize Wearable synchronizer
 		mWearableSynchronizer = UARTConfigurationSynchronizer.from(this, this);
@@ -250,25 +254,30 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	protected void onViewCreated(final Bundle savedInstanceState) {
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-		final ClosableSpinner configurationSpinner = mConfigurationSpinner = (ClosableSpinner) findViewById(R.id.toolbar_spinner);
-		configurationSpinner.setOnItemSelectedListener(this);
-		configurationSpinner.setAdapter(mConfigurationsAdapter);
-		configurationSpinner.setSelection(mConfigurationsAdapter.getItemPosition(mPreferences.getLong(PREFS_CONFIGURATION, 0)));
+//		final ClosableSpinner configurationSpinner = mConfigurationSpinner = (ClosableSpinner) findViewById(R.id.toolbar_spinner);
+//		configurationSpinner.setOnItemSelectedListener(this);
+//		configurationSpinner.setAdapter(mConfigurationsAdapter);
+//		configurationSpinner.setSelection(mConfigurationsAdapter.getItemPosition(mPreferences.getLong(PREFS_CONFIGURATION, 0)));
+
+		mUser = mPreferences.getString("iot_user", "");
+		((EditText)findViewById(R.id.value_user)).setText(mUser);
+		mToken = mPreferences.getString("iot_token", "");
+		((EditText)findViewById(R.id.value_token)).setText(mToken);
 	}
 
 	@Override
 	protected void onRestoreInstanceState(final @NonNull Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 
-		mEditMode = savedInstanceState.getBoolean(SIS_EDIT_MODE);
-		setEditMode(mEditMode, false);
+//		mEditMode = savedInstanceState.getBoolean(SIS_EDIT_MODE);
+//		setEditMode(mEditMode, false);
 	}
 
 	@Override
 	public void onSaveInstanceState(final Bundle outState) {
 		super.onSaveInstanceState(outState);
 
-		outState.putBoolean(SIS_EDIT_MODE, mEditMode);
+//		outState.putBoolean(SIS_EDIT_MODE, mEditMode);
 	}
 
 	@Override
@@ -284,6 +293,18 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 		// Notify the log fragment about it
 		final UARTLogFragment logFragment = (UARTLogFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_log);
 		logFragment.onServiceStarted();
+	}
+
+	@Override
+	public void onConnectClicked(View view) {
+		super.onConnectClicked(view);
+
+//		SharedPreferences pref = getApplicationContext().getSharedPreferences("iot", MODE_PRIVATE);
+		mUser = ((EditText)findViewById(R.id.value_user)).getText().toString();
+		mPreferences.edit().putString("iot_user", mUser).apply();
+		mToken = ((EditText)findViewById(R.id.value_token)).getText().toString();
+		mPreferences.edit().putString("iot_token", mToken).apply();
+//		mPreferences.edit().commit();
 	}
 
 	@Override
@@ -314,94 +335,95 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 	@Override
 	public void onBackPressed() {
-		if (mSlider != null && mSlider.isOpen()) {
-			mSlider.closePane();
-			return;
-		}
-		if (mEditMode) {
-			setEditMode(false);
-			return;
-		}
+//		if (mSlider != null && mSlider.isOpen()) {
+//			mSlider.closePane();
+//			return;
+//		}
+//		if (mEditMode) {
+//			setEditMode(false);
+//			return;
+//		}
 		super.onBackPressed();
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(final Menu menu) {
-		getMenuInflater().inflate(R.menu.uart_menu_configurations, menu);
-		getMenuInflater().inflate(mEditMode ? R.menu.uart_menu_config : R.menu.uart_menu, menu);
-
-		final int configurationsCount = mDatabaseHelper.getConfigurationsCount();
-		menu.findItem(R.id.action_remove).setVisible(configurationsCount > 1);
-		return super.onCreateOptionsMenu(menu);
+//		getMenuInflater().inflate(R.menu.uart_menu_configurations, menu);
+//		getMenuInflater().inflate(mEditMode ? R.menu.uart_menu_config : R.menu.uart_menu, menu);
+//
+//		final int configurationsCount = mDatabaseHelper.getConfigurationsCount();
+//		menu.findItem(R.id.action_remove).setVisible(configurationsCount > 1);
+//		return super.onCreateOptionsMenu(menu);
+		return false;
 	}
 
 	@Override
 	protected boolean onOptionsItemSelected(int itemId) {
-		final String name = mConfiguration.getName();
-		switch (itemId) {
-			case R.id.action_configure:
-				setEditMode(!mEditMode);
-				return true;
-			case R.id.action_show_log:
-				mSlider.openPane();
-				return true;
-			case R.id.action_share: {
-				final String xml = mDatabaseHelper.getConfiguration(mConfigurationSpinner.getSelectedItemId());
-
-				final Intent intent = new Intent(Intent.ACTION_SEND);
-				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				intent.setType("text/xml");
-				intent.putExtra(Intent.EXTRA_TEXT, xml);
-				intent.putExtra(Intent.EXTRA_SUBJECT, mConfiguration.getName());
-				try {
-					startActivity(intent);
-				} catch (final ActivityNotFoundException e) {
-					Toast.makeText(this, R.string.no_uri_application, Toast.LENGTH_SHORT).show();
-				}
-				return true;
-			}
-			case R.id.action_export: {
-				if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-					exportConfiguration();
-				} else {
-					ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE }, PERMISSION_REQ);
-				}
-				return true;
-			}
-			case R.id.action_rename: {
-				final DialogFragment fragment = UARTNewConfigurationDialogFragment.getInstance(name, false);
-				fragment.show(getSupportFragmentManager(), null);
-				// onNewConfiguration(name, false) will be called when user press OK
-				return true;
-			}
-			case R.id.action_duplicate: {
-				final DialogFragment fragment = UARTNewConfigurationDialogFragment.getInstance(name, true);
-				fragment.show(getSupportFragmentManager(), null);
-				// onNewConfiguration(name, true) will be called when user press OK
-				return true;
-			}
-			case R.id.action_remove: {
-				mDatabaseHelper.removeDeletedServerConfigurations(); // just to be sure nothing has left
-				final UartConfiguration removedConfiguration = mConfiguration;
-				final long id = mDatabaseHelper.deleteConfiguration(name);
-				if (id >= 0)
-					mWearableSynchronizer.onConfigurationDeleted(id);
-				refreshConfigurations();
-
-				final Snackbar snackbar = Snackbar.make(mSlider, R.string.uart_configuration_deleted, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_undo, new View.OnClickListener() {
-					@Override
-					public void onClick(final View v) {
-						final long id = mDatabaseHelper.restoreDeletedServerConfiguration(name);
-						if (id >= 0)
-							mWearableSynchronizer.onConfigurationAddedOrEdited(id, removedConfiguration);
-						refreshConfigurations();
-					}
-				});
-				snackbar.setDuration(5000); // This is not an error
-				snackbar.show();
-				return true;
-			}
-		}
+//		final String name = mConfiguration.getName();
+//		switch (itemId) {
+//			case R.id.action_configure:
+//				setEditMode(!mEditMode);
+//				return true;
+//			case R.id.action_show_log:
+//				mSlider.openPane();
+//				return true;
+//			case R.id.action_share: {
+//				final String xml = mDatabaseHelper.getConfiguration(mConfigurationSpinner.getSelectedItemId());
+//
+//				final Intent intent = new Intent(Intent.ACTION_SEND);
+//				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//				intent.setType("text/xml");
+//				intent.putExtra(Intent.EXTRA_TEXT, xml);
+//				intent.putExtra(Intent.EXTRA_SUBJECT, mConfiguration.getName());
+//				try {
+//					startActivity(intent);
+//				} catch (final ActivityNotFoundException e) {
+//					Toast.makeText(this, R.string.no_uri_application, Toast.LENGTH_SHORT).show();
+//				}
+//				return true;
+//			}
+//			case R.id.action_export: {
+//				if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+//					exportConfiguration();
+//				} else {
+//					ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE }, PERMISSION_REQ);
+//				}
+//				return true;
+//			}
+//			case R.id.action_rename: {
+//				final DialogFragment fragment = UARTNewConfigurationDialogFragment.getInstance(name, false);
+//				fragment.show(getSupportFragmentManager(), null);
+//				// onNewConfiguration(name, false) will be called when user press OK
+//				return true;
+//			}
+//			case R.id.action_duplicate: {
+//				final DialogFragment fragment = UARTNewConfigurationDialogFragment.getInstance(name, true);
+//				fragment.show(getSupportFragmentManager(), null);
+//				// onNewConfiguration(name, true) will be called when user press OK
+//				return true;
+//			}
+//			case R.id.action_remove: {
+//				mDatabaseHelper.removeDeletedServerConfigurations(); // just to be sure nothing has left
+//				final UartConfiguration removedConfiguration = mConfiguration;
+//				final long id = mDatabaseHelper.deleteConfiguration(name);
+//				if (id >= 0)
+//					mWearableSynchronizer.onConfigurationDeleted(id);
+//				refreshConfigurations();
+//
+//				final Snackbar snackbar = Snackbar.make(mSlider, R.string.uart_configuration_deleted, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_undo, new View.OnClickListener() {
+//					@Override
+//					public void onClick(final View v) {
+//						final long id = mDatabaseHelper.restoreDeletedServerConfiguration(name);
+//						if (id >= 0)
+//							mWearableSynchronizer.onConfigurationAddedOrEdited(id, removedConfiguration);
+//						refreshConfigurations();
+//					}
+//				});
+//				snackbar.setDuration(5000); // This is not an error
+//				snackbar.show();
+//				return true;
+//			}
+//		}
 		return false;
 	}
 
@@ -423,35 +445,35 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 	@Override
 	public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
-		if (position > 0) { // FIXME this is called twice after rotation.
-			try {
-				final String xml = mDatabaseHelper.getConfiguration(id);
-				final Format format = new Format(new HyphenStyle());
-				final Serializer serializer = new Persister(format);
-				mConfiguration = serializer.read(UartConfiguration.class, xml);
-				mConfigurationListener.onConfigurationChanged(mConfiguration);
-			} catch (final Exception e) {
-				Log.e(TAG, "Selecting configuration failed", e);
-
-				String message;
-				if (e.getLocalizedMessage() != null)
-					message = e.getLocalizedMessage();
-				else if (e.getCause() != null && e.getCause().getLocalizedMessage() != null)
-					message = e.getCause().getLocalizedMessage();
-				else
-					message = "Unknown error";
-				final String msg = message;
-				Snackbar.make(mSlider, R.string.uart_configuration_loading_failed, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_details, new View.OnClickListener() {
-					@Override
-					public void onClick(final View v) {
-						new AlertDialog.Builder(UARTActivity.this).setMessage(msg).setTitle(R.string.uart_action_details).setPositiveButton(R.string.ok, null).show();
-					}
-				}).show();
-				return;
-			}
-
-			mPreferences.edit().putLong(PREFS_CONFIGURATION, id).apply();
-		}
+//		if (position > 0) { // FIXME this is called twice after rotation.
+//			try {
+//				final String xml = mDatabaseHelper.getConfiguration(id);
+//				final Format format = new Format(new HyphenStyle());
+//				final Serializer serializer = new Persister(format);
+//				mConfiguration = serializer.read(UartConfiguration.class, xml);
+//				mConfigurationListener.onConfigurationChanged(mConfiguration);
+//			} catch (final Exception e) {
+//				Log.e(TAG, "Selecting configuration failed", e);
+//
+//				String message;
+//				if (e.getLocalizedMessage() != null)
+//					message = e.getLocalizedMessage();
+//				else if (e.getCause() != null && e.getCause().getLocalizedMessage() != null)
+//					message = e.getCause().getLocalizedMessage();
+//				else
+//					message = "Unknown error";
+//				final String msg = message;
+//				Snackbar.make(mSlider, R.string.uart_configuration_loading_failed, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_details, new View.OnClickListener() {
+//					@Override
+//					public void onClick(final View v) {
+//						new AlertDialog.Builder(UARTActivity.this).setMessage(msg).setTitle(R.string.uart_action_details).setPositiveButton(R.string.ok, null).show();
+//					}
+//				}).show();
+//				return;
+//			}
+//
+//			mPreferences.edit().putLong(PREFS_CONFIGURATION, id).apply();
+//		}
 	}
 
 	@Override
@@ -462,11 +484,11 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	@Override
 	public void onNewConfigurationClick() {
 		// No item has been selected. We must close the spinner manually.
-		mConfigurationSpinner.close();
-
-		// Open the dialog
-		final DialogFragment fragment = UARTNewConfigurationDialogFragment.getInstance(null, false);
-		fragment.show(getSupportFragmentManager(), null);
+//		mConfigurationSpinner.close();
+//
+//		// Open the dialog
+//		final DialogFragment fragment = UARTNewConfigurationDialogFragment.getInstance(null, false);
+//		fragment.show(getSupportFragmentManager(), null);
 
 		// onNewConfiguration(null, false) will be called when user press OK
 	}
@@ -474,38 +496,38 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	@Override
 	public void onImportClick() {
 		// No item has been selected. We must close the spinner manually.
-		mConfigurationSpinner.close();
-
-		final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-		intent.setType("text/xml");
-		intent.addCategory(Intent.CATEGORY_OPENABLE);
-		if (intent.resolveActivity(getPackageManager()) != null) {
-			// file browser has been found on the device
-			startActivityForResult(intent, SELECT_FILE_REQ);
-		} else {
-			// there is no any file browser app, let's try to download one
-			final View customView = getLayoutInflater().inflate(R.layout.app_file_browser, null);
-			final ListView appsList = (ListView) customView.findViewById(android.R.id.list);
-			appsList.setAdapter(new FileBrowserAppsAdapter(this));
-			appsList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-			appsList.setItemChecked(0, true);
-			new AlertDialog.Builder(this).setTitle(R.string.dfu_alert_no_filebrowser_title).setView(customView).setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(final DialogInterface dialog, final int which) {
-					dialog.dismiss();
-				}
-			}).setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(final DialogInterface dialog, final int which) {
-					final int pos = appsList.getCheckedItemPosition();
-					if (pos >= 0) {
-						final String query = getResources().getStringArray(R.array.dfu_app_file_browser_action)[pos];
-						final Intent storeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(query));
-						startActivity(storeIntent);
-					}
-				}
-			}).show();
-		}
+//		mConfigurationSpinner.close();
+//
+//		final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//		intent.setType("text/xml");
+//		intent.addCategory(Intent.CATEGORY_OPENABLE);
+//		if (intent.resolveActivity(getPackageManager()) != null) {
+//			// file browser has been found on the device
+//			startActivityForResult(intent, SELECT_FILE_REQ);
+//		} else {
+//			// there is no any file browser app, let's try to download one
+//			final View customView = getLayoutInflater().inflate(R.layout.app_file_browser, null);
+//			final ListView appsList = (ListView) customView.findViewById(android.R.id.list);
+//			appsList.setAdapter(new FileBrowserAppsAdapter(this));
+//			appsList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+//			appsList.setItemChecked(0, true);
+//			new AlertDialog.Builder(this).setTitle(R.string.dfu_alert_no_filebrowser_title).setView(customView).setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+//				@Override
+//				public void onClick(final DialogInterface dialog, final int which) {
+//					dialog.dismiss();
+//				}
+//			}).setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+//				@Override
+//				public void onClick(final DialogInterface dialog, final int which) {
+//					final int pos = appsList.getCheckedItemPosition();
+//					if (pos >= 0) {
+//						final String query = getResources().getStringArray(R.array.dfu_app_file_browser_action)[pos];
+//						final Intent storeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(query));
+//						startActivity(storeIntent);
+//					}
+//				}
+//			}).show();
+//		}
 	}
 
 	@Override
@@ -589,7 +611,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			final long id = mDatabaseHelper.addConfiguration(name, xml);
 			mWearableSynchronizer.onConfigurationAddedOrEdited(id, configuration);
 			refreshConfigurations();
-			selectConfiguration(mConfigurationsAdapter.getItemPosition(id));
+//			selectConfiguration(mConfigurationsAdapter.getItemPosition(id));
 		} catch (final Exception e) {
 			Log.e(TAG, "Error while creating a new configuration", e);
 		}
@@ -623,13 +645,13 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	}
 
 	private void refreshConfigurations() {
-		mConfigurationsAdapter.swapCursor(mDatabaseHelper.getConfigurationsNames());
-		mConfigurationsAdapter.notifyDataSetChanged();
-		invalidateOptionsMenu();
+//		mConfigurationsAdapter.swapCursor(mDatabaseHelper.getConfigurationsNames());
+//		mConfigurationsAdapter.notifyDataSetChanged();
+//		invalidateOptionsMenu();
 	}
 
 	private void selectConfiguration(final int position) {
-		mConfigurationSpinner.setSelection(position);
+//		mConfigurationSpinner.setSelection(position);
 	}
 
 	/**
@@ -642,50 +664,50 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	 */
 	@SuppressLint("NewApi")
 	private void setEditMode(final boolean editMode, final boolean change) {
-		mEditMode = editMode;
-		mConfigurationListener.setEditMode(editMode);
-		if (!change) {
-			final ColorDrawable color = new ColorDrawable();
-			int darkColor = 0;
-			if (editMode) {
-				color.setColor(getResources().getColor(R.color.orange));
-				darkColor = getResources().getColor(R.color.dark_orange);
-			} else {
-				color.setColor(getResources().getColor(R.color.actionBarColor));
-				darkColor = getResources().getColor(R.color.actionBarColorDark);
-			}
-			getSupportActionBar().setBackgroundDrawable(color);
-
-			// Since Lollipop the status bar color may also be changed
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-				getWindow().setStatusBarColor(darkColor);
-		} else {
-			final TransitionDrawable transition = (TransitionDrawable) getResources().getDrawable(
-					editMode ? R.drawable.start_edit_mode : R.drawable.stop_edit_mode);
-			transition.setCrossFadeEnabled(true);
-			getSupportActionBar().setBackgroundDrawable(transition);
-			transition.startTransition(200);
-
-			// Since Lollipop the status bar color may also be changed
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-				final int colorFrom = getResources().getColor(editMode ? R.color.actionBarColorDark : R.color.dark_orange);
-				final int colorTo = getResources().getColor(!editMode ? R.color.actionBarColorDark : R.color.dark_orange);
-
-				final ValueAnimator anim = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
-				anim.setDuration(200);
-				anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-					@Override
-					public void onAnimationUpdate(final ValueAnimator animation) {
-						getWindow().setStatusBarColor((Integer) animation.getAnimatedValue());
-					}
-				});
-				anim.start();
-			}
-
-			if (mSlider != null && editMode) {
-				mSlider.closePane();
-			}
-		}
+//		mEditMode = editMode;
+//		mConfigurationListener.setEditMode(editMode);
+//		if (!change) {
+//			final ColorDrawable color = new ColorDrawable();
+//			int darkColor = 0;
+//			if (editMode) {
+//				color.setColor(getResources().getColor(R.color.orange));
+//				darkColor = getResources().getColor(R.color.dark_orange);
+//			} else {
+//				color.setColor(getResources().getColor(R.color.actionBarColor));
+//				darkColor = getResources().getColor(R.color.actionBarColorDark);
+//			}
+//			getSupportActionBar().setBackgroundDrawable(color);
+//
+//			// Since Lollipop the status bar color may also be changed
+//			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+//				getWindow().setStatusBarColor(darkColor);
+//		} else {
+//			final TransitionDrawable transition = (TransitionDrawable) getResources().getDrawable(
+//					editMode ? R.drawable.start_edit_mode : R.drawable.stop_edit_mode);
+//			transition.setCrossFadeEnabled(true);
+//			getSupportActionBar().setBackgroundDrawable(transition);
+//			transition.startTransition(200);
+//
+//			// Since Lollipop the status bar color may also be changed
+//			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//				final int colorFrom = getResources().getColor(editMode ? R.color.actionBarColorDark : R.color.dark_orange);
+//				final int colorTo = getResources().getColor(!editMode ? R.color.actionBarColorDark : R.color.dark_orange);
+//
+//				final ValueAnimator anim = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
+//				anim.setDuration(200);
+//				anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+//					@Override
+//					public void onAnimationUpdate(final ValueAnimator animation) {
+//						getWindow().setStatusBarColor((Integer) animation.getAnimatedValue());
+//					}
+//				});
+//				anim.start();
+//			}
+//
+//			if (mSlider != null && editMode) {
+//				mSlider.closePane();
+//			}
+//		}
 	}
 
 	/**
@@ -733,7 +755,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 				new Handler().post(new Runnable() {
 					@Override
 					public void run() {
-						selectConfiguration(mConfigurationsAdapter.getItemPosition(id));
+//						selectConfiguration(mConfigurationsAdapter.getItemPosition(id));
 					}
 				});
 			} else {
@@ -761,35 +783,35 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 	private void exportConfiguration() {
 		// TODO this may not work if the SD card is not available. (Lenovo A806, email from 11.03.2015)
-		final File folder = new File(Environment.getExternalStorageDirectory(), FileHelper.NORDIC_FOLDER);
-		if (!folder.exists())
-			folder.mkdir();
-		final File serverFolder = new File(folder, FileHelper.UART_FOLDER);
-		if (!serverFolder.exists())
-			serverFolder.mkdir();
-
-		final String fileName = mConfiguration.getName() + ".xml";
-		final File file = new File(serverFolder, fileName);
-		try {
-			file.createNewFile();
-			final FileOutputStream fos = new FileOutputStream(file);
-			final OutputStreamWriter writer = new OutputStreamWriter(fos);
-			writer.append(mDatabaseHelper.getConfiguration(mConfigurationSpinner.getSelectedItemId()));
-			writer.close();
-
-			// Notify user about the file
-			final Intent intent = new Intent(Intent.ACTION_VIEW);
-			intent.setDataAndType(Uri.fromFile(file), "text/xml");
-			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			final PendingIntent pendingIntent = PendingIntent.getActivity(this, 420, intent, 0);
-			final Notification notification = new NotificationCompat.Builder(this).setContentIntent(pendingIntent).setContentTitle(fileName).setContentText(getText(R.string.uart_configuration_export_succeeded))
-					.setAutoCancel(true).setShowWhen(true).setTicker(getText(R.string.uart_configuration_export_succeeded_ticker)).setSmallIcon(android.R.drawable.stat_notify_sdcard).build();
-			final NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-			nm.notify(fileName, 823, notification);
-		} catch (final Exception e) {
-			Log.e(TAG, "Error while exporting configuration", e);
-			Toast.makeText(this, R.string.uart_configuration_save_error, Toast.LENGTH_SHORT).show();
-		}
+//		final File folder = new File(Environment.getExternalStorageDirectory(), FileHelper.NORDIC_FOLDER);
+//		if (!folder.exists())
+//			folder.mkdir();
+//		final File serverFolder = new File(folder, FileHelper.UART_FOLDER);
+//		if (!serverFolder.exists())
+//			serverFolder.mkdir();
+//
+//		final String fileName = mConfiguration.getName() + ".xml";
+//		final File file = new File(serverFolder, fileName);
+//		try {
+//			file.createNewFile();
+//			final FileOutputStream fos = new FileOutputStream(file);
+//			final OutputStreamWriter writer = new OutputStreamWriter(fos);
+//			writer.append(mDatabaseHelper.getConfiguration(mConfigurationSpinner.getSelectedItemId()));
+//			writer.close();
+//
+//			// Notify user about the file
+//			final Intent intent = new Intent(Intent.ACTION_VIEW);
+//			intent.setDataAndType(Uri.fromFile(file), "text/xml");
+//			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//			final PendingIntent pendingIntent = PendingIntent.getActivity(this, 420, intent, 0);
+//			final Notification notification = new NotificationCompat.Builder(this).setContentIntent(pendingIntent).setContentTitle(fileName).setContentText(getText(R.string.uart_configuration_export_succeeded))
+//					.setAutoCancel(true).setShowWhen(true).setTicker(getText(R.string.uart_configuration_export_succeeded_ticker)).setSmallIcon(android.R.drawable.stat_notify_sdcard).build();
+//			final NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//			nm.notify(fileName, 823, notification);
+//		} catch (final Exception e) {
+//			Log.e(TAG, "Error while exporting configuration", e);
+//			Toast.makeText(this, R.string.uart_configuration_save_error, Toast.LENGTH_SHORT).show();
+//		}
 	}
 
 	/**

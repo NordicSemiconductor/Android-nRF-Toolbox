@@ -21,6 +21,7 @@
  */
 package no.nordicsemi.android.nrftoolbox.profile;
 
+import android.app.Activity;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -79,7 +80,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 
 	private E mService;
 
-	private TextView mDeviceNameView;
+//	private TextView mDeviceNameView;
 	private TextView mBatteryLevelView;
 	private Button mConnectButton;
 
@@ -173,7 +174,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 
 			// update UI
 			mDeviceName = bleService.getDeviceName();
-			mDeviceNameView.setText(mDeviceName);
+//			mDeviceNameView.setText(mDeviceName);
 			mConnectButton.setText(R.string.action_disconnect);
 
 			// and notify user if device is connected
@@ -184,7 +185,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 		@Override
 		public void onServiceDisconnected(final ComponentName name) {
 			Logger.d(mLogSession, "Activity disconnected from the service");
-			mDeviceNameView.setText(getDefaultDeviceName());
+//			mDeviceNameView.setText(getDefaultDeviceName());
 			mConnectButton.setText(R.string.action_connect);
 
 			mService = null;
@@ -342,9 +343,9 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	 */
 	protected final void setUpView() {
 		// set GUI
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		mConnectButton = (Button) findViewById(R.id.action_connect);
-		mDeviceNameView = (TextView) findViewById(R.id.device_name);
+//		mDeviceNameView = (TextView) findViewById(R.id.device_name);
 		mBatteryLevelView = (TextView) findViewById(R.id.battery);
 	}
 
@@ -400,6 +401,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	 * Called when user press CONNECT or DISCONNECT button. See layout files -> onClick attribute.
 	 */
 	public void onConnectClicked(final View view) {
+
 		if (isBLEEnabled()) {
 			if (mService == null) {
 				setDefaultUI();
@@ -442,7 +444,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 			}
 		}
 		mDeviceName = name;
-		mDeviceNameView.setText(name != null ? name : getString(R.string.not_available));
+//		mDeviceNameView.setText(name != null ? name : getString(R.string.not_available));
 		mConnectButton.setText(R.string.action_connecting);
 		mConnectButton.setEnabled(false);
 
@@ -468,7 +470,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	 * services have not been found.
 	 */
 	public void onDeviceConnected() {
-		mDeviceNameView.setText(mDeviceName);
+//		mDeviceNameView.setText(mDeviceName);
 		mConnectButton.setText(R.string.action_disconnect);
 		mConnectButton.setEnabled(true);
 	}
@@ -484,7 +486,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	 */
 	public void onDeviceDisconnected() {
 		mConnectButton.setText(R.string.action_connect);
-		mDeviceNameView.setText(getDefaultDeviceName());
+//		mDeviceNameView.setText(getDefaultDeviceName());
 		if (mBatteryLevelView != null)
 			mBatteryLevelView.setText(R.string.not_available);
 

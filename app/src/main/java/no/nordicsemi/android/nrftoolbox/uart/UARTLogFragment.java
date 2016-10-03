@@ -124,10 +124,14 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 			byte[] data = intent.getByteArrayExtra(UARTService.EXTRA_DATA);
 			String text = ParserUtils.parse(data);
 			Log.i("data receiver","data received "+text+" size "+data.length);
+			if(data.length!=20){
+				Log.w("data receiver","incorrect message length! "+text+" size "+data.length);
+				return;
+			}
 			MyIoTActionListener listener = new MyIoTActionListener(context, Constants.ActionStateStatus.PUBLISH);
 			String msg = Decoder.decode(data);
 			try {
-				String eventType=Constants.ACCEL_EVENT;
+				String eventType="";
 				if (data[2] == 0x01)
 				{
 					eventType = Constants.PACK1_EVENT;
@@ -140,8 +144,13 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 				{
 					eventType = Constants.PACK3_EVENT;
 				}
-				iotClient.publishEvent(eventType, "json", msg, 0, false, listener);
-				Log.i("data receiver","data published"+text);
+				if(eventType.length()>0) {
+					iotClient.publishEvent(eventType, "json", msg, 0, false, listener);
+					Log.i("data receiver", "data published" + text);
+				}
+				else {
+					Log.w("data receiver", "unknown message type! data not published" + text);
+				}
 			} catch (MqttException e) {
 				e.printStackTrace();
 			}
@@ -176,11 +185,11 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mCommonBroadcastReceiver, makeIntentFilter());
+		LocalBroadcastManager.getInstance(getContext()).registerReceiver(mCommonBroadcastReceiver, makeIntentFilter());
 
-		iotClient = IoTClient.getInstance(getActivity(), "9iybos", "emulator", "Android", "*rX@lR)ABD3A443_1r");
-		myIoTCallbacks = MyIoTCallbacks.getInstance(getActivity());
-		MyIoTActionListener listener = new MyIoTActionListener(getActivity(), Constants.ActionStateStatus.CONNECTING);
+		iotClient = IoTClient.getInstance(getContext(), "9iybos", "emulator", "Android", "*rX@lR)ABD3A443_1r");
+		myIoTCallbacks = MyIoTCallbacks.getInstance(getContext());
+		MyIoTActionListener listener = new MyIoTActionListener(getContext(), Constants.ActionStateStatus.CONNECTING);
 		try {
 			iotClient.connectDevice(myIoTCallbacks,listener,null);
 			Log.i("data receiver", "iotclient connected");
@@ -191,7 +200,7 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(UARTService.BROADCAST_UART_RX);
-		LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mDataReceiver, intentFilter);
+		LocalBroadcastManager.getInstance(getContext()).registerReceiver(mDataReceiver, intentFilter);
 
 		// Load the last log list view scroll position
 		if (savedInstanceState != null) {

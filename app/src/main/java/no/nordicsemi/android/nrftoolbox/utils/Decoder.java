@@ -12,6 +12,7 @@ public class Decoder {
     static int byteArrayToInt(byte[] b, int offset, int length) {
         int value= 0;
         for (int i = 0; i < length; i++) {
+            if((i+offset)>=b.length) break;//TODOf
             int shift= (length - 1 - i) * 8;
             value +=(b[i + offset] & 0x000000FF) << shift;
         }

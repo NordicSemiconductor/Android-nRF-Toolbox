@@ -85,37 +85,37 @@ public class UARTControlFragment extends Fragment implements GridView.OnItemClic
 	public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.fragment_feature_uart_control, container, false);
 
-		final GridView grid = (GridView) view.findViewById(R.id.grid);
-		grid.setAdapter(mAdapter = new UARTButtonAdapter(mConfiguration));
-		grid.setOnItemClickListener(this);
-		mAdapter.setEditMode(mEditMode);
+//		final GridView grid = (GridView) view.findViewById(R.id.grid);
+//		grid.setAdapter(mAdapter = new UARTButtonAdapter(mConfiguration));
+//		grid.setOnItemClickListener(this);
+//		mAdapter.setEditMode(mEditMode);
 
 		return view;
 	}
 
 	@Override
 	public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
-		if (mEditMode) {
-			Command command = mConfiguration.getCommands()[position];
-			if (command == null)
-				mConfiguration.getCommands()[position] = command = new Command();
-			final UARTEditDialog dialog = UARTEditDialog.getInstance(position, command);
-			dialog.show(getChildFragmentManager(), null);
-		} else {
-			final Command command = (Command)mAdapter.getItem(position);
-			final Command.Eol eol = command.getEol();
-			String text = command.getCommand();
-			switch (eol) {
-				case CR_LF:
-					text = text.replaceAll("\n", "\r\n");
-					break;
-				case CR:
-					text = text.replaceAll("\n", "\r");
-					break;
-			}
-			final UARTInterface uart = (UARTInterface) getActivity();
-			uart.send(text);
-		}
+//		if (mEditMode) {
+//			Command command = mConfiguration.getCommands()[position];
+//			if (command == null)
+//				mConfiguration.getCommands()[position] = command = new Command();
+//			final UARTEditDialog dialog = UARTEditDialog.getInstance(position, command);
+//			dialog.show(getChildFragmentManager(), null);
+//		} else {
+//			final Command command = (Command)mAdapter.getItem(position);
+//			final Command.Eol eol = command.getEol();
+//			String text = command.getCommand();
+//			switch (eol) {
+//				case CR_LF:
+//					text = text.replaceAll("\n", "\r\n");
+//					break;
+//				case CR:
+//					text = text.replaceAll("\n", "\r");
+//					break;
+//			}
+//			final UARTInterface uart = (UARTInterface) getActivity();
+//			uart.send(text);
+//		}
 	}
 
 	@Override
