@@ -21,7 +21,7 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 
-<no.nordicsemi.android.nrftoolbox.uart.UARTConfigurationItemLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.ibm.android.cntv.tibet.client.uart.UARTConfigurationItemLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="80dp"
@@ -48,4 +48,4 @@
 		android:gravity="center_vertical"
 		android:textSize="16sp"/>
 
-</no.nordicsemi.android.nrftoolbox.uart.UARTConfigurationItemLayout>
+</com.ibm.android.cntv.tibet.client.uart.UARTConfigurationItemLayout>

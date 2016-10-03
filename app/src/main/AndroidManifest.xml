@@ -20,7 +20,7 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="no.nordicsemi.android.nrftoolbox"
+    package="com.ibm.android.cntv.tibet.client"
     android:installLocation="auto">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -50,7 +50,7 @@
 
 
         <activity
-            android:name=".uart.UARTActivity"
+            android:name="com.ibm.android.cntv.tibet.client.uart.UARTActivity"
             android:label="@string/app_name"
             android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize">
@@ -65,9 +65,9 @@
 
 
         <service
-            android:name=".uart.UARTService"
+            android:name="com.ibm.android.cntv.tibet.client.uart.UARTService"
             android:label="@string/uart_feature_title" />
-        <service android:name=".wearable.MainWearableListenerService">
+        <service android:name="com.ibm.android.cntv.tibet.client.wearable.MainWearableListenerService">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
                 <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
@@ -81,8 +81,8 @@
         <service android:name="org.eclipse.paho.android.service.MqttService" />
 
         <provider
-            android:name=".uart.UARTLocalLogContentProvider"
-            android:authorities="no.nordicsemi.android.nrftoolbox.uart.log"
+            android:name="com.ibm.android.cntv.tibet.client.uart.UARTLocalLogContentProvider"
+            android:authorities="com.ibm.android.cntv.tibet.client.uart.log"
             android:exported="true" />
 
 

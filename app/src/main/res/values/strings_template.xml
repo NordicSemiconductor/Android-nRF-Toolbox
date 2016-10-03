@@ -22,7 +22,6 @@
   -->
 <resources>
     <string name="template_feature_title">Template</string>
-	<string name="template_settings_title">Template Settings</string>
 
 	<string name="template_feature_title_long">TEMPLATE</string>
 	<dimen name="template_feature_title_long_margin">-62dp</dimen>

@@ -35,7 +35,6 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="@string/label_user"
-			android:id="@+id/label_user"
 
 			android:gravity="left"
 			android:paddingTop="@dimen/activity_vertical_margin"
@@ -62,7 +61,6 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="@string/label_token"
-			android:id="@+id/label_token"
 			android:gravity="left"
 			android:paddingTop="@dimen/activity_vertical_margin"
 			android:paddingBottom="@dimen/activity_vertical_margin"
@@ -105,7 +103,6 @@
 		<TextView android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="@string/label_power"
-			android:id="@+id/label_power"
 			android:gravity="left"
 			android:paddingTop="@dimen/activity_vertical_margin"
 			android:paddingBottom="@dimen/activity_vertical_margin"
@@ -118,14 +115,12 @@
 		<ImageView
 			android:layout_width="40dp"
 			android:layout_height="40dp"
-			android:id="@+id/image_cctv"
 			android:src="@drawable/cctv"
 			android:layout_gravity="center"
 			android:adjustViewBounds="false" />
 		<TextView android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="@string/label_cctv"
-			android:id="@+id/label_cctv"
 			android:gravity="left"
 			android:textStyle="bold"
 			android:paddingTop="@dimen/activity_vertical_margin"
@@ -138,14 +133,12 @@
 			<ImageView
 				android:layout_width="40dp"
 				android:layout_height="40dp"
-				android:id="@+id/image_bluemix"
 				android:src="@drawable/bluemix"
 				android:layout_gravity="center"
 				android:adjustViewBounds="false" />
 			<TextView android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/label_bluemix"
-				android:id="@+id/label_bluemix"
 				android:gravity="left"
 				android:textStyle="bold"
 				android:paddingTop="@dimen/activity_vertical_margin"
@@ -158,14 +151,12 @@
 			<ImageView
 				android:layout_width="40dp"
 				android:layout_height="40dp"
-				android:id="@+id/image_cloudant"
 				android:layout_gravity="center"
 				android:src="@drawable/cloudant_logo"
 				android:adjustViewBounds="false" />
 			<TextView android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/label_cloudant"
-				android:id="@+id/label_cloudant"
 				android:gravity="left"
 				android:textStyle="bold"
 				android:paddingTop="@dimen/activity_vertical_margin"

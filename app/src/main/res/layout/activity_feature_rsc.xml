@@ -30,14 +30,14 @@
 		android:id="@+id/toolbar_actionbar"
 		layout="@layout/toolbar"/>
 
-	<no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout
+	<com.ibm.android.cntv.tibet.client.widget.ForegroundRelativeLayout
 		style="@style/HeaderShadow"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent">
 
 		<!-- The size of text below must be fixed, therefore dp are used instead of sp -->
 
-		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+		<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_centerVertical="true"
@@ -62,7 +62,7 @@
 			android:textColor="#FFFFFF"
 			android:textSize="12sp"/>
 
-		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+		<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 			android:id="@+id/device_name"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
@@ -93,7 +93,7 @@
 				android:layout_marginTop="@dimen/feature_vertical_margin_top"
 				android:orientation="vertical">
 
-				<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+				<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 					style="@style/Widget.ListTitle"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
@@ -108,14 +108,14 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content">
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 							android:layout_width="0dp"
 							android:layout_height="match_parent"
 							android:layout_weight="1"
 							android:gravity="center_vertical"
 							android:text="@string/rsc_speed"/>
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 							android:id="@+id/speed"
 							android:layout_width="wrap_content"
 							android:layout_height="match_parent"
@@ -124,7 +124,7 @@
 							android:text="@string/not_available_value"
 							android:textSize="36sp"/>
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 							android:id="@+id/speed_unit"
 							android:layout_width="45dp"
 							android:layout_height="match_parent"
@@ -138,14 +138,14 @@
 						android:layout_height="wrap_content"
 						android:layout_marginTop="4dp">
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 							android:layout_width="0dp"
 							android:layout_height="match_parent"
 							android:layout_weight="1"
 							android:gravity="center_vertical"
 							android:text="@string/rsc_cadence"/>
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 							android:id="@+id/cadence"
 							android:layout_width="wrap_content"
 							android:layout_height="match_parent"
@@ -154,7 +154,7 @@
 							android:text="@string/not_available_value"
 							android:textSize="36sp"/>
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 							android:layout_width="45dp"
 							android:layout_height="match_parent"
 							android:freezesText="true"
@@ -167,14 +167,14 @@
 						android:layout_height="wrap_content"
 						android:layout_marginTop="4dp">
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 							android:layout_width="0dp"
 							android:layout_height="match_parent"
 							android:layout_weight="1"
 							android:gravity="center_vertical"
 							android:text="@string/rsc_distance"/>
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 							android:id="@+id/distance"
 							android:layout_width="wrap_content"
 							android:layout_height="match_parent"
@@ -183,7 +183,7 @@
 							android:text="@string/not_available_value"
 							android:textSize="36sp"/>
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 							android:id="@+id/distance_unit"
 							android:layout_width="45dp"
 							android:layout_height="match_parent"
@@ -197,14 +197,14 @@
 						android:layout_height="wrap_content"
 						android:layout_marginTop="4dp">
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 							android:layout_width="0dp"
 							android:layout_height="match_parent"
 							android:layout_weight="1"
 							android:gravity="center_vertical"
 							android:text="@string/rsc_total_distance"/>
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 							android:id="@+id/total_distance"
 							android:layout_width="wrap_content"
 							android:layout_height="match_parent"
@@ -213,7 +213,7 @@
 							android:text="@string/not_available_value"
 							android:textSize="36sp"/>
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 							android:id="@+id/total_distance_unit"
 							android:layout_width="45dp"
 							android:layout_height="match_parent"
@@ -227,14 +227,14 @@
 						android:layout_height="wrap_content"
 						android:layout_marginTop="4dp">
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 							android:layout_width="0dp"
 							android:layout_height="match_parent"
 							android:layout_weight="1"
 							android:gravity="center_vertical"
 							android:text="@string/rsc_strides"/>
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 							android:id="@+id/strides"
 							android:layout_width="wrap_content"
 							android:layout_height="match_parent"
@@ -259,13 +259,13 @@
 				android:layout_marginTop="15dp"
 				android:orientation="vertical">
 
-				<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+				<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 					style="@style/Widget.ListTitle"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:text="@string/rsc_section_activity_header"/>
 
-				<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+				<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 					android:id="@+id/activity"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
@@ -296,5 +296,5 @@
 			android:layout_marginBottom="6dp"
 			android:src="@drawable/background_title"/>
 
-	</no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout>
+	</com.ibm.android.cntv.tibet.client.widget.ForegroundRelativeLayout>
 </LinearLayout>

@@ -56,7 +56,6 @@
 	<string name="no_apps">No profiles found.</string>
 	<string name="not_supported">The device does not have required services.</string>
 	<string name="no_application">Web Browser application is not available.</string>
-	<string name="no_uri_application">There is no application that can open this URI.</string>
 	<string name="no_application_play">Google Play not installed.</string>
 	<string name="no_required_permission">Permission denied.</string>
 	<string name="scanner_title">请选择设备:</string>
@@ -74,6 +73,5 @@
 	<string name="about_title">About</string>
 	<string name="about_version">\n\nVersion: %s</string>
 	<string name="about_text">The nRF Toolbox is a container application that stores your Nordic Semiconductor apps in one location.</string>
-    <string name="title_activity_main">MainActivity</string>
 
 </resources>

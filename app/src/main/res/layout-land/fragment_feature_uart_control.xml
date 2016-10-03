@@ -28,7 +28,7 @@
 
 	<!-- The size of text below must be fixed, therefore dp are used instead of sp -->
 
-	<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+	<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_centerVertical="true"
@@ -39,7 +39,7 @@
 		android:textSize="32dp"
 		android:textStyle="bold"/>
 
-	<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+	<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 		android:id="@+id/device_name"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"

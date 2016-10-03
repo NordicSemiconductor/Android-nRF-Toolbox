@@ -22,9 +22,8 @@
   -->
 <resources>
     <string name="csc_feature_title">CSC</string>
-    <string name="csc_settings_title">CSC Settings</string>
-    
-    <string name="csc_feature_title_long">CYCLING SPEED &amp; CADENCE</string>
+
+	<string name="csc_feature_title_long">CYCLING SPEED &amp; CADENCE</string>
     <dimen name="csc_feature_title_long_margin">-192dp</dimen>
     
     <string name="csc_section_csc_header">SPEED AND CADENCE</string>

@@ -61,7 +61,6 @@
 		android:paddingEnd="?android:attr/listPreferredItemPaddingLeft"/>
 
 	<TextView
-		android:id="@+id/cgms_unit"
 		android:layout_width="wrap_content"
 		android:layout_height="match_parent"
 		android:gravity="center"

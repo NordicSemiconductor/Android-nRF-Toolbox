@@ -21,7 +21,7 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 
-<no.nordicsemi.android.nrftoolbox.DeviceItemLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.ibm.android.cntv.tibet.client.DeviceItemLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="80dp">
@@ -59,4 +59,4 @@
 		android:fontFamily="sans-serif-condensed-light"
 		android:textSize="14sp"/>
 
-</no.nordicsemi.android.nrftoolbox.DeviceItemLayout>
+</com.ibm.android.cntv.tibet.client.DeviceItemLayout>
