@@ -42,6 +42,7 @@
 	<string name="label_power">Powered by</string>
 	<string name="label_bluemix">IBM Bluemix</string>
 	<string name="label_cloudant">IBM Cloudant</string>
+	<string name="label_cctv">央视网</string>
 
 	<string name="drawer_open">Open</string>
 	<string name="drawer_close">Close</string>
