@@ -30,10 +30,10 @@ import javax.net.SocketFactory;
  */
 public class IoTClient {
     private static final String TAG = IoTClient.class.getName();
-    private static final String IOT_ORGANIZATION_TCP = ".messaging.internetofthings.ibmcloud.com:1883";
-//    private static final String IOT_ORGANIZATION_TCP = ".messaging.internetofthings.chinabluemix.net:1883";
-    private static final String IOT_ORGANIZATION_SSL = ".messaging.internetofthings.ibmcloud.com:8883";
-//    private static final String IOT_ORGANIZATION_SSL = ".messaging.internetofthings.chinabluemix.net:8883";
+//    private static final String IOT_ORGANIZATION_TCP = ".messaging.internetofthings.ibmcloud.com:1883";
+    private static final String IOT_ORGANIZATION_TCP = ".messaging.internetofthings.chinabluemix.net:1883";
+//    private static final String IOT_ORGANIZATION_SSL = ".messaging.internetofthings.ibmcloud.com:8883";
+    private static final String IOT_ORGANIZATION_SSL = ".messaging.internetofthings.chinabluemix.net:8883";
     private static final String IOT_DEVICE_USERNAME  = "use-token-auth";
 
     private static IoTClient instance;

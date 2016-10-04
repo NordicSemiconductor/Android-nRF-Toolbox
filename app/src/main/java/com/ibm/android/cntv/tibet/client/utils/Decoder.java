@@ -81,11 +81,11 @@ public class Decoder{
         if(!is0xFF(raw,15,4)){
             int longitude = byteArrayToInt(raw,15,4);
             longitude *= 10000000;
-            ret.append("\"longtitude\":"+ Long.toString(longitude & 0xFFFFFFFFL)+"\n");
+            ret.append("\"longtitude\":"+ Long.toString(longitude & 0xFFFFFFFFL)+", \n");
         }
 
         ret.append("} }");
-        return ret.toString();
+        return ret.toString().replace(", \n} }"," \n} }");
     }
 
     static String decode2(byte[] raw)
@@ -117,11 +117,11 @@ public class Decoder{
 
         if(!is0xFF(raw,14,4)){
             int pressure = byteArrayToInt(raw,14,4);
-            ret.append("\"pressure\":"+ Long.toString(pressure & 0xFFFFFFFFL)+"\n");
+            ret.append("\"pressure\":"+ Long.toString(pressure & 0xFFFFFFFFL)+", \n");
         }
 
         ret.append("} }");
-        return ret.toString();
+        return ret.toString().replace(", \n} }"," \n} }");
 
     }
 
@@ -191,11 +191,12 @@ public class Decoder{
         if(!is0xFF(raw,18,1)){
             int max_hrm = byteArrayToInt(raw,18,1);
 
-            ret.append("\"maxhrm\":"+ Long.toString(max_hrm & 0x000000FF)+"\n");
+            ret.append("\"maxhrm\":"+ Long.toString(max_hrm & 0x000000FF)+", \n");
         }
+
 
         ret.append("} }");
 
-        return ret.toString();
+        return ret.toString().replace(", \n} }"," \n} }");
     }
 }

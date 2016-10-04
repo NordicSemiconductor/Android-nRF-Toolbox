@@ -127,7 +127,7 @@ public class IoTDataService extends Service {
 
     private void connect(){
         if(mUser==null || mToken==null) return;
-        iotClient = IoTClient.getInstance(getApplicationContext(), "9iybos", mUser, "Android", mToken);
+        iotClient = IoTClient.getInstance(getApplicationContext(), "rb6b3e", mUser, "Android", mToken);
         myIoTCallbacks = MyIoTCallbacks.getInstance(getApplicationContext());
         MyIoTActionListener listener = new MyIoTActionListener(getApplicationContext(), Constants.ActionStateStatus.CONNECTING);
         try {
