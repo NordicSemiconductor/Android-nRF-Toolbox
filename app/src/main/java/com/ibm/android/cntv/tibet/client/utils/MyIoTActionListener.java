@@ -16,6 +16,8 @@
 package com.ibm.android.cntv.tibet.client.utils;
 
 import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.ibm.android.cntv.tibet.client.iot.IoTActionListener;
@@ -35,6 +37,10 @@ public class MyIoTActionListener implements IoTActionListener {
     private final Context context;
     private final Constants.ActionStateStatus action;
 //    private final IoTStarterApplication app;
+
+    public static final String BROADCAST_IOT_EVENT = "com.ibm.android.cntv.tibet.client.BROADCAST_IOT_EVENT";
+    public static final String ACTION = "com.ibm.android.cntv.tibet.client.iot.ACTION";
+    public static final String SUCCESS = "com.ibm.android.cntv.tibet.client.iot.SUCCESS";
 
     public MyIoTActionListener(Context context, Constants.ActionStateStatus action) {
         this.context = context;
@@ -99,6 +105,11 @@ public class MyIoTActionListener implements IoTActionListener {
             default:
                 break;
         }
+
+        Intent broadcast = new Intent(BROADCAST_IOT_EVENT);
+        broadcast.putExtra(ACTION, action);
+        broadcast.putExtra(SUCCESS, false);
+        LocalBroadcastManager.getInstance(this.context).sendBroadcast(broadcast);
     }
 
     /**
@@ -106,6 +117,11 @@ public class MyIoTActionListener implements IoTActionListener {
      */
     private void handleConnectSuccess() {
         Log.d(TAG, ".handleConnectSuccess() entered");
+
+        Intent broadcast = new Intent(BROADCAST_IOT_EVENT);
+        broadcast.putExtra(ACTION, "connect");
+        broadcast.putExtra(SUCCESS, true);
+        LocalBroadcastManager.getInstance(this.context).sendBroadcast(broadcast);
 //        connected = true;
 
 //        app.setConnected(true);
@@ -127,6 +143,7 @@ public class MyIoTActionListener implements IoTActionListener {
 //            actionIntent.putExtra(Constants.INTENT_DATA, Constants.INTENT_DATA_CONNECT);
 //            context.sendBroadcast(actionIntent);
         //}
+
     }
 
     /**
@@ -148,6 +165,10 @@ public class MyIoTActionListener implements IoTActionListener {
      */
     private void handleDisconnectSuccess() {
         Log.d(TAG, ".handleDisconnectSuccess() entered");
+        Intent broadcast = new Intent(BROADCAST_IOT_EVENT);
+        broadcast.putExtra(ACTION, "disconnect");
+        broadcast.putExtra(SUCCESS, true);
+        LocalBroadcastManager.getInstance(this.context).sendBroadcast(broadcast);
 
 //        app.setConnected(false);
 
@@ -167,6 +188,11 @@ public class MyIoTActionListener implements IoTActionListener {
         Log.e(TAG, ".handleConnectFailure() entered");
         Log.e(TAG, ".handleConnectFailure() - Failed with exception", throwable.getCause());
         throwable.printStackTrace();
+
+        Intent broadcast = new Intent(BROADCAST_IOT_EVENT);
+        broadcast.putExtra(ACTION, "connect");
+        broadcast.putExtra(SUCCESS, false);
+        LocalBroadcastManager.getInstance(this.context).sendBroadcast(broadcast);
 
 //        app.setConnected(false);
 
@@ -203,6 +229,10 @@ public class MyIoTActionListener implements IoTActionListener {
     private void handleDisconnectFailure(Throwable throwable) {
         Log.e(TAG, ".handleDisconnectFailure() entered");
         Log.e(TAG, ".handleDisconnectFailure() - Failed with exception", throwable.getCause());
+        Intent broadcast = new Intent(BROADCAST_IOT_EVENT);
+        broadcast.putExtra(ACTION, "disconnect");
+        broadcast.putExtra(SUCCESS, false);
+        LocalBroadcastManager.getInstance(this.context).sendBroadcast(broadcast);
     }
 
 }

@@ -89,7 +89,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 
 	protected IoTDataService.IoTDataServiceBinder mIoTDataServiceBinder;
 
-	private ServiceConnection mIoTDataServiceConn = new ServiceConnection() {
+	protected ServiceConnection mIoTDataServiceConn = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
 			mIoTDataServiceBinder = (IoTDataService.IoTDataServiceBinder)iBinder;
@@ -123,6 +123,8 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 						}
 						case BleProfileService.STATE_LINK_LOSS: {
 							onLinklossOccur();
+//							onDeviceDisconnected();
+//							mDeviceName = null;
 							break;
 						}
 						case BleProfileService.STATE_CONNECTING:

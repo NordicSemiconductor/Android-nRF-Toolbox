@@ -37,12 +37,26 @@
 	<string name="action_connecting">正在连接…</string>
 	<string name="action_disconnect">断开</string>
 
-	<string name="label_user">用户名</string>
+	<string name="label_user">选手编号</string>
 	<string name="label_token">密码</string>
-	<string name="label_power">Powered by</string>
+	<string name="label_power">技术支持：</string>
 	<string name="label_bluemix">IBM Bluemix</string>
 	<string name="label_cloudant">IBM Cloudant</string>
 	<string name="label_cctv">央视网</string>
+
+	<string name="label_status">连接状态：</string>
+	<string name="label_sensor">码表</string>
+	<string name="label_server">服务器</string>
+
+	<string name="status_connected">已连接</string>
+	<string name="status_disconnected">已断开</string>
+	<string name="status_disconnecting">正在断开</string>
+	<string name="status_linkloss">连接丢失</string>
+	<string name="status_ready">已就绪</string>
+	<string name="status_bondrequired">请求绑定</string>
+	<string name="status_bonded">已绑定</string>
+	<string name="status_notsupport">不支持</string>
+	<string name="status_unknown">未知</string>
 
 	<string name="drawer_open">Open</string>
 	<string name="drawer_close">Close</string>

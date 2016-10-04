@@ -25,9 +25,11 @@ package com.ibm.android.cntv.tibet.client.uart;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -40,6 +42,7 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -47,6 +50,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -79,6 +83,8 @@ import com.ibm.android.cntv.tibet.client.uart.database.DatabaseHelper;
 import com.ibm.android.cntv.tibet.client.uart.domain.Command;
 import com.ibm.android.cntv.tibet.client.uart.domain.UartConfiguration;
 import com.ibm.android.cntv.tibet.client.uart.wearable.UARTConfigurationSynchronizer;
+import com.ibm.android.cntv.tibet.client.utils.Constants;
+import com.ibm.android.cntv.tibet.client.utils.MyIoTActionListener;
 
 public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UARTBinder> implements UARTInterface,
 		UARTNewConfigurationDialogFragment.NewConfigurationDialogListener, UARTConfigurationsAdapter.ActionListener, AdapterView.OnItemSelectedListener,
@@ -112,6 +118,31 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 	private String mUser;
 	private String mToken;
+
+	private TextView mStatusSensor;
+	private TextView mStatusServer;
+
+	private BroadcastReceiver mIoTReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if(mIoTDataServiceBinder!=null){
+				if(mIoTDataServiceBinder.isConnected())
+					mStatusServer.setText(R.string.status_connected);
+				else
+					mStatusServer.setText(R.string.status_disconnected);
+			}
+			else
+				mStatusServer.setText(R.string.status_unknown);
+//			String action = intent.getStringExtra(MyIoTActionListener.ACTION);
+//			boolean success = intent.getBooleanExtra(MyIoTActionListener.SUCCESS, false);
+//			if(success){
+//				if(action.equals("connect")) mStatusServer.setText("connected");
+//				if(action.equals("disconnect")) mStatusServer.setText("disconnected");
+//				if(action.equals("connection loss")) mStatusServer.setText("connection loss");
+//				if(action.equals("delivery complete")) mStatusServer.setText("connected");
+//			}
+		}
+	};
 
 	public interface ConfigurationListener {
 		void onConfigurationModified();
@@ -209,6 +240,8 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	protected void onDestroy() {
 		super.onDestroy();
 		mWearableSynchronizer.close();
+
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(mIoTReceiver);
 	}
 
 	@Override
@@ -244,6 +277,13 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 		((EditText)findViewById(R.id.value_user)).setText(mUser);
 		mToken = mPreferences.getString("iot_token", "");
 		((EditText)findViewById(R.id.value_token)).setText(mToken);
+
+		mStatusSensor = (TextView)findViewById(R.id.status_sensor);
+		mStatusServer = (TextView)findViewById(R.id.status_server);
+
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(MyIoTActionListener.BROADCAST_IOT_EVENT);
+		LocalBroadcastManager.getInstance(this).registerReceiver(mIoTReceiver, intentFilter);
 	}
 
 	@Override
@@ -264,6 +304,66 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	@Override
 	public void onServicesDiscovered(final boolean optionalServicesFound) {
 		// do nothing
+	}
+
+	@Override
+	public void onDeviceConnected() {
+		super.onDeviceConnected();
+		mStatusSensor.setText(R.string.status_connected);
+	}
+
+	@Override
+	public void onDeviceDisconnecting() {
+		super.onDeviceDisconnecting();
+		mStatusSensor.setText(R.string.status_disconnecting);
+	}
+
+	@Override
+	public void onDeviceDisconnected() {
+		super.onDeviceDisconnected();
+		mStatusSensor.setText(R.string.status_disconnected);
+	}
+
+	@Override
+	public void onLinklossOccur() {
+		super.onLinklossOccur();
+		mStatusSensor.setText(R.string.status_linkloss);
+	}
+
+	@Override
+	public void onDeviceReady() {
+		super.onDeviceReady();
+		mStatusSensor.setText(R.string.status_ready);
+	}
+
+	@Override
+	public void onBondingRequired() {
+		super.onBondingRequired();
+		mStatusSensor.setText(R.string.status_bondrequired);
+	}
+
+	@Override
+	public void onBonded() {
+		super.onBonded();
+		mStatusSensor.setText(R.string.status_bonded);
+	}
+
+	@Override
+	public void onDeviceNotSupported() {
+		super.onDeviceNotSupported();
+		mStatusSensor.setText(R.string.status_notsupport);
+	}
+
+	@Override
+	public void onBatteryValueReceived(int value) {
+		super.onBatteryValueReceived(value);
+		mStatusSensor.setText("battery value "+value);
+	}
+
+	@Override
+	public void onError(String message, int errorCode) {
+		super.onError(message, errorCode);
+		mStatusSensor.setText("error "+message);
 	}
 
 	@Override

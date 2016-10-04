@@ -18,6 +18,7 @@ import com.ibm.android.cntv.tibet.client.utils.Decoder;
 import com.ibm.android.cntv.tibet.client.utils.MyIoTActionListener;
 import com.ibm.android.cntv.tibet.client.utils.MyIoTCallbacks;
 
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
 public class IoTDataService extends Service {
@@ -41,6 +42,11 @@ public class IoTDataService extends Service {
             mToken = token;
             connect();
         }
+
+        public boolean isConnected(){
+            if(iotClient!=null) return iotClient.isMqttConnected();
+            else return false;
+        }
     }
 
     @Override
@@ -58,10 +64,7 @@ public class IoTDataService extends Service {
                 Log.w("data receiver","incorrect message length! "+text+" size "+data.length);
                 return;
             }
-//            if(iotClient==null){
-//                connect();
-//            }
-            if(iotClient==null) return;
+            if(iotClient==null || !iotClient.isMqttConnected()) return;
             MyIoTActionListener listener = new MyIoTActionListener(context, Constants.ActionStateStatus.PUBLISH);
             String msg = Decoder.decode(data);
             try {
@@ -79,8 +82,9 @@ public class IoTDataService extends Service {
                     eventType = Constants.PACK3_EVENT;
                 }
                 if(eventType.length()>0) {
-                    iotClient.publishEvent(eventType, "json", msg, 0, false, listener);
-                    Log.i("data receiver", "data published" + text);
+                    IMqttDeliveryToken deliveryToken = iotClient.publishEvent(eventType, "json", msg, 2, false, listener);
+                    if(deliveryToken != null)
+                        Log.i("data receiver", "data published" + text);
                 }
                 else {
                     Log.w("data receiver", "unknown message type! data not published" + text);

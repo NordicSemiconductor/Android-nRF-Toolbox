@@ -16,6 +16,8 @@
 package com.ibm.android.cntv.tibet.client.utils;
 
 import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.ibm.android.cntv.tibet.client.iot.IoTCallbacks;
@@ -55,6 +57,11 @@ public class MyIoTCallbacks implements IoTCallbacks {
         if (throwable != null) {
             throwable.printStackTrace();
         }
+
+        Intent broadcast = new Intent(MyIoTActionListener.BROADCAST_IOT_EVENT);
+        broadcast.putExtra(MyIoTActionListener.ACTION, "connection loss");
+        broadcast.putExtra(MyIoTActionListener.SUCCESS, true);
+        LocalBroadcastManager.getInstance(this.context).sendBroadcast(broadcast);
 
 //        app.setConnected(false);
 
@@ -107,5 +114,10 @@ public class MyIoTCallbacks implements IoTCallbacks {
     @Override
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
         Log.d(TAG, ".deliveryComplete() entered");
+
+        Intent broadcast = new Intent(MyIoTActionListener.BROADCAST_IOT_EVENT);
+        broadcast.putExtra(MyIoTActionListener.ACTION, "delivery complete");
+        broadcast.putExtra(MyIoTActionListener.SUCCESS, true);
+        LocalBroadcastManager.getInstance(this.context).sendBroadcast(broadcast);
     }
 }

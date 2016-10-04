@@ -3,17 +3,26 @@ package com.ibm.android.cntv.tibet.client.utils;
 /**
  * Created by yingkitw on 2016/9/30.
  */
-public class Decoder {
-
+public class Decoder{
     static long defSEC1989 =   631065600L;
+
+    static boolean is0xFF(byte[] b, int offset, int length) {
+        if ((b[offset] & 0x000000FF) == 0xFF)
+        {
+            return true;
+        }
+        return false;
+    }
 
     static int byteArrayToInt(byte[] b, int offset, int length) {
         int value= 0;
         for (int i = 0; i < length; i++) {
-            if((i+offset)>=b.length) break;//TODOf
-            int shift= (length - 1 - i) * 8;
+            int shift= (i) * 8;
+            //  int shift= (length - 1 - i) * 8;
             value +=(b[i + offset] & 0x000000FF) << shift;
+            System.out.print((b[i + offset] & 0x000000FF)+"|");
         }
+        System.out.println();
         return value;
     }
 
@@ -48,89 +57,145 @@ public class Decoder {
 
     static String decode1(byte[] raw)
     {
-        int cur_time = byteArrayToInt(raw,3,4);
-        cur_time += defSEC1989;
+        StringBuilder ret = new StringBuilder();
+        ret.append("{ \"d\": {\n");
 
-        int moving_time = byteArrayToInt(raw,7,4);
-        moving_time *= 100;
+        if(!is0xFF(raw,3,4)){
+            int cur_time = byteArrayToInt(raw,3,4);
+            cur_time += defSEC1989;
+            ret.append("\"currenttime\":"+ Long.toString(cur_time & 0x000000FF)+", \n");
+        }
 
-        int latitude = byteArrayToInt(raw,11,4);
-        latitude *= 10000000;
+        if(!is0xFF(raw,7,4)){
+            int moving_time = byteArrayToInt(raw,7,4);
+            moving_time *= 100;
+            ret.append("\"movingtime\":"+ Long.toString(moving_time & 0xFFFFFFFFL)+", \n");
+        }
 
-        int longitude = byteArrayToInt(raw,15,4);
-        longitude *= 10000000;
+        if(!is0xFF(raw,11,4)){
+            int latitude = byteArrayToInt(raw,11,4);
+            latitude *= 10000000;
+            ret.append("\"latitude\":"+ Long.toString(latitude & 0xFFFFFFFFL)+", \n");
+        }
 
-        return "{ \"d\": {"
-                +"\"currenttime\":"+ Integer.toString(cur_time)+",\n"
-                +"\"movingtime\":"+ Integer.toString(moving_time)+",\n"
-                +"\"latitude\":"+ Integer.toString(latitude)+",\n"
-                +"\"longtitude\":"+ Integer.toString(longitude)+"\n"
-                +"} }";
+        if(!is0xFF(raw,15,4)){
+            int longitude = byteArrayToInt(raw,15,4);
+            longitude *= 10000000;
+            ret.append("\"longtitude\":"+ Long.toString(longitude & 0xFFFFFFFFL)+"\n");
+        }
 
-
+        ret.append("} }");
+        return ret.toString();
     }
 
     static String decode2(byte[] raw)
     {
-        int cur_time = byteArrayToInt(raw,3,4);
-        cur_time += defSEC1989;
+        StringBuilder ret = new StringBuilder();
+        ret.append("{ \"d\": {");
 
-        int ride_dist = byteArrayToInt(raw,7,4);
-        ride_dist *= 100;
+        if(!is0xFF(raw,3,4)){
+            int cur_time = byteArrayToInt(raw,3,4);
+            cur_time += defSEC1989;
+            ret.append("\"currenttime\":"+ Long.toString(cur_time & 0x000000FF)+", \n");
+        }
 
-        int altitude = byteArrayToInt(raw,11,2);
+        if(!is0xFF(raw,7,4)){
+            int ride_dist = byteArrayToInt(raw,7,4);
+            ride_dist *= 100;
+            ret.append("\"riderdistance\":"+ Long.toString(ride_dist & 0xFFFFFFFFL)+", \n");
+        }
 
-        int temperature = byteArrayToInt(raw,13,1);
+        if(!is0xFF(raw,11,2)){
+            int altitude = byteArrayToInt(raw,11,2);
+            ret.append("\"altitude\":"+ Long.toString(altitude & 0xFFFFFFFFL)+", \n");
+        }
 
-        int pressure = byteArrayToInt(raw,14,4);
+        if(!is0xFF(raw,13,1)){
+            int temperature = byteArrayToInt(raw,13,1);
+            ret.append("\"temperature\":"+ Long.toString(temperature & 0xFFFFFFFFL)+", \n");
+        }
 
-        return "{ \"d\": {"
-                +"\"currenttime\":"+ Integer.toString(cur_time)+",\n"
-                +"\"riderdistance\":"+ Integer.toString(ride_dist)+",\n"
-                +"\"altitude\":"+ Integer.toString(altitude)+",\n"
-                +"\"temperature\":"+ Integer.toString(temperature)+",\n"
-                +"\"pressure\":"+ Integer.toString(pressure)+"\n"
-                +"} }";
+        if(!is0xFF(raw,14,4)){
+            int pressure = byteArrayToInt(raw,14,4);
+            ret.append("\"pressure\":"+ Long.toString(pressure & 0xFFFFFFFFL)+"\n");
+        }
+
+        ret.append("} }");
+        return ret.toString();
 
     }
 
     static String decode3(byte[] raw)
     {
-        int cur_time = byteArrayToInt(raw,3,4);
-        cur_time += defSEC1989;
+        StringBuilder ret = new StringBuilder();
+        ret.append("{ \"d\": {");
 
-        int cur_speed = byteArrayToInt(raw,7,2);
-        cur_speed *= 1000;
+        if(!is0xFF(raw,3,4)){
+            int cur_time = byteArrayToInt(raw,3,4);
+            cur_time += defSEC1989;
 
-        int avg_speed = byteArrayToInt(raw,9,2);
-        avg_speed *= 1000;
+            ret.append("\"currenttime\":"+ Long.toString(cur_time & 0x000000FF)+", \n");
+        }
 
-        int max_speed = byteArrayToInt(raw,11,2);
-        max_speed *= 1000;
+        if(!is0xFF(raw,7,2)){
+            int cur_speed = byteArrayToInt(raw,7,2);
+            cur_speed *= 1000;
 
-        int cur_cad = byteArrayToInt(raw,13,1);
+            ret.append("\"currentspeed\":"+ Long.toString(cur_speed & 0x000000FF)+", \n");
+        }
 
-        int avg_cad = byteArrayToInt(raw,14,1);
+        if(!is0xFF(raw,9,2)){
+            int avg_speed = byteArrayToInt(raw,9,2);
+            avg_speed *= 1000;
 
-        int max_cad = byteArrayToInt(raw,15,1);
+            ret.append("\"averagespeed\":"+ Long.toString(avg_speed & 0x000000FF)+", \n");
+        }
 
-        int cur_hrm = byteArrayToInt(raw,16,1);
+        if(!is0xFF(raw,11,2)){
+            int max_speed = byteArrayToInt(raw,11,2);
+            max_speed *= 1000;
 
-        int avg_hrm = byteArrayToInt(raw,17,1);
+            ret.append("\"maxspeed\":"+ Long.toString(max_speed & 0x000000FF)+", \n");
+        }
 
-        int max_hrm = byteArrayToInt(raw,18,1);
+        if(!is0xFF(raw,13,2)){
+            int cur_cad = byteArrayToInt(raw,13,1);
 
-        return "{ \"d\": {"
-                +"\"currenttime\":"+ Integer.toString(cur_time)+",\n"
-                +"\"currentspeed\":"+ Integer.toString(cur_speed)+",\n"
-                +"\"averagespeed\":"+ Integer.toString(avg_speed)+",\n"
-                +"\"currentcad\":"+ Integer.toString(cur_cad)+",\n"
-                +"\"averagecad\":"+ Integer.toString(avg_cad)+",\n"
-                +"\"maxcad\":"+ Integer.toString(max_cad)+",\n"
-                +"\"currenthrm\":"+ Integer.toString(cur_hrm)+",\n"
-                +"\"averagehrm\":"+ Integer.toString(avg_hrm)+",\n"
-                +"\"maxhrm\":"+ Integer.toString(max_hrm)+"\n"
-                +"} }";
+            ret.append("\"currentcad\":"+ Long.toString(cur_cad & 0x000000FF)+", \n");
+        }
 
+        if(!is0xFF(raw,14,1)){
+            int avg_cad = byteArrayToInt(raw,14,1);
+
+            ret.append("\"averagecad\":"+ Long.toString(avg_cad & 0x000000FF)+", \n");
+        }
+
+        if(!is0xFF(raw,15,1)){
+            int max_cad = byteArrayToInt(raw,15,1);
+
+            ret.append("\"maxcad\":"+ Long.toString(max_cad & 0x000000FF)+", \n");
+        }
+
+        if(!is0xFF(raw,16,1)){
+            int cur_hrm = byteArrayToInt(raw,16,1);
+
+            ret.append("\"currenthrm\":"+ Long.toString(cur_hrm & 0x000000FF)+", \n");
+        }
+
+        if(!is0xFF(raw,17,1)){
+            int avg_hrm = byteArrayToInt(raw,17,1);
+
+            ret.append("\"averagehrm\":"+ Long.toString(avg_hrm & 0x000000FF)+", \n");
+        }
+
+        if(!is0xFF(raw,18,1)){
+            int max_hrm = byteArrayToInt(raw,18,1);
+
+            ret.append("\"maxhrm\":"+ Long.toString(max_hrm & 0x000000FF)+"\n");
+        }
+
+        ret.append("} }");
+
+        return ret.toString();
     }
 }
