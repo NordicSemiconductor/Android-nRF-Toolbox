@@ -80,6 +80,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 	private final static String ERROR_WRITE_DESCRIPTOR = "Error on writing descriptor";
 	private final static String ERROR_READ_CHARACTERISTIC = "Error on reading characteristic";
 
+	private final Object mLock = new Object();
 	/**
 	 * The log session or null if nRF Logger is not installed.
 	 */
@@ -197,18 +198,20 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 		if (mConnected)
 			return;
 
-		if (mBluetoothGatt != null) {
-			Logger.d(mLogSession, "gatt.close()");
-			mBluetoothGatt.close();
-			mBluetoothGatt = null;
-		}
+		synchronized (mLock) {
+			if (mBluetoothGatt != null) {
+				Logger.d(mLogSession, "gatt.close()");
+				mBluetoothGatt.close();
+				mBluetoothGatt = null;
+			}
 
-		final boolean autoConnect = shouldAutoConnect();
-		mUserDisconnected = !autoConnect; // We will receive Linkloss events only when the device is connected with autoConnect=true
-		Logger.v(mLogSession, "Connecting...");
-		Logger.d(mLogSession, "gatt = device.connectGatt(autoConnect = " + autoConnect + ")");
-		mBluetoothDevice = device;
-		mBluetoothGatt = device.connectGatt(mContext, autoConnect, getGattCallback());
+			final boolean autoConnect = shouldAutoConnect();
+			mUserDisconnected = !autoConnect; // We will receive Linkloss events only when the device is connected with autoConnect=true
+			Logger.v(mLogSession, "Connecting...");
+			Logger.d(mLogSession, "gatt = device.connectGatt(autoConnect = " + autoConnect + ")");
+			mBluetoothDevice = device;
+			mBluetoothGatt = device.connectGatt(mContext, autoConnect, getGattCallback());
+		}
 	}
 
 	/**
@@ -245,13 +248,15 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 		} catch (Exception e) {
 			// the receiver must have been not registered or unregistered before
 		}
-		if (mBluetoothGatt != null) {
-			Logger.d(mLogSession, "gatt.close()");
-			mBluetoothGatt.close();
-			mBluetoothGatt = null;
+		synchronized (mLock) {
+			if (mBluetoothGatt != null) {
+				Logger.d(mLogSession, "gatt.close()");
+				mBluetoothGatt.close();
+				mBluetoothGatt = null;
+			}
+			mBluetoothDevice = null;
+			mUserDisconnected = false;
 		}
-		mBluetoothDevice = null;
-		mUserDisconnected = false;
 	}
 
 	/**
