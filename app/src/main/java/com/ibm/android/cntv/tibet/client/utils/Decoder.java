@@ -115,9 +115,9 @@ public class Decoder{
             ret.append("\"temperature\":"+ Long.toString(temperature & 0xFFFFFFFFL)+", \n");
         }
 
-        if(!is0xFF(raw,14,4)){
-            int pressure = byteArrayToInt(raw,14,4);
-            ret.append("\"pressure\":"+ Long.toString(pressure & 0xFFFFFFFFL)+", \n");
+        if(!is0xFF(raw,14,2)){
+            int slope = byteArrayToInt(raw,14,2);
+            ret.append("\"slope\":"+ Long.toString(slope & 0xFFFFFFFFL)+", \n");
         }
 
         ret.append("} }");
