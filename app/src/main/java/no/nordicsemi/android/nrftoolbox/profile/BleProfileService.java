@@ -200,7 +200,8 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	/**
-	 * Called when the activity has unbinded from the service before being finished. This method is not called when the activity is killed to be recreated just to change the phone orientation.
+	 * Called when the activity has unbound from the service before being finished.
+	 * This method is not called when the activity is killed to be recreated just to change the phone orientation.
 	 */
 	protected void onUnbind() {
 		// empty
@@ -232,11 +233,6 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 		Logger.i(mLogSession, "Service started");
 
-		// notify user about changing the state to CONNECTING
-		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
-		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_CONNECTING);
-		LocalBroadcastManager.getInstance(BleProfileService.this).sendBroadcast(broadcast);
-
 		final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
 		final BluetoothAdapter adapter = bluetoothManager.getAdapter();
 		final String deviceAddress = intent.getStringExtra(EXTRA_DEVICE_ADDRESS);
@@ -266,6 +262,14 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 		mDeviceName = null;
 		mConnected = false;
 		mLogSession = null;
+	}
+
+	@Override
+	public void onDeviceConnecting(final BluetoothDevice device) {
+		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
+		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_CONNECTING);
+		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	@Override

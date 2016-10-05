@@ -115,9 +115,14 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 							onLinklossOccur(bluetoothDevice);
 							break;
 						}
-						case BleProfileService.STATE_CONNECTING:
-						case BleProfileService.STATE_DISCONNECTING:
-							// current implementation does nothing in this states
+						case BleProfileService.STATE_CONNECTING: {
+							onDeviceConnecting(bluetoothDevice);
+							break;
+						}
+						case BleProfileService.STATE_DISCONNECTING: {
+							onDeviceDisconnecting(bluetoothDevice);
+							break;
+						}
 						default:
 							// there should be no other actions
 							break;
@@ -475,6 +480,11 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	}
 
 	@Override
+	public void onDeviceConnecting(final BluetoothDevice device) {
+		// empty default implementation
+	}
+
+	@Override
 	public void onDeviceConnected(final BluetoothDevice device) {
 		mDeviceNameView.setText(mDeviceName);
 		mConnectButton.setText(R.string.action_disconnect);
@@ -483,7 +493,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 
 	@Override
 	public void onDeviceDisconnecting(final BluetoothDevice device) {
-		// do nothing
+		// empty default implementation
 	}
 
 	@Override
@@ -515,7 +525,9 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	}
 
 	@Override
-	public abstract void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound);
+	public void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound) {
+		// empty default implementation
+	}
 
 	@Override
 	public void onDeviceReady(final BluetoothDevice device) {

@@ -236,6 +236,11 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	}
 
 	@Override
+	public void onDeviceConnecting(final BluetoothDevice device) {
+		// do nothing
+	}
+
+	@Override
 	public void onDeviceConnected(final BluetoothDevice device) {
 		mDeviceConnected = true;
 		runOnUiThread(new Runnable() {

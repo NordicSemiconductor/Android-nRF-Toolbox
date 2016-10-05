@@ -28,8 +28,18 @@ import android.bluetooth.BluetoothGattCallback;
 public interface BleManagerCallbacks {
 
 	/**
-	 * Called when the device has been connected. This does not mean that the application may start communication. A service discovery will be handled automatically after this call. Service discovery
-	 * may ends up with calling {@link #onServicesDiscovered(BluetoothDevice, boolean)} or {@link #onDeviceNotSupported(BluetoothDevice)} if required services have not been found.
+	 * Called when the Android device started connecting to given device.
+	 * The {@link #onDeviceConnected(BluetoothDevice)} will be called when the device is connected,
+	 * or {@link #onError(BluetoothDevice, String, int)} in case of error.
+	 * @param device the device that got connected
+	 */
+	void onDeviceConnecting(final BluetoothDevice device);
+
+	/**
+	 * Called when the device has been connected. This does not mean that the application may start communication.
+	 * A service discovery will be handled automatically after this call. Service discovery
+	 * may ends up with calling {@link #onServicesDiscovered(BluetoothDevice, boolean)} or
+	 * {@link #onDeviceNotSupported(BluetoothDevice)} if required services have not been found.
 	 * @param device the device that got connected
 	 */
 	void onDeviceConnected(final BluetoothDevice device);
@@ -41,26 +51,32 @@ public interface BleManagerCallbacks {
 	void onDeviceDisconnecting(final BluetoothDevice device);
 
 	/**
-	 * Called when the device has disconnected (when the callback returned {@link BluetoothGattCallback#onConnectionStateChange(BluetoothGatt, int, int)} with state DISCONNECTED.
+	 * Called when the device has disconnected (when the callback returned
+	 * {@link BluetoothGattCallback#onConnectionStateChange(BluetoothGatt, int, int)} with state DISCONNECTED.
 	 * @param device the device that got disconnected
 	 */
 	void onDeviceDisconnected(final BluetoothDevice device);
 
 	/**
-	 * This callback is invoked when the Ble Manager lost connection to a device that has been connected with autoConnect option. Otherwise a {@link #onDeviceDisconnected(BluetoothDevice)}
-	 * method will be called on such event.
+	 * This callback is invoked when the Ble Manager lost connection to a device that has been connected
+	 * with autoConnect option (see {@link BleManager#shouldAutoConnect()}.
+	 * Otherwise a {@link #onDeviceDisconnected(BluetoothDevice)} method will be called on such event.
 	 * @param device the device that got disconnected due to a link loss
 	 */
 	void onLinklossOccur(final BluetoothDevice device);
 
 	/**
-	 * Called when service discovery has finished and primary services has been found. The device is ready to operate. This method is not called if the primary, mandatory services were not found
-	 * during service discovery. For example in the Blood Pressure Monitor, a Blood Pressure service is a primary service and Intermediate Cuff Pressure service is a optional secondary service.
+	 * Called when service discovery has finished and primary services has been found.
+	 * This method is not called if the primary, mandatory services were not found during service discovery.
+	 * For example in the Blood Pressure Monitor, a Blood Pressure service is a primary service and
+	 * Intermediate Cuff Pressure service is a optional secondary service.
 	 * Existence of battery service is not notified by this call.
+	 * <p>After successful service discovery the service will initialize all services.
+	 * The {@link #onDeviceReady(BluetoothDevice)} method will be called when the initialization is complete.</p>
 	 *
+	 * @param device the device which services got disconnected
 	 * @param optionalServicesFound
 	 *            if <code>true</code> the secondary services were also found on the device.
-	 * @param device the device which services got disconnected
 	 */
 	void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound);
 

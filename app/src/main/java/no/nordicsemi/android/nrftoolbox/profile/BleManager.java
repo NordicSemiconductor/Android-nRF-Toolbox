@@ -207,9 +207,10 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 
 			final boolean autoConnect = shouldAutoConnect();
 			mUserDisconnected = !autoConnect; // We will receive Linkloss events only when the device is connected with autoConnect=true
+			mBluetoothDevice = device;
+			mCallbacks.onDeviceConnecting(device);
 			Logger.v(mLogSession, "Connecting...");
 			Logger.d(mLogSession, "gatt = device.connectGatt(autoConnect = " + autoConnect + ")");
-			mBluetoothDevice = device;
 			mBluetoothGatt = device.connectGatt(mContext, autoConnect, getGattCallback());
 		}
 	}
