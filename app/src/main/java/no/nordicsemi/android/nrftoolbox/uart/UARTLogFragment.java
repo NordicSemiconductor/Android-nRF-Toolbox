@@ -81,25 +81,23 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			// This receiver listens only for the BleProfileService.BROADCAST_CONNECTION_STATE action, no need to check it.
-
 			final int state = intent.getIntExtra(BleProfileService.EXTRA_CONNECTION_STATE, BleProfileService.STATE_DISCONNECTED);
 
 			switch (state) {
-			case BleProfileService.STATE_CONNECTED: {
-				onDeviceConnected();
-				break;
-			}
-			case BleProfileService.STATE_DISCONNECTED: {
-				onDeviceDisconnected();
-				break;
-			}
-			case BleProfileService.STATE_CONNECTING:
-			case BleProfileService.STATE_DISCONNECTING:
-				// current implementation does nothing in this states
-			default:
-				// there should be no other actions 
-				break;
-
+				case BleProfileService.STATE_CONNECTED: {
+					onDeviceConnected();
+					break;
+				}
+				case BleProfileService.STATE_DISCONNECTED: {
+					onDeviceDisconnected();
+					break;
+				}
+				case BleProfileService.STATE_CONNECTING:
+				case BleProfileService.STATE_DISCONNECTING:
+					// current implementation does nothing in this states
+				default:
+					// there should be no other actions
+					break;
 			}
 		}
 	};
