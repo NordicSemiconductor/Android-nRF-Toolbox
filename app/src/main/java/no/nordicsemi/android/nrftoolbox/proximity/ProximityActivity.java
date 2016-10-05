@@ -21,6 +21,7 @@
  */
 package no.nordicsemi.android.nrftoolbox.proximity;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -134,35 +135,35 @@ public class ProximityActivity extends BleProfileServiceReadyActivity<ProximityS
 	}
 
 	@Override
-	public void onServicesDiscovered(boolean optionalServicesFound) {
+	public void onServicesDiscovered(final BluetoothDevice device, boolean optionalServicesFound) {
 		// this may notify user or update views
 	}
 
 	@Override
-	public void onDeviceReady() {
+	public void onDeviceReady(final BluetoothDevice device) {
 		showOpenLock();
 	}
 
 	@Override
-	public void onDeviceDisconnected() {
-		super.onDeviceDisconnected();
+	public void onDeviceDisconnected(final BluetoothDevice device) {
+		super.onDeviceDisconnected(device);
 		showClosedLock();
 		mGattServerSwitch.setEnabled(true);
 	}
 
 	@Override
-	public void onBondingRequired() {
+	public void onBondingRequired(final BluetoothDevice device) {
 		showClosedLock();
 	}
 
 	@Override
-	public void onBonded() {
+	public void onBonded(final BluetoothDevice device) {
 		showOpenLock();
 	}
 
 	@Override
-	public void onLinklossOccur() {
-		super.onLinklossOccur();
+	public void onLinklossOccur(final BluetoothDevice device) {
+		super.onLinklossOccur(device);
 		showClosedLock();
 		resetForLinkloss();
 

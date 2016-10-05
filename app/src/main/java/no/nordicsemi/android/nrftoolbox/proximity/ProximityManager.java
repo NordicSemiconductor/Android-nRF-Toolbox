@@ -185,10 +185,10 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 			if (!preparedWrite && value != null && value.length == 1) { // small validation
 				if (value[0] != NO_ALERT[0]) {
 					Logger.a(mLogSession, "[Server] Immediate alarm request received: " + AlertLevelParser.parse(characteristic));
-					mCallbacks.onAlarmTriggered();
+					mCallbacks.onAlarmTriggered(device);
 				} else {
 					Logger.a(mLogSession, "[Server] Immediate alarm request received: OFF");
-					mCallbacks.onAlarmStopped();
+					mCallbacks.onAlarmStopped(device);
 				}
 			}
 
@@ -279,7 +279,7 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 		@Override
 		protected Queue<Request> initGatt(final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
-			requests.push(Request.newWriteRequest(mLinklossCharacteristic, HIGH_ALERT));
+			requests.add(Request.newWriteRequest(mLinklossCharacteristic, HIGH_ALERT));
 			return requests;
 		}
 
@@ -306,10 +306,14 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 			mAlertLevelCharacteristic = null;
 			mLinklossCharacteristic = null;
 		}
+
+		@Override
+		protected void onCharacteristicWrite(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+			Logger.a(mLogSession, "\"" + AlertLevelParser.parse(characteristic) + "\" sent");
+		}
 	};
 
 	public void writeImmediateAlertOn() {
-		Logger.a(mLogSession, "Immediate alarm request: ON");
 		if (mAlertLevelCharacteristic != null) {
 			mAlertLevelCharacteristic.setValue(HIGH_ALERT);
 			writeCharacteristic(mAlertLevelCharacteristic);
@@ -319,7 +323,6 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 	}
 
 	public void writeImmediateAlertOff() {
-		Logger.a(mLogSession, "Immediate alarm request: OFF");
 		if (mAlertLevelCharacteristic != null) {
 			mAlertLevelCharacteristic.setValue(NO_ALERT);
 			writeCharacteristic(mAlertLevelCharacteristic);

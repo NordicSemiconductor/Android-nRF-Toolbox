@@ -63,7 +63,7 @@ public class CSCManager extends BleManager<CSCManagerCallbacks> {
 		@Override
 		protected Queue<Request> initGatt(final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
-			requests.push(Request.newEnableNotificationsRequest(mCSCMeasurementCharacteristic));
+			requests.add(Request.newEnableNotificationsRequest(mCSCMeasurementCharacteristic));
 			return requests;
 		}
 
@@ -83,8 +83,7 @@ public class CSCManager extends BleManager<CSCManagerCallbacks> {
 
 		@Override
 		public void onCharacteristicNotified(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
-			if (mLogSession != null)
-				Logger.a(mLogSession, CSCMeasurementParser.parse(characteristic));
+			Logger.a(mLogSession, "\"" + CSCMeasurementParser.parse(characteristic) + "\" received");
 
 			// Decode the new data
 			int offset = 0;
@@ -102,7 +101,7 @@ public class CSCManager extends BleManager<CSCManagerCallbacks> {
 				offset += 2;
 
 				// Notify listener about the new measurement
-				mCallbacks.onWheelMeasurementReceived(wheelRevolutions, lastWheelEventTime);
+				mCallbacks.onWheelMeasurementReceived(gatt.getDevice(), wheelRevolutions, lastWheelEventTime);
 			}
 
 			if (crankRevPreset) {
@@ -113,7 +112,7 @@ public class CSCManager extends BleManager<CSCManagerCallbacks> {
 				// offset += 2;
 
 				// Notify listener about the new measurement
-				mCallbacks.onCrankMeasurementReceived(crankRevolutions, lastCrankEventTime);
+				mCallbacks.onCrankMeasurementReceived(gatt.getDevice(), crankRevolutions, lastCrankEventTime);
 			}
 		}
 	};

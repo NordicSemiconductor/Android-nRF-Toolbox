@@ -21,12 +21,14 @@
  */
 package no.nordicsemi.android.nrftoolbox.rsc;
 
+import android.bluetooth.BluetoothDevice;
+
 import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
 
 public interface RSCManagerCallbacks extends BleManagerCallbacks {
-	public static final int NOT_AVAILABLE = -1;
-	public static final int ACTIVITY_WALKING = 0;
-	public static final int ACTIVITY_RUNNING = 1;
+	int NOT_AVAILABLE = -1;
+	int ACTIVITY_WALKING = 0;
+	int ACTIVITY_RUNNING = 1;
 
-	public void onMeasurementReceived(float speed, int cadence, float distance, float strideLen, int activity);
+	void onMeasurementReceived(final BluetoothDevice device, float speed, int cadence, float distance, float strideLen, int activity);
 }

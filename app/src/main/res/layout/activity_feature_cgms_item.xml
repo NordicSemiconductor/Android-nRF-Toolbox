@@ -20,52 +20,35 @@
   ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
 	android:layout_height="?android:attr/listPreferredItemHeightSmall"
 	android:paddingBottom="2dp"
-	android:paddingEnd="4dp"
-	android:paddingStart="?android:attr/listPreferredItemPaddingLeft"
-	android:paddingTop="2dp"
-	android:orientation="horizontal">
+	android:paddingEnd="8dp"
+	android:paddingStart="8dp"
+	android:paddingTop="2dp">
 
-	<LinearLayout
+	<TextView
+		android:id="@+id/time"
 		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:orientation="vertical">
+		android:layout_height="wrap_content"
+		android:textAppearance="?android:attr/textAppearanceListItem"/>
 
-		<TextView
-			android:id="@+id/time"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:textAppearance="?android:attr/textAppearanceListItem"/>
-
-		<TextView
-			android:id="@+id/details"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginTop="2dp"
-			android:textAppearance="?android:attr/textAppearanceSmall"
-			android:textSize="12sp"
-			android:text="@string/cgms_item_summary"/>
-	</LinearLayout>
+	<TextView
+		android:id="@+id/details"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@+id/time"
+		android:layout_marginTop="2dp"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+		android:textSize="12sp"/>
 
 	<TextView
 		android:id="@+id/cgms_concentration"
-		android:layout_width="0dp"
-		android:layout_height="match_parent"
-		android:layout_weight="1"
-		android:layout_centerVertical="true"
-		android:gravity="right"
-		android:textAppearance="?android:attr/textAppearanceLarge"
-		android:paddingEnd="?android:attr/listPreferredItemPaddingLeft"/>
-
-	<TextView
-		android:id="@+id/cgms_unit"
 		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:gravity="center"
-		android:textAppearance="?android:attr/textAppearanceSmall"
-		android:text="@string/cgms_value_unit"/>
+		android:layout_height="wrap_content"
+		android:layout_alignParentRight="true"
+		android:layout_centerVertical="true"
+		android:textAppearance="?android:attr/textAppearanceLarge"/>
 
-</LinearLayout>
+</RelativeLayout>

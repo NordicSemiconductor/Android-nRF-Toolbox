@@ -21,6 +21,7 @@
  */
 package no.nordicsemi.android.nrftoolbox.template;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -133,7 +134,7 @@ public class TemplateActivity extends BleProfileServiceReadyActivity<TemplateSer
 	}
 
 	@Override
-	public void onServicesDiscovered(boolean optionalServicesFound) {
+	public void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound) {
 		// this may notify user or show some views
 	}
 

@@ -239,7 +239,7 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	}
 
 	@Override
-	public void onDeviceConnected() {
+	public void onDeviceConnected(final BluetoothDevice device) {
 		mDeviceConnected = true;
 		runOnUiThread(new Runnable() {
 			@Override
@@ -251,12 +251,12 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	}
 
 	@Override
-	public void onDeviceDisconnecting() {
+	public void onDeviceDisconnecting(final BluetoothDevice device) {
 		// do nothing
 	}
 
 	@Override
-	public void onDeviceDisconnected() {
+	public void onDeviceDisconnected(final BluetoothDevice device) {
 		mDeviceConnected = false;
 		mBleManager.close();
 		runOnUiThread(new Runnable() {
@@ -271,7 +271,7 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	}
 
 	@Override
-	public void onLinklossOccur() {
+	public void onLinklossOccur(final BluetoothDevice device) {
 		mDeviceConnected = false;
 		runOnUiThread(new Runnable() {
 			@Override
@@ -284,7 +284,7 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	}
 
 	@Override
-	public void onBatteryValueReceived(final int value) {
+	public void onBatteryValueReceived(final BluetoothDevice device, final int value) {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -294,23 +294,23 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	}
 
 	@Override
-	public void onBondingRequired() {
+	public void onBondingRequired(final BluetoothDevice device) {
 		showToast(R.string.bonding);
 	}
 
 	@Override
-	public void onBonded() {
+	public void onBonded(final BluetoothDevice device) {
 		showToast(R.string.bonded);
 	}
 
 	@Override
-	public void onError(final String message, final int errorCode) {
+	public void onError(final BluetoothDevice device, final String message, final int errorCode) {
 		DebugLogger.e(TAG, "Error occurred: " + message + ",  error code: " + errorCode);
 		showToast(message + " (" + errorCode + ")");
 	}
 
 	@Override
-	public void onDeviceNotSupported() {
+	public void onDeviceNotSupported(final BluetoothDevice device) {
 		showToast(R.string.not_supported);
 	}
 

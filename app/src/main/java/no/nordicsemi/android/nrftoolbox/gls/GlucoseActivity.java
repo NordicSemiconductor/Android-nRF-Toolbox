@@ -21,6 +21,7 @@
  */
 package no.nordicsemi.android.nrftoolbox.gls;
 
+import android.bluetooth.BluetoothDevice;
 import android.os.Bundle;
 import android.util.SparseArray;
 import android.view.MenuInflater;
@@ -158,46 +159,46 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 	}
 
 	@Override
-	public void onDeviceDisconnected() {
-		super.onDeviceDisconnected();
+	public void onDeviceDisconnected(final BluetoothDevice device) {
+		super.onDeviceDisconnected(device);
 		setOperationInProgress(false);
 	}
 
 	@Override
-	public void onOperationStarted() {
+	public void onOperationStarted(final BluetoothDevice device) {
 		setOperationInProgress(true);
 	}
 
 	@Override
-	public void onOperationCompleted() {
+	public void onOperationCompleted(final BluetoothDevice device) {
 		setOperationInProgress(false);
 	}
 
 	@Override
-	public void onOperationAborted() {
+	public void onOperationAborted(final BluetoothDevice device) {
 		setOperationInProgress(false);
 	}
 
 	@Override
-	public void onOperationNotSupported() {
+	public void onOperationNotSupported(final BluetoothDevice device) {
 		setOperationInProgress(false);
 		showToast(R.string.gls_operation_not_supported);
 	}
 
 	@Override
-	public void onOperationFailed() {
+	public void onOperationFailed(final BluetoothDevice device) {
 		setOperationInProgress(false);
 		showToast(R.string.gls_operation_failed);
 	}
 
 	@Override
-	public void onError(final String message, final int errorCode) {
-		super.onError(message, errorCode);
-		onOperationFailed();
+	public void onError(final BluetoothDevice device, final String message, final int errorCode) {
+		super.onError(device, message, errorCode);
+		onOperationFailed(device);
 	}
 
 	@Override
-	public void onDatasetChanged() {
+	public void onDatasetChanged(final BluetoothDevice device) {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -215,7 +216,7 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 	}
 
 	@Override
-	public void onNumberOfRecordsRequested(final int value) {
+	public void onNumberOfRecordsRequested(final BluetoothDevice device, final int value) {
 		showToast(getString(R.string.gls_progress, value));
 	}
 }

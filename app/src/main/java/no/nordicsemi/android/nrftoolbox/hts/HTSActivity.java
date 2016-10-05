@@ -21,6 +21,7 @@
  */
 package no.nordicsemi.android.nrftoolbox.hts;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -179,7 +180,7 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.RSCBi
 	}
 
 	@Override
-	public void onServicesDiscovered(boolean optionalServicesFound) {
+	public void onServicesDiscovered(final BluetoothDevice device, boolean optionalServicesFound) {
 		// this may notify user or show some views
 	}
 

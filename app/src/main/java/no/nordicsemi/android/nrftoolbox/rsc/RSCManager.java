@@ -64,7 +64,7 @@ public class RSCManager extends BleManager<RSCManagerCallbacks> {
 		@Override
 		protected Queue<Request> initGatt(final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
-			requests.push(Request.newEnableNotificationsRequest(mRSCMeasurementCharacteristic));
+			requests.add(Request.newEnableNotificationsRequest(mRSCMeasurementCharacteristic));
 			return requests;
 		}
 
@@ -84,8 +84,7 @@ public class RSCManager extends BleManager<RSCManagerCallbacks> {
 
 		@Override
 		public void onCharacteristicNotified(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
-			if (mLogSession != null)
-				Logger.a(mLogSession, RSCMeasurementParser.parse(characteristic));
+			Logger.a(mLogSession, "\"" + RSCMeasurementParser.parse(characteristic) + "\" received");
 
 			// Decode the new data
 			int offset = 0;
@@ -115,8 +114,8 @@ public class RSCManager extends BleManager<RSCManagerCallbacks> {
 			}
 
 			// Notify listener about the new measurement
-			mCallbacks.onMeasurementReceived(instantaneousSpeed, instantaneousCadence, totalDistance, instantaneousStrideLength, running ? RSCManagerCallbacks.ACTIVITY_RUNNING
-					: RSCManagerCallbacks.ACTIVITY_WALKING);
+			mCallbacks.onMeasurementReceived(gatt.getDevice(), instantaneousSpeed, instantaneousCadence, totalDistance, instantaneousStrideLength,
+					running ? RSCManagerCallbacks.ACTIVITY_RUNNING : RSCManagerCallbacks.ACTIVITY_WALKING);
 		}
 	};
 }

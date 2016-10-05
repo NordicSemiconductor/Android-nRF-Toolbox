@@ -21,12 +21,14 @@
  */
 package no.nordicsemi.android.nrftoolbox.csc;
 
+import android.bluetooth.BluetoothDevice;
+
 import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
 
 public interface CSCManagerCallbacks extends BleManagerCallbacks {
-	public static final int NOT_AVAILABLE = -1;
+	int NOT_AVAILABLE = -1;
 
-	public void onWheelMeasurementReceived(final int wheelRevolutions, final int wheelCrankEventTime);
+	void onWheelMeasurementReceived(final BluetoothDevice device, final int wheelRevolutions, final int wheelCrankEventTime);
 
-	public void onCrankMeasurementReceived(final int crankRevolutions, final int lastCrankEventTime);
+	void onCrankMeasurementReceived(final BluetoothDevice device, final int crankRevolutions, final int lastCrankEventTime);
 }

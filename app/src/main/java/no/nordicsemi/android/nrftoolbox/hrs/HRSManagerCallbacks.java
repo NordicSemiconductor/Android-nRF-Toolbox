@@ -21,23 +21,27 @@
  */
 package no.nordicsemi.android.nrftoolbox.hrs;
 
+import android.bluetooth.BluetoothDevice;
+
 import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
 
 public interface HRSManagerCallbacks extends BleManagerCallbacks {
 
 	/**
 	 * Called when the sensor position information has been obtained from the sensor
-	 * 
+	 *
+	 * @param device  the bluetooth device from which the value was obtained
 	 * @param position
 	 *            the sensor position
 	 */
-	public void onHRSensorPositionFound(String position);
+	void onHRSensorPositionFound(final BluetoothDevice device, String position);
 
 	/**
 	 * Called when new Heart Rate value has been obtained from the sensor
-	 * 
+	 *
+	 * @param device  the bluetooth device from which the value was obtained
 	 * @param value
 	 *            the new value
 	 */
-	public void onHRValueReceived(int value);
+	void onHRValueReceived(final BluetoothDevice device, int value);
 }

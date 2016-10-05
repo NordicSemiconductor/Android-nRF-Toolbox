@@ -24,6 +24,7 @@ package no.nordicsemi.android.nrftoolbox.proximity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -169,19 +170,19 @@ public class ProximityService extends BleProfileService implements ProximityMana
 	}
 
 	@Override
-	public void onDeviceDisconnecting() {
+	public void onDeviceDisconnecting(final BluetoothDevice device) {
 		stopAlarm();
 	}
 
 	@Override
-	public void onDeviceDisconnected() {
-		super.onDeviceDisconnected();
+	public void onDeviceDisconnected(final BluetoothDevice device) {
+		super.onDeviceDisconnected(device);
 		isImmediateAlertOn = false;
 	}
 
 	@Override
-	public void onLinklossOccur() {
-		super.onLinklossOccur();
+	public void onLinklossOccur(final BluetoothDevice device) {
+		super.onLinklossOccur(device);
 		isImmediateAlertOn = false;
 
 		if (!mBinded) {
@@ -192,12 +193,12 @@ public class ProximityService extends BleProfileService implements ProximityMana
 	}
 
 	@Override
-	public void onAlarmTriggered() {
+	public void onAlarmTriggered(final BluetoothDevice device) {
 		playAlarm();
 	}
 
 	@Override
-	public void onAlarmStopped() {
+	public void onAlarmStopped(final BluetoothDevice device) {
 		stopAlarm();
 	}
 

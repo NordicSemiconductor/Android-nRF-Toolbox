@@ -66,7 +66,7 @@ public class TemplateManager extends BleManager<TemplateManagerCallbacks> {
 		protected Queue<Request> initGatt(final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
 			// TODO initialize your device, enable required notifications and indications, write what needs to be written to start working
-			requests.push(Request.newEnableNotificationsRequest(mCharacteristic));
+			requests.add(Request.newEnableNotificationsRequest(mCharacteristic));
 			return requests;
 		}
 
@@ -99,8 +99,7 @@ public class TemplateManager extends BleManager<TemplateManagerCallbacks> {
 			// TODO this method is called when a notification has been received
 			// This method may be removed from this class if not required
 
-			if (mLogSession != null)
-				Logger.a(mLogSession, TemplateParser.parse(characteristic));
+			Logger.a(mLogSession, "\"" + TemplateParser.parse(characteristic) + "\" received");
 
 			int value;
 			final int flags = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
@@ -110,7 +109,7 @@ public class TemplateManager extends BleManager<TemplateManagerCallbacks> {
 				value = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 1);
 			}
 			//This will send callback to the Activity when new value is received from HR device
-			mCallbacks.onSampleValueReceived(value);
+			mCallbacks.onSampleValueReceived(gatt.getDevice(), value);
 		}
 
 		@Override

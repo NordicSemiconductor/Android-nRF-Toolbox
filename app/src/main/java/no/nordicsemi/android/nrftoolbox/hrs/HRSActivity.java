@@ -210,29 +210,29 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 	}
 
 	@Override
-	public void onServicesDiscovered(final boolean optionalServicesFound) {
+	public void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound) {
 		// this may notify user or show some views
 	}
 
 	@Override
-	public void onDeviceReady() {
+	public void onDeviceReady(final BluetoothDevice device) {
 		startShowGraph();
 	}
 
 	@Override
-	public void onHRSensorPositionFound(final String position) {
+	public void onHRSensorPositionFound(final BluetoothDevice device, final String position) {
 		setHRSPositionOnView(position);
 	}
 
 	@Override
-	public void onHRValueReceived(int value) {
+	public void onHRValueReceived(final BluetoothDevice device, int value) {
 		mHrmValue = value;
 		setHRSValueOnView(mHrmValue);
 	}
 
 	@Override
-	public void onDeviceDisconnected() {
-		super.onDeviceDisconnected();
+	public void onDeviceDisconnected(final BluetoothDevice device) {
+		super.onDeviceDisconnected(device);
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {

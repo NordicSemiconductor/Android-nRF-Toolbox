@@ -21,6 +21,8 @@
  */
 package no.nordicsemi.android.nrftoolbox.hts;
 
+import android.bluetooth.BluetoothDevice;
+
 import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
 
 /**
@@ -30,10 +32,11 @@ public interface HTSManagerCallbacks extends BleManagerCallbacks {
 
 	/**
 	 * Called when Health Thermometer value has been received
-	 * 
+	 *
+	 * @param device  the bluetooth device from which the value was obtained
 	 * @param value
 	 *            the new value
 	 */
-	public void onHTValueReceived(double value);
+	void onHTValueReceived(final BluetoothDevice device, double value);
 
 }

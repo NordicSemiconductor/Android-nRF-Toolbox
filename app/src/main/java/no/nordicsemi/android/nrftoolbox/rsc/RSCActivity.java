@@ -22,6 +22,7 @@
 
 package no.nordicsemi.android.nrftoolbox.rsc;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +34,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.Menu;
 import android.widget.TextView;
 
+import java.util.Locale;
 import java.util.UUID;
 
 import no.nordicsemi.android.nrftoolbox.R;
@@ -175,7 +177,7 @@ public class RSCActivity extends BleProfileServiceReadyActivity<RSCService.RSCBi
 	}
 
 	@Override
-	public void onServicesDiscovered(final boolean optionalServicesFound) {
+	public void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound) {
 		// not used
 	}
 
@@ -192,7 +194,7 @@ public class RSCActivity extends BleProfileServiceReadyActivity<RSCService.RSCBi
 					mTotalDistanceView.setText(R.string.not_available);
 					mTotalDistanceUnitView.setText(null);
 				} else {
-					mTotalDistanceView.setText(String.format("%.2f", totalDistance / 1000.0f)); // 1 km in m
+					mTotalDistanceView.setText(String.format(Locale.US, "%.2f", totalDistance / 1000.0f)); // 1 km in m
 					mTotalDistanceUnitView.setText(R.string.rsc_total_distance_unit_km);
 				}
 				break;
@@ -202,14 +204,14 @@ public class RSCActivity extends BleProfileServiceReadyActivity<RSCService.RSCBi
 					mTotalDistanceView.setText(R.string.not_available);
 					mTotalDistanceUnitView.setText(null);
 				} else {
-					mTotalDistanceView.setText(String.format("%.2f", totalDistance / 1609.31f)); // 1 mile in m
+					mTotalDistanceView.setText(String.format(Locale.US, "%.2f", totalDistance / 1609.31f)); // 1 mile in m
 					mTotalDistanceUnitView.setText(R.string.rsc_total_distance_unit_mile);
 				}
 				break;
 		}
 
-		mSpeedView.setText(String.format("%.1f", speed));
-		mCadenceView.setText(String.format("%d", cadence));
+		mSpeedView.setText(String.format(Locale.US, "%.1f", speed));
+		mCadenceView.setText(String.format(Locale.US, "%d", cadence));
 		mActivityView.setText(activity == RSCManagerCallbacks.ACTIVITY_RUNNING ? R.string.rsc_running : R.string.rsc_walking);
 	}
 
@@ -225,19 +227,19 @@ public class RSCActivity extends BleProfileServiceReadyActivity<RSCService.RSCBi
 				case SettingsFragment.SETTINGS_UNIT_KM_H:
 				case SettingsFragment.SETTINGS_UNIT_M_S:
 					if (distance < 100000) { // 1 km in cm
-						mDistanceView.setText(String.format("%.0f", distance / 100.0f));
+						mDistanceView.setText(String.format(Locale.US, "%.0f", distance / 100.0f));
 						mDistanceUnitView.setText(R.string.rsc_distance_unit_m);
 					} else {
-						mDistanceView.setText(String.format("%.2f", distance / 100000.0f));
+						mDistanceView.setText(String.format(Locale.US, "%.2f", distance / 100000.0f));
 						mDistanceUnitView.setText(R.string.rsc_distance_unit_km);
 					}
 					break;
 				case SettingsFragment.SETTINGS_UNIT_MPH:
 					if (distance < 160931) { // 1 mile in cm
-						mDistanceView.setText(String.format("%.0f", distance / 91.4392f));
+						mDistanceView.setText(String.format(Locale.US, "%.0f", distance / 91.4392f));
 						mDistanceUnitView.setText(R.string.rsc_distance_unit_yd);
 					} else {
-						mDistanceView.setText(String.format("%.2f", distance / 160931.23f));
+						mDistanceView.setText(String.format(Locale.US, "%.2f", distance / 160931.23f));
 						mDistanceUnitView.setText(R.string.rsc_distance_unit_mile);
 					}
 					break;

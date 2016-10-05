@@ -21,23 +21,22 @@
  */
 package no.nordicsemi.android.nrftoolbox.gls;
 
+import android.bluetooth.BluetoothDevice;
+
 import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
 
 public interface GlucoseManagerCallbacks extends BleManagerCallbacks {
-	public static final int UNIT_mmHG = 0;
-	public static final int UNIT_kPa = 1;
+	void onOperationStarted(final BluetoothDevice device);
 
-	public void onOperationStarted();
+	void onOperationCompleted(final BluetoothDevice device);
 
-	public void onOperationCompleted();
+	void onOperationFailed(final BluetoothDevice device);
 
-	public void onOperationFailed();
+	void onOperationAborted(final BluetoothDevice device);
 
-	public void onOperationAborted();
+	void onOperationNotSupported(final BluetoothDevice device);
 
-	public void onOperationNotSupported();
+	void onDatasetChanged(final BluetoothDevice device);
 
-	public void onDatasetChanged();
-
-	public void onNumberOfRecordsRequested(final int value);
+	void onNumberOfRecordsRequested(final BluetoothDevice device, final int value);
 }

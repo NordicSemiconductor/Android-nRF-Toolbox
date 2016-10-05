@@ -3,6 +3,7 @@ package no.nordicsemi.android.nrftoolbox.cgms;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -22,7 +23,8 @@ import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
  */
 public class CGMService extends BleProfileService implements CGMSManagerCallbacks {
     private static final String ACTION_DISCONNECT = "no.nordicsemi.android.nrftoolbox.cgms.ACTION_DISCONNECT";
-    public static final String BROADCAST_CGMS_VALUES = "no.nordicsemi.android.nrftoolbox.cgms.BROADCAST_CGMS_VALUES";
+    public static final String BROADCAST_NEW_CGMS_VALUE = "no.nordicsemi.android.nrftoolbox.cgms.BROADCAST_NEW_CGMS_VALUE";
+    public static final String BROADCAST_DATA_SET_CLEAR = "no.nordicsemi.android.nrftoolbox.cgms.BROADCAST_DATA_SET_CLEAR";
     public static final String OPERATION_STARTED = "no.nordicsemi.android.nrftoolbox.cgms.OPERATION_STARTED";
     public static final String OPERATION_COMPLETED = "no.nordicsemi.android.nrftoolbox.cgms.OPERATION_COMPLETED";
     public static final String OPERATION_SUPPORTED = "no.nordicsemi.android.nrftoolbox.cgms.OPERATION_SUPPORTED";
@@ -30,7 +32,6 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     public static final String OPERATION_FAILED = "no.nordicsemi.android.nrftoolbox.cgms.OPERATION_FAILED";
     public static final String OPERATION_ABORTED = "no.nordicsemi.android.nrftoolbox.cgms.OPERATION_ABORTED";
     public static final String EXTRA_CGMS_RECORD = "no.nordicsemi.android.nrftoolbox.cgms.EXTRA_CGMS_RECORD";
-    public static final String BROADCAST_DATA_SET_CHANGED = "no.nordicsemi.android.nrftoolbox.cgms.BROADCAST_DATA_SET_CHANGED";
     public static final String EXTRA_DATA = "no.nordicsemi.android.nrftoolbox.cgms.EXTRA_DATA";
 
     private final static int NOTIFICATION_ID = 229;
@@ -39,54 +40,32 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
 
     private CGMSManager mManager;
     private final LocalBinder mBinder = new CGMSBinder();
-    private SparseArray<CGMSRecord> mRecords = new SparseArray<>();
 
     /**
      * This local binder is an interface for the bonded activity to operate with the RSC sensor
      */
 
     public class CGMSBinder extends LocalBinder {
-        public SparseArray<CGMSRecord> getCgmsRecords() {
-            return mRecords;
-        }
-
-        /**
-         * Sends the request to obtain the last (most recent) record from glucose device. The data will be returned to Glucose Measurement characteristic as a notification followed by Record Access
-         * Control Point indication with status code ({@link CGMSManager#RESPONSE_SUCCESS} or other in case of error.
-         */
-        public void getLastRecord() {
-            clear();
-            if(mManager != null)
-                mManager.getLastRecord();
-        }
-
         /**
          * Returns all records as a sparse array where sequence number is the key.
          *
          * @return the records list
          */
         public SparseArray<CGMSRecord> getRecords() {
-            return mRecords;
+            return mManager.getRecords();
         }
 
         /**
          * Clears the records list locally
          */
         public void clear() {
-            mRecords.clear();
+            if (mManager != null)
+                mManager.clear();
         }
 
         /**
-         * Sends abort operation signal to the device
-         */
-        public void abort() {
-
-            if(mManager != null)
-                mManager.abort();
-        }
-
-        /**
-         * Sends the request to obtain the first (oldest) record from glucose device. The data will be returned to Glucose Measurement characteristic as a notification followed by Record Access Control
+         * Sends the request to obtain the first (oldest) record from glucose device.
+         * The data will be returned to Glucose Measurement characteristic as a notification followed by Record Access Control
          * Point indication with status code ({@link CGMSManager# RESPONSE_SUCCESS} or other in case of error.
          */
         public void getFirstRecord() {
@@ -95,18 +74,48 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
         }
 
         /**
-         * Sends the request to obtain all records from glucose device. Initially we want to notify him/her about the number of the records so the {@link CGMSManager#OP_CODE_REPORT_NUMBER_OF_RECORDS} is send. The
-         * data will be returned to Glucose Measurement characteristic as a notification followed by Record Access Control Point indication with status code ({@link CGMSManager#RESPONSE_SUCCESS} or other in case of
-         * error.
+         * Sends the request to obtain the last (most recent) record from glucose device.
+         * The data will be returned to Glucose Measurement characteristic as a notification followed by Record Access
+         * Control Point indication with status code ({@link CGMSManager#RESPONSE_SUCCESS} or other in case of error.
+         */
+        public void getLastRecord() {
+            if(mManager != null)
+                mManager.getLastRecord();
+        }
+
+        /**
+         * Sends the request to obtain all records from glucose device.
+         * Initially we want to notify user about the number of the records so the {@link CGMSManager#OP_CODE_REPORT_NUMBER_OF_RECORDS} is send.
+         * The data will be returned to Glucose Measurement characteristic as a series of notifications followed by Record Access Control Point
+         * indication with status code ({@link CGMSManager#RESPONSE_SUCCESS} or other in case of error.
          */
         public void getAllRecords() {
-            clear();
             if(mManager != null)
                 mManager.getAllRecords();
         }
 
-        public void deleteAllRecords() {
+		/**
+         * Sends the request to obtain all records from glucose device with sequence number greater than the last one already obtained.
+         * The data will be returned to Glucose Measurement characteristic as a series of notifications followed by Record Access Control Point
+         * indication with status code ({@link CGMSManager#RESPONSE_SUCCESS} or other in case of error.
+         */
+        public void refreshRecords() {
+            if (mManager != null)
+                mManager.refreshRecords();
+        }
 
+        /**
+         * Sends abort operation signal to the device
+         */
+        public void abort() {
+            if(mManager != null)
+                mManager.abort();
+        }
+
+		/**
+         * Sends Delete op code with All stored records parameter. This method may not be supported by the SDK sample.
+         */
+        public void deleteAllRecords() {
             if(mManager != null)
                 mManager.deleteAllRecords();
         }
@@ -212,56 +221,62 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     };
 
     @Override
-    public void onCGMValueReceived(float value, String timeStamp) {
-        final Intent broadcast = new Intent(BROADCAST_CGMS_VALUES);
-        CGMSRecord cgmsRecord = new CGMSRecord(value, timeStamp);
-        broadcast.putExtra(EXTRA_CGMS_RECORD, cgmsRecord);
+    public void onCGMValueReceived(final BluetoothDevice device, final CGMSRecord record) {
+        final Intent broadcast = new Intent(BROADCAST_NEW_CGMS_VALUE);
+        broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
+        broadcast.putExtra(EXTRA_CGMS_RECORD, record);
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
-        mRecords.put(mRecords.size(), cgmsRecord);
     }
 
     @Override
-    public void onOperationStarted() {
+    public void onOperationStarted(final BluetoothDevice device) {
         final Intent broadcast = new Intent(OPERATION_STARTED);
+        broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
         broadcast.putExtra(EXTRA_DATA, true);
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
     }
 
     @Override
-    public void onOperationCompleted() {
+    public void onOperationCompleted(final BluetoothDevice device) {
         final Intent broadcast = new Intent(OPERATION_COMPLETED);
+        broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
         broadcast.putExtra(EXTRA_DATA, true);
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
     }
 
     @Override
-    public void onOperationFailed() {
+    public void onOperationFailed(final BluetoothDevice device) {
         final Intent broadcast = new Intent(OPERATION_FAILED);
+        broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
         broadcast.putExtra(EXTRA_DATA, true);
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
     }
 
     @Override
-    public void onOperationAborted() {
+    public void onOperationAborted(final BluetoothDevice device) {
         final Intent broadcast = new Intent(OPERATION_ABORTED);
+        broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
         broadcast.putExtra(EXTRA_DATA, true);
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
     }
 
     @Override
-    public void onOperationNotSupported() {
+    public void onOperationNotSupported(final BluetoothDevice device) {
         final Intent broadcast = new Intent(OPERATION_NOT_SUPPORTED);
+        broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
         broadcast.putExtra(EXTRA_DATA, false);
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
     }
 
     @Override
-    public void onDatasetChanged() {
-
+    public void onDatasetClear(final BluetoothDevice device) {
+        final Intent broadcast = new Intent(BROADCAST_DATA_SET_CLEAR);
+        broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
+        LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
     }
 
     @Override
-    public void onNumberOfRecordsRequested(int value) {
+    public void onNumberOfRecordsRequested(final BluetoothDevice device, int value) {
         showToast(getString(R.string.gls_progress, value));
     }
 }

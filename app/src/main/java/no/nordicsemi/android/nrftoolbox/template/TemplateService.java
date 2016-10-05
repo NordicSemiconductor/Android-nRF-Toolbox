@@ -25,6 +25,7 @@ package no.nordicsemi.android.nrftoolbox.template;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -112,8 +113,9 @@ public class TemplateService extends BleProfileService implements TemplateManage
 	}
 
 	@Override
-	public void onSampleValueReceived(final int value) {
+	public void onSampleValueReceived(final BluetoothDevice device, final int value) {
 		final Intent broadcast = new Intent(BROADCAST_TEMPLATE_MEASUREMENT);
+		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
 		broadcast.putExtra(EXTRA_DATA, value);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 

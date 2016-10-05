@@ -21,6 +21,8 @@
  */
 package no.nordicsemi.android.nrftoolbox.template;
 
+import android.bluetooth.BluetoothDevice;
+
 import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
 
 /**
@@ -32,10 +34,11 @@ public interface TemplateManagerCallbacks extends BleManagerCallbacks {
 
 	/**
 	 * Called when a value is received.
-	 * 
+	 *
+	 * @param device a device from which the value was obtained
 	 * @param value
 	 *            the new value
 	 */
-	public void onSampleValueReceived(int value);
+	void onSampleValueReceived(final BluetoothDevice device, int value);
 
 }

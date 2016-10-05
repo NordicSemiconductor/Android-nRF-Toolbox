@@ -25,6 +25,7 @@ package no.nordicsemi.android.nrftoolbox.rsc;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -149,8 +150,9 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 	};
 
 	@Override
-	public void onMeasurementReceived(final float speed, final int cadence, final float totalDistance, final float strideLen, final int activity) {
+	public void onMeasurementReceived(final BluetoothDevice device, final float speed, final int cadence, final float totalDistance, final float strideLen, final int activity) {
 		final Intent broadcast = new Intent(BROADCAST_RSC_MEASUREMENT);
+		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
 		broadcast.putExtra(EXTRA_SPEED, speed);
 		broadcast.putExtra(EXTRA_CADENCE, cadence);
 		broadcast.putExtra(EXTRA_TOTAL_DISTANCE, totalDistance);

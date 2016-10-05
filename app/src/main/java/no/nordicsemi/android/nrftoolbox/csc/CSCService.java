@@ -25,6 +25,7 @@ package no.nordicsemi.android.nrftoolbox.csc;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -126,7 +127,7 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 	}
 
 	@Override
-	public void onWheelMeasurementReceived(final int wheelRevolutions, final int lastWheelEventTime) {
+	public void onWheelMeasurementReceived(final BluetoothDevice device, final int wheelRevolutions, final int lastWheelEventTime) {
 		Logger.a(getLogSession(), "Wheel rev: " + wheelRevolutions + "\nLast wheel event time: " + lastWheelEventTime + " ms");
 
 		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -151,6 +152,7 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 			mWheelCadence = (wheelRevolutions - mLastWheelRevolutions) * 60.0f / timeDifference;
 
 			final Intent broadcast = new Intent(BROADCAST_WHEEL_DATA);
+			broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
 			broadcast.putExtra(EXTRA_SPEED, speed);
 			broadcast.putExtra(EXTRA_DISTANCE, distance);
 			broadcast.putExtra(EXTRA_TOTAL_DISTANCE, totalDistance);
@@ -161,7 +163,7 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 	}
 
 	@Override
-	public void onCrankMeasurementReceived(int crankRevolutions, int lastCrankEventTime) {
+	public void onCrankMeasurementReceived(final BluetoothDevice device, int crankRevolutions, int lastCrankEventTime) {
 		Logger.a(getLogSession(), "Crank rev: " + crankRevolutions + "\nLast crank event time: " + lastCrankEventTime + " ms");
 
 		if (mLastCrankEventTime == lastCrankEventTime)
@@ -179,6 +181,7 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 				final float gearRatio = mWheelCadence / crankCadence;
 
 				final Intent broadcast = new Intent(BROADCAST_CRANK_DATA);
+				broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
 				broadcast.putExtra(EXTRA_GEAR_RATIO, gearRatio);
 				broadcast.putExtra(EXTRA_CADENCE, (int) crankCadence);
 				LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);

@@ -114,6 +114,7 @@
                         style="@style/Widget.ListTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:text="@string/cgms_value_unit"
                         android:layout_alignParentRight="true"
                         android:layout_marginRight="4dp"/>
                 </RelativeLayout>

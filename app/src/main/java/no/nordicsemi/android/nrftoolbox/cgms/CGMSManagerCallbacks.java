@@ -22,6 +22,8 @@
 
 package no.nordicsemi.android.nrftoolbox.cgms;
 
+import android.bluetooth.BluetoothDevice;
+
 import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
 
 /**
@@ -29,26 +31,22 @@ import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
  */
 public interface CGMSManagerCallbacks extends BleManagerCallbacks {
     /**
-     * Called when new CGM value has been obtained from the sensor
-     *
-     * @param value
-     *            the new value
+     * Called when new CGM value has been obtained from the sensor.
      */
-    public void onCGMValueReceived(float value, String timeStamp);
+    void onCGMValueReceived(final BluetoothDevice device, final CGMSRecord record);
 
+    void onOperationStarted(final BluetoothDevice device);
 
-    public void onOperationStarted();
+    void onOperationCompleted(final BluetoothDevice device);
 
-    public void onOperationCompleted();
+    void onOperationFailed(final BluetoothDevice device);
 
-    public void onOperationFailed();
+    void onOperationAborted(final BluetoothDevice device);
 
-    public void onOperationAborted();
+    void onOperationNotSupported(final BluetoothDevice device);
 
-    public void onOperationNotSupported();
+    void onDatasetClear(final BluetoothDevice device);
 
-    public void onDatasetChanged();
-
-    public void onNumberOfRecordsRequested(final int value);
+    void onNumberOfRecordsRequested(final BluetoothDevice device, final int value);
 
 }

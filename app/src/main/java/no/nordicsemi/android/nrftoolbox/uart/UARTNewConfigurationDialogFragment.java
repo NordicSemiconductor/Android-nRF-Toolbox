@@ -22,10 +22,8 @@
 
 package no.nordicsemi.android.nrftoolbox.uart;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -33,7 +31,6 @@ import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -53,21 +50,21 @@ public class UARTNewConfigurationDialogFragment extends DialogFragment implement
 		 * @param name the name
 		 * @param duplicate true if configuration is to be duplicated
 		 */
-		public void onNewConfiguration(final String name, final boolean duplicate);
+		void onNewConfiguration(final String name, final boolean duplicate);
 
 		/**
 		 * Renames the current configuration with given name.
 		 * @param newName the new name
 		 */
-		public void onRenameConfiguration(final String newName);
+		void onRenameConfiguration(final String newName);
 	}
 
 	@Override
-	public void onAttach(final Activity activity) {
-		super.onAttach(activity);
+	public void onAttach(final Context context) {
+		super.onAttach(context);
 
-		if (activity instanceof NewConfigurationDialogListener) {
-			mListener = (NewConfigurationDialogListener) activity;
+		if (context instanceof NewConfigurationDialogListener) {
+			mListener = (NewConfigurationDialogListener) context;
 		} else {
 			throw new IllegalArgumentException("The parent activity must implement NewConfigurationDialogListener");
 		}

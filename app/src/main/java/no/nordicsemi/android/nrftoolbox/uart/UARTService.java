@@ -25,6 +25,7 @@ package no.nordicsemi.android.nrftoolbox.uart;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -143,8 +144,8 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	}
 
 	@Override
-	public void onDeviceConnected() {
-		super.onDeviceConnected();
+	public void onDeviceConnected(final BluetoothDevice device) {
+		super.onDeviceConnected(device);
 		sendMessageToWearables(Constants.UART.DEVICE_CONNECTED, notNull(getDeviceName()));
 	}
 
@@ -154,14 +155,14 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	}
 
 	@Override
-	public void onDeviceDisconnected() {
-		super.onDeviceDisconnected();
+	public void onDeviceDisconnected(final BluetoothDevice device) {
+		super.onDeviceDisconnected(device);
 		sendMessageToWearables(Constants.UART.DEVICE_DISCONNECTED, notNull(getDeviceName()));
 	}
 
 	@Override
-	public void onLinklossOccur() {
-		super.onLinklossOccur();
+	public void onLinklossOccur(final BluetoothDevice device) {
+		super.onLinklossOccur(device);
 		sendMessageToWearables(Constants.UART.DEVICE_LINKLOSS, notNull(getDeviceName()));
 	}
 
@@ -172,24 +173,23 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	}
 
 	@Override
-	public void onDataReceived(final String data) {
-		Logger.a(getLogSession(), "\"" + data + "\" received");
-
+	public void onDataReceived(final BluetoothDevice device, final String data) {
 		final Intent broadcast = new Intent(BROADCAST_UART_RX);
+		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
 		broadcast.putExtra(EXTRA_DATA, data);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 
 		// send the data received to other apps, e.g. the Tasker
 		final Intent globalBroadcast = new Intent(ACTION_RECEIVE);
+		globalBroadcast.putExtra(BluetoothDevice.EXTRA_DEVICE, getBluetoothDevice());
 		globalBroadcast.putExtra(Intent.EXTRA_TEXT, data);
 		sendBroadcast(globalBroadcast);
 	}
 
 	@Override
-	public void onDataSent(final String data) {
-		Logger.a(getLogSession(), "\"" + data + "\" sent");
-
+	public void onDataSent(final BluetoothDevice device, final String data) {
 		final Intent broadcast = new Intent(BROADCAST_UART_TX);
+		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
 		broadcast.putExtra(EXTRA_DATA, data);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}

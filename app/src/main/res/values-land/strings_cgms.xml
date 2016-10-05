@@ -23,7 +23,5 @@
 
 <resources>
     <string name="cgms_feature_title_long">CGMS</string>
-    <string name="text_cgms_interval">GCM updates are notified every minute</string>
-    <string name="cgms_item_summary">Glucose concentration level</string>
     <dimen name="cgms_feature_title_long_margin">-16dp</dimen>
 </resources>

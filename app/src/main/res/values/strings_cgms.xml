@@ -22,16 +22,15 @@
   -->
 
 <resources>
-    <string name="cgms_feature_title">CGMS</string>
-    <string name="cgms_feature_title_long">CONT. GLUCOSE MONITOR</string>
-    <dimen name="cgms_feature_title_long_margin">-180dp</dimen>
+	<string name="cgms_feature_title">CGMS</string>
+	<string name="cgms_feature_title_long">CONT. GLUCOSE MONITOR</string>
+	<dimen name="cgms_feature_title_long_margin">-180dp</dimen>
 
-    <string name="cgms_default_name">DEFAULT CGMS</string>
-    <string name="cgms_value_unit">mg/dL</string>
-    <string name="cgms_position_label">sensor position</string>
+	<string name="cgms_default_name">DEFAULT CGMS</string>
+	<string name="cgms_value_unit">mg/dL</string>
+	<string name="cgms_details">Sequence number: %d</string>
 
     <string name="cgms_about_text">CGMS (Continuous Glucode Monitoring Service) profile allows you to connect to your Continuous Glucose Monitoring sensor.
-        It shows you the continuous glucose measurement on the table.</string>
-    <string name="text_cgms_interval">GCM updates are notified every minute</string>
-    <string name="cgms_item_summary">Glucose concentration level</string>
+        It shows you the continuous glucose measurement on the table. A new record should show up on the list every minute. You may also request all, first or the last
+        record using buttons below the list.</string>
 </resources>

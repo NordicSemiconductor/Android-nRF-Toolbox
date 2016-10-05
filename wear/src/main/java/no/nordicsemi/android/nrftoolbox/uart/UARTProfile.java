@@ -25,11 +25,8 @@ package no.nordicsemi.android.nrftoolbox.uart;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
-import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 
-import java.util.LinkedList;
 import java.util.Queue;
 import java.util.UUID;
 
@@ -82,7 +79,7 @@ public class UARTProfile extends BleProfile {
 
 		// We don't want to enable notifications on TX characteristic as we are not showing them here. A watch may be just used to send data. At least now.
 //		final LinkedList<BleManager.Request> requests = new LinkedList<>();
-//		requests.push(BleManager.Request.newEnableNotificationsRequest(mTXCharacteristic));
+//		requests.add(BleManager.Request.newEnableNotificationsRequest(mTXCharacteristic));
 //		return requests;
 		return null;
 	}

@@ -271,7 +271,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	}
 
 	@Override
-	public void onServicesDiscovered(final boolean optionalServicesFound) {
+	public void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound) {
 		// do nothing
 	}
 

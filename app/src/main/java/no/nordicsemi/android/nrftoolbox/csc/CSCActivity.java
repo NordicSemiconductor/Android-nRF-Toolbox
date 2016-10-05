@@ -22,6 +22,7 @@
 
 package no.nordicsemi.android.nrftoolbox.csc;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +34,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.Menu;
 import android.widget.TextView;
 
+import java.util.Locale;
 import java.util.UUID;
 
 import no.nordicsemi.android.nrftoolbox.R;
@@ -172,7 +174,7 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 	}
 
 	@Override
-	public void onServicesDiscovered(final boolean optionalServicesFound) {
+	public void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound) {
 		// not used
 	}
 
@@ -186,35 +188,35 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 				// pass through intended
 			case SettingsFragment.SETTINGS_UNIT_M_S:
 				if (distance < 1000) { // 1 km in m
-					mDistanceView.setText(String.format("%.0f", distance));
+					mDistanceView.setText(String.format(Locale.US, "%.0f", distance));
 					mDistanceUnitView.setText(R.string.csc_distance_unit_m);
 				} else {
-					mDistanceView.setText(String.format("%.2f", distance / 1000.0f));
+					mDistanceView.setText(String.format(Locale.US, "%.2f", distance / 1000.0f));
 					mDistanceUnitView.setText(R.string.csc_distance_unit_km);
 				}
 
-				mTotalDistanceView.setText(String.format("%.2f", totalDistance / 1000.0f));
+				mTotalDistanceView.setText(String.format(Locale.US, "%.2f", totalDistance / 1000.0f));
 				break;
 			case SettingsFragment.SETTINGS_UNIT_MPH:
 				speed = speed * 2.2369f;
 				if (distance < 1760) { // 1 mile in yrs
-					mDistanceView.setText(String.format("%.0f", distance));
+					mDistanceView.setText(String.format(Locale.US, "%.0f", distance));
 					mDistanceUnitView.setText(R.string.csc_distance_unit_yd);
 				} else {
-					mDistanceView.setText(String.format("%.2f", distance / 1760.0f));
+					mDistanceView.setText(String.format(Locale.US, "%.2f", distance / 1760.0f));
 					mDistanceUnitView.setText(R.string.csc_distance_unit_mile);
 				}
 
-				mTotalDistanceView.setText(String.format("%.2f", totalDistance / 1609.31f));
+				mTotalDistanceView.setText(String.format(Locale.US, "%.2f", totalDistance / 1609.31f));
 				break;
 		}
 
-		mSpeedView.setText(String.format("%.1f", speed));
+		mSpeedView.setText(String.format(Locale.US, "%.1f", speed));
 	}
 
 	private void onGearRatioUpdate(final float ratio, final int cadence) {
-		mGearRatioView.setText(String.format("%.1f", ratio));
-		mCadenceView.setText(String.format("%d", cadence));
+		mGearRatioView.setText(String.format(Locale.US, "%.1f", ratio));
+		mCadenceView.setText(String.format(Locale.US, "%d", cadence));
 	}
 
 	private final  BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {

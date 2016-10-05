@@ -73,7 +73,7 @@ public class HTSManager extends BleManager<HTSManagerCallbacks> {
 		@Override
 		protected Queue<Request> initGatt(final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
-			requests.push(Request.newEnableIndicationsRequest(mHTCharacteristic));
+			requests.add(Request.newEnableIndicationsRequest(mHTCharacteristic));
 			return requests;
 		}
 
@@ -93,12 +93,11 @@ public class HTSManager extends BleManager<HTSManagerCallbacks> {
 
 		@Override
 		public void onCharacteristicIndicated(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
-			if (mLogSession != null)
-				Logger.a(mLogSession, TemperatureMeasurementParser.parse(characteristic));
+			Logger.a(mLogSession, "\"" + TemperatureMeasurementParser.parse(characteristic) + "\" received");
 
 			try {
 				final double tempValue = decodeTemperature(characteristic.getValue());
-				mCallbacks.onHTValueReceived(tempValue);
+				mCallbacks.onHTValueReceived(gatt.getDevice(), tempValue);
 			} catch (Exception e) {
 				DebugLogger.e(TAG, "Invalid temperature value", e);
 			}

@@ -21,47 +21,53 @@
  */
 package no.nordicsemi.android.nrftoolbox.bpm;
 
+import android.bluetooth.BluetoothDevice;
+
 import java.util.Calendar;
 
 import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
 
 public interface BPMManagerCallbacks extends BleManagerCallbacks {
-	public static final int UNIT_mmHG = 0;
-	public static final int UNIT_kPa = 1;
+	int UNIT_mmHG = 0;
+	int UNIT_kPa = 1;
 
 	/**
 	 * Called when new BPM value has been obtained from the sensor
-	 * 
+	 *
+	 * @param device the target device
 	 * @param systolic
 	 * @param diastolic
 	 * @param meanArterialPressure
 	 * @param unit
 	 *            one of the following {@link #UNIT_kPa} or {@link #UNIT_mmHG}
 	 */
-	public void onBloodPressureMeasurementRead(final float systolic, final float diastolic, final float meanArterialPressure, final int unit);
+	void onBloodPressureMeasurementRead(final BluetoothDevice device, final float systolic, final float diastolic, final float meanArterialPressure, final int unit);
 
 	/**
 	 * Called when new ICP value has been obtained from the device
-	 * 
+	 *
+	 * @param device the target device
 	 * @param cuffPressure
 	 * @param unit
 	 *            one of the following {@link #UNIT_kPa} or {@link #UNIT_mmHG}
 	 */
-	public void onIntermediateCuffPressureRead(final float cuffPressure, final int unit);
+	void onIntermediateCuffPressureRead(final BluetoothDevice device, final float cuffPressure, final int unit);
 
 	/**
 	 * Called when new pulse rate value has been obtained from the device. If there was no pulse rate in the packet the parameter will be equal -1.0f
-	 * 
+	 *
+	 * @param device the target device
 	 * @param pulseRate
 	 *            pulse rate or -1.0f
 	 */
-	public void onPulseRateRead(final float pulseRate);
+	void onPulseRateRead(final BluetoothDevice device, final float pulseRate);
 
 	/**
 	 * Called when the timestamp value has been read from the device. If there was no timestamp information the parameter will be <code>null</code>
-	 * 
+	 *
+	 * @param device the target device
 	 * @param calendar
 	 *            the timestamp or <code>null</code>
 	 */
-	public void onTimestampRead(final Calendar calendar);
+	void onTimestampRead(final BluetoothDevice device, final Calendar calendar);
 }

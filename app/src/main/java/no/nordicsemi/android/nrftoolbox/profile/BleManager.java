@@ -33,11 +33,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.support.annotation.StringRes;
 
 import java.util.Queue;
 import java.util.UUID;
 
 import no.nordicsemi.android.log.ILogSession;
+import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.error.GattError;
 import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
@@ -53,8 +55,8 @@ import no.nordicsemi.android.nrftoolbox.utility.ParserUtils;
  * <li>The manager tries to read the Battery Level characteristic. No matter the result of this operation (for example the Battery Level characteristic may not have the READ property)
  * it tries to enable Battery Level notifications, to get battery updates from the device.</li>
  * <li>Afterwards, the manager initializes the device using given queue of commands. See {@link BleManagerGattCallback#initGatt(BluetoothGatt)} method for more details.</li>
- * <li>When initialization complete, the {@link BleManagerCallbacks#onDeviceReady()} callback is called.</li>
- * </ol>The manager also is responsible for parsing the Battery Level values and calling {@link BleManagerCallbacks#onBatteryValueReceived(int)} method.</p>
+ * <li>When initialization complete, the {@link BleManagerCallbacks#onDeviceReady(BluetoothDevice)} callback is called.</li>
+ * </ol>The manager also is responsible for parsing the Battery Level values and calling {@link BleManagerCallbacks#onBatteryValueReceived(BluetoothDevice, int)} method.</p>
  * <p>Events from all profiles are being logged into the nRF Logger application,
  * which may be downloaded from Google Play: <a href="https://play.google.com/store/apps/details?id=no.nordicsemi.android.log">https://play.google.com/store/apps/details?id=no.nordicsemi.android.log</a></p>
  * <p>The nRF Logger application allows you to see application logs without need to connect it to the computer.</p>
@@ -82,11 +84,17 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 	 * The log session or null if nRF Logger is not installed.
 	 */
 	protected ILogSession mLogSession;
+	protected BluetoothDevice mBluetoothDevice;
 	protected E mCallbacks;
 	private Handler mHandler;
 	private BluetoothGatt mBluetoothGatt;
 	private Context mContext;
+	/**
+	 * This flag is set to false only when the {@link #shouldAutoConnect()} method returns true and the device got disconnected without calling {@link #disconnect()} method.
+	 * If {@link #shouldAutoConnect()} returns false (dafault) this is always set to true.
+	 */
 	private boolean mUserDisconnected;
+	/** Flag set to true when the device is connected. */
 	private boolean mConnected;
 
 	private BroadcastReceiver mBondingBroadcastReceiver = new BroadcastReceiver() {
@@ -105,11 +113,11 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 
 			switch (bondState) {
 				case BluetoothDevice.BOND_BONDING:
-					mCallbacks.onBondingRequired();
+					mCallbacks.onBondingRequired(device);
 					break;
 				case BluetoothDevice.BOND_BONDED:
 					Logger.i(mLogSession, "Device bonded");
-					mCallbacks.onBonded();
+					mCallbacks.onBonded(device);
 
 					// Start initializing again.
 					// In fact, bonding forces additional, internal service discovery (at least on Nexus devices), so this method may safely be used to start this process again.
@@ -199,6 +207,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 		mUserDisconnected = !autoConnect; // We will receive Linkloss events only when the device is connected with autoConnect=true
 		Logger.v(mLogSession, "Connecting...");
 		Logger.d(mLogSession, "gatt = device.connectGatt(autoConnect = " + autoConnect + ")");
+		mBluetoothDevice = device;
 		mBluetoothGatt = device.connectGatt(mContext, autoConnect, getGattCallback());
 	}
 
@@ -211,12 +220,19 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 
 		if (mConnected && mBluetoothGatt != null) {
 			Logger.v(mLogSession, "Disconnecting...");
-			mCallbacks.onDeviceDisconnecting();
+			mCallbacks.onDeviceDisconnecting(mBluetoothGatt.getDevice());
 			Logger.d(mLogSession, "gatt.disconnect()");
 			mBluetoothGatt.disconnect();
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * This method returns true if the device is connected. Services could have not been discovered yet.
+	 */
+	public boolean isConnected() {
+		return mConnected;
 	}
 
 	/**
@@ -230,9 +246,11 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 			// the receiver must have been not registered or unregistered before
 		}
 		if (mBluetoothGatt != null) {
+			Logger.d(mLogSession, "gatt.close()");
 			mBluetoothGatt.close();
 			mBluetoothGatt = null;
 		}
+		mBluetoothDevice = null;
 		mUserDisconnected = false;
 	}
 
@@ -246,6 +264,30 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 	 */
 	public void setLogger(final ILogSession session) {
 		mLogSession = session;
+	}
+
+	/**
+	 * Logs a message on the manager's log session. Does nothing when log session has not been set by {@link #setLogger(ILogSession)}.
+	 * @param level
+	 *            the log level, one of {@link LogContract.Log.Level#DEBUG}, {@link LogContract.Log.Level#VERBOSE}, {@link LogContract.Log.Level#INFO}, {@link LogContract.Log.Level#WARNING},
+	 *            {@link LogContract.Log.Level#ERROR}
+	 * @param message
+	 *            the message to be logged
+	 */
+	public void log(final int level, final String message) {
+		Logger.log(mLogSession, level, message);
+	}
+
+	/**
+	 * Logs a message on the manager's log session. Does nothing when log session has not been set by {@link #setLogger(ILogSession)}.
+	 * @param level
+	 *            the log level, one of {@link LogContract.Log.Level#DEBUG}, {@link LogContract.Log.Level#VERBOSE}, {@link LogContract.Log.Level#INFO}, {@link LogContract.Log.Level#WARNING},
+	 *            {@link LogContract.Log.Level#ERROR}
+	 * @param messageRes
+	 *            the message string resource to be logged
+	 */
+	public void log(final int level, @StringRes final int messageRes) {
+		Logger.log(mLogSession, level, messageRes);
 	}
 
 	/**
@@ -573,7 +615,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 		 * Called then the initialization queue is complete.
 		 */
 		protected void onDeviceReady() {
-			mCallbacks.onDeviceReady();
+			mCallbacks.onDeviceReady(mBluetoothGatt.getDevice());
 		}
 
 		/**
@@ -617,9 +659,9 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 			// do nothing
 		}
 
-		private void onError(final String message, final int errorCode) {
+		private void onError(final BluetoothDevice device, final String message, final int errorCode) {
 			Logger.e(mLogSession, "Error (0x" + Integer.toHexString(errorCode) + "): " + GattError.parse(errorCode));
-			mCallbacks.onError(message, errorCode);
+			mCallbacks.onError(device, message, errorCode);
 		}
 
 		@Override
@@ -630,7 +672,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 				// Notify the parent activity/service
 				Logger.i(mLogSession, "Connected to " + gatt.getDevice().getAddress());
 				mConnected = true;
-				mCallbacks.onDeviceConnected();
+				mCallbacks.onDeviceConnected(gatt.getDevice());
 
 				/*
 				 * The onConnectionStateChange event is triggered just after the Android connects to a device.
@@ -668,11 +710,11 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 					mConnected = false;
 					if (mUserDisconnected) {
 						Logger.i(mLogSession, "Disconnected");
-						mCallbacks.onDeviceDisconnected();
+						mCallbacks.onDeviceDisconnected(gatt.getDevice());
 						close();
 					} else {
 						Logger.w(mLogSession, "Connection lost");
-						mCallbacks.onLinklossOccur();
+						mCallbacks.onLinklossOccur(gatt.getDevice());
 						// We are not closing the connection here as the device should try to reconnect automatically.
 						// This may be only called when the shouldAutoConnect() method returned true.
 					}
@@ -681,7 +723,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 
 				// TODO Should the disconnect method be called or the connection is still valid? Does this ever happen?
 				Logger.e(mLogSession, "Error (0x" + Integer.toHexString(status) + "): " + GattError.parseConnectionError(status));
-				mCallbacks.onError(ERROR_CONNECTION_STATE_CHANGE, status);
+				mCallbacks.onError(gatt.getDevice(), ERROR_CONNECTION_STATE_CHANGE, status);
 			}
 		}
 
@@ -696,7 +738,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 						Logger.v(mLogSession, "Secondary service found");
 
 					// Notify the parent activity
-					mCallbacks.onServicesDiscovered(optionalServicesFound);
+					mCallbacks.onServicesDiscovered(gatt.getDevice(), optionalServicesFound);
 
 					// Obtain the queue of initialization requests
 					mInitInProgress = true;
@@ -713,12 +755,12 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 						nextRequest();
 				} else {
 					Logger.w(mLogSession, "Device is not supported");
-					mCallbacks.onDeviceNotSupported();
+					mCallbacks.onDeviceNotSupported(gatt.getDevice());
 					disconnect();
 				}
 			} else {
 				DebugLogger.e(TAG, "onServicesDiscovered error " + status);
-				onError(ERROR_DISCOVERY_SERVICE, status);
+				onError(gatt.getDevice(), ERROR_DISCOVERY_SERVICE, status);
 			}
 		}
 
@@ -730,7 +772,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 				if (isBatteryLevelCharacteristic(characteristic)) {
 					final int batteryValue = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
 					Logger.a(mLogSession, "Battery level received: " + batteryValue + "%");
-					mCallbacks.onBatteryValueReceived(batteryValue);
+					mCallbacks.onBatteryValueReceived(gatt.getDevice(), batteryValue);
 
 					// The Battery Level value has been read. Let's try to enable Battery Level notifications.
 					// If the Battery Level characteristic does not have the NOTIFY property, proceed with the initialization queue.
@@ -744,16 +786,16 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
 					DebugLogger.w(TAG, ERROR_AUTH_ERROR_WHILE_BONDED);
-					mCallbacks.onError(ERROR_AUTH_ERROR_WHILE_BONDED, status);
+					mCallbacks.onError(gatt.getDevice(), ERROR_AUTH_ERROR_WHILE_BONDED, status);
 				}
 			} else {
 				DebugLogger.e(TAG, "onCharacteristicRead error " + status);
-				onError(ERROR_READ_CHARACTERISTIC, status);
+				onError(gatt.getDevice(), ERROR_READ_CHARACTERISTIC, status);
 			}
 		}
 
 		@Override
-		public void onCharacteristicWrite(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic, final int status) {
+		public final void onCharacteristicWrite(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic, final int status) {
 			if (status == BluetoothGatt.GATT_SUCCESS) {
 				Logger.i(mLogSession, "Data written to " + characteristic.getUuid() + ", value: " + ParserUtils.parse(characteristic.getValue()));
 				// The value has been written. Notify the manager and proceed with the initialization queue.
@@ -762,11 +804,11 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
 					DebugLogger.w(TAG, ERROR_AUTH_ERROR_WHILE_BONDED);
-					mCallbacks.onError(ERROR_AUTH_ERROR_WHILE_BONDED, status);
+					mCallbacks.onError(gatt.getDevice(), ERROR_AUTH_ERROR_WHILE_BONDED, status);
 				}
 			} else {
 				DebugLogger.e(TAG, "onCharacteristicRead error " + status);
-				onError(ERROR_READ_CHARACTERISTIC, status);
+				onError(gatt.getDevice(), ERROR_READ_CHARACTERISTIC, status);
 			}
 		}
 
@@ -792,11 +834,11 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
 					DebugLogger.w(TAG, ERROR_AUTH_ERROR_WHILE_BONDED);
-					mCallbacks.onError(ERROR_AUTH_ERROR_WHILE_BONDED, status);
+					mCallbacks.onError(gatt.getDevice(), ERROR_AUTH_ERROR_WHILE_BONDED, status);
 				}
 			} else {
 				DebugLogger.e(TAG, "onDescriptorWrite error " + status);
-				onError(ERROR_WRITE_DESCRIPTOR, status);
+				onError(gatt.getDevice(), ERROR_WRITE_DESCRIPTOR, status);
 			}
 		}
 
@@ -808,7 +850,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 				Logger.i(mLogSession, "Notification received from " + characteristic.getUuid() + ", value: " + data);
 				final int batteryValue = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
 				Logger.a(mLogSession, "Battery level received: " + batteryValue + "%");
-				mCallbacks.onBatteryValueReceived(batteryValue);
+				mCallbacks.onBatteryValueReceived(gatt.getDevice(), batteryValue);
 			} else {
 				final BluetoothGattDescriptor cccd = characteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
 				final boolean notifications = cccd == null || cccd.getValue() == null || cccd.getValue().length != 2 || cccd.getValue()[0] == 0x01;

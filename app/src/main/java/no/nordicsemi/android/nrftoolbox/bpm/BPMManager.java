@@ -76,8 +76,8 @@ public class BPMManager extends BleManager<BPMManagerCallbacks> {
 		protected Queue<Request> initGatt(final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
 			if (mICPCharacteristic != null)
-				requests.push(Request.newEnableNotificationsRequest(mICPCharacteristic));
-			requests.push(Request.newEnableIndicationsRequest(mBPMCharacteristic));
+				requests.add(Request.newEnableNotificationsRequest(mICPCharacteristic));
+			requests.add(Request.newEnableIndicationsRequest(mBPMCharacteristic));
 			return requests;
 		}
 
@@ -105,22 +105,20 @@ public class BPMManager extends BleManager<BPMManagerCallbacks> {
 		@Override
 		protected void onCharacteristicNotified(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
 			// Intermediate Cuff Pressure characteristic read
-			if (mLogSession != null)
-				Logger.a(mLogSession, IntermediateCuffPressureParser.parse(characteristic));
+			Logger.a(mLogSession, "\"" + IntermediateCuffPressureParser.parse(characteristic) + "\" received");
 
-			parseBPMValue(characteristic);
+			parseBPMValue(gatt, characteristic);
 		}
 
 		@Override
 		protected void onCharacteristicIndicated(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
 			// Blood Pressure Measurement characteristic read
-			if (mLogSession != null)
-				Logger.a(mLogSession, BloodPressureMeasurementParser.parse(characteristic));
+			Logger.a(mLogSession, "\"" + BloodPressureMeasurementParser.parse(characteristic) + "\" received");
 
-			parseBPMValue(characteristic);
+			parseBPMValue(gatt, characteristic);
 		}
 
-		private void parseBPMValue(final BluetoothGattCharacteristic characteristic) {
+		private void parseBPMValue(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
 			// Both BPM and ICP have the same structure.
 
 			// first byte - flags
@@ -137,12 +135,12 @@ public class BPMManager extends BleManager<BPMManagerCallbacks> {
 				final float diastolic = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset + 2);
 				final float meanArterialPressure = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset + 4);
 				offset += 6;
-				mCallbacks.onBloodPressureMeasurementRead(systolic, diastolic, meanArterialPressure, unit);
+				mCallbacks.onBloodPressureMeasurementRead(gatt.getDevice(), systolic, diastolic, meanArterialPressure, unit);
 			} else if (ICP_CHARACTERISTIC_UUID.equals(characteristic.getUuid())) {
 				// following bytes - cuff pressure. Diastolic and MAP are unused
 				final float cuffPressure = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset);
 				offset += 6;
-				mCallbacks.onIntermediateCuffPressureRead(cuffPressure, unit);
+				mCallbacks.onIntermediateCuffPressureRead(gatt.getDevice(), cuffPressure, unit);
 			}
 
 			// parse timestamp if present
@@ -155,17 +153,17 @@ public class BPMManager extends BleManager<BPMManagerCallbacks> {
 				calendar.set(Calendar.MINUTE, characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 5));
 				calendar.set(Calendar.SECOND, characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 6));
 				offset += 7;
-				mCallbacks.onTimestampRead(calendar);
+				mCallbacks.onTimestampRead(gatt.getDevice(), calendar);
 			} else
-				mCallbacks.onTimestampRead(null);
+				mCallbacks.onTimestampRead(gatt.getDevice(), null);
 
 			// parse pulse rate if present
 			if (pulseRatePresent) {
 				final float pulseRate = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset);
 				// offset += 2;
-				mCallbacks.onPulseRateRead(pulseRate);
+				mCallbacks.onPulseRateRead(gatt.getDevice(), pulseRate);
 			} else
-				mCallbacks.onPulseRateRead(-1.0f);
+				mCallbacks.onPulseRateRead(gatt.getDevice(), -1.0f);
 		}
 	};
 }

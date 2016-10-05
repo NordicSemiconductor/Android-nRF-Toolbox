@@ -21,6 +21,7 @@
  */
 package no.nordicsemi.android.nrftoolbox.bpm;
 
+import android.bluetooth.BluetoothDevice;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -102,23 +103,23 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 	}
 
 	@Override
-	public void onServicesDiscovered(final boolean optionalServicesFound) {
+	public void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound) {
 		// this may notify user or show some views
 	}
 
 	@Override
-	public void onDeviceReady() {
+	public void onDeviceReady(final BluetoothDevice device) {
 		// this may notify user
 	}
 
 	@Override
-	public void onBloodPressureMeasurementRead(final float systolic, final float diastolic, final float meanArterialPressure, final int unit) {
+	public void onBloodPressureMeasurementRead(final BluetoothDevice device, final float systolic, final float diastolic, final float meanArterialPressure, final int unit) {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				mSystolicView.setText(Float.toString(systolic));
-				mDiastolicView.setText(Float.toString(diastolic));
-				mMeanAPView.setText(Float.toString(meanArterialPressure));
+				mSystolicView.setText(String.valueOf(systolic));
+				mDiastolicView.setText(String.valueOf(diastolic));
+				mMeanAPView.setText(String.valueOf(meanArterialPressure));
 
 				mSystolicUnitView.setText(unit == UNIT_mmHG ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
 				mDiastolicUnitView.setText(unit == UNIT_mmHG ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
@@ -128,11 +129,11 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 	}
 
 	@Override
-	public void onIntermediateCuffPressureRead(final float cuffPressure, final int unit) {
+	public void onIntermediateCuffPressureRead(final BluetoothDevice device, final float cuffPressure, final int unit) {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				mSystolicView.setText(Float.toString(cuffPressure));
+				mSystolicView.setText(String.valueOf(cuffPressure));
 				mDiastolicView.setText(R.string.not_available_value);
 				mMeanAPView.setText(R.string.not_available_value);
 
@@ -144,12 +145,12 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 	}
 
 	@Override
-	public void onPulseRateRead(final float pulseRate) {
+	public void onPulseRateRead(final BluetoothDevice device, final float pulseRate) {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				if (pulseRate >= 0)
-					mPulseView.setText(Float.toString(pulseRate));
+					mPulseView.setText(String.valueOf(pulseRate));
 				else
 					mPulseView.setText(R.string.not_available_value);
 			}
@@ -157,7 +158,7 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 	}
 
 	@Override
-	public void onTimestampRead(final Calendar calendar) {
+	public void onTimestampRead(final BluetoothDevice device, final Calendar calendar) {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {

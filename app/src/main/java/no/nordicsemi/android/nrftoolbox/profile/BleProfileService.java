@@ -51,6 +51,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	public static final String EXTRA_DEVICE_ADDRESS = "no.nordicsemi.android.nrftoolbox.EXTRA_DEVICE_ADDRESS";
 	/** The key for the device name that is returned in {@link #BROADCAST_CONNECTION_STATE} with state {@link #STATE_CONNECTED}. */
 	public static final String EXTRA_DEVICE_NAME = "no.nordicsemi.android.nrftoolbox.EXTRA_DEVICE_NAME";
+	public static final String EXTRA_DEVICE = "no.nordicsemi.android.nrftoolbox.EXTRA_DEVICE";
 	public static final String EXTRA_LOG_URI = "no.nordicsemi.android.nrftoolbox.EXTRA_LOG_URI";
 	public static final String EXTRA_CONNECTION_STATE = "no.nordicsemi.android.nrftoolbox.EXTRA_CONNECTION_STATE";
 	public static final String EXTRA_BOND_STATE = "no.nordicsemi.android.nrftoolbox.EXTRA_BOND_STATE";
@@ -72,7 +73,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	protected boolean mBinded;
 	private boolean mActivityFinished;
 	private boolean mConnected;
-	private String mDeviceAddress;
+	private BluetoothDevice mBluetoothDevice;
 	private String mDeviceName;
 	private ILogSession mLogSession;
 
@@ -83,7 +84,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 		public final void disconnect() {
 			if (!mConnected) {
 				mBleManager.close();
-				onDeviceDisconnected();
+				onDeviceDisconnected(mBluetoothDevice);
 				return;
 			}
 
@@ -104,7 +105,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 		 * @return device address
 		 */
 		public String getDeviceAddress() {
-			return mDeviceAddress;
+			return mBluetoothDevice.getAddress();
 		}
 
 		/**
@@ -114,6 +115,15 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 		 */
 		public String getDeviceName() {
 			return mDeviceName;
+		}
+
+		/**
+		 * Returns the Bluetooth device
+		 *
+		 * @return the Bluetooth device
+		 */
+		public BluetoothDevice getBluetoothDevice() {
+			return mBluetoothDevice;
 		}
 
 		/**
@@ -218,7 +228,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 		final Uri logUri = intent.getParcelableExtra(EXTRA_LOG_URI);
 		mLogSession = Logger.openSession(getApplicationContext(), logUri);
-		mDeviceAddress = intent.getStringExtra(EXTRA_DEVICE_ADDRESS);
+		mDeviceName = intent.getStringExtra(EXTRA_DEVICE_NAME);
 
 		Logger.i(mLogSession, "Service started");
 
@@ -229,11 +239,11 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 		final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
 		final BluetoothAdapter adapter = bluetoothManager.getAdapter();
-		final BluetoothDevice device = adapter.getRemoteDevice(mDeviceAddress);
-		mDeviceName = device.getName();
+		final String deviceAddress = intent.getStringExtra(EXTRA_DEVICE_ADDRESS);
+		mBluetoothDevice = adapter.getRemoteDevice(deviceAddress);
 		onServiceStarted();
 
-		mBleManager.connect(device);
+		mBleManager.connect(mBluetoothDevice);
 		return START_REDELIVER_INTENT;
 	}
 
@@ -252,27 +262,28 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 		mBleManager.close();
 		Logger.i(mLogSession, "Service destroyed");
 		mBleManager = null;
-		mDeviceAddress = null;
+		mBluetoothDevice = null;
 		mDeviceName = null;
 		mConnected = false;
 		mLogSession = null;
 	}
 
 	@Override
-	public void onDeviceConnected() {
+	public void onDeviceConnected(final BluetoothDevice device) {
 		mConnected = true;
 
 		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
 		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_CONNECTED);
-		broadcast.putExtra(EXTRA_DEVICE_ADDRESS, mDeviceAddress);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_DEVICE_NAME, mDeviceName);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	@Override
-	public void onDeviceDisconnecting() {
+	public void onDeviceDisconnecting(final BluetoothDevice device) {
 		// Notify user about changing the state to DISCONNECTING
 		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_DISCONNECTING);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
@@ -287,12 +298,12 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
-	public void onDeviceDisconnected() {
+	public void onDeviceDisconnected(final BluetoothDevice device) {
 		mConnected = false;
-		mDeviceAddress = null;
-		mDeviceName = null;
 
+		// Do not use the device argument here unless you change calling onDeviceDisconnected from the binder above
 		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_DISCONNECTED);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 
@@ -307,31 +318,35 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
-	public void onLinklossOccur() {
+	public void onLinklossOccur(final BluetoothDevice device) {
 		mConnected = false;
 
 		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_LINK_LOSS);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	@Override
-	public void onServicesDiscovered(final boolean optionalServicesFound) {
+	public void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound) {
 		final Intent broadcast = new Intent(BROADCAST_SERVICES_DISCOVERED);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_SERVICE_PRIMARY, true);
 		broadcast.putExtra(EXTRA_SERVICE_SECONDARY, optionalServicesFound);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	@Override
-	public void onDeviceReady() {
+	public void onDeviceReady(final BluetoothDevice device) {
 		final Intent broadcast = new Intent(BROADCAST_DEVICE_READY);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	@Override
-	public void onDeviceNotSupported() {
+	public void onDeviceNotSupported(final BluetoothDevice device) {
 		final Intent broadcast = new Intent(BROADCAST_SERVICES_DISCOVERED);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_SERVICE_PRIMARY, false);
 		broadcast.putExtra(EXTRA_SERVICE_SECONDARY, false);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
@@ -340,33 +355,37 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
-	public void onBatteryValueReceived(final int value) {
+	public void onBatteryValueReceived(final BluetoothDevice device, final int value) {
 		final Intent broadcast = new Intent(BROADCAST_BATTERY_LEVEL);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_BATTERY_LEVEL, value);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	@Override
-	public void onBondingRequired() {
+	public void onBondingRequired(final BluetoothDevice device) {
 		showToast(no.nordicsemi.android.nrftoolbox.common.R.string.bonding);
 
 		final Intent broadcast = new Intent(BROADCAST_BOND_STATE);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_BOND_STATE, BluetoothDevice.BOND_BONDING);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	@Override
-	public void onBonded() {
+	public void onBonded(final BluetoothDevice device) {
 		showToast(no.nordicsemi.android.nrftoolbox.common.R.string.bonded);
 
 		final Intent broadcast = new Intent(BROADCAST_BOND_STATE);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_BOND_STATE, BluetoothDevice.BOND_BONDED);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	@Override
-	public void onError(final String message, final int errorCode) {
+	public void onError(final BluetoothDevice device, final String message, final int errorCode) {
 		final Intent broadcast = new Intent(BROADCAST_ERROR);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_ERROR_MESSAGE, message);
 		broadcast.putExtra(EXTRA_ERROR_CODE, errorCode);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
@@ -421,7 +440,16 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	 * @return device address
 	 */
 	protected String getDeviceAddress() {
-		return mDeviceAddress;
+		return mBluetoothDevice.getAddress();
+	}
+
+	/**
+	 * Returns the Bluetooth device object
+	 *
+	 * @return bluetooth device
+	 */
+	protected BluetoothDevice getBluetoothDevice() {
+		return mBluetoothDevice;
 	}
 
 	/**

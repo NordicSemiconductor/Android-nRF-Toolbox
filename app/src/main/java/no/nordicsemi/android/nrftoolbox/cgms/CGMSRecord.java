@@ -3,31 +3,27 @@ package no.nordicsemi.android.nrftoolbox.cgms;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Calendar;
-
 /**
  * Created by rora on 02.09.2016.
  */
 public class CGMSRecord implements Parcelable{
-
-    /** Record sequence number */
+    /** Record sequence number. */
     protected int sequenceNumber;
-    /** The base time of the measurement */
-    protected Calendar time;
-    /** Time offset of the record */
-    protected String timeStamp;
-    protected float reading;
+    /** The base time of the measurement (start time + sequenceNumber of minutes). */
+    protected long timestamp;
+    /** The glucose concentration in mg/dL. */
+    protected float glucoseConcentration;
 
-    protected CGMSRecord(float cgmsValue, String timeStamp) {
-        sequenceNumber = 0;
-        this.timeStamp = timeStamp;
-        this.reading = cgmsValue;
+    protected CGMSRecord(int sequenceNumber, float glucoseConcentration, long timestamp) {
+        this.sequenceNumber = sequenceNumber;
+        this.glucoseConcentration = glucoseConcentration;
+        this.timestamp = timestamp;
     }
 
     protected CGMSRecord(Parcel in) {
-        sequenceNumber = in.readInt();
-        timeStamp = in.readString();
-        reading = in.readFloat();
+        this.sequenceNumber = in.readInt();
+        this.glucoseConcentration = in.readFloat();
+        this.timestamp = in.readLong();
     }
 
     public static final Creator<CGMSRecord> CREATOR = new Creator<CGMSRecord>() {
@@ -50,7 +46,7 @@ public class CGMSRecord implements Parcelable{
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeInt(sequenceNumber);
-        parcel.writeString(timeStamp);
-        parcel.writeFloat(reading);
+        parcel.writeFloat(glucoseConcentration);
+        parcel.writeLong(timestamp);
     }
 }

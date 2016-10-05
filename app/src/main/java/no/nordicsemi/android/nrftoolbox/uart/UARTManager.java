@@ -33,6 +33,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.UUID;
 
+import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 
 public class UARTManager extends BleManager<UARTManagerCallbacks> {
@@ -66,7 +67,7 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 		@Override
 		protected Queue<Request> initGatt(final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
-			requests.push(Request.newEnableNotificationsRequest(mTXCharacteristic));
+			requests.add(Request.newEnableNotificationsRequest(mTXCharacteristic));
 			return requests;
 		}
 
@@ -106,7 +107,9 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 			final byte[] buffer = mOutgoingBuffer;
 			if (mBufferOffset == buffer.length) {
 				try {
-					mCallbacks.onDataSent(new String(buffer, "UTF-8"));
+					final String data = new String(buffer, "UTF-8");
+					Logger.a(mLogSession, "\"" + data + "\" sent");
+					mCallbacks.onDataSent(gatt.getDevice(), data);
 				} catch (final UnsupportedEncodingException e) {
 					// do nothing
 				}
@@ -124,7 +127,8 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 		@Override
 		public void onCharacteristicNotified(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
 			final String data = characteristic.getStringValue(0);
-			mCallbacks.onDataReceived(data);
+			Logger.a(mLogSession, "\"" + data + "\" received");
+			mCallbacks.onDataReceived(gatt.getDevice(), data);
 		}
 	};
 
