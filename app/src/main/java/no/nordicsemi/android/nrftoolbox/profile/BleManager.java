@@ -791,6 +791,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 				}
 			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
+					// This should never happen but it used to: http://stackoverflow.com/a/20093695/2115352
 					DebugLogger.w(TAG, ERROR_AUTH_ERROR_WHILE_BONDED);
 					mCallbacks.onError(gatt.getDevice(), ERROR_AUTH_ERROR_WHILE_BONDED, status);
 				}
@@ -809,6 +810,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 				nextRequest();
 			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
+					// This should never happen but it used to: http://stackoverflow.com/a/20093695/2115352
 					DebugLogger.w(TAG, ERROR_AUTH_ERROR_WHILE_BONDED);
 					mCallbacks.onError(gatt.getDevice(), ERROR_AUTH_ERROR_WHILE_BONDED, status);
 				}
@@ -839,6 +841,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 				}
 			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
+					// This should never happen but it used to: http://stackoverflow.com/a/20093695/2115352
 					DebugLogger.w(TAG, ERROR_AUTH_ERROR_WHILE_BONDED);
 					mCallbacks.onError(gatt.getDevice(), ERROR_AUTH_ERROR_WHILE_BONDED, status);
 				}
