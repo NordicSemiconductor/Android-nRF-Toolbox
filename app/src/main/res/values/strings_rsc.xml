@@ -22,8 +22,7 @@
   -->
 <resources>
     <string name="rsc_feature_title">RSC</string>
-	<string name="rsc_settings_title">RSC Settings</string>
-    
+
     <string name="rsc_feature_title_long">RUNNING SPEED &amp; CADENCE</string>
     <dimen name="rsc_feature_title_long_margin">-192dp</dimen>
     

@@ -202,7 +202,7 @@ if "%ADDRESS%"=="" (
 ) else (
 	rem Start DFU service on the device
 	echo|set /p=Starting DFU service...
-	call adb %S_DEVICE% shell am startservice -n no.nordicsemi.android.nrftoolbox/.dfu.DfuService -a no.nordicsemi.android.action.DFU_UPLOAD^
+	call adb %S_DEVICE% shell am startservice -n client/.dfu.DfuService -a no.nordicsemi.android.action.DFU_UPLOAD^
  -e no.nordicsemi.android.dfu.extra.EXTRA_DEVICE_ADDRESS %ADDRESS%^
  -e no.nordicsemi.android.dfu.extra.EXTRA_DEVICE_NAME %NAME%^
  --ei no.nordicsemi.android.dfu.extra.EXTRA_FILE_TYPE %TYPE%^

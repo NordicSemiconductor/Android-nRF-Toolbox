@@ -34,7 +34,7 @@
 		android:layout_margin="3dp"
 		android:background="@drawable/ic_feature_bg"/>
 
-	<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+	<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 		android:id="@+id/label"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"

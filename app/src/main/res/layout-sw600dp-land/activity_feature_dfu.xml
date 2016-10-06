@@ -31,14 +31,14 @@
 		android:id="@+id/toolbar_actionbar"
 		layout="@layout/toolbar"/>
 
-	<no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout
+	<com.ibm.android.cntv.tibet.client.widget.ForegroundRelativeLayout
 		style="@style/HeaderShadow"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent">
 
 		<!-- The size of text below must be fixed, therefore dp are used instead of sp -->
 
-		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+		<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_centerVertical="true"
@@ -49,7 +49,7 @@
 			android:textSize="32dp"
 			android:textStyle="bold"/>
 
-		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+		<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 			android:id="@+id/device_name"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
@@ -81,7 +81,7 @@
 				android:layout_marginTop="@dimen/feature_vertical_margin_top"
 				android:orientation="vertical">
 
-				<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+				<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 					style="@style/Widget.ListTitle"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
@@ -96,12 +96,12 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content">
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="@string/dfu_file_name_label"/>
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 							android:id="@+id/file_name"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
@@ -113,12 +113,12 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content">
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="@string/dfu_file_type_label"/>
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 							android:id="@+id/file_type"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
@@ -130,12 +130,12 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content">
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="@string/dfu_file_size_label"/>
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 							android:id="@+id/file_size"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
@@ -147,12 +147,12 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content">
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="@string/dfu_file_status_label"/>
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+						<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 							android:id="@+id/file_status"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
@@ -190,7 +190,6 @@
 			<!-- DFU section -->
 
 			<LinearLayout
-				android:id="@+id/dfu_pane"
 				style="@style/Widget.List"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
@@ -200,7 +199,7 @@
 				android:layout_marginTop="15dp"
 				android:orientation="vertical">
 
-				<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+				<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 					style="@style/Widget.ListTitle"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
@@ -215,7 +214,7 @@
 					android:onClick="onUploadClicked"
 					android:text="@string/dfu_action_upload"/>
 
-				<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+				<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 					android:id="@+id/textviewUploading"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
@@ -232,7 +231,7 @@
 					android:max="100"
 					android:visibility="invisible"/>
 
-				<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+				<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 					android:id="@+id/textviewProgress"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
@@ -262,5 +261,5 @@
 			android:layout_marginBottom="6dp"
 			android:src="@drawable/background_title"/>
 
-	</no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout>
+	</com.ibm.android.cntv.tibet.client.widget.ForegroundRelativeLayout>
 </LinearLayout>

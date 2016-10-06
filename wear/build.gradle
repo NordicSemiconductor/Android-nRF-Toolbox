@@ -5,11 +5,11 @@ android {
     buildToolsVersion "24.0.2"
 
     defaultConfig {
-        applicationId "no.nordicsemi.android.nrftoolbox"
+        applicationId "com.ibm.android.cntv.tibet.client"
         minSdkVersion 20
         targetSdkVersion 24
-        versionCode 51
-        versionName "1.18.4"
+        versionCode 1
+        versionName "1.0.0"
     }
     buildTypes {
         release {

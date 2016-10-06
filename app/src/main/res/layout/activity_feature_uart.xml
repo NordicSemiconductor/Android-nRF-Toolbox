@@ -42,14 +42,13 @@
 
 			<fragment
 				android:id="@+id/fragment_log"
-				android:name="no.nordicsemi.android.nrftoolbox.uart.UARTLogFragment"
+				android:name="com.ibm.android.cntv.tibet.client.uart.UARTLogFragment"
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
 				tools:layout="@layout/fragment_feature_uart_log"/>
 
 			<fragment
-				android:id="@+id/fragment_control"
-				android:name="no.nordicsemi.android.nrftoolbox.uart.UARTControlFragment"
+				android:name="com.ibm.android.cntv.tibet.client.uart.UARTControlFragment"
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
 				tools:layout="@layout/fragment_feature_uart_control"/>

@@ -28,10 +28,8 @@
 
     <string name="cgms_default_name">DEFAULT CGMS</string>
     <string name="cgms_value_unit">mg/dL</string>
-    <string name="cgms_position_label">sensor position</string>
 
     <string name="cgms_about_text">CGMS (Continuous Glucode Monitoring Service) profile allows you to connect to your Continuous Glucose Monitoring sensor.
         It shows you the continuous glucose measurement on the table.</string>
-    <string name="text_cgms_interval">GCM updates are notified every minute</string>
     <string name="cgms_item_summary">Glucose concentration level</string>
 </resources>

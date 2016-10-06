@@ -30,14 +30,14 @@
 		android:id="@+id/toolbar_actionbar"
 		layout="@layout/toolbar"/>
 
-	<no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout
+	<com.ibm.android.cntv.tibet.client.widget.ForegroundRelativeLayout
 		style="@style/HeaderShadow"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent">
 
 		<!-- The size of text below must be fixed, therefore dp are used instead of sp -->
 
-		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+		<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_centerVertical="true"
@@ -62,7 +62,7 @@
 			android:textColor="#FFFFFF"
 			android:textSize="12sp"/>
 
-		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+		<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 			android:id="@+id/device_name"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
@@ -103,13 +103,13 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content">
 
-					<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+					<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 						style="@style/Widget.ListTitle"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:text="@string/gls_section_data"/>
 
-					<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+					<com.ibm.android.cntv.tibet.client.widget.TrebuchetTextView
 						android:id="@+id/unit"
 						style="@style/Widget.ListTitle"
 						android:layout_width="wrap_content"
@@ -145,7 +145,7 @@
 				android:layout_marginTop="@dimen/feature_vertical_margin_top"
 				android:orientation="vertical">
 
-				<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+				<com.ibm.android.cntv.tibet.client.widget.TrebuchetBoldTextView
 					style="@style/Widget.ListTitle"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
@@ -223,5 +223,5 @@
 			android:layout_marginBottom="6dp"
 			android:src="@drawable/background_title"/>
 
-	</no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout>
+	</com.ibm.android.cntv.tibet.client.widget.ForegroundRelativeLayout>
 </LinearLayout>

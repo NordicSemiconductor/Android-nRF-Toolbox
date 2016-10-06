@@ -50,7 +50,7 @@
             android:key="settings_assume_dfu_mode"
             android:title="@string/dfu_settings_dfu_assume_dfu_mode" />
 
-        <no.nordicsemi.android.nrftoolbox.dfu.settings.AboutDfuPreference
+        <com.ibm.android.cntv.tibet.client.dfu.settings.AboutDfuPreference
             android:summary="@string/dfu_settings_dfu_about_summary"
             android:title="@string/dfu_settings_dfu_about" />
     </PreferenceCategory>
