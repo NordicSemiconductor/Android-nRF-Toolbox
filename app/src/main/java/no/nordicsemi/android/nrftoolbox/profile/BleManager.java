@@ -155,7 +155,6 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 	public BleManager(final Context context) {
 		mContext = context;
 		mHandler = new Handler();
-		mUserDisconnected = false;
 
 		// Register bonding broadcast receiver
 		context.registerReceiver(mBondingBroadcastReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
@@ -256,7 +255,6 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 				mBluetoothGatt = null;
 			}
 			mBluetoothDevice = null;
-			mUserDisconnected = false;
 		}
 	}
 
