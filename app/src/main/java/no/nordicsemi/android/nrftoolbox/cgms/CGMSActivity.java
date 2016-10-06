@@ -185,12 +185,17 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 	public void onDeviceDisconnected(final BluetoothDevice device) {
 		super.onDeviceDisconnected(device);
 		setOperationInProgress(false);
-		clearRecords();
+	}
+
+	@Override
+	public void onError(final BluetoothDevice device, final String message, final int errorCode) {
+		super.onError(device, message, errorCode);
+		setOperationInProgress(false);
 	}
 
 	@Override
 	protected void setDefaultUI() {
-		// do nothing
+		clearRecords();
 	}
 
 	@Override

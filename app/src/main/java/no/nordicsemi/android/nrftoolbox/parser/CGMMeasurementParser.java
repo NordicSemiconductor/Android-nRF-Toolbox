@@ -23,8 +23,6 @@ package no.nordicsemi.android.nrftoolbox.parser;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 public class CGMMeasurementParser {
@@ -58,7 +56,20 @@ public class CGMMeasurementParser {
 	private static final int SSA_RESULT_HIGHER_THAN_DEVICE_CAN_PROCESS = 1 << 23;
 
 	public static String parse(final BluetoothGattCharacteristic characteristic) {
+		// The CGM Measurement characteristic is a variable length structure containing one or more CGM Measurement records
+		int totalSize = characteristic.getValue().length;
+
+		final StringBuilder builder = new StringBuilder();
 		int offset = 0;
+		while (offset < totalSize) {
+			offset += parseRecord(builder, characteristic, offset);
+			if (offset <  totalSize)
+				builder.append("\n\n");
+		}
+		return builder.toString();
+	}
+
+	private static int parseRecord(final StringBuilder builder, final BluetoothGattCharacteristic characteristic, int offset) {
 		// Read size and flags bytes
 		final int size = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
 		final int flags = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
@@ -101,9 +112,8 @@ public class CGMMeasurementParser {
 		final int timeOffset = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
 		offset += 2;
 
-		final StringBuilder builder = new StringBuilder();
 		builder.append("Glucose concentration: ").append(glucoseConcentration).append(" mg/dL\n");
-		builder.append("Sequence number: ").append(timeOffset).append(" (minutes since start)\n");
+		builder.append("Sequence number: ").append(timeOffset).append(" (Time Offset in min)\n");
 
 		if (ssaWarningOctetPresent) {
 			final int ssaWarningOctet = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
@@ -178,6 +188,6 @@ public class CGMMeasurementParser {
 			builder.append(String.format(Locale.US, "E2E-CRC: 0x%04X\n", crc));
 		}
 		builder.setLength(builder.length() - 1); // Remove last \n
-		return builder.toString();
+		return size;
 	}
 }

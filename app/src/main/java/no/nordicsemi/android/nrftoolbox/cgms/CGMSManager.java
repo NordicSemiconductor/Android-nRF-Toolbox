@@ -184,16 +184,21 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 		public void onCharacteristicNotified(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
 			Logger.a(mLogSession, "\"" + CGMMeasurementParser.parse(characteristic) + "\" received");
 
-			// CGM Measurement characteristic
-			final int cgmSize = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
-			if (cgmSize > 0) {
-				final float cgmValue = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, 2);
-				final int sequenceNumber = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 4);
+			// CGM Measurement characteristic may have one or more CGM records
+			int totalSize = characteristic.getValue().length;
+			int offset = 0;
+			while (offset < totalSize) {
+				final int cgmSize = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
+				final float cgmValue = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset + 2);
+				final int sequenceNumber = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset + 4);
 				final long timestamp = mSessionStartTime + (sequenceNumber * 60000L); // Sequence number is in minutes since Start Session
+
 				//This will send callback to CGMSActivity when new concentration value is received from CGMS device
 				final CGMSRecord cgmsRecord = new CGMSRecord(sequenceNumber, cgmValue, timestamp);
 				mRecords.put(cgmsRecord.sequenceNumber, cgmsRecord);
 				mCallbacks.onCGMValueReceived(gatt.getDevice(), cgmsRecord);
+
+				offset += cgmSize;
 			}
 		}
 

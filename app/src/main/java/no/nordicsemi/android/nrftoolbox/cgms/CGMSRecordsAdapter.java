@@ -19,7 +19,7 @@ import no.nordicsemi.android.nrftoolbox.R;
  * Created by rora on 02.09.2016.
  */
 public class CGMSRecordsAdapter extends BaseAdapter {
-	private final static SimpleDateFormat mTimeFormat = new SimpleDateFormat("dd.MM.YYYY HH:mm:ss", Locale.US);
+	private final static SimpleDateFormat mTimeFormat = new SimpleDateFormat("dd.MM.YYYY HH:mm", Locale.US);
 
 	private List<CGMSRecord> mRecords;
 	private LayoutInflater mInflater;
