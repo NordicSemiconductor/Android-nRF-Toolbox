@@ -21,20 +21,34 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <resources>
-    <string name="proximity_feature_title">PROXIMITY</string>
-    
-    <string name="proximity_feature_title_long">PROXIMITY MONITOR</string>
-    <dimen name="proximity_feature_title_long_margin">-142dp</dimen>
-    
-    <string name="proximity_default_name">DEFAULT PROXIMITY</string>      
-    <string name="proximity_action_findme">Find Me</string>
-    <string name="proximity_action_silentme">Silent Me</string>
-    <string name="proximity_lock_image_description">LOCK Image</string>   
-    <string name="proximity_notification_action_disconnect">Disconnect</string> 
-    <string name="proximity_notification_linkloss_alert">%s is getting away!</string>
-    <string name="proximity_notification_connected_message">%s is connected.</string>
-    
-    <string name="proximity_enable_server">GATT Server enabled</string>
+	<string name="proximity_feature_title">PROXIMITY</string>
+
+	<string name="proximity_feature_title_long">PROXIMITY MONITOR</string>
+	<dimen name="proximity_feature_title_long_margin">-142dp</dimen>
+
+	<string name="proximity_action_disconnect">Disconnect</string>
+	<string name="proximity_action_remove">Remove</string>
+	<string name="proximity_action_find">Find</string>
+	<string name="proximity_action_silent">Silent</string>
+	<string name="proximity_default_device_name">Proximity Tag</string>
+
+	<plurals name="proximity_notification_text_nothing_connected">
+		<item quantity="one">%s is disconnected.</item>
+		<item quantity="few">%d tags are disconnected.</item>
+		<item quantity="many">%d tags are disconnected.</item>
+		<item quantity="other">%d tags are disconnected.</item>
+	</plurals>
+	<string name="proximity_notification_text">%s connected</string>
+	<plurals name="proximity_notification_summary_text">
+		<item quantity="one">%s is connected.</item>
+		<item quantity="few">%d tags connected.</item>
+		<item quantity="many">%d tags connected.</item>
+		<item quantity="other">%d tags connected.</item>
+	</plurals>
+	<string name="proximity_notification_linkloss_alert">%s is getting away!</string>
+
+	<string name="proximity_devices_title">YOUR TAGS</string>
+	<string name="proximity_enable_server">GATT Server enabled</string>
     
     <string name="proximity_about_text">PROXIMITY profile allows you to connect to your Proximity sensor.
         \nYou can find your valuables attached with Proximity tag by pressing FindMe button on screen and you can find your phone by pressing relevant button on your tag.

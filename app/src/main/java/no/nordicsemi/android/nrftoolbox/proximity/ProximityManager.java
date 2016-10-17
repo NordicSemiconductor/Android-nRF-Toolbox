@@ -21,30 +21,19 @@
  */
 package no.nordicsemi.android.nrftoolbox.proximity;
 
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattServer;
-import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothManager;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Handler;
-import android.preference.PreferenceManager;
-import android.util.Log;
 
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.UUID;
 
-import no.nordicsemi.android.error.GattError;
 import no.nordicsemi.android.log.Logger;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.parser.AlertLevelParser;
+import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
-import no.nordicsemi.android.nrftoolbox.utility.ParserUtils;
 
 public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 	private final String TAG = "ProximityManager";
@@ -57,213 +46,19 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 	private static final UUID ALERT_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A06-0000-1000-8000-00805f9b34fb");
 
 	private final static byte[] HIGH_ALERT = { 0x02 };
+	private final static byte[] MILD_ALERT = { 0x01 };
 	private final static byte[] NO_ALERT = { 0x00 };
 
 	private BluetoothGattCharacteristic mAlertLevelCharacteristic, mLinklossCharacteristic;
-	private BluetoothGattServer mBluetoothGattServer;
-	private BluetoothDevice mDeviceToConnect;
-	private Handler mHandler;
+	private boolean mAlertOn;
 
-	public ProximityManager(Context context) {
+	public ProximityManager(final Context context) {
 		super(context);
-		mHandler = new Handler();
 	}
 
 	@Override
 	protected boolean shouldAutoConnect() {
 		return true;
-	}
-
-	private void openGattServer(Context context, BluetoothManager manager) {
-		mBluetoothGattServer = manager.openGattServer(context, mGattServerCallbacks);
-	}
-
-	private void closeGattServer() {
-		if (mBluetoothGattServer != null) {
-			// mBluetoothGattServer.cancelConnection(mBluetoothGatt.getDevice()); // FIXME this method does not cancel the connection
-			mBluetoothGattServer.close(); // FIXME This method does not cause BluetoothGattServerCallback#onConnectionStateChange(newState=DISCONNECTED) to be called on Nexus phones.
-			mBluetoothGattServer = null;
-		}
-	}
-
-	private void addImmediateAlertService() {
-		/*
-		 * This method must be called in UI thread. It works fine on Nexus devices but if called from other thread (f.e. from onServiceAdded in gatt server callback) it hangs the app. 
-		 */
-		final BluetoothGattCharacteristic alertLevel = new BluetoothGattCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID, BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE,
-				BluetoothGattCharacteristic.PERMISSION_WRITE);
-		alertLevel.setValue(HIGH_ALERT);
-		final BluetoothGattService immediateAlertService = new BluetoothGattService(IMMEDIATE_ALERT_SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY);
-		immediateAlertService.addCharacteristic(alertLevel);
-		mBluetoothGattServer.addService(immediateAlertService);
-	}
-
-	private void addLinklossService() {
-		/*
-		 * This method must be called in UI thread. It works fine on Nexus devices but if called from other thread (f.e. from onServiceAdded in gatt server callback) it hangs the app. 
-		 */
-		final BluetoothGattCharacteristic linklossAlertLevel = new BluetoothGattCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID, BluetoothGattCharacteristic.PROPERTY_WRITE
-				| BluetoothGattCharacteristic.PROPERTY_READ, BluetoothGattCharacteristic.PERMISSION_WRITE | BluetoothGattCharacteristic.PERMISSION_READ);
-		linklossAlertLevel.setValue(HIGH_ALERT);
-		final BluetoothGattService linklossService = new BluetoothGattService(LINKLOSS_SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY);
-		linklossService.addCharacteristic(linklossAlertLevel);
-		mBluetoothGattServer.addService(linklossService);
-	}
-
-	private final BluetoothGattServerCallback mGattServerCallbacks = new BluetoothGattServerCallback() {
-
-		@Override
-		public void onServiceAdded(final int status, final BluetoothGattService service) {
-			Logger.v(mLogSession, "[Server] Service " + service.getUuid() + " added");
-
-			mHandler.post(new Runnable() {
-				@Override
-				public void run() {
-					// Adding another service from callback thread fails on Samsung S4 with Android 4.3
-					if (IMMEDIATE_ALERT_SERVICE_UUID.equals(service.getUuid()))
-						addLinklossService();
-					else {
-						Logger.i(mLogSession, "[Server] Gatt server started");
-						ProximityManager.super.connect(mDeviceToConnect);
-						mDeviceToConnect = null;
-					}
-				}
-			});
-		}
-
-		@Override
-		public void onConnectionStateChange(final BluetoothDevice device, final int status, final int newState) {
-			Logger.d(mLogSession, "[Server callback] Connection state changed with status: " + status + " and new state: " + stateToString(newState) + " (" + newState + ")");
-			if (status == BluetoothGatt.GATT_SUCCESS) {
-				if (newState == BluetoothGatt.STATE_CONNECTED) {
-					Logger.i(mLogSession, "[Server] Device with address " + device.getAddress() + " connected");
-				} else {
-					Logger.i(mLogSession, "[Server] Device disconnected");
-				}
-			} else {
-				Logger.e(mLogSession, "[Server] Error " + status + " (0x" + Integer.toHexString(status) + "): " + GattError.parseConnectionError(status));
-			}
-		}
-
-		@Override
-		public void onCharacteristicReadRequest(final BluetoothDevice device, final int requestId, final int offset, final BluetoothGattCharacteristic characteristic) {
-			Logger.d(mLogSession, "[Server callback] Read request for characteristic " + characteristic.getUuid() + " (requestId=" + requestId + ", offset=" + offset + ")");
-			Logger.i(mLogSession, "[Server] READ request for characteristic " + characteristic.getUuid() + " received");
-
-			byte[] value = characteristic.getValue();
-			if (value != null && offset > 0) {
-				byte[] offsetValue = new byte[value.length - offset];
-				System.arraycopy(value, offset, offsetValue, 0, offsetValue.length);
-				value = offsetValue;
-			}
-			if (value != null)
-				Logger.d(mLogSession, "server.sendResponse(GATT_SUCCESS, value=" + ParserUtils.parse(value) + ")");
-			else
-				Logger.d(mLogSession, "server.sendResponse(GATT_SUCCESS, value=null)");
-			mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
-			Logger.v(mLogSession, "[Server] Response sent");
-		}
-
-		@Override
-		public void onCharacteristicWriteRequest(final BluetoothDevice device, final int requestId, final BluetoothGattCharacteristic characteristic, final boolean preparedWrite,
-												 final boolean responseNeeded, final int offset, final byte[] value) {
-			Logger.d(mLogSession, "[Server callback] Write request to characteristic " + characteristic.getUuid()
-					+ " (requestId=" + requestId + ", prepareWrite=" + preparedWrite + ", responseNeeded=" + responseNeeded + ", offset=" + offset + ", value=" + ParserUtils.parse(value) + ")");
-			final String writeType = !responseNeeded ? "WRITE NO RESPONSE" : "WRITE COMMAND";
-			Logger.i(mLogSession, "[Server] " + writeType + " request for characteristic " + characteristic.getUuid() + " received, value: " + ParserUtils.parse(value));
-
-			if (offset == 0) {
-				characteristic.setValue(value);
-			} else {
-				final byte[] currentValue = characteristic.getValue();
-				final byte[] newValue = new byte[currentValue.length + value.length];
-				System.arraycopy(currentValue, 0, newValue, 0, currentValue.length);
-				System.arraycopy(value, 0, newValue, offset, value.length);
-				characteristic.setValue(newValue);
-			}
-
-			if (!preparedWrite && value != null && value.length == 1) { // small validation
-				if (value[0] != NO_ALERT[0]) {
-					Logger.a(mLogSession, "[Server] Immediate alarm request received: " + AlertLevelParser.parse(characteristic));
-					mCallbacks.onAlarmTriggered(device);
-				} else {
-					Logger.a(mLogSession, "[Server] Immediate alarm request received: OFF");
-					mCallbacks.onAlarmStopped(device);
-				}
-			}
-
-			Logger.d(mLogSession, "server.sendResponse(GATT_SUCCESS, offset=" + offset + ", value=" + ParserUtils.parse(value) + ")");
-			mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, null);
-			Logger.v(mLogSession, "[Server] Response sent");
-		}
-
-		@Override
-		public void onDescriptorReadRequest(final BluetoothDevice device, final int requestId, final int offset, final BluetoothGattDescriptor descriptor) {
-			Logger.d(mLogSession, "[Server callback] Write request to descriptor " + descriptor.getUuid() + " (requestId=" + requestId + ", offset=" + offset + ")");
-			Logger.i(mLogSession, "[Server] READ request for descriptor " + descriptor.getUuid() + " received");
-			// This method is not supported
-			Logger.w(mLogSession, "[Server] Operation not supported");
-			Logger.d(mLogSession, "[Server] server.sendResponse(GATT_REQUEST_NOT_SUPPORTED)");
-			mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_REQUEST_NOT_SUPPORTED, offset, null);
-			Logger.v(mLogSession, "[Server] Response sent");
-		}
-
-		@Override
-		public void onDescriptorWriteRequest(final BluetoothDevice device, final int requestId, final BluetoothGattDescriptor descriptor, final boolean preparedWrite,
-											 final boolean responseNeeded, final int offset, final byte[] value) {
-			Logger.d(mLogSession, "[Server callback] Write request to descriptor " + descriptor.getUuid()
-					+ " (requestId=" + requestId + ", prepareWrite=" + preparedWrite + ", responseNeeded=" + responseNeeded + ", offset=" + offset + ", value=" + ParserUtils.parse(value) + ")");
-			Logger.i(mLogSession, "[Server] READ request for descriptor " + descriptor.getUuid() + " received");
-			// This method is not supported
-			Logger.w(mLogSession, "[Server] Operation not supported");
-			Logger.d(mLogSession, "[Server] server.sendResponse(GATT_REQUEST_NOT_SUPPORTED)");
-			mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_REQUEST_NOT_SUPPORTED, offset, null);
-			Logger.v(mLogSession, "[Server] Response sent");
-		}
-
-		@Override
-		public void onExecuteWrite(final BluetoothDevice device, final int requestId, final boolean execute) {
-			Logger.d(mLogSession, "[Server callback] Execute write request (requestId=" + requestId + ", execute=" + execute + ")");
-			// This method is not supported
-			Logger.w(mLogSession, "[Server] Operation not supported");
-			Logger.d(mLogSession, "[Server] server.sendResponse(GATT_REQUEST_NOT_SUPPORTED)");
-			mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_REQUEST_NOT_SUPPORTED, 0, null);
-			Logger.v(mLogSession, "[Server] Response sent");
-		}
-	};
-
-	@Override
-	public void connect(final BluetoothDevice device) {
-		// Should we use the GATT Server?
-		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		final boolean useGattServer = preferences.getBoolean(ProximityActivity.PREFS_GATT_SERVER_ENABLED, true);
-
-		if (useGattServer) {
-			// Save the device that we want to connect to. First we will create a GATT Server
-			mDeviceToConnect = device;
-
-			final BluetoothManager bluetoothManager = (BluetoothManager) getContext().getSystemService(Context.BLUETOOTH_SERVICE);
-			try {
-				DebugLogger.d(TAG, "[Server] Starting Gatt server...");
-				Logger.v(mLogSession, "[Server] Starting Gatt server...");
-				openGattServer(getContext(), bluetoothManager);
-				addImmediateAlertService();
-				// the BluetoothGattServerCallback#onServiceAdded callback will proceed further operations
-			} catch (final Exception e) {
-				// On Nexus 4&7 with Android 4.4 (build KRT16S) sometimes creating Gatt Server fails. There is a Null Pointer Exception thrown from addCharacteristic method.
-				Logger.e(mLogSession, "[Server] Gatt server failed to start");
-				Log.e(TAG, "Creating Gatt Server failed", e);
-			}
-		} else {
-			super.connect(device);
-		}
-	}
-
-	@Override
-	public boolean disconnect() {
-		final boolean result = super.disconnect();
-		closeGattServer();
-		return result;
 	}
 
 	@Override
@@ -313,31 +108,36 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 		}
 	};
 
-	public void writeImmediateAlertOn() {
+	/**
+	 * Toggles the immediate alert on the target device.
+	 * @return true if alarm has been enabled, false if disabled
+	 */
+	public boolean toggleImmediateAlert() {
+		writeImmediateAlert(!mAlertOn);
+		return mAlertOn;
+	}
+
+	/**
+	 * Writes the HIGH ALERT or NO ALERT command to the target device
+	 * @param on true to enable the alarm on proximity tag, false to disable it
+	 */
+	public void writeImmediateAlert(final boolean on) {
+		if (!isConnected())
+			return;
+
 		if (mAlertLevelCharacteristic != null) {
-			mAlertLevelCharacteristic.setValue(HIGH_ALERT);
+			mAlertLevelCharacteristic.setValue(on ? HIGH_ALERT : NO_ALERT);
 			writeCharacteristic(mAlertLevelCharacteristic);
+			mAlertOn = on;
 		} else {
 			DebugLogger.w(TAG, "Immediate Alert Level Characteristic is not found");
 		}
 	}
 
-	public void writeImmediateAlertOff() {
-		if (mAlertLevelCharacteristic != null) {
-			mAlertLevelCharacteristic.setValue(NO_ALERT);
-			writeCharacteristic(mAlertLevelCharacteristic);
-		} else {
-			DebugLogger.w(TAG, "Immediate Alert Level Characteristic is not found");
-		}
-	}
-
-	@Override
-	public void close() {
-		super.close();
-
-		if (mBluetoothGattServer != null) {
-			mBluetoothGattServer.close();
-			mBluetoothGattServer = null;
-		}
+	/**
+	 * Returns true if the alert has been enabled on the proximity tag, false otherwise.
+	 */
+	public boolean isAlertEnabled() {
+		return mAlertOn;
 	}
 }
