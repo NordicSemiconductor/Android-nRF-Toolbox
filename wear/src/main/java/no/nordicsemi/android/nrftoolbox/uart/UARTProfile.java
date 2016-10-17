@@ -27,11 +27,12 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.text.TextUtils;
 
-import java.util.Queue;
+import java.util.Deque;
 import java.util.UUID;
 
 import no.nordicsemi.android.nrftoolbox.ble.BleManager;
 import no.nordicsemi.android.nrftoolbox.ble.BleProfile;
+import no.nordicsemi.android.nrftoolbox.ble.BleProfileApi;
 
 public class UARTProfile extends BleProfile {
 	/** Broadcast sent when a UART message is received. */
@@ -40,11 +41,11 @@ public class UARTProfile extends BleProfile {
 	public static final String EXTRA_DATA = "no.nordicsemi.android.nrftoolbox.EXTRA_DATA";
 
 	/** Nordic UART Service UUID */
-	private final static UUID UART_SERVICE_UUID = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E");
+	private static final UUID UART_SERVICE_UUID = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E");
 	/** RX characteristic UUID */
-	private final static UUID UART_RX_CHARACTERISTIC_UUID = UUID.fromString("6E400002-B5A3-F393-E0A9-E50E24DCCA9E");
+	private static final UUID UART_RX_CHARACTERISTIC_UUID = UUID.fromString("6E400002-B5A3-F393-E0A9-E50E24DCCA9E");
 	/** TX characteristic UUID */
-	private final static UUID UART_TX_CHARACTERISTIC_UUID = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E");
+	private static final UUID UART_TX_CHARACTERISTIC_UUID = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E");
 	/** The maximum packet size is 20 bytes. */
 	private static final int MAX_PACKET_SIZE = 20;
 
@@ -64,7 +65,7 @@ public class UARTProfile extends BleProfile {
 	private int mBufferOffset;
 
 	@Override
-	protected Queue<BleManager.Request> initGatt(final BluetoothGatt gatt) {
+	protected Deque<BleManager.Request> initGatt(final BluetoothGatt gatt) {
 		final BluetoothGattService service = gatt.getService(UART_SERVICE_UUID);
 		mTXCharacteristic = service.getCharacteristic(UART_TX_CHARACTERISTIC_UUID);
 		mRXCharacteristic = service.getCharacteristic(UART_RX_CHARACTERISTIC_UUID);
@@ -78,8 +79,8 @@ public class UARTProfile extends BleProfile {
 			mRXCharacteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
 
 		// We don't want to enable notifications on TX characteristic as we are not showing them here. A watch may be just used to send data. At least now.
-//		final LinkedList<BleManager.Request> requests = new LinkedList<>();
-//		requests.add(BleManager.Request.newEnableNotificationsRequest(mTXCharacteristic));
+//		final LinkedList<BleProfileApi.Request> requests = new LinkedList<>();
+//		requests.add(BleProfileApi.Request.newEnableNotificationsRequest(mTXCharacteristic));
 //		return requests;
 		return null;
 	}
@@ -106,11 +107,8 @@ public class UARTProfile extends BleProfile {
 			mOutgoingBuffer = null;
 		} else { // Otherwise...
 			final int length = Math.min(buffer.length - mBufferOffset, MAX_PACKET_SIZE);
-			final byte[] data = new byte[length]; // We send at most 20 bytes
-			System.arraycopy(buffer, mBufferOffset, data, 0, length);
+			getApi().enqueue(BleProfileApi.Request.newWriteRequest(mRXCharacteristic, buffer, mBufferOffset, length));
 			mBufferOffset += length;
-			mRXCharacteristic.setValue(data);
-			getApi().writeCharacteristic(mRXCharacteristic);
 		}
 	}
 
@@ -134,15 +132,12 @@ public class UARTProfile extends BleProfile {
 
 			if (!writeRequest) { // no WRITE REQUEST property
 				final int length = Math.min(buffer.length, MAX_PACKET_SIZE);
-				final byte[] data = new byte[length]; // We send at most 20 bytes
-				System.arraycopy(buffer, 0, data, 0, length);
 				mBufferOffset += length;
-				mRXCharacteristic.setValue(data);
-			} else { // there is WRITE REQUEST property
-				mRXCharacteristic.setValue(buffer);
+				getApi().enqueue(BleProfileApi.Request.newWriteRequest(mRXCharacteristic, buffer, 0, length));
+			} else { // there is WRITE REQUEST property, let's try Long Write
 				mBufferOffset = buffer.length;
+				getApi().enqueue(BleProfileApi.Request.newWriteRequest(mRXCharacteristic, buffer, 0, buffer.length));
 			}
-			getApi().writeCharacteristic(mRXCharacteristic);
 		}
 	}
 }

@@ -83,11 +83,6 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 		public void send(final String text) {
 			mManager.send(text);
 		}
-
-		@Override
-		public ILogSession getLogSession() {
-			return super.getLogSession();
-		}
 	}
 
 	@Override
@@ -138,9 +133,9 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	}
 
 	@Override
-	protected void onServiceStarted() {
-		// logger is now available. Assign it to the manager
-		mManager.setLogger(getLogSession());
+	public boolean shouldEnableBatteryLevelNotifications(final BluetoothDevice device) {
+		// No UI in UART profile for Battery Level information
+		return false;
 	}
 
 	@Override

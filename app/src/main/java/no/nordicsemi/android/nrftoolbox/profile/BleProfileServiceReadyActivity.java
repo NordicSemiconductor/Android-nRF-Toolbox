@@ -179,21 +179,30 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 			final E bleService = mService = (E) service;
 			mBluetoothDevice = bleService.getBluetoothDevice();
 			mLogSession = mService.getLogSession();
-			Logger.d(mLogSession, "Activity binded to the service");
+			Logger.d(mLogSession, "Activity bound to the service");
 			onServiceBinded(bleService);
 
-			// update UI
+			// Update UI
 			mDeviceName = bleService.getDeviceName();
 			mDeviceNameView.setText(mDeviceName);
 			mConnectButton.setText(R.string.action_disconnect);
 
-			// and notify user if device is connected
-			if (bleService.isConnected())
+			// And notify user if device is connected
+			if (bleService.isConnected()) {
 				onDeviceConnected(mBluetoothDevice);
+			} else {
+				// If the device is not connected it means that either it is still connecting,
+				// or the link was lost and service is trying to connect to it (autoConnect=true).
+				onDeviceConnecting(mBluetoothDevice);
+			}
 		}
 
 		@Override
 		public void onServiceDisconnected(final ComponentName name) {
+			// Note: this method is called only when the service is killed by the system,
+			// not when it stops itself or is stopped by the activity.
+			// It will be called only when there is critically low memory, in practice never
+			// when the activity is in foreground.
 			Logger.d(mLogSession, "Activity disconnected from the service");
 			mDeviceNameView.setText(getDefaultDeviceName());
 			mConnectButton.setText(R.string.action_connect);
@@ -221,33 +230,32 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 			mLogSession = Logger.openSession(getApplicationContext(), logUri);
 		}
 
-		/*
-		 * In this example we use the ProximityManager in the service. This class communicates with the service using local broadcasts. Final activity may bind
-		 * to the Server to use its interface.
-		 */
+		// In onInitialize method a final class may register local broadcast receivers that will listen for events from the service
 		onInitialize(savedInstanceState);
+		// The onCreateView class should... create the view
 		onCreateView(savedInstanceState);
 
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
-        setSupportActionBar(toolbar);
+		final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+		setSupportActionBar(toolbar);
 
+		// Common nRF Toolbox view references are obtained here
 		setUpView();
+		// View is ready to be used
 		onViewCreated(savedInstanceState);
 
 		LocalBroadcastManager.getInstance(this).registerReceiver(mCommonBroadcastReceiver, makeIntentFilter());
 	}
 
 	@Override
-	protected void onStart() {
-		super.onStart();
+	protected void onResume() {
+		super.onResume();
 
 		/*
-		 * If the service has not been started before, the following lines will not start it. However, if it's running, the Activity will be binded to it and
+		 * If the service has not been started before, the following lines will not start it. However, if it's running, the Activity will bind to it and
 		 * notified via mServiceConnection.
 		 */
 		final Intent service = new Intent(this, getServiceClass());
-		if (bindService(service, mServiceConnection, 0)) // we pass 0 as a flag so the service will not be created if not exists
-			Logger.d(mLogSession, "Binding to the service..."); // (* - see the comment below)
+		bindService(service, mServiceConnection, 0); // we pass 0 as a flag so the service will not be created if not exists
 
 		/*
 		 * * - When user exited the UARTActivity while being connected, the log session is kept in the service. We may not get it before binding to it so in this
@@ -256,20 +264,19 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	}
 
 	@Override
-	protected void onStop() {
-		super.onStop();
+	protected void onPause() {
+		super.onPause();
 
 		try {
 			// We don't want to perform some operations (e.g. disable Battery Level notifications) in the service if we are just rotating the screen.
-			// However, when the activity is finishing, we may want to disable some device features to reduce the battery consumption.
+			// However, when the activity will disappear, we may want to disable some device features to reduce the battery consumption.
 			if (mService != null)
-				mService.setActivityIsFinishing(isFinishing());
+				mService.setActivityIsChangingConfiguration(isChangingConfigurations());
 
-			Logger.d(mLogSession, "Unbinding from the service...");
 			unbindService(mServiceConnection);
 			mService = null;
 
-			Logger.d(mLogSession, "Activity unbinded from the service");
+			Logger.d(mLogSession, "Activity unbound from the service");
 			onServiceUnbinded();
 			mDeviceName = null;
 			mBluetoothDevice = null;
@@ -460,7 +467,6 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 		mDeviceName = name;
 		mDeviceNameView.setText(name != null ? name : getString(R.string.not_available));
 		mConnectButton.setText(R.string.action_connecting);
-		mConnectButton.setEnabled(false);
 
 		// The device may not be in the range but the service will try to connect to it if it reach it
 		Logger.d(mLogSession, "Creating service...");
@@ -488,7 +494,6 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	public void onDeviceConnected(final BluetoothDevice device) {
 		mDeviceNameView.setText(mDeviceName);
 		mConnectButton.setText(R.string.action_disconnect);
-		mConnectButton.setEnabled(true);
 	}
 
 	@Override
@@ -545,8 +550,10 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	}
 
 	@Override
-	public void onDeviceNotSupported(final BluetoothDevice device) {
-		showToast(R.string.not_supported);
+	public final boolean shouldEnableBatteryLevelNotifications(final BluetoothDevice device) {
+		// This method will never be called.
+		// Please see BleProfileService#shouldEnableBatteryLevelNotifications(BluetoothDevice) instead.
+		throw new UnsupportedOperationException("This method should not be called");
 	}
 
 	@Override
@@ -559,6 +566,11 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	public void onError(final BluetoothDevice device, final String message, final int errorCode) {
 		DebugLogger.e(TAG, "Error occurred: " + message + ",  error code: " + errorCode);
 		showToast(message + " (" + errorCode + ")");
+	}
+
+	@Override
+	public void onDeviceNotSupported(final BluetoothDevice device) {
+		showToast(R.string.not_supported);
 	}
 
 	/**
@@ -593,7 +605,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	 * Returns <code>true</code> if the device is connected. Services may not have been discovered yet.
 	 */
 	protected boolean isDeviceConnected() {
-		return mService != null;
+		return mService != null && mService.isConnected();
 	}
 
 	/**
@@ -658,7 +670,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	 *
 	 * @return the logger session or <code>null</code>
 	 */
-	public ILogSession getLogSession() {
+	protected ILogSession getLogSession() {
 		return mLogSession;
 	}
 

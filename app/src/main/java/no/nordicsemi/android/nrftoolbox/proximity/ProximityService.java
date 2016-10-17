@@ -164,12 +164,6 @@ public class ProximityService extends BleProfileService implements ProximityMana
 	}
 
 	@Override
-	protected void onServiceStarted() {
-		// logger is now available. Assign it to the manager
-		mProximityManager.setLogger(getLogSession());
-	}
-
-	@Override
 	public void onDeviceDisconnecting(final BluetoothDevice device) {
 		stopAlarm();
 	}

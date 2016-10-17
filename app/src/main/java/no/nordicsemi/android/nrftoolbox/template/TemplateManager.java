@@ -26,13 +26,13 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 
+import java.util.Deque;
 import java.util.LinkedList;
-import java.util.Queue;
 import java.util.UUID;
 
 import no.nordicsemi.android.log.Logger;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.parser.TemplateParser;
+import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 
 /**
  * Modify to template manager to match your requirements.
@@ -63,7 +63,7 @@ public class TemplateManager extends BleManager<TemplateManagerCallbacks> {
 	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 
 		@Override
-		protected Queue<Request> initGatt(final BluetoothGatt gatt) {
+		protected Deque<Request> initGatt(final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
 			// TODO initialize your device, enable required notifications and indications, write what needs to be written to start working
 			requests.add(Request.newEnableNotificationsRequest(mCharacteristic));

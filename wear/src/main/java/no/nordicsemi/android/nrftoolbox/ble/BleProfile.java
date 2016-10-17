@@ -27,7 +27,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.content.Context;
 
-import java.util.Queue;
+import java.util.Deque;
 
 public abstract class BleProfile {
 	private Context mContext;
@@ -63,7 +63,7 @@ public abstract class BleProfile {
 	 * @param gatt the gatt device with services discovered
 	 * @return the queue of requests
 	 */
-	protected abstract Queue<BleManager.Request> initGatt(final BluetoothGatt gatt);
+	protected abstract Deque<BleManager.Request> initGatt(final BluetoothGatt gatt);
 
 	/**
 	 * Releases all profile resources. The device is no longer connected.
@@ -71,11 +71,20 @@ public abstract class BleProfile {
 	protected abstract void release();
 
 	/**
+	 * Called when battery value has been received from the device.
+	 *
+	 * @param gatt GATT client
+	 * @param value the battery value in percent
+	 */
+	protected void onBatteryValueReceived(final BluetoothGatt gatt, final int value) {
+		// do nothing
+	}
+
+	/**
 	 * Callback reporting the result of a characteristic read operation.
 	 *
-	 * @param gatt           GATT client invoked {@link BluetoothGatt#readCharacteristic}
-	 * @param characteristic Characteristic that was read from the associated
-	 *                       remote device.
+	 * @param gatt GATT client
+	 * @param characteristic Characteristic that was read from the associated remote device.
 	 */
 	protected void onCharacteristicRead(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
 		// do nothing
@@ -83,40 +92,65 @@ public abstract class BleProfile {
 
 	/**
 	 * Callback indicating the result of a characteristic write operation.
-	 * <p/>
 	 * <p>If this callback is invoked while a reliable write transaction is
 	 * in progress, the value of the characteristic represents the value
 	 * reported by the remote device. An application should compare this
 	 * value to the desired value to be written. If the values don't match,
 	 * the application must abort the reliable write transaction.
 	 *
-	 * @param gatt           GATT client invoked {@link BluetoothGatt#writeCharacteristic}
-	 * @param characteristic Characteristic that was written to the associated
-	 *                       remote device.
+	 * @param gatt GATT client
+	 * @param characteristic Characteristic that was written to the associated remote device.
 	 */
 	protected void onCharacteristicWrite(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
 		// do nothing
 	}
 
+	/**
+	 * Callback reporting the result of a descriptor read operation.
+	 *
+	 * @param gatt GATT client
+	 * @param descriptor Descriptor that was read from the associated remote device.
+	 */
+	protected void onDescriptorRead(final BluetoothGatt gatt, final BluetoothGattDescriptor descriptor) {
+		// do nothing
+	}
+
+	/**
+	 * Callback indicating the result of a descriptor write operation.
+	 * <p>If this callback is invoked while a reliable write transaction is in progress,
+	 * the value of the characteristic represents the value reported by the remote device.
+	 * An application should compare this value to the desired value to be written.
+	 * If the values don't match, the application must abort the reliable write transaction.
+	 *
+	 * @param gatt GATT client
+	 * @param descriptor Descriptor that was written to the associated remote device.
+	 */
 	protected void onDescriptorWrite(final BluetoothGatt gatt, final BluetoothGattDescriptor descriptor) {
 		// do nothing
 	}
 
+	/**
+	 * Callback indicating a notification has been received.
+	 * @param gatt GATT client
+	 * @param characteristic Characteristic from which the notification came.
+	 */
 	protected void onCharacteristicNotified(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
 		// do nothing
 	}
 
+	/**
+	 * Callback indicating an indication has been received.
+	 * @param gatt GATT client
+	 * @param characteristic Characteristic from which the indication came.
+	 */
 	protected void onCharacteristicIndicated(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
 		// do nothing
 	}
 
 	/**
 	 * Called when a BLE error has occurred
-	 *
-	 * @param message
-	 *            the error message
-	 * @param errorCode
-	 *            the error code
+	 * @param message the error message
+	 * @param errorCode the error code
 	 */
 	public void onError(final String message, final int errorCode) {
 		// do nothing

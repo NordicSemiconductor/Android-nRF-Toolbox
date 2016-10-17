@@ -35,8 +35,8 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import java.util.Deque;
 import java.util.LinkedList;
-import java.util.Queue;
 import java.util.UUID;
 
 import no.nordicsemi.android.error.GattError;
@@ -277,7 +277,7 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 
 		@Override
-		protected Queue<Request> initGatt(final BluetoothGatt gatt) {
+		protected Deque<Request> initGatt(final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
 			requests.add(Request.newWriteRequest(mLinklossCharacteristic, HIGH_ALERT));
 			return requests;

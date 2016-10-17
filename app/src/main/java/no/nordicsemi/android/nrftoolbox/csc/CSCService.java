@@ -121,12 +121,6 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 	}
 
 	@Override
-	protected void onServiceStarted() {
-		// logger is now available. Assign it to the manager
-		mManager.setLogger(getLogSession());
-	}
-
-	@Override
 	public void onWheelMeasurementReceived(final BluetoothDevice device, final int wheelRevolutions, final int lastWheelEventTime) {
 		Logger.a(getLogSession(), "Wheel rev: " + wheelRevolutions + "\nLast wheel event time: " + lastWheelEventTime + " ms");
 

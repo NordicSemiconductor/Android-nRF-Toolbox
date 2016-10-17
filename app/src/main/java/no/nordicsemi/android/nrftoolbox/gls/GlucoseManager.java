@@ -29,15 +29,15 @@ import android.os.Handler;
 import android.util.SparseArray;
 
 import java.util.Calendar;
+import java.util.Deque;
 import java.util.LinkedList;
-import java.util.Queue;
 import java.util.UUID;
 
 import no.nordicsemi.android.log.Logger;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.parser.GlucoseMeasurementContextParser;
 import no.nordicsemi.android.nrftoolbox.parser.GlucoseMeasurementParser;
 import no.nordicsemi.android.nrftoolbox.parser.RecordAccessControlPointParser;
+import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
 
 @SuppressWarnings("unused")
@@ -127,7 +127,7 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 
 		@Override
-		protected Queue<Request> initGatt(final BluetoothGatt gatt) {
+		protected Deque<Request> initGatt(final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
 			requests.add(Request.newEnableNotificationsRequest(mGlucoseMeasurementCharacteristic));
 			if (mGlucoseMeasurementContextCharacteristic != null)

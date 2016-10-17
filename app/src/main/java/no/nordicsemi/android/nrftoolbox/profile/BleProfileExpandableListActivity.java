@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -81,12 +82,18 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 		 * broadcast listeners, local broadcast listeners (see support.v4 library), or messages. See the Proximity profile for Service approach.
 		 */
 		mBleManager = initializeManager();
+
+		// In onInitialize method a final class may register local broadcast receivers that will listen for events from the service
 		onInitialize(savedInstanceState);
+		// The onCreateView class should... create the view
 		onCreateView(savedInstanceState);
 
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
-        setSupportActionBar(toolbar);
+		final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+		setSupportActionBar(toolbar);
 
+		// Common nRF Toolbox view references are obtained here
+		setUpView();
+		// View is ready to be used
 		onViewCreated(savedInstanceState);
 	}
 
@@ -110,7 +117,14 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	 *
 	 * @param savedInstanceState contains the data it most recently supplied in {@link #onSaveInstanceState(Bundle)}. Note: <b>Otherwise it is null</b>.
 	 */
-	protected final void onViewCreated(final Bundle savedInstanceState) {
+	protected void onViewCreated(final Bundle savedInstanceState) {
+		// empty default implementation
+	}
+
+	/**
+	 * Called after the view and the toolbar has been created.
+	 */
+	protected final void setUpView() {
 		// set GUI
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		mConnectButton = (Button) findViewById(R.id.action_connect);
@@ -132,7 +146,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	}
 
 	@Override
-	protected void onRestoreInstanceState(final Bundle savedInstanceState) {
+	protected void onRestoreInstanceState(@NonNull final Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 		mDeviceConnected = savedInstanceState.getBoolean(SIS_CONNECTION_STATUS);
 		mDeviceName = savedInstanceState.getString(SIS_DEVICE_NAME);
@@ -226,7 +240,6 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 		mBleManager.setLogger(mLogSession);
 		mDeviceNameView.setText(name != null ? name : getString(R.string.not_available));
 		mConnectButton.setText(R.string.action_connecting);
-		mConnectButton.setEnabled(false);
 		mBleManager.connect(device);
 	}
 
@@ -247,7 +260,6 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 			@Override
 			public void run() {
 				mConnectButton.setText(R.string.action_disconnect);
-				mConnectButton.setEnabled(true);
 			}
 		});
 	}
@@ -277,9 +289,8 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				mConnectButton.setText(R.string.action_connect);
-				mDeviceNameView.setText(getDefaultDeviceName());
-				mBatteryLevelView.setText(R.string.not_available);
+				if (mBatteryLevelView != null)
+					mBatteryLevelView.setText(R.string.not_available);
 			}
 		});
 	}
@@ -289,21 +300,9 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 		// this may notify user or show some views
 	}
 
-	/**
-	 * Called when the initialization process in completed.
-	 */
+	@Override
 	public void onDeviceReady(final BluetoothDevice device) {
 		// empty default implementation
-	}
-
-	@Override
-	public void onBatteryValueReceived(final BluetoothDevice device, final int value) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				mBatteryLevelView.setText(getString(R.string.battery, value));
-			}
-		});
 	}
 
 	@Override
@@ -314,6 +313,23 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	@Override
 	public void onBonded(final BluetoothDevice device) {
 		showToast(R.string.bonded);
+	}
+
+	@Override
+	public boolean shouldEnableBatteryLevelNotifications(final BluetoothDevice device) {
+		// Yes, we want battery level updates
+		return true;
+	}
+
+	@Override
+	public void onBatteryValueReceived(final BluetoothDevice device, final int value) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (mBatteryLevelView != null)
+					mBatteryLevelView.setText(getString(R.string.battery, value));
+			}
+		});
 	}
 
 	@Override
@@ -419,6 +435,15 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 				dialog.show(getSupportFragmentManager(), "scan_fragment");
 			}
 		});
+	}
+
+	/**
+	 * Returns the log session. Log session is created when the device was selected using the {@link ScannerFragment} and released when user press DISCONNECT.
+	 *
+	 * @return the logger session or <code>null</code>
+	 */
+	protected ILogSession getLogSession() {
+		return mLogSession;
 	}
 
 	private void ensureBLESupported() {

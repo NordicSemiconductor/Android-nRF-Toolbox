@@ -26,15 +26,15 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 
+import java.util.Deque;
 import java.util.LinkedList;
-import java.util.Queue;
 import java.util.UUID;
 
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.parser.BodySensorLocationParser;
 import no.nordicsemi.android.nrftoolbox.parser.HeartRateMeasurementParser;
+import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 
 /**
  * HRSManager class performs BluetoothGatt operations for connection, service discovery, enabling notification and reading characteristics. All operations required to connect to device with BLE HR
@@ -74,7 +74,7 @@ public class HRSManager extends BleManager<HRSManagerCallbacks> {
 	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 
 		@Override
-		protected Queue<Request> initGatt(final BluetoothGatt gatt) {
+		protected Deque<Request> initGatt(final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
 			if (mHRLocationCharacteristic != null)
 				requests.add(Request.newReadRequest(mHRLocationCharacteristic));

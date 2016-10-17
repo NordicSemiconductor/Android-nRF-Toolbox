@@ -101,12 +101,6 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	}
 
 	@Override
-	protected void onServiceStarted() {
-		// logger is now available. Assign it to the manager
-		mManager.setLogger(getLogSession());
-	}
-
-	@Override
 	public void onHTValueReceived(final BluetoothDevice device, final double value) {
 		final Intent broadcast = new Intent(BROADCAST_HTS_MEASUREMENT);
 		broadcast.putExtra(EXTRA_DEVICE, device);

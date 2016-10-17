@@ -161,12 +161,6 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
         createNotification(R.string.csc_notification_connected_message, 0);
     }
 
-    @Override
-    protected void onServiceStarted() {
-        // logger is now available. Assign it to the manager
-        mManager.setLogger(getLogSession());
-    }
-
     /**
      * Creates the notification
      *

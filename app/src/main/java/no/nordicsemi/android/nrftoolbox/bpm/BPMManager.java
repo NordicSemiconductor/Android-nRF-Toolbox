@@ -27,14 +27,14 @@ import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 
 import java.util.Calendar;
+import java.util.Deque;
 import java.util.LinkedList;
-import java.util.Queue;
 import java.util.UUID;
 
 import no.nordicsemi.android.log.Logger;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.parser.BloodPressureMeasurementParser;
 import no.nordicsemi.android.nrftoolbox.parser.IntermediateCuffPressureParser;
+import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 
 public class BPMManager extends BleManager<BPMManagerCallbacks> {
 	/** Blood Pressure service UUID */
@@ -73,7 +73,7 @@ public class BPMManager extends BleManager<BPMManagerCallbacks> {
 	private final BleManagerGattCallback  mGattCallback = new BleManagerGattCallback() {
 
 		@Override
-		protected Queue<Request> initGatt(final BluetoothGatt gatt) {
+		protected Deque<Request> initGatt(final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
 			if (mICPCharacteristic != null)
 				requests.add(Request.newEnableNotificationsRequest(mICPCharacteristic));

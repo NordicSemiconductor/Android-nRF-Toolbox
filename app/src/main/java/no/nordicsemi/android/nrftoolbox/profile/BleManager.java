@@ -32,14 +32,16 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.StringRes;
 
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.UUID;
 
 import no.nordicsemi.android.log.ILogSession;
-import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.error.GattError;
 import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
@@ -63,22 +65,16 @@ import no.nordicsemi.android.nrftoolbox.utility.ParserUtils;
  *
  * @param <E> The profile callbacks type
  */
-public abstract class BleManager<E extends BleManagerCallbacks> {
+public abstract class BleManager<E extends BleManagerCallbacks> implements ILogger {
 	private final static String TAG = "BleManager";
 
-	private static final UUID CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+	private final static UUID CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
 	private final static UUID BATTERY_SERVICE = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb");
 	private final static UUID BATTERY_LEVEL_CHARACTERISTIC = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb");
 
 	private final static UUID GENERIC_ATTRIBUTE_SERVICE = UUID.fromString("00001801-0000-1000-8000-00805f9b34fb");
 	private final static UUID SERVICE_CHANGED_CHARACTERISTIC = UUID.fromString("00002A05-0000-1000-8000-00805f9b34fb");
-
-	private final static String ERROR_CONNECTION_STATE_CHANGE = "Error on connection state change";
-	private final static String ERROR_DISCOVERY_SERVICE = "Error on discovering services";
-	private final static String ERROR_AUTH_ERROR_WHILE_BONDED = "Phone has lost bonding information";
-	private final static String ERROR_WRITE_DESCRIPTOR = "Error on writing descriptor";
-	private final static String ERROR_READ_CHARACTERISTIC = "Error on reading characteristic";
 
 	private final Object mLock = new Object();
 	/**
@@ -89,14 +85,18 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 	protected E mCallbacks;
 	private Handler mHandler;
 	private BluetoothGatt mBluetoothGatt;
+	private BleManagerGattCallback mGattCallback;
 	private Context mContext;
 	/**
 	 * This flag is set to false only when the {@link #shouldAutoConnect()} method returns true and the device got disconnected without calling {@link #disconnect()} method.
-	 * If {@link #shouldAutoConnect()} returns false (dafault) this is always set to true.
+	 * If {@link #shouldAutoConnect()} returns false (default) this is always set to true.
 	 */
 	private boolean mUserDisconnected;
 	/** Flag set to true when the device is connected. */
 	private boolean mConnected;
+	private int mConnectionState = BluetoothGatt.STATE_DISCONNECTED;
+	/** Last received battery value or -1 if value wasn't received. */
+	private int mBatteryValue = -1;
 
 	private BroadcastReceiver mBondingBroadcastReceiver = new BroadcastReceiver() {
 		@Override
@@ -189,7 +189,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 	}
 
 	/**
-	 * Connects to the Bluetooth Smart device
+	 * Connects to the Bluetooth Smart device.
 	 *
 	 * @param device a device to connect to
 	 */
@@ -203,15 +203,16 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 				mBluetoothGatt.close();
 				mBluetoothGatt = null;
 			}
-
-			final boolean autoConnect = shouldAutoConnect();
-			mUserDisconnected = !autoConnect; // We will receive Linkloss events only when the device is connected with autoConnect=true
-			mBluetoothDevice = device;
-			mCallbacks.onDeviceConnecting(device);
-			Logger.v(mLogSession, "Connecting...");
-			Logger.d(mLogSession, "gatt = device.connectGatt(autoConnect = " + autoConnect + ")");
-			mBluetoothGatt = device.connectGatt(mContext, autoConnect, getGattCallback());
 		}
+
+		final boolean autoConnect = shouldAutoConnect();
+		mUserDisconnected = !autoConnect; // We will receive Linkloss events only when the device is connected with autoConnect=true
+		mBluetoothDevice = device;
+		Logger.v(mLogSession, "Connecting...");
+		mConnectionState = BluetoothGatt.STATE_CONNECTING;
+		mCallbacks.onDeviceConnecting(device);
+		Logger.d(mLogSession, "gatt = device.connectGatt(autoConnect = " + autoConnect + ")");
+		mBluetoothGatt = device.connectGatt(mContext, autoConnect, mGattCallback = getGattCallback());
 	}
 
 	/**
@@ -223,6 +224,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 
 		if (mConnected && mBluetoothGatt != null) {
 			Logger.v(mLogSession, "Disconnecting...");
+			mConnectionState = BluetoothGatt.STATE_DISCONNECTING;
 			mCallbacks.onDeviceDisconnecting(mBluetoothGatt.getDevice());
 			Logger.d(mLogSession, "gatt.disconnect()");
 			mBluetoothGatt.disconnect();
@@ -236,6 +238,26 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 	 */
 	public boolean isConnected() {
 		return mConnected;
+	}
+
+	/**
+	 * Method returns the connection state:
+	 * {@link BluetoothGatt#STATE_CONNECTING STATE_CONNECTING},
+	 * {@link BluetoothGatt#STATE_CONNECTED STATE_CONNECTED},
+	 * {@link BluetoothGatt#STATE_DISCONNECTING STATE_DISCONNECTING},
+	 * {@link BluetoothGatt#STATE_DISCONNECTED STATE_DISCONNECTED}
+	 * @return the connection state
+	 */
+	public int getConnectionState() {
+		return mConnectionState;
+	}
+
+	/**
+	 * Returns the last received value of Battery Level characteristic, or -1 if such does not exist, hasn't been read or notification wasn't received yet.
+	 * @return the last battery level value in percent
+	 */
+	public int getBatteryValue() {
+		return mBatteryValue;
 	}
 
 	/**
@@ -254,6 +276,9 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 				mBluetoothGatt.close();
 				mBluetoothGatt = null;
 			}
+			mConnected = false;
+			mConnectionState = BluetoothGatt.STATE_DISCONNECTED;
+			mGattCallback = null;
 			mBluetoothDevice = null;
 		}
 	}
@@ -270,28 +295,14 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 		mLogSession = session;
 	}
 
-	/**
-	 * Logs a message on the manager's log session. Does nothing when log session has not been set by {@link #setLogger(ILogSession)}.
-	 * @param level
-	 *            the log level, one of {@link LogContract.Log.Level#DEBUG}, {@link LogContract.Log.Level#VERBOSE}, {@link LogContract.Log.Level#INFO}, {@link LogContract.Log.Level#WARNING},
-	 *            {@link LogContract.Log.Level#ERROR}
-	 * @param message
-	 *            the message to be logged
-	 */
+	@Override
 	public void log(final int level, final String message) {
 		Logger.log(mLogSession, level, message);
 	}
 
-	/**
-	 * Logs a message on the manager's log session. Does nothing when log session has not been set by {@link #setLogger(ILogSession)}.
-	 * @param level
-	 *            the log level, one of {@link LogContract.Log.Level#DEBUG}, {@link LogContract.Log.Level#VERBOSE}, {@link LogContract.Log.Level#INFO}, {@link LogContract.Log.Level#WARNING},
-	 *            {@link LogContract.Log.Level#ERROR}
-	 * @param messageRes
-	 *            the message string resource to be logged
-	 */
-	public void log(final int level, @StringRes final int messageRes) {
-		Logger.log(mLogSession, level, messageRes);
+	@Override
+	public void log(final int level, @StringRes final int messageRes, final Object... params) {
+		Logger.log(mLogSession, level, messageRes, params);
 	}
 
 	/**
@@ -304,53 +315,14 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 	}
 
 	/**
-	 * Returns true if this descriptor is from the Service Changed characteristic.
-	 *
-	 * @param descriptor the descriptor to be checked
-	 * @return true if the descriptor belongs to the Service Changed characteristic
-	 */
-	private boolean isServiceChangedCCCD(final BluetoothGattDescriptor descriptor) {
-		if (descriptor == null)
-			return false;
-
-		return SERVICE_CHANGED_CHARACTERISTIC.equals(descriptor.getCharacteristic().getUuid());
-	}
-
-	/**
-	 * Returns true if the characteristic is the Battery Level characteristic.
-	 *
-	 * @param characteristic the characteristic to be checked
-	 * @return true if the characteristic is the Battery Level characteristic.
-	 */
-	private boolean isBatteryLevelCharacteristic(final BluetoothGattCharacteristic characteristic) {
-		if (characteristic == null)
-			return false;
-
-		return BATTERY_LEVEL_CHARACTERISTIC.equals(characteristic.getUuid());
-	}
-
-	/**
-	 * Returns true if this descriptor is from the Battery Level characteristic.
-	 *
-	 * @param descriptor the descriptor to be checked
-	 * @return true if the descriptor belongs to the Battery Level characteristic
-	 */
-	private boolean isBatteryLevelCCCD(final BluetoothGattDescriptor descriptor) {
-		if (descriptor == null)
-			return false;
-
-		return BATTERY_LEVEL_CHARACTERISTIC.equals(descriptor.getCharacteristic().getUuid());
-	}
-
-	/**
 	 * When the device is bonded and has the Generic Attribute service and the Service Changed characteristic this method enables indications on this characteristic.
 	 * In case one of the requirements is not fulfilled this method returns <code>false</code>.
 	 *
-	 * @param gatt the gatt device with services discovered
 	 * @return <code>true</code> when the request has been sent, <code>false</code> when the device is not bonded, does not have the Generic Attribute service, the GA service does not have
 	 * the Service Changed characteristic or this characteristic does not have the CCCD.
 	 */
-	private boolean ensureServiceChangedEnabled(final BluetoothGatt gatt) {
+	private boolean ensureServiceChangedEnabled() {
+		final BluetoothGatt gatt = mBluetoothGatt;
 		if (gatt == null)
 			return false;
 
@@ -372,11 +344,15 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 	}
 
 	/**
-	 * Enables notifications on given characteristic
+	 * Enables notifications on given characteristic.
 	 *
-	 * @return true is the request has been sent, false if one of the arguments was <code>null</code> or the characteristic does not have the CCCD.
+	 * @return true is the request has been enqueued
 	 */
 	protected final boolean enableNotifications(final BluetoothGattCharacteristic characteristic) {
+		return enqueue(Request.newEnableNotificationsRequest(characteristic));
+	}
+
+	private boolean internalEnableNotifications(final BluetoothGattCharacteristic characteristic) {
 		final BluetoothGatt gatt = mBluetoothGatt;
 		if (gatt == null || characteristic == null)
 			return false;
@@ -399,11 +375,15 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 	}
 
 	/**
-	 * Enables indications on given characteristic
+	 * Enables indications on given characteristic.
 	 *
-	 * @return true is the request has been sent, false if one of the arguments was <code>null</code> or the characteristic does not have the CCCD.
+	 * @return true is the request has been enqueued
 	 */
 	protected final boolean enableIndications(final BluetoothGattCharacteristic characteristic) {
+		return enqueue(Request.newEnableIndicationsRequest(characteristic));
+	}
+
+	private boolean internalEnableIndications(final BluetoothGattCharacteristic characteristic) {
 		final BluetoothGatt gatt = mBluetoothGatt;
 		if (gatt == null || characteristic == null)
 			return false;
@@ -429,9 +409,13 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 	 * Sends the read request to the given characteristic.
 	 *
 	 * @param characteristic the characteristic to read
-	 * @return true if request has been sent
+	 * @return true if request has been enqueued
 	 */
 	protected final boolean readCharacteristic(final BluetoothGattCharacteristic characteristic) {
+		return enqueue(Request.newReadRequest(characteristic));
+	}
+
+	private boolean internalReadCharacteristic(final BluetoothGattCharacteristic characteristic) {
 		final BluetoothGatt gatt = mBluetoothGatt;
 		if (gatt == null || characteristic == null)
 			return false;
@@ -450,9 +434,13 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 	 * Writes the characteristic value to the given characteristic.
 	 *
 	 * @param characteristic the characteristic to write to
-	 * @return true if request has been sent
+	 * @return true if request has been enqueued
 	 */
 	protected final boolean writeCharacteristic(final BluetoothGattCharacteristic characteristic) {
+		return enqueue(Request.newWriteRequest(characteristic, characteristic.getValue()));
+	}
+
+	private boolean internalWriteCharacteristic(final BluetoothGattCharacteristic characteristic) {
 		final BluetoothGatt gatt = mBluetoothGatt;
 		if (gatt == null || characteristic == null)
 			return false;
@@ -468,11 +456,62 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 	}
 
 	/**
+	 * Sends the read request to the given descriptor.
+	 *
+	 * @param descriptor the descriptor to read
+	 * @return true if request has been enqueued
+	 */
+	protected final boolean readDescriptor(final BluetoothGattDescriptor descriptor) {
+		return enqueue(Request.newReadRequest(descriptor));
+	}
+
+	private boolean internalReadDescriptor(final BluetoothGattDescriptor descriptor) {
+		final BluetoothGatt gatt = mBluetoothGatt;
+		if (gatt == null || descriptor == null)
+			return false;
+
+		Logger.v(mLogSession, "Reading descriptor " + descriptor.getUuid());
+		Logger.d(mLogSession, "gatt.readDescriptor(" + descriptor.getUuid() + ")");
+		return gatt.readDescriptor(descriptor);
+	}
+
+	/**
+	 * Writes the descriptor value to the given descriptor.
+	 *
+	 * @param descriptor the descriptor to write to
+	 * @return true if request has been enqueued
+	 */
+	protected final boolean writeDescriptor(final BluetoothGattDescriptor descriptor) {
+		return enqueue(Request.newWriteRequest(descriptor, descriptor.getValue()));
+	}
+
+	private boolean internalWriteDescriptor(final BluetoothGattDescriptor descriptor) {
+		final BluetoothGatt gatt = mBluetoothGatt;
+		if (gatt == null || descriptor == null)
+			return false;
+
+		Logger.v(mLogSession, "Writing descriptor " + descriptor.getUuid());
+		Logger.d(mLogSession, "gatt.writeDescriptor(" + descriptor.getUuid() + ")");
+		// There was a bug in Android up to 6.0 where the descriptor was written using parent characteristic write type, instead of always Write With Response,
+		// as the spec says.
+		final BluetoothGattCharacteristic parentCharacteristic = descriptor.getCharacteristic();
+		final int originalWriteType = parentCharacteristic.getWriteType();
+		parentCharacteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+		final boolean result = gatt.writeDescriptor(descriptor);
+		parentCharacteristic.setWriteType(originalWriteType);
+		return result;
+	}
+
+	/**
 	 * Reads the battery level from the device.
 	 *
-	 * @return true if request has been sent
+	 * @return true if request has been enqueued
 	 */
 	public final boolean readBatteryLevel() {
+		return enqueue(Request.newReadBatteryLevelRequest());
+	}
+
+	private boolean internalReadBatteryLevel() {
 		final BluetoothGatt gatt = mBluetoothGatt;
 		if (gatt == null)
 			return false;
@@ -487,21 +526,27 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 
 		// Check characteristic property
 		final int properties = batteryLevelCharacteristic.getProperties();
-		if ((properties & BluetoothGattCharacteristic.PROPERTY_READ) == 0) {
-			return setBatteryNotifications(true);
-		}
+		if ((properties & BluetoothGattCharacteristic.PROPERTY_READ) == 0)
+			return false;
 
 		Logger.a(mLogSession, "Reading battery level...");
-		return readCharacteristic(batteryLevelCharacteristic);
+		return internalReadCharacteristic(batteryLevelCharacteristic);
 	}
 
 	/**
 	 * This method tries to enable notifications on the Battery Level characteristic.
 	 *
 	 * @param enable <code>true</code> to enable battery notifications, false to disable
-	 * @return true if request has been sent
+	 * @return true if request has been enqueued
 	 */
-	public boolean setBatteryNotifications(final boolean enable) {
+	public final boolean setBatteryNotifications(final boolean enable) {
+		if (enable)
+			return enqueue(Request.newEnableBatteryLevelNotificationsRequest());
+		else
+			return enqueue(Request.newDisableBatteryLevelNotificationsRequest());
+	}
+
+	private boolean internalSetBatteryNotifications(final boolean enable) {
 		final BluetoothGatt gatt = mBluetoothGatt;
 		if (gatt == null) {
 			return false;
@@ -527,62 +572,277 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 				descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
 				Logger.a(mLogSession, "Enabling battery level notifications...");
 				Logger.v(mLogSession, "Enabling notifications for " + BATTERY_LEVEL_CHARACTERISTIC);
-				Logger.d(mLogSession, "gatt.writeDescriptor(" + CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID + ", value=0x01-00)");
+				Logger.d(mLogSession, "gatt.writeDescriptor(" + CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID + ", value=0x0100)");
 			} else {
 				descriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
 				Logger.a(mLogSession, "Disabling battery level notifications...");
 				Logger.v(mLogSession, "Disabling notifications for " + BATTERY_LEVEL_CHARACTERISTIC);
-				Logger.d(mLogSession, "gatt.writeDescriptor(" + CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID + ", value=0x00-00)");
+				Logger.d(mLogSession, "gatt.writeDescriptor(" + CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID + ", value=0x0000)");
 			}
 			return gatt.writeDescriptor(descriptor);
 		}
 		return false;
 	}
 
+	/**
+	 * Enqueues a new request. The request will be handled immediately if there is no operation in progress,
+	 * or automatically after the last enqueued one will finish.
+	 * <p>This method should be used to read and write data from the target device as it ensures that the last operation has finished
+	 * before a new one will be called.</p>
+	 * @param request new request to be performed
+	 * @return true if request has been enqueued, false if the device is not connected
+	 */
+	public boolean enqueue(final Request request) {
+		if (mGattCallback != null) {
+			// Add the new task to the end of the queue
+			mGattCallback.mTaskQueue.add(request);
+			mGattCallback.nextRequest();
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * On Android, when multiple BLE operations needs to be done, it is required to wait for a proper
+	 * {@link android.bluetooth.BluetoothGattCallback BluetoothGattCallback} callback before calling
+	 * another operation. In order to make BLE operations easier the BleManager allows to enqueue a request
+	 * containing all data necessary for a given operation. Requests are performed one after another until the
+	 * queue is empty. Use static methods from below to instantiate a request and then enqueue them using {@link #enqueue(Request)}.
+	 */
 	protected static final class Request {
 		private enum Type {
 			WRITE,
 			READ,
+			WRITE_DESCRIPTOR,
+			READ_DESCRIPTOR,
 			ENABLE_NOTIFICATIONS,
-			ENABLE_INDICATIONS
+			ENABLE_INDICATIONS,
+			READ_BATTERY_LEVEL,
+			ENABLE_BATTERY_LEVEL_NOTIFICATIONS,
+			DISABLE_BATTERY_LEVEL_NOTIFICATIONS,
+			ENABLE_SERVICE_CHANGED_INDICATIONS,
 		}
 
 		private final Type type;
 		private final BluetoothGattCharacteristic characteristic;
+		private final BluetoothGattDescriptor descriptor;
 		private final byte[] value;
+		private final int writeType;
+
+		private Request(final Type type) {
+			this.type = type;
+			this.characteristic = null;
+			this.descriptor = null;
+			this.value = null;
+			this.writeType = 0;
+		}
 
 		private Request(final Type type, final BluetoothGattCharacteristic characteristic) {
 			this.type = type;
 			this.characteristic = characteristic;
+			this.descriptor = null;
 			this.value = null;
+			this.writeType = 0;
 		}
 
-		private Request(final Type type, final BluetoothGattCharacteristic characteristic, final byte[] value) {
+		private Request(final Type type, final BluetoothGattCharacteristic characteristic, final int writeType, final byte[] value, final int offset, final int length) {
 			this.type = type;
 			this.characteristic = characteristic;
-			this.value = value;
+			this.descriptor = null;
+			this.value = copy(value, offset, length);
+			this.writeType = writeType;
 		}
 
+		private Request(final Type type, final BluetoothGattDescriptor descriptor) {
+			this.type = type;
+			this.characteristic = null;
+			this.descriptor = descriptor;
+			this.value = null;
+			this.writeType = 0;
+		}
+
+		private Request(final Type type, final BluetoothGattDescriptor descriptor, final byte[] value, final int offset, final int length) {
+			this.type = type;
+			this.characteristic = null;
+			this.descriptor = descriptor;
+			this.value = copy(value, offset, length);
+			this.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT;
+		}
+
+		private static byte[] copy(final byte[] value, final int offset, final int length) {
+			if (value == null || offset > value.length)
+				return null;
+			final int maxLength = Math.min(value.length - offset, length);
+			final byte[] copy = new byte[maxLength];
+			System.arraycopy(value, offset, copy, 0, maxLength);
+			return copy;
+		}
+
+		/**
+		 * Creates new Read Characteristic request. The request will not be executed if given characteristic
+		 * is null or does not have READ property. After the operation is complete a proper callback will be invoked.
+		 * @param characteristic characteristic to be read
+		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
+		 */
 		public static Request newReadRequest(final BluetoothGattCharacteristic characteristic) {
 			return new Request(Type.READ, characteristic);
 		}
 
+		/**
+		 * Creates new Write Characteristic request. The request will not be executed if given characteristic
+		 * is null or does not have WRITE property. After the operation is complete a proper callback will be invoked.
+		 * @param characteristic characteristic to be written
+		 * @param value value to be written. The array is copied into another buffer so it's safe to reuse the array again.
+		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
+		 */
 		public static Request newWriteRequest(final BluetoothGattCharacteristic characteristic, final byte[] value) {
-			return new Request(Type.WRITE, characteristic, value);
+			return new Request(Type.WRITE, characteristic, characteristic.getWriteType(), value, 0, value != null ? value.length : 0);
 		}
 
+		/**
+		 * Creates new Write Characteristic request. The request will not be executed if given characteristic
+		 * is null or does not have WRITE property. After the operation is complete a proper callback will be invoked.
+		 * @param characteristic characteristic to be written
+		 * @param value value to be written. The array is copied into another buffer so it's safe to reuse the array again.
+		 * @param writeType write type to be used, one of {@link BluetoothGattCharacteristic#WRITE_TYPE_DEFAULT}, {@link BluetoothGattCharacteristic#WRITE_TYPE_NO_RESPONSE}.
+		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
+		 */
+		public static Request newWriteRequest(final BluetoothGattCharacteristic characteristic, final byte[] value, final int writeType) {
+			return new Request(Type.WRITE, characteristic, writeType, value, 0, value != null ? value.length : 0);
+		}
+
+		/**
+		 * Creates new Write Characteristic request. The request will not be executed if given characteristic
+		 * is null or does not have WRITE property. After the operation is complete a proper callback will be invoked.
+		 * @param characteristic characteristic to be written
+		 * @param value value to be written. The array is copied into another buffer so it's safe to reuse the array again.
+		 * @param offset the offset from which value has to be copied
+		 * @param length number of bytes to be copied from the value buffer
+		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
+		 */
+		public static Request newWriteRequest(final BluetoothGattCharacteristic characteristic, final byte[] value, final int offset, final int length) {
+			return new Request(Type.WRITE, characteristic, characteristic.getWriteType(), value, offset, length);
+		}
+
+		/**
+		 * Creates new Write Characteristic request. The request will not be executed if given characteristic
+		 * is null or does not have WRITE property. After the operation is complete a proper callback will be invoked.
+		 * @param characteristic characteristic to be written
+		 * @param value value to be written. The array is copied into another buffer so it's safe to reuse the array again.
+		 * @param offset the offset from which value has to be copied
+		 * @param length number of bytes to be copied from the value buffer
+		 * @param writeType write type to be used, one of {@link BluetoothGattCharacteristic#WRITE_TYPE_DEFAULT}, {@link BluetoothGattCharacteristic#WRITE_TYPE_NO_RESPONSE}.
+		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
+		 */
+		public static Request newWriteRequest(final BluetoothGattCharacteristic characteristic, final byte[] value, final int offset, final int length, final int writeType) {
+			return new Request(Type.WRITE, characteristic, writeType, value, offset, length);
+		}
+
+		/**
+		 * Creates new Read Descriptor request. The request will not be executed if given descriptor
+		 * is null. After the operation is complete a proper callback will be invoked.
+		 * @param descriptor descriptor to be read
+		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
+		 */
+		public static Request newReadRequest(final BluetoothGattDescriptor descriptor) {
+			return new Request(Type.READ_DESCRIPTOR, descriptor);
+		}
+
+		/**
+		 * Creates new Write Descriptor request. The request will not be executed if given descriptor
+		 * is null. After the operation is complete a proper callback will be invoked.
+		 * @param descriptor descriptor to be written
+		 * @param value value to be written. The array is copied into another buffer so it's safe to reuse the array again.
+		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
+		 */
+		public static Request newWriteRequest(final BluetoothGattDescriptor descriptor, final byte[] value) {
+			return new Request(Type.WRITE_DESCRIPTOR, descriptor, value, 0, value != null ? value.length : 0);
+		}
+
+		/**
+		 * Creates new Write Descriptor request. The request will not be executed if given descriptor
+		 * is null. After the operation is complete a proper callback will be invoked.
+		 * @param descriptor descriptor to be written
+		 * @param value value to be written. The array is copied into another buffer so it's safe to reuse the array again.
+		 * @param offset the offset from which value has to be copied
+		 * @param length number of bytes to be copied from the value buffer
+		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
+		 */
+		public static Request newWriteRequest(final BluetoothGattDescriptor descriptor, final byte[] value, final int offset, final int length) {
+			return new Request(Type.WRITE_DESCRIPTOR, descriptor, value, offset, length);
+		}
+
+		/**
+		 * Creates new Enable Notification request. The request will not be executed if given characteristic
+		 * is null, does not have NOTIFY property or the CCCD. After the operation is complete a proper callback will be invoked.
+		 * @param characteristic characteristic to have notifications enabled
+		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
+		 */
 		public static Request newEnableNotificationsRequest(final BluetoothGattCharacteristic characteristic) {
 			return new Request(Type.ENABLE_NOTIFICATIONS, characteristic);
 		}
 
+		/**
+		 * Creates new Enable Indications request. The request will not be executed if given characteristic
+		 * is null, does not have INDICATE property or the CCCD. After the operation is complete a proper callback will be invoked.
+		 * @param characteristic characteristic to have indications enabled
+		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
+		 */
 		public static Request newEnableIndicationsRequest(final BluetoothGattCharacteristic characteristic) {
 			return new Request(Type.ENABLE_INDICATIONS, characteristic);
+		}
+
+		/**
+		 * Reads the first found Battery Level characteristic value from the first found Battery Service.
+		 * If any of them is not found, or the characteristic does not have the READ property this operation will not execute.
+		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
+		 */
+		public static Request newReadBatteryLevelRequest() {
+			return new Request(Type.READ_BATTERY_LEVEL); // the first Battery Level char from the first Battery Service is used
+		}
+
+		/**
+		 * Enables notifications on the first found Battery Level characteristic from the first found Battery Service.
+		 * If any of them is not found, or the characteristic does not have the NOTIFY property this operation will not execute.
+		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
+		 */
+		public static Request newEnableBatteryLevelNotificationsRequest() {
+			return new Request(Type.ENABLE_BATTERY_LEVEL_NOTIFICATIONS); // the first Battery Level char from the first Battery Service is used
+		}
+
+		/**
+		 * Disables notifications on the first found Battery Level characteristic from the first found Battery Service.
+		 * If any of them is not found, or the characteristic does not have the NOTIFY property this operation will not execute.
+		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
+		 */
+		public static Request newDisableBatteryLevelNotificationsRequest() {
+			return new Request(Type.DISABLE_BATTERY_LEVEL_NOTIFICATIONS); // the first Battery Level char from the first Battery Service is used
+		}
+
+		/**
+		 * Enables indications on Service Changed characteristic if such exists in the Generic Attribute service.
+		 * It is required to enable those notifications on bonded devices on older Android versions to be
+		 * informed about attributes changes. Android 7+ (or 6+) handles this automatically and no action is required.
+		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
+		 */
+		private static Request newEnableServiceChangedIndicationsRequest() {
+			return new Request(Type.ENABLE_SERVICE_CHANGED_INDICATIONS); // the only Service Changed char is used (if such exists)
 		}
 	}
 
 	protected abstract class BleManagerGattCallback extends BluetoothGattCallback {
-		private Queue<Request> mInitQueue;
+		private final static String ERROR_CONNECTION_STATE_CHANGE = "Error on connection state change";
+		private final static String ERROR_DISCOVERY_SERVICE = "Error on discovering services";
+		private final static String ERROR_AUTH_ERROR_WHILE_BONDED = "Phone has lost bonding information";
+		private final static String ERROR_READ_CHARACTERISTIC = "Error on reading characteristic";
+		private final static String ERROR_WRITE_CHARACTERISTIC = "Error on writing characteristic";
+		private final static String ERROR_READ_DESCRIPTOR = "Error on reading descriptor";
+		private final static String ERROR_WRITE_DESCRIPTOR = "Error on writing descriptor";
+
+		private final Queue<Request> mTaskQueue = new LinkedList<>();
+		private Deque<Request> mInitQueue;
 		private boolean mInitInProgress;
+		private boolean mOperationInProgress;
 
 		/**
 		 * This method should return <code>true</code> when the gatt device supports the required services.
@@ -613,7 +873,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 		 * @param gatt the gatt device with services discovered
 		 * @return the queue of requests
 		 */
-		protected abstract Queue<Request> initGatt(final BluetoothGatt gatt);
+		protected abstract Deque<Request> initGatt(final BluetoothGatt gatt);
 
 		/**
 		 * Called then the initialization queue is complete.
@@ -630,9 +890,8 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 		/**
 		 * Callback reporting the result of a characteristic read operation.
 		 *
-		 * @param gatt           GATT client invoked {@link BluetoothGatt#readCharacteristic}
-		 * @param characteristic Characteristic that was read from the associated
-		 *                       remote device.
+		 * @param gatt GATT client
+		 * @param characteristic Characteristic that was read from the associated remote device.
 		 */
 		protected void onCharacteristicRead(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
 			// do nothing
@@ -640,25 +899,68 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 
 		/**
 		 * Callback indicating the result of a characteristic write operation.
-		 * <p/>
 		 * <p>If this callback is invoked while a reliable write transaction is
 		 * in progress, the value of the characteristic represents the value
 		 * reported by the remote device. An application should compare this
 		 * value to the desired value to be written. If the values don't match,
 		 * the application must abort the reliable write transaction.
 		 *
-		 * @param gatt           GATT client invoked {@link BluetoothGatt#writeCharacteristic}
-		 * @param characteristic Characteristic that was written to the associated
-		 *                       remote device.
+		 * @param gatt GATT client
+		 * @param characteristic Characteristic that was written to the associated remote device.
 		 */
 		protected void onCharacteristicWrite(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
 			// do nothing
 		}
 
+		/**
+		 * Callback reporting the result of a descriptor read operation.
+		 *
+		 * @param gatt GATT client
+		 * @param descriptor Descriptor that was read from the associated remote device.
+		 */
+		protected void onDescriptorRead(final BluetoothGatt gatt, final BluetoothGattDescriptor descriptor) {
+			// do nothing
+		}
+
+		/**
+		 * Callback indicating the result of a descriptor write operation.
+		 * <p>If this callback is invoked while a reliable write transaction is in progress,
+		 * the value of the characteristic represents the value reported by the remote device.
+		 * An application should compare this value to the desired value to be written.
+		 * If the values don't match, the application must abort the reliable write transaction.
+		 *
+		 * @param gatt GATT client
+		 * @param descriptor Descriptor that was written to the associated remote device.
+		 */
+		protected void onDescriptorWrite(final BluetoothGatt gatt, final BluetoothGattDescriptor descriptor) {
+			// do nothing
+		}
+
+		/**
+		 * Callback reporting the value of Battery Level characteristic which could have
+		 * been received by Read or Notify operations.
+		 *
+		 * @param gatt GATT client
+		 * @param value the battery value in percent
+		 */
+		protected void onBatteryValueReceived(final BluetoothGatt gatt, final int value) {
+			// do nothing
+		}
+
+		/**
+		 * Callback indicating a notification has been received.
+		 * @param gatt GATT client
+		 * @param characteristic Characteristic from which the notification came.
+		 */
 		protected void onCharacteristicNotified(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
 			// do nothing
 		}
 
+		/**
+		 * Callback indicating an indication has been received.
+		 * @param gatt GATT client
+		 * @param characteristic Characteristic from which the indication came.
+		 */
 		protected void onCharacteristicIndicated(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
 			// do nothing
 		}
@@ -676,6 +978,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 				// Notify the parent activity/service
 				Logger.i(mLogSession, "Connected to " + gatt.getDevice().getAddress());
 				mConnected = true;
+				mConnectionState = BluetoothGatt.STATE_CONNECTED;
 				mCallbacks.onDeviceConnected(gatt.getDevice());
 
 				/*
@@ -710,8 +1013,9 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 					if (status != BluetoothGatt.GATT_SUCCESS)
 						Logger.w(mLogSession, "Error: (0x" + Integer.toHexString(status) + "): " + GattError.parseConnectionError(status));
 
-					onDeviceDisconnected();
 					mConnected = false;
+					mConnectionState = BluetoothGatt.STATE_DISCONNECTED;
+					mOperationInProgress = true; // no more calls are possible
 					if (mUserDisconnected) {
 						Logger.i(mLogSession, "Disconnected");
 						mCallbacks.onDeviceDisconnected(gatt.getDevice());
@@ -748,15 +1052,23 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 					mInitInProgress = true;
 					mInitQueue = initGatt(gatt);
 
-					// When the device is bonded and has Service Changed characteristic, the indications must be enabled first.
-					// In case this method returns true we have to continue in the onDescriptorWrite callback
-					if (ensureServiceChangedEnabled(gatt))
-						return;
+					// Before we start executing the initialization queue some other tasks need to be done.
+					if (mInitQueue == null)
+						mInitQueue = new LinkedList<>();
 
-					// We have discovered services, let's start by reading the battery level value. If the characteristic is not readable, try to enable notifications.
-					// If there is no Battery service, proceed with the initialization queue.
-					if (!readBatteryLevel())
-						nextRequest();
+					// Note, that operations are added in reverse order to the front of the queue.
+
+					// 3. Enable Battery Level notifications if required (if this char. does not exist, this operation will be skipped)
+					if (mCallbacks.shouldEnableBatteryLevelNotifications(gatt.getDevice()))
+						mInitQueue.addFirst(Request.newEnableBatteryLevelNotificationsRequest());
+					// 2. Read Battery Level characteristic (if such does not exist, this will be skipped)
+					mInitQueue.addFirst(Request.newReadBatteryLevelRequest());
+					// 1. On devices running Android 4.3-6.0 the Service Changed characteristic needs to be enabled by the app (for bonded devices)
+					if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+						mInitQueue.addFirst(Request.newEnableServiceChangedIndicationsRequest());
+
+					mOperationInProgress = false;
+					nextRequest();
 				} else {
 					Logger.w(mLogSession, "Device is not supported");
 					mCallbacks.onDeviceNotSupported(gatt.getDevice());
@@ -776,17 +1088,15 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 				if (isBatteryLevelCharacteristic(characteristic)) {
 					final int batteryValue = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
 					Logger.a(mLogSession, "Battery level received: " + batteryValue + "%");
+					mBatteryValue = batteryValue;
+					onBatteryValueReceived(gatt, batteryValue);
 					mCallbacks.onBatteryValueReceived(gatt.getDevice(), batteryValue);
-
-					// The Battery Level value has been read. Let's try to enable Battery Level notifications.
-					// If the Battery Level characteristic does not have the NOTIFY property, proceed with the initialization queue.
-					if (!setBatteryNotifications(true))
-						nextRequest();
 				} else {
 					// The value has been read. Notify the manager and proceed with the initialization queue.
 					onCharacteristicRead(gatt, characteristic);
-					nextRequest();
 				}
+				mOperationInProgress = false;
+				nextRequest();
 			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
 					// This should never happen but it used to: http://stackoverflow.com/a/20093695/2115352
@@ -802,9 +1112,10 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 		@Override
 		public final void onCharacteristicWrite(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic, final int status) {
 			if (status == BluetoothGatt.GATT_SUCCESS) {
-				Logger.i(mLogSession, "Data written to " + characteristic.getUuid() + ", value: " + ParserUtils.parse(characteristic.getValue()));
+				Logger.i(mLogSession, "Data written to " + characteristic.getUuid() + ", value: " + ParserUtils.parse(characteristic));
 				// The value has been written. Notify the manager and proceed with the initialization queue.
 				onCharacteristicWrite(gatt, characteristic);
+				mOperationInProgress = false;
 				nextRequest();
 			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
@@ -813,8 +1124,29 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 					mCallbacks.onError(gatt.getDevice(), ERROR_AUTH_ERROR_WHILE_BONDED, status);
 				}
 			} else {
-				DebugLogger.e(TAG, "onCharacteristicRead error " + status);
-				onError(gatt.getDevice(), ERROR_READ_CHARACTERISTIC, status);
+				DebugLogger.e(TAG, "onCharacteristicWrite error " + status);
+				onError(gatt.getDevice(), ERROR_WRITE_CHARACTERISTIC, status);
+			}
+		}
+
+		@Override
+		public void onDescriptorRead(final BluetoothGatt gatt, final BluetoothGattDescriptor descriptor, final int status) {
+			if (status == BluetoothGatt.GATT_SUCCESS) {
+				Logger.i(mLogSession, "Read Response received from descr. " + descriptor.getUuid() + ", value: " + ParserUtils.parse(descriptor));
+
+				// The value has been read. Notify the manager and proceed with the initialization queue.
+				onDescriptorRead(gatt, descriptor);
+				mOperationInProgress = false;
+				nextRequest();
+			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
+				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
+					// This should never happen but it used to: http://stackoverflow.com/a/20093695/2115352
+					DebugLogger.w(TAG, ERROR_AUTH_ERROR_WHILE_BONDED);
+					mCallbacks.onError(gatt.getDevice(), ERROR_AUTH_ERROR_WHILE_BONDED, status);
+				}
+			} else {
+				DebugLogger.e(TAG, "onDescriptorRead error " + status);
+				onError(gatt.getDevice(), ERROR_READ_DESCRIPTOR, status);
 			}
 		}
 
@@ -825,18 +1157,39 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 
 				if (isServiceChangedCCCD(descriptor)) {
 					Logger.a(mLogSession, "Service Changed notifications enabled");
-					if (!readBatteryLevel())
-						nextRequest();
 				} else if (isBatteryLevelCCCD(descriptor)) {
 					final byte[] value = descriptor.getValue();
-					if (value != null && value.length > 0 && value[0] == 0x01) {
-						Logger.a(mLogSession, "Battery Level notifications enabled");
-						nextRequest();
-					} else
-						Logger.a(mLogSession, "Battery Level notifications disabled");
+					if (value != null && value.length == 2 && value[1] == 0x00) {
+						if (value[0] == 0x01) {
+							Logger.a(mLogSession, "Battery Level notifications enabled");
+						} else {
+							Logger.a(mLogSession, "Battery Level notifications disabled");
+						}
+					} else {
+						onDescriptorWrite(gatt, descriptor);
+					}
+				} else if (isCCCD(descriptor)) {
+					final byte[] value = descriptor.getValue();
+					if (value != null && value.length == 2 && value[1] == 0x00) {
+						switch (value[0]) {
+							case 0x00:
+								Logger.a(mLogSession, "Notifications and indications disabled");
+								break;
+							case 0x01:
+								Logger.a(mLogSession, "Notifications enabled");
+								break;
+							case 0x02:
+								Logger.a(mLogSession, "Indications enabled");
+								break;
+						}
+					} else {
+						onDescriptorWrite(gatt, descriptor);
+					}
 				} else {
-					nextRequest();
+					onDescriptorWrite(gatt, descriptor);
 				}
+				mOperationInProgress = false;
+				nextRequest();
 			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
 					// This should never happen but it used to: http://stackoverflow.com/a/20093695/2115352
@@ -857,6 +1210,8 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 				Logger.i(mLogSession, "Notification received from " + characteristic.getUuid() + ", value: " + data);
 				final int batteryValue = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
 				Logger.a(mLogSession, "Battery level received: " + batteryValue + "%");
+				mBatteryValue = batteryValue;
+				onBatteryValueReceived(gatt, batteryValue);
 				mCallbacks.onBatteryValueReceived(gatt.getDevice(), batteryValue);
 			} else {
 				final BluetoothGattDescriptor cccd = characteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
@@ -873,43 +1228,138 @@ public abstract class BleManager<E extends BleManagerCallbacks> {
 		}
 
 		/**
-		 * Executes the next initialization request. If the last element from the queue has been executed a {@link #onDeviceReady()} callback is called.
+		 * Executes the next request. If the last element from the initialization queue has been executed
+		 * the {@link #onDeviceReady()} callback is called.
 		 */
 		private void nextRequest() {
-			final Queue<Request> requests = mInitQueue;
+			if (mOperationInProgress)
+				return;
 
-			// Get the first request from the queue
-			final Request request = requests != null ? requests.poll() : null;
+			// Get the first request from the init queue
+			Request request = mInitQueue != null ? mInitQueue.poll() : null;
 
-			// Are we done?
+			// Are we done with initializing?
 			if (request == null) {
 				if (mInitInProgress) {
+					mInitQueue = null; // release the queue
 					mInitInProgress = false;
 					onDeviceReady();
 				}
-				return;
+				// If so, we can continue with the task queue
+				request = mTaskQueue.poll();
+				if (request == null) {
+					// Nothing to be done for now
+					return;
+				}
 			}
 
+			mOperationInProgress = true;
+			boolean result = false;
 			switch (request.type) {
 				case READ: {
-					readCharacteristic(request.characteristic);
+					result = internalReadCharacteristic(request.characteristic);
 					break;
 				}
 				case WRITE: {
 					final BluetoothGattCharacteristic characteristic = request.characteristic;
 					characteristic.setValue(request.value);
-					writeCharacteristic(characteristic);
+					characteristic.setWriteType(request.writeType);
+					result = internalWriteCharacteristic(characteristic);
+					break;
+				}
+				case READ_DESCRIPTOR: {
+					result = internalReadDescriptor(request.descriptor);
+					break;
+				}
+				case WRITE_DESCRIPTOR: {
+					final BluetoothGattDescriptor descriptor = request.descriptor;
+					descriptor.setValue(request.value);
+					result = internalWriteDescriptor(descriptor);
 					break;
 				}
 				case ENABLE_NOTIFICATIONS: {
-					enableNotifications(request.characteristic);
+					result = internalEnableNotifications(request.characteristic);
 					break;
 				}
 				case ENABLE_INDICATIONS: {
-					enableIndications(request.characteristic);
+					result = internalEnableIndications(request.characteristic);
+					break;
+				}
+				case READ_BATTERY_LEVEL: {
+					result = internalReadBatteryLevel();
+					break;
+				}
+				case ENABLE_BATTERY_LEVEL_NOTIFICATIONS: {
+					result = internalSetBatteryNotifications(true);
+					break;
+				}
+				case DISABLE_BATTERY_LEVEL_NOTIFICATIONS: {
+					result = internalSetBatteryNotifications(false);
+					break;
+				}
+				case ENABLE_SERVICE_CHANGED_INDICATIONS: {
+					result = ensureServiceChangedEnabled();
 					break;
 				}
 			}
+			// The result may be false if given characteristic or descriptor were not found on the device.
+			// In that case, proceed with next operation and ignore the one that failed.
+			if (!result) {
+				mOperationInProgress = false;
+				nextRequest();
+			}
+		}
+
+		/**
+		 * Returns true if this descriptor is from the Service Changed characteristic.
+		 *
+		 * @param descriptor the descriptor to be checked
+		 * @return true if the descriptor belongs to the Service Changed characteristic
+		 */
+		private boolean isServiceChangedCCCD(final BluetoothGattDescriptor descriptor) {
+			if (descriptor == null)
+				return false;
+
+			return SERVICE_CHANGED_CHARACTERISTIC.equals(descriptor.getCharacteristic().getUuid());
+		}
+
+		/**
+		 * Returns true if the characteristic is the Battery Level characteristic.
+		 *
+		 * @param characteristic the characteristic to be checked
+		 * @return true if the characteristic is the Battery Level characteristic.
+		 */
+		private boolean isBatteryLevelCharacteristic(final BluetoothGattCharacteristic characteristic) {
+			if (characteristic == null)
+				return false;
+
+			return BATTERY_LEVEL_CHARACTERISTIC.equals(characteristic.getUuid());
+		}
+
+		/**
+		 * Returns true if this descriptor is from the Battery Level characteristic.
+		 *
+		 * @param descriptor the descriptor to be checked
+		 * @return true if the descriptor belongs to the Battery Level characteristic
+		 */
+		private boolean isBatteryLevelCCCD(final BluetoothGattDescriptor descriptor) {
+			if (descriptor == null)
+				return false;
+
+			return BATTERY_LEVEL_CHARACTERISTIC.equals(descriptor.getCharacteristic().getUuid());
+		}
+
+		/**
+		 * Returns true if this descriptor is a Client Characteristic Configuration descriptor (CCCD).
+		 *
+		 * @param descriptor the descriptor to be checked
+		 * @return true if the descriptor is a CCCD
+		 */
+		private boolean isCCCD(final BluetoothGattDescriptor descriptor) {
+			if (descriptor == null)
+				return false;
+
+			return CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID.equals(descriptor.getUuid());
 		}
 	}
 

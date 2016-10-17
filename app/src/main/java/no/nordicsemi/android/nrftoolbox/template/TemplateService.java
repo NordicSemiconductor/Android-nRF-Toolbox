@@ -107,12 +107,6 @@ public class TemplateService extends BleProfileService implements TemplateManage
 	}
 
 	@Override
-	protected void onServiceStarted() {
-		// logger is now available. Assign it to the manager
-		mManager.setLogger(getLogSession());
-	}
-
-	@Override
 	public void onSampleValueReceived(final BluetoothDevice device, final int value) {
 		final Intent broadcast = new Intent(BROADCAST_TEMPLATE_MEASUREMENT);
 		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());

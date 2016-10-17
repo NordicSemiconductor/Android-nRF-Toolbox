@@ -87,6 +87,18 @@ public interface BleManagerCallbacks {
 	void onDeviceReady(final BluetoothDevice device);
 
 	/**
+	 * This method should return true if Battery Level notifications should be enabled on the target device.
+	 * If there is no Battery Service, or the Battery Level characteristic does not have NOTIFY property,
+	 * this method will not be called for this device.
+	 * <p>This method may return true only if an activity is bound to the service (to display the information
+	 * to the user), always (e.g. if critical battery level is reported using notifications) or never, if
+	 * such information is not important or the manager wants to control Battery Level notifications on its own.</p>
+	 * @param device target device
+	 * @return true to enabled battery level notifications after connecting to the device, false otherwise
+	 */
+	boolean shouldEnableBatteryLevelNotifications(final BluetoothDevice device);
+
+	/**
 	 * Called when battery value has been received from the device.
 	 *
 	 * @param value

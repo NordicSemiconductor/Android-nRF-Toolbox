@@ -121,12 +121,6 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 		createNotification(R.string.rsc_notification_connected_message, 0);
 	}
 
-	@Override
-	protected void onServiceStarted() {
-		// logger is now available. Assign it to the manager
-		mManager.setLogger(getLogSession());
-	}
-
 	private final Runnable mUpdateStridesTask = new Runnable() {
 		@Override
 		public void run() {

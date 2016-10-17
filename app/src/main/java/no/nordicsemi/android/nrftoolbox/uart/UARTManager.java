@@ -29,8 +29,8 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Deque;
 import java.util.LinkedList;
-import java.util.Queue;
 import java.util.UUID;
 
 import no.nordicsemi.android.log.Logger;
@@ -65,7 +65,7 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 
 		@Override
-		protected Queue<Request> initGatt(final BluetoothGatt gatt) {
+		protected Deque<Request> initGatt(final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
 			requests.add(Request.newEnableNotificationsRequest(mTXCharacteristic));
 			return requests;
@@ -116,11 +116,8 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 				mOutgoingBuffer = null;
 			} else { // Otherwise...
 				final int length = Math.min(buffer.length - mBufferOffset, MAX_PACKET_SIZE);
-				final byte[] data = new byte[length]; // We send at most 20 bytes
-				System.arraycopy(buffer, mBufferOffset, data, 0, length);
+				enqueue(Request.newWriteRequest(mRXCharacteristic, buffer, mBufferOffset, length));
 				mBufferOffset += length;
-				mRXCharacteristic.setValue(data);
-				writeCharacteristic(mRXCharacteristic);
 			}
 		}
 
@@ -158,15 +155,12 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 
 			if (!writeRequest) { // no WRITE REQUEST property
 				final int length = Math.min(buffer.length, MAX_PACKET_SIZE);
-				final byte[] data = new byte[length]; // We send at most 20 bytes
-				System.arraycopy(buffer, 0, data, 0, length);
 				mBufferOffset += length;
-				mRXCharacteristic.setValue(data);
-			} else { // there is WRITE REQUEST property
-				mRXCharacteristic.setValue(buffer);
+				enqueue(Request.newWriteRequest(mRXCharacteristic, buffer, 0, length));
+			} else { // there is WRITE REQUEST property, let's try Long Write
 				mBufferOffset = buffer.length;
+				enqueue(Request.newWriteRequest(mRXCharacteristic, buffer, 0, buffer.length));
 			}
-			writeCharacteristic(mRXCharacteristic);
 		}
 	}
 }

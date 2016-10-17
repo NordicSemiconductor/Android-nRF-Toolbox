@@ -52,9 +52,9 @@ import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
 public abstract class BleProfileActivity extends AppCompatActivity implements BleManagerCallbacks, ScannerFragment.OnDeviceSelectedListener {
 	private static final String TAG = "BaseProfileActivity";
 
-	private static final String CONNECTION_STATUS = "connection_status";
-	private static final String DEVICE_NAME = "device_name";
-	private static final int REQUEST_ENABLE_BT = 2;
+	private static final String SIS_CONNECTION_STATUS = "connection_status";
+	private static final String SIS_DEVICE_NAME = "device_name";
+	protected static final int REQUEST_ENABLE_BT = 2;
 
 	private BleManager<? extends BleManagerCallbacks> mBleManager;
 
@@ -82,12 +82,18 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 		 * broadcast listeners, local broadcast listeners (see support.v4 library), or messages. See the Proximity profile for Service approach.
 		 */
 		mBleManager = initializeManager();
+
+		// In onInitialize method a final class may register local broadcast receivers that will listen for events from the service
 		onInitialize(savedInstanceState);
+		// The onCreateView class should... create the view
 		onCreateView(savedInstanceState);
 
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
-        setSupportActionBar(toolbar);
+		final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+		setSupportActionBar(toolbar);
 
+		// Common nRF Toolbox view references are obtained here
+		setUpView();
+		// View is ready to be used
 		onViewCreated(savedInstanceState);
 	}
 
@@ -101,18 +107,24 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	/**
 	 * Called from {@link #onCreate(Bundle)}. This method should build the activity UI, f.e. using {@link #setContentView(int)}. Use to obtain references to
 	 * views. Connect/Disconnect button, the device name view and battery level view are manager automatically.
-	 * 
-	 * @param savedInstanceState
-	 *            contains the data it most recently supplied in {@link #onSaveInstanceState(Bundle)}. Note: <b>Otherwise it is null</b>.
+	 *
+	 * @param savedInstanceState contains the data it most recently supplied in {@link #onSaveInstanceState(Bundle)}. Note: <b>Otherwise it is null</b>.
 	 */
 	protected abstract void onCreateView(final Bundle savedInstanceState);
 
 	/**
 	 * Called after the view has been created.
-	 * 
-	 * @param savedInstanceState
+	 *
+	 * @param savedInstanceState contains the data it most recently supplied in {@link #onSaveInstanceState(Bundle)}. Note: <b>Otherwise it is null</b>.
 	 */
-	protected final void onViewCreated(final Bundle savedInstanceState) {
+	protected void onViewCreated(final Bundle savedInstanceState) {
+		// empty default implementation
+	}
+
+	/**
+	 * Called after the view and the toolbar has been created.
+	 */
+	protected final void setUpView() {
 		// set GUI
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		mConnectButton = (Button) findViewById(R.id.action_connect);
@@ -129,15 +141,15 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	@Override
 	protected void onSaveInstanceState(final Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putBoolean(CONNECTION_STATUS, mDeviceConnected);
-		outState.putString(DEVICE_NAME, mDeviceName);
+		outState.putBoolean(SIS_CONNECTION_STATUS, mDeviceConnected);
+		outState.putString(SIS_DEVICE_NAME, mDeviceName);
 	}
 
 	@Override
 	protected void onRestoreInstanceState(@NonNull final Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
-		mDeviceConnected = savedInstanceState.getBoolean(CONNECTION_STATUS);
-		mDeviceName = savedInstanceState.getString(DEVICE_NAME);
+		mDeviceConnected = savedInstanceState.getBoolean(SIS_CONNECTION_STATUS);
+		mDeviceName = savedInstanceState.getString(SIS_DEVICE_NAME);
 
 		if (mDeviceConnected) {
 			mConnectButton.setText(R.string.action_disconnect);
@@ -154,9 +166,8 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 
 	/**
 	 * Use this method to handle menu actions other than home and about.
-	 * 
-	 * @param itemId
-	 *            the menu item id
+	 *
+	 * @param itemId the menu item id
 	 * @return <code>true</code> if action has been handled
 	 */
 	protected boolean onOptionsItemSelected(final int itemId) {
@@ -168,15 +179,15 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	public boolean onOptionsItemSelected(final MenuItem item) {
 		final int id = item.getItemId();
 		switch (id) {
-		case android.R.id.home:
-			onBackPressed();
-			break;
-		case R.id.action_about:
-			final AppHelpFragment fragment = AppHelpFragment.getInstance(getAboutTextId());
-			fragment.show(getSupportFragmentManager(), "help_fragment");
-			break;
-		default:
-			return onOptionsItemSelected(id);
+			case android.R.id.home:
+				onBackPressed();
+				break;
+			case R.id.action_about:
+				final AppHelpFragment fragment = AppHelpFragment.getInstance(getAboutTextId());
+				fragment.show(getSupportFragmentManager(), "help_fragment");
+				break;
+			default:
+				return onOptionsItemSelected(id);
 		}
 		return true;
 	}
@@ -229,7 +240,6 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 		mBleManager.setLogger(mLogSession);
 		mDeviceNameView.setText(name != null ? name : getString(R.string.not_available));
 		mConnectButton.setText(R.string.action_connecting);
-		mConnectButton.setEnabled(false);
 		mBleManager.connect(device);
 	}
 
@@ -250,7 +260,6 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 			@Override
 			public void run() {
 				mConnectButton.setText(R.string.action_disconnect);
-				mConnectButton.setEnabled(true);
 			}
 		});
 	}
@@ -270,7 +279,6 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 				mConnectButton.setText(R.string.action_connect);
 				mDeviceNameView.setText(getDefaultDeviceName());
 				mBatteryLevelView.setText(R.string.not_available);
-				mConnectButton.setEnabled(true);
 			}
 		});
 	}
@@ -281,21 +289,20 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				mConnectButton.setText(R.string.action_connect);
-				mDeviceNameView.setText(getDefaultDeviceName());
-				mBatteryLevelView.setText(R.string.not_available);
+				if (mBatteryLevelView != null)
+					mBatteryLevelView.setText(R.string.not_available);
 			}
 		});
 	}
 
 	@Override
-	public void onBatteryValueReceived(final BluetoothDevice device, final int value) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				mBatteryLevelView.setText(getString(R.string.battery, value));
-			}
-		});
+	public void onServicesDiscovered(final BluetoothDevice device, boolean optionalServicesFound) {
+		// this may notify user or show some views
+	}
+
+	@Override
+	public void onDeviceReady(final BluetoothDevice device) {
+		// empty default implementation
 	}
 
 	@Override
@@ -306,6 +313,23 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	@Override
 	public void onBonded(final BluetoothDevice device) {
 		showToast(R.string.bonded);
+	}
+
+	@Override
+	public boolean shouldEnableBatteryLevelNotifications(final BluetoothDevice device) {
+		// Yes, we want battery level updates
+		return true;
+	}
+
+	@Override
+	public void onBatteryValueReceived(final BluetoothDevice device, final int value) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (mBatteryLevelView != null)
+					mBatteryLevelView.setText(getString(R.string.battery, value));
+			}
+		});
 	}
 
 	@Override
@@ -321,9 +345,8 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 
 	/**
 	 * Shows a message as a Toast notification. This method is thread safe, you can call it from any thread
-	 * 
-	 * @param message
-	 *            a message to be shown
+	 *
+	 * @param message a message to be shown
 	 */
 	protected void showToast(final String message) {
 		runOnUiThread(new Runnable() {
@@ -336,9 +359,8 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 
 	/**
 	 * Shows a message as a Toast notification. This method is thread safe, you can call it from any thread
-	 * 
-	 * @param messageResId
-	 *            an resource id of the message to be shown
+	 *
+	 * @param messageResId an resource id of the message to be shown
 	 */
 	protected void showToast(final int messageResId) {
 		runOnUiThread(new Runnable() {
@@ -365,7 +387,7 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 
 	/**
 	 * Initializes the Bluetooth Low Energy manager. A manager is used to communicate with profile's services.
-	 * 
+	 *
 	 * @return the manager that was created
 	 */
 	protected abstract BleManager<? extends BleManagerCallbacks> initializeManager();
@@ -378,14 +400,14 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	/**
 	 * Returns the default device name resource id. The real device name is obtained when connecting to the device. This one is used when device has
 	 * disconnected.
-	 * 
+	 *
 	 * @return the default device name resource id
 	 */
 	protected abstract int getDefaultDeviceName();
 
 	/**
 	 * Returns the string resource id that will be shown in About box
-	 * 
+	 *
 	 * @return the about resource id
 	 */
 	protected abstract int getAboutTextId();
@@ -393,17 +415,16 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	/**
 	 * The UUID filter is used to filter out available devices that does not have such UUID in their advertisement packet. See also:
 	 * {@link #isChangingConfigurations()}.
-	 * 
+	 *
 	 * @return the required UUID or <code>null</code>
 	 */
 	protected abstract UUID getFilterUUID();
 
 	/**
 	 * Shows the scanner fragment.
-	 * 
-	 * @param filter
-	 *            the UUID filter used to filter out available devices. The fragment will always show all bonded devices as there is no information about their
-	 *            services
+	 *
+	 * @param filter               the UUID filter used to filter out available devices. The fragment will always show all bonded devices as there is no information about their
+	 *                             services
 	 * @see #getFilterUUID()
 	 */
 	private void showDeviceScanningDialog(final UUID filter) {
@@ -414,6 +435,15 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 				dialog.show(getSupportFragmentManager(), "scan_fragment");
 			}
 		});
+	}
+
+	/**
+	 * Returns the log session. Log session is created when the device was selected using the {@link ScannerFragment} and released when user press DISCONNECT.
+	 *
+	 * @return the logger session or <code>null</code>
+	 */
+	protected ILogSession getLogSession() {
+		return mLogSession;
 	}
 
 	private void ensureBLESupported() {

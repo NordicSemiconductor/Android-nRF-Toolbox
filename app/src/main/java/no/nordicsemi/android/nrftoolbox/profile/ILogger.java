@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Nordic Semiconductor
+ * Copyright (c) 2016, Nordic Semiconductor
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -20,48 +20,24 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.nrftoolbox.utility;
+package no.nordicsemi.android.nrftoolbox.profile;
 
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
+import android.support.annotation.StringRes;
 
-public class ParserUtils {
-	final private static char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+public interface ILogger {
 
+	/**
+	 * Logs the given message with given log level into the all managed devices' log session.
+	 * @param level the log level
+	 * @param message the message to be logged
+	 */
+	void log(final int level, final String message);
 
-	public static String parse(final BluetoothGattCharacteristic characteristic) {
-		return parse(characteristic.getValue());
-	}
-
-	public static String parse(final BluetoothGattDescriptor descriptor) {
-		return parse(descriptor.getValue());
-	}
-
-	public static String parse(final byte[] data) {
-		if (data == null || data.length == 0)
-			return "";
-
-		final char[] out = new char[data.length * 3 - 1];
-		for (int j = 0; j < data.length; j++) {
-			int v = data[j] & 0xFF;
-			out[j * 3] = HEX_ARRAY[v >>> 4];
-			out[j * 3 + 1] = HEX_ARRAY[v & 0x0F];
-			if (j != data.length - 1)
-				out[j * 3 + 2] = '-';
-		}
-		return "(0x) " + new String(out);
-	}
-
-	public static String parseDebug(final byte[] data) {
-		if (data == null || data.length == 0)
-			return "";
-
-		final char[] out = new char[data.length * 2];
-		for (int j = 0; j < data.length; j++) {
-			int v = data[j] & 0xFF;
-			out[j * 2] = HEX_ARRAY[v >>> 4];
-			out[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
-		}
-		return "0x" + new String(out);
-	}
+	/**
+	 * Logs the given message with given log level into the all managed devices' log session.
+	 * @param level the log level
+	 * @param messageRes string resource id
+	 * @param params additional (optional) parameters used to fill the message
+	 */
+	void log(final int level, @StringRes final int messageRes, final Object... params);
 }

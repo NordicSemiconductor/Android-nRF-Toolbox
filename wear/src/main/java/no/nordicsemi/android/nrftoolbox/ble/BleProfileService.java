@@ -25,6 +25,8 @@ import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Binder;
@@ -41,12 +43,14 @@ public class BleProfileService extends Service implements BleManagerCallbacks {
 	public static final String BROADCAST_DEVICE_NOT_SUPPORTED = "no.nordicsemi.android.nrftoolbox.BROADCAST_DEVICE_NOT_SUPPORTED";
 	public static final String BROADCAST_DEVICE_READY = "no.nordicsemi.android.nrftoolbox.DEVICE_READY";
 	public static final String BROADCAST_BOND_STATE = "no.nordicsemi.android.nrftoolbox.BROADCAST_BOND_STATE";
+	public static final String BROADCAST_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.BROADCAST_BATTERY_LEVEL";
 	public static final String BROADCAST_ERROR = "no.nordicsemi.android.nrftoolbox.BROADCAST_ERROR";
 
 	/** The parameter passed when creating the service. Must contain the address of the sensor that we want to connect to */
 	public static final String EXTRA_DEVICE_ADDRESS = "no.nordicsemi.android.nrftoolbox.EXTRA_DEVICE_ADDRESS";
 	/** The key for the device name that is returned in {@link #BROADCAST_CONNECTION_STATE} with state {@link #STATE_CONNECTED}. */
 	public static final String EXTRA_DEVICE_NAME = "no.nordicsemi.android.nrftoolbox.EXTRA_DEVICE_NAME";
+	public static final String EXTRA_DEVICE = "no.nordicsemi.android.nrftoolbox.EXTRA_DEVICE";
 	public static final String EXTRA_CONNECTION_STATE = "no.nordicsemi.android.nrftoolbox.EXTRA_CONNECTION_STATE";
 	public static final String EXTRA_BOND_STATE = "no.nordicsemi.android.nrftoolbox.EXTRA_BOND_STATE";
 	public static final String EXTRA_ERROR_MESSAGE = "no.nordicsemi.android.nrftoolbox.EXTRA_ERROR_MESSAGE";
@@ -63,17 +67,34 @@ public class BleProfileService extends Service implements BleManagerCallbacks {
 
 	protected boolean mBinded;
 	private boolean mConnected;
-	private String mDeviceAddress;
+	private BluetoothDevice mBluetoothDevice;
 	private String mDeviceName;
+
+	private final BroadcastReceiver mBluetoothStateBroadcastReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(final Context context, final Intent intent) {
+			final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.STATE_OFF);
+
+			switch (state) {
+				case BluetoothAdapter.STATE_ON:
+					onBluetoothEnabled();
+					break;
+				case BluetoothAdapter.STATE_TURNING_OFF:
+				case BluetoothAdapter.STATE_OFF:
+					onBluetoothDisabled();
+					break;
+			}
+		}
+	};
 
 	public class LocalBinder extends Binder {
 		/**
 		 * Disconnects from the sensor.
 		 */
-		public final void disconnect() {
+		public void disconnect() {
 			if (!mConnected) {
 				mBleManager.close();
-				onDeviceDisconnected();
+				onDeviceDisconnected(mBluetoothDevice);
 				return;
 			}
 
@@ -85,8 +106,8 @@ public class BleProfileService extends Service implements BleManagerCallbacks {
 		 *
 		 * @return device address
 		 */
-		public String getDeviceAddress() {
-			return mDeviceAddress;
+		public final String getDeviceAddress() {
+			return mBluetoothDevice.getAddress();
 		}
 
 		/**
@@ -94,8 +115,17 @@ public class BleProfileService extends Service implements BleManagerCallbacks {
 		 *
 		 * @return the device name
 		 */
-		public String getDeviceName() {
+		public final String getDeviceName() {
 			return mDeviceName;
+		}
+
+		/**
+		 * Returns the Bluetooth device
+		 *
+		 * @return the Bluetooth device
+		 */
+		public final BluetoothDevice getBluetoothDevice() {
+			return mBluetoothDevice;
 		}
 
 		/**
@@ -103,20 +133,20 @@ public class BleProfileService extends Service implements BleManagerCallbacks {
 		 *
 		 * @return <code>true</code> if device is connected to the sensor, <code>false</code> otherwise
 		 */
-		public boolean isConnected() {
+		public final boolean isConnected() {
 			return mConnected;
 		}
 
 		/**
 		 * Returns the Profile API. Profile may be null if service discovery has not been performed or the device does not match any profile.
 		 */
-		public BleProfile getProfile() {
+		public final BleProfile getProfile() {
 			return mBleManager.getProfile();
 		}
 	}
 
 	/**
-	 * Returns the binder implementation. This must return class implementing the additional manager interface that may be used in the binded activity.
+	 * Returns the binder implementation. This must return class implementing the additional manager interface that may be used in the bound activity.
 	 *
 	 * @return the service binder
 	 */
@@ -140,7 +170,7 @@ public class BleProfileService extends Service implements BleManagerCallbacks {
 	public final boolean onUnbind(final Intent intent) {
 		mBinded = false;
 
-		// we must allow to rebind to the same service
+		// We want the onRebind method be called if anything else binds to it again
 		return true;
 	}
 
@@ -153,6 +183,25 @@ public class BleProfileService extends Service implements BleManagerCallbacks {
 
 		// initialize the manager
 		mBleManager = new BleManager(this, this);
+
+		// Register broadcast receivers
+		registerReceiver(mBluetoothStateBroadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+
+		// Service has now been created
+		onServiceCreated();
+
+		// Call onBluetoothEnabled if Bluetooth enabled
+		final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+		if (bluetoothAdapter.isEnabled()) {
+			onBluetoothEnabled();
+		}
+	}
+
+	/**
+	 * Called when the service has been created, before the {@link #onBluetoothEnabled()} is called.
+	 */
+	protected void onServiceCreated() {
+		// empty default implementation
 	}
 
 	@Override
@@ -160,58 +209,92 @@ public class BleProfileService extends Service implements BleManagerCallbacks {
 		if (intent == null || !intent.hasExtra(EXTRA_DEVICE_ADDRESS))
 			throw new UnsupportedOperationException("No device address at EXTRA_DEVICE_ADDRESS key");
 
-		mDeviceAddress = intent.getStringExtra(EXTRA_DEVICE_ADDRESS);
-
-		// notify user about changing the state to CONNECTING
-		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
-		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_CONNECTING);
-		LocalBroadcastManager.getInstance(BleProfileService.this).sendBroadcast(broadcast);
+		mDeviceName = intent.getStringExtra(EXTRA_DEVICE_NAME);
 
 		final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
 		final BluetoothAdapter adapter = bluetoothManager.getAdapter();
-		final BluetoothDevice device = adapter.getRemoteDevice(mDeviceAddress);
-		mDeviceName = device.getName();
+		final String deviceAddress = intent.getStringExtra(EXTRA_DEVICE_ADDRESS);
+		mBluetoothDevice = adapter.getRemoteDevice(deviceAddress);
+		onServiceStarted();
 
-		mBleManager.connect(device);
+		mBleManager.connect(mBluetoothDevice);
 		return START_REDELIVER_INTENT;
+	}
+
+	/**
+	 * Called when the service has been started. The device name and address are set. It nRF Logger is installed than logger was also initialized.
+	 */
+	protected void onServiceStarted() {
+		// empty default implementation
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		// Unregister broadcast receivers
+		unregisterReceiver(mBluetoothStateBroadcastReceiver);
 
 		// shutdown the manager
 		mBleManager.close();
 		mBleManager = null;
-		mDeviceAddress = null;
+		mBluetoothDevice = null;
 		mDeviceName = null;
 		mConnected = false;
 	}
 
+	/**
+	 * Method called when Bluetooth Adapter has been disabled.
+	 */
+	protected void onBluetoothDisabled() {
+		// empty default implementation
+	}
+
+	/**
+	 * This method is called when Bluetooth Adapter has been enabled and
+	 * after the service was created if Bluetooth Adapter was enabled at that moment.
+	 * This method could initialize all Bluetooth related features, for example open the GATT server.
+	 */
+	protected void onBluetoothEnabled() {
+		// empty default implementation
+	}
+
 	@Override
-	public void onDeviceConnected() {
+	public boolean shouldEnableBatteryLevelNotifications(final BluetoothDevice device) {
+		// By default the Battery Level notifications will be enabled only the activity is bound.
+		return mBinded;
+	}
+
+	@Override
+	public void onDeviceConnecting(final BluetoothDevice device) {
+		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
+		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_CONNECTING);
+		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
+	}
+
+	@Override
+	public void onDeviceConnected(final BluetoothDevice device) {
 		mConnected = true;
 
 		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
 		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_CONNECTED);
-		broadcast.putExtra(EXTRA_DEVICE_ADDRESS, mDeviceAddress);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_DEVICE_NAME, mDeviceName);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	@Override
-	public void onDeviceDisconnecting() {
+	public void onDeviceDisconnecting(final BluetoothDevice device) {
 		// Notify user about changing the state to DISCONNECTING
 		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_DISCONNECTING);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	@Override
-	public void onDeviceDisconnected() {
+	public void onDeviceDisconnected(final BluetoothDevice device) {
 		mConnected = false;
-		mDeviceAddress = null;
-		mDeviceName = null;
 
 		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
 		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_DISCONNECTED);
@@ -221,53 +304,61 @@ public class BleProfileService extends Service implements BleManagerCallbacks {
 	}
 
 	@Override
-	public void onLinklossOccur() {
+	public void onLinklossOccur(final BluetoothDevice device) {
 		mConnected = false;
 
 		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_LINK_LOSS);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	@Override
-	public void onDeviceReady() {
+	public void onDeviceReady(final BluetoothDevice device) {
 		final Intent broadcast = new Intent(BROADCAST_DEVICE_READY);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	@Override
-	public void onDeviceNotSupported() {
+	public void onDeviceNotSupported(final BluetoothDevice device) {
 		final Intent broadcast = new Intent(BROADCAST_DEVICE_NOT_SUPPORTED);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 
 		// no need for disconnecting, it will be disconnected by the manager automatically
 	}
 
 	@Override
-	public void onBondingRequired() {
+	public void onBondingRequired(final BluetoothDevice device) {
 		showToast(no.nordicsemi.android.nrftoolbox.common.R.string.bonding);
 
 		final Intent broadcast = new Intent(BROADCAST_BOND_STATE);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_BOND_STATE, BluetoothDevice.BOND_BONDING);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	@Override
-	public void onBonded() {
+	public void onBonded(final BluetoothDevice device) {
 		showToast(no.nordicsemi.android.nrftoolbox.common.R.string.bonded);
 
 		final Intent broadcast = new Intent(BROADCAST_BOND_STATE);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_BOND_STATE, BluetoothDevice.BOND_BONDED);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	@Override
-	public void onError(final String message, final int errorCode) {
+	public void onError(final BluetoothDevice device, final String message, final int errorCode) {
 		final Intent broadcast = new Intent(BROADCAST_ERROR);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_ERROR_MESSAGE, message);
 		broadcast.putExtra(EXTRA_ERROR_CODE, errorCode);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 
+		// After receiving an error the device will be automatically disconnected.
+		// Replace it with other implementation if necessary.
 		mBleManager.disconnect();
 		stopSelf();
 	}
