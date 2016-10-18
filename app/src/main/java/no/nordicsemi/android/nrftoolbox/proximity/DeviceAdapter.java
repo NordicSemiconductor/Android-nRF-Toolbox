@@ -85,7 +85,6 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 	}
 
 	public class ViewHolder extends RecyclerView.ViewHolder {
-		private ImageView iconView;
 		private TextView nameView;
 		private TextView addressView;
 		private TextView batteryView;
@@ -94,7 +93,6 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 		public ViewHolder(final View itemView) {
 			super(itemView);
 
-			iconView = (ImageView) itemView.findViewById(R.id.icon);
 			nameView = (TextView) itemView.findViewById(R.id.name);
 			addressView = (TextView) itemView.findViewById(R.id.address);
 			batteryView = (TextView) itemView.findViewById(R.id.battery);
@@ -119,24 +117,14 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 					final int position = getAdapterPosition();
 					final BluetoothDevice device = mDevices.get(position);
 					mService.disconnect(device);
+					// The device might have not been connected, so there will be no callback
+					onDeviceRemoved(device);
 				}
 			});
 		}
 
 		private void bind(final BluetoothDevice device) {
 			final int state = mService.getConnectionState(device);
-			switch (state) {
-				case BluetoothGatt.STATE_DISCONNECTED:
-				case BluetoothGatt.STATE_DISCONNECTING:
-					DrawableCompat.setTint(iconView.getDrawable(), ContextCompat.getColor(iconView.getContext(), android.R.color.black));
-					break;
-				case BluetoothGatt.STATE_CONNECTING:
-					DrawableCompat.setTint(iconView.getDrawable(), ContextCompat.getColor(iconView.getContext(), R.color.actionBarColor));
-					break;
-				case BluetoothGatt.STATE_CONNECTED:
-					DrawableCompat.setTint(iconView.getDrawable(), ContextCompat.getColor(iconView.getContext(), R.color.actionBarColorDark));
-					break;
-			}
 
 			String name = device.getName();
 			if (TextUtils.isEmpty(name))

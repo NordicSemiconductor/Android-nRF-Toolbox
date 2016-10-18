@@ -50,7 +50,8 @@
 	<string name="proximity_devices_title">YOUR TAGS</string>
 	<string name="proximity_enable_server">GATT Server enabled</string>
     
-    <string name="proximity_about_text">PROXIMITY profile allows you to connect to your Proximity sensor.
-        \nYou can find your valuables attached with Proximity tag by pressing FindMe button on screen and you can find your phone by pressing relevant button on your tag.
-        \n\nYou may close this activity when connected without being disconnected from the sensor. A notification will be shown.</string>
+    <string name="proximity_about_text">PROXIMITY profile allows you to connect to multiple Proximity sensors.
+        \nYou can find your valuables attached with Proximity tag by pressing the Locate button next to your device.
+		You can also find your phone by pressing relevant button on your tag.
+        \n\nYou may close this activity when connected without being disconnected from the sensors. A notification will be shown.</string>
 </resources>

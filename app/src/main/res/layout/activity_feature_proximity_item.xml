@@ -21,6 +21,7 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="?android:attr/listPreferredItemHeightSmall"
 	android:paddingBottom="2dp"
@@ -28,13 +29,6 @@
 	android:paddingStart="8dp"
 	android:paddingTop="2dp"
 	android:gravity="center_vertical">
-
-	<ImageView
-		android:id="@+id/icon"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:src="@drawable/ic_proximity_tag"
-		android:layout_marginRight="8dp"/>
 
 	<RelativeLayout
 		android:layout_width="0dp"
@@ -46,6 +40,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:ellipsize="marquee"
+			android:layout_toRightOf="@+id/icon"
 			android:gravity="center_vertical"
 			android:lines="1"
 			android:textSize="20sp"
@@ -56,7 +51,6 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:textSize="12sp"
-			android:layout_marginTop="2dp"
 			android:layout_below="@+id/name"
 			android:lines="1"/>
 
@@ -69,7 +63,7 @@
 			android:gravity="center"
 			android:layout_toRightOf="@+id/address"
 			android:drawableLeft="@drawable/ic_battery"
-			android:layout_marginLeft="8dp"
+			android:layout_marginLeft="4dp"
 			android:visibility="gone"/>
 
 	</RelativeLayout>
@@ -79,6 +73,7 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:backgroundTint="@color/actionBarColorDark"
+		app:backgroundTint="@color/actionBarColorDark"
 		android:src="@drawable/ic_stat_notify_proximity_find"
 		android:visibility="gone"/>
 
@@ -87,6 +82,7 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:backgroundTint="@color/orange"
+		app:backgroundTint="@color/orange"
 		android:src="@drawable/ic_action_disconnect"/>
 
 </LinearLayout>

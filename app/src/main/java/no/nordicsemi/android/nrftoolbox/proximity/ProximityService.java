@@ -38,10 +38,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.NotificationCompat;
 import android.text.TextUtils;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
@@ -170,7 +168,6 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 
 	@Override
 	protected void onBluetoothEnabled() {
-		super.onBluetoothEnabled();
 		// Start the GATT Server only if Bluetooth is enabled
 		mServerManager = new ProximityServerManager(this);
 		mServerManager.setLogger(mBinder);
@@ -188,6 +185,7 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 		super.onBluetoothDisabled();
 		if (mServerManager != null) {
 			mServerManager.closeGattServer();
+			mServerManager = null;
 		}
 	}
 
