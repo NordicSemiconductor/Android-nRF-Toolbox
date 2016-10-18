@@ -354,7 +354,9 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 	@Override
 	public int onStartCommand(final Intent intent, final int flags, final int startId) {
 		onServiceStarted();
-		return super.onStartCommand(intent, flags, startId);
+		// The service does not save addresses of managed devices.
+		// A bound activity will be required to add connections again.
+		return START_NOT_STICKY;
 	}
 
 	/**
