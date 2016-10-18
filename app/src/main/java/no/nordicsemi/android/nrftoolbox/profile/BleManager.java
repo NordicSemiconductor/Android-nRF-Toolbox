@@ -892,6 +892,8 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 
 		/**
 		 * This method should nullify all services and characteristics of the device.
+		 * It's called when the device is no longer connected, either due to user action
+		 * or a link loss.
 		 */
 		protected abstract void onDeviceDisconnected();
 
@@ -1034,6 +1036,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 						// We are not closing the connection here as the device should try to reconnect automatically.
 						// This may be only called when the shouldAutoConnect() method returned true.
 					}
+					onDeviceDisconnected();
 					return;
 				}
 
