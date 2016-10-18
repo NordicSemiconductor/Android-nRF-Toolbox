@@ -152,6 +152,8 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 
 			BleManager<BleManagerCallbacks> manager = mBleManagers.get(device);
 			if (manager != null) {
+				if (session != null)
+					manager.setLogger(session);
 				manager.connect(device);
 			} else {
 				mBleManagers.put(device, manager = initializeManager());
