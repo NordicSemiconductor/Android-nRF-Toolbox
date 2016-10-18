@@ -100,6 +100,8 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 		protected void onDeviceDisconnected() {
 			mAlertLevelCharacteristic = null;
 			mLinklossCharacteristic = null;
+			// Reset the alert flag
+			mAlertOn = false;
 		}
 
 		@Override
