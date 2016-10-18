@@ -9,6 +9,8 @@ It contains applications demonstrating Bluetooth Smart profiles:
 * **Blood Pressure Monitor**, 
 * **Health Thermometer Monitor**, 
 * **Glucose Monitor**,
+* **Continuous Glucose Monitor** - NEW: profile added,
+* **Proximity Monitor** - NEW: multiple connections supported.
 
 Since version 1.10.0 the *nRF Toolbox* also supports the **Nordic UART Service** which may be used for bidirectional text communication between devices.
 
@@ -21,6 +23,7 @@ The nRF Toolbox application is a reference design demonstrating how to use the B
 * ```boolean isRequiredServiceSupported(BluetoothGatt)``` - method that verifies if the connected device is supported by the profile
 * ```void onDeviceDisconnected()``` - method that releases device's resources
 
+There are 3 different solutions how to use the manager shown in different profiles. The very basic approach is used by the BPM, HRM and GLS profiles. Each of those activities holds a static reference to the manager. Keeping the manager as a static object protects from disposing it when device orientation changes and the activities are being destroyed and recreated. However, this approach does not allow to keep the connections in background mode and therfore is not a solution that should be used in any final application.
 
 A better implementation may be found in CSC, RSC, HTM and CGM. The BleManager instance is maintained by the running service. The service is started in order to connect to a device and stopped when user decides to disconnect from it. When an activity is destroyed it unbinds from the service, but the service is still running, so the incoming data may continue to be handled. All device-related data are kept be the service and may be obtained by a new activity when it binds to it in order to be shown to the user.
 
