@@ -422,7 +422,12 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 	@Override
 	public void onDeviceDisconnected(final BluetoothDevice device) {
-		// Do not use the device argument here unless you change calling onDeviceDisconnected from the binder above
+		// Note 1: Do not use the device argument here unless you change calling onDeviceDisconnected from the binder above
+
+		// Note 2: if BleManager#shouldAutoConnect() for this device returned true, this callback will be
+		// invoked ONLY when user requested disconnection (using Disconnect button). If the device
+		// disconnects due to a link loss, the onLinklossOccur(BluetoothDevice) method will be called instead.
+
 		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
 		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_DISCONNECTED);
@@ -508,11 +513,6 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 		broadcast.putExtra(EXTRA_ERROR_MESSAGE, message);
 		broadcast.putExtra(EXTRA_ERROR_CODE, errorCode);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
-
-		// After receiving an error the device will be automatically disconnected.
-		// Replace it with other implementation if necessary.
-		mBleManager.disconnect();
-		stopSelf();
 	}
 
 	/**

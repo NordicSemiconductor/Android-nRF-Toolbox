@@ -34,7 +34,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.StringRes;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -85,6 +84,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.STATE_OFF);
+			final int previousState = intent.getIntExtra(BluetoothAdapter.EXTRA_PREVIOUS_STATE, BluetoothAdapter.STATE_OFF);
 			final ILogger logger = getBinder();
 
 			final String stateString = "[Broadcast] Action received: " + BluetoothAdapter.ACTION_STATE_CHANGED + ", state changed to " + state2String(state);
@@ -96,7 +96,8 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 					break;
 				case BluetoothAdapter.STATE_TURNING_OFF:
 				case BluetoothAdapter.STATE_OFF:
-					onBluetoothDisabled();
+					if (previousState != BluetoothAdapter.STATE_TURNING_OFF && previousState != BluetoothAdapter.STATE_OFF)
+						onBluetoothDisabled();
 					break;
 			}
 		}
@@ -143,13 +144,16 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 		 */
 		@SuppressWarnings("unchecked")
 		public void connect(final BluetoothDevice device, final ILogSession session) {
+			// If a device is in managed devices it means that it's already connected, or was connected
+			// using autoConnect and the link was lost but Android is already trying to connect to it.
+			if (mManagedDevices.contains(device))
+				return;
+			mManagedDevices.add(device);
+
 			BleManager<BleManagerCallbacks> manager = mBleManagers.get(device);
 			if (manager != null) {
-				if (!manager.isConnected())
-					manager.connect(device);
-				// else do nothing, the device is already connected
+				manager.connect(device);
 			} else {
-				mManagedDevices.add(device);
 				mBleManagers.put(device, manager = initializeManager());
 				manager.setGattCallbacks(BleMulticonnectProfileService.this);
 				manager.setLogger(session);
@@ -449,8 +453,13 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 
 	@Override
 	public void onDeviceDisconnected(final BluetoothDevice device) {
+		// Note: if BleManager#shouldAutoConnect() for this device returned true, this callback will be
+		// invoked ONLY when user requested disconnection (using Disconnect button). If the device
+		// disconnects due to a link loss, the onLinklossOccur(BluetoothDevice) method will be called instead.
+
+		// We no longer want to keep the device in the service
 		mManagedDevices.remove(device);
-		// The BleManager is not removed from the HashMap to keep the device's log session.
+		// The BleManager is not removed from the HashMap in order to keep the device's log session.
 		// mBleManagers.remove(device);
 
 		// Do not use the device argument here unless you change calling onDeviceDisconnected from the binder above
@@ -458,6 +467,11 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 		broadcast.putExtra(EXTRA_DEVICE, device);
 		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_DISCONNECTED);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
+
+		// When user disconnected the last device while the activity was not bound the service can be stopped
+		if (!mBinded && mManagedDevices.isEmpty()) {
+			stopSelf();
+		}
 	}
 
 	@Override
@@ -534,11 +548,6 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 		broadcast.putExtra(EXTRA_ERROR_MESSAGE, message);
 		broadcast.putExtra(EXTRA_ERROR_CODE, errorCode);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
-
-		// After receiving an error the device will be automatically disconnected.
-		// Replace it with other implementation if necessary.
-		final BleManager<BleManagerCallbacks> manager = mBleManagers.get(device);
-		manager.disconnect();
 	}
 
 	/**
