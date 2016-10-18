@@ -70,8 +70,10 @@ public interface BleManagerCallbacks {
 
 	/**
 	 * Called when the device has disconnected (when the callback returned
-	 * {@link BluetoothGattCallback#onConnectionStateChange(BluetoothGatt, int, int)} with state DISCONNECTED.
-	 * @param device target device
+	 * {@link BluetoothGattCallback#onConnectionStateChange(BluetoothGatt, int, int)} with state DISCONNECTED),
+	 * but ONLY if the {@link BleManager#shouldAutoConnect()} method returned false for this device when it was connecting.
+	 * Otherwise the {@link #onLinklossOccur(BluetoothDevice)} method will be called instead.
+	 * @param device the device that got disconnected
 	 */
 	void onDeviceDisconnected(final BluetoothDevice device);
 

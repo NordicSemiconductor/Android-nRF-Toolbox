@@ -179,8 +179,16 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 	protected abstract BleManagerGattCallback getGattCallback();
 
 	/**
-	 * Returns whether to directly connect to the remote device (false) or to automatically connect as soon as the remote
-	 * device becomes available (true).
+	 * Returns whether to connect to the remote device just once (false) or to add the address to white list of devices
+	 * that will be automatically connect as soon as they become available (true). In the latter case, if
+	 * Bluetooth adapter is enabled, Android scans periodically for devices from the white list and if a advertising packet
+	 * is received from such, it tries to connect to it. When the connection is lost, the system will keep trying to reconnect
+	 * to it in. If true is returned, and the connection to the device is lost the {@link BleManagerCallbacks#onLinklossOccur(BluetoothDevice)}
+	 * callback is called instead of {@link BleManagerCallbacks#onDeviceDisconnected(BluetoothDevice)}.
+	 * <p>This feature works much better on newer Android phone models and many not work on older phones.</p>
+	 * <p>This method should only be used with bonded devices, as otherwise the device may change it's address.
+	 * It will however work also with non-bonded devices with private static address. A connection attempt to
+	 * a device with private resolvable address will fail.</p>
 	 *
 	 * @return autoConnect flag value
 	 */
