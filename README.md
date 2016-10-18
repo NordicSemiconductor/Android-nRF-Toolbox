@@ -9,12 +9,24 @@ It contains applications demonstrating Bluetooth Smart profiles:
 * **Blood Pressure Monitor**, 
 * **Health Thermometer Monitor**, 
 * **Glucose Monitor**,
-* **Continuous Glucose Monitor**,
-* **Proximity Monitor**.
 
-Since version 1.10.0 the *nRF Toolbox* also supports the **Nordic UART Service** which may be used for bidirectional text communication between devices. 
+Since version 1.10.0 the *nRF Toolbox* also supports the **Nordic UART Service** which may be used for bidirectional text communication between devices.
 
 **Note:** To get a smaller version, with only the DFU profile, switch to the *only_dfu* branch.
+
+### BleManager and how to use it
+
+The nRF Toolbox application is a reference design demonstrating how to use the BLE API on Android. The main class responsible for managing connection to a single device is called [BleManager](app/src/main/java/no/nordicsemi/android/nrftoolbox/profile/BleManager.java). Each of the profiles listed above is using this manager and overriding it to add some profile-related functionality. The BleManager sends events using the [BleManagerCallbacks](app/src/main/java/no/nordicsemi/android/nrftoolbox/profile/BleManagerCallbacks.java) interface, which should be impemented by your controller. A profile's BleManager should override the BleManager and implement required methods, that is:
+* ```Deque<Request> initGatt(BluetoothGatt)``` - method that definies initialization queue
+* ```boolean isRequiredServiceSupported(BluetoothGatt)``` - method that verifies if the connected device is supported by the profile
+* ```void onDeviceDisconnected()``` - method that releases device's resources
+
+
+A better implementation may be found in CSC, RSC, HTM and CGM. The BleManager instance is maintained by the running service. The service is started in order to connect to a device and stopped when user decides to disconnect from it. When an activity is destroyed it unbinds from the service, but the service is still running, so the incoming data may continue to be handled. All device-related data are kept be the service and may be obtained by a new activity when it binds to it in order to be shown to the user.
+
+At last, the Proximity profile allows to connect to multiple sensors at the same time. It uses a different service implementation but still the BleManager is used to manage each connection. If the [shouldAutoConnect()](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/blob/master/app/src/main/java/no/nordicsemi/android/nrftoolbox/profile/BleManager.java#L181) method returns true for a connection, the manager will try to reconnect automatically to the device if a link was lost. You will also be notified about a device that got away using ```onLinklossOccur(BluetoothDevice)```.
+
+The BleMulticonnectProfileService implementation, used by Proximity profile, does not save addresses of connected devices. When the service is killed it will not be able to reconnect to them after it's restarted, so this feature has been disabled. Also, when user removes the nRF Toolbox app from Recents, the service will be killed and all devices will be disconnected automatically. To change this behaviour a service would have to either save the addresses and reconnect to devices after it has restarted (but then removing the app from Recents would cause disconnection and immediate reconnection as the service is then killed and moved to another process), or would have to be implemented in a way that is using another [process](https://developer.android.com/guide/topics/manifest/service-element.html#proc). Then, however, it is not possible to bind to such service and data must be exchanged using a [Messenger](https://developer.android.com/reference/android/app/Service.html#RemoteMessengerServiceSample). Such approach is not demonstrated in nRF Toolbox.
 
 ### Nordic UART Service
 
