@@ -32,6 +32,7 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.os.Handler;
+import android.util.Log;
 
 import java.util.UUID;
 
@@ -60,10 +61,13 @@ public class ProximityServerManager  {
 	private IDeviceLogger mLogger;
 	private Handler mHandler;
 	private OnServerOpenCallback mOnServerOpenCallback;
+	private boolean mServerReady;
 
 	public interface OnServerOpenCallback {
 		/** Method called when the GATT server was created and all services were added successfully. */
 		void onGattServerOpen();
+		/** Method called when the GATT server failed to open and initialize services. -1 is returned when the server failed to start. */
+		void onGattServerFailed(final int error);
 	}
 
 	public ProximityServerManager(final ProximityServerManagerCallbacks callbacks) {
@@ -71,27 +75,96 @@ public class ProximityServerManager  {
 		mCallbacks = callbacks;
 	}
 
+	/**
+	 * Sets the logger object. Logger is used to create logs in nRF Logger application.
+	 * @param logger the logger object
+	 */
 	public void setLogger(final IDeviceLogger logger) {
 		mLogger = logger;
 	}
 
+	/**
+	 * Opens GATT server and creates 2 services: Link Loss Service and Immediate Alert Service.
+	 * The callback is called when initialization is complete.
+	 * @param context the context
+	 * @param callback optional callback notifying when all services has been added
+	 */
 	public void openGattServer(final Context context, final OnServerOpenCallback callback) {
+		// Is the server already open?
+		if (mBluetoothGattServer != null) {
+			if (callback != null)
+				callback.onGattServerOpen();
+			return;
+		}
+
 		mOnServerOpenCallback = callback;
 
 		final BluetoothManager manager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
 		mBluetoothGattServer = manager.openGattServer(context, mGattServerCallbacks);
-		addImmediateAlertService();
+		if (mBluetoothGattServer != null) {
+			// Start adding services one by one. The onServiceAdded method will be called when it completes.
+			addImmediateAlertService();
+		} else {
+			if (callback != null)
+				callback.onGattServerFailed(-1);
+			mOnServerOpenCallback = null;
+		}
 	}
 
+	/**
+	 * Returns true if GATT server was opened and configured correctly.
+	 * False if hasn't been opened, was closed, of failed to start.
+	 */
+	public boolean isServerReady() {
+		return mServerReady;
+	}
+
+	/**
+	 * Closes the GATT server. It will also disconnect all existing connections.
+	 * If the service has already been closed, or hasn't been open, this method does nothing.
+	 */
 	public void closeGattServer() {
 		if (mBluetoothGattServer != null) {
 			mBluetoothGattServer.close();
 			mBluetoothGattServer = null;
 			mOnServerOpenCallback = null;
+			mServerReady = false;
 		}
 	}
 
-	public void cancelConnection(final  BluetoothDevice device) {
+	/**
+	 * This method notifies the Android that the Proximity profile will use the server connection to given device.
+	 * If the server hasn't been open this method does nothing. The {@link #cancelConnection(BluetoothDevice)} method
+	 * should be called when the connection is no longer used.
+	 * @param device target device
+	 */
+	public void openConnection(final BluetoothDevice device) {
+		if (mBluetoothGattServer != null) {
+			mLogger.log(device, LogContract.Log.Level.VERBOSE, "[Server] Creating server connection...");
+			mLogger.log(device, LogContract.Log.Level.DEBUG, "server.connect(device, autoConnect = true)");
+			mBluetoothGattServer.connect(device, true); // In proximity the autoConnect is true
+		}
+	}
+
+	/**
+	 * Cancels the connection to the given device. This notifies Android that this profile will no longer
+	 * use this connection and it can be disconnected. In practice, this method does not disconnect, so
+	 * if the remote device decides still to use the phone's GATT server it will be able to do so.
+	 * <p>This bug/feature can be tested using a proximity tag that does not release its connection when it got
+	 * disconnected:
+	 * <ol>
+	 *     <li>Connect to your Proximity Tag.</li>
+	 *     <li>Verify that the bidirectional connection works - test the FIND ME button in nRF Toolbox and
+	 *     the FIND PHONE button on the tag.</li>
+	 *     <li>Disconnect from the tag</li>
+	 *     <li>When the device disappear from the list of devices click the FIND PHONE button on the tag.
+	 *     Your phone should still trigger an alarm, as the connection tag-&gt;phone is still active.</li>
+	 * </ol>
+	 * In order to avoid this issue make sure that your tag disconnects gently from phone when it got disconnected itself.
+	 * </p>
+	 * @param device the device that will no longer be used
+	 */
+	public void cancelConnection(final BluetoothDevice device) {
 		if (mBluetoothGattServer != null) {
 			mLogger.log(device, LogContract.Log.Level.VERBOSE, "[Server] Cancelling server connection...");
 			mLogger.log(device, LogContract.Log.Level.DEBUG, "server.cancelConnection(device)");
@@ -126,18 +199,28 @@ public class ProximityServerManager  {
 	private final BluetoothGattServerCallback mGattServerCallbacks = new BluetoothGattServerCallback() {
 		@Override
 		public void onServiceAdded(final int status, final BluetoothGattService service) {
-			// Adding another service from callback thread fails on Samsung S4 with Android 4.3
-			mHandler.post(new Runnable() {
-				@Override
-				public void run() {
-					if (IMMEDIATE_ALERT_SERVICE_UUID.equals(service.getUuid())) {
-						addLinklossService();
-					} else if (mOnServerOpenCallback != null) {
-						mOnServerOpenCallback.onGattServerOpen();
-						mOnServerOpenCallback = null;
+			if (status == BluetoothGatt.GATT_SUCCESS) {
+				// Adding another service from callback thread fails on Samsung S4 with Android 4.3
+				mHandler.post(new Runnable() {
+					@Override
+					public void run() {
+						if (IMMEDIATE_ALERT_SERVICE_UUID.equals(service.getUuid())) {
+							addLinklossService();
+						} else {
+							mServerReady = true;
+							// Both services has been added
+							if (mOnServerOpenCallback != null)
+								mOnServerOpenCallback.onGattServerOpen();
+							mOnServerOpenCallback = null;
+						}
 					}
-				}
-			});
+				});
+			} else {
+				Log.e(TAG, "GATT Server failed to add service, status: " + status);
+				if (mOnServerOpenCallback != null)
+					mOnServerOpenCallback.onGattServerFailed(status);
+				mOnServerOpenCallback = null;
+			}
 		}
 
 		@Override

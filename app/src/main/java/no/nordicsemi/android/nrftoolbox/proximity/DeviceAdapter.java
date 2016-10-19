@@ -24,15 +24,12 @@ package no.nordicsemi.android.nrftoolbox.proximity;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -142,6 +139,8 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 				batteryView.setVisibility(View.VISIBLE);
 				batteryView.setText(batteryView.getResources().getString(R.string.battery, batteryValue));
 				batteryView.setAlpha(state == BluetoothGatt.STATE_CONNECTED ? 1.0f : 0.5f);
+			} else {
+				batteryView.setVisibility(View.GONE);
 			}
 		}
 	}

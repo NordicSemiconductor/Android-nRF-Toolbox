@@ -24,6 +24,7 @@ package no.nordicsemi.android.nrftoolbox.proximity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -142,6 +143,9 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 
 	@Override
 	protected void onServiceCreated() {
+		mServerManager = new ProximityServerManager(this);
+		mServerManager.setLogger(mBinder);
+
 		initializeAlarm();
 
 		registerReceiver(mDisconnectActionBroadcastReceiver, new IntentFilter(ACTION_DISCONNECT));
@@ -155,10 +159,8 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	public void onServiceStopped() {
 		cancelNotifications();
 
-		// GATT server might have not been created if Bluetooth was disabled
-		if (mServerManager != null) {
-			mServerManager.closeGattServer();
-		}
+		// Close the GATT server. If it hasn't been opened this method does nothing
+		mServerManager.closeGattServer();
 
 		unregisterReceiver(mDisconnectActionBroadcastReceiver);
 		unregisterReceiver(mToggleAlarmActionBroadcastReceiver);
@@ -169,13 +171,17 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	@Override
 	protected void onBluetoothEnabled() {
 		// Start the GATT Server only if Bluetooth is enabled
-		mServerManager = new ProximityServerManager(this);
-		mServerManager.setLogger(mBinder);
 		mServerManager.openGattServer(this, new ProximityServerManager.OnServerOpenCallback() {
 			@Override
 			public void onGattServerOpen() {
 				// We are now ready to reconnect devices
 				ProximityService.super.onBluetoothEnabled();
+			}
+
+			@Override
+			public void onGattServerFailed(final int error) {
+				mServerManager.closeGattServer();
+				showToast(getString(R.string.proximity_server_error, error));
 			}
 		});
 	}
@@ -183,15 +189,13 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	@Override
 	protected void onBluetoothDisabled() {
 		super.onBluetoothDisabled();
-		if (mServerManager != null) {
-			mServerManager.closeGattServer();
-			mServerManager = null;
-		}
+		// Close the GATT server
+		mServerManager.closeGattServer();
 	}
 
 	@Override
 	protected void onRebind() {
-		// when the activity rebinds to the service, remove the notification
+		// When the activity rebinds to the service, remove the notification
 		cancelNotifications();
 	}
 
@@ -210,21 +214,29 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	}
 
 	@Override
+	public void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound) {
+		super.onServicesDiscovered(device, optionalServicesFound);
+		mServerManager.openConnection(device);
+	}
+
+	@Override
 	public void onLinklossOccur(final BluetoothDevice device) {
+		mServerManager.cancelConnection(device);
 		stopAlarm(device);
 		super.onLinklossOccur(device);
 
 		if (!mBinded) {
 			createBackgroundNotification();
-			createLinklossNotification(device);
+			if (BluetoothAdapter.getDefaultAdapter().isEnabled())
+				createLinklossNotification(device);
+			else
+				cancelNotification(device);
 		}
 	}
 
 	@Override
 	public void onDeviceDisconnected(final BluetoothDevice device) {
-		if (mServerManager != null) {
-			mServerManager.cancelConnection(device);
-		}
+		mServerManager.cancelConnection(device);
 		stopAlarm(device);
 		super.onDeviceDisconnected(device);
 

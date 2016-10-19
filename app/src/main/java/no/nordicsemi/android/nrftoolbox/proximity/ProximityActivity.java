@@ -21,6 +21,7 @@
  */
 package no.nordicsemi.android.nrftoolbox.proximity;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -126,7 +127,10 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 	public void onLinklossOccur(final BluetoothDevice device) {
 		if (mAdapter != null)
 			mAdapter.onDeviceStateChanged(device);
-		showLinklossDialog(device.getName());
+
+		// The link loss may also be called when Bluetooth adapter was disabled
+		if (BluetoothAdapter.getDefaultAdapter().isEnabled())
+			showLinklossDialog(device.getName());
 	}
 
 	@Override

@@ -48,7 +48,7 @@
 	<string name="proximity_notification_linkloss_alert">%s is getting away!</string>
 
 	<string name="proximity_devices_title">YOUR TAGS</string>
-	<string name="proximity_enable_server">GATT Server enabled</string>
+	<string name="proximity_server_error">GATT Server failed to start (error %d).</string>
     
     <string name="proximity_about_text">PROXIMITY profile allows you to connect to multiple Proximity sensors.
         \nYou can find your valuables attached with Proximity tag by pressing the Locate button next to your device.
