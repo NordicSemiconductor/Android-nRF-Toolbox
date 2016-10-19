@@ -21,6 +21,7 @@
  */
 package no.nordicsemi.android.nrftoolbox.profile;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
@@ -81,12 +82,12 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 	 * The log session or null if nRF Logger is not installed.
 	 */
 	protected ILogSession mLogSession;
+	private final Context mContext;
+	private final Handler mHandler;
 	protected BluetoothDevice mBluetoothDevice;
 	protected E mCallbacks;
-	private Handler mHandler;
 	private BluetoothGatt mBluetoothGatt;
 	private BleManagerGattCallback mGattCallback;
-	private Context mContext;
 	/**
 	 * This flag is set to false only when the {@link #shouldAutoConnect()} method returns true and the device got disconnected without calling {@link #disconnect()} method.
 	 * If {@link #shouldAutoConnect()} returns false (default) this is always set to true.
@@ -97,6 +98,43 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 	private int mConnectionState = BluetoothGatt.STATE_DISCONNECTED;
 	/** Last received battery value or -1 if value wasn't received. */
 	private int mBatteryValue = -1;
+
+	private final BroadcastReceiver mBluetoothStateBroadcastReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(final Context context, final Intent intent) {
+			final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.STATE_OFF);
+			final int previousState = intent.getIntExtra(BluetoothAdapter.EXTRA_PREVIOUS_STATE, BluetoothAdapter.STATE_OFF);
+
+			final String stateString = "[Broadcast] Action received: " + BluetoothAdapter.ACTION_STATE_CHANGED + ", state changed to " + state2String(state);
+			Logger.d(mLogSession, stateString);
+
+			switch (state) {
+				case BluetoothAdapter.STATE_TURNING_OFF:
+				case BluetoothAdapter.STATE_OFF:
+					if (mConnected && previousState != BluetoothAdapter.STATE_TURNING_OFF && previousState != BluetoothAdapter.STATE_OFF) {
+						// The connection is killed by the system, no need to gently disconnect
+						mGattCallback.notifyDeviceDisconnected(mBluetoothDevice);
+						close();
+					}
+					break;
+			}
+		}
+
+		private String state2String(final int state) {
+			switch (state) {
+				case BluetoothAdapter.STATE_TURNING_ON:
+					return "TURNING ON";
+				case BluetoothAdapter.STATE_ON:
+					return "ON";
+				case BluetoothAdapter.STATE_TURNING_OFF:
+					return "TURNING OFF";
+				case BluetoothAdapter.STATE_OFF:
+					return "OFF";
+				default:
+					return "UNKNOWN (" + state + ")";
+			}
+		}
+	};
 
 	private BroadcastReceiver mBondingBroadcastReceiver = new BroadcastReceiver() {
 		@Override
@@ -155,10 +193,6 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 	public BleManager(final Context context) {
 		mContext = context;
 		mHandler = new Handler();
-
-		// Register bonding broadcast receiver
-		context.registerReceiver(mBondingBroadcastReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
-		context.registerReceiver(mPairingRequestBroadcastReceiver, new IntentFilter("android.bluetooth.device.action.PAIRING_REQUEST"/*BluetoothDevice.ACTION_PAIRING_REQUEST*/));
 	}
 
 	/**
@@ -210,6 +244,11 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 				Logger.d(mLogSession, "gatt.close()");
 				mBluetoothGatt.close();
 				mBluetoothGatt = null;
+			} else {
+				// Register bonding broadcast receiver
+				mContext.registerReceiver(mBluetoothStateBroadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+				mContext.registerReceiver(mBondingBroadcastReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
+				mContext.registerReceiver(mPairingRequestBroadcastReceiver, new IntentFilter("android.bluetooth.device.action.PAIRING_REQUEST"/*BluetoothDevice.ACTION_PAIRING_REQUEST*/));
 			}
 		}
 
@@ -273,6 +312,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 	 */
 	public void close() {
 		try {
+			mContext.unregisterReceiver(mBluetoothStateBroadcastReceiver);
 			mContext.unregisterReceiver(mBondingBroadcastReceiver);
 			mContext.unregisterReceiver(mPairingRequestBroadcastReceiver);
 		} catch (Exception e) {
@@ -897,6 +937,22 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 		 */
 		protected abstract void onDeviceDisconnected();
 
+		private void notifyDeviceDisconnected(final BluetoothDevice device) {
+			mConnected = false;
+			mConnectionState = BluetoothGatt.STATE_DISCONNECTED;
+			if (mUserDisconnected) {
+				Logger.i(mLogSession, "Disconnected");
+				mCallbacks.onDeviceDisconnected(device);
+				close();
+			} else {
+				Logger.w(mLogSession, "Connection lost");
+				mCallbacks.onLinklossOccur(device);
+				// We are not closing the connection here as the device should try to reconnect automatically.
+				// This may be only called when the shouldAutoConnect() method returned true.
+			}
+			onDeviceDisconnected();
+		}
+
 		/**
 		 * Callback reporting the result of a characteristic read operation.
 		 *
@@ -1023,20 +1079,8 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 					if (status != BluetoothGatt.GATT_SUCCESS)
 						Logger.w(mLogSession, "Error: (0x" + Integer.toHexString(status) + "): " + GattError.parseConnectionError(status));
 
-					mConnected = false;
-					mConnectionState = BluetoothGatt.STATE_DISCONNECTED;
 					mOperationInProgress = true; // no more calls are possible
-					if (mUserDisconnected) {
-						Logger.i(mLogSession, "Disconnected");
-						mCallbacks.onDeviceDisconnected(gatt.getDevice());
-						close();
-					} else {
-						Logger.w(mLogSession, "Connection lost");
-						mCallbacks.onLinklossOccur(gatt.getDevice());
-						// We are not closing the connection here as the device should try to reconnect automatically.
-						// This may be only called when the shouldAutoConnect() method returned true.
-					}
-					onDeviceDisconnected();
+					notifyDeviceDisconnected(gatt.getDevice());
 					return;
 				}
 

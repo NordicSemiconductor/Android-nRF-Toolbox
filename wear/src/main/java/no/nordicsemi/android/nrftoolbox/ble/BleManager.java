@@ -21,6 +21,7 @@
  */
 package no.nordicsemi.android.nrftoolbox.ble;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
@@ -74,9 +75,9 @@ public class BleManager implements BleProfileApi {
 
 	protected final BleManagerCallbacks mCallbacks;
 	private final Context mContext;
+	private final Handler mHandler;
 	protected BluetoothDevice mBluetoothDevice;
 	protected BleProfile mProfile;
-	private Handler mHandler;
 	private BluetoothGatt mBluetoothGatt;
 	private BleManagerGattCallback mGattCallback;
 	/**
@@ -84,13 +85,30 @@ public class BleManager implements BleProfileApi {
 	 * If {@link #shouldAutoConnect()} returns false (default) this is always set to true.
 	 */
 	private boolean mUserDisconnected;
-	/**
-	 * Flag set to true when the device is connected.
-	 */
+	/** Flag set to true when the device is connected. */
 	private boolean mConnected;
 	private int mConnectionState = BluetoothGatt.STATE_DISCONNECTED;
 	/** Last received battery value or -1 if value wasn't received. */
 	private int mBatteryValue = -1;
+
+	private final BroadcastReceiver mBluetoothStateBroadcastReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(final Context context, final Intent intent) {
+			final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.STATE_OFF);
+			final int previousState = intent.getIntExtra(BluetoothAdapter.EXTRA_PREVIOUS_STATE, BluetoothAdapter.STATE_OFF);
+
+			switch (state) {
+				case BluetoothAdapter.STATE_TURNING_OFF:
+				case BluetoothAdapter.STATE_OFF:
+					if (mConnected && previousState != BluetoothAdapter.STATE_TURNING_OFF && previousState != BluetoothAdapter.STATE_OFF) {
+						// The connection is killed by the system, no need to gently disconnect
+						mGattCallback.notifyDeviceDisconnected(mBluetoothDevice);
+						close();
+					}
+					break;
+			}
+		}
+	};
 
 	private BroadcastReceiver mBondingBroadcastReceiver = new BroadcastReceiver() {
 		@Override
@@ -165,7 +183,7 @@ public class BleManager implements BleProfileApi {
 	}
 
 	/**
-	 * Connects to the Bluetooth Smart device
+	 * Connects to the Bluetooth Smart device.
 	 *
 	 * @param device a device to connect to
 	 */
@@ -177,6 +195,10 @@ public class BleManager implements BleProfileApi {
 			if (mBluetoothGatt != null) {
 				mBluetoothGatt.close();
 				mBluetoothGatt = null;
+			} else {
+				// Register bonding broadcast receiver
+				mContext.registerReceiver(mBluetoothStateBroadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+				mContext.registerReceiver(mBondingBroadcastReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
 			}
 		}
 
@@ -236,6 +258,7 @@ public class BleManager implements BleProfileApi {
 	 */
 	public void close() {
 		try {
+			mContext.unregisterReceiver(mBluetoothStateBroadcastReceiver);
 			mContext.unregisterReceiver(mBondingBroadcastReceiver);
 		} catch (Exception e) {
 			// the receiver must have been not registered or unregistered before
@@ -488,6 +511,21 @@ public class BleManager implements BleProfileApi {
 		private boolean mInitInProgress;
 		private boolean mOperationInProgress;
 
+		private void notifyDeviceDisconnected(final BluetoothDevice device) {
+			mConnected = false;
+			mConnectionState = BluetoothGatt.STATE_DISCONNECTED;
+			if (mUserDisconnected) {
+				mCallbacks.onDeviceDisconnected(device);
+				close();
+			} else {
+				mCallbacks.onLinklossOccur(device);
+				// We are not closing the connection here as the device should try to reconnect automatically.
+				// This may be only called when the shouldAutoConnect() method returned true.
+			}
+			if (mProfile != null)
+				mProfile.release();
+		}
+
 		private void onError(final BluetoothDevice device, final String message, final int errorCode) {
 			mCallbacks.onError(device, message, errorCode);
 			if (mProfile != null)
@@ -529,19 +567,8 @@ public class BleManager implements BleProfileApi {
 				}, 600);
 			} else {
 				if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-					mConnected = false;
-					mConnectionState = BluetoothGatt.STATE_DISCONNECTED;
 					mOperationInProgress = true; // no more calls are possible
-					if (mUserDisconnected) {
-						mCallbacks.onDeviceDisconnected(gatt.getDevice());
-						close();
-					} else {
-						mCallbacks.onLinklossOccur(gatt.getDevice());
-						// We are not closing the connection here as the device should try to reconnect automatically.
-						// This may be only called when the shouldAutoConnect() method returned true.
-					}
-					if (mProfile != null)
-						mProfile.release();
+					notifyDeviceDisconnected(gatt.getDevice());
 					return;
 				}
 

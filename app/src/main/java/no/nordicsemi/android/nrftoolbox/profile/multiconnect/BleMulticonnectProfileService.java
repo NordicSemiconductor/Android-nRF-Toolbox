@@ -85,10 +85,6 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 		public void onReceive(final Context context, final Intent intent) {
 			final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.STATE_OFF);
 			final int previousState = intent.getIntExtra(BluetoothAdapter.EXTRA_PREVIOUS_STATE, BluetoothAdapter.STATE_OFF);
-			final ILogger logger = getBinder();
-
-			final String stateString = "[Broadcast] Action received: " + BluetoothAdapter.ACTION_STATE_CHANGED + ", state changed to " + state2String(state);
-			logger.log(LogContract.Log.Level.DEBUG, stateString);
 
 			switch (state) {
 				case BluetoothAdapter.STATE_ON:
@@ -99,21 +95,6 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 					if (previousState != BluetoothAdapter.STATE_TURNING_OFF && previousState != BluetoothAdapter.STATE_OFF)
 						onBluetoothDisabled();
 					break;
-			}
-		}
-
-		private String state2String(final int state) {
-			switch (state) {
-				case BluetoothAdapter.STATE_TURNING_ON:
-					return "TURNING ON";
-				case BluetoothAdapter.STATE_ON:
-					return "ON";
-				case BluetoothAdapter.STATE_TURNING_OFF:
-					return "TURNING OFF";
-				case BluetoothAdapter.STATE_OFF:
-					return "OFF";
-				default:
-					return "UNKNOWN (" + state + ")";
 			}
 		}
 	};
@@ -404,10 +385,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 	 * Method called when Bluetooth Adapter has been disabled.
 	 */
 	protected void onBluetoothDisabled() {
-		for (final BleManager<BleManagerCallbacks> manager : mBleManagers.values()) {
-			// Devices were disconnected, no need to disconnect manually.
-			manager.close();
-		}
+		// do nothing, BleManagers have their own Bluetooth State broadcast received and will close themselves
 	}
 
 	/**
