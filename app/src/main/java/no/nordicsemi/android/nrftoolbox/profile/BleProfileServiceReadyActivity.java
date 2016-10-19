@@ -427,7 +427,6 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 				setDefaultUI();
 				showDeviceScanningDialog(getFilterUUID());
 			} else {
-				Logger.v(mLogSession, "Disconnecting...");
 				mService.disconnect();
 			}
 		} else {
