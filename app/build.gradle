@@ -1,15 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 24
+    compileSdkVersion 25
     buildToolsVersion '24.0.2'
 
     defaultConfig {
         applicationId "no.nordicsemi.android.nrftoolbox"
         minSdkVersion 18
-        targetSdkVersion 24
-        versionCode 52
-        versionName "2.0.0"
+        targetSdkVersion 25
+        versionCode 53
+        versionName "2.1.0"
     }
     buildTypes {
         release {
@@ -32,8 +32,8 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.google.android.gms:play-services-wearable:9.2.0'
-    compile 'com.android.support:appcompat-v7:24.2.1'
-    compile 'com.android.support:design:24.2.1'
+    compile 'com.android.support:appcompat-v7:25.0.0'
+    compile 'com.android.support:design:25.0.0'
     compile 'no.nordicsemi.android.support.v18:scanner:0.2.0'
     compile 'no.nordicsemi.android:log:2.0.0'
     compile('org.simpleframework:simple-xml:2.7.1') {

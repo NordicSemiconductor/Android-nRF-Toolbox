@@ -25,6 +25,11 @@
 	<string name="app_name">nRF Toolbox</string>
 	<string name="font_path">fonts/trebucbd.ttf</string>
 	<string name="normal_font_path">fonts/trebuc.ttf</string>
+
+	<string name="shortcut_dfu_short">DFU</string>
+	<string name="shortcut_dfu_long">Device Firmware Update</string>
+	<string name="shortcut_uart_short">UART</string>
+	<string name="shortcut_uart_long">Nordic UART Service</string>
 	
 	<string name="ok">OK</string>
 	<string name="yes">Yes</string>
