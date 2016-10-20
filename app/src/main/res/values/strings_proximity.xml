@@ -32,19 +32,11 @@
 	<string name="proximity_action_silent">Silent</string>
 	<string name="proximity_default_device_name">Proximity Tag</string>
 
-	<plurals name="proximity_notification_text_nothing_connected">
-		<item quantity="one">%s is disconnected.</item>
-		<item quantity="few">%d tags are disconnected.</item>
-		<item quantity="many">%d tags are disconnected.</item>
-		<item quantity="other">%d tags are disconnected.</item>
-	</plurals>
+	<string name="proximity_notification_text_nothing_connected_one_disconnected">%s is disconnected.</string>
+	<string name="proximity_notification_text_nothing_connected_number_disconnected">%d is disconnected.</string>
 	<string name="proximity_notification_text">%s connected</string>
-	<plurals name="proximity_notification_summary_text">
-		<item quantity="one">%s is connected.</item>
-		<item quantity="few">%d tags connected.</item>
-		<item quantity="many">%d tags connected.</item>
-		<item quantity="other">%d tags connected.</item>
-	</plurals>
+	<string name="proximity_notification_summary_text_name">%s is connected.</string>
+	<string name="proximity_notification_summary_text_number">%d is connected.</string>
 	<string name="proximity_notification_linkloss_alert">%s is getting away!</string>
 
 	<string name="proximity_devices_title">YOUR TAGS</string>

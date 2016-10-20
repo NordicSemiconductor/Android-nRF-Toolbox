@@ -278,9 +278,11 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 			final int numberOfManagedDevices = managedDevices.size();
 			if (numberOfManagedDevices == 1) {
 				final String name = getDeviceName(managedDevices.get(0));
-				builder.setContentText(getResources().getQuantityString(R.plurals.proximity_notification_text_nothing_connected, numberOfManagedDevices, name));
+				// We don't use plurals here, as we only have the default language and 'one' is not in every language (versions differ in %d or %s)
+				// and throw an exception in e.g. in Chinese
+				builder.setContentText(getString(R.string.proximity_notification_text_nothing_connected_one_disconnected, name));
 			} else {
-				builder.setContentText(getResources().getQuantityString(R.plurals.proximity_notification_text_nothing_connected, numberOfManagedDevices, numberOfManagedDevices));
+				builder.setContentText(getString(R.string.proximity_notification_text_nothing_connected_number_disconnected, numberOfManagedDevices));
 			}
 		} else {
 			// There are some proximity tags connected
@@ -289,9 +291,9 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 			final int numberOfConnectedDevices = connectedDevices.size();
 			if (numberOfConnectedDevices == 1) {
 				final String name = getDeviceName(connectedDevices.get(0));
-				text.append(getResources().getQuantityString(R.plurals.proximity_notification_summary_text, numberOfConnectedDevices, name));
+				text.append(getString(R.string.proximity_notification_summary_text_name, name));
 			} else {
-				text.append(getResources().getQuantityString(R.plurals.proximity_notification_summary_text, numberOfConnectedDevices, numberOfConnectedDevices));
+				text.append(getString(R.string.proximity_notification_summary_text_number, numberOfConnectedDevices));
 			}
 
 			// If there are some disconnected devices, also print them
@@ -302,14 +304,14 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 				for (final BluetoothDevice device : managedDevices) {
 					if (!isConnected(device)) {
 						final String name = getDeviceName(device);
-						text.append(getResources().getQuantityString(R.plurals.proximity_notification_text_nothing_connected, numberOfDisconnectedDevices, name));
+						text.append(getString(R.string.proximity_notification_text_nothing_connected_one_disconnected, name));
 						break;
 					}
 				}
 			} else if (numberOfDisconnectedDevices > 1) {
 				text.append(", ");
 				// If there are more, just write number of them
-				text.append(getResources().getQuantityString(R.plurals.proximity_notification_text_nothing_connected, numberOfDisconnectedDevices, numberOfDisconnectedDevices));
+				text.append(getString(R.string.proximity_notification_text_nothing_connected_number_disconnected, numberOfDisconnectedDevices));
 			}
 			builder.setContentText(text);
 		}
