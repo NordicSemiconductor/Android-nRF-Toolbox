@@ -105,6 +105,8 @@ public class UARTControlFragment extends Fragment implements GridView.OnItemClic
 			final Command command = (Command)mAdapter.getItem(position);
 			final Command.Eol eol = command.getEol();
 			String text = command.getCommand();
+			if (text == null)
+				text = "";
 			switch (eol) {
 				case CR_LF:
 					text = text.replaceAll("\n", "\r\n");
