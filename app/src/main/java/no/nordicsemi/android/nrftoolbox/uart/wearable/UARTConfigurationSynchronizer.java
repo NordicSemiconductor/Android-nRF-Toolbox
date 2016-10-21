@@ -77,7 +77,8 @@ public class UARTConfigurationSynchronizer {
 	 * Closes the synchronizer.
 	 */
 	public void close() {
-		mGoogleApiClient.disconnect();
+		if (mGoogleApiClient != null)
+			mGoogleApiClient.disconnect();
 		mGoogleApiClient = null;
 	}
 
