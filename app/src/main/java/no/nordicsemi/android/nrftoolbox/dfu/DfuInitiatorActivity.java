@@ -71,6 +71,7 @@ public class DfuInitiatorActivity extends AppCompatActivity implements ScannerFr
 		if (intent.hasExtra(DfuService.EXTRA_INIT_FILE_PATH))
 			service.putExtra(DfuService.EXTRA_INIT_FILE_PATH, initPath);
 		service.putExtra(DfuService.EXTRA_KEEP_BOND, keepBond);
+		service.putExtra(DfuService.EXTRA_UNSAFE_EXPERIMENTAL_BUTTONLESS_DFU, true);
 		startService(service);
 		finish();
 	}
