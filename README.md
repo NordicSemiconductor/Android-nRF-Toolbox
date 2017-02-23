@@ -37,6 +37,8 @@ The UART profile allows for fast prototyping of devices. The service itself it v
 
 Since nRF Toolbox version 1.16.0 the UART profile supports also Android Wear devices (watches). If you have an Android watch, the application will automatically be installed on it after you install or update the application on the phone. Before you start playing with the watch, please open the UART profile on the phone so it could share your configurations to all wearables.
 
+Android Wear 2.0 support has been added in nRF Toolbox version 2.2.2. Now, after installing the app on the phone, you will be notified on the watch to download the watch-APK onto the watch. The app on the watch is not standalone. UART configurations must be configured on the phone.
+
 The wearable application may work in 2 modes: as a remote control of the phone, or directly connected to a UART device.
 
 1. Connect your phone to the UART device. After few seconds you should get a notification on the watch that your device is now connected. Swipe it left to see Disconnect button (will send a message to the phone to terminate the connection with UART target) and Open button. Click the Open button to see a list of your UART configurations. Click one and see the list of active buttons. When pressed the button will send a message to the phone using Google Play Services and the phone will send the command to the target device. In this mode you may have more than one watch connected to the phone and use both as remote controls.
