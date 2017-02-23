@@ -194,7 +194,7 @@
 				style="@style/Widget.List"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
+				android:layout_marginBottom="8dp"
 				android:layout_marginLeft="@dimen/feature_horizontal_margin"
 				android:layout_marginRight="@dimen/feature_horizontal_margin"
 				android:layout_marginTop="15dp"
@@ -241,6 +241,14 @@
 					android:text="@string/dfu_uploading_percentage_label"
 					android:visibility="invisible"/>
 			</LinearLayout>
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginRight="@dimen/feature_horizontal_margin"
+				android:layout_gravity="right"
+				android:text="@string/dfu_lib_version"
+				android:textSize="12sp"/>
 		</LinearLayout>
 
 		<Button

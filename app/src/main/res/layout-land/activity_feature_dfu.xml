@@ -64,6 +64,7 @@
 			android:textAppearance="?android:attr/textAppearanceLarge"/>
 
 		<LinearLayout
+			android:id="@+id/dfu_container"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginLeft="@dimen/feature_horizontal_margin"
@@ -78,7 +79,7 @@
 				style="@style/Widget.List"
 				android:layout_width="0dp"
 				android:layout_height="160dp"
-				android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
+				android:layout_marginBottom="8dp"
 				android:layout_marginLeft="4dp"
 				android:layout_marginTop="@dimen/feature_vertical_margin_top"
 				android:layout_weight="1"
@@ -200,7 +201,7 @@
 				style="@style/Widget.List"
 				android:layout_width="0dp"
 				android:layout_height="160dp"
-				android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
+				android:layout_marginBottom="8dp"
 				android:layout_marginLeft="14dp"
 				android:layout_marginRight="4dp"
 				android:layout_marginTop="@dimen/feature_vertical_margin_top"
@@ -249,6 +250,15 @@
 					android:visibility="invisible"/>
 			</LinearLayout>
 		</LinearLayout>
+
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="@dimen/feature_horizontal_margin"
+			android:layout_alignParentRight="true"
+			android:layout_below="@+id/dfu_container"
+			android:text="@string/dfu_lib_version"
+			android:textSize="12dp"/>
 
 		<Button
 			android:id="@+id/action_connect"

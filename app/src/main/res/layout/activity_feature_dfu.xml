@@ -62,11 +62,32 @@
 			android:textAllCaps="true"
 			android:textAppearance="?android:attr/textAppearanceLarge"/>
 
+		<Button
+			android:id="@+id/action_connect"
+			style="@style/Widget.Connect"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentBottom="true"
+			android:layout_centerHorizontal="true"
+			android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
+			android:onClick="onConnectClicked"
+			android:text="@string/action_select"/>
+
+		<ImageView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentBottom="true"
+			android:layout_centerHorizontal="true"
+			android:layout_marginBottom="6dp"
+			android:src="@drawable/background_title"/>
+
 		<LinearLayout
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:gravity="center_horizontal"
-			android:orientation="vertical">
+			android:orientation="vertical"
+			android:layout_alignParentTop="true"
+			android:layout_alignParentStart="true">
 
 			<!-- Application section -->
 
@@ -107,7 +128,7 @@
 							android:layout_weight="1"
 							android:ellipsize="middle"
 							android:freezesText="true"
-							android:singleLine="true"/>
+							android:lines="1"/>
 					</TableRow>
 
 					<TableRow
@@ -195,7 +216,7 @@
 				style="@style/Widget.List"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
+				android:layout_marginBottom="8dp"
 				android:layout_marginLeft="@dimen/feature_horizontal_margin"
 				android:layout_marginRight="@dimen/feature_horizontal_margin"
 				android:layout_marginTop="15dp"
@@ -242,26 +263,16 @@
 					android:text="@string/dfu_uploading_percentage_label"
 					android:visibility="invisible"/>
 			</LinearLayout>
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginRight="@dimen/feature_horizontal_margin"
+				android:layout_gravity="right"
+				android:text="@string/dfu_lib_version"
+				android:textSize="12sp"/>
 		</LinearLayout>
 
-		<Button
-			android:id="@+id/action_connect"
-			style="@style/Widget.Connect"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_alignParentBottom="true"
-			android:layout_centerHorizontal="true"
-			android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
-			android:onClick="onConnectClicked"
-			android:text="@string/action_select"/>
-
-		<ImageView
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_alignParentBottom="true"
-			android:layout_centerHorizontal="true"
-			android:layout_marginBottom="6dp"
-			android:src="@drawable/background_title"/>
 
 	</no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout>
 </LinearLayout>
