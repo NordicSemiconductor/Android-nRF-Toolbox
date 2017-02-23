@@ -51,6 +51,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.NotificationCompat;
@@ -651,11 +652,11 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			final ColorDrawable color = new ColorDrawable();
 			int darkColor = 0;
 			if (editMode) {
-				color.setColor(getResources().getColor(R.color.orange));
-				darkColor = getResources().getColor(R.color.dark_orange);
+				color.setColor(ContextCompat.getColor(this, R.color.orange));
+				darkColor = ContextCompat.getColor(this, R.color.dark_orange);
 			} else {
-				color.setColor(getResources().getColor(R.color.actionBarColor));
-				darkColor = getResources().getColor(R.color.actionBarColorDark);
+				color.setColor(ContextCompat.getColor(this, R.color.actionBarColor));
+				darkColor = ContextCompat.getColor(this, R.color.actionBarColorDark);
 			}
 			getSupportActionBar().setBackgroundDrawable(color);
 
@@ -671,8 +672,8 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 			// Since Lollipop the status bar color may also be changed
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-				final int colorFrom = getResources().getColor(editMode ? R.color.actionBarColorDark : R.color.dark_orange);
-				final int colorTo = getResources().getColor(!editMode ? R.color.actionBarColorDark : R.color.dark_orange);
+				final int colorFrom = ContextCompat.getColor(this, editMode ? R.color.actionBarColorDark : R.color.dark_orange);
+				final int colorTo = ContextCompat.getColor(this, !editMode ? R.color.actionBarColorDark : R.color.dark_orange);
 
 				final ValueAnimator anim = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
 				anim.setDuration(200);
