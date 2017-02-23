@@ -67,7 +67,7 @@ public class UARTConfigurationSynchronizer {
 			return;
 
 		mGoogleApiClient = new GoogleApiClient.Builder(context)
-				.addApi(Wearable.API)
+				.addApiIfAvailable(Wearable.API)
 				.addConnectionCallbacks(listener)
 				.build();
 		mGoogleApiClient.connect();
@@ -83,12 +83,19 @@ public class UARTConfigurationSynchronizer {
 	}
 
 	/**
+	 * Returns true if Wearable API has been connected.
+	 */
+	public boolean hasConnectedApi() {
+		return mGoogleApiClient != null && mGoogleApiClient.isConnected() && mGoogleApiClient.hasConnectedApi(Wearable.API);
+	}
+
+	/**
 	 * Synchronizes the UART configurations between handheld and wearables.
 	 * Call this when configuration has been created or altered.
 	 * @return pending result
 	 */
 	public PendingResult<DataApi.DataItemResult> onConfigurationAddedOrEdited(final long id, final UartConfiguration configuration) {
-		if (mGoogleApiClient == null || !mGoogleApiClient.isConnected())
+		if (!hasConnectedApi())
 			return null;
 
 		final PutDataMapRequest mapRequest = PutDataMapRequest.create(Constants.UART.CONFIGURATIONS + "/" + id);
@@ -115,7 +122,7 @@ public class UARTConfigurationSynchronizer {
 	 * @return pending result
 	 */
 	public PendingResult<DataApi.DeleteDataItemsResult> onConfigurationDeleted(final long id) {
-		if (mGoogleApiClient == null || !mGoogleApiClient.isConnected())
+		if (!hasConnectedApi())
 			return null;
 		return Wearable.DataApi.deleteDataItems(mGoogleApiClient, id2Uri(id));
 	}

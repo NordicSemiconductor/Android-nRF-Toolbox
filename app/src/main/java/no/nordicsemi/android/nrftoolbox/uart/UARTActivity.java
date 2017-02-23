@@ -183,6 +183,10 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	 */
 	@Override
 	public void onConnected(final Bundle bundle) {
+		// Ensure the Wearable API was connected
+		if (!mWearableSynchronizer.hasConnectedApi())
+			return;
+
 		if (!mPreferences.getBoolean(PREFS_WEAR_SYNCED, false)) {
 			new Thread(new Runnable() {
 				@Override
