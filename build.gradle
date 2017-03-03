@@ -5,7 +5,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.2'
+        classpath 'com.android.tools.build:gradle:2.2.3'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -14,6 +14,11 @@ buildscript {
 
 allprojects {
     repositories {
+        maven {
+            // nRF Toolbox is using Play Service 7.8.87 in order to make the app working in China:
+            // https://developer.android.com/training/wearables/apps/creating-app-china.html#ChinaSDK
+            url "${rootProject.projectDir}/google-play-services-7-8-87"
+        }
         jcenter()
     }
 }
