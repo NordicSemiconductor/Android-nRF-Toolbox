@@ -112,7 +112,7 @@
 	</style>
 
 	<style name="AppThemeBase" parent="@style/Theme.AppCompat.Light.NoActionBar">
-		<item name="android:windowBackground">@drawable/background_image</item>
+		<item name="android:windowBackground">@color/nordicBackground</item>
 		<item name="android:spinnerItemStyle">@style/ActionBar.SpinnerTitle</item>
 		<item name="actionMenuTextColor">@color/actionBarMenuTextColor</item>
 		<item name="alertDialogTheme">@style/AppTheme.DialogTheme</item>
@@ -142,7 +142,7 @@
 	</style>
 
 	<style name="AppTheme.Fullscreen" parent="@style/Theme.AppCompat.Light.NoActionBar">
-		<item name="android:windowBackground">@drawable/background_image</item>
+		<item name="android:windowBackground">@color/nordicBackground</item>
 	</style>
 
 </resources>

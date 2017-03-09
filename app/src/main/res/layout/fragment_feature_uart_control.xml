@@ -23,7 +23,7 @@
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:background="@drawable/background_image"
+	android:background="@color/nordicBackground"
 	android:orientation="vertical">
 
 	<!-- The size of text below must be fixed, therefore dp are used instead of sp -->
