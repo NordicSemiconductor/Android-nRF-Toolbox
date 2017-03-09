@@ -8,8 +8,8 @@ android {
         applicationId "no.nordicsemi.android.nrftoolbox"
         minSdkVersion 18
         targetSdkVersion 25
-        versionCode 57
-        versionName "2.2.2"
+        versionCode 58
+        versionName "2.3.0"
     }
     buildTypes {
         release {
@@ -31,10 +31,10 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:25.0.1'
-    compile 'com.android.support:design:25.0.1'
+    compile 'com.android.support:appcompat-v7:25.2.0'
+    compile 'com.android.support:design:25.2.0'
     compile 'no.nordicsemi.android.support.v18:scanner:1.0.0'
-    compile 'no.nordicsemi.android:log:2.0.0'
+    compile 'no.nordicsemi.android:log:2.1.0'
     compile('org.simpleframework:simple-xml:2.7.1') {
         exclude group: 'stax', module: 'stax-api'
         exclude group: 'xpp3', module: 'xpp3'
