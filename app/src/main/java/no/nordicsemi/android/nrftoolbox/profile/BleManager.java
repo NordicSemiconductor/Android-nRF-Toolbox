@@ -388,7 +388,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 			return false;
 
 		Logger.i(mLogSession, "Service Changed characteristic found on a bonded device");
-		return enableIndications(scCharacteristic);
+		return internalEnableIndications(scCharacteristic);
 	}
 
 	/**
