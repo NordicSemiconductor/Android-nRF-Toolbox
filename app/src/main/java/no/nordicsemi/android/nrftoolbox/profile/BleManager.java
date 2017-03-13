@@ -114,8 +114,9 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 					if (mConnected && previousState != BluetoothAdapter.STATE_TURNING_OFF && previousState != BluetoothAdapter.STATE_OFF) {
 						// The connection is killed by the system, no need to gently disconnect
 						mGattCallback.notifyDeviceDisconnected(mBluetoothDevice);
-						close();
 					}
+					// Calling close() will prevent the STATE_OFF event from being logged (this receiver will be unregistered). But it doesn't matter.
+					close();
 					break;
 			}
 		}
@@ -241,9 +242,34 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 
 		synchronized (mLock) {
 			if (mBluetoothGatt != null) {
-				Logger.d(mLogSession, "gatt.close()");
-				mBluetoothGatt.close();
-				mBluetoothGatt = null;
+				// There are 2 ways of reconnecting to the same device:
+				// 1. Reusing the same BluetoothGatt object and calling connect() on it or
+				// 2. Closing it and reopening a new instance of BluetoothGatt object.
+				// The gatt.close() is an asynchronous method. It requires some time before it's finished and
+				// device.connectGatt(...) can't be called immediately or service discovery
+				// may never finish on some older devices (Nexus 4, Android 5.0.1).
+				// However, the autoConnect flag settings may have changed. If it did, try closing and opening new BluetoothGatt
+				// despite the difficulties.
+				final boolean autoConnect = shouldAutoConnect();
+				if (autoConnect == mUserDisconnected) { // autoConnect has changed. Previously mUserDisconnected was set to !autoConnect (see below)
+					Logger.d(mLogSession, "gatt.close()");
+					mBluetoothGatt.close();
+					mBluetoothGatt = null;
+					try {
+						Logger.d(mLogSession, "wait(200)");
+						Thread.sleep(200); // Is 200 ms enough?
+					} catch (final InterruptedException e) {
+						// Ignore
+					}
+				} else {
+					// Instead, the gatt.connect() method will be used to reconnect to the same device.
+					Logger.v(mLogSession, "Connecting...");
+					mConnectionState = BluetoothGatt.STATE_CONNECTING;
+					mCallbacks.onDeviceConnecting(device);
+					Logger.d(mLogSession, "gatt.connect()");
+					mBluetoothGatt.connect();
+					return;
+				}
 			} else {
 				// Register bonding broadcast receiver
 				mContext.registerReceiver(mBluetoothStateBroadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
@@ -890,7 +916,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 		private final Queue<Request> mTaskQueue = new LinkedList<>();
 		private Deque<Request> mInitQueue;
 		private boolean mInitInProgress;
-		private boolean mOperationInProgress;
+		private boolean mOperationInProgress = true; // Initially true to block operations before services are discovered.
 
 		/**
 		 * This method should return <code>true</code> when the gatt device supports the required services.
@@ -1057,12 +1083,27 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 				 * If the mBluetoothGatt.discoverServices() method would be invoked here, if would returned cached services,
 				 * as the SC indication wouldn't be received yet.
 				 * Therefore we have to postpone the service discovery operation until we are (almost, as there is no such callback) sure, that it had to be handled.
-				 * Our tests has shown that 600 ms is enough. It is important to call it AFTER receiving the SC indication, but not necessarily
+				 * Our tests has shown that 600 ms is enough(*). It is important to call it AFTER receiving the SC indication, but not necessarily
 				 * after Android finishes the internal service discovery.
 				 *
 				 * NOTE: This applies only for bonded devices with Service Changed characteristic, but to be sure we will postpone
 				 * service discovery for all devices.
+				 *
+				 * (*) - While testing on Nexus 4 with Android 5.0.1 it appeared that 600 ms may be not enough.
+				 *       The service discovery initiated by the system was still in progress while gatt.serviceDiscovery() below
+				 *       was called and (due to a bug on older Android versions, where there can be only one callback registered)
+				 *       the onServicesDiscovered(...) callback has never been called.
 				 */
+				// On Android Nougat or never devices no delay is necessary any more.
+				int delay = 0;
+				// TODO: modify the delay to match your use case. More services require longer discovery time. Use Nexus 4, 7 or other phone with bad throughput.
+				// The delays here are based on a guess. Newer phones should handle service discovery it faster, I guess.
+				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+					delay = 600;
+				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+					delay = 1200;
+				if (delay > 0)
+					Logger.d(mLogSession, "wait(" + delay + ")");
 				mHandler.postDelayed(new Runnable() {
 					@Override
 					public void run() {
@@ -1073,14 +1114,16 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 							gatt.discoverServices();
 						}
 					}
-				}, 600);
+				}, delay);
 			} else {
 				if (newState == BluetoothProfile.STATE_DISCONNECTED) {
 					if (status != BluetoothGatt.GATT_SUCCESS)
 						Logger.w(mLogSession, "Error: (0x" + Integer.toHexString(status) + "): " + GattError.parseConnectionError(status));
 
 					mOperationInProgress = true; // no more calls are possible
-					notifyDeviceDisconnected(gatt.getDevice());
+					if (mConnected) {
+						notifyDeviceDisconnected(gatt.getDevice());
+					}
 					return;
 				}
 
