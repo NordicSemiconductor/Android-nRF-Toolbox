@@ -62,7 +62,14 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 	}
 
 	public void onDeviceAdded(final BluetoothDevice device) {
-		notifyItemInserted(mDevices.size() - 1);
+		final int position = mDevices.indexOf(device);
+		if (position == -1) {
+			notifyItemInserted(mDevices.size() - 1);
+		} else {
+			// This may happen when Bluetooth adapter was switched off and on again
+			// while there were devices on the list.
+			notifyItemChanged(position);
+		}
 	}
 
 	public void onDeviceRemoved(final BluetoothDevice device) {
