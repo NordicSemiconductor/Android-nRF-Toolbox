@@ -210,6 +210,14 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	/**
+	 * Returns a handler that is created in onCreate().
+	 * The handler may be used to postpone execution of some operations or to run them in UI thread.
+	 */
+	protected Handler getHandler() {
+		return mHandler;
+	}
+
+	/**
 	 * Returns the binder implementation. This must return class implementing the additional manager interface that may be used in the bound activity.
 	 *
 	 * @return the service binder
@@ -361,6 +369,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 		mBluetoothDevice = null;
 		mDeviceName = null;
 		mLogSession = null;
+		mHandler = null;
 	}
 
 	/**

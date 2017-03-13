@@ -73,6 +73,9 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	 */
 	private List<BluetoothDevice> mDevicesWithAlarm;
 
+	private int mAttempt;
+	private final static int MAX_ATTEMPTS = 1;
+
 	/**
 	 * This local binder is an interface for the bonded activity to operate with the proximity sensor
 	 */
@@ -170,18 +173,33 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 
 	@Override
 	protected void onBluetoothEnabled() {
-		// Start the GATT Server only if Bluetooth is enabled
-		mServerManager.openGattServer(this, new ProximityServerManager.OnServerOpenCallback() {
+		mAttempt = 0;
+		getHandler().post(new Runnable() {
 			@Override
-			public void onGattServerOpen() {
-				// We are now ready to reconnect devices
-				ProximityService.super.onBluetoothEnabled();
-			}
+			public void run() {
+				final Runnable that = this;
+				// Start the GATT Server only if Bluetooth is enabled
+				mServerManager.openGattServer(ProximityService.this, new ProximityServerManager.OnServerOpenCallback() {
+					@Override
+					public void onGattServerOpen() {
+						// We are now ready to reconnect devices
+						ProximityService.super.onBluetoothEnabled();
+					}
 
-			@Override
-			public void onGattServerFailed(final int error) {
-				mServerManager.closeGattServer();
-				showToast(getString(R.string.proximity_server_error, error));
+					@Override
+					public void onGattServerFailed(final int error) {
+						mServerManager.closeGattServer();
+
+						if (mAttempt < MAX_ATTEMPTS) {
+							mAttempt++;
+							getHandler().postDelayed(that, 2000);
+						} else {
+							showToast(getString(R.string.proximity_server_error, error));
+							// GATT server failed to start, but we may connect as a client
+							ProximityService.super.onBluetoothEnabled();
+						}
+					}
+				});
 			}
 		});
 	}

@@ -88,7 +88,15 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 
 			switch (state) {
 				case BluetoothAdapter.STATE_ON:
-					onBluetoothEnabled();
+					// On older phones (tested on Nexus 4 with Android 5.0.1) the Bluetooth requires some time
+					// after it has been enabled before some operations can start. Starting the GATT server here
+					// without a delay is very likely to cause a DeadObjectException from BluetoothManager#openGattServer(...).
+					mHandler.postDelayed(new Runnable() {
+						@Override
+						public void run() {
+							onBluetoothEnabled();
+						}
+					}, 600);
 					break;
 				case BluetoothAdapter.STATE_TURNING_OFF:
 				case BluetoothAdapter.STATE_OFF:
@@ -222,6 +230,14 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 			for (final BleManager<BleManagerCallbacks> manager : mBleManagers.values())
 				manager.log(level, messageRes, params);
 		}
+	}
+
+	/**
+	 * Returns a handler that is created in onCreate().
+	 * The handler may be used to postpone execution of some operations or to run them in UI thread.
+	 */
+	protected Handler getHandler() {
+		return mHandler;
 	}
 
 	/**
@@ -360,6 +376,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 	public void onDestroy() {
 		super.onDestroy();
 		onServiceStopped();
+		mHandler = null;
 	}
 
 	/**
