@@ -36,7 +36,9 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.StringRes;
+import android.util.Log;
 
+import java.lang.reflect.Method;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -389,6 +391,57 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 	}
 
 	/**
+	 * Enqueues creating bond request to the queue.
+	 * @return true if request has been enqueued, false if the device has not been connected
+	 */
+	protected final boolean createBond() {
+		return enqueue(Request.createBond());
+	}
+
+	/**
+	 * Creates a bond with the device. The device must be first set using {@link #connect(BluetoothDevice)} which will
+	 * try to connect to the device. If you need to pair with a device before connecting to it you may do it without
+	 * the use of BleManager object and connect after bond is established.
+	 * @return true if pairing has started, false if it was already paired or an immediate error occur.
+	 */
+	private boolean internalCreateBond() {
+		final BluetoothDevice device = mBluetoothDevice;
+		if (device == null)
+			return false;
+
+		if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
+			Logger.v(mLogSession, "Create bond request on already bonded device...");
+			Logger.i(mLogSession, "Device bonded");
+			return false;
+		}
+
+		Logger.v(mLogSession, "Starting pairing...");
+
+		boolean result = false;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+			Logger.d(mLogSession, "device.createBond()");
+			result = device.createBond();
+		} else {
+			/*
+			 * There is a createBond() method in BluetoothDevice class but for now it's hidden. We will call it using reflections. It has been revealed in KitKat (Api19)
+			 */
+			try {
+				final Method createBond = device.getClass().getMethod("createBond");
+				if (createBond != null) {
+					Logger.d(mLogSession, "device.createBond() (hidden)");
+					result = (Boolean) createBond.invoke(device);
+				}
+			} catch (final Exception e) {
+				Log.w(TAG, "An exception occurred while creating bond", e);
+			}
+		}
+
+		if (!result)
+			Log.w(TAG, "Creating bond failed");
+		return result;
+	}
+
+	/**
 	 * When the device is bonded and has the Generic Attribute service and the Service Changed characteristic this method enables indications on this characteristic.
 	 * In case one of the requirements is not fulfilled this method returns <code>false</code>.
 	 *
@@ -663,8 +716,9 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 	 * or automatically after the last enqueued one will finish.
 	 * <p>This method should be used to read and write data from the target device as it ensures that the last operation has finished
 	 * before a new one will be called.</p>
-	 * @param request new request to be performed
-	 * @return true if request has been enqueued, false if the device is not connected
+	 * @param request new request to be added to the queue.
+	 * @return true if request has been enqueued, false if the {@link #connect(BluetoothDevice)} method was not called before,
+	 * or the manager was closed using {@link #close()}.
 	 */
 	public boolean enqueue(final Request request) {
 		if (mGattCallback != null) {
@@ -685,6 +739,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 	 */
 	protected static final class Request {
 		private enum Type {
+			CREATE_BOND,
 			WRITE,
 			READ,
 			WRITE_DESCRIPTOR,
@@ -750,6 +805,14 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 			final byte[] copy = new byte[maxLength];
 			System.arraycopy(value, offset, copy, 0, maxLength);
 			return copy;
+		}
+
+		/**
+		 * Creates a new request that will start pairing with the device.
+		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
+		 */
+		public static Request createBond() {
+			return new Request(Type.CREATE_BOND);
 		}
 
 		/**
@@ -1354,6 +1417,10 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 			mOperationInProgress = true;
 			boolean result = false;
 			switch (request.type) {
+				case CREATE_BOND: {
+					result = internalCreateBond();
+					break;
+				}
 				case READ: {
 					result = internalReadCharacteristic(request.characteristic);
 					break;

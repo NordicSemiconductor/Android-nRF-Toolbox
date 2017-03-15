@@ -37,6 +37,7 @@ public interface BleProfileApi {
 	 */
 	final class Request {
 		enum Type {
+			CREATE_BOND,
 			WRITE,
 			READ,
 			WRITE_DESCRIPTOR,
@@ -102,6 +103,14 @@ public interface BleProfileApi {
 			final byte[] copy = new byte[maxLength];
 			System.arraycopy(value, offset, copy, 0, maxLength);
 			return copy;
+		}
+
+		/**
+		 * Creates a new request that will start pairing with the device.
+		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
+		 */
+		public static Request createBond() {
+			return new Request(Type.CREATE_BOND);
 		}
 
 		/**
@@ -260,6 +269,12 @@ public interface BleProfileApi {
 	 * Returns the context.
 	 */
 	Context getContext();
+
+	/**
+	 * Enqueues creating bond request to the queue.
+	 * @return true if request has been enqueued, false if the device has not been connected
+	 */
+	boolean createBond();
 
 	/**
 	 * Enables notifications on given characteristic

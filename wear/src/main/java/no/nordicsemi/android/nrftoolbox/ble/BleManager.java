@@ -275,6 +275,28 @@ public class BleManager implements BleProfileApi {
 		}
 	}
 
+	@Override
+	public final boolean createBond() {
+		return enqueue(Request.createBond());
+	}
+
+	/**
+	 * Creates a bond with the device. The device must be first set using {@link #connect(BluetoothDevice)} which will
+	 * try to connect to the device. If you need to pair with a device before connecting to it you may do it without
+	 * the use of BleManager object and connect after bond is established.
+	 * @return true if pairing has started, false if it was already paired or an immediate error occur.
+	 */
+	private boolean internalCreateBond() {
+		final BluetoothDevice device = mBluetoothDevice;
+		if (device == null)
+			return false;
+
+		if (device.getBondState() == BluetoothDevice.BOND_BONDED)
+			return false;
+
+		return device.createBond();
+	}
+
 	/**
 	 * When the device is bonded and has the Generic Attribute service and the Service Changed characteristic this method enables indications on this characteristic.
 	 * In case one of the requirements is not fulfilled this method returns <code>false</code>.
@@ -745,6 +767,10 @@ public class BleManager implements BleProfileApi {
 			mOperationInProgress = true;
 			boolean result = false;
 			switch (request.type) {
+				case CREATE_BOND: {
+					result = internalCreateBond();
+					break;
+				}
 				case READ: {
 					result = internalReadCharacteristic(request.characteristic);
 					break;
