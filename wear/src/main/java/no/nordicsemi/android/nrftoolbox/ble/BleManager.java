@@ -611,6 +611,8 @@ public class BleManager implements BleProfileApi {
 			} else {
 				if (newState == BluetoothProfile.STATE_DISCONNECTED) {
 					mOperationInProgress = true; // no more calls are possible
+					mInitQueue.clear();
+					mTaskQueue.clear();
 					if (mConnected) {
 						notifyDeviceDisconnected(gatt.getDevice());
 					}
