@@ -103,8 +103,8 @@ public class BleManager implements BleProfileApi {
 					if (mConnected && previousState != BluetoothAdapter.STATE_TURNING_OFF && previousState != BluetoothAdapter.STATE_OFF) {
 						// The connection is killed by the system, no need to gently disconnect
 						mGattCallback.notifyDeviceDisconnected(mBluetoothDevice);
-						close();
 					}
+					close();
 					break;
 			}
 		}
@@ -193,8 +193,30 @@ public class BleManager implements BleProfileApi {
 
 		synchronized (mLock) {
 			if (mBluetoothGatt != null) {
-				mBluetoothGatt.close();
-				mBluetoothGatt = null;
+				// There are 2 ways of reconnecting to the same device:
+				// 1. Reusing the same BluetoothGatt object and calling connect() on it or
+				// 2. Closing it and reopening a new instance of BluetoothGatt object.
+				// The gatt.close() is an asynchronous method. It requires some time before it's finished and
+				// device.connectGatt(...) can't be called immediately or service discovery
+				// may never finish on some older devices (Nexus 4, Android 5.0.1).
+				// However, the autoConnect flag settings may have changed. If it did, try closing and opening new BluetoothGatt
+				// despite the difficulties.
+				final boolean autoConnect = shouldAutoConnect();
+				if (autoConnect == mUserDisconnected) { // autoConnect has changed. Previously mUserDisconnected was set to !autoConnect (see below)
+					mBluetoothGatt.close();
+					mBluetoothGatt = null;
+					try {
+						Thread.sleep(200); // Is 200 ms enough?
+					} catch (final InterruptedException e) {
+						// Ignore
+					}
+				} else {
+					// Instead, the gatt.connect() method will be used to reconnect to the same device.
+					mConnectionState = BluetoothGatt.STATE_CONNECTING;
+					mCallbacks.onDeviceConnecting(device);
+					mBluetoothGatt.connect();
+					return;
+				}
 			} else {
 				// Register bonding broadcast receiver
 				mContext.registerReceiver(mBluetoothStateBroadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
@@ -322,7 +344,7 @@ public class BleManager implements BleProfileApi {
 		if (scCharacteristic == null)
 			return false;
 
-		return enableIndications(scCharacteristic);
+		return internalEnableIndications(scCharacteristic);
 	}
 
 	@Override
@@ -531,7 +553,7 @@ public class BleManager implements BleProfileApi {
 		private final Queue<Request> mTaskQueue = new LinkedList<>();
 		private Deque<Request> mInitQueue;
 		private boolean mInitInProgress;
-		private boolean mOperationInProgress;
+		private boolean mOperationInProgress = true;
 
 		private void notifyDeviceDisconnected(final BluetoothDevice device) {
 			mConnected = false;
@@ -574,10 +596,9 @@ public class BleManager implements BleProfileApi {
 				 * Therefore we have to postpone the service discovery operation until we are (almost, as there is no such callback) sure, that it had to be handled.
 				 * Our tests has shown that 600 ms is enough. It is important to call it AFTER receiving the SC indication, but not necessarily
 				 * after Android finishes the internal service discovery.
-				 *
-				 * NOTE: This applies only for bonded devices with Service Changed characteristic, but to be sure we will postpone
-				 * service discovery for all devices.
 				 */
+				final boolean bonded = gatt.getDevice().getBondState() == BluetoothDevice.BOND_BONDED;
+				int delay = bonded ? 600 : 0;
 				mHandler.postDelayed(new Runnable() {
 					@Override
 					public void run() {
@@ -586,11 +607,13 @@ public class BleManager implements BleProfileApi {
 							gatt.discoverServices();
 						}
 					}
-				}, 600);
+				}, delay);
 			} else {
 				if (newState == BluetoothProfile.STATE_DISCONNECTED) {
 					mOperationInProgress = true; // no more calls are possible
-					notifyDeviceDisconnected(gatt.getDevice());
+					if (mConnected) {
+						notifyDeviceDisconnected(gatt.getDevice());
+					}
 					return;
 				}
 

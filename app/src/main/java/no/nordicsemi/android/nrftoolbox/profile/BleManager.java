@@ -1149,21 +1149,19 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 				 * Our tests has shown that 600 ms is enough(*). It is important to call it AFTER receiving the SC indication, but not necessarily
 				 * after Android finishes the internal service discovery.
 				 *
-				 * NOTE: This applies only for bonded devices with Service Changed characteristic, but to be sure we will postpone
-				 * service discovery for all devices.
-				 *
 				 * (*) - While testing on Nexus 4 with Android 5.0.1 it appeared that 600 ms may be not enough.
 				 *       The service discovery initiated by the system was still in progress while gatt.serviceDiscovery() below
 				 *       was called and (due to a bug on older Android versions, where there can be only one callback registered)
 				 *       the onServicesDiscovered(...) callback has never been called.
 				 */
 				// On Android Nougat or never devices no delay is necessary any more.
+				final boolean bonded = gatt.getDevice().getBondState() == BluetoothDevice.BOND_BONDED;
 				int delay = 0;
 				// TODO: modify the delay to match your use case. More services require longer discovery time. Use Nexus 4, 7 or other phone with bad throughput.
 				// The delays here are based on a guess. Newer phones should handle service discovery it faster, I guess.
-				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+				if (bonded && Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
 					delay = 600;
-				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+				if (bonded && Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
 					delay = 1200;
 				if (delay > 0)
 					Logger.d(mLogSession, "wait(" + delay + ")");
