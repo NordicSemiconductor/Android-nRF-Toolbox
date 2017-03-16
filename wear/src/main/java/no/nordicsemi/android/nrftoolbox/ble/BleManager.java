@@ -601,17 +601,20 @@ public class BleManager implements BleProfileApi {
 				 * The onConnectionStateChange event is triggered just after the Android connects to a device.
 				 * In case of bonded devices, the encryption is reestablished AFTER this callback is called.
 				 * Moreover, when the device has Service Changed indication enabled, and the list of services has changed (e.g. using the DFU),
-				 * the indication is received few milliseconds later, depending on the connection interval.
-				 * When received, Android will start performing a service discovery operation itself, internally.
+				 * the indication is received few hundred milliseconds later, depending on the connection interval.
+				 * When received, Android will start performing a service discovery operation on its own, internally,
+				 * and will NOT notify the app that services has changed.
 				 *
-				 * If the mBluetoothGatt.discoverServices() method would be invoked here, if would returned cached services,
+				 * If the gatt.discoverServices() method would be invoked here with no delay, if would return cached services,
 				 * as the SC indication wouldn't be received yet.
-				 * Therefore we have to postpone the service discovery operation until we are (almost, as there is no such callback) sure, that it had to be handled.
-				 * Our tests has shown that 600 ms is enough. It is important to call it AFTER receiving the SC indication, but not necessarily
-				 * after Android finishes the internal service discovery.
+				 * Therefore we have to postpone the service discovery operation until we are (almost, as there is no such callback) sure,
+				 * that it has been handled.
+				 * TODO: Please calculate the proper delay that will work in your solution.
+				 * It should be greater than the time from LLCP Feature Exchange to ATT Write for Service Change indication.
+				 * If your device does not use Service Change indication (for example does not have DFU) the delay may be 0.
 				 */
 				final boolean bonded = gatt.getDevice().getBondState() == BluetoothDevice.BOND_BONDED;
-				int delay = bonded ? 600 : 0;
+				final int delay = bonded ? 1600 : 0; // around 1600 ms is required when connection interval is ~45ms.
 				mHandler.postDelayed(new Runnable() {
 					@Override
 					public void run() {

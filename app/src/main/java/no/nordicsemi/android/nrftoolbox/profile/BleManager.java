@@ -1156,29 +1156,20 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 				 * The onConnectionStateChange event is triggered just after the Android connects to a device.
 				 * In case of bonded devices, the encryption is reestablished AFTER this callback is called.
 				 * Moreover, when the device has Service Changed indication enabled, and the list of services has changed (e.g. using the DFU),
-				 * the indication is received few milliseconds later, depending on the connection interval.
-				 * When received, Android will start performing a service discovery operation itself, internally.
+				 * the indication is received few hundred milliseconds later, depending on the connection interval.
+				 * When received, Android will start performing a service discovery operation on its own, internally,
+				 * and will NOT notify the app that services has changed.
 				 *
-				 * If the mBluetoothGatt.discoverServices() method would be invoked here, if would returned cached services,
+				 * If the gatt.discoverServices() method would be invoked here with no delay, if would return cached services,
 				 * as the SC indication wouldn't be received yet.
-				 * Therefore we have to postpone the service discovery operation until we are (almost, as there is no such callback) sure, that it had to be handled.
-				 * Our tests has shown that 600 ms is enough(*). It is important to call it AFTER receiving the SC indication, but not necessarily
-				 * after Android finishes the internal service discovery.
-				 *
-				 * (*) - While testing on Nexus 4 with Android 5.0.1 it appeared that 600 ms may be not enough.
-				 *       The service discovery initiated by the system was still in progress while gatt.serviceDiscovery() below
-				 *       was called and (due to a bug on older Android versions, where there can be only one callback registered)
-				 *       the onServicesDiscovered(...) callback has never been called.
+				 * Therefore we have to postpone the service discovery operation until we are (almost, as there is no such callback) sure,
+				 * that it has been handled.
+				 * TODO: Please calculate the proper delay that will work in your solution.
+				 * It should be greater than the time from LLCP Feature Exchange to ATT Write for Service Change indication.
+				 * If your device does not use Service Change indication (for example does not have DFU) the delay may be 0.
 				 */
-				// On Android Nougat or never devices no delay is necessary any more.
 				final boolean bonded = gatt.getDevice().getBondState() == BluetoothDevice.BOND_BONDED;
-				int delay = 0;
-				// TODO: modify the delay to match your use case. More services require longer discovery time. Use Nexus 4, 7 or other phone with bad throughput.
-				// The delays here are based on a guess. Newer phones should handle service discovery it faster, I guess.
-				if (bonded && Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
-					delay = 600;
-				if (bonded && Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
-					delay = 1200;
+				final int delay = bonded ? 1600 : 0; // around 1600 ms is required when connection interval is ~45ms.
 				if (delay > 0)
 					Logger.d(mLogSession, "wait(" + delay + ")");
 				mHandler.postDelayed(new Runnable() {
