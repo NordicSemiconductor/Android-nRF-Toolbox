@@ -1182,7 +1182,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 						Logger.w(mLogSession, "Error: (0x" + Integer.toHexString(status) + "): " + GattError.parseConnectionError(status));
 
 					mOperationInProgress = true; // no more calls are possible
-					mInitQueue.clear();
+					mInitQueue = null;
 					mTaskQueue.clear();
 					if (mConnected) {
 						notifyDeviceDisconnected(gatt.getDevice());
