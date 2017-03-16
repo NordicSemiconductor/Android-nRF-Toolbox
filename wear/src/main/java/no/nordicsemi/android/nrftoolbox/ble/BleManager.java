@@ -85,6 +85,12 @@ public class BleManager implements BleProfileApi {
 	 * If {@link #shouldAutoConnect()} returns false (default) this is always set to true.
 	 */
 	private boolean mUserDisconnected;
+	/**
+	 * Flag set to true when {@link #shouldAutoConnect()} method returned <code>true</code>. The first connection attempt is done with <code>autoConnect</code>
+	 * flag set to false (to make the first connection quick) but on connection lost the manager will call {@link #connect(BluetoothDevice)} again.
+	 * This time this method will call {@link BluetoothGatt#connect()} which always uses <code>autoConnect</code> equal true.
+	 */
+	private boolean mInitialConnection;
 	/** Flag set to true when the device is connected. */
 	private boolean mConnected;
 	private int mConnectionState = BluetoothGatt.STATE_DISCONNECTED;
@@ -175,6 +181,10 @@ public class BleManager implements BleProfileApi {
 	 * <p>This method should only be used with bonded devices, as otherwise the device may change it's address.
 	 * It will however work also with non-bonded devices with private static address. A connection attempt to
 	 * a device with private resolvable address will fail.</p>
+	 * <p>The first connection to a device will always be created with autoConnect flag to false
+	 * (see {@link BluetoothDevice#connectGatt(Context, boolean, BluetoothGattCallback)}). This is to make it quick as the
+	 * user most probably waits for a quick response. However, if this method returned true during first connection and the link was lost,
+	 * the manager will try to reconnect to it using {@link BluetoothGatt#connect()} which forces autoConnect to true .</p>
 	 *
 	 * @return autoConnect flag value
 	 */
@@ -201,8 +211,7 @@ public class BleManager implements BleProfileApi {
 				// may never finish on some older devices (Nexus 4, Android 5.0.1).
 				// However, the autoConnect flag settings may have changed. If it did, try closing and opening new BluetoothGatt
 				// despite the difficulties.
-				final boolean autoConnect = shouldAutoConnect();
-				if (autoConnect == mUserDisconnected) { // autoConnect has changed. Previously mUserDisconnected was set to !autoConnect (see below)
+				if (!mInitialConnection) {
 					mBluetoothGatt.close();
 					mBluetoothGatt = null;
 					try {
@@ -212,6 +221,8 @@ public class BleManager implements BleProfileApi {
 					}
 				} else {
 					// Instead, the gatt.connect() method will be used to reconnect to the same device.
+					// This method forces autoConnect = true even if the gatt was created with this flag set to false.
+					mInitialConnection = false;
 					mConnectionState = BluetoothGatt.STATE_CONNECTING;
 					mCallbacks.onDeviceConnecting(device);
 					mBluetoothGatt.connect();
@@ -238,6 +249,7 @@ public class BleManager implements BleProfileApi {
 	 */
 	public boolean disconnect() {
 		mUserDisconnected = true;
+		mInitialConnection = false;
 
 		if (mConnected && mBluetoothGatt != null) {
 			mConnectionState = BluetoothGatt.STATE_DISCONNECTING;
@@ -291,6 +303,7 @@ public class BleManager implements BleProfileApi {
 				mBluetoothGatt = null;
 			}
 			mConnected = false;
+			mInitialConnection = false;
 			mConnectionState = BluetoothGatt.STATE_DISCONNECTED;
 			mGattCallback = null;
 			mBluetoothDevice = null;
@@ -614,7 +627,12 @@ public class BleManager implements BleProfileApi {
 					mInitQueue = null;
 					mTaskQueue.clear();
 					if (mConnected) {
-						notifyDeviceDisconnected(gatt.getDevice());
+						notifyDeviceDisconnected(gatt.getDevice()); // This sets the mConnected flag to false
+					}
+					// Try to reconnect if the initial connection was lost because of a link loss or timeout, and shouldAutoConnect() returned true during connection attempt.
+					// This time it will set the autoConnect flag to true (gatt.connect() forces autoConnect true)
+					if (mInitialConnection) {
+						connect(gatt.getDevice());
 					}
 					return;
 				}
