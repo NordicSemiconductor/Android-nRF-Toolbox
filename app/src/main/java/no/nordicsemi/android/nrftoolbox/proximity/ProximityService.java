@@ -31,14 +31,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
-import android.media.Ringtone;
+import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.NotificationCompat;
 import android.text.TextUtils;
+import android.util.Log;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -66,7 +68,8 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 
 	private final ProximityBinder mBinder = new ProximityBinder();
 	private ProximityServerManager mServerManager;
-	private Ringtone mRingtoneAlarm;
+	private MediaPlayer mMediaPlayer;
+	private int mOriginalVolume;
 	/**
 	 * When a device starts an alarm on the phone it is added to this list.
 	 * Alarm is disabled when this list is empty.
@@ -164,6 +167,8 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 
 		// Close the GATT server. If it hasn't been opened this method does nothing
 		mServerManager.closeGattServer();
+
+		releaseAlarm();
 
 		unregisterReceiver(mDisconnectActionBroadcastReceiver);
 		unregisterReceiver(mToggleAlarmActionBroadcastReceiver);
@@ -435,8 +440,20 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 
 	private void initializeAlarm() {
 		mDevicesWithAlarm = new LinkedList<>();
-		final Uri alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-		mRingtoneAlarm = RingtoneManager.getRingtone(this, alarmUri);
+		mMediaPlayer = new MediaPlayer();
+		mMediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
+		mMediaPlayer.setLooping(true);
+		mMediaPlayer.setVolume(1.0f, 1.0f);
+		try {
+			mMediaPlayer.setDataSource(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM));
+		} catch (final IOException e) {
+			Log.e(TAG, "Initialize Alarm failed: ", e);
+		}
+	}
+
+	private void releaseAlarm() {
+		mMediaPlayer.release();
+		mMediaPlayer = null;
 	}
 
 	private void playAlarm(final BluetoothDevice device) {
@@ -445,16 +462,26 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 			mDevicesWithAlarm.add(device);
 
 		if (!alarmPlaying) {
+			// Save the current alarm volume and set it to max
 			final AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+			mOriginalVolume = am.getStreamVolume(AudioManager.STREAM_ALARM);
 			am.setStreamVolume(AudioManager.STREAM_ALARM, am.getStreamMaxVolume(AudioManager.STREAM_ALARM), AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
-			mRingtoneAlarm.play();
+			try {
+				mMediaPlayer.prepare();
+				mMediaPlayer.start();
+			} catch (final IOException e) {
+				Log.e(TAG, "Prepare Alarm failed: ", e);
+			}
 		}
 	}
 
 	private void stopAlarm(final BluetoothDevice device) {
 		mDevicesWithAlarm.remove(device);
-		if (mDevicesWithAlarm.isEmpty()) {
-			mRingtoneAlarm.stop();
+		if (mDevicesWithAlarm.isEmpty() && mMediaPlayer.isPlaying()) {
+			mMediaPlayer.stop();
+			// Restore original volume
+			final AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+			am.setStreamVolume(AudioManager.STREAM_ALARM, mOriginalVolume, 0);
 		}
 	}
 
