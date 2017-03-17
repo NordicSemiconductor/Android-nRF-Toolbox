@@ -43,6 +43,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -99,6 +100,8 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 	private static final String DATA_INIT_FILE_PATH = "init_file_path";
 	private static final String DATA_INIT_FILE_STREAM = "init_file_stream";
 	private static final String DATA_STATUS = "status";
+	private static final String DATA_DFU_COMPLETED = "dfu_completed";
+	private static final String DATA_DFU_ERROR = "dfu_error";
 
 	private static final String EXTRA_URI = "uri";
 
@@ -126,7 +129,20 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 	private int mFileType;
 	private int mFileTypeTmp; // This value is being used when user is selecting a file not to overwrite the old value (in case he/she will cancel selecting file)
 	private boolean mStatusOk;
+	/** Flag set to true in {@link #onRestart()} and to false in {@link #onPause()}. */
+	private boolean mResumed;
+	/** Flag set to true if DFU operation was completed while {@link #mResumed} was false. */
+	private boolean mDfuCompleted;
+	/** The error message received from DFU service while {@link #mResumed} was false. */
+	private String mDfuError;
 
+	/**
+	 * The progress listener receives events from the DFU Service.
+	 * If is registered in onCreate() and unregistered in onDestroy() so methods here may also be called
+	 * when the screen is locked or the app went to the background. This is because the UI needs to have the
+	 * correct information after user comes back to the activity and this information can't be read from the service
+	 * as it might have been killed already (DFU completed or finished with error).
+	 */
 	private final DfuProgressListener mDfuProgressListener = new DfuProgressListenerAdapter() {
 		@Override
 		public void onDeviceConnecting(final String deviceAddress) {
@@ -161,17 +177,22 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		@Override
 		public void onDfuCompleted(final String deviceAddress) {
 			mTextPercentage.setText(R.string.dfu_status_completed);
-			// let's wait a bit until we cancel the notification. When canceled immediately it will be recreated by service again.
-			new Handler().postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					onTransferCompleted();
+			if (mResumed) {
+				// let's wait a bit until we cancel the notification. When canceled immediately it will be recreated by service again.
+				new Handler().postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						onTransferCompleted();
 
-					// if this activity is still open and upload process was completed, cancel the notification
-					final NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-					manager.cancel(DfuService.NOTIFICATION_ID);
-				}
-			}, 200);
+						// if this activity is still open and upload process was completed, cancel the notification
+						final NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+						manager.cancel(DfuService.NOTIFICATION_ID);
+					}
+				}, 200);
+			} else {
+				// Save that the DFU process has finished
+				mDfuCompleted = true;
+			}
 		}
 
 		@Override
@@ -203,17 +224,21 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 
 		@Override
 		public void onError(final String deviceAddress, final int error, final int errorType, final String message) {
-			showErrorMessage(message);
+			if (mResumed) {
+				showErrorMessage(message);
 
-			// We have to wait a bit before canceling notification. This is called before DfuService creates the last notification.
-			new Handler().postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					// if this activity is still open and upload process was completed, cancel the notification
-					final NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-					manager.cancel(DfuService.NOTIFICATION_ID);
-				}
-			}, 200);
+				// We have to wait a bit before canceling notification. This is called before DfuService creates the last notification.
+				new Handler().postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						// if this activity is still open and upload process was completed, cancel the notification
+						final NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+						manager.cancel(DfuService.NOTIFICATION_ID);
+					}
+				}, 200);
+			} else {
+				mDfuError = message;
+			}
 		}
 	};
 
@@ -249,7 +274,17 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 			mSelectedDevice = savedInstanceState.getParcelable(DATA_DEVICE);
 			mStatusOk = mStatusOk || savedInstanceState.getBoolean(DATA_STATUS);
 			mUploadButton.setEnabled(mSelectedDevice != null && mStatusOk);
+			mDfuCompleted = savedInstanceState.getBoolean(DATA_DFU_COMPLETED);
+			mDfuError = savedInstanceState.getString(DATA_DFU_ERROR);
 		}
+
+		DfuServiceListenerHelper.registerProgressListener(this, mDfuProgressListener);
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		DfuServiceListenerHelper.unregisterProgressListener(this, mDfuProgressListener);
 	}
 
 	@Override
@@ -263,6 +298,8 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		outState.putParcelable(DATA_INIT_FILE_STREAM, mInitFileStreamUri);
 		outState.putParcelable(DATA_DEVICE, mSelectedDevice);
 		outState.putBoolean(DATA_STATUS, mStatusOk);
+		outState.putBoolean(DATA_DFU_COMPLETED, mDfuCompleted);
+		outState.putString(DATA_DFU_ERROR, mDfuError);
 	}
 
 	private void setGUI() {
@@ -299,15 +336,24 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 	@Override
 	protected void onResume() {
 		super.onResume();
-
-		DfuServiceListenerHelper.registerProgressListener(this, mDfuProgressListener);
+		mResumed = true;
+		if (mDfuCompleted)
+			onTransferCompleted();
+		if (mDfuError != null)
+			showErrorMessage(mDfuError);
+		if (mDfuCompleted || mDfuError != null) {
+			// if this activity is still open and upload process was completed, cancel the notification
+			final NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+			manager.cancel(DfuService.NOTIFICATION_ID);
+			mDfuCompleted = false;
+			mDfuError = null;
+		}
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-
-		DfuServiceListenerHelper.unregisterProgressListener(this, mDfuProgressListener);
+		mResumed = false;
 	}
 
 	@Override
@@ -316,7 +362,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 	}
 
 	@Override
-	public void onRequestPermissionsResult(final int requestCode, final String[] permissions, final int[] grantResults) {
+	public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
 		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 		switch (requestCode) {
 			case PERMISSION_REQ: {
