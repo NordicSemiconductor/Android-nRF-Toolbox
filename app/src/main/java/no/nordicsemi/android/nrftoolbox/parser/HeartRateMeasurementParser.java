@@ -78,7 +78,7 @@ public class HeartRateMeasurementParser {
 		if (rrIntervalStatus) {
 			for (int o = offset; o < characteristic.getValue().length; o += 2) {
 				final int units = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, o);
-				rrIntervals.add(units * 1024.0f / 1000.0f); // RR interval is in [1/1024s]
+				rrIntervals.add(units * 1000.0f / 1024.0f); // RR interval is in [1/1024s]
 			}
 		}
 
