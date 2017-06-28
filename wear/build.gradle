@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     publishNonDefault true
     compileSdkVersion 25
-    buildToolsVersion "25.0.1"
+    buildToolsVersion "25.0.3"
 
     defaultConfig {
         applicationId "no.nordicsemi.android.nrftoolbox"
@@ -31,7 +31,8 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.google.android.support:wearable:2.0.0'
+    compile 'com.google.android.support:wearable:2.0.3'
+    provided 'com.google.android.wearable:wearable:2.0.3'
     // nRF Toolbox is using Play Service 7.8.87 in order to make the app working in China:
     // https://developer.android.com/training/wearables/apps/creating-app-china.html#ChinaSDK
     compile 'com.google.android.gms:play-services-wearable:7.8.87'
