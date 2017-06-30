@@ -516,7 +516,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 			descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
 			Logger.v(mLogSession, "Enabling notifications for " + characteristic.getUuid());
 			Logger.d(mLogSession, "gatt.writeDescriptor(" + CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID + ", value=0x01-00)");
-			return gatt.writeDescriptor(descriptor);
+			return internalWriteDescriptorWorkaround(descriptor);
 		}
 		return false;
 	}
@@ -547,7 +547,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 			descriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
 			Logger.v(mLogSession, "Enabling indications for " + characteristic.getUuid());
 			Logger.d(mLogSession, "gatt.writeDescriptor(" + CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID + ", value=0x02-00)");
-			return gatt.writeDescriptor(descriptor);
+			return internalWriteDescriptorWorkaround(descriptor);
 		}
 		return false;
 	}
@@ -639,14 +639,7 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 
 		Logger.v(mLogSession, "Writing descriptor " + descriptor.getUuid());
 		Logger.d(mLogSession, "gatt.writeDescriptor(" + descriptor.getUuid() + ")");
-		// There was a bug in Android up to 6.0 where the descriptor was written using parent characteristic write type, instead of always Write With Response,
-		// as the spec says.
-		final BluetoothGattCharacteristic parentCharacteristic = descriptor.getCharacteristic();
-		final int originalWriteType = parentCharacteristic.getWriteType();
-		parentCharacteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
-		final boolean result = gatt.writeDescriptor(descriptor);
-		parentCharacteristic.setWriteType(originalWriteType);
-		return result;
+		return internalWriteDescriptorWorkaround(descriptor);
 	}
 
 	/**
@@ -726,9 +719,28 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 				Logger.v(mLogSession, "Disabling notifications for " + BATTERY_LEVEL_CHARACTERISTIC);
 				Logger.d(mLogSession, "gatt.writeDescriptor(" + CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID + ", value=0x0000)");
 			}
-			return gatt.writeDescriptor(descriptor);
+			return internalWriteDescriptorWorkaround(descriptor);
 		}
 		return false;
+	}
+
+	/**
+	 * There was a bug in Android up to 6.0 where the descriptor was written using parent
+	 * characteristic's write type, instead of always Write With Response, as the spec says.
+	 * @param descriptor the descriptor to be written
+	 * @return the result of {@link BluetoothGatt#writeDescriptor(BluetoothGattDescriptor)}
+	 */
+	private boolean internalWriteDescriptorWorkaround(final BluetoothGattDescriptor descriptor) {
+		final BluetoothGatt gatt = mBluetoothGatt;
+		if (gatt == null || descriptor == null)
+			return false;
+
+		final BluetoothGattCharacteristic parentCharacteristic = descriptor.getCharacteristic();
+		final int originalWriteType = parentCharacteristic.getWriteType();
+		parentCharacteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+		final boolean result = gatt.writeDescriptor(descriptor);
+		parentCharacteristic.setWriteType(originalWriteType);
+		return result;
 	}
 
 	/**
