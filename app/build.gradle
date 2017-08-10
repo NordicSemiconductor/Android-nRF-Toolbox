@@ -1,15 +1,21 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.3'
+
+    compileSdkVersion 26
+    buildToolsVersion '26.0.1'
 
     defaultConfig {
         applicationId "no.nordicsemi.android.nrftoolbox"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testBuildType "debug"
         minSdkVersion 18
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 60
         versionName "2.4.0"
+    }
+    lintOptions {
+        abortOnError false
     }
     buildTypes {
         release {
@@ -29,10 +35,15 @@ android {
     }
 }
 
+// exclude these from the build:
+configurations.all() { configuration ->
+    exclude group: "org.apache.httpcomponents", module: "httpclient"
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:25.4.0'
-    compile 'com.android.support:design:25.4.0'
+    compile 'com.android.support:appcompat-v7:26.0.0'
+    compile 'com.android.support:design:26.0.0'
     compile 'no.nordicsemi.android.support.v18:scanner:1.0.0'
     compile 'no.nordicsemi.android:log:2.1.0'
     compile('org.simpleframework:simple-xml:2.7.1') {
@@ -42,9 +53,9 @@ dependencies {
     compile files('libs/achartengine-1.1.0.jar')
     compile project(':common')
     wearApp project(path: ':wear', configuration: 'wear1Release')
-    // nRF Toolbox is using Play Service 7.8.87 in order to make the app working in China:
+    // nRF Toolbox is using Play Service 10.2.0 in order to make the app working in China:
     // https://developer.android.com/training/wearables/apps/creating-app-china.html#ChinaSDK
-    compile 'com.google.android.gms:play-services-wearable:7.8.87'
+    compile 'com.google.android.gms:play-services-wearable:10.2.0'
 
     // The DFU Library is imported automatically from jcenter.
     compile 'no.nordicsemi.android:dfu:1.3.0'
