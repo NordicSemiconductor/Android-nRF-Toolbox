@@ -19,3 +19,18 @@ allprojects {
         jcenter()
     }
 }
+
+
+// clean
+task clean(type: Delete) {
+
+    delete rootProject.buildDir
+    delete project.buildDir
+
+    // when the task has finished
+    doLast {
+
+        // create a new APK output directory
+        mkdir("${project.buildDir}/outputs/apk")
+    }
+}
