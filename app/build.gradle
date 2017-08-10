@@ -42,8 +42,8 @@ configurations.all() { configuration ->
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:26.0.0'
-    compile 'com.android.support:design:26.0.0'
+    compile 'com.android.support:appcompat-v7:26.0.1'
+    compile 'com.android.support:design:26.0.1'
     compile 'no.nordicsemi.android.support.v18:scanner:1.0.0'
     compile 'no.nordicsemi.android:log:2.1.0'
     compile('org.simpleframework:simple-xml:2.7.1') {
