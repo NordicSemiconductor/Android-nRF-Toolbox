@@ -2,17 +2,16 @@ apply plugin: 'com.android.application'
 
 android {
 
-    compileSdkVersion 26
-    buildToolsVersion '26.0.1'
-
     defaultConfig {
         applicationId "no.nordicsemi.android.nrftoolbox"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        versionName "2.4.0"
+        versionCode 60
         testBuildType "debug"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        buildToolsVersion '26.0.1'
+        compileSdkVersion 26
         minSdkVersion 18
         targetSdkVersion 26
-        versionCode 60
-        versionName "2.4.0"
     }
     lintOptions {
         abortOnError false
@@ -65,4 +64,16 @@ dependencies {
     // compile project(':dfu')
 
     // Also uncomment selected lines in settings.gradle
+}
+
+// temporary workaround for support library version mismatch
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        def requested = details.requested
+        if (requested.group == 'com.android.support') {
+            if (!requested.name.startsWith("multidex")) {
+                details.useVersion '26.0.1'
+            }
+        }
+    }
 }

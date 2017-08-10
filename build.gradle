@@ -14,14 +14,7 @@ buildscript {
 
 allprojects {
     repositories {
-        maven {
-            url "https://maven.google.com"
-        }
-        maven {
-            // nRF Toolbox is using Play Service 7.8.87 in order to make the app working in China:
-            // https://developer.android.com/training/wearables/apps/creating-app-china.html#ChinaSDK
-            url "${rootProject.projectDir}/google-play-services-7-8-87"
-        }
+        maven {url "https://maven.google.com"}
         jcenter()
     }
 }

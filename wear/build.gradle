@@ -41,9 +41,8 @@ dependencies {
     compile project(':common')
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'no.nordicsemi.android.support.v18:scanner:1.0.0'
-
     provided 'com.google.android.wearable:wearable:2.0.4'
-    compile 'com.google.android.support:wearable:2.0.4'
+    compile('com.google.android.support:wearable:2.0.4') {}
 
     // https://developer.android.com/training/wearables/ui/wear-ui-library.html
     // compile 'com.android.support:wear:26.0.1'
@@ -51,4 +50,16 @@ dependencies {
     // nRF Toolbox is using Play Service 10.2.0 in order to make the app working in China:
     // https://developer.android.com/training/wearables/apps/creating-app-china.html#ChinaSDK
     compile 'com.google.android.gms:play-services-wearable:10.2.0'
+}
+
+// temporary workaround for support library version mismatch
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        def requested = details.requested
+        if (requested.group == 'com.android.support') {
+            if (!requested.name.startsWith("multidex")) {
+                details.useVersion '26.0.1'
+            }
+        }
+    }
 }
