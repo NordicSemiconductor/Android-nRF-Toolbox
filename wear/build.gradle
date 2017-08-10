@@ -2,13 +2,13 @@ apply plugin: 'com.android.application'
 
 android {
     publishNonDefault true
-    compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.1"
 
     defaultConfig {
         applicationId "no.nordicsemi.android.nrftoolbox"
-        minSdkVersion 20
-        targetSdkVersion 25
+        minSdkVersion 23
+        targetSdkVersion 26
         versionCode 202225700 // target: 25, version: 2.2.2, build: 57, multi-APK: 01
         versionName "2.2.2"
     }
@@ -31,14 +31,24 @@ android {
         }
     }
 }
+// exclude these from the build:
+configurations.all() { configuration ->
+    exclude group: "org.apache.httpcomponents", module: "httpclient"
+}
 
 dependencies {
+
+    compile project(':common')
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.google.android.support:wearable:2.0.4'
+    compile 'no.nordicsemi.android.support.v18:scanner:1.0.0'
+
     provided 'com.google.android.wearable:wearable:2.0.4'
+    compile 'com.google.android.support:wearable:2.0.4'
+
+    // https://developer.android.com/training/wearables/ui/wear-ui-library.html
+    compile 'com.android.support:wear:26.0.1'
+
     // nRF Toolbox is using Play Service 10.2.0 in order to make the app working in China:
     // https://developer.android.com/training/wearables/apps/creating-app-china.html#ChinaSDK
     compile 'com.google.android.gms:play-services-wearable:10.2.0'
-    compile 'no.nordicsemi.android.support.v18:scanner:1.0.0'
-    compile project(':common')
 }
