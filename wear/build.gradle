@@ -46,7 +46,7 @@ dependencies {
     compile 'com.google.android.support:wearable:2.0.4'
 
     // https://developer.android.com/training/wearables/ui/wear-ui-library.html
-    compile 'com.android.support:wear:26.0.1'
+    // compile 'com.android.support:wear:26.0.1'
 
     // nRF Toolbox is using Play Service 10.2.0 in order to make the app working in China:
     // https://developer.android.com/training/wearables/apps/creating-app-china.html#ChinaSDK
