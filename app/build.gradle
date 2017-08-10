@@ -77,3 +77,6 @@ configurations.all {
         }
     }
 }
+
+// apply the Google Services Plugin (requires google-services.json)
+// apply plugin: "com.google.gms.google-services"
