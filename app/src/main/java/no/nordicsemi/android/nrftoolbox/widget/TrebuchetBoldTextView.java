@@ -24,11 +24,10 @@ package no.nordicsemi.android.nrftoolbox.widget;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
-import android.widget.TextView;
 
 import no.nordicsemi.android.nrftoolbox.R;
 
-public class TrebuchetBoldTextView extends TextView {
+public class TrebuchetBoldTextView extends android.support.v7.widget.AppCompatTextView {
 
 	public TrebuchetBoldTextView(Context context) {
 		super(context);
