@@ -19,12 +19,14 @@
   ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.LinearLayoutCompat
+	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:orientation="vertical"
-	tools:context=".uart.UARTActivity">
+	tools:context=".uart.UARTActivity"
+	android:id="@+id/layout_feature_uart">
 
 	<include
 		android:id="@+id/toolbar_actionbar"
@@ -55,5 +57,7 @@
 				tools:layout="@layout/fragment_feature_uart_control"/>
 
 		</android.support.v4.widget.SlidingPaneLayout>
+
 	</FrameLayout>
-</LinearLayout>
+
+</android.support.v7.widget.LinearLayoutCompat>

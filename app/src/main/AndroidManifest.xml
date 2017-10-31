@@ -20,7 +20,9 @@
   ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
 	package="no.nordicsemi.android.nrftoolbox"
 	android:installLocation="auto">
 
@@ -41,7 +43,8 @@
 		android:icon="@mipmap/ic_launcher"
 		android:roundIcon="@mipmap/ic_launcher_round"
 		android:label="@string/app_name"
-		android:theme="@style/AppTheme" >
+		android:theme="@style/AppTheme"
+		tools:ignore="GoogleAppIndexingWarning">
 
 		<meta-data
 			android:name="com.google.android.gms.version"
@@ -53,7 +56,6 @@
 			android:theme="@style/AppTheme.Fullscreen" >
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
-
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 
@@ -62,13 +64,12 @@
 
 			<intent-filter>
 				<action android:name="android.nfc.action.NDEF_DISCOVERED" />
-
 				<category android:name="android.intent.category.DEFAULT" />
-
 				<data android:mimeType="application/vnd.no.nordicsemi.type.app"/>
 				<data android:mimeType="application/vnd.no.nordicsemi.type.address"/>
 			</intent-filter>
 		</activity>
+
 		<activity
 			android:name="no.nordicsemi.android.nrftoolbox.FeaturesActivity"
 			android:label="@string/app_name"
@@ -88,9 +89,11 @@
 				<category android:name="no.nordicsemi.android.nrftoolbox.LAUNCHER" />
 			</intent-filter>
 		</activity>
+
 		<activity
 			android:name="no.nordicsemi.android.nrftoolbox.template.settings.SettingsActivity"
 			android:label="@string/template_settings_title" />
+
 		<service
 			android:name="no.nordicsemi.android.nrftoolbox.template.TemplateService"
 			android:label="@string/template_feature_title" />
@@ -118,7 +121,6 @@
 			android:label="@string/hrs_feature_title" >
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
-
 				<category android:name="no.nordicsemi.android.nrftoolbox.LAUNCHER" />
 			</intent-filter>
 		</activity>
@@ -269,6 +271,7 @@
 		<provider android:name="no.nordicsemi.android.nrftoolbox.uart.UARTLocalLogContentProvider"
 			android:authorities="no.nordicsemi.android.nrftoolbox.uart.log"
 			android:exported="true"/>
+
 	</application>
 
 </manifest>

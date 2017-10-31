@@ -21,8 +21,9 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 
-<manifest package="no.nordicsemi.android.nrftoolbox"
-	xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:tools="http://schemas.android.com/tools"
+		  package="no.nordicsemi.android.nrftoolbox"
+		  xmlns:android="http://schemas.android.com/apk/res/android">
 
 	<uses-feature android:name="android.hardware.type.watch"/>
 
@@ -36,7 +37,8 @@
 		android:icon="@mipmap/ic_launcher"
 		android:roundIcon="@mipmap/ic_launcher_round"
 		android:label="@string/app_name"
-		android:theme="@android:style/Theme.DeviceDefault.Light">
+		android:theme="@android:style/Theme.DeviceDefault.Light"
+		tools:ignore="GoogleAppIndexingWarning">
 
 		<meta-data
 			android:name="com.google.android.wearable.standalone"

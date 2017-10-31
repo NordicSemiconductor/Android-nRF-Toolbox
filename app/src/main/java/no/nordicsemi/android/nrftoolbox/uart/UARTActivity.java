@@ -22,10 +22,12 @@
 
 package no.nordicsemi.android.nrftoolbox.uart;
 
+import android.annotation.SuppressLint;
+import android.support.annotation.NonNull;
+
 import android.Manifest;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -47,7 +49,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
@@ -55,6 +56,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.NotificationCompat;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -101,6 +103,7 @@ import no.nordicsemi.android.nrftoolbox.widget.ClosableSpinner;
 public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UARTBinder> implements UARTInterface,
 		UARTNewConfigurationDialogFragment.NewConfigurationDialogListener, UARTConfigurationsAdapter.ActionListener, AdapterView.OnItemSelectedListener,
 		GoogleApiClient.ConnectionCallbacks {
+
 	private final static String TAG = "UARTActivity";
 
 	private final static String PREFS_BUTTON_ENABLED = "prefs_uart_enabled_";
@@ -117,13 +120,16 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 	UARTConfigurationSynchronizer mWearableSynchronizer;
 
+	/** The views. */
+	private LinearLayoutCompat mLayout;
+	private SlidingPaneLayout mSlider;
+
 	/** The current configuration. */
 	private UartConfiguration mConfiguration;
 	private DatabaseHelper mDatabaseHelper;
 	private SharedPreferences mPreferences;
 	private UARTConfigurationsAdapter mConfigurationsAdapter;
 	private ClosableSpinner mConfigurationSpinner;
-	private SlidingPaneLayout mSlider;
 	private UARTService.UARTBinder mServiceBinder;
 	private ConfigurationListener mConfigurationListener;
 	private boolean mEditMode;
@@ -170,6 +176,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 	@Override
 	protected void onInitialize(final Bundle savedInstanceState) {
+
 		mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		mDatabaseHelper = new DatabaseHelper(this);
 		ensureFirstConfiguration(mDatabaseHelper);
@@ -184,9 +191,11 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	 */
 	@Override
 	public void onConnected(final Bundle bundle) {
+
 		// Ensure the Wearable API was connected
-		if (!mWearableSynchronizer.hasConnectedApi())
+		if (! mWearableSynchronizer.hasConnectedApi()) {
 			return;
+		}
 
 		if (!mPreferences.getBoolean(PREFS_WEAR_SYNCED, false)) {
 			new Thread(new Runnable() {
@@ -232,17 +241,19 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 	@Override
 	protected void onCreateView(final Bundle savedInstanceState) {
-		setContentView(R.layout.activity_feature_uart);
 
-		// Setup the sliding pane if it exists
-		final SlidingPaneLayout slidingPane = mSlider = (SlidingPaneLayout) findViewById(R.id.sliding_pane);
-		if (slidingPane != null) {
-			slidingPane.setSliderFadeColor(Color.TRANSPARENT);
-			slidingPane.setShadowResourceLeft(R.drawable.shadow_r);
-			slidingPane.setPanelSlideListener(new SlidingPaneLayout.SimplePanelSlideListener() {
+		this.setContentView(R.layout.activity_feature_uart);
+		this.mLayout = (LinearLayoutCompat) findViewById(R.id.layout_feature_uart);
+		this.mSlider = (SlidingPaneLayout) findViewById(R.id.sliding_pane);
+
+		if (this.mSlider != null) {
+			this.mSlider.setSliderFadeColor(Color.TRANSPARENT);
+			this.mSlider.setShadowResourceLeft(R.drawable.shadow_r);
+			this.mSlider.setPanelSlideListener(new SlidingPaneLayout.SimplePanelSlideListener() {
 				@Override
 				public void onPanelClosed(final View panel) {
-					// Close the keyboard
+
+					// close the keyboard
 					final UARTLogFragment logFragment = (UARTLogFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_log);
 					logFragment.onFragmentHidden();
 				}
@@ -252,18 +263,16 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 	@Override
 	protected void onViewCreated(final Bundle savedInstanceState) {
-		getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-		final ClosableSpinner configurationSpinner = mConfigurationSpinner = (ClosableSpinner) findViewById(R.id.toolbar_spinner);
-		configurationSpinner.setOnItemSelectedListener(this);
-		configurationSpinner.setAdapter(mConfigurationsAdapter);
-		configurationSpinner.setSelection(mConfigurationsAdapter.getItemPosition(mPreferences.getLong(PREFS_CONFIGURATION, 0)));
+		this.getSupportActionBar().setDisplayShowTitleEnabled(false);
+		this.mConfigurationSpinner = (ClosableSpinner) findViewById(R.id.toolbar_spinner);
+		this.mConfigurationSpinner.setOnItemSelectedListener(this);
+		this.mConfigurationSpinner.setAdapter(mConfigurationsAdapter);
+		this.mConfigurationSpinner.setSelection(mConfigurationsAdapter.getItemPosition(mPreferences.getLong(PREFS_CONFIGURATION, 0)));
 	}
 
 	@Override
 	protected void onRestoreInstanceState(final @NonNull Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
-
 		mEditMode = savedInstanceState.getBoolean(SIS_EDIT_MODE);
 		setEditMode(mEditMode, false);
 	}
@@ -271,7 +280,6 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	@Override
 	public void onSaveInstanceState(final Bundle outState) {
 		super.onSaveInstanceState(outState);
-
 		outState.putBoolean(SIS_EDIT_MODE, mEditMode);
 	}
 
@@ -282,6 +290,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 	@Override
 	public void onDeviceSelected(final BluetoothDevice device, final String name) {
+
 		// The super method starts the service
 		super.onDeviceSelected(device, name);
 
@@ -307,8 +316,9 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 	@Override
 	public void send(final String text) {
-		if (mServiceBinder != null)
-			mServiceBinder.send(text);
+		if (this.mServiceBinder != null) {
+			this.mServiceBinder.send(text);
+		}
 	}
 
 	public void setEditMode(final boolean editMode) {
@@ -331,6 +341,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 	@Override
 	public boolean onCreateOptionsMenu(final Menu menu) {
+
 		getMenuInflater().inflate(R.menu.uart_menu_configurations, menu);
 		getMenuInflater().inflate(mEditMode ? R.menu.uart_menu_config : R.menu.uart_menu, menu);
 
@@ -384,20 +395,21 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 				// onNewConfiguration(name, true) will be called when user press OK
 				return true;
 			}
+
 			case R.id.action_remove: {
+
 				mDatabaseHelper.removeDeletedServerConfigurations(); // just to be sure nothing has left
 				final UartConfiguration removedConfiguration = mConfiguration;
 				final long id = mDatabaseHelper.deleteConfiguration(name);
-				if (id >= 0)
-					mWearableSynchronizer.onConfigurationDeleted(id);
+				if (id >= 0) {mWearableSynchronizer.onConfigurationDeleted(id);}
 				refreshConfigurations();
 
-				final Snackbar snackbar = Snackbar.make(mSlider, R.string.uart_configuration_deleted, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_undo, new View.OnClickListener() {
+				/* mSlider was null in landscape layout, because of inconsistent layout xml. */
+				final Snackbar snackbar = Snackbar.make(this.mLayout, R.string.uart_configuration_deleted, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_undo, new View.OnClickListener() {
 					@Override
 					public void onClick(final View v) {
 						final long id = mDatabaseHelper.restoreDeletedServerConfiguration(name);
-						if (id >= 0)
-							mWearableSynchronizer.onConfigurationAddedOrEdited(id, removedConfiguration);
+						if (id >= 0) {mWearableSynchronizer.onConfigurationAddedOrEdited(id, removedConfiguration);}
 						refreshConfigurations();
 					}
 				});
