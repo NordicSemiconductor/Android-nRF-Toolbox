@@ -1,17 +1,92 @@
-# Add project specific ProGuard rules here.
-# By default, the flags in this file are appended to flags specified
-# in C:\Users\alno\AppData\Local\Android\sdk/tools/proguard/proguard-android.txt
-# You can edit the include path and order by changing the proguardFiles
-# directive in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+-libraryjars ../app/libs
+-optimizationpasses 5
+-dontusemixedcaseclassnames
+-dontskipnonpubliclibraryclasses
+-dontskipnonpubliclibraryclassmembers
+-dontpreverify
+-dontshrink
+-verbose
 
-# Add any project specific keep options here:
+-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+-keepattributes *Annotation*
+-keepattributes Signature
+
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+
+-keepclasseswithmembers class * {
+    public <init>(android.content.Context, android.util.AttributeSet);
+}
+
+-keep public class * extends android.app.Activity
+-keep public class * extends android.app.Application
+-keep public class * extends android.app.Service
+-keep public class * extends android.content.BroadcastReceiver
+-keep public class * extends android.content.ContentProvider
+-keep public class * extends android.app.backup.BackupAgentHelper
+-keep public class * extends android.preference.Preference
+-keep public class com.android.vending.licensing.ILicensingService
+
+# The support library contains references to newer platform versions.
+# Don't warn about those in case this app is linking against an older platform version.
+-dontwarn android.support.**
+
+# android-support-design
+-dontwarn android.support.design.**
+-keep class android.support.design.** { *; }
+-keep interface android.support.design.** { *; }
+-keep,includedescriptorclasses class android.support.transition.** { *; }
+-keep public class android.support.design.R$* { *; }
+
+# android-support-v4
+-dontwarn android.support.v4.**
+-dontnote android.support.v4.**
+-keep interface android.support.v4.app.** { *; }
+-keep class android.support.v4.app.** { *; }
+-keep class android.support.v4.** { *; }
+
+# android-support-v7
+-dontwarn android.support.v7.**
+-dontnote android.support.v7.**
+-keep interface android.support.v7.internal.** { *; }
+-keep class android.support.v7.internal.** { *; }
+-keep class android.support.v7.** { *; }
+
+-keep class com.google.android.gms.**
+-dontwarn com.google.android.gms.**
+
+# Java
+-keep class java.** { *; }
+-dontnote java.**
+-dontwarn java.**
+
+-keep class javax.** { *; }
+-dontnote javax.**
+-dontwarn javax.**
+
+-keep class sun.misc.Unsafe { *; }
+-dontnote sun.misc.Unsafe
+
+-keep class javax.xml.stream.XMLOutputFactory { *; }
+
+# (the rt.jar has them)
+-dontwarn com.bea.xml.stream.XMLWriterBase
+-dontwarn javax.xml.stream.events.**
+
+# Simple XML
+-keep public class org.simpleframework.** { *; }
+-keep class org.simpleframework.xml.** { *; }
+-keep class org.simpleframework.xml.core.** { *; }
+-keep class org.simpleframework.xml.util.** { *; }
+
+# Chart Engine
+-keep class org.achartengine.** { *; }
+-dontnote org.achartengine.**
+
+# HTTP (might require legacyLibraries) ?
+-dontnote org.apache.http.params.**
+-dontnote org.apache.http.conn.scheme.**
+-dontnote org.apache.http.conn.**
+-dontnote android.net.http.**
