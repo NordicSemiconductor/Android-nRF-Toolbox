@@ -26,8 +26,9 @@ android {
 
     defaultConfig {
         compileSdkVersion 26
-        buildToolsVersion "26.0.1"
+        buildToolsVersion "26.0.2"
         minSdkVersion 18
+        //noinspection OldTargetApi
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
@@ -44,6 +45,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:support-v4:26.0.1'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //noinspection GradleDependency
+    implementation 'com.android.support:support-v4:26.0.2'
 }

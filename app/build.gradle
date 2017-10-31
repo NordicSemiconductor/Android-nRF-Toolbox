@@ -8,9 +8,10 @@ android {
         versionCode 60
         testBuildType "debug"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        buildToolsVersion '26.0.1'
+        buildToolsVersion '26.0.2'
         compileSdkVersion 26
         minSdkVersion 18
+        //noinspection OldTargetApi
         targetSdkVersion 26
     }
     lintOptions {
@@ -23,14 +24,7 @@ android {
         }
     }
     productFlavors {
-        fastBuild {
-            // Switching the flavor to fastBuild accelerates te build speed (works only with Android 7+ devices)
-            minSdkVersion 21
-            versionName "Instant Run"
-        }
-        releaseBuild {
-            minSdkVersion 18
-        }
+
     }
 }
 
@@ -40,40 +34,30 @@ configurations.all() { configuration ->
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:26.0.1'
-    compile 'com.android.support:design:26.0.1'
-    compile 'no.nordicsemi.android.support.v18:scanner:1.0.0'
-    compile 'no.nordicsemi.android:log:2.1.0'
-    compile('org.simpleframework:simple-xml:2.7.1') {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //noinspection GradleDependency
+    implementation 'com.android.support:appcompat-v7:26.0.2'
+    //noinspection GradleDependency
+    implementation 'com.android.support:design:26.0.2'
+    implementation 'no.nordicsemi.android.support.v18:scanner:1.0.0'
+    implementation 'no.nordicsemi.android:log:2.1.0'
+    implementation('org.simpleframework:simple-xml:2.7.1') {
         exclude group: 'stax', module: 'stax-api'
         exclude group: 'xpp3', module: 'xpp3'
     }
-    compile files('libs/achartengine-1.1.0.jar')
-    compile project(':common')
-    wearApp project(path: ':wear', configuration: 'wear1Release')
+    implementation files('libs/achartengine-1.1.0.jar')
+    implementation project(':common')
+    wearApp project(path: ':wear', configuration: 'wearRelease')
+
     // nRF Toolbox is using Play Service 10.2.0 in order to make the app working in China:
     // https://developer.android.com/training/wearables/apps/creating-app-china.html#ChinaSDK
-    compile 'com.google.android.gms:play-services-wearable:10.2.0'
+    //noinspection GradleDependency
+    implementation 'com.google.android.gms:play-services-wearable:10.2.0'
 
-    // The DFU Library is imported automatically from jcenter.
-    compile 'no.nordicsemi.android:dfu:1.3.0'
+    // The DFU Library is being imported from jcenter.
+    implementation 'no.nordicsemi.android:dfu:1.3.0'
+
     // If you want to make some changes in the DFU Library, clone the https://github.com/NordicSemiconductor/Android-DFU-Library project into DFULibrary folder,
-    // add it as a module in Project Structure and uncomment the following line:
-
-    // compile project(':dfu')
-
-    // Also uncomment selected lines in settings.gradle
-}
-
-// temporary workaround for support library version mismatch
-configurations.all {
-    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-        def requested = details.requested
-        if (requested.group == 'com.android.support') {
-            if (!requested.name.startsWith("multidex")) {
-                details.useVersion '26.0.1'
-            }
-        }
-    }
+    // add it as a module into the project structure and uncomment the following line (and also uncomment the according lines in the settings.gradle):
+    // implementation project(':dfu')
 }
