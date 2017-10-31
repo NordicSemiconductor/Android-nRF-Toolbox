@@ -5,6 +5,7 @@ android {
     defaultConfig {
         applicationId "no.nordicsemi.android.nrftoolbox"
         minSdkVersion 23
+        //noinspection OldTargetApi
         targetSdkVersion 26
         compileSdkVersion 26
         buildToolsVersion "26.0.2"
@@ -47,14 +48,3 @@ dependencies {
     implementation 'com.google.android.gms:play-services-wearable:10.2.0'
 }
 
-// temporary workaround for support library version mismatch
-configurations.all {
-    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-        def requested = details.requested
-        if (requested.group == 'com.android.support') {
-            if (! requested.name.startsWith("multidex")) {
-                details.useVersion '26.0.2'
-            }
-        }
-    }
-}
