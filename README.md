@@ -88,7 +88,7 @@ This guessing may not be always correct. One situation may be when the nRF chip 
 In order to compile the project the **DFU Library is required**. This project may be found here: https://github.com/NordicSemiconductor/Android-DFU-Library.
 Since version 1.16.1 it is imported automatically from *jcenter* repository and no special configuration is needed. If you want to make some modifications in the DFU Library, please clone the DFU Library to the same root as nRF Toolbox is cloned and name the library's folder **DFULibrary**. Add the dfu module in Project Structure and edit *app/build.gradle* file and *settings.gradle* files as describe in them.
 
-The nRF Toolbox also uses the nRF Logger API library which may be found here: https://github.com/NordicSemiconductor/nRF-Logger-API. The library is included in dependencies in *build.gradle* file. This library allows the app to create log entries in the [nRF Logger](https://play.google.com/store/apps/details?id=no.nordicsemi.android.log) application. Please, read the library documentation on GitHub for more information about the usage and permissions.
+The nRF Toolbox also uses the nRF Logger API library which may be found here: https://github.com/NordicPlayground/nRF-Logger-API. The library is included in dependencies in *build.gradle* file. This library allows the app to create log entries in the [nRF Logger](https://play.google.com/store/apps/details?id=no.nordicsemi.android.log) application. Please, read the library documentation on GitHub for more information about the usage and permissions.
 
 The graph in HRM profile is created using the [AChartEngine v1.1.0](http://www.achartengine.org) contributed based on the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0).
 
