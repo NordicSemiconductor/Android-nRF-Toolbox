@@ -10,6 +10,8 @@ android {
         applicationId "no.nordicsemi.android.nrftoolbox"
         minSdkVersion 23
         targetSdkVersion 26
+        versionCode 232405702 // target: 23, version: 2.4.0, build: 57, multi-APK: 01
+        versionName "2.4.0"
         resConfigs "en"
     }
     lintOptions {
