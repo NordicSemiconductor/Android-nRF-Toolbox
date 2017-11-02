@@ -464,8 +464,6 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 		}
 		mBluetoothDevice = device;
 		mDeviceName = name;
-		mDeviceNameView.setText(name != null ? name : getString(R.string.not_available));
-		mConnectButton.setText(R.string.action_connecting);
 
 		// The device may not be in the range but the service will try to connect to it if it reach it
 		Logger.d(mLogSession, "Creating service...");
@@ -486,7 +484,8 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 
 	@Override
 	public void onDeviceConnecting(final BluetoothDevice device) {
-		// empty default implementation
+		mDeviceNameView.setText(mDeviceName != null ? mDeviceName : getString(R.string.not_available));
+		mConnectButton.setText(R.string.action_connecting);
 	}
 
 	@Override
@@ -497,7 +496,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 
 	@Override
 	public void onDeviceDisconnecting(final BluetoothDevice device) {
-		// empty default implementation
+		mConnectButton.setText(R.string.action_disconnecting);
 	}
 
 	@Override

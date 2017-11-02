@@ -43,6 +43,7 @@
 	<string name="action_add_device">ADD DEVICE</string>
 	<string name="action_connecting">CONNECTING…</string>
 	<string name="action_disconnect">DISCONNECT</string>
+	<string name="action_disconnecting">DISCONNECTING…</string>
 
 	<string name="drawer_open">Open</string>
 	<string name="drawer_close">Close</string>

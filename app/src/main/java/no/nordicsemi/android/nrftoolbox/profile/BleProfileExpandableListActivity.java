@@ -238,8 +238,6 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 		}
 		mDeviceName = name;
 		mBleManager.setLogger(mLogSession);
-		mDeviceNameView.setText(name != null ? name : getString(R.string.not_available));
-		mConnectButton.setText(R.string.action_connecting);
 		mBleManager.connect(device);
 	}
 
@@ -250,7 +248,10 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 
 	@Override
 	public void onDeviceConnecting(final BluetoothDevice device) {
-		// do nothing
+		runOnUiThread(() -> {
+			mDeviceNameView.setText(mDeviceName != null ? mDeviceName : getString(R.string.not_available));
+			mConnectButton.setText(R.string.action_connecting);
+		});
 	}
 
 	@Override
@@ -261,7 +262,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 
 	@Override
 	public void onDeviceDisconnecting(final BluetoothDevice device) {
-		// do nothing
+		runOnUiThread(() -> mConnectButton.setText(R.string.action_disconnecting));
 	}
 
 	@Override
