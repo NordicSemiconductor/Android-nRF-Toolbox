@@ -29,7 +29,7 @@
     
     <string name="rsc_section_rsc_header">SPEED AND CADENCE</string>
     <string name="rsc_speed">SPEED</string>
-	<string name="rsc_speed_unit_m_s">km/h</string>
+	<string name="rsc_speed_unit_m_s">m/s</string>
     <string name="rsc_speed_unit_km_h">km/h</string>
 	<string name="rsc_speed_unit_mph">mph</string>
     <string name="rsc_cadence">CADENCE</string>
