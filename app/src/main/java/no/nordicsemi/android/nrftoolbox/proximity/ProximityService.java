@@ -36,7 +36,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -47,6 +47,7 @@ import java.util.List;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.ToolboxApplication;
 import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.profile.multiconnect.BleMulticonnectProfileService;
 
@@ -411,7 +412,7 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 		// Both activities above have launchMode="singleTask" in the AndroidManifest.xml file, so if the task is already running, it will be resumed
 		final PendingIntent pendingIntent = PendingIntent.getActivities(this, OPEN_ACTIVITY_REQ, new Intent[] { parentIntent, targetIntent }, PendingIntent.FLAG_UPDATE_CURRENT);
 
-		final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+		final NotificationCompat.Builder builder = new NotificationCompat.Builder(this, ToolboxApplication.PROXIMITY_WARNINGS_CHANNEL);
 		builder.setContentIntent(pendingIntent).setAutoCancel(false);
 		builder.setSmallIcon(R.drawable.ic_stat_notify_proximity);
 		return builder;

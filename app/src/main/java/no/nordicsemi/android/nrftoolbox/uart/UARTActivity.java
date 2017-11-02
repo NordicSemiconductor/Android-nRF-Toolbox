@@ -51,10 +51,10 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -88,6 +88,7 @@ import java.io.StringWriter;
 import java.util.UUID;
 
 import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.ToolboxApplication;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 import no.nordicsemi.android.nrftoolbox.dfu.adapter.FileBrowserAppsAdapter;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileServiceReadyActivity;
@@ -754,7 +755,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			intent.setDataAndType(Uri.fromFile(file), "text/xml");
 			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			final PendingIntent pendingIntent = PendingIntent.getActivity(this, 420, intent, 0);
-			final Notification notification = new NotificationCompat.Builder(this).setContentIntent(pendingIntent).setContentTitle(fileName).setContentText(getText(R.string.uart_configuration_export_succeeded))
+			final Notification notification = new NotificationCompat.Builder(this, ToolboxApplication.FILE_SAVED_CHANNEL).setContentIntent(pendingIntent).setContentTitle(fileName).setContentText(getText(R.string.uart_configuration_export_succeeded))
 					.setAutoCancel(true).setShowWhen(true).setTicker(getText(R.string.uart_configuration_export_succeeded_ticker)).setSmallIcon(android.R.drawable.stat_notify_sdcard).build();
 			final NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 			nm.notify(fileName, 823, notification);
