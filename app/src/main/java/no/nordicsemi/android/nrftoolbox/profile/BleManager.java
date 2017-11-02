@@ -309,19 +309,27 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 	}
 
 	/**
-	 * Disconnects from the device. Does nothing if not connected.
+	 * Disconnects from the device or cancels the pending connection attempt. Does nothing if device was not connected.
 	 * @return true if device is to be disconnected. False if it was already disconnected.
 	 */
 	public boolean disconnect() {
 		mUserDisconnected = true;
 		mInitialConnection = false;
 
-		if (mConnected && mBluetoothGatt != null) {
-			Logger.v(mLogSession, "Disconnecting...");
+		if (mBluetoothGatt != null) {
 			mConnectionState = BluetoothGatt.STATE_DISCONNECTING;
+			Logger.v(mLogSession, mConnected ? "Disconnecting..." : "Cancelling connection...");
 			mCallbacks.onDeviceDisconnecting(mBluetoothGatt.getDevice());
+			final boolean wasConnected = mConnected;
 			Logger.d(mLogSession, "gatt.disconnect()");
 			mBluetoothGatt.disconnect();
+
+			if (!wasConnected) {
+				// There will be no callback, the connection attempt will be stopped
+				mConnectionState = BluetoothGatt.STATE_DISCONNECTED;
+				Logger.i(mLogSession, "Disconnected");
+				mCallbacks.onDeviceDisconnected(mBluetoothGatt.getDevice());
+			}
 			return true;
 		}
 		return false;
@@ -1205,9 +1213,9 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 					mInitQueue = null;
 					mTaskQueue.clear();
 					final boolean wasConnected = mConnected;
-					if (mConnected) {
+					// if (mConnected) { // Checking mConnected prevents from calling onDeviceDisconnected if connection attempt failed. This check is not necessary
 						notifyDeviceDisconnected(gatt.getDevice()); // This sets the mConnected flag to false
-					}
+					// }
 					// Try to reconnect if the initial connection was lost because of a link loss or timeout, and shouldAutoConnect() returned true during connection attempt.
 					// This time it will set the autoConnect flag to true (gatt.connect() forces autoConnect true)
 					if (mInitialConnection) {
