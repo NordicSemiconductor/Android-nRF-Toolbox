@@ -124,6 +124,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	private UARTConfigurationsAdapter mConfigurationsAdapter;
 	private ClosableSpinner mConfigurationSpinner;
 	private SlidingPaneLayout mSlider;
+	private View mContainer;
 	private UARTService.UARTBinder mServiceBinder;
 	private ConfigurationListener mConfigurationListener;
 	private boolean mEditMode;
@@ -231,6 +232,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	protected void onCreateView(final Bundle savedInstanceState) {
 		setContentView(R.layout.activity_feature_uart);
 
+		mContainer = findViewById(R.id.container);
 		// Setup the sliding pane if it exists
 		final SlidingPaneLayout slidingPane = mSlider = findViewById(R.id.sliding_pane);
 		if (slidingPane != null) {
@@ -439,12 +441,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 				else
 					message = "Unknown error";
 				final String msg = message;
-				Snackbar.make(mSlider, R.string.uart_configuration_loading_failed, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_details, new View.OnClickListener() {
-					@Override
-					public void onClick(final View v) {
-						new AlertDialog.Builder(UARTActivity.this).setMessage(msg).setTitle(R.string.uart_action_details).setPositiveButton(R.string.ok, null).show();
-					}
-				}).show();
+				Snackbar.make(mContainer, R.string.uart_configuration_loading_failed, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_details, v -> new AlertDialog.Builder(UARTActivity.this).setMessage(msg).setTitle(R.string.uart_action_details).setPositiveButton(R.string.ok, null).show()).show();
 				return;
 			}
 
@@ -730,12 +727,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			else
 				message = "Unknown error";
 			final String msg = message;
-			Snackbar.make(mSlider, R.string.uart_configuration_loading_failed, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_details, new View.OnClickListener() {
-				@Override
-				public void onClick(final View v) {
-					new AlertDialog.Builder(UARTActivity.this).setMessage(msg).setTitle(R.string.uart_action_details).setPositiveButton(R.string.ok, null).show();
-				}
-			}).show();
+			Snackbar.make(mContainer, R.string.uart_configuration_loading_failed, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_details, v -> new AlertDialog.Builder(UARTActivity.this).setMessage(msg).setTitle(R.string.uart_action_details).setPositiveButton(R.string.ok, null).show()).show();
 		}
 	}
 
