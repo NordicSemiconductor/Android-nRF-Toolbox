@@ -415,7 +415,7 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 	 */
 	public void clear() {
 		mRecords.clear();
-		mCallbacks.onDatasetChanged(mBluetoothDevice);
+		mCallbacks.onOperationCompleted(mBluetoothDevice);
 	}
 
 	/**

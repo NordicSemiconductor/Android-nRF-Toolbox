@@ -51,8 +51,6 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 
 	@Override
 	protected void onCreateView(final Bundle savedInstanceState) {
-		// FEATURE_INDETERMINATE_PROGRESS notifies the system, that we are going to show indeterminate progress bar in the ActionBar (during device scan)
-		// requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS); // <- Deprecated
 		setContentView(R.layout.activity_feature_gls);
 		setGUI();
 	}
@@ -150,6 +148,18 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 	@Override
 	public void onOperationCompleted(final BluetoothDevice device) {
 		setOperationInProgress(false);
+
+		runOnUiThread(() -> {
+			final SparseArray<GlucoseRecord> records = mGlucoseManager.getRecords();
+			if (records.size() > 0) {
+				final int unit = records.valueAt(0).unit;
+				mUnitView.setVisibility(View.VISIBLE);
+				mUnitView.setText(unit == GlucoseRecord.UNIT_kgpl ? R.string.gls_unit_mgpdl : R.string.gls_unit_mmolpl);
+			} else {
+				mUnitView.setVisibility(View.GONE);
+			}
+			mAdapter.notifyDataSetChanged();
+		});
 	}
 
 	@Override
@@ -177,24 +187,11 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 
 	@Override
 	public void onDatasetChanged(final BluetoothDevice device) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				final SparseArray<GlucoseRecord> records = mGlucoseManager.getRecords();
-				if (records.size() > 0) {
-					final int unit = records.valueAt(0).unit;
-					mUnitView.setVisibility(View.VISIBLE);
-					mUnitView.setText(unit == GlucoseRecord.UNIT_kgpl ? R.string.gls_unit_mgpdl : R.string.gls_unit_mmolpl);
-				} else
-					mUnitView.setVisibility(View.GONE);
-
-				mAdapter.notifyDataSetChanged();
-			}
-		});
+		// Do nothing. Refreshing the list is done in onOperationCompleted
 	}
 
 	@Override
 	public void onNumberOfRecordsRequested(final BluetoothDevice device, final int value) {
-		showToast(getString(R.string.gls_progress, value));
+		showToast(getResources().getQuantityString(R.plurals.gls_progress, value, value));
 	}
 }

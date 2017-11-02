@@ -269,6 +269,6 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
 
     @Override
     public void onNumberOfRecordsRequested(final BluetoothDevice device, int value) {
-        showToast(getString(R.string.gls_progress, value));
+        showToast(getResources().getQuantityString(R.plurals.gls_progress, value, value));
     }
 }

@@ -146,9 +146,30 @@
 		<item></item>
 		<item>Health value not available</item>
     </string-array>
+	<string name="gls_context_exercise_title">Exercise</string>
+	<string name="gls_context_exercise">Duration: %ds, intensity: %d%%</string>
+	<string name="gls_context_medication_title">Medication</string>
+	<string name="gls_context_medication_kg">%s (%.2f mg)</string>
+	<string name="gls_context_medication_l">%s (%.2f ml)</string>
+	<string-array name="gls_context_medication_id">
+		<item>Reserved for future use</item>
+		<item>Rapid acting insulin</item>
+		<item>Short acting insulin</item>
+		<item>Intermediate acting insulin</item>
+		<item>Long acting insulin</item>
+		<item>Pre-mixed insulin</item>
+	</string-array>
+	<string name="gls_context_hba1c_title">HbA1c</string>
+	<string name="gls_context_hba1c">%f%%</string>
     
-    
-    <string name="gls_progress">Downloading %d records</string>
+	<plurals name="gls_progress">
+		<item quantity="zero">No records found</item>
+		<item quantity="one">Downloading %d record</item>
+		<item quantity="two">Downloading %d records</item>
+		<item quantity="few">Downloading %d records</item>
+		<item quantity="other">Downloading %d records</item>
+		<item quantity="many">Downloading %d records</item>
+	</plurals>
     <string name="gls_operation_not_supported">Operation not supported by the device</string>
     <string name="gls_operation_failed">Operation failed</string>
     <string name="gls_value">%.1f</string>
@@ -156,8 +177,7 @@
     <string name="gls_unit_mmolpl">mmol/l</string>
 
     <string name="gls_about_text">GLUCOSE SERVICE profile allows you to connect to your Glucose sensor. 
-        You can read the last and historical glucose measurement readings from the device. The current implementation partially supports also the
-        Glucose Measurement Context characteristic which is not supported by the GLS sample in the NRF51 SDK,
-         therefore when connecting to this sample application some parameters are not displayed.</string>
+        You can read the last and historical glucose measurement readings from the device. The current implementation supports also the
+        Glucose Measurement Context characteristic which is not supported by the GLS sample in the NRF5x SDK.</string>
 
 </resources>

@@ -91,7 +91,7 @@ public class ExpandableRecordAdapter extends BaseExpandableListAdapter {
 	@Override
 	public int getChildrenCount(final int groupPosition) {
 		final GlucoseRecord record = (GlucoseRecord) getGroup(groupPosition);
-		int count = 1 + (record.status != 0 ? 1 : 0); // Sample Location and Sensor Status Annunciation
+		int count = 1 + (record.status != 0 ? 1 : 0); // Sample Location and optional Sensor Status Annunciation
 		if (record.context != null) {
 			final GlucoseRecord.MeasurementContext context = record.context;
 			if (context.carbohydrateId != 0)
@@ -116,48 +116,95 @@ public class ExpandableRecordAdapter extends BaseExpandableListAdapter {
 	public Object getChild(final int groupPosition, final int childPosition) {
 		final Resources resources = mContext.getResources();
 		final GlucoseRecord record = (GlucoseRecord) getGroup(groupPosition);
-		switch (childPosition) {
-		case 0:
-			String location = null;
-			try {
-				location = resources.getStringArray(R.array.gls_location)[record.sampleLocation];
-			} catch (final ArrayIndexOutOfBoundsException e) {
-				location = resources.getStringArray(R.array.gls_location)[0];
+		String tmp;
+		switch (childIdToItemId(childPosition, record)) {
+			case 0:
+				try {
+					tmp = resources.getStringArray(R.array.gls_location)[record.sampleLocation];
+				} catch (final ArrayIndexOutOfBoundsException e) {
+					tmp = resources.getStringArray(R.array.gls_location)[0];
+				}
+				return new Pair<>(resources.getString(R.string.gls_location_title), tmp);
+			case 1: { // sensor status annunciation
+				final StringBuilder builder = new StringBuilder();
+				final int status = record.status;
+				for (int i = 0; i < 12; ++i)
+					if ((status & (1 << i)) > 0)
+						builder.append(resources.getStringArray(R.array.gls_status_annunciation)[i]).append("\n");
+				builder.setLength(builder.length() - 1);
+				return new Pair<>(resources.getString(R.string.gls_status_annunciation_title), builder.toString());
 			}
-			return new Pair<>(resources.getString(R.string.gls_location_title), location);
-		case 1: { // sensor status annunciation
-			final StringBuilder builder = new StringBuilder();
-			final int status = record.status;
-			for (int i = 0; i < 12; ++i)
-				if ((status & (1 << i)) > 0)
-					builder.append(resources.getStringArray(R.array.gls_status_annunciation)[i]).append("\n");
-			builder.setLength(builder.length() - 1);
-			return new Pair<>(resources.getString(R.string.gls_status_annunciation_title), builder.toString());
+			case 2: { // carbohydrate id and unit
+				try {
+					tmp = resources.getStringArray(R.array.gls_context_carbohydrare)[record.context.carbohydrateId];
+				} catch (final ArrayIndexOutOfBoundsException e) {
+					tmp = resources.getStringArray(R.array.gls_context_carbohydrare)[0];
+				}
+				return new Pair<>(resources.getString(R.string.gls_context_carbohydrare_title), tmp + " (" + record.context.carbohydrateUnits + " kg)");
+			}
+			case 3: { // meal
+				try {
+					tmp = resources.getStringArray(R.array.gls_context_meal)[record.context.meal];
+				} catch (final ArrayIndexOutOfBoundsException e) {
+					tmp = resources.getStringArray(R.array.gls_context_meal)[0];
+				}
+				return new Pair<>(resources.getString(R.string.gls_context_meal_title), tmp);
+			}
+			case 4: { // tester
+				try {
+					tmp = resources.getStringArray(R.array.gls_context_tester)[record.context.tester];
+				} catch (final ArrayIndexOutOfBoundsException e) {
+					tmp = resources.getStringArray(R.array.gls_context_tester)[0];
+				}
+				return new Pair<>(resources.getString(R.string.gls_context_tester_title), tmp);
+			}
+			case 5: { // health
+				try {
+					tmp = resources.getStringArray(R.array.gls_context_health)[record.context.health];
+				} catch (final ArrayIndexOutOfBoundsException e) {
+					tmp = resources.getStringArray(R.array.gls_context_health)[0];
+				}
+				return new Pair<>(resources.getString(R.string.gls_context_health_title), tmp);
+			}
+			case 6: { // exercise duration and intensity
+				return new Pair<>(resources.getString(R.string.gls_context_exercise_title), resources.getString(R.string.gls_context_exercise, record.context.exerciseDuration, record.context.exerciseIntensity));
+			}
+			case 7: { // medication ID and quantity
+				try {
+					tmp = resources.getStringArray(R.array.gls_context_medication_id)[record.context.medicationId];
+				} catch (final ArrayIndexOutOfBoundsException e) {
+					tmp = resources.getStringArray(R.array.gls_context_medication_id)[0];
+				}
+				final int resId = record.context.medicationUnit == GlucoseRecord.UNIT_kgpl ? R.string.gls_context_medication_kg : R.string.gls_context_medication_l;
+				return new Pair<>(resources.getString(R.string.gls_context_medication_title), resources.getString(resId, tmp, record.context.medicationQuantity));
+			}
+			case 8: { // HbA1c value
+				return new Pair<>(resources.getString(R.string.gls_context_hba1c_title), resources.getString(R.string.gls_context_hba1c, record.context.HbA1c));
+			}
+			default:
+				return new Pair<>("Not implemented", "The value exists but is not shown");
+			}
+	}
+
+	private int childIdToItemId(final int childPosition, final GlucoseRecord record) {
+		int itemId = 0;
+		int child = childPosition;
+
+		// Location is required
+		if (itemId == childPosition)
+			return itemId;
+
+		if (++itemId > 0 && record.status != 0 && --child == 0) return itemId;
+		if (record.context != null) {
+			if (++itemId > 0 && record.context.carbohydrateId != 0 	 && --child == 0) return itemId;
+			if (++itemId > 0 && record.context.meal != 0 			 && --child == 0) return itemId;
+			if (++itemId > 0 && record.context.tester != 0 			 && --child == 0) return itemId;
+			if (++itemId > 0 && record.context.health != 0 			 && --child == 0) return itemId;
+			if (++itemId > 0 && record.context.exerciseDuration != 0 && --child == 0) return itemId;
+			if (++itemId > 0 && record.context.medicationId != 0 	 && --child == 0) return itemId;
+			if (++itemId > 0 && record.context.HbA1c != 0 			 && --child == 0) return itemId;
 		}
-		case 2: { // carbohydrate id and unit
-			final StringBuilder builder = new StringBuilder();
-			builder.append(resources.getStringArray(R.array.gls_context_carbohydrare)[record.context.carbohydrateId]).append(" (").append(record.context.carbohydrateUnits).append(" kg)");
-			return new Pair<>(resources.getString(R.string.gls_context_carbohydrare_title), builder.toString());
-		}
-		case 3: { // meal
-			final StringBuilder builder = new StringBuilder();
-			builder.append(resources.getStringArray(R.array.gls_context_meal)[record.context.meal]);
-			return new Pair<>(resources.getString(R.string.gls_context_meal_title), builder.toString());
-		}
-		case 4: { // tester
-			final StringBuilder builder = new StringBuilder();
-			builder.append(resources.getStringArray(R.array.gls_context_tester)[record.context.tester]);
-			return new Pair<>(resources.getString(R.string.gls_context_tester_title), builder.toString());
-		}
-		case 5: { // health
-			final StringBuilder builder = new StringBuilder();
-			builder.append(resources.getStringArray(R.array.gls_context_health)[record.context.health]);
-			return new Pair<>(resources.getString(R.string.gls_context_health_title), builder.toString());
-		}
-		default:
-			// TODO write parsers for other properties
-			return new Pair<>("Not implemented", "The value exists but is not shown");
-		}
+		throw new IllegalArgumentException("No item ID for position " + childPosition);
 	}
 
 	@Override
