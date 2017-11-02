@@ -36,7 +36,7 @@ public class PermissionRationaleFragment extends DialogFragment {
 	private PermissionDialogListener mListener;
 
 	public interface PermissionDialogListener {
-		public void onRequestPermission(final String permission);
+		void onRequestPermission(final String permission);
 	}
 
 	@Override
@@ -74,11 +74,6 @@ public class PermissionRationaleFragment extends DialogFragment {
 		final StringBuilder text = new StringBuilder(getString(args.getInt(ARG_TEXT)));
 		return new AlertDialog.Builder(getActivity()).setTitle(R.string.permission_title).setMessage(text)
 				.setNegativeButton(R.string.cancel, null)
-				.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(final DialogInterface dialog, final int which) {
-						mListener.onRequestPermission(args.getString(ARG_PERMISSION));
-					}
-				}).create();
+				.setPositiveButton(R.string.ok, (dialog, which) -> mListener.onRequestPermission(args.getString(ARG_PERMISSION))).create();
 	}
 }

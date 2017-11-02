@@ -251,7 +251,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	protected void onViewCreated(final Bundle savedInstanceState) {
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-		final ClosableSpinner configurationSpinner = mConfigurationSpinner = (ClosableSpinner) findViewById(R.id.toolbar_spinner);
+		final ClosableSpinner configurationSpinner = mConfigurationSpinner = findViewById(R.id.toolbar_spinner);
 		configurationSpinner.setOnItemSelectedListener(this);
 		configurationSpinner.setAdapter(mConfigurationsAdapter);
 		configurationSpinner.setSelection(mConfigurationsAdapter.getItemPosition(mPreferences.getLong(PREFS_CONFIGURATION, 0)));
