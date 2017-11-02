@@ -23,6 +23,8 @@ package no.nordicsemi.android.nrftoolbox.parser;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 
+import java.util.Locale;
+
 public class RSCMeasurementParser {
 	private static final byte INSTANTANEOUS_STRIDE_LENGTH_PRESENT = 0x01; // 1 bit
 	private static final byte TOTAL_DISTANCE_PRESENT = 0x02; // 1 bit
@@ -57,11 +59,11 @@ public class RSCMeasurementParser {
 		}
 
 		final StringBuilder builder = new StringBuilder();
-		builder.append(String.format("Speed: %.2f m/s, Cadence: %d RPM,\n", instantaneousSpeed, instantaneousCadence));
+		builder.append(String.format(Locale.US, "Speed: %.2f m/s, Cadence: %d RPM,\n", instantaneousSpeed, instantaneousCadence));
 		if (islmPresent)
-			builder.append(String.format("Instantaneous Stride Length: %.2f m,\n", instantaneousStrideLength));
+			builder.append(String.format(Locale.US, "Instantaneous Stride Length: %.2f m,\n", instantaneousStrideLength));
 		if (tdPreset)
-			builder.append(String.format("Total Distance: %.1f m,\n", totalDistance));
+			builder.append(String.format(Locale.US, "Total Distance: %.1f m,\n", totalDistance));
 		if (walking)
 			builder.append("Status: WALKING");
 		else

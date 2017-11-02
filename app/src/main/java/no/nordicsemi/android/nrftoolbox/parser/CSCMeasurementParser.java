@@ -23,6 +23,8 @@ package no.nordicsemi.android.nrftoolbox.parser;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 
+import java.util.Locale;
+
 public class CSCMeasurementParser {
 	private static final byte WHEEL_REV_DATA_PRESENT = 0x01; // 1 bit
 	private static final byte CRANK_REV_DATA_PRESENT = 0x02; // 1 bit
@@ -57,12 +59,12 @@ public class CSCMeasurementParser {
 
 		final StringBuilder builder = new StringBuilder();
 		if (wheelRevPresent) {
-			builder.append(String.format("Wheel rev: %d,\n", wheelRevolutions));
-			builder.append(String.format("Last wheel event time: %d ms,\n", lastWheelEventTime));
+			builder.append(String.format(Locale.US, "Wheel rev: %d,\n", wheelRevolutions));
+			builder.append(String.format(Locale.US, "Last wheel event time: %d ms,\n", lastWheelEventTime));
 		}
 		if (crankRevPreset) {
-			builder.append(String.format("Crank rev: %d,\n", crankRevolutions));
-			builder.append(String.format("Last crank event time: %d ms,\n", lastCrankEventTime));
+			builder.append(String.format(Locale.US, "Crank rev: %d,\n", crankRevolutions));
+			builder.append(String.format(Locale.US, "Last crank event time: %d ms,\n", lastCrankEventTime));
 		}
 		builder.setLength(builder.length() - 2);
 		return builder.toString();

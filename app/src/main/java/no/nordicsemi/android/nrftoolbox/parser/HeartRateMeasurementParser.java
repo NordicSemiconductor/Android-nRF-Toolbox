@@ -25,6 +25,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class HeartRateMeasurementParser {
 	private static final byte HEART_RATE_VALUE_FORMAT = 0x01; // 1 bit
@@ -101,7 +102,7 @@ public class HeartRateMeasurementParser {
 		if (rrIntervalStatus) {
 			builder.append(",\nRR Interval: ");
 			for (final Float interval : rrIntervals)
-				builder.append(String.format("%.02f ms, ", interval));
+				builder.append(String.format(Locale.US, "%.02f ms, ", interval));
 			builder.setLength(builder.length() - 2); // remove the ", " at the end
 		}
 		return builder.toString();

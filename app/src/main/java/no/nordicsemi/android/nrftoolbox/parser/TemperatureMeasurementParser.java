@@ -23,6 +23,8 @@ package no.nordicsemi.android.nrftoolbox.parser;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 
+import java.util.Locale;
+
 public class TemperatureMeasurementParser {
 	private static final byte TEMPERATURE_UNIT_FLAG = 0x01; // 1 bit
 	private static final byte TIMESTAMP_FLAG = 0x02; // 1 bits
@@ -66,7 +68,7 @@ public class TemperatureMeasurementParser {
 		}
 
 		final StringBuilder builder = new StringBuilder();
-		builder.append(String.format("%.02f", tempValue));
+		builder.append(String.format(Locale.US, "%.02f", tempValue));
 
 		if (fahrenheit)
 			builder.append("°F");

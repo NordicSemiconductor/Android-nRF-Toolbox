@@ -24,6 +24,7 @@ package no.nordicsemi.android.nrftoolbox.parser;
 import android.bluetooth.BluetoothGattCharacteristic;
 
 import java.util.Calendar;
+import java.util.Locale;
 
 public class BloodPressureMeasurementParser {
 	public static String parse(final BluetoothGattCharacteristic characteristic) {
@@ -59,7 +60,7 @@ public class BloodPressureMeasurementParser {
 			calendar.set(Calendar.MINUTE, characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 5));
 			calendar.set(Calendar.SECOND, characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 6));
 			offset += 7;
-			builder.append(String.format("\nTimestamp: %1$tT %1$te.%1$tm.%1$tY", calendar));
+			builder.append(String.format(Locale.US, "\nTimestamp: %1$tT %1$te.%1$tm.%1$tY", calendar));
 		}
 
 		// parse pulse rate if present
