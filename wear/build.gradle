@@ -1,41 +1,62 @@
+// module :wear build.gradle for Wear 1.0 and 2.0 watches.
+// https://developer.android.com/training/wearables/apps/packaging.html
 apply plugin: 'com.android.application'
 
 android {
-    publishNonDefault true
-    compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
         applicationId "no.nordicsemi.android.nrftoolbox"
-        minSdkVersion 20
-        targetSdkVersion 25
-        versionCode 202225700 // target: 25, version: 2.2.2, build: 57, multi-APK: 01
-        versionName "2.2.2"
+        minSdkVersion 23
+        targetSdkVersion 26
+        resConfigs "en"
+    }
+    lintOptions {
+        abortOnError false
     }
     buildTypes {
-        release {
-            minifyEnabled false
+        debug {
+            minifyEnabled true
+            useProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-    }
-    productFlavors {
-        wear1 {
-            // Use the defaultConfig value
-        }
-        wear2 {
-            minSdkVersion 25
-            versionCode 252225701 // target: 25, version: 2.2.2, build: 57, multi-APK: 01
+        release {
+            minifyEnabled true
+            useProguard true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
 
+// exclude these from the build:
+configurations.all() { configuration -> exclude group: "org.apache.httpcomponents", module: "httpclient" }
+
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.google.android.support:wearable:2.0.3'
-    provided 'com.google.android.wearable:wearable:2.0.3'
-    // nRF Toolbox is using Play Service 7.8.87 in order to make the app working in China:
+    implementation project(':common')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'no.nordicsemi.android.support.v18:scanner:1.0.0'
+    implementation 'com.google.android.support:wearable:2.1.0'
+    compileOnly 'com.google.android.wearable:wearable:2.1.0'
+
+    // uncomment to enable the Wear UI Library
+    // https://developer.android.com/training/wearables/ui/wear-ui-library.html
+    // implementation 'com.android.support:wear:26.0.2'
+
+    // nRF Toolbox is using Play Service 10.2.0 in order to make the app working in China:
     // https://developer.android.com/training/wearables/apps/creating-app-china.html#ChinaSDK
-    compile 'com.google.android.gms:play-services-wearable:7.8.87'
-    compile 'no.nordicsemi.android.support.v18:scanner:1.0.0'
-    compile project(':common')
+    //noinspection GradleDependency
+    implementation 'com.google.android.gms:play-services-wearable:10.2.0'
+}
+
+// temporary workaround for support library version mismatch
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        def requested = details.requested
+        if (requested.group == 'com.android.support') {
+            if (!requested.name.startsWith("multidex")) {
+                details.useVersion '26.1.0'
+            }
+        }
+    }
 }

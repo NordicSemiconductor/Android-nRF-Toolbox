@@ -3,9 +3,10 @@
 buildscript {
     repositories {
         jcenter()
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.0.0'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -17,11 +18,21 @@ allprojects {
         maven {
             url "https://maven.google.com"
         }
-        maven {
-            // nRF Toolbox is using Play Service 7.8.87 in order to make the app working in China:
-            // https://developer.android.com/training/wearables/apps/creating-app-china.html#ChinaSDK
-            url "${rootProject.projectDir}/google-play-services-7-8-87"
-        }
         jcenter()
+        google()
+    }
+}
+
+// clean
+task clean(type: Delete) {
+
+    delete rootProject.buildDir
+    delete project.buildDir
+
+    // when the task has finished
+    doLast {
+
+        // create a new APK output directory
+        mkdir("${project.buildDir}/outputs/apk")
     }
 }

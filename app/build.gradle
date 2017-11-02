@@ -1,57 +1,61 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.3'
+    compileSdkVersion 26
+    buildToolsVersion '26.0.2'
 
     defaultConfig {
         applicationId "no.nordicsemi.android.nrftoolbox"
         minSdkVersion 18
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 60
         versionName "2.4.0"
+        resConfigs "en"
     }
     buildTypes {
+        debug {
+            minifyEnabled true
+            useProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
         release {
-            minifyEnabled false
+            minifyEnabled true
+            useProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    productFlavors {
-        fastBuild {
-            // Switching the flavor to fastBuild accelerates te build speed (works only with Android 7+ devices)
-            minSdkVersion 21
-            versionName "Instant Run"
-        }
-        releaseBuild {
-            minSdkVersion 18
-        }
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
     }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:25.4.0'
-    compile 'com.android.support:design:25.4.0'
-    compile 'no.nordicsemi.android.support.v18:scanner:1.0.0'
-    compile 'no.nordicsemi.android:log:2.1.0'
-    compile('org.simpleframework:simple-xml:2.7.1') {
+    implementation project(':common')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    wearApp project(path: ':wear')
+
+    // nRF Toolbox is using Play Service 10.2.0 in order to make the app working in China:
+    // https://developer.android.com/training/wearables/apps/creating-app-china.html
+    //noinspection GradleDependency
+    implementation 'com.google.android.gms:play-services-wearable:10.2.0'
+
+    //noinspection GradleDependency
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    //noinspection GradleDependency
+    implementation 'com.android.support:design:26.1.0'
+
+    implementation 'no.nordicsemi.android:log:2.1.1'
+    implementation 'no.nordicsemi.android.support.v18:scanner:1.0.0'
+
+    // The DFU Library is imported automatically from jcenter:
+    implementation 'no.nordicsemi.android:dfu:1.5.1'
+    // if you desire to build the DFU Library, clone the https://github.com/NordicSemiconductor/Android-DFU-Library project into DFULibrary folder,
+    // add it as a module into the project structure and uncomment the following line (and also the according lines in the settings.gradle):
+    // implementation project(':dfu')
+
+    implementation('org.simpleframework:simple-xml:2.7.1') {
         exclude group: 'stax', module: 'stax-api'
         exclude group: 'xpp3', module: 'xpp3'
     }
-    compile files('libs/achartengine-1.1.0.jar')
-    compile project(':common')
-    wearApp project(path: ':wear', configuration: 'wear1Release')
-    // nRF Toolbox is using Play Service 7.8.87 in order to make the app working in China:
-    // https://developer.android.com/training/wearables/apps/creating-app-china.html#ChinaSDK
-    compile 'com.google.android.gms:play-services-wearable:7.8.87'
-
-    // The DFU Library is imported automatically from jcenter.
-    compile 'no.nordicsemi.android:dfu:1.3.0'
-    // If you want to make some changes in the DFU Library, clone the https://github.com/NordicSemiconductor/Android-DFU-Library project into DFULibrary folder,
-    // add it as a module in Project Structure and uncomment the following line:
-
-    // compile project(':dfu')
-
-    // Also uncomment selected lines in settings.gradle
 }
