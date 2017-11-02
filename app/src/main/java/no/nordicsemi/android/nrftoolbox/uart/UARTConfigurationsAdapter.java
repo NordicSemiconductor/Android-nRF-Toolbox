@@ -28,7 +28,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import no.nordicsemi.android.nrftoolbox.R;
@@ -38,8 +37,8 @@ public class UARTConfigurationsAdapter extends CursorAdapter {
 	final ActionListener mListener;
 
 	public interface ActionListener {
-		public void onNewConfigurationClick();
-		public void onImportClick();
+		void onNewConfigurationClick();
+		void onImportClick();
 	}
 
 	public UARTConfigurationsAdapter(final Context context, final ActionListener listener, final Cursor c) {
@@ -115,18 +114,8 @@ public class UARTConfigurationsAdapter extends CursorAdapter {
 
 	public View newToolbarView(final Context context, final ViewGroup parent) {
 		final View view = LayoutInflater.from(context).inflate(R.layout.feature_uart_dropdown_title, parent, false);
-		view.findViewById(R.id.action_add).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(final View v) {
-				mListener.onNewConfigurationClick();
-			}
-		});
-		view.findViewById(R.id.action_import).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(final View v) {
-				mListener.onImportClick();
-			}
-		});
+		view.findViewById(R.id.action_add).setOnClickListener(v -> mListener.onNewConfigurationClick());
+		view.findViewById(R.id.action_import).setOnClickListener(v -> mListener.onImportClick());
 		return view;
 	}
 

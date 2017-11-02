@@ -22,7 +22,6 @@
 package no.nordicsemi.android.nrftoolbox.scanner;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -150,35 +149,29 @@ public class ScannerFragment extends DialogFragment {
 	public Dialog onCreateDialog(final Bundle savedInstanceState) {
 		final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		final View dialogView = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_device_selection, null);
-		final ListView listview = (ListView) dialogView.findViewById(android.R.id.list);
+		final ListView listview = dialogView.findViewById(android.R.id.list);
 
 		listview.setEmptyView(dialogView.findViewById(android.R.id.empty));
 		listview.setAdapter(mAdapter = new DeviceListAdapter(getActivity()));
 
 		builder.setTitle(R.string.scanner_title);
 		final AlertDialog dialog = builder.setView(dialogView).create();
-		listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			@Override
-			public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
-				stopScan();
-				dialog.dismiss();
-				final ExtendedBluetoothDevice d = (ExtendedBluetoothDevice) mAdapter.getItem(position);
-				mListener.onDeviceSelected(d.device, d.name);
-			}
+		listview.setOnItemClickListener((parent, view, position, id) -> {
+			stopScan();
+			dialog.dismiss();
+			final ExtendedBluetoothDevice d = (ExtendedBluetoothDevice) mAdapter.getItem(position);
+			mListener.onDeviceSelected(d.device, d.name);
 		});
 
 		mPermissionRationale = dialogView.findViewById(R.id.permission_rationale); // this is not null only on API23+
 
-		mScanButton = (Button) dialogView.findViewById(R.id.action_cancel);
-		mScanButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (v.getId() == R.id.action_cancel) {
-					if (mIsScanning) {
-						dialog.cancel();
-					} else {
-						startScan();
-					}
+		mScanButton = dialogView.findViewById(R.id.action_cancel);
+		mScanButton.setOnClickListener(v -> {
+			if (v.getId() == R.id.action_cancel) {
+				if (mIsScanning) {
+					dialog.cancel();
+				} else {
+					startScan();
 				}
 			}
 		});
@@ -246,12 +239,9 @@ public class ScannerFragment extends DialogFragment {
 		scanner.startScan(filters, settings, scanCallback);
 
 		mIsScanning = true;
-		mHandler.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				if (mIsScanning) {
-					stopScan();
-				}
+		mHandler.postDelayed(() -> {
+			if (mIsScanning) {
+				stopScan();
 			}
 		}, SCAN_DURATION);
 	}

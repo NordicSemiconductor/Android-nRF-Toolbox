@@ -58,39 +58,21 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 	}
 
 	private void setGUI() {
-		mUnitView = (TextView) findViewById(R.id.unit);
+		mUnitView = findViewById(R.id.unit);
 		mControlPanelStd = findViewById(R.id.gls_control_std);
 		mControlPanelAbort = findViewById(R.id.gls_control_abort);
 
-		findViewById(R.id.action_last).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				mGlucoseManager.getLastRecord();
-			}
-		});
-		findViewById(R.id.action_all).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				mGlucoseManager.getAllRecords();
-			}
-		});
-		findViewById(R.id.action_abort).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				mGlucoseManager.abort();
-			}
-		});
+		findViewById(R.id.action_last).setOnClickListener(v -> mGlucoseManager.getLastRecord());
+		findViewById(R.id.action_all).setOnClickListener(v -> mGlucoseManager.getAllRecords());
+		findViewById(R.id.action_abort).setOnClickListener(v -> mGlucoseManager.abort());
 
 		// create popup menu attached to the button More
-		findViewById(R.id.action_more).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				PopupMenu menu = new PopupMenu(GlucoseActivity.this, v);
-				menu.setOnMenuItemClickListener(GlucoseActivity.this);
-				MenuInflater inflater = menu.getMenuInflater();
-				inflater.inflate(R.menu.gls_more, menu.getMenu());
-				menu.show();
-			}
+		findViewById(R.id.action_more).setOnClickListener(v -> {
+			PopupMenu menu = new PopupMenu(GlucoseActivity.this, v);
+			menu.setOnMenuItemClickListener(GlucoseActivity.this);
+			MenuInflater inflater = menu.getMenuInflater();
+			inflater.inflate(R.menu.gls_more, menu.getMenu());
+			menu.show();
 		});
 
 		setListAdapter(mAdapter = new ExpandableRecordAdapter(this, mGlucoseManager));
@@ -148,13 +130,9 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 	}
 
 	private void setOperationInProgress(final boolean progress) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				// setSupportProgressBarIndeterminateVisibility(progress);
-				mControlPanelStd.setVisibility(!progress ? View.VISIBLE : View.GONE);
-				mControlPanelAbort.setVisibility(progress ? View.VISIBLE : View.GONE);
-			}
+		runOnUiThread(() -> {
+			mControlPanelStd.setVisibility(!progress ? View.VISIBLE : View.GONE);
+			mControlPanelAbort.setVisibility(progress ? View.VISIBLE : View.GONE);
 		});
 	}
 

@@ -531,12 +531,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	 *            an resource id of the message to be shown
 	 */
 	protected void showToast(final int messageResId) {
-		mHandler.post(new Runnable() {
-			@Override
-			public void run() {
-				Toast.makeText(BleProfileService.this, messageResId, Toast.LENGTH_SHORT).show();
-			}
-		});
+		mHandler.post(() -> Toast.makeText(BleProfileService.this, messageResId, Toast.LENGTH_SHORT).show());
 	}
 
 	/**
@@ -546,12 +541,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	 *            a message to be shown
 	 */
 	protected void showToast(final String message) {
-		mHandler.post(new Runnable() {
-			@Override
-			public void run() {
-				Toast.makeText(BleProfileService.this, message, Toast.LENGTH_SHORT).show();
-			}
-		});
+		mHandler.post(() -> Toast.makeText(BleProfileService.this, message, Toast.LENGTH_SHORT).show());
 	}
 
 	/**

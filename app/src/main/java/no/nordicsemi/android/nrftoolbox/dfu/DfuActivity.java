@@ -179,15 +179,12 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 			mTextPercentage.setText(R.string.dfu_status_completed);
 			if (mResumed) {
 				// let's wait a bit until we cancel the notification. When canceled immediately it will be recreated by service again.
-				new Handler().postDelayed(new Runnable() {
-					@Override
-					public void run() {
-						onTransferCompleted();
+				new Handler().postDelayed(() -> {
+					onTransferCompleted();
 
-						// if this activity is still open and upload process was completed, cancel the notification
-						final NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-						manager.cancel(DfuService.NOTIFICATION_ID);
-					}
+					// if this activity is still open and upload process was completed, cancel the notification
+					final NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+					manager.cancel(DfuService.NOTIFICATION_ID);
 				}, 200);
 			} else {
 				// Save that the DFU process has finished
@@ -199,15 +196,12 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		public void onDfuAborted(final String deviceAddress) {
 			mTextPercentage.setText(R.string.dfu_status_aborted);
 			// let's wait a bit until we cancel the notification. When canceled immediately it will be recreated by service again.
-			new Handler().postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					onUploadCanceled();
+			new Handler().postDelayed(() -> {
+				onUploadCanceled();
 
-					// if this activity is still open and upload process was completed, cancel the notification
-					final NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-					manager.cancel(DfuService.NOTIFICATION_ID);
-				}
+				// if this activity is still open and upload process was completed, cancel the notification
+				final NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+				manager.cancel(DfuService.NOTIFICATION_ID);
 			}, 200);
 		}
 
@@ -228,13 +222,10 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 				showErrorMessage(message);
 
 				// We have to wait a bit before canceling notification. This is called before DfuService creates the last notification.
-				new Handler().postDelayed(new Runnable() {
-					@Override
-					public void run() {
-						// if this activity is still open and upload process was completed, cancel the notification
-						final NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-						manager.cancel(DfuService.NOTIFICATION_ID);
-					}
+				new Handler().postDelayed(() -> {
+					// if this activity is still open and upload process was completed, cancel the notification
+					final NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+					manager.cancel(DfuService.NOTIFICATION_ID);
 				}, 200);
 			} else {
 				mDfuError = message;
@@ -303,22 +294,22 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 	}
 
 	private void setGUI() {
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        final Toolbar toolbar = findViewById(R.id.toolbar_actionbar);
         setSupportActionBar(toolbar);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-		mDeviceNameView = (TextView) findViewById(R.id.device_name);
-		mFileNameView = (TextView) findViewById(R.id.file_name);
-		mFileTypeView = (TextView) findViewById(R.id.file_type);
-		mFileSizeView = (TextView) findViewById(R.id.file_size);
-		mFileStatusView = (TextView) findViewById(R.id.file_status);
-		mSelectFileButton = (Button) findViewById(R.id.action_select_file);
+		mDeviceNameView = findViewById(R.id.device_name);
+		mFileNameView = findViewById(R.id.file_name);
+		mFileTypeView = findViewById(R.id.file_type);
+		mFileSizeView = findViewById(R.id.file_size);
+		mFileStatusView = findViewById(R.id.file_status);
+		mSelectFileButton = findViewById(R.id.action_select_file);
 
-		mUploadButton = (Button) findViewById(R.id.action_upload);
-		mConnectButton = (Button) findViewById(R.id.action_connect);
-		mTextPercentage = (TextView) findViewById(R.id.textviewProgress);
-		mTextUploading = (TextView) findViewById(R.id.textviewUploading);
-		mProgressBar = (ProgressBar) findViewById(R.id.progressbar_file);
+		mUploadButton = findViewById(R.id.action_upload);
+		mConnectButton = findViewById(R.id.action_connect);
+		mTextPercentage = findViewById(R.id.textviewProgress);
+		mTextUploading = findViewById(R.id.textviewUploading);
+		mProgressBar = findViewById(R.id.progressbar_file);
 
 		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		if (isDfuServiceRunning()) {
@@ -575,21 +566,15 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		// Ask the user for the Init packet file if HEX or BIN files are selected. In case of a ZIP file the Init packets should be included in the ZIP.
 		if (statusOk && fileType != DfuService.TYPE_AUTO) {
 			new AlertDialog.Builder(this).setTitle(R.string.dfu_file_init_title).setMessage(R.string.dfu_file_init_message)
-					.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(final DialogInterface dialog, final int which) {
-							mInitFilePath = null;
-							mInitFileStreamUri = null;
-						}
-					}).setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(final DialogInterface dialog, final int which) {
-					final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-					intent.setType(DfuService.MIME_TYPE_OCTET_STREAM);
-					intent.addCategory(Intent.CATEGORY_OPENABLE);
-					startActivityForResult(intent, SELECT_INIT_FILE_REQ);
-				}
-			}).show();
+					.setNegativeButton(R.string.no, (dialog, which) -> {
+						mInitFilePath = null;
+						mInitFileStreamUri = null;
+					}).setPositiveButton(R.string.yes, (dialog, which) -> {
+						final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+						intent.setType(DfuService.MIME_TYPE_OCTET_STREAM);
+						intent.addCategory(Intent.CATEGORY_OPENABLE);
+						startActivityForResult(intent, SELECT_INIT_FILE_REQ);
+					}).show();
 		}
 	}
 
@@ -627,35 +612,24 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		}
 		// Show a dialog with file types
 		new AlertDialog.Builder(this).setTitle(R.string.dfu_file_type_title)
-				.setSingleChoiceItems(R.array.dfu_file_type, index, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(final DialogInterface dialog, final int which) {
-						switch (which) {
-							case 0:
-								mFileTypeTmp = DfuService.TYPE_AUTO;
-								break;
-							case 1:
-								mFileTypeTmp = DfuService.TYPE_SOFT_DEVICE;
-								break;
-							case 2:
-								mFileTypeTmp = DfuService.TYPE_BOOTLOADER;
-								break;
-							case 3:
-								mFileTypeTmp = DfuService.TYPE_APPLICATION;
-								break;
-						}
+				.setSingleChoiceItems(R.array.dfu_file_type, index, (dialog, which) -> {
+					switch (which) {
+						case 0:
+							mFileTypeTmp = DfuService.TYPE_AUTO;
+							break;
+						case 1:
+							mFileTypeTmp = DfuService.TYPE_SOFT_DEVICE;
+							break;
+						case 2:
+							mFileTypeTmp = DfuService.TYPE_BOOTLOADER;
+							break;
+						case 3:
+							mFileTypeTmp = DfuService.TYPE_APPLICATION;
+							break;
 					}
-				}).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(final DialogInterface dialog, final int which) {
-				openFileChooser();
-			}
-		}).setNeutralButton(R.string.dfu_file_info, new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(final DialogInterface dialog, final int which) {
-				final ZipInfoFragment fragment = new ZipInfoFragment();
-				fragment.show(getSupportFragmentManager(), "help_fragment");
-			}
+				}).setPositiveButton(R.string.ok, (dialog, which) -> openFileChooser()).setNeutralButton(R.string.dfu_file_info, (dialog, which) -> {
+			final ZipInfoFragment fragment = new ZipInfoFragment();
+			fragment.show(getSupportFragmentManager(), "help_fragment");
 		}).setNegativeButton(R.string.cancel, null).show();
 	}
 
@@ -669,27 +643,19 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		} else {
 			// there is no any file browser app, let's try to download one
 			final View customView = getLayoutInflater().inflate(R.layout.app_file_browser, null);
-			final ListView appsList = (ListView) customView.findViewById(android.R.id.list);
+			final ListView appsList = customView.findViewById(android.R.id.list);
 			appsList.setAdapter(new FileBrowserAppsAdapter(this));
 			appsList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 			appsList.setItemChecked(0, true);
 			new AlertDialog.Builder(this).setTitle(R.string.dfu_alert_no_filebrowser_title).setView(customView)
-					.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(final DialogInterface dialog, final int which) {
-							dialog.dismiss();
+					.setNegativeButton(R.string.no, (dialog, which) -> dialog.dismiss()).setPositiveButton(R.string.ok, (dialog, which) -> {
+						final int pos = appsList.getCheckedItemPosition();
+						if (pos >= 0) {
+							final String query = getResources().getStringArray(R.array.dfu_app_file_browser_action)[pos];
+							final Intent storeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(query));
+							startActivity(storeIntent);
 						}
-					}).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(final DialogInterface dialog, final int which) {
-					final int pos = appsList.getCheckedItemPosition();
-					if (pos >= 0) {
-						final String query = getResources().getStringArray(R.array.dfu_app_file_browser_action)[pos];
-						final Intent storeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(query));
-						startActivity(storeIntent);
-					}
-				}
-			}).show();
+					}).show();
 		}
 	}
 

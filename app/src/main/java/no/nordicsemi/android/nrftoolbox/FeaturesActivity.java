@@ -71,14 +71,14 @@ public class FeaturesActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_features);
 
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        final Toolbar toolbar = findViewById(R.id.toolbar_actionbar);
         setSupportActionBar(toolbar);
 
 		// ensure that Bluetooth exists
 		if (!ensureBLEExists())
 			finish();
 
-		final DrawerLayout drawer = mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		final DrawerLayout drawer = mDrawerLayout = findViewById(R.id.drawer_layout);
 		drawer.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
 		// Set the drawer toggle as the DrawerListener
@@ -95,7 +95,7 @@ public class FeaturesActivity extends AppCompatActivity {
 		setupPluginsInDrawer((ViewGroup) drawer.findViewById(R.id.plugin_container));
 
 		// configure the app grid
-		final GridView grid = (GridView) findViewById(R.id.grid);
+		final GridView grid = findViewById(R.id.grid);
 		grid.setAdapter(new AppAdapter(this));
 		grid.setEmptyView(findViewById(android.R.id.empty));
 
@@ -165,28 +165,25 @@ public class FeaturesActivity extends AppCompatActivity {
 		final ResolveInfo nrfConnectInfo = pm.resolveActivity(nrfConnectIntent, 0);
 
 		// configure link to nRF Connect
-		final TextView nrfConnectItem = (TextView) container.findViewById(R.id.link_mcp);
+		final TextView nrfConnectItem = container.findViewById(R.id.link_mcp);
 		if (nrfConnectInfo == null) {
 			nrfConnectItem.setTextColor(Color.GRAY);
 			ColorMatrix grayscale = new ColorMatrix();
 			grayscale.setSaturation(0.0f);
 			nrfConnectItem.getCompoundDrawables()[0].mutate().setColorFilter(new ColorMatrixColorFilter(grayscale));
 		}
-		nrfConnectItem.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(final View v) {
-				Intent action = nrfConnectIntent;
-				if (nrfConnectInfo == null)
-					action = new Intent(Intent.ACTION_VIEW, Uri.parse(NRF_CONNECT_MARKET_URI));
-				action.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-				action.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				try {
-					startActivity(action);
-				} catch (final ActivityNotFoundException e) {
-					Toast.makeText(FeaturesActivity.this, R.string.no_application_play, Toast.LENGTH_SHORT).show();
-				}
-				mDrawerLayout.closeDrawers();
+		nrfConnectItem.setOnClickListener(v -> {
+			Intent action = nrfConnectIntent;
+			if (nrfConnectInfo == null)
+				action = new Intent(Intent.ACTION_VIEW, Uri.parse(NRF_CONNECT_MARKET_URI));
+			action.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+			action.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			try {
+				startActivity(action);
+			} catch (final ActivityNotFoundException e) {
+				Toast.makeText(FeaturesActivity.this, R.string.no_application_play, Toast.LENGTH_SHORT).show();
 			}
+			mDrawerLayout.closeDrawers();
 		});
 
 		// look for other plug-ins
@@ -196,21 +193,18 @@ public class FeaturesActivity extends AppCompatActivity {
 		final List<ResolveInfo> appList = pm.queryIntentActivities(utilsIntent, 0);
 		for (final ResolveInfo info : appList) {
 			final View item = inflater.inflate(R.layout.drawer_plugin, container, false);
-			final ImageView icon = (ImageView) item.findViewById(android.R.id.icon);
-			final TextView label = (TextView) item.findViewById(android.R.id.text1);
+			final ImageView icon = item.findViewById(android.R.id.icon);
+			final TextView label = item.findViewById(android.R.id.text1);
 
 			label.setText(info.loadLabel(pm));
 			icon.setImageDrawable(info.loadIcon(pm));
-			item.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(final View v) {
-					final Intent intent = new Intent();
-					intent.setComponent(new ComponentName(info.activityInfo.packageName, info.activityInfo.name));
-					intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-					startActivity(intent);
-					mDrawerLayout.closeDrawers();
-				}
+			item.setOnClickListener(v -> {
+				final Intent intent = new Intent();
+				intent.setComponent(new ComponentName(info.activityInfo.packageName, info.activityInfo.name));
+				intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(intent);
+				mDrawerLayout.closeDrawers();
 			});
 			container.addView(item);
 		}

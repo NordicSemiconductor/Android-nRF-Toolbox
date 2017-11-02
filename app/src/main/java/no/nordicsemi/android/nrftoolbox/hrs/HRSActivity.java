@@ -76,14 +76,14 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 
 	private void setGUI() {
 		mLineGraph = LineGraphView.getLineGraphView();
-		mHRSValue = (TextView) findViewById(R.id.text_hrs_value);
-		mHRSPosition = (TextView) findViewById(R.id.text_hrs_position);
+		mHRSValue = findViewById(R.id.text_hrs_value);
+		mHRSPosition = findViewById(R.id.text_hrs_position);
 		showGraph();
 	}
 
 	private void showGraph() {
 		mGraphView = mLineGraph.getView(this);
-		ViewGroup layout = (ViewGroup) findViewById(R.id.graph_hrs);
+		ViewGroup layout = findViewById(R.id.graph_hrs);
 		layout.addView(mGraphView);
 	}
 
@@ -184,27 +184,21 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 	}
 
 	private void setHRSValueOnView(final int value) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				if (value >= MIN_POSITIVE_VALUE && value <= MAX_HR_VALUE) {
-					mHRSValue.setText(Integer.toString(value));
-				} else {
-					mHRSValue.setText(R.string.not_available_value);
-				}
+		runOnUiThread(() -> {
+			if (value >= MIN_POSITIVE_VALUE && value <= MAX_HR_VALUE) {
+				mHRSValue.setText(Integer.toString(value));
+			} else {
+				mHRSValue.setText(R.string.not_available_value);
 			}
 		});
 	}
 
 	private void setHRSPositionOnView(final String position) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				if (position != null) {
-					mHRSPosition.setText(position);
-				} else {
-					mHRSPosition.setText(R.string.not_available);
-				}
+		runOnUiThread(() -> {
+			if (position != null) {
+				mHRSPosition.setText(position);
+			} else {
+				mHRSPosition.setText(R.string.not_available);
 			}
 		});
 	}
@@ -233,13 +227,10 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 	@Override
 	public void onDeviceDisconnected(final BluetoothDevice device) {
 		super.onDeviceDisconnected(device);
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				mHRSValue.setText(R.string.not_available_value);
-				mHRSPosition.setText(R.string.not_available);
-				stopShowGraph();
-			}
+		runOnUiThread(() -> {
+			mHRSValue.setText(R.string.not_available_value);
+			mHRSPosition.setText(R.string.not_available);
+			stopShowGraph();
 		});
 	}
 

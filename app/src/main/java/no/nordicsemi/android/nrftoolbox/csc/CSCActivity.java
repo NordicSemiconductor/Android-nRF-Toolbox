@@ -71,14 +71,14 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 	}
 
 	private void setGui() {
-		mSpeedView = (TextView) findViewById(R.id.speed);
-		mSpeedUnitView = (TextView) findViewById(R.id.speed_unit);
-		mCadenceView = (TextView) findViewById(R.id.cadence);
-		mDistanceView = (TextView) findViewById(R.id.distance);
-		mDistanceUnitView = (TextView) findViewById(R.id.distance_unit);
-		mTotalDistanceView = (TextView) findViewById(R.id.distance_total);
-		mTotalDistanceUnitView = (TextView) findViewById(R.id.distance_total_unit);
-		mGearRatioView = (TextView) findViewById(R.id.ratio);
+		mSpeedView = findViewById(R.id.speed);
+		mSpeedUnitView = findViewById(R.id.speed_unit);
+		mCadenceView = findViewById(R.id.cadence);
+		mDistanceView = findViewById(R.id.distance);
+		mDistanceUnitView = findViewById(R.id.distance_unit);
+		mTotalDistanceView = findViewById(R.id.distance_total);
+		mTotalDistanceUnitView = findViewById(R.id.distance_total_unit);
+		mGearRatioView = findViewById(R.id.ratio);
 	}
 
 	@Override

@@ -1188,15 +1188,12 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 				final int delay = bonded ? 1600 : 0; // around 1600 ms is required when connection interval is ~45ms.
 				if (delay > 0)
 					Logger.d(mLogSession, "wait(" + delay + ")");
-				mHandler.postDelayed(new Runnable() {
-					@Override
-					public void run() {
-						// Some proximity tags (e.g. nRF PROXIMITY) initialize bonding automatically when connected.
-						if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_BONDING) {
-							Logger.v(mLogSession, "Discovering Services...");
-							Logger.d(mLogSession, "gatt.discoverServices()");
-							gatt.discoverServices();
-						}
+				mHandler.postDelayed(() -> {
+					// Some proximity tags (e.g. nRF PROXIMITY) initialize bonding automatically when connected.
+					if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_BONDING) {
+						Logger.v(mLogSession, "Discovering Services...");
+						Logger.d(mLogSession, "gatt.discoverServices()");
+						gatt.discoverServices();
 					}
 				}, delay);
 			} else {

@@ -51,7 +51,7 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 	}
 
 	private void setGUI() {
-		final RecyclerView recyclerView = mDevicesView = (RecyclerView) findViewById(android.R.id.list);
+		final RecyclerView recyclerView = mDevicesView = findViewById(android.R.id.list);
 		recyclerView.setLayoutManager(new LinearLayoutManager(this));
 		recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
 	}

@@ -128,7 +128,7 @@
 							android:layout_weight="1"
 							android:ellipsize="middle"
 							android:freezesText="true"
-							android:lines="1"/>
+							android:singleLine="true"/>
 					</TableRow>
 
 					<TableRow

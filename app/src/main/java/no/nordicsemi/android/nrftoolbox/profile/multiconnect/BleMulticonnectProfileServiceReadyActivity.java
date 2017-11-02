@@ -197,7 +197,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 		// The onCreateView class should... create the view
 		onCreateView(savedInstanceState);
 
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        final Toolbar toolbar = findViewById(R.id.toolbar_actionbar);
         setSupportActionBar(toolbar);
 
 		// Common nRF Toolbox view references are obtained here
@@ -466,12 +466,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	 * @param message a message to be shown
 	 */
 	protected void showToast(final String message) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				Toast.makeText(BleMulticonnectProfileServiceReadyActivity.this, message, Toast.LENGTH_LONG).show();
-			}
-		});
+		runOnUiThread(() -> Toast.makeText(BleMulticonnectProfileServiceReadyActivity.this, message, Toast.LENGTH_LONG).show());
 	}
 
 	/**
@@ -480,12 +475,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	 * @param messageResId an resource id of the message to be shown
 	 */
 	protected void showToast(final int messageResId) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				Toast.makeText(BleMulticonnectProfileServiceReadyActivity.this, messageResId, Toast.LENGTH_SHORT).show();
-			}
-		});
+		runOnUiThread(() -> Toast.makeText(BleMulticonnectProfileServiceReadyActivity.this, messageResId, Toast.LENGTH_SHORT).show());
 	}
 
 	/**

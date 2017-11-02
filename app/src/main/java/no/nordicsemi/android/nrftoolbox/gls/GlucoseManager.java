@@ -233,16 +233,13 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 				//				record.context.HbA1c = 213.3f;
 
 				// data set modifications must be done in UI thread
-				mHandler.post(new Runnable() {
-					@Override
-					public void run() {
-						// insert the new record to storage
-						mRecords.put(record.sequenceNumber, record);
+				mHandler.post(() -> {
+					// insert the new record to storage
+					mRecords.put(record.sequenceNumber, record);
 
-						// if there is no context information following the measurement data, notify callback about the new record
-						if (!contextInfoFollows)
-							mCallbacks.onDatasetChanged(gatt.getDevice());
-					}
+					// if there is no context information following the measurement data, notify callback about the new record
+					if (!contextInfoFollows)
+						mCallbacks.onDatasetChanged(gatt.getDevice());
 				});
 			} else if (GM_CONTEXT_CHARACTERISTIC.equals(uuid)) {
 				Logger.a(mLogSession, "\"" + GlucoseMeasurementContextParser.parse(characteristic) + "\" received");

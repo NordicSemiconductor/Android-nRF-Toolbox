@@ -18,9 +18,6 @@ import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 
-/**
- * Created by rora on 05.09.2016.
- */
 public class CGMService extends BleProfileService implements CGMSManagerCallbacks {
     private static final String ACTION_DISCONNECT = "no.nordicsemi.android.nrftoolbox.cgms.ACTION_DISCONNECT";
     public static final String BROADCAST_NEW_CGMS_VALUE = "no.nordicsemi.android.nrftoolbox.cgms.BROADCAST_NEW_CGMS_VALUE";

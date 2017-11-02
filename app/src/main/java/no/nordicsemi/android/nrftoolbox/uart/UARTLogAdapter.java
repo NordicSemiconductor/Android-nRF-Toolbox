@@ -58,8 +58,8 @@ public class UARTLogAdapter extends CursorAdapter {
 		final View view = LayoutInflater.from(context).inflate(R.layout.log_item, parent, false);
 
 		final ViewHolder holder = new ViewHolder();
-		holder.time = (TextView) view.findViewById(R.id.time);
-		holder.data = (TextView) view.findViewById(R.id.data);
+		holder.time = view.findViewById(R.id.time);
+		holder.data = view.findViewById(R.id.data);
 		view.setTag(holder);
 		return view;
 	}

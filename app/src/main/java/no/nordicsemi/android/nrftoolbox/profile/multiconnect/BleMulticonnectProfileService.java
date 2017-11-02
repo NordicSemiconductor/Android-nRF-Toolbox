@@ -91,12 +91,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 					// On older phones (tested on Nexus 4 with Android 5.0.1) the Bluetooth requires some time
 					// after it has been enabled before some operations can start. Starting the GATT server here
 					// without a delay is very likely to cause a DeadObjectException from BluetoothManager#openGattServer(...).
-					mHandler.postDelayed(new Runnable() {
-						@Override
-						public void run() {
-							onBluetoothEnabled();
-						}
-					}, 600);
+					mHandler.postDelayed(() -> onBluetoothEnabled(), 600);
 					break;
 				case BluetoothAdapter.STATE_TURNING_OFF:
 				case BluetoothAdapter.STATE_OFF:
@@ -556,12 +551,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 	 *            an resource id of the message to be shown
 	 */
 	protected void showToast(final int messageResId) {
-		mHandler.post(new Runnable() {
-			@Override
-			public void run() {
-				Toast.makeText(BleMulticonnectProfileService.this, messageResId, Toast.LENGTH_SHORT).show();
-			}
-		});
+		mHandler.post(() -> Toast.makeText(BleMulticonnectProfileService.this, messageResId, Toast.LENGTH_SHORT).show());
 	}
 
 	/**
@@ -571,12 +561,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 	 *            a message to be shown
 	 */
 	protected void showToast(final String message) {
-		mHandler.post(new Runnable() {
-			@Override
-			public void run() {
-				Toast.makeText(BleMulticonnectProfileService.this, message, Toast.LENGTH_SHORT).show();
-			}
-		});
+		mHandler.post(() -> Toast.makeText(BleMulticonnectProfileService.this, message, Toast.LENGTH_SHORT).show());
 	}
 
 	/**

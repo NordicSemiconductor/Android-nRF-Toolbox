@@ -37,8 +37,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.wearable.view.DotsPageIndicator;
 import android.support.wearable.view.GridViewPager;
 import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -56,7 +54,6 @@ import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
 import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.ble.BleProfile;
 import no.nordicsemi.android.nrftoolbox.ble.BleProfileService;
 import no.nordicsemi.android.nrftoolbox.wearable.common.Constants;
 import no.nordicsemi.android.nrftoolbox.uart.domain.Command;
@@ -131,10 +128,10 @@ public class UARTCommandsActivity extends Activity implements UARTCommandsAdapte
 		bindService(service, mServiceConnection, 0);
 
 		// Set up tht grid
-		final GridViewPager pager = (GridViewPager) findViewById(R.id.pager);
+		final GridViewPager pager = findViewById(R.id.pager);
 		pager.setAdapter(mAdapter = new UARTCommandsAdapter(configuration, this));
 
-		final DotsPageIndicator dotsPageIndicator = (DotsPageIndicator) findViewById(R.id.page_indicator);
+		final DotsPageIndicator dotsPageIndicator = findViewById(R.id.page_indicator);
 		dotsPageIndicator.setPager(pager);
 
 		// Configure Google API client

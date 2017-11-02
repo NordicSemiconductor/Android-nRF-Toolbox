@@ -53,7 +53,7 @@ public class ForegroundLinearLayout extends LinearLayout {
 	public ForegroundLinearLayout(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 
-		TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ForegroundRelativeLayout,
+		TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ForegroundLinearLayout,
 				defStyle, 0);
 
 		final Drawable d = a.getDrawable(R.styleable.ForegroundRelativeLayout_foreground);

@@ -201,18 +201,15 @@ public class ProximityServerManager  {
 		public void onServiceAdded(final int status, final BluetoothGattService service) {
 			if (status == BluetoothGatt.GATT_SUCCESS) {
 				// Adding another service from callback thread fails on Samsung S4 with Android 4.3
-				mHandler.post(new Runnable() {
-					@Override
-					public void run() {
-						if (IMMEDIATE_ALERT_SERVICE_UUID.equals(service.getUuid())) {
-							addLinklossService();
-						} else {
-							mServerReady = true;
-							// Both services has been added
-							if (mOnServerOpenCallback != null)
-								mOnServerOpenCallback.onGattServerOpen();
-							mOnServerOpenCallback = null;
-						}
+				mHandler.post(() -> {
+					if (IMMEDIATE_ALERT_SERVICE_UUID.equals(service.getUuid())) {
+						addLinklossService();
+					} else {
+						mServerReady = true;
+						// Both services has been added
+						if (mOnServerOpenCallback != null)
+							mOnServerOpenCallback.onGattServerOpen();
+						mOnServerOpenCallback = null;
 					}
 				});
 			} else {

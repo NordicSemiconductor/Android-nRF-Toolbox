@@ -3,9 +3,6 @@ package no.nordicsemi.android.nrftoolbox.cgms;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/**
- * Created by rora on 02.09.2016.
- */
 public class CGMSRecord implements Parcelable{
     /** Record sequence number. */
     protected int sequenceNumber;

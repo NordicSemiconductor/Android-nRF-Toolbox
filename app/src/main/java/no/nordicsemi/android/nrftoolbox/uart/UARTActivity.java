@@ -189,27 +189,24 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			return;
 
 		if (!mPreferences.getBoolean(PREFS_WEAR_SYNCED, false)) {
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					final Cursor cursor = mDatabaseHelper.getConfigurations();
-					try {
-						while (cursor.moveToNext()) {
-							final long id = cursor.getLong(0 /* _ID */);
-							try {
-								final String xml = cursor.getString(2 /* XML */);
-								final Format format = new Format(new HyphenStyle());
-								final Serializer serializer = new Persister(format);
-								final UartConfiguration configuration = serializer.read(UartConfiguration.class, xml);
-								mWearableSynchronizer.onConfigurationAddedOrEdited(id, configuration).await();
-							} catch (final Exception e) {
-								Log.w(TAG, "Deserializing configuration with id " + id + " failed", e);
-							}
+			new Thread(() -> {
+				final Cursor cursor = mDatabaseHelper.getConfigurations();
+				try {
+					while (cursor.moveToNext()) {
+						final long id = cursor.getLong(0 /* _ID */);
+						try {
+							final String xml = cursor.getString(2 /* XML */);
+							final Format format = new Format(new HyphenStyle());
+							final Serializer serializer = new Persister(format);
+							final UartConfiguration configuration = serializer.read(UartConfiguration.class, xml);
+							mWearableSynchronizer.onConfigurationAddedOrEdited(id, configuration).await();
+						} catch (final Exception e) {
+							Log.w(TAG, "Deserializing configuration with id " + id + " failed", e);
 						}
-						mPreferences.edit().putBoolean(PREFS_WEAR_SYNCED, true).apply();
-					} finally {
-						cursor.close();
 					}
+					mPreferences.edit().putBoolean(PREFS_WEAR_SYNCED, true).apply();
+				} finally {
+					cursor.close();
 				}
 			}).start();
 		}
@@ -235,7 +232,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 		setContentView(R.layout.activity_feature_uart);
 
 		// Setup the sliding pane if it exists
-		final SlidingPaneLayout slidingPane = mSlider = (SlidingPaneLayout) findViewById(R.id.sliding_pane);
+		final SlidingPaneLayout slidingPane = mSlider = findViewById(R.id.sliding_pane);
 		if (slidingPane != null) {
 			slidingPane.setSliderFadeColor(Color.TRANSPARENT);
 			slidingPane.setShadowResourceLeft(R.drawable.shadow_r);
@@ -392,14 +389,11 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 					mWearableSynchronizer.onConfigurationDeleted(id);
 				refreshConfigurations();
 
-				final Snackbar snackbar = Snackbar.make(mSlider, R.string.uart_configuration_deleted, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_undo, new View.OnClickListener() {
-					@Override
-					public void onClick(final View v) {
-						final long id = mDatabaseHelper.restoreDeletedServerConfiguration(name);
-						if (id >= 0)
-							mWearableSynchronizer.onConfigurationAddedOrEdited(id, removedConfiguration);
-						refreshConfigurations();
-					}
+				final Snackbar snackbar = Snackbar.make(mContainer, R.string.uart_configuration_deleted, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_undo, v -> {
+					final long id1 = mDatabaseHelper.restoreDeletedServerConfiguration(name);
+					if (id1 >= 0)
+						mWearableSynchronizer.onConfigurationAddedOrEdited(id1, removedConfiguration);
+					refreshConfigurations();
 				});
 				snackbar.setDuration(5000); // This is not an error
 				snackbar.show();
@@ -489,24 +483,16 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 		} else {
 			// there is no any file browser app, let's try to download one
 			final View customView = getLayoutInflater().inflate(R.layout.app_file_browser, null);
-			final ListView appsList = (ListView) customView.findViewById(android.R.id.list);
+			final ListView appsList = customView.findViewById(android.R.id.list);
 			appsList.setAdapter(new FileBrowserAppsAdapter(this));
 			appsList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 			appsList.setItemChecked(0, true);
-			new AlertDialog.Builder(this).setTitle(R.string.dfu_alert_no_filebrowser_title).setView(customView).setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(final DialogInterface dialog, final int which) {
-					dialog.dismiss();
-				}
-			}).setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(final DialogInterface dialog, final int which) {
-					final int pos = appsList.getCheckedItemPosition();
-					if (pos >= 0) {
-						final String query = getResources().getStringArray(R.array.dfu_app_file_browser_action)[pos];
-						final Intent storeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(query));
-						startActivity(storeIntent);
-					}
+			new AlertDialog.Builder(this).setTitle(R.string.dfu_alert_no_filebrowser_title).setView(customView).setNegativeButton(R.string.no, (dialog, which) -> dialog.dismiss()).setPositiveButton(R.string.yes, (dialog, which) -> {
+				final int pos = appsList.getCheckedItemPosition();
+				if (pos >= 0) {
+					final String query = getResources().getStringArray(R.array.dfu_app_file_browser_action)[pos];
+					final Intent storeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(query));
+					startActivity(storeIntent);
 				}
 			}).show();
 		}
@@ -677,12 +663,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 				final ValueAnimator anim = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
 				anim.setDuration(200);
-				anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-					@Override
-					public void onAnimationUpdate(final ValueAnimator animation) {
-						getWindow().setStatusBarColor((Integer) animation.getAnimatedValue());
-					}
-				});
+				anim.addUpdateListener(animation -> getWindow().setStatusBarColor((Integer) animation.getAnimatedValue()));
 				anim.start();
 			}
 
@@ -734,12 +715,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 				final long id = mDatabaseHelper.addConfiguration(name, xml);
 				mWearableSynchronizer.onConfigurationAddedOrEdited(id, configuration);
 				refreshConfigurations();
-				new Handler().post(new Runnable() {
-					@Override
-					public void run() {
-						selectConfiguration(mConfigurationsAdapter.getItemPosition(id));
-					}
-				});
+				new Handler().post(() -> selectConfiguration(mConfigurationsAdapter.getItemPosition(id)));
 			} else {
 				Toast.makeText(this, R.string.uart_configuration_name_already_taken, Toast.LENGTH_LONG).show();
 			}

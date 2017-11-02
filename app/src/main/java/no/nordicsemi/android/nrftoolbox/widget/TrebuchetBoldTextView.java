@@ -28,7 +28,7 @@ import android.widget.TextView;
 
 import no.nordicsemi.android.nrftoolbox.R;
 
-public class TrebuchetBoldTextView extends TextView {
+public class TrebuchetBoldTextView extends android.support.v7.widget.AppCompatTextView {
 
 	public TrebuchetBoldTextView(Context context) {
 		super(context);

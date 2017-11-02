@@ -87,8 +87,8 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.RSCBi
 	}
 
 	private void setGUI() {
-		mHTSValue = (TextView) findViewById(R.id.text_hts_value);
-		mHTSUnit = (TextView) findViewById(R.id.text_hts_unit);
+		mHTSValue = findViewById(R.id.text_hts_value);
+		mHTSUnit = findViewById(R.id.text_hts_unit);
 
 		if (mValueC != null)
 			mHTSValue.setText(String.valueOf(mValueC));

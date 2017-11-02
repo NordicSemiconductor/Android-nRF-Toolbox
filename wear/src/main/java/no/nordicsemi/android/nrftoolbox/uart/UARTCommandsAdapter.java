@@ -38,7 +38,7 @@ public class UARTCommandsAdapter extends GridPagerAdapter {
 	private UartConfiguration mConfiguration;
 
 	public interface OnCommandSelectedListener {
-		public void onCommandSelected(final Command command);
+		void onCommandSelected(final Command command);
 	}
 
 	public UARTCommandsAdapter(final UartConfiguration configuration, final OnCommandSelectedListener listener) {
@@ -72,7 +72,7 @@ public class UARTCommandsAdapter extends GridPagerAdapter {
 		if (commands != null && commands.length > 0) {
 			final Command command = commands[column];
 
-			final CircularButton icon = (CircularButton) view.findViewById(R.id.icon);
+			final CircularButton icon = view.findViewById(R.id.icon);
 			icon.getImageDrawable().setLevel(command.getIconIndex());
 			icon.setOnClickListener(new View.OnClickListener() {
 				@Override
@@ -85,7 +85,7 @@ public class UARTCommandsAdapter extends GridPagerAdapter {
 			view.findViewById(R.id.icon).setVisibility(View.GONE);
 
 			// and show the message
-			final TextView emptyView = (TextView) view.findViewById(R.id.empty);
+			final TextView emptyView = view.findViewById(R.id.empty);
 			emptyView.setVisibility(View.VISIBLE);
 			if (commands == null)
 				emptyView.setText(R.string.configuration_deleted);

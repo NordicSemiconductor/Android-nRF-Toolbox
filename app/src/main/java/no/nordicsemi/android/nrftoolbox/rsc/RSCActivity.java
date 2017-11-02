@@ -72,15 +72,15 @@ public class RSCActivity extends BleProfileServiceReadyActivity<RSCService.RSCBi
 	}
 
 	private void setGui() {
-		mSpeedView = (TextView) findViewById(R.id.speed);
-		mSpeedUnitView = (TextView) findViewById(R.id.speed_unit);
-		mCadenceView = (TextView) findViewById(R.id.cadence);
-		mDistanceView = (TextView) findViewById(R.id.distance);
-		mDistanceUnitView = (TextView) findViewById(R.id.distance_unit);
-		mTotalDistanceView = (TextView) findViewById(R.id.total_distance);
-		mTotalDistanceUnitView = (TextView) findViewById(R.id.total_distance_unit);
-		mStridesCountView = (TextView) findViewById(R.id.strides);
-		mActivityView = (TextView) findViewById(R.id.activity);
+		mSpeedView = findViewById(R.id.speed);
+		mSpeedUnitView = findViewById(R.id.speed_unit);
+		mCadenceView = findViewById(R.id.cadence);
+		mDistanceView = findViewById(R.id.distance);
+		mDistanceUnitView = findViewById(R.id.distance_unit);
+		mTotalDistanceView = findViewById(R.id.total_distance);
+		mTotalDistanceUnitView = findViewById(R.id.total_distance_unit);
+		mStridesCountView = findViewById(R.id.strides);
+		mActivityView = findViewById(R.id.activity);
 	}
 
 	@Override

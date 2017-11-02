@@ -23,5 +23,5 @@ package no.nordicsemi.android.nrftoolbox.uart.database;
 
 public interface UndoColumns {
 	/** The 'deleted' flag */
-	public final static String DELETED = "deleted";
+	String DELETED = "deleted";
 }

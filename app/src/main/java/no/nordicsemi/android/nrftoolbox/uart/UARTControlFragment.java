@@ -22,17 +22,11 @@
 
 package no.nordicsemi.android.nrftoolbox.uart;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -85,7 +79,7 @@ public class UARTControlFragment extends Fragment implements GridView.OnItemClic
 	public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.fragment_feature_uart_control, container, false);
 
-		final GridView grid = (GridView) view.findViewById(R.id.grid);
+		final GridView grid = view.findViewById(R.id.grid);
 		grid.setAdapter(mAdapter = new UARTButtonAdapter(mConfiguration));
 		grid.setOnItemClickListener(this);
 		mAdapter.setEditMode(mEditMode);

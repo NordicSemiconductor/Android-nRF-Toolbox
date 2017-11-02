@@ -29,7 +29,6 @@ import android.support.wearable.view.CircledImageView;
 import android.support.wearable.view.WearableListView;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import no.nordicsemi.android.nrftoolbox.R;
@@ -74,8 +73,8 @@ public class UARTConfigurationItemLayout extends LinearLayout implements Wearabl
 	protected void onFinishInflate() {
 		super.onFinishInflate();
 
-		mName = (TextView) findViewById(R.id.name);
-		mIcon = (CircledImageView) findViewById(R.id.icon);
+		mName = findViewById(R.id.name);
+		mIcon = findViewById(R.id.icon);
 		mExpandCircleRadius = mIcon.getCircleRadius();
 		mShrinkCircleRadius = mExpandCircleRadius * SHRINK_CIRCLE_RATIO;
 

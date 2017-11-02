@@ -24,5 +24,5 @@ package no.nordicsemi.android.nrftoolbox.uart.database;
 
 public interface NameColumns {
 	/** The name */
-	public final static String NAME = "name";
+	String NAME = "name";
 }

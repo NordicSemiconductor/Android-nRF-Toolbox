@@ -99,15 +99,10 @@ public class UARTNewConfigurationDialogFragment extends DialogFragment implement
 
 		final LayoutInflater inflater = LayoutInflater.from(getActivity());
 		final View view = inflater.inflate(R.layout.feature_uart_dialog_new_configuration, null);
-		final EditText editText = mEditText = (EditText) view.findViewById(R.id.name);
+		final EditText editText = mEditText = view.findViewById(R.id.name);
 		editText.setText(args.getString(NAME));
 		final View actionClear = view.findViewById(R.id.action_clear);
-		actionClear.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(final View v) {
-				editText.setText(null);
-			}
-		});
+		actionClear.setOnClickListener(v -> editText.setText(null));
 
 		final AlertDialog dialog = new AlertDialog.Builder(context).setTitle(titleResId).setView(view).setNegativeButton(R.string.cancel, null)
 				.setPositiveButton(R.string.ok, null).setCancelable(false).show(); // this must be show() or the getButton() below will return null.

@@ -44,7 +44,7 @@ public class UploadCancelFragment extends DialogFragment {
 	private CancelFragmentListener mListener;
 
 	public interface CancelFragmentListener {
-		public void onCancelUpload();
+		void onCancelUpload();
 	}
 
 	public static UploadCancelFragment getInstance() {
@@ -66,22 +66,14 @@ public class UploadCancelFragment extends DialogFragment {
     @Override
 	public Dialog onCreateDialog(final Bundle savedInstanceState) {
 		return new AlertDialog.Builder(getActivity()).setTitle(R.string.dfu_confirmation_dialog_title).setMessage(R.string.dfu_upload_dialog_cancel_message).setCancelable(false)
-				.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(final DialogInterface dialog, final int whichButton) {
-						final LocalBroadcastManager manager = LocalBroadcastManager.getInstance(getActivity());
-						final Intent pauseAction = new Intent(DfuService.BROADCAST_ACTION);
-						pauseAction.putExtra(DfuService.EXTRA_ACTION, DfuService.ACTION_ABORT);
-						manager.sendBroadcast(pauseAction);
+				.setPositiveButton(R.string.yes, (dialog, whichButton) -> {
+					final LocalBroadcastManager manager = LocalBroadcastManager.getInstance(getActivity());
+					final Intent pauseAction = new Intent(DfuService.BROADCAST_ACTION);
+					pauseAction.putExtra(DfuService.EXTRA_ACTION, DfuService.ACTION_ABORT);
+					manager.sendBroadcast(pauseAction);
 
-						mListener.onCancelUpload();
-					}
-				}).setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(final DialogInterface dialog, final int which) {
-						dialog.cancel();
-					}
-				}).create();
+					mListener.onCancelUpload();
+				}).setNegativeButton(R.string.no, (dialog, which) -> dialog.cancel()).create();
 	}
 
 	@Override

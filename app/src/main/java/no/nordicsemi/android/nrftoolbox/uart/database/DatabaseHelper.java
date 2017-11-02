@@ -36,7 +36,7 @@ public class DatabaseHelper {
 
 	private interface Tables {
 		/** Configurations table. See {@link ConfigurationContract.Configuration} for column names. */
-		public static final String CONFIGURATIONS = "configurations";
+		String CONFIGURATIONS = "configurations";
 	}
 
     private static final String[] ID_PROJECTION = new String[] { BaseColumns._ID };

@@ -27,7 +27,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -85,20 +84,17 @@ public class UARTEditDialog extends DialogFragment implements View.OnClickListen
 
 		// Create view
 		final View view = inflater.inflate(R.layout.feature_uart_dialog_edit, null);
-		final EditText field = mField = (EditText) view.findViewById(R.id.field);
-		final GridView grid = (GridView) view.findViewById(R.id.grid);
-		final CheckBox checkBox = mActiveCheckBox = (CheckBox) view.findViewById(R.id.active);
-		checkBox.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(final CompoundButton buttonView, final boolean isChecked) {
-				field.setEnabled(isChecked);
-				grid.setEnabled(isChecked);
-				if (mIconAdapter != null)
-					mIconAdapter.notifyDataSetChanged();
-			}
+		final EditText field = mField = view.findViewById(R.id.field);
+		final GridView grid = view.findViewById(R.id.grid);
+		final CheckBox checkBox = mActiveCheckBox = view.findViewById(R.id.active);
+		checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+			field.setEnabled(isChecked);
+			grid.setEnabled(isChecked);
+			if (mIconAdapter != null)
+				mIconAdapter.notifyDataSetChanged();
 		});
 
-		final RadioGroup eolGroup = mEOLGroup = (RadioGroup) view.findViewById(R.id.uart_eol);
+		final RadioGroup eolGroup = mEOLGroup = view.findViewById(R.id.uart_eol);
 		switch (Command.Eol.values()[eol]) {
 			case CR_LF:
 				eolGroup.check(R.id.uart_eol_cr_lf);

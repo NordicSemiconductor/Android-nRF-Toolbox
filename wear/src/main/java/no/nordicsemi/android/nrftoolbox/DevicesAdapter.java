@@ -206,9 +206,9 @@ public class DevicesAdapter extends WearableListView.Adapter {
 		public ItemViewHolder(final View itemView) {
 			super(itemView);
 
-			mIcon = (CircledImageView) itemView.findViewById(R.id.icon);
-			mName = (TextView) itemView.findViewById(R.id.name);
-			mAddress = (TextView) itemView.findViewById(R.id.state);
+			mIcon = itemView.findViewById(R.id.icon);
+			mName = itemView.findViewById(R.id.name);
+			mAddress = itemView.findViewById(R.id.state);
 		}
 
 		/** Returns the Bluetooth device for that holder, or null for "Scanning for nearby devices" row. */

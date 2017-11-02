@@ -39,9 +39,6 @@ import no.nordicsemi.android.nrftoolbox.parser.RecordAccessControlPointParser;
 import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
 
-/**
- * Created by rora on 10.05.2016.
- */
 public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 	private static final String TAG = "CGMSManager";
 

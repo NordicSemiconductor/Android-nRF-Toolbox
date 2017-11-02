@@ -91,8 +91,8 @@ public class AppAdapter extends BaseAdapter {
 
 			final ViewHolder holder = new ViewHolder();
 			holder.view = view;
-			holder.icon = (ImageView) view.findViewById(R.id.icon);
-			holder.label = (TextView) view.findViewById(R.id.label);
+			holder.icon = view.findViewById(R.id.icon);
+			holder.label = view.findViewById(R.id.label);
 			view.setTag(holder);
 		}
 
@@ -102,14 +102,11 @@ public class AppAdapter extends BaseAdapter {
 		final ViewHolder holder = (ViewHolder) view.getTag();
 		holder.icon.setImageDrawable(info.loadIcon(pm));
 		holder.label.setText(info.loadLabel(pm).toString().toUpperCase(Locale.US));
-		holder.view.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				final Intent intent = new Intent();
-				intent.setComponent(new ComponentName(info.activityInfo.packageName, info.activityInfo.name));
-				intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-				mContext.startActivity(intent);
-			}
+		holder.view.setOnClickListener(v -> {
+			final Intent intent = new Intent();
+			intent.setComponent(new ComponentName(info.activityInfo.packageName, info.activityInfo.name));
+			intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+			mContext.startActivity(intent);
 		});
 
 		return view;

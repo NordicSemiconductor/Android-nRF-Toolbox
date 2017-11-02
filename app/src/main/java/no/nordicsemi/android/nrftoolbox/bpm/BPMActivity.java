@@ -53,14 +53,14 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 	}
 
 	private void setGUI() {
-		mSystolicView = (TextView) findViewById(R.id.systolic);
-		mSystolicUnitView = (TextView) findViewById(R.id.systolic_unit);
-		mDiastolicView = (TextView) findViewById(R.id.diastolic);
-		mDiastolicUnitView = (TextView) findViewById(R.id.diastolic_unit);
-		mMeanAPView = (TextView) findViewById(R.id.mean_ap);
-		mMeanAPUnitView = (TextView) findViewById(R.id.mean_ap_unit);
-		mPulseView = (TextView) findViewById(R.id.pulse);
-		mTimestampView = (TextView) findViewById(R.id.timestamp);
+		mSystolicView = findViewById(R.id.systolic);
+		mSystolicUnitView = findViewById(R.id.systolic_unit);
+		mDiastolicView = findViewById(R.id.diastolic);
+		mDiastolicUnitView = findViewById(R.id.diastolic_unit);
+		mMeanAPView = findViewById(R.id.mean_ap);
+		mMeanAPUnitView = findViewById(R.id.mean_ap_unit);
+		mPulseView = findViewById(R.id.pulse);
+		mTimestampView = findViewById(R.id.timestamp);
 	}
 
 	@Override
@@ -114,59 +114,47 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 
 	@Override
 	public void onBloodPressureMeasurementRead(final BluetoothDevice device, final float systolic, final float diastolic, final float meanArterialPressure, final int unit) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				mSystolicView.setText(String.valueOf(systolic));
-				mDiastolicView.setText(String.valueOf(diastolic));
-				mMeanAPView.setText(String.valueOf(meanArterialPressure));
+		runOnUiThread(() -> {
+			mSystolicView.setText(String.valueOf(systolic));
+			mDiastolicView.setText(String.valueOf(diastolic));
+			mMeanAPView.setText(String.valueOf(meanArterialPressure));
 
-				mSystolicUnitView.setText(unit == UNIT_mmHG ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
-				mDiastolicUnitView.setText(unit == UNIT_mmHG ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
-				mMeanAPUnitView.setText(unit == UNIT_mmHG ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
-			}
+			mSystolicUnitView.setText(unit == UNIT_mmHG ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
+			mDiastolicUnitView.setText(unit == UNIT_mmHG ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
+			mMeanAPUnitView.setText(unit == UNIT_mmHG ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
 		});
 	}
 
 	@Override
 	public void onIntermediateCuffPressureRead(final BluetoothDevice device, final float cuffPressure, final int unit) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				mSystolicView.setText(String.valueOf(cuffPressure));
-				mDiastolicView.setText(R.string.not_available_value);
-				mMeanAPView.setText(R.string.not_available_value);
+		runOnUiThread(() -> {
+			mSystolicView.setText(String.valueOf(cuffPressure));
+			mDiastolicView.setText(R.string.not_available_value);
+			mMeanAPView.setText(R.string.not_available_value);
 
-				mSystolicUnitView.setText(unit == UNIT_mmHG ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
-				mDiastolicUnitView.setText(null);
-				mMeanAPUnitView.setText(null);
-			}
+			mSystolicUnitView.setText(unit == UNIT_mmHG ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
+			mDiastolicUnitView.setText(null);
+			mMeanAPUnitView.setText(null);
 		});
 	}
 
 	@Override
 	public void onPulseRateRead(final BluetoothDevice device, final float pulseRate) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				if (pulseRate >= 0)
-					mPulseView.setText(String.valueOf(pulseRate));
-				else
-					mPulseView.setText(R.string.not_available_value);
-			}
+		runOnUiThread(() -> {
+			if (pulseRate >= 0)
+				mPulseView.setText(String.valueOf(pulseRate));
+			else
+				mPulseView.setText(R.string.not_available_value);
 		});
 	}
 
 	@Override
 	public void onTimestampRead(final BluetoothDevice device, final Calendar calendar) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				if (calendar != null)
-					mTimestampView.setText(getString(R.string.bpm_timestamp, calendar));
-				else
-					mTimestampView.setText(R.string.not_available);
-			}
+		runOnUiThread(() -> {
+			if (calendar != null)
+				mTimestampView.setText(getString(R.string.bpm_timestamp, calendar));
+			else
+				mTimestampView.setText(R.string.not_available);
 		});
 	}
 }

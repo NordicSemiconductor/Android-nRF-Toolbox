@@ -26,9 +26,6 @@ import android.bluetooth.BluetoothDevice;
 
 import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
 
-/**
- * Created by rora on 10.05.2016.
- */
 public interface CGMSManagerCallbacks extends BleManagerCallbacks {
     /**
      * Called when new CGM value has been obtained from the sensor.

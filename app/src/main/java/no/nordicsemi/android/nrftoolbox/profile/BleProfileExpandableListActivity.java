@@ -88,7 +88,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 		// The onCreateView class should... create the view
 		onCreateView(savedInstanceState);
 
-		final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+		final Toolbar toolbar = findViewById(R.id.toolbar_actionbar);
 		setSupportActionBar(toolbar);
 
 		// Common nRF Toolbox view references are obtained here
@@ -127,9 +127,9 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	protected final void setUpView() {
 		// set GUI
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		mConnectButton = (Button) findViewById(R.id.action_connect);
-		mDeviceNameView = (TextView) findViewById(R.id.device_name);
-		mBatteryLevelView = (TextView) findViewById(R.id.battery);
+		mConnectButton = findViewById(R.id.action_connect);
+		mDeviceNameView = findViewById(R.id.device_name);
+		mBatteryLevelView = findViewById(R.id.battery);
 	}
 
 	@Override
@@ -256,12 +256,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	@Override
 	public void onDeviceConnected(final BluetoothDevice device) {
 		mDeviceConnected = true;
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				mConnectButton.setText(R.string.action_disconnect);
-			}
-		});
+		runOnUiThread(() -> mConnectButton.setText(R.string.action_disconnect));
 	}
 
 	@Override
@@ -273,25 +268,19 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	public void onDeviceDisconnected(final BluetoothDevice device) {
 		mDeviceConnected = false;
 		mBleManager.close();
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				mConnectButton.setText(R.string.action_connect);
-				mDeviceNameView.setText(getDefaultDeviceName());
-				mBatteryLevelView.setText(R.string.not_available);
-			}
+		runOnUiThread(() -> {
+			mConnectButton.setText(R.string.action_connect);
+			mDeviceNameView.setText(getDefaultDeviceName());
+			mBatteryLevelView.setText(R.string.not_available);
 		});
 	}
 
 	@Override
 	public void onLinklossOccur(final BluetoothDevice device) {
 		mDeviceConnected = false;
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				if (mBatteryLevelView != null)
-					mBatteryLevelView.setText(R.string.not_available);
-			}
+		runOnUiThread(() -> {
+			if (mBatteryLevelView != null)
+				mBatteryLevelView.setText(R.string.not_available);
 		});
 	}
 
@@ -323,12 +312,9 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 
 	@Override
 	public void onBatteryValueReceived(final BluetoothDevice device, final int value) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				if (mBatteryLevelView != null)
-					mBatteryLevelView.setText(getString(R.string.battery, value));
-			}
+		runOnUiThread(() -> {
+			if (mBatteryLevelView != null)
+				mBatteryLevelView.setText(getString(R.string.battery, value));
 		});
 	}
 
@@ -349,12 +335,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	 * @param message a message to be shown
 	 */
 	protected void showToast(final String message) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				Toast.makeText(BleProfileExpandableListActivity.this, message, Toast.LENGTH_SHORT).show();
-			}
-		});
+		runOnUiThread(() -> Toast.makeText(BleProfileExpandableListActivity.this, message, Toast.LENGTH_SHORT).show());
 	}
 
 	/**
@@ -363,12 +344,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	 * @param messageResId an resource id of the message to be shown
 	 */
 	protected void showToast(final int messageResId) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				Toast.makeText(BleProfileExpandableListActivity.this, messageResId, Toast.LENGTH_SHORT).show();
-			}
-		});
+		runOnUiThread(() -> Toast.makeText(BleProfileExpandableListActivity.this, messageResId, Toast.LENGTH_SHORT).show());
 	}
 
 	/**
@@ -428,12 +404,9 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	 * @see #getFilterUUID()
 	 */
 	private void showDeviceScanningDialog(final UUID filter) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				final ScannerFragment dialog = ScannerFragment.getInstance(filter);
-				dialog.show(getSupportFragmentManager(), "scan_fragment");
-			}
+		runOnUiThread(() -> {
+			final ScannerFragment dialog = ScannerFragment.getInstance(filter);
+			dialog.show(getSupportFragmentManager(), "scan_fragment");
 		});
 	}
 

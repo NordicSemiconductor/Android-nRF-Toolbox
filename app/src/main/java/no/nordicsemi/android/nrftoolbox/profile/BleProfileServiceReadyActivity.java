@@ -235,7 +235,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 		// The onCreateView class should... create the view
 		onCreateView(savedInstanceState);
 
-		final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+		final Toolbar toolbar = findViewById(R.id.toolbar_actionbar);
 		setSupportActionBar(toolbar);
 
 		// Common nRF Toolbox view references are obtained here
@@ -363,9 +363,9 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	protected final void setUpView() {
 		// set GUI
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		mConnectButton = (Button) findViewById(R.id.action_connect);
-		mDeviceNameView = (TextView) findViewById(R.id.device_name);
-		mBatteryLevelView = (TextView) findViewById(R.id.battery);
+		mConnectButton = findViewById(R.id.action_connect);
+		mDeviceNameView = findViewById(R.id.device_name);
+		mBatteryLevelView = findViewById(R.id.battery);
 	}
 
 	@Override
@@ -578,12 +578,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	 * @param message a message to be shown
 	 */
 	protected void showToast(final String message) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				Toast.makeText(BleProfileServiceReadyActivity.this, message, Toast.LENGTH_LONG).show();
-			}
-		});
+		runOnUiThread(() -> Toast.makeText(BleProfileServiceReadyActivity.this, message, Toast.LENGTH_LONG).show());
 	}
 
 	/**
@@ -592,12 +587,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	 * @param messageResId an resource id of the message to be shown
 	 */
 	protected void showToast(final int messageResId) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				Toast.makeText(BleProfileServiceReadyActivity.this, messageResId, Toast.LENGTH_SHORT).show();
-			}
-		});
+		runOnUiThread(() -> Toast.makeText(BleProfileServiceReadyActivity.this, messageResId, Toast.LENGTH_SHORT).show());
 	}
 
 	/**

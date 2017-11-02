@@ -97,33 +97,27 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 		public ViewHolder(final View itemView) {
 			super(itemView);
 
-			nameView = (TextView) itemView.findViewById(R.id.name);
-			addressView = (TextView) itemView.findViewById(R.id.address);
-			batteryView = (TextView) itemView.findViewById(R.id.battery);
-			actionButton = (ImageButton) itemView.findViewById(R.id.action_find_silent);
+			nameView = itemView.findViewById(R.id.name);
+			addressView = itemView.findViewById(R.id.address);
+			batteryView = itemView.findViewById(R.id.battery);
+			actionButton = itemView.findViewById(R.id.action_find_silent);
 
 			// Configure FIND / SILENT button
-			actionButton.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(final View v) {
-					final int position = getAdapterPosition();
-					final BluetoothDevice device = mDevices.get(position);
-					final boolean on = mService.toggleImmediateAlert(device);
+			actionButton.setOnClickListener(v -> {
+				final int position = getAdapterPosition();
+				final BluetoothDevice device = mDevices.get(position);
+				final boolean on = mService.toggleImmediateAlert(device);
 
-					actionButton.setImageResource(on ? R.drawable.ic_stat_notify_proximity_silent : R.drawable.ic_stat_notify_proximity_find);
-				}
+				actionButton.setImageResource(on ? R.drawable.ic_stat_notify_proximity_silent : R.drawable.ic_stat_notify_proximity_find);
 			});
 
 			// Configure Disconnect button
-			itemView.findViewById(R.id.action_disconnect).setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(final View v) {
-					final int position = getAdapterPosition();
-					final BluetoothDevice device = mDevices.get(position);
-					mService.disconnect(device);
-					// The device might have not been connected, so there will be no callback
-					onDeviceRemoved(device);
-				}
+			itemView.findViewById(R.id.action_disconnect).setOnClickListener(v -> {
+				final int position = getAdapterPosition();
+				final BluetoothDevice device = mDevices.get(position);
+				mService.disconnect(device);
+				// The device might have not been connected, so there will be no callback
+				onDeviceRemoved(device);
 			});
 		}
 

@@ -42,9 +42,9 @@
 			android:ellipsize="marquee"
 			android:layout_toRightOf="@+id/icon"
 			android:gravity="center_vertical"
-			android:lines="1"
 			android:textSize="20sp"
-			android:textColor="@android:color/black"/>
+			android:textColor="@android:color/black"
+			android:singleLine="true"/>
 
 		<TextView
 			android:id="@+id/address"

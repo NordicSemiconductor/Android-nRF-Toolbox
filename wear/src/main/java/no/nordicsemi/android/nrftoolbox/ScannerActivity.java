@@ -26,20 +26,14 @@ import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.content.PermissionChecker;
 import android.support.wearable.view.WearableListView;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -98,7 +92,7 @@ public class ScannerActivity extends Activity {
 		setContentView(R.layout.activity_list_with_header);
 
 		// Get the list component from the layout of the activity
-		final WearableListView listView = (WearableListView) findViewById(R.id.devices_list);
+		final WearableListView listView = findViewById(R.id.devices_list);
 		listView.setAdapter(mDeviceAdapter = new DevicesAdapter(listView));
 		listView.setClickListener(mOnRowClickListener);
 		listView.addOnScrollListener(mOnScrollListener);

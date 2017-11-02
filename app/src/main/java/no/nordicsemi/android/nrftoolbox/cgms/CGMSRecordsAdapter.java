@@ -15,9 +15,6 @@ import java.util.Locale;
 
 import no.nordicsemi.android.nrftoolbox.R;
 
-/**
- * Created by rora on 02.09.2016.
- */
 public class CGMSRecordsAdapter extends BaseAdapter {
 	private final static SimpleDateFormat mTimeFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.US);
 
@@ -50,9 +47,9 @@ public class CGMSRecordsAdapter extends BaseAdapter {
 		if (convertView == null) {
 			convertView = mInflater.inflate(R.layout.activity_feature_cgms_item, parent, false);
 			viewHolder = new ViewHolder();
-			viewHolder.concentration = (TextView) convertView.findViewById(R.id.cgms_concentration);
-			viewHolder.time = (TextView) convertView.findViewById(R.id.time);
-			viewHolder.details = (TextView) convertView.findViewById(R.id.details);
+			viewHolder.concentration = convertView.findViewById(R.id.cgms_concentration);
+			viewHolder.time = convertView.findViewById(R.id.time);
+			viewHolder.details = convertView.findViewById(R.id.details);
 			convertView.setTag(viewHolder);
 		} else {
 			viewHolder = (ViewHolder) convertView.getTag();

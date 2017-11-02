@@ -183,25 +183,17 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 	public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.fragment_feature_uart_log, container, false);
 
-		final EditText field = mField = (EditText) view.findViewById(R.id.field);
-		field.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-			@Override
-			public boolean onEditorAction(final TextView v, final int actionId, final KeyEvent event) {
-				if (actionId == EditorInfo.IME_ACTION_SEND) {
-					onSendClicked();
-					return true;
-				}
-				return false;
+		final EditText field = mField = view.findViewById(R.id.field);
+		field.setOnEditorActionListener((v, actionId, event) -> {
+			if (actionId == EditorInfo.IME_ACTION_SEND) {
+				onSendClicked();
+				return true;
 			}
+			return false;
 		});
 
-		final Button sendButton = mSendButton = (Button) view.findViewById(R.id.action_send);
-		sendButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(final View v) {
-				onSendClicked();
-			}
-		});
+		final Button sendButton = mSendButton = view.findViewById(R.id.action_send);
+		sendButton.setOnClickListener(v -> onSendClicked());
 		return view;
 	}
 

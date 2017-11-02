@@ -62,49 +62,37 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 	}
 
 	private void setGUI() {
-		mRecordsListView = (ListView) findViewById(R.id.list);
+		mRecordsListView = findViewById(R.id.list);
 		mControlPanelStd = findViewById(R.id.cgms_control_std);
 		mControlPanelAbort = findViewById(R.id.cgms_control_abort);
 
-		findViewById(R.id.action_last).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				clearRecords();
-				if (mBinder != null) {
-					mBinder.clear();
-					mBinder.getLastRecord();
-				}
+		findViewById(R.id.action_last).setOnClickListener(v -> {
+			clearRecords();
+			if (mBinder != null) {
+				mBinder.clear();
+				mBinder.getLastRecord();
 			}
 		});
-		findViewById(R.id.action_all).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
+		findViewById(R.id.action_all).setOnClickListener(v -> {
+			clearRecords();
+			if (mBinder != null) {
 				clearRecords();
-				if (mBinder != null) {
-					clearRecords();
-					mBinder.getAllRecords();
-				}
+				mBinder.getAllRecords();
 			}
 		});
-		findViewById(R.id.action_abort).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (mBinder != null) {
-					mBinder.abort();
-				}
+		findViewById(R.id.action_abort).setOnClickListener(v -> {
+			if (mBinder != null) {
+				mBinder.abort();
 			}
 		});
 
 		// create popup menu attached to the button More
-		findViewById(R.id.action_more).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				PopupMenu menu = new PopupMenu(CGMSActivity.this, v);
-				menu.setOnMenuItemClickListener(CGMSActivity.this);
-				MenuInflater inflater = menu.getMenuInflater();
-				inflater.inflate(R.menu.gls_more, menu.getMenu());
-				menu.show();
-			}
+		findViewById(R.id.action_more).setOnClickListener(v -> {
+			PopupMenu menu = new PopupMenu(CGMSActivity.this, v);
+			menu.setOnMenuItemClickListener(CGMSActivity.this);
+			MenuInflater inflater = menu.getMenuInflater();
+			inflater.inflate(R.menu.gls_more, menu.getMenu());
+			menu.show();
 		});
 	}
 
@@ -171,13 +159,10 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 	}
 
 	private void setOperationInProgress(final boolean progress) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				// setSupportProgressBarIndeterminateVisibility(progress);
-				mControlPanelStd.setVisibility(!progress ? View.VISIBLE : View.GONE);
-				mControlPanelAbort.setVisibility(progress ? View.VISIBLE : View.GONE);
-			}
+		runOnUiThread(() -> {
+			// setSupportProgressBarIndeterminateVisibility(progress);
+			mControlPanelStd.setVisibility(!progress ? View.VISIBLE : View.GONE);
+			mControlPanelAbort.setVisibility(progress ? View.VISIBLE : View.GONE);
 		});
 	}
 

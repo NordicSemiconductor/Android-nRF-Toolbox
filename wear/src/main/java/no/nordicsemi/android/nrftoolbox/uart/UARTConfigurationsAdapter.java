@@ -73,7 +73,7 @@ public class UARTConfigurationsAdapter extends WearableListView.Adapter {
 		public ConfigurationViewHolder(final View itemView) {
 			super(itemView);
 
-			mName = (TextView) itemView.findViewById(R.id.name);
+			mName = itemView.findViewById(R.id.name);
 		}
 
 		private void setConfiguration(final UartConfiguration configuration) {

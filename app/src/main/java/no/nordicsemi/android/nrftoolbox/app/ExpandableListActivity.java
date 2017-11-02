@@ -197,7 +197,7 @@ public class ExpandableListActivity extends AppCompatActivity implements
 	public void onContentChanged() {
 		super.onContentChanged();
 		View emptyView = findViewById(R.id.empty);
-		mList = (ExpandableListView) findViewById(R.id.list);
+		mList = findViewById(R.id.list);
 		if (mList == null) {
 			throw new RuntimeException(
 					"Your content must have a ExpandableListView whose id attribute is " +

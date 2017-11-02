@@ -65,9 +65,9 @@ public class ExpandableRecordAdapter extends BaseExpandableListAdapter {
 			view = mInflater.inflate(R.layout.activity_feature_gls_item, parent, false);
 
 			final GroupViewHolder holder = new GroupViewHolder();
-			holder.time = (TextView) view.findViewById(R.id.time);
-			holder.details = (TextView) view.findViewById(R.id.details);
-			holder.concentration = (TextView) view.findViewById(R.id.gls_concentration);
+			holder.time = view.findViewById(R.id.time);
+			holder.details = view.findViewById(R.id.details);
+			holder.concentration = view.findViewById(R.id.gls_concentration);
 			view.setTag(holder);
 		}
 		final GlucoseRecord record = (GlucoseRecord) getGroup(position);
@@ -172,8 +172,8 @@ public class ExpandableRecordAdapter extends BaseExpandableListAdapter {
 		if (view == null) {
 			view = mInflater.inflate(R.layout.activity_feature_gls_subitem, parent, false);
 			final ChildViewHolder holder = new ChildViewHolder();
-			holder.title = (TextView) view.findViewById(android.R.id.text1);
-			holder.details = (TextView) view.findViewById(android.R.id.text2);
+			holder.title = view.findViewById(android.R.id.text1);
+			holder.details = view.findViewById(android.R.id.text2);
 			view.setTag(holder);
 		}
 		final Pair<String, String> value = (Pair<String, String>) getChild(groupPosition, childPosition);

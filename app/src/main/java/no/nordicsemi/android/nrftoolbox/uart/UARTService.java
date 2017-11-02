@@ -42,7 +42,6 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
-import no.nordicsemi.android.log.ILogSession;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
@@ -196,23 +195,20 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	 */
 	private void sendMessageToWearables(final @NonNull String path, final @NonNull String message) {
 		if(mGoogleApiClient.isConnected()) {
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
-					for(Node node : nodes.getNodes()) {
-						Logger.v(getLogSession(), "[WEAR] Sending message '" + path + "' to " + node.getDisplayName());
-						final MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), path, message.getBytes()).await();
-						if(result.getStatus().isSuccess()){
-							Logger.i(getLogSession(), "[WEAR] Message sent");
-						} else {
-							Logger.w(getLogSession(), "[WEAR] Sending message failed: " + result.getStatus().getStatusMessage());
-							Log.w(TAG, "Failed to send " + path + " to " + node.getDisplayName());
-						}
+			new Thread(() -> {
+				NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
+				for(Node node : nodes.getNodes()) {
+					Logger.v(getLogSession(), "[WEAR] Sending message '" + path + "' to " + node.getDisplayName());
+					final MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), path, message.getBytes()).await();
+					if(result.getStatus().isSuccess()){
+						Logger.i(getLogSession(), "[WEAR] Message sent");
+					} else {
+						Logger.w(getLogSession(), "[WEAR] Sending message failed: " + result.getStatus().getStatusMessage());
+						Log.w(TAG, "Failed to send " + path + " to " + node.getDisplayName());
 					}
-					if (Constants.UART.DEVICE_DISCONNECTED.equals(path))
-						stopService();
 				}
+				if (Constants.UART.DEVICE_DISCONNECTED.equals(path))
+					stopService();
 			}).start();
 		} else {
 			if (Constants.UART.DEVICE_DISCONNECTED.equals(path))

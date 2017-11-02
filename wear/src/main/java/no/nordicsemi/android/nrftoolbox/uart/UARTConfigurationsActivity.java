@@ -110,7 +110,7 @@ public class UARTConfigurationsActivity extends Activity implements GoogleApiCli
 		final Intent service = new Intent(this, BleProfileService.class);
 		bindService(service, mServiceConnection, 0);
 
-		final WearableListView listView = (WearableListView) findViewById(R.id.list);
+		final WearableListView listView = findViewById(R.id.list);
 		listView.setClickListener(this);
 		listView.setAdapter(mAdapter = new UARTConfigurationsAdapter(this));
 

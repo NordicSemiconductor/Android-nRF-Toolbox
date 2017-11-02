@@ -71,8 +71,8 @@ public class DeviceItemLayout extends RelativeLayout implements WearableListView
 	protected void onFinishInflate() {
 		super.onFinishInflate();
 
-		mName = (TextView) findViewById(R.id.name);
-		mIcon = (CircledImageView) findViewById(R.id.icon);
+		mName = findViewById(R.id.name);
+		mIcon = findViewById(R.id.icon);
 		mExpandCircleRadius = mIcon.getCircleRadius();
 		mShrinkCircleRadius = mExpandCircleRadius * SHRINK_CIRCLE_RATIO;
 

@@ -58,8 +58,8 @@ public class TemplateActivity extends BleProfileServiceReadyActivity<TemplateSer
 
 	private void setGUI() {
 		// TODO assign your views to fields
-		mValueView = (TextView) findViewById(R.id.value);
-		mValueUnitView = (TextView) findViewById(R.id.value_unit);
+		mValueView = findViewById(R.id.value);
+		mValueUnitView = findViewById(R.id.value_unit);
 	}
 
 	@Override
