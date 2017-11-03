@@ -10,8 +10,8 @@ android {
         applicationId "no.nordicsemi.android.nrftoolbox"
         minSdkVersion 23
         targetSdkVersion 26
-        versionCode 232405702 // target: 23, version: 2.4.0, build: 57, multi-APK: 01
-        versionName "2.4.0"
+        versionCode 232506201 // target: 23, version: 2.5.0, build: 62, multi-APK: 01
+        versionName "2.5.0"
         resConfigs "en"
     }
     lintOptions {
@@ -43,7 +43,7 @@ dependencies {
 
     // uncomment to enable the Wear UI Library
     // https://developer.android.com/training/wearables/ui/wear-ui-library.html
-    // implementation 'com.android.support:wear:26.0.2'
+    // implementation 'com.android.support:wear:26.1.0'
 
     // nRF Toolbox is using Play Service 10.2.0 in order to make the app working in China:
     // https://developer.android.com/training/wearables/apps/creating-app-china.html#ChinaSDK
