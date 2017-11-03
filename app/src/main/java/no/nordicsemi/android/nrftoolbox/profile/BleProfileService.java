@@ -587,6 +587,6 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	 * @return <code>true</code> if device is connected to the sensor, <code>false</code> otherwise
 	 */
 	protected boolean isConnected() {
-		return mBleManager.isConnected();
+		return mBleManager != null && mBleManager.isConnected();
 	}
 }
