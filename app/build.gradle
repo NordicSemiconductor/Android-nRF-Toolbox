@@ -49,7 +49,7 @@ dependencies {
     implementation 'no.nordicsemi.android.support.v18:scanner:1.0.0'
 
     // The DFU Library is imported automatically from jcenter:
-    implementation 'no.nordicsemi.android:dfu:1.5.1'
+    implementation 'no.nordicsemi.android:dfu:1.5.2'
     // if you desire to build the DFU Library, clone the https://github.com/NordicSemiconductor/Android-DFU-Library project into DFULibrary folder,
     // add it as a module into the project structure and uncomment the following line (and also the according lines in the settings.gradle):
     // implementation project(':dfu')

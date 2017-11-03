@@ -24,7 +24,7 @@
 	<string name="dfu_feature_title">DFU</string>
 	<string name="dfu_service_title">nRF Toolbox DFU Proxy</string>
 	<string name="dfu_settings_title">DFU Settings</string>
-	<string name="dfu_lib_version">DFU Library version 1.5.1</string>
+	<string name="dfu_lib_version">DFU Library version 1.5.2</string>
 
 	<string name="dfu_feature_title_long">DEVICE FIRMWARE UPDATE</string>
 	<dimen name="dfu_feature_title_long_margin">-186dp</dimen>
@@ -34,9 +34,10 @@
 	<string name="dfu_scripts_created">DFU script files were copied to /sdcard/Nordic Semiconductor.</string>
 	
 	<string name="dfu_section_application_header">APPLICATION</string>
-	<string name="dfu_file_name_label">File Name:</string>
-	<string name="dfu_file_type_label">File Type:</string>
-	<string name="dfu_file_size_label">File Size:</string>
+	<string name="dfu_file_name_label">File name:</string>
+	<string name="dfu_file_type_label">Type:</string>
+	<string name="dfu_file_size_label">Size:</string>
+	<string name="dfu_file_scope_label">Scope:</string>
 	<string name="dfu_file_status_label">Status:</string>
 	<string name="dfu_file_size_text">%d bytes</string>
 	<string name="dfu_file_status_ok">OK</string>
@@ -83,7 +84,7 @@
 	<string name="dfu_settings_dfu_number_of_packets_info">During a DFU operation a lot of data packets are being sent to the target. The <i>onCharacteristicWrite(...)</i>
 		callback in Android API is invoked when the data has been written to the outgoing queue, not when physically sent. Packet receipt notifications were introduced to
 		prevent from overflowing the queue. Depending on the device model, disabling the notifications or setting the value to “high” (> ~300) may make the DFU process freeze
-		at some point.</string>
+		at some point on Android versions before Marshmallow.</string>
 	
 	<string name="dfu_file_type_title">Select file type</string>
 	<string-array name="dfu_file_type">
@@ -97,6 +98,12 @@
 		The Init packet file (*.dat) should contain the device type and revision, application version, list of supported Soft Devices and the firmware CRC
 		in binary format or, with old versions of the DFU bootloader, only the CRC (CRC-CCITT-16).
 		With the new version of the bootloader the extended Init packet is <b>required</b>.</string>
+	<string name="dfu_file_scope_title">Select scope</string>
+	<string-array name="dfu_file_scope">
+		<item>All</item>
+		<item>System components only</item>
+		<item>Application only</item>
+	</string-array>
 	
 	<string name="dfu_unknown_name">unnamed device</string>
 	<string name="dfu_uploading_percentage_label">0%</string>
@@ -110,7 +117,7 @@
 	<string name="dfu_help_title">Select file</string>
 	<string name="dfu_help_message">A file browser application must be installed on the device before selecting the file.
 		\n\nThere are number of applications available on Google Play store, e.g. Total Commander or File Manager, that allow you to pick a file from internal memory of the device. To upload
-		a file from the Internet you may use f.e. Drive or Dropbox application.
+		a file from the Internet you may use e.g. Drive or Dropbox application.
 		\n\nYou will be asked to select an application if more than one is installed. A single application will be launched automatically.
 		\n\nSince <b>Android KitKat</b> you may use the preinstalled document picker application. Ensure <i>Display advanced devices</i> option is enabled in settings to use the <i>Internal storage</i>.
 		\n\nSample applications were copied to <i>Nordic Semiconductor</i> folder in the internal storage.</string>

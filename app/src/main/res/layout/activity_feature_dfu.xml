@@ -155,6 +155,23 @@
 						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
+							android:text="@string/dfu_file_scope_label"/>
+
+						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+							android:id="@+id/file_scope"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginLeft="5dp"
+							android:freezesText="true"/>
+					</TableRow>
+
+					<TableRow
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content">
+
+						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
 							android:text="@string/dfu_file_size_label"/>
 
 						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView

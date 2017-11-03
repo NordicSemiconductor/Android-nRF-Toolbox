@@ -90,6 +90,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 	private static final String PREFS_DEVICE_NAME = "no.nordicsemi.android.nrftoolbox.dfu.PREFS_DEVICE_NAME";
 	private static final String PREFS_FILE_NAME = "no.nordicsemi.android.nrftoolbox.dfu.PREFS_FILE_NAME";
 	private static final String PREFS_FILE_TYPE = "no.nordicsemi.android.nrftoolbox.dfu.PREFS_FILE_TYPE";
+	private static final String PREFS_FILE_SCOPE = "no.nordicsemi.android.nrftoolbox.dfu.PREFS_FILE_SCOPE";
 	private static final String PREFS_FILE_SIZE = "no.nordicsemi.android.nrftoolbox.dfu.PREFS_FILE_SIZE";
 
 	private static final String DATA_DEVICE = "device";
@@ -100,6 +101,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 	private static final String DATA_INIT_FILE_PATH = "init_file_path";
 	private static final String DATA_INIT_FILE_STREAM = "init_file_stream";
 	private static final String DATA_STATUS = "status";
+	private static final String DATA_SCOPE = "scope";
 	private static final String DATA_DFU_COMPLETED = "dfu_completed";
 	private static final String DATA_DFU_ERROR = "dfu_error";
 
@@ -113,6 +115,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 	private TextView mDeviceNameView;
 	private TextView mFileNameView;
 	private TextView mFileTypeView;
+	private TextView mFileScopeView;
 	private TextView mFileSizeView;
 	private TextView mFileStatusView;
 	private TextView mTextPercentage;
@@ -128,6 +131,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 	private Uri mInitFileStreamUri;
 	private int mFileType;
 	private int mFileTypeTmp; // This value is being used when user is selecting a file not to overwrite the old value (in case he/she will cancel selecting file)
+	private Integer mScope;
 	private boolean mStatusOk;
 	/** Flag set to true in {@link #onRestart()} and to false in {@link #onPause()}. */
 	private boolean mResumed;
@@ -264,6 +268,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 			mInitFileStreamUri = savedInstanceState.getParcelable(DATA_INIT_FILE_STREAM);
 			mSelectedDevice = savedInstanceState.getParcelable(DATA_DEVICE);
 			mStatusOk = mStatusOk || savedInstanceState.getBoolean(DATA_STATUS);
+			mScope = savedInstanceState.containsKey(DATA_SCOPE) ? savedInstanceState.getInt(DATA_SCOPE) : null;
 			mUploadButton.setEnabled(mSelectedDevice != null && mStatusOk);
 			mDfuCompleted = savedInstanceState.getBoolean(DATA_DFU_COMPLETED);
 			mDfuError = savedInstanceState.getString(DATA_DFU_ERROR);
@@ -289,6 +294,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		outState.putParcelable(DATA_INIT_FILE_STREAM, mInitFileStreamUri);
 		outState.putParcelable(DATA_DEVICE, mSelectedDevice);
 		outState.putBoolean(DATA_STATUS, mStatusOk);
+		if (mScope != null) outState.putInt(DATA_SCOPE, mScope);
 		outState.putBoolean(DATA_DFU_COMPLETED, mDfuCompleted);
 		outState.putString(DATA_DFU_ERROR, mDfuError);
 	}
@@ -301,10 +307,10 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		mDeviceNameView = findViewById(R.id.device_name);
 		mFileNameView = findViewById(R.id.file_name);
 		mFileTypeView = findViewById(R.id.file_type);
+		mFileScopeView = findViewById(R.id.file_scope);
 		mFileSizeView = findViewById(R.id.file_size);
 		mFileStatusView = findViewById(R.id.file_status);
 		mSelectFileButton = findViewById(R.id.action_select_file);
-
 		mUploadButton = findViewById(R.id.action_upload);
 		mConnectButton = findViewById(R.id.action_connect);
 		mTextPercentage = findViewById(R.id.textviewProgress);
@@ -317,6 +323,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 			mDeviceNameView.setText(preferences.getString(PREFS_DEVICE_NAME, ""));
 			mFileNameView.setText(preferences.getString(PREFS_FILE_NAME, ""));
 			mFileTypeView.setText(preferences.getString(PREFS_FILE_TYPE, ""));
+			mFileScopeView.setText(preferences.getString(PREFS_FILE_SCOPE, ""));
 			mFileSizeView.setText(preferences.getString(PREFS_FILE_SIZE, ""));
 			mFileStatusView.setText(R.string.dfu_file_status_ok);
 			mStatusOk = true;
@@ -558,23 +565,53 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 				break;
 		}
 		mFileSizeView.setText(getString(R.string.dfu_file_size_text, fileSize));
+		mFileScopeView.setText(getString(R.string.not_available));
 		final String extension = mFileType == DfuService.TYPE_AUTO ? "(?i)ZIP" : "(?i)HEX|BIN"; // (?i) =  case insensitive
 		final boolean statusOk = mStatusOk = MimeTypeMap.getFileExtensionFromUrl(fileName).matches(extension);
 		mFileStatusView.setText(statusOk ? R.string.dfu_file_status_ok : R.string.dfu_file_status_invalid);
 		mUploadButton.setEnabled(mSelectedDevice != null && statusOk);
 
 		// Ask the user for the Init packet file if HEX or BIN files are selected. In case of a ZIP file the Init packets should be included in the ZIP.
-		if (statusOk && fileType != DfuService.TYPE_AUTO) {
-			new AlertDialog.Builder(this).setTitle(R.string.dfu_file_init_title).setMessage(R.string.dfu_file_init_message)
-					.setNegativeButton(R.string.no, (dialog, which) -> {
-						mInitFilePath = null;
-						mInitFileStreamUri = null;
-					}).setPositiveButton(R.string.yes, (dialog, which) -> {
-						final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-						intent.setType(DfuService.MIME_TYPE_OCTET_STREAM);
-						intent.addCategory(Intent.CATEGORY_OPENABLE);
-						startActivityForResult(intent, SELECT_INIT_FILE_REQ);
-					}).show();
+		if (statusOk) {
+			if (fileType != DfuService.TYPE_AUTO) {
+				mScope = null;
+				mFileScopeView.setText(getString(R.string.not_available));
+				new AlertDialog.Builder(this).setTitle(R.string.dfu_file_init_title).setMessage(R.string.dfu_file_init_message)
+						.setNegativeButton(R.string.no, (dialog, which) -> {
+							mInitFilePath = null;
+							mInitFileStreamUri = null;
+						}).setPositiveButton(R.string.yes, (dialog, which) -> {
+							final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+							intent.setType(DfuService.MIME_TYPE_OCTET_STREAM);
+							intent.addCategory(Intent.CATEGORY_OPENABLE);
+							startActivityForResult(intent, SELECT_INIT_FILE_REQ);
+						}).show();
+			} else {
+				new AlertDialog.Builder(this).setTitle(R.string.dfu_file_scope_title).setCancelable(false)
+						.setSingleChoiceItems(R.array.dfu_file_scope, 0, (dialog, which) -> {
+							switch (which) {
+								case 0:
+									mScope = null;
+									break;
+								case 1:
+									mScope = DfuServiceInitiator.SCOPE_SYSTEM_COMPONENTS;
+									break;
+								case 2:
+									mScope = DfuServiceInitiator.SCOPE_APPLICATION;
+									break;
+							}
+						}).setPositiveButton(R.string.ok, (dialogInterface, i) -> {
+							int index;
+							if (mScope == null) {
+								index = 0;
+							} else if (mScope == DfuServiceInitiator.SCOPE_SYSTEM_COMPONENTS) {
+								index = 1;
+							} else {
+								index = 2;
+							}
+							mFileScopeView.setText(getResources().getStringArray(R.array.dfu_file_scope)[index]);
+						}).show();
+			}
 		}
 	}
 
@@ -680,6 +717,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		editor.putString(PREFS_DEVICE_NAME, mSelectedDevice.getName());
 		editor.putString(PREFS_FILE_NAME, mFileNameView.getText().toString());
 		editor.putString(PREFS_FILE_TYPE, mFileTypeView.getText().toString());
+		editor.putString(PREFS_FILE_SCOPE, mFileScopeView.getText().toString());
 		editor.putString(PREFS_FILE_SIZE, mFileSizeView.getText().toString());
 		editor.apply();
 
@@ -703,9 +741,11 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 				.setPacketsReceiptNotificationsEnabled(enablePRNs)
 				.setPacketsReceiptNotificationsValue(numberOfPackets)
 				.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true);
-		if (mFileType == DfuService.TYPE_AUTO)
+		if (mFileType == DfuService.TYPE_AUTO) {
 			starter.setZip(mFileStreamUri, mFilePath);
-		else {
+			if (mScope != null)
+				starter.setScope(mScope);
+		} else {
 			starter.setBinOrHex(mFileType, mFileStreamUri, mFilePath).setInitFile(mInitFileStreamUri, mInitFilePath);
 		}
 		starter.start(this, DfuService.class);
@@ -793,6 +833,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		// Application may have lost the right to these files if Activity was closed during upload (grant uri permission). Clear file related values.
 		mFileNameView.setText(null);
 		mFileTypeView.setText(null);
+		mFileScopeView.setText(null);
 		mFileSizeView.setText(null);
 		mFileStatusView.setText(R.string.dfu_file_status_no_file);
 		mFilePath = null;
@@ -811,7 +852,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 	}
 
 	private boolean isDfuServiceRunning() {
-		ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+		final ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
 			if (DfuService.class.getName().equals(service.service.getClassName())) {
 				return true;

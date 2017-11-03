@@ -78,7 +78,7 @@
 			<LinearLayout
 				style="@style/Widget.List"
 				android:layout_width="0dp"
-				android:layout_height="160dp"
+				android:layout_height="176dp"
 				android:layout_marginBottom="8dp"
 				android:layout_marginLeft="4dp"
 				android:layout_marginTop="@dimen/feature_vertical_margin_top"
@@ -140,6 +140,23 @@
 						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
+							android:text="@string/dfu_file_scope_label"/>
+
+						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+							android:id="@+id/file_scope"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginLeft="5dp"
+							android:freezesText="true"/>
+					</TableRow>
+
+					<TableRow
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content">
+
+						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
 							android:text="@string/dfu_file_size_label"/>
 
 						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
@@ -173,7 +190,6 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:layout_marginBottom="@dimen/feature_section_padding"
-					android:layout_marginTop="4dp"
 					android:gravity="center_vertical"
 					android:orientation="horizontal"
 					android:paddingLeft="42dp">
@@ -200,7 +216,7 @@
 				android:id="@+id/dfu_pane"
 				style="@style/Widget.List"
 				android:layout_width="0dp"
-				android:layout_height="160dp"
+				android:layout_height="176dp"
 				android:layout_marginBottom="8dp"
 				android:layout_marginLeft="14dp"
 				android:layout_marginRight="4dp"
@@ -254,8 +270,7 @@
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_marginRight="@dimen/feature_horizontal_margin"
-			android:layout_alignParentRight="true"
+			android:layout_alignRight="@+id/dfu_container"
 			android:layout_below="@+id/dfu_container"
 			android:text="@string/dfu_lib_version"
 			android:textSize="12dp"/>
