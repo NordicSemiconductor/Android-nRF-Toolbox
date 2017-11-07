@@ -90,3 +90,7 @@
 -dontnote org.apache.http.conn.scheme.**
 -dontnote org.apache.http.conn.**
 -dontnote android.net.http.**
+
+# DFU Library
+-keep class no.nordicsemi.android.dfu.** { *; }
+
