@@ -218,20 +218,17 @@ public class UARTConfigurationsActivity extends Activity implements GoogleApiCli
 	private void populateConfigurations() {
 		if (mGoogleApiClient.isConnected()) {
 			final PendingResult<DataItemBuffer> results = Wearable.DataApi.getDataItems(mGoogleApiClient, Uri.parse("wear:" + Constants.UART.CONFIGURATIONS), DataApi.FILTER_PREFIX);
-			results.setResultCallback(new ResultCallback<DataItemBuffer>() {
-				@Override
-				public void onResult(final DataItemBuffer dataItems) {
-					final List<UartConfiguration> configurations = new ArrayList<>(dataItems.getCount());
-					for (int i = 0; i < dataItems.getCount(); ++i) {
-						final DataItem item = dataItems.get(i);
-						final long id = ContentUris.parseId(item.getUri());
-						final DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
-						final UartConfiguration configuration = new UartConfiguration(dataMap, id);
-						configurations.add(configuration);
-					}
-					mAdapter.setConfigurations(configurations);
-					dataItems.release();
+			results.setResultCallback(dataItems -> {
+				final List<UartConfiguration> configurations = new ArrayList<>(dataItems.getCount());
+				for (int i = 0; i < dataItems.getCount(); ++i) {
+					final DataItem item = dataItems.get(i);
+					final long id = ContentUris.parseId(item.getUri());
+					final DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+					final UartConfiguration configuration = new UartConfiguration(dataMap, id);
+					configurations.add(configuration);
 				}
+				mAdapter.setConfigurations(configurations);
+				dataItems.release();
 			});
 		}
 	}

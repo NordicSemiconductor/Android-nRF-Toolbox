@@ -207,22 +207,12 @@ public class UARTCommandsActivity extends Activity implements UARTCommandsAdapte
 				final UartConfiguration configuration = new UartConfiguration(dataMap, id);
 
 				// Update UI on UI thread
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						mAdapter.setConfiguration(configuration);
-					}
-				});
+				runOnUiThread(() -> mAdapter.setConfiguration(configuration));
 			} else if (event.getType() == DataEvent.TYPE_DELETED) {
 				// Configuration removed
 
 				// Update UI on UI thread
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						mAdapter.setConfiguration(null);
-					}
-				});
+				runOnUiThread(() -> mAdapter.setConfiguration(null));
 			}
 		}
 	}
@@ -268,23 +258,20 @@ public class UARTCommandsActivity extends Activity implements UARTCommandsAdapte
 	 * @param command the message
 	 */
 	private void sendMessageToHandheld(final @NonNull Context context, final @NonNull String command) {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				final GoogleApiClient client = new GoogleApiClient.Builder(context)
-						.addApi(Wearable.API)
-						.build();
-				client.blockingConnect();
+		new Thread(() -> {
+			final GoogleApiClient client = new GoogleApiClient.Builder(context)
+					.addApi(Wearable.API)
+					.build();
+			client.blockingConnect();
 
-				final NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(client).await();
-				for (Node node : nodes.getNodes()) {
-					final MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(client, node.getId(), Constants.UART.COMMAND, command.getBytes()).await();
-					if (!result.getStatus().isSuccess()) {
-						Log.w(TAG, "Failed to send " + Constants.UART.COMMAND + " to " + node.getDisplayName());
-					}
+			final NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(client).await();
+			for (Node node : nodes.getNodes()) {
+				final MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(client, node.getId(), Constants.UART.COMMAND, command.getBytes()).await();
+				if (!result.getStatus().isSuccess()) {
+					Log.w(TAG, "Failed to send " + Constants.UART.COMMAND + " to " + node.getDisplayName());
 				}
-				client.disconnect();
 			}
+			client.disconnect();
 		}).start();
 	}
 }

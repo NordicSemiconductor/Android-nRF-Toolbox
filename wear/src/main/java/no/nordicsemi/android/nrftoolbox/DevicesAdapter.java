@@ -163,12 +163,7 @@ public class DevicesAdapter extends WearableListView.Adapter {
 		return mAvailableText;
 	}
 
-	private Runnable mStopScanTask = new Runnable() {
-		@Override
-		public void run() {
-			stopLeScan();
-		}
-	};
+	private Runnable mStopScanTask = () -> stopLeScan();
 
 	private ScanCallback mScanCallback = new ScanCallback() {
 		@Override

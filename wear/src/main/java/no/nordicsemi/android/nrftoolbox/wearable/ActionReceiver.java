@@ -59,23 +59,20 @@ public class ActionReceiver extends BroadcastReceiver {
 	 * @param message the message
 	 */
 	private void sendMessageToHandheld(final @NonNull Context context, final @NonNull String path, final @NonNull String message) {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				final GoogleApiClient client = new GoogleApiClient.Builder(context)
-						.addApi(Wearable.API)
-						.build();
-				client.blockingConnect();
+		new Thread(() -> {
+			final GoogleApiClient client = new GoogleApiClient.Builder(context)
+					.addApi(Wearable.API)
+					.build();
+			client.blockingConnect();
 
-				final NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(client).await();
-				for(Node node : nodes.getNodes()) {
-					final MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(client, node.getId(), path, message.getBytes()).await();
-					if (!result.getStatus().isSuccess()){
-						Log.w(TAG, "Failed to send " + path + " to " + node.getDisplayName());
-					}
+			final NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(client).await();
+			for(Node node : nodes.getNodes()) {
+				final MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(client, node.getId(), path, message.getBytes()).await();
+				if (!result.getStatus().isSuccess()){
+					Log.w(TAG, "Failed to send " + path + " to " + node.getDisplayName());
 				}
-				client.disconnect();
 			}
+			client.disconnect();
 		}).start();
 	}
 }

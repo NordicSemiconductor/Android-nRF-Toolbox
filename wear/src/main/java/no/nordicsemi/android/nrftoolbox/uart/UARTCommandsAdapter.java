@@ -74,12 +74,7 @@ public class UARTCommandsAdapter extends GridPagerAdapter {
 
 			final CircularButton icon = view.findViewById(R.id.icon);
 			icon.getImageDrawable().setLevel(command.getIconIndex());
-			icon.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(final View v) {
-					mListener.onCommandSelected(command);
-				}
-			});
+			icon.setOnClickListener(v -> mListener.onCommandSelected(command));
 		} else {
 			// Hide the icon
 			view.findViewById(R.id.icon).setVisibility(View.GONE);

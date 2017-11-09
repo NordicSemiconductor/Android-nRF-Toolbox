@@ -370,12 +370,7 @@ public class BleProfileService extends Service implements BleManagerCallbacks {
 	 *            an resource id of the message to be shown
 	 */
 	private void showToast(final int messageResId) {
-		mHandler.post(new Runnable() {
-			@Override
-			public void run() {
-				Toast.makeText(BleProfileService.this, messageResId, Toast.LENGTH_SHORT).show();
-			}
-		});
+		mHandler.post(() -> Toast.makeText(BleProfileService.this, messageResId, Toast.LENGTH_SHORT).show());
 	}
 
 	/**
