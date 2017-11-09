@@ -180,12 +180,6 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 	}
 
 	@Override
-	public void onError(final BluetoothDevice device, final String message, final int errorCode) {
-		super.onError(device, message, errorCode);
-		onOperationFailed(device);
-	}
-
-	@Override
 	public void onDatasetChanged(final BluetoothDevice device) {
 		// Do nothing. Refreshing the list is done in onOperationCompleted
 	}
