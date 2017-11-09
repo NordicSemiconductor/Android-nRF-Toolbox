@@ -735,6 +735,10 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 	/**
 	 * There was a bug in Android up to 6.0 where the descriptor was written using parent
 	 * characteristic's write type, instead of always Write With Response, as the spec says.
+	 * <p>
+	 *     See: <a href="https://android.googlesource.com/platform/frameworks/base/+/942aebc95924ab1e7ea1e92aaf4e7fc45f695a6c%5E%21/#F0">
+	 *         https://android.googlesource.com/platform/frameworks/base/+/942aebc95924ab1e7ea1e92aaf4e7fc45f695a6c%5E%21/#F0</a>
+	 * </p>
 	 * @param descriptor the descriptor to be written
 	 * @return the result of {@link BluetoothGatt#writeDescriptor(BluetoothGattDescriptor)}
 	 */
