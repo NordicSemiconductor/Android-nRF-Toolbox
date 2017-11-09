@@ -23,16 +23,19 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
 	android:layout_height="?android:attr/listPreferredItemHeightSmall"
+	xmlns:tools="http://schemas.android.com/tools"
 	android:paddingBottom="2dp"
 	android:paddingEnd="4dp"
 	android:paddingStart="?android:attr/expandableListPreferredItemPaddingLeft"
-	android:paddingTop="2dp">
+	android:paddingTop="4dp">
 
 	<TextView
 		android:id="@+id/time"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:textAppearance="?android:attr/textAppearanceListItem"/>
+		android:textSize="13sp"
+		android:textStyle="bold"
+		tools:text="1 Jan 2012 as 12:30:15"/>
 
 	<TextView
 		android:id="@+id/details"
@@ -40,8 +43,8 @@
 		android:layout_height="wrap_content"
 		android:layout_below="@+id/time"
 		android:layout_marginTop="2dp"
-		android:textAppearance="?android:attr/textAppearanceSmall"
-		android:textSize="12sp"/>
+		android:textSize="12sp"
+		tools:text="Capilary Whole blood"/>
 
 	<TextView
 		android:id="@+id/gls_concentration"
@@ -49,6 +52,7 @@
 		android:layout_height="wrap_content"
 		android:layout_alignParentRight="true"
 		android:layout_centerVertical="true"
-		android:textAppearance="?android:attr/textAppearanceLarge"/>
+		android:textAppearance="?android:attr/textAppearanceLarge"
+		tools:text="550.0"/>
 
 </RelativeLayout>

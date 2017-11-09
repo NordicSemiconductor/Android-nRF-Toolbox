@@ -61,16 +61,16 @@
 		<item>Alternate Site Test (AST)</item>
 		<item>Earlobe</item>
 		<item>Control solution</item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
 		<item>Sample Location value not available</item>
     </string-array>
     <string name="gls_status_annunciation_title">Sensor Status Annunciation</string>
@@ -114,17 +114,17 @@
         <item>Self</item>
         <item>Health Care Professional</item>
         <item>Lab test</item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
         <item>Tester value not available</item>
     </string-array>
     <string name="gls_context_health_title">Health</string>
@@ -135,15 +135,15 @@
         <item>During menses</item>
         <item>Under stress</item>
         <item>No health issues</item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
-		<item></item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
+		<item>Reserved for future use</item>
 		<item>Health value not available</item>
     </string-array>
 	<string name="gls_context_exercise_title">Exercise</string>

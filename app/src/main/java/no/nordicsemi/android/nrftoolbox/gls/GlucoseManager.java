@@ -130,9 +130,24 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 		protected Deque<Request> initGatt(final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
 			requests.add(Request.newEnableNotificationsRequest(mGlucoseMeasurementCharacteristic));
-			if (mGlucoseMeasurementContextCharacteristic != null)
+			if (mGlucoseMeasurementContextCharacteristic != null) {
 				requests.add(Request.newEnableNotificationsRequest(mGlucoseMeasurementContextCharacteristic));
+			}
 			requests.add(Request.newEnableIndicationsRequest(mRecordAccessControlPointCharacteristic));
+
+			// The gatt.setCharacteristicNotification(...) method is called in BleManager during enabling
+			// notifications or indications (see BleManager#internalEnableNotifications/Indications).
+			// However, on Samsung S3 with Android 4.3 it looks like the 2 gatt calls
+			// (gatt.setCharacteristicNotification(...) and gatt.writeDescriptor(...)) are called
+			// too quickly, or from a wrong thread, and in result the notification listener is not set,
+			// causing onCharacteristicChanged(...) callback never being called when a notification comes.
+			// Enabling them here, like below, solves the problem.
+			// However... the original approach works for the Battery Level CCCD, which makes it even weirder.
+			gatt.setCharacteristicNotification(mGlucoseMeasurementCharacteristic, true);
+			if (mGlucoseMeasurementContextCharacteristic != null) {
+				gatt.setCharacteristicNotification(mGlucoseMeasurementContextCharacteristic, true);
+			}
+			gatt.setCharacteristicNotification(mRecordAccessControlPointCharacteristic, true);
 			return requests;
 		}
 
@@ -199,8 +214,8 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 				record.time = calendar;
 
 				if (timeOffsetPresent) {
-					// time offset is ignored in the current release
 					record.timeOffset = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+					calendar.add(Calendar.MINUTE, record.timeOffset);
 					offset += 2;
 				}
 
@@ -208,8 +223,8 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 					record.glucoseConcentration = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset);
 					record.unit = concentrationUnit;
 					final int typeAndLocation = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 2);
-					record.type = (typeAndLocation & 0xF0) >> 4; // TODO this way or around?
-					record.sampleLocation = (typeAndLocation & 0x0F);
+					record.type = (typeAndLocation & 0x0F);
+					record.sampleLocation = (typeAndLocation & 0xF0) >> 4;
 					offset += 3;
 				}
 
