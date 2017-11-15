@@ -1296,8 +1296,6 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 					// The value has been read. Notify the manager and proceed with the initialization queue.
 					onCharacteristicRead(gatt, characteristic);
 				}
-				mOperationInProgress = false;
-				nextRequest();
 			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
 					// This should never happen but it used to: http://stackoverflow.com/a/20093695/2115352
@@ -1308,6 +1306,8 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 				DebugLogger.e(TAG, "onCharacteristicRead error " + status);
 				onError(gatt.getDevice(), ERROR_READ_CHARACTERISTIC, status);
 			}
+			mOperationInProgress = false;
+			nextRequest();
 		}
 
 		@Override
@@ -1316,8 +1316,6 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 				Logger.i(mLogSession, "Data written to " + characteristic.getUuid() + ", value: " + ParserUtils.parse(characteristic));
 				// The value has been written. Notify the manager and proceed with the initialization queue.
 				onCharacteristicWrite(gatt, characteristic);
-				mOperationInProgress = false;
-				nextRequest();
 			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
 					// This should never happen but it used to: http://stackoverflow.com/a/20093695/2115352
@@ -1328,6 +1326,8 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 				DebugLogger.e(TAG, "onCharacteristicWrite error " + status);
 				onError(gatt.getDevice(), ERROR_WRITE_CHARACTERISTIC, status);
 			}
+			mOperationInProgress = false;
+			nextRequest();
 		}
 
 		@Override
@@ -1337,8 +1337,6 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 
 				// The value has been read. Notify the manager and proceed with the initialization queue.
 				onDescriptorRead(gatt, descriptor);
-				mOperationInProgress = false;
-				nextRequest();
 			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
 					// This should never happen but it used to: http://stackoverflow.com/a/20093695/2115352
@@ -1349,6 +1347,8 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 				DebugLogger.e(TAG, "onDescriptorRead error " + status);
 				onError(gatt.getDevice(), ERROR_READ_DESCRIPTOR, status);
 			}
+			mOperationInProgress = false;
+			nextRequest();
 		}
 
 		@Override
@@ -1389,8 +1389,6 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 				} else {
 					onDescriptorWrite(gatt, descriptor);
 				}
-				mOperationInProgress = false;
-				nextRequest();
 			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
 					// This should never happen but it used to: http://stackoverflow.com/a/20093695/2115352
@@ -1401,6 +1399,8 @@ public abstract class BleManager<E extends BleManagerCallbacks> implements ILogg
 				DebugLogger.e(TAG, "onDescriptorWrite error " + status);
 				onError(gatt.getDevice(), ERROR_WRITE_DESCRIPTOR, status);
 			}
+			mOperationInProgress = false;
+			nextRequest();
 		}
 
 		@Override
