@@ -81,10 +81,10 @@
 -keep class org.simpleframework.xml.core.** { *; }
 -keep class org.simpleframework.xml.util.** { *; }
 
--keepattributes ElementArray, ElementList, Root
+-keepattributes ElementList, Root
 
--keepclassmembers class * {
-    @org.simpleframework.xml.* *;
+-keepclasseswithmembers class * {
+    @org.simpleframework.xml.* <fields>;
 }
 
 # Chart Engine
