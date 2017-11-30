@@ -752,7 +752,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 			// Notify user about the file
 			final Intent intent = new Intent(Intent.ACTION_VIEW);
-			intent.setDataAndType(Uri.fromFile(file), "text/xml");
+			intent.setDataAndType(FileHelper.getContentUri(this, file), "text/xml");
 			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			final PendingIntent pendingIntent = PendingIntent.getActivity(this, 420, intent, 0);
 			final Notification notification = new NotificationCompat.Builder(this, ToolboxApplication.FILE_SAVED_CHANNEL).setContentIntent(pendingIntent).setContentTitle(fileName).setContentText(getText(R.string.uart_configuration_export_succeeded))

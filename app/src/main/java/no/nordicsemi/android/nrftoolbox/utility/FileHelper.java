@@ -22,10 +22,15 @@
 
 package no.nordicsemi.android.nrftoolbox.utility;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.BaseColumns;
+import android.provider.MediaStore;
 import android.widget.Toast;
 
 import java.io.File;
@@ -190,7 +195,7 @@ public class FileHelper {
 	/**
 	 * Copies the file from res/raw with given id to given destination file. If dest does not exist it will be created.
 	 *
-	 * @param context activity context
+	 * @param context  activity context
 	 * @param rawResId the resource id
 	 * @param dest     destination file
 	 */
@@ -210,6 +215,32 @@ public class FileHelper {
 			}
 		} catch (final IOException e) {
 			DebugLogger.e(TAG, "Error while copying HEX file " + e.toString());
+		}
+	}
+
+	public static Uri getContentUri(final Context context, final File file) {
+		final String filePath = file.getAbsolutePath();
+		final Uri uri = MediaStore.Files.getContentUri("external");
+		final Cursor cursor = context.getContentResolver().query(
+				uri,
+				new String[]{BaseColumns._ID},
+				MediaStore.Files.FileColumns.DATA + "=? ",
+				new String[]{filePath}, null);
+		try {
+			if (cursor != null && cursor.moveToFirst()) {
+				final int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
+				return Uri.withAppendedPath(uri, String.valueOf(id));
+			} else {
+				if (file.exists()) {
+					final ContentValues values = new ContentValues();
+					values.put(MediaStore.Files.FileColumns.DATA, filePath);
+					return context.getContentResolver().insert(uri, values);
+				} else {
+					return null;
+				}
+			}
+		} finally {
+			cursor.close();
 		}
 	}
 }
