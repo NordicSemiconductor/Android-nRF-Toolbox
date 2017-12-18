@@ -2,14 +2,14 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '26.0.2'
+    buildToolsVersion "27.0.1"
 
     defaultConfig {
         applicationId "no.nordicsemi.android.nrftoolbox"
         minSdkVersion 18
         targetSdkVersion 27
-        versionCode 65
-        versionName "2.5.3"
+        versionCode 66
+        versionName "2.6.0"
         resConfigs "en"
     }
     buildTypes {
