@@ -21,7 +21,7 @@
  */
 package no.nordicsemi.android.nrftoolbox.proximity;
 
-import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
+import no.nordicsemi.android.ble.BleManagerCallbacks;
 
 public interface ProximityManagerCallbacks extends BleManagerCallbacks {
 	// No additional methods

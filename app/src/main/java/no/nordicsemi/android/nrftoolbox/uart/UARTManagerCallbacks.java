@@ -24,7 +24,7 @@ package no.nordicsemi.android.nrftoolbox.uart;
 
 import android.bluetooth.BluetoothDevice;
 
-import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
+import no.nordicsemi.android.ble.BleManagerCallbacks;
 
 public interface UARTManagerCallbacks extends BleManagerCallbacks {
 

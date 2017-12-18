@@ -31,10 +31,10 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.UUID;
 
+import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.parser.BloodPressureMeasurementParser;
 import no.nordicsemi.android.nrftoolbox.parser.IntermediateCuffPressureParser;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 
 public class BPMManager extends BleManager<BPMManagerCallbacks> {
 	/** Blood Pressure service UUID */

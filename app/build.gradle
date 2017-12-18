@@ -54,6 +54,9 @@ dependencies {
     // add it as a module into the project structure and uncomment the following line (and also the according lines in the settings.gradle):
     // implementation project(':dfu')
 
+    // Import the BLE Library
+    implementation project(':ble')
+
     implementation('org.simpleframework:simple-xml:2.7.1') {
         exclude group: 'stax', module: 'stax-api'
         exclude group: 'xpp3', module: 'xpp3'

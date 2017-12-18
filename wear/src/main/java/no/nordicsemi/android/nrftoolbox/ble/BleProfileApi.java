@@ -22,6 +22,7 @@
 
 package no.nordicsemi.android.nrftoolbox.ble;
 
+import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.content.Context;
@@ -48,52 +49,69 @@ public interface BleProfileApi {
 			ENABLE_BATTERY_LEVEL_NOTIFICATIONS,
 			DISABLE_BATTERY_LEVEL_NOTIFICATIONS,
 			ENABLE_SERVICE_CHANGED_INDICATIONS,
+			REQUEST_MTU,
+			REQUEST_CONNECTION_PRIORITY,
 		}
 
 		final Type type;
 		final BluetoothGattCharacteristic characteristic;
 		final BluetoothGattDescriptor descriptor;
-		final byte[] value;
+		final byte[] data;
 		final int writeType;
+		final int value;
 
 		private Request(final Type type) {
 			this.type = type;
 			this.characteristic = null;
 			this.descriptor = null;
-			this.value = null;
+			this.data = null;
 			this.writeType = 0;
+			this.value = 0;
+		}
+
+		private Request(final Type type, final int value) {
+			this.type = type;
+			this.characteristic = null;
+			this.descriptor = null;
+			this.data = null;
+			this.writeType = 0;
+			this.value = value;
 		}
 
 		private Request(final Type type, final BluetoothGattCharacteristic characteristic) {
 			this.type = type;
 			this.characteristic = characteristic;
 			this.descriptor = null;
-			this.value = null;
+			this.data = null;
 			this.writeType = 0;
+			this.value = 0;
 		}
 
-		private Request(final Type type, final BluetoothGattCharacteristic characteristic, final int writeType, final byte[] value, final int offset, final int length) {
+		private Request(final Type type, final BluetoothGattCharacteristic characteristic, final int writeType, final byte[] data, final int offset, final int length) {
 			this.type = type;
 			this.characteristic = characteristic;
 			this.descriptor = null;
-			this.value = copy(value, offset, length);
+			this.data = copy(data, offset, length);
 			this.writeType = writeType;
+			this.value = 0;
 		}
 
 		private Request(final Type type, final BluetoothGattDescriptor descriptor) {
 			this.type = type;
 			this.characteristic = null;
 			this.descriptor = descriptor;
-			this.value = null;
+			this.data = null;
 			this.writeType = 0;
+			this.value = 0;
 		}
 
-		private Request(final Type type, final BluetoothGattDescriptor descriptor, final byte[] value, final int offset, final int length) {
+		private Request(final Type type, final BluetoothGattDescriptor descriptor, final byte[] data, final int offset, final int length) {
 			this.type = type;
 			this.characteristic = null;
 			this.descriptor = descriptor;
-			this.value = copy(value, offset, length);
+			this.data = copy(data, offset, length);
 			this.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT;
+			this.value = 0;
 		}
 
 		private static byte[] copy(final byte[] value, final int offset, final int length) {
@@ -127,50 +145,50 @@ public interface BleProfileApi {
 		 * Creates new Write Characteristic request. The request will not be executed if given characteristic
 		 * is null or does not have WRITE property. After the operation is complete a proper callback will be invoked.
 		 * @param characteristic characteristic to be written
-		 * @param value value to be written. The array is copied into another buffer so it's safe to reuse the array again.
+		 * @param data data to be written. The array is copied into another buffer so it's safe to reuse the array again.
 		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
 		 */
-		public static Request newWriteRequest(final BluetoothGattCharacteristic characteristic, final byte[] value) {
-			return new Request(Type.WRITE, characteristic, characteristic.getWriteType(), value, 0, value != null ? value.length : 0);
+		public static Request newWriteRequest(final BluetoothGattCharacteristic characteristic, final byte[] data) {
+			return new Request(Type.WRITE, characteristic, characteristic.getWriteType(), data, 0, data != null ? data.length : 0);
 		}
 
 		/**
 		 * Creates new Write Characteristic request. The request will not be executed if given characteristic
 		 * is null or does not have WRITE property. After the operation is complete a proper callback will be invoked.
 		 * @param characteristic characteristic to be written
-		 * @param value value to be written. The array is copied into another buffer so it's safe to reuse the array again.
+		 * @param data data to be written. The array is copied into another buffer so it's safe to reuse the array again.
 		 * @param writeType write type to be used, one of {@link BluetoothGattCharacteristic#WRITE_TYPE_DEFAULT}, {@link BluetoothGattCharacteristic#WRITE_TYPE_NO_RESPONSE}.
 		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
 		 */
-		public static Request newWriteRequest(final BluetoothGattCharacteristic characteristic, final byte[] value, final int writeType) {
-			return new Request(Type.WRITE, characteristic, writeType, value, 0, value != null ? value.length : 0);
+		public static Request newWriteRequest(final BluetoothGattCharacteristic characteristic, final byte[] data, final int writeType) {
+			return new Request(Type.WRITE, characteristic, writeType, data, 0, data != null ? data.length : 0);
 		}
 
 		/**
 		 * Creates new Write Characteristic request. The request will not be executed if given characteristic
 		 * is null or does not have WRITE property. After the operation is complete a proper callback will be invoked.
 		 * @param characteristic characteristic to be written
-		 * @param value value to be written. The array is copied into another buffer so it's safe to reuse the array again.
-		 * @param offset the offset from which value has to be copied
-		 * @param length number of bytes to be copied from the value buffer
+		 * @param data data to be written. The array is copied into another buffer so it's safe to reuse the array again.
+		 * @param offset the offset from which data has to be copied
+		 * @param length number of bytes to be copied from the data buffer
 		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
 		 */
-		public static Request newWriteRequest(final BluetoothGattCharacteristic characteristic, final byte[] value, final int offset, final int length) {
-			return new Request(Type.WRITE, characteristic, characteristic.getWriteType(), value, offset, length);
+		public static Request newWriteRequest(final BluetoothGattCharacteristic characteristic, final byte[] data, final int offset, final int length) {
+			return new Request(Type.WRITE, characteristic, characteristic.getWriteType(), data, offset, length);
 		}
 
 		/**
 		 * Creates new Write Characteristic request. The request will not be executed if given characteristic
 		 * is null or does not have WRITE property. After the operation is complete a proper callback will be invoked.
 		 * @param characteristic characteristic to be written
-		 * @param value value to be written. The array is copied into another buffer so it's safe to reuse the array again.
-		 * @param offset the offset from which value has to be copied
-		 * @param length number of bytes to be copied from the value buffer
+		 * @param data data to be written. The array is copied into another buffer so it's safe to reuse the array again.
+		 * @param offset the offset from which data has to be copied
+		 * @param length number of bytes to be copied from the data buffer
 		 * @param writeType write type to be used, one of {@link BluetoothGattCharacteristic#WRITE_TYPE_DEFAULT}, {@link BluetoothGattCharacteristic#WRITE_TYPE_NO_RESPONSE}.
 		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
 		 */
-		public static Request newWriteRequest(final BluetoothGattCharacteristic characteristic, final byte[] value, final int offset, final int length, final int writeType) {
-			return new Request(Type.WRITE, characteristic, writeType, value, offset, length);
+		public static Request newWriteRequest(final BluetoothGattCharacteristic characteristic, final byte[] data, final int offset, final int length, final int writeType) {
+			return new Request(Type.WRITE, characteristic, writeType, data, offset, length);
 		}
 
 		/**
@@ -187,24 +205,24 @@ public interface BleProfileApi {
 		 * Creates new Write Descriptor request. The request will not be executed if given descriptor
 		 * is null. After the operation is complete a proper callback will be invoked.
 		 * @param descriptor descriptor to be written
-		 * @param value value to be written. The array is copied into another buffer so it's safe to reuse the array again.
+		 * @param data data to be written. The array is copied into another buffer so it's safe to reuse the array again.
 		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
 		 */
-		public static Request newWriteRequest(final BluetoothGattDescriptor descriptor, final byte[] value) {
-			return new Request(Type.WRITE_DESCRIPTOR, descriptor, value, 0, value != null ? value.length : 0);
+		public static Request newWriteRequest(final BluetoothGattDescriptor descriptor, final byte[] data) {
+			return new Request(Type.WRITE_DESCRIPTOR, descriptor, data, 0, data != null ? data.length : 0);
 		}
 
 		/**
 		 * Creates new Write Descriptor request. The request will not be executed if given descriptor
 		 * is null. After the operation is complete a proper callback will be invoked.
 		 * @param descriptor descriptor to be written
-		 * @param value value to be written. The array is copied into another buffer so it's safe to reuse the array again.
-		 * @param offset the offset from which value has to be copied
-		 * @param length number of bytes to be copied from the value buffer
+		 * @param data data to be written. The array is copied into another buffer so it's safe to reuse the array again.
+		 * @param offset the offset from which data has to be copied
+		 * @param length number of bytes to be copied from the data buffer
 		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
 		 */
-		public static Request newWriteRequest(final BluetoothGattDescriptor descriptor, final byte[] value, final int offset, final int length) {
-			return new Request(Type.WRITE_DESCRIPTOR, descriptor, value, offset, length);
+		public static Request newWriteRequest(final BluetoothGattDescriptor descriptor, final byte[] data, final int offset, final int length) {
+			return new Request(Type.WRITE_DESCRIPTOR, descriptor, data, offset, length);
 		}
 
 		/**
@@ -262,6 +280,38 @@ public interface BleProfileApi {
 		 */
 		static Request newEnableServiceChangedIndicationsRequest() {
 			return new Request(Type.ENABLE_SERVICE_CHANGED_INDICATIONS); // the only Service Changed char is used (if such exists)
+		}
+
+		/**
+		 * Requests new MTU (Maximum Transfer Unit). This is only supported on Android Lollipop or newer.
+		 * The target device may reject requested data and set smalled MTU.
+		 * @param mtu the new MTU. Acceptable values are &lt;23, 517&gt;.
+		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
+		 */
+		static Request newMtuRequest(int mtu) {
+			if (mtu < 23)
+				mtu = 23;
+			if (mtu > 517)
+				mtu = 517;
+			return new Request(Type.REQUEST_MTU, mtu);
+		}
+
+		/**
+		 * Requests the new connection priority. Acceptable values are:
+		 * <ol>
+		 *     <li>{@link BluetoothGatt#CONNECTION_PRIORITY_HIGH} - Interval: 11.25 -15 ms, latency: 0, supervision timeout: 20 sec,</li>
+		 *     <li>{@link BluetoothGatt#CONNECTION_PRIORITY_BALANCED} - Interval: 30 - 50 ms, latency: 0, supervision timeout: 20 sec,</li>
+		 *     <li>{@link BluetoothGatt#CONNECTION_PRIORITY_LOW_POWER} - Interval: 100 - 125 ms, latency: 2, supervision timeout: 20 sec.</li>
+		 * </ol>
+		 *
+		 * @param priority one of: {@link BluetoothGatt#CONNECTION_PRIORITY_HIGH}, {@link BluetoothGatt#CONNECTION_PRIORITY_BALANCED},
+		 *                 {@link BluetoothGatt#CONNECTION_PRIORITY_LOW_POWER}.
+		 * @return the new request that can be enqueued using {@link #enqueue(Request)} method.
+		 */
+		static Request newConnectionPriorityRequest(int priority) {
+			if (priority < 0 || priority > 2)
+				priority = 0; // Balanced
+			return new Request(Type.REQUEST_CONNECTION_PRIORITY, priority);
 		}
 	}
 
@@ -336,6 +386,28 @@ public interface BleProfileApi {
 	 * @return true if request has been enqueued
 	 */
 	boolean setBatteryNotifications(final boolean enable);
+
+	/**
+	 * Requests new MTU. On Android 4.3 and 4.4.x returns false.
+	 *
+	 * @return true if request has been enqueued
+	 */
+	boolean requestMtu(final int mtu);
+
+	/**
+	 * Requests the new connection priority. Acceptable values are:
+	 * <ol>
+	 *     <li>{@link BluetoothGatt#CONNECTION_PRIORITY_HIGH} - Interval: 11.25 -15 ms, latency: 0, supervision timeout: 20 sec,</li>
+	 *     <li>{@link BluetoothGatt#CONNECTION_PRIORITY_BALANCED} - Interval: 30 - 50 ms, latency: 0, supervision timeout: 20 sec,</li>
+	 *     <li>{@link BluetoothGatt#CONNECTION_PRIORITY_LOW_POWER} - Interval: 100 - 125 ms, latency: 2, supervision timeout: 20 sec.</li>
+	 * </ol>
+	 * On Android 4.3 and 4.4.x returns false.
+	 *
+	 * @param priority one of: {@link BluetoothGatt#CONNECTION_PRIORITY_HIGH}, {@link BluetoothGatt#CONNECTION_PRIORITY_BALANCED},
+	 *                 {@link BluetoothGatt#CONNECTION_PRIORITY_LOW_POWER}.
+	 * @return true if request has been enqueued
+	 */
+	boolean requestConnectionPriority(final int priority);
 
 	/**
 	 * Enqueues a new request. The request will be handled immediately if there is no operation in progress,

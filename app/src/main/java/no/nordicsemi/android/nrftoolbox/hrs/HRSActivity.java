@@ -35,9 +35,9 @@ import org.achartengine.GraphicalView;
 
 import java.util.UUID;
 
+import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileActivity;
 
 /**

@@ -23,7 +23,7 @@ package no.nordicsemi.android.nrftoolbox.rsc;
 
 import android.bluetooth.BluetoothDevice;
 
-import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
+import no.nordicsemi.android.ble.BleManagerCallbacks;
 
 public interface RSCManagerCallbacks extends BleManagerCallbacks {
 	int NOT_AVAILABLE = -1;

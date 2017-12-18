@@ -31,9 +31,9 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.UUID;
 
+import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.parser.RSCMeasurementParser;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 
 public class RSCManager extends BleManager<RSCManagerCallbacks> {
 	private static final byte INSTANTANEOUS_STRIDE_LENGTH_PRESENT = 0x01; // 1 bit

@@ -38,6 +38,9 @@ import android.support.annotation.StringRes;
 import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
 
+import no.nordicsemi.android.ble.BleManager;
+import no.nordicsemi.android.ble.BleManagerCallbacks;
+import no.nordicsemi.android.ble.utils.ILogger;
 import no.nordicsemi.android.log.ILogSession;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.log.Logger;

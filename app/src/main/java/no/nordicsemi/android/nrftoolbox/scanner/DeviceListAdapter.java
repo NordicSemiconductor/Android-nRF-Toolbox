@@ -49,7 +49,7 @@ public class DeviceListAdapter extends BaseAdapter {
 	private final ArrayList<ExtendedBluetoothDevice> mListValues = new ArrayList<>();
 	private final Context mContext;
 
-	public DeviceListAdapter(Context context) {
+	public DeviceListAdapter(final Context context) {
 		mContext = context;
 	}
 

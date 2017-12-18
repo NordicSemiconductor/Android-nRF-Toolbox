@@ -38,9 +38,9 @@ import java.util.Locale;
 import java.util.UUID;
 
 import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 import no.nordicsemi.android.nrftoolbox.csc.settings.SettingsActivity;
 import no.nordicsemi.android.nrftoolbox.csc.settings.SettingsFragment;
+import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileServiceReadyActivity;
 
 public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBinder> {

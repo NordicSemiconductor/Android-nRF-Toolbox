@@ -23,7 +23,7 @@ package no.nordicsemi.android.nrftoolbox.gls;
 
 import android.bluetooth.BluetoothDevice;
 
-import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
+import no.nordicsemi.android.ble.BleManagerCallbacks;
 
 public interface GlucoseManagerCallbacks extends BleManagerCallbacks {
 	void onOperationStarted(final BluetoothDevice device);

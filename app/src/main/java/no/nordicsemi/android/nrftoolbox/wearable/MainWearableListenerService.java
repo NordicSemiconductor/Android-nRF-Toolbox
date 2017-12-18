@@ -27,8 +27,8 @@ import android.content.Intent;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableListenerService;
 
-import no.nordicsemi.android.nrftoolbox.wearable.common.Constants;
 import no.nordicsemi.android.nrftoolbox.uart.UARTService;
+import no.nordicsemi.android.nrftoolbox.wearable.common.Constants;
 
 /**
  * The main listener for messages from Wearable devices. There may be only one such service per application so it has to handle messages from all profiles.

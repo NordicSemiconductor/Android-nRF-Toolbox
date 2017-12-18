@@ -22,10 +22,12 @@
 
 package no.nordicsemi.android.nrftoolbox.ble;
 
+import android.annotation.TargetApi;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.content.Context;
+import android.os.Build;
 
 import java.util.Deque;
 
@@ -144,6 +146,30 @@ public abstract class BleProfile {
 	 * @param characteristic Characteristic from which the indication came.
 	 */
 	protected void onCharacteristicIndicated(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		// do nothing
+	}
+
+	/**
+	 * Method called when the MTU request has finished with success. The MTU value may
+	 * be different than requested one.
+	 * @param mtu the new MTU (Maximum Transfer Unit)
+	 */
+	protected void onMtuChanged(final int mtu) {
+		// do nothing
+	}
+
+	/**
+	 * Callback indicating the connection parameters were updated. Works on Android 8+.
+	 *
+	 * @param interval Connection interval used on this connection, 1.25ms unit. Valid range is from
+	 * 6 (7.5ms) to 3200 (4000ms).
+	 * @param latency Slave latency for the connection in number of connection events. Valid range
+	 * is from 0 to 499
+	 * @param timeout Supervision timeout for this connection, in 10ms unit. Valid range is from 10
+	 * (0.1s) to 3200 (32s)
+	 */
+	@TargetApi(Build.VERSION_CODES.O)
+	protected void onConnectionUpdated(final int interval, final int latency, final int timeout) {
 		// do nothing
 	}
 

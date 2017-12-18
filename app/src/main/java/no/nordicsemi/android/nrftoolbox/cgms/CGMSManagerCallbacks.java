@@ -24,7 +24,7 @@ package no.nordicsemi.android.nrftoolbox.cgms;
 
 import android.bluetooth.BluetoothDevice;
 
-import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
+import no.nordicsemi.android.ble.BleManagerCallbacks;
 
 public interface CGMSManagerCallbacks extends BleManagerCallbacks {
     /**

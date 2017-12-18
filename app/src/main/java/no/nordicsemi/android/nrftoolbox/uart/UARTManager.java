@@ -33,8 +33,8 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.UUID;
 
+import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.log.Logger;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 
 public class UARTManager extends BleManager<UARTManagerCallbacks> {
 	/** Nordic UART Service UUID */

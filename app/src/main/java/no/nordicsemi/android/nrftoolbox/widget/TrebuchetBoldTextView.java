@@ -24,7 +24,6 @@ package no.nordicsemi.android.nrftoolbox.widget;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
-import android.widget.TextView;
 
 import no.nordicsemi.android.nrftoolbox.R;
 

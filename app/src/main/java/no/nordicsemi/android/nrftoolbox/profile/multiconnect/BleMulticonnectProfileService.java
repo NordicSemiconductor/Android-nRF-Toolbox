@@ -41,11 +41,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import no.nordicsemi.android.ble.BleManager;
+import no.nordicsemi.android.ble.BleManagerCallbacks;
+import no.nordicsemi.android.ble.utils.ILogger;
 import no.nordicsemi.android.log.ILogSession;
 import no.nordicsemi.android.log.LogContract;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
-import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
-import no.nordicsemi.android.nrftoolbox.profile.ILogger;
 
 public abstract class BleMulticonnectProfileService extends Service implements BleManagerCallbacks {
 	@SuppressWarnings("unused")

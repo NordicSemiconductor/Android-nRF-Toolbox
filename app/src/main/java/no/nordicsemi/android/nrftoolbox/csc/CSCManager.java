@@ -31,9 +31,9 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.UUID;
 
+import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.parser.CSCMeasurementParser;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 
 public class CSCManager extends BleManager<CSCManagerCallbacks> {
 	/** Cycling Speed and Cadence service UUID */

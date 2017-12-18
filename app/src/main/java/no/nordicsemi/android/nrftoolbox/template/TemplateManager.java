@@ -30,9 +30,9 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.UUID;
 
+import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.parser.TemplateParser;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 
 /**
  * Modify to template manager to match your requirements.

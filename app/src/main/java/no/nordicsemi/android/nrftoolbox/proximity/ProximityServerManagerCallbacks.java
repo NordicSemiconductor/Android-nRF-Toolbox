@@ -23,7 +23,7 @@ package no.nordicsemi.android.nrftoolbox.proximity;
 
 import android.bluetooth.BluetoothDevice;
 
-import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
+import no.nordicsemi.android.ble.BleManagerCallbacks;
 
 public interface ProximityServerManagerCallbacks extends BleManagerCallbacks {
 	void onAlarmTriggered(final BluetoothDevice device);

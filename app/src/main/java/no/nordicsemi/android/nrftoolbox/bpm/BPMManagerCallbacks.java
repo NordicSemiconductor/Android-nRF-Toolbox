@@ -25,7 +25,7 @@ import android.bluetooth.BluetoothDevice;
 
 import java.util.Calendar;
 
-import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
+import no.nordicsemi.android.ble.BleManagerCallbacks;
 
 public interface BPMManagerCallbacks extends BleManagerCallbacks {
 	int UNIT_mmHG = 0;

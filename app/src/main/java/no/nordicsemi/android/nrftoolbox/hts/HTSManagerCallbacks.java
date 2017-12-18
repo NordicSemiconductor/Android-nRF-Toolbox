@@ -23,7 +23,7 @@ package no.nordicsemi.android.nrftoolbox.hts;
 
 import android.bluetooth.BluetoothDevice;
 
-import no.nordicsemi.android.nrftoolbox.profile.BleManagerCallbacks;
+import no.nordicsemi.android.ble.BleManagerCallbacks;
 
 /**
  * Interface {@link HTSManagerCallbacks} must be implemented by {@link HTSActivity} in order to receive callbacks from {@link HTSManager}

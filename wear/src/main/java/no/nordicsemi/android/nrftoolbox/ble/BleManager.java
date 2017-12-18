@@ -35,6 +35,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Handler;
+import android.support.annotation.RequiresApi;
 
 import java.util.Deque;
 import java.util.LinkedList;
@@ -574,6 +575,34 @@ public class BleManager implements BleProfileApi {
 	}
 
 	@Override
+	public final boolean requestMtu(final int mtu) {
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && enqueue(Request.newMtuRequest(mtu));
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	private boolean internalRequestMtu(final int mtu) {
+		final BluetoothGatt gatt = mBluetoothGatt;
+		if (gatt == null)
+			return false;
+
+		return gatt.requestMtu(mtu);
+	}
+
+	@Override
+	public final boolean requestConnectionPriority(final int priority) {
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && enqueue(Request.newConnectionPriorityRequest(priority));
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	private boolean internalRequestConnectionPriority(final int priority) {
+		final BluetoothGatt gatt = mBluetoothGatt;
+		if (gatt == null)
+			return false;
+
+		return gatt.requestConnectionPriority(priority);
+	}
+
+	@Override
 	public boolean enqueue(final Request request) {
 		if (mGattCallback != null) {
 			// Add the new task to the end of the queue
@@ -592,11 +621,21 @@ public class BleManager implements BleProfileApi {
 		private final static String ERROR_WRITE_CHARACTERISTIC = "Error on writing characteristic";
 		private final static String ERROR_READ_DESCRIPTOR = "Error on reading descriptor";
 		private final static String ERROR_WRITE_DESCRIPTOR = "Error on writing descriptor";
+		private final static String ERROR_MTU_REQUEST = "Error on mtu request";
+		private final static String ERROR_CONNECTION_PRIORITY_REQUEST = "Error on connection priority request";
 
 		private final Queue<Request> mTaskQueue = new LinkedList<>();
 		private Deque<Request> mInitQueue;
 		private boolean mInitInProgress;
 		private boolean mOperationInProgress = true;
+		/**
+		 * This flag is required to resume operations after the connection priority request was made.
+		 * It is used only on Android Oreo and newer, as only there there is onConnectionUpdated callback.
+		 * However, as this callback is triggered every time the connection parameters change, even
+		 * when such request wasn't made, this flag ensures the nextRequest() method won't be called
+		 * during another operation.
+		 */
+		private boolean mConnectionPriorityOperationInProgress = false;
 
 		private void notifyDeviceDisconnected(final BluetoothDevice device) {
 			mConnected = false;
@@ -814,6 +853,48 @@ public class BleManager implements BleProfileApi {
 			}
 		}
 
+		@Override
+		public void onMtuChanged(final BluetoothGatt gatt, final int mtu, final int status) {
+			if (status == BluetoothGatt.GATT_SUCCESS) {
+				mProfile.onMtuChanged(mtu);
+			} else {
+				DebugLogger.e(TAG, "onMtuChanged error: " + status + ", mtu: " + mtu);
+				onError(gatt.getDevice(), ERROR_MTU_REQUEST, status);
+			}
+			mOperationInProgress = false;
+			nextRequest();
+		}
+
+		// @Override
+		/**
+		 * Callback indicating the connection parameters were updated. Works on Android 8+.
+		 *
+		 * @param gatt GATT client involved
+		 * @param interval Connection interval used on this connection, 1.25ms unit. Valid range is from
+		 * 6 (7.5ms) to 3200 (4000ms).
+		 * @param latency Slave latency for the connection in number of connection events. Valid range
+		 * is from 0 to 499
+		 * @param timeout Supervision timeout for this connection, in 10ms unit. Valid range is from 10
+		 * (0.1s) to 3200 (32s)
+		 * @param status {@link BluetoothGatt#GATT_SUCCESS} if the connection has been updated
+		 * successfully
+		 */
+		public void onConnectionUpdated(final BluetoothGatt gatt, final int interval, final int latency, final int timeout,	final int status) {
+			if (status == BluetoothGatt.GATT_SUCCESS) {
+				mProfile.onConnectionUpdated(interval, latency, timeout);
+			} else if (status == 0x3b) { // HCI_ERR_UNACCEPT_CONN_INTERVAL
+				DebugLogger.e(TAG, "onConnectionUpdated received status: Unacceptable connection interval, interval: " + interval + ", latency: " + latency + ", timeout: " + timeout);
+			} else {
+				DebugLogger.e(TAG, "onConnectionUpdated received status: " + status + ", interval: " + interval + ", latency: " + latency + ", timeout: " + timeout);
+				mCallbacks.onError(gatt.getDevice(), ERROR_CONNECTION_PRIORITY_REQUEST, status);
+			}
+			if (mConnectionPriorityOperationInProgress) {
+				mConnectionPriorityOperationInProgress = false;
+				mOperationInProgress = false;
+				nextRequest();
+			}
+		}
+
 		/**
 		 * Executes the next request. If the last element from the initialization queue has been executed
 		 * the {@link BleManagerCallbacks#onDeviceReady(BluetoothDevice)} callback is called.
@@ -853,7 +934,7 @@ public class BleManager implements BleProfileApi {
 				}
 				case WRITE: {
 					final BluetoothGattCharacteristic characteristic = request.characteristic;
-					characteristic.setValue(request.value);
+					characteristic.setValue(request.data);
 					characteristic.setWriteType(request.writeType);
 					result = internalWriteCharacteristic(characteristic);
 					break;
@@ -864,7 +945,7 @@ public class BleManager implements BleProfileApi {
 				}
 				case WRITE_DESCRIPTOR: {
 					final BluetoothGattDescriptor descriptor = request.descriptor;
-					descriptor.setValue(request.value);
+					descriptor.setValue(request.data);
 					result = internalWriteDescriptor(descriptor);
 					break;
 				}
@@ -892,10 +973,32 @@ public class BleManager implements BleProfileApi {
 					result = ensureServiceChangedEnabled();
 					break;
 				}
+				case REQUEST_MTU: {
+					result = internalRequestMtu(request.value);
+					break;
+				}
+				case REQUEST_CONNECTION_PRIORITY: {
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+						mConnectionPriorityOperationInProgress = true;
+						result = internalRequestConnectionPriority(request.value);
+					} else {
+						result = internalRequestConnectionPriority(request.value);
+						// There is no callback for requestConnectionPriority(...) before Android Oreo.\
+						// Let's give it some time to finish as the request is an asynchronous operation.
+						if (result) {
+							mHandler.postDelayed(() -> {
+								mOperationInProgress = false;
+								nextRequest();
+							}, 100);
+						}
+					}
+					break;
+				}
 			}
 			// The result may be false if given characteristic or descriptor were not found on the device.
 			// In that case, proceed with next operation and ignore the one that failed.
 			if (!result) {
+				mConnectionPriorityOperationInProgress = false;
 				mOperationInProgress = false;
 				nextRequest();
 			}

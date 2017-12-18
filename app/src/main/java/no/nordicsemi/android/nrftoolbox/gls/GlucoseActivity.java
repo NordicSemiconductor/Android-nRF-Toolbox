@@ -33,8 +33,8 @@ import android.widget.TextView;
 
 import java.util.UUID;
 
+import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.profile.BleManager;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileExpandableListActivity;
 
 // TODO The GlucoseActivity should be rewritten to use the service approach, like other do.

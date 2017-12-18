@@ -35,9 +35,9 @@ import com.google.android.gms.wearable.Wearable;
 
 import java.util.ArrayList;
 
-import no.nordicsemi.android.nrftoolbox.wearable.common.Constants;
 import no.nordicsemi.android.nrftoolbox.uart.domain.Command;
 import no.nordicsemi.android.nrftoolbox.uart.domain.UartConfiguration;
+import no.nordicsemi.android.nrftoolbox.wearable.common.Constants;
 
 public class UARTConfigurationSynchronizer {
 	private static final String WEAR_URI_PREFIX = "wear:"; // no / at the end as the path already has it
