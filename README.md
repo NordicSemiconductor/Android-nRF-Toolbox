@@ -1,16 +1,16 @@
 # nRF Toolbox
 
-The nRF Toolbox is a container app that stores your Nordic Semiconductor apps for Bluetooth Smart in one location. 
+The nRF Toolbox is a container app that stores your Nordic Semiconductor apps for Bluetooth Low Energy in one location. 
 
-It contains applications demonstrating Bluetooth Smart profiles: 
+It contains applications demonstrating standard Bluetooth LE profiles: 
 * **Cycling Speed and Cadence**, 
 * **Running Speed and Cadence**, 
 * **Heart Rate Monitor**, 
 * **Blood Pressure Monitor**, 
 * **Health Thermometer Monitor**, 
 * **Glucose Monitor**,
-* **Continuous Glucose Monitor** - NEW: profile added,
-* **Proximity Monitor** - NEW: multiple connections supported.
+* **Continuous Glucose Monitor**,
+* **Proximity Monitor** - supports multiple connections.
 
 Since version 1.10.0 the *nRF Toolbox* also supports the **Nordic UART Service** which may be used for bidirectional text communication between devices.
 
@@ -20,7 +20,7 @@ Since version 1.10.0 the *nRF Toolbox* also supports the **Nordic UART Service**
 
 nRF Toolbox depends on [Android BLE Library](https://github.com/NordicSemiconductor/Android-BLE-Library/) which has to be cloned into the same root folder as this app.
 
-If you are having issue like #40 or #41, the correct folders structure should look like this:
+If you are having issue like [#40](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/issues/40) or [#41](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/issues/41), the correct folders structure should look like this:
 
 ![Folders structure](resources/structure.png)
 
