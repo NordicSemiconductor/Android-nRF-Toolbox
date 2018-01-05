@@ -14,22 +14,38 @@ It contains applications demonstrating Bluetooth Smart profiles:
 
 Since version 1.10.0 the *nRF Toolbox* also supports the **Nordic UART Service** which may be used for bidirectional text communication between devices.
 
-**Note:** To get a smaller version, with only the DFU profile, switch to the *only_dfu* branch.
+**Note:** To get a smaller version, with only the DFU profile, switch to the *only_dfu* branch (this branch is not maintained anymore, so you have to update it on your own).
+
+### How to import to Android Studio
+
+nRF Toolbox depends on [Android BLE Library](https://github.com/NordicSemiconductor/Android-BLE-Library/) which has to be cloned into the same root folder as this app.
+
+If you are having issue like #40 or #41, the correct folders structure should look like this:
+
+![Folders structure](resources/structure.png)
+
+If you prefer a different name for BLE library, update the [*settings.gradle*](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/blob/master/settings.gradle) file.
+
+*DFULibrary* folder is optional, as the library is downloaded from jcenter repository automatically. Clone it only when you want to modify the code (not recommended).
+
+If you get ["Missing Feature Watch" error](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/issues/41#issuecomment-355291101), switch the configuration to 'app'.
 
 ### BleManager and how to use it
 
-The nRF Toolbox application is a reference design demonstrating how to use the BLE API on Android. The main class responsible for managing connection to a single device is called [BleManager](app/src/main/java/no/nordicsemi/android/nrftoolbox/profile/BleManager.java). Each of the profiles listed above is using this manager and overriding it to add some profile-related functionality. The BleManager sends events using the [BleManagerCallbacks](app/src/main/java/no/nordicsemi/android/nrftoolbox/profile/BleManagerCallbacks.java) interface, which should be impemented by your controller. A profile's BleManager should override the BleManager and implement required methods, that is:
-* ```Deque<Request> initGatt(BluetoothGatt)``` - method that definies initialization queue
+The nRF Toolbox application is a reference design demonstrating how to use the BLE API on Android. The main class responsible for managing connection to a single device is called [BleManager](https://github.com/NordicSemiconductor/Android-BLE-Library/blob/master/ble/src/main/java/no/nordicsemi/android/ble/BleManager.java). Each of the profiles listed above is using this manager and overriding it to add some profile-related functionality. The BleManager sends events using the [BleManagerCallbacks](https://github.com/NordicSemiconductor/Android-BLE-Library/blob/master/ble/src/main/java/no/nordicsemi/android/ble/BleManagerCallbacks.java) interface, which should be implemented by your controller. A profile's BleManager should override the BleManager and implement required methods, that is:
+* ```Deque<Request> initGatt(BluetoothGatt)``` - method that defines initialization queue
 * ```boolean isRequiredServiceSupported(BluetoothGatt)``` - method that verifies if the connected device is supported by the profile
 * ```void onDeviceDisconnected()``` - method that releases device's resources
 
-There are 3 different solutions how to use the manager shown in different profiles. The very basic approach is used by the BPM, HRM and GLS profiles. Each of those activities holds a static reference to the manager. Keeping the manager as a static object protects from disposing it when device orientation changes and the activities are being destroyed and recreated. However, this approach does not allow to keep the connections in background mode and therfore is not a solution that should be used in any final application.
+There are 4 different solutions how to use the manager shown in different profiles. The very basic approach is used by the BPM, HRM and GLS profiles. Each of those activities holds a static reference to the manager. Keeping the manager as a static object protects from disposing it when device orientation changes and the activities are being destroyed and recreated. However, this approach does not allow to keep the connections in background mode and therefore is not a solution that should be used in any final application.
 
 A better implementation may be found in CSC, RSC, HTM and CGM. The BleManager instance is maintained by the running service. The service is started in order to connect to a device and stopped when user decides to disconnect from it. When an activity is destroyed it unbinds from the service, but the service is still running, so the incoming data may continue to be handled. All device-related data are kept be the service and may be obtained by a new activity when it binds to it in order to be shown to the user.
 
-At last, the Proximity profile allows to connect to multiple sensors at the same time. It uses a different service implementation but still the BleManager is used to manage each connection. If the [shouldAutoConnect()](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/blob/master/app/src/main/java/no/nordicsemi/android/nrftoolbox/profile/BleManager.java#L181) method returns true for a connection, the manager will try to reconnect automatically to the device if a link was lost. You will also be notified about a device that got away using ```onLinklossOccur(BluetoothDevice)```.
+As a third, the Proximity profile allows to connect to multiple sensors at the same time. It uses a different service implementation but still the BleManager is used to manage each connection. If the [shouldAutoConnect()](hhttps://github.com/NordicSemiconductor/Android-BLE-Library/blob/master/ble/src/main/java/no/nordicsemi/android/ble/BleManager.java#L246) method returns true for a connection, the manager will try to reconnect automatically to the device if a link was lost. You will also be notified about a device that got away using ```onLinklossOccur(BluetoothDevice)```.
 
 The BleMulticonnectProfileService implementation, used by Proximity profile, does not save addresses of connected devices. When the service is killed it will not be able to reconnect to them after it's restarted, so this feature has been disabled. Also, when user removes the nRF Toolbox app from Recents, the service will be killed and all devices will be disconnected automatically. To change this behaviour a service would have to either save the addresses and reconnect to devices after it has restarted (but then removing the app from Recents would cause disconnection and immediate reconnection as the service is then killed and moved to another process), or would have to be implemented in a way that is using another [process](https://developer.android.com/guide/topics/manifest/service-element.html#proc). Then, however, it is not possible to bind to such service and data must be exchanged using a [Messenger](https://developer.android.com/reference/android/app/Service.html#RemoteMessengerServiceSample). Such approach is not demonstrated in nRF Toolbox.
+
+At last, the BleManager can be accessed from a ViewModel (see [Architecture Components](https://developer.android.com/topic/libraries/architecture/index.html)). Check out the [Android nRF Blinky](https://github.com/NordicSemiconductor/Android-nRF-Blinky) app for sample code. 
 
 ### Nordic UART Service
 
@@ -85,6 +101,8 @@ This guessing may not be always correct. One situation may be when the nRF chip 
 
 ### Dependencies
 
+nRF Toolbox depends on [Android BLE Library](https://github.com/NordicSemiconductor/Android-BLE-Library/) which has to be cloned into the same root folder as this app. If you prefer a different name, update the [*settings.gradle*](https://github.com/NordicSemiconductor/Android-BLE-Library/blob/master/settings.gradle) file.
+
 In order to compile the project the **DFU Library is required**. This project may be found here: https://github.com/NordicSemiconductor/Android-DFU-Library.
 Since version 1.16.1 it is imported automatically from *jcenter* repository and no special configuration is needed. If you want to make some modifications in the DFU Library, please clone the DFU Library to the same root as nRF Toolbox is cloned and name the library's folder **DFULibrary**. Add the dfu module in Project Structure and edit *app/build.gradle* file and *settings.gradle* files as describe in them.
 
@@ -94,8 +112,7 @@ The graph in HRM profile is created using the [AChartEngine v1.1.0](http://www.a
 
 ### Note
 - Android 4.3 or newer is required.
-- Tested on Nexus 4, Nexus 7, Samsung S3 and S4 with Android 4.3 and on Nexus 4, Nexus 5, Nexus 7, Nexus 9 with Android 4.4.4 and 5.
-- Compatible with nRF51 devices that have S110 v5.2.1+ and the bootloader from nRF51 SDK v4.4.1+ and nRF52 with S132 SoftDevice.
+- Compatible with nRF5 devices running samples from the Nordic SDK and other devices implementing standard profiles.
 - Development kits can be ordered from http://www.nordicsemi.com/eng/Buy-Online.
 - The nRF51 or nRF52 SDKs and SoftDevices are available online at http://developer.nordicsemi.com.
 
