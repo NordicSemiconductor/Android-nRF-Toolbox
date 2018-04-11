@@ -41,8 +41,8 @@ dependencies {
     implementation project(':common')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'no.nordicsemi.android.support.v18:scanner:1.0.0'
-    implementation 'com.google.android.support:wearable:2.1.0'
-    compileOnly 'com.google.android.wearable:wearable:2.1.0'
+    implementation 'com.google.android.support:wearable:2.3.0'
+    compileOnly 'com.google.android.wearable:wearable:2.3.0'
 
     // uncomment to enable the Wear UI Library
     // https://developer.android.com/training/wearables/ui/wear-ui-library.html

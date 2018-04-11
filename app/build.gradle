@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion "27.0.1"
+    buildToolsVersion "27.0.3"
 
     defaultConfig {
         applicationId "no.nordicsemi.android.nrftoolbox"
@@ -41,9 +41,9 @@ dependencies {
     implementation 'com.google.android.gms:play-services-wearable:10.2.0'
 
     //noinspection GradleDependency
-    implementation 'com.android.support:appcompat-v7:27.0.2'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
     //noinspection GradleDependency
-    implementation 'com.android.support:design:27.0.2'
+    implementation 'com.android.support:design:27.1.1'
 
     implementation 'no.nordicsemi.android:log:2.1.1'
     implementation 'no.nordicsemi.android.support.v18:scanner:1.0.0'
