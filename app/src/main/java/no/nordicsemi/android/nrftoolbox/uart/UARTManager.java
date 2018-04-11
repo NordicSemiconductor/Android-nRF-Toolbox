@@ -34,6 +34,7 @@ import java.util.LinkedList;
 import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
+import no.nordicsemi.android.ble.Request;
 import no.nordicsemi.android.log.Logger;
 
 public class UARTManager extends BleManager<UARTManagerCallbacks> {
