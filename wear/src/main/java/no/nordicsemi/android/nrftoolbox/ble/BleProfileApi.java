@@ -22,7 +22,9 @@
 
 package no.nordicsemi.android.nrftoolbox.ble;
 
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.content.Context;
@@ -393,6 +395,26 @@ public interface BleProfileApi {
 	 * @return true if request has been enqueued
 	 */
 	boolean requestMtu(final int mtu);
+
+	/**
+	 * Returns the current MTU (Maximum Transfer Unit). MTU specifies the maximum number of bytes that can
+	 * be sent in a single write operation. 3 bytes are used for internal purposes, so the maximum size is MTU-3.
+	 * The value will changed only if requested with {@link #requestMtu(int)} and a successful callback is received.
+	 * If the peripheral requests MTU change, the {@link BluetoothGattCallback#onMtuChanged(BluetoothGatt, int, int)}
+	 * callback is not invoked, therefor the returned MTU value will not be correct.
+	 * Use {@link android.bluetooth.BluetoothGattServerCallback#onMtuChanged(BluetoothDevice, int)} to get the
+	 * callback with right value requested from the peripheral side.
+	 * @return the current MTU value. Default to 23.
+	 */
+	int getMtu();
+
+	/**
+	 * This method overrides the MTU value. Use it only when the peripheral has changed MTU and you
+	 * received the {@link android.bluetooth.BluetoothGattServerCallback#onMtuChanged(BluetoothDevice, int)}
+	 * callback. If you want to set MTU as a master, use {@link #requestMtu(int)} instead.
+	 * @param mtu the MTU value set by the peripheral.
+	 */
+	void overrideMtu(final int mtu);
 
 	/**
 	 * Requests the new connection priority. Acceptable values are:
