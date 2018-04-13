@@ -438,6 +438,11 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	}
 
 	@Override
+	public void onBondingFailed(final BluetoothDevice device) {
+		// empty default implementation
+	}
+
+	@Override
 	public void onDeviceNotSupported(final BluetoothDevice device) {
 		showToast(R.string.not_supported);
 	}

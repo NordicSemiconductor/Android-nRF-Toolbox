@@ -308,6 +308,11 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	}
 
 	@Override
+	public void onBondingFailed(final BluetoothDevice device) {
+		showToast(R.string.bonding_failed);
+	}
+
+	@Override
 	public boolean shouldEnableBatteryLevelNotifications(final BluetoothDevice device) {
 		// Yes, we want battery level updates
 		return true;

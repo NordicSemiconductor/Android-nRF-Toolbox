@@ -549,6 +549,11 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	}
 
 	@Override
+	public void onBondingFailed(final BluetoothDevice device) {
+		// empty default implementation
+	}
+
+	@Override
 	public final boolean shouldEnableBatteryLevelNotifications(final BluetoothDevice device) {
 		// This method will never be called.
 		// Please see BleProfileService#shouldEnableBatteryLevelNotifications(BluetoothDevice) instead.

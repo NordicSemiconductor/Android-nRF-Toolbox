@@ -286,7 +286,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 				// But we will still be receiving other values, if enabled.
 				for (final BleManager<BleManagerCallbacks> manager : mBleManagers.values()) {
 					if (manager.isConnected())
-						manager.setBatteryNotifications(false);
+						manager.disableBatteryLevelNotifications();
 				}
 			} else {
 				// The last activity has disconnected from the service and there are no devices to manage. The service may be stopped.
@@ -532,6 +532,16 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 		final Intent broadcast = new Intent(BROADCAST_BOND_STATE);
 		broadcast.putExtra(EXTRA_DEVICE, device);
 		broadcast.putExtra(EXTRA_BOND_STATE, BluetoothDevice.BOND_BONDED);
+		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
+	}
+
+	@Override
+	public void onBondingFailed(final BluetoothDevice device) {
+		showToast(no.nordicsemi.android.nrftoolbox.common.R.string.bonding_failed);
+
+		final Intent broadcast = new Intent(BROADCAST_BOND_STATE);
+		broadcast.putExtra(EXTRA_DEVICE, device);
+		broadcast.putExtra(EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 

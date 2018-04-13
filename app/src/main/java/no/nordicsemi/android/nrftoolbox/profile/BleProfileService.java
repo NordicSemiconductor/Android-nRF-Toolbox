@@ -268,7 +268,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 		// When we are connected, but the application is not open, we are not really interested in battery level notifications. But we will still be receiving other values, if enabled.
 		if (!mActivityIsChangingConfiguration && mBleManager.isConnected())
-			mBleManager.setBatteryNotifications(false);
+			mBleManager.disableBatteryLevelNotifications();
 
 		// We want the onRebind method be called if anything else binds to it again
 		return true;
@@ -515,6 +515,16 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 		final Intent broadcast = new Intent(BROADCAST_BOND_STATE);
 		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_BOND_STATE, BluetoothDevice.BOND_BONDED);
+		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
+	}
+
+	@Override
+	public void onBondingFailed(final BluetoothDevice device) {
+		showToast(no.nordicsemi.android.nrftoolbox.common.R.string.bonding_failed);
+
+		final Intent broadcast = new Intent(BROADCAST_BOND_STATE);
+		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
+		broadcast.putExtra(EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
