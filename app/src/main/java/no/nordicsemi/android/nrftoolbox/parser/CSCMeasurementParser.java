@@ -21,17 +21,15 @@
  */
 package no.nordicsemi.android.nrftoolbox.parser;
 
-import android.bluetooth.BluetoothGattCharacteristic;
-
-import java.util.Locale;
+import no.nordicsemi.android.ble.callback.Data;
 
 public class CSCMeasurementParser {
 	private static final byte WHEEL_REV_DATA_PRESENT = 0x01; // 1 bit
 	private static final byte CRANK_REV_DATA_PRESENT = 0x02; // 1 bit
 
-	public static String parse(final BluetoothGattCharacteristic characteristic) {
+	public static String parse(final Data data) {
 		int offset = 0;
-		final int flags = characteristic.getValue()[offset]; // 1 byte
+		final int flags = data.getByte(offset); // 1 byte
 		offset += 1;
 
 		final boolean wheelRevPresent = (flags & WHEEL_REV_DATA_PRESENT) > 0;
@@ -40,31 +38,34 @@ public class CSCMeasurementParser {
 		int wheelRevolutions = 0;
 		int lastWheelEventTime = 0;
 		if (wheelRevPresent) {
-			wheelRevolutions = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
+			wheelRevolutions = data.getIntValue(Data.FORMAT_UINT32, offset);
 			offset += 4;
 
-			lastWheelEventTime = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset); // 1/1024 s
+			lastWheelEventTime = data.getIntValue(Data.FORMAT_UINT16, offset); // 1/1024 s
 			offset += 2;
 		}
 
 		int crankRevolutions = 0;
 		int lastCrankEventTime = 0;
 		if (crankRevPreset) {
-			crankRevolutions = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+			crankRevolutions = data.getIntValue(Data.FORMAT_UINT16, offset);
 			offset += 2;
 
-			lastCrankEventTime = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+			lastCrankEventTime = data.getIntValue(Data.FORMAT_UINT16, offset);
 			//offset += 2;
 		}
 
 		final StringBuilder builder = new StringBuilder();
 		if (wheelRevPresent) {
-			builder.append(String.format(Locale.US, "Wheel rev: %d,\n", wheelRevolutions));
-			builder.append(String.format(Locale.US, "Last wheel event time: %d ms,\n", lastWheelEventTime));
+			builder.append("Wheel rev: ").append(wheelRevolutions).append(",\n");
+			builder.append("Last wheel event time: ").append(lastWheelEventTime).append(",\n");
 		}
 		if (crankRevPreset) {
-			builder.append(String.format(Locale.US, "Crank rev: %d,\n", crankRevolutions));
-			builder.append(String.format(Locale.US, "Last crank event time: %d ms,\n", lastCrankEventTime));
+			builder.append("Crank rev: ").append(crankRevolutions).append(",\n");
+			builder.append("Last crank event time: ").append(lastCrankEventTime).append(",\n");
+		}
+		if (!wheelRevPresent && !crankRevPreset) {
+			builder.append("No wheel or crank data");
 		}
 		builder.setLength(builder.length() - 2);
 		return builder.toString();

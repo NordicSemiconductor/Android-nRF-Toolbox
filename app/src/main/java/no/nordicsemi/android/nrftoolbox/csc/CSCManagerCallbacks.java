@@ -26,9 +26,7 @@ import android.bluetooth.BluetoothDevice;
 import no.nordicsemi.android.ble.BleManagerCallbacks;
 
 public interface CSCManagerCallbacks extends BleManagerCallbacks {
-	int NOT_AVAILABLE = -1;
+	void onDistanceChanged(final BluetoothDevice device, final float totalDistance, final float distance, final float speed);
 
-	void onWheelMeasurementReceived(final BluetoothDevice device, final int wheelRevolutions, final int wheelCrankEventTime);
-
-	void onCrankMeasurementReceived(final BluetoothDevice device, final int crankRevolutions, final int lastCrankEventTime);
+	void onCrankDataChanged(final BluetoothDevice device, final float crankCadence, final float gearRatio);
 }

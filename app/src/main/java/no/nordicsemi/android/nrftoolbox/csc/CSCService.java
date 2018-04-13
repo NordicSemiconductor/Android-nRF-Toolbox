@@ -30,8 +30,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -40,10 +38,10 @@ import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.ToolboxApplication;
-import no.nordicsemi.android.nrftoolbox.csc.settings.SettingsFragment;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 
 public class CSCService extends BleProfileService implements CSCManagerCallbacks {
+	@SuppressWarnings("unused")
 	private static final String TAG = "CSCService";
 
 	public static final String BROADCAST_WHEEL_DATA = "no.nordicsemi.android.nrftoolbox.csc.BROADCAST_WHEEL_DATA";
@@ -59,15 +57,6 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 
 	private static final String ACTION_DISCONNECT = "no.nordicsemi.android.nrftoolbox.csc.ACTION_DISCONNECT";
 
-	private CSCManager mManager;
-
-	private int mFirstWheelRevolutions = -1;
-	private int mLastWheelRevolutions = -1;
-	private int mLastWheelEventTime = -1;
-	private float mWheelCadence = -1;
-	private int mLastCrankRevolutions = -1;
-	private int mLastCrankEventTime = -1;
-
 	private final static int NOTIFICATION_ID = 200;
 	private final static int OPEN_ACTIVITY_REQ = 0;
 	private final static int DISCONNECT_REQ = 1;
@@ -77,7 +66,7 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 	/**
 	 * This local binder is an interface for the bonded activity to operate with the RSC sensor
 	 */
-	public class CSCBinder extends LocalBinder {
+	class CSCBinder extends LocalBinder {
 		// empty
 	}
 
@@ -88,7 +77,7 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 
 	@Override
 	protected BleManager<CSCManagerCallbacks> initializeManager() {
-		return mManager = new CSCManager(this);
+		return new CSCManager(this);
 	}
 
 	@Override
@@ -122,68 +111,22 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 	}
 
 	@Override
-	public void onWheelMeasurementReceived(final BluetoothDevice device, final int wheelRevolutions, final int lastWheelEventTime) {
-		Logger.a(getLogSession(), "Wheel rev: " + wheelRevolutions + "\nLast wheel event time: " + lastWheelEventTime + " ms");
-
-		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-		final int circumference = Integer.parseInt(preferences.getString(SettingsFragment.SETTINGS_WHEEL_SIZE, String.valueOf(SettingsFragment.SETTINGS_WHEEL_SIZE_DEFAULT))); // [mm]
-
-		if (mFirstWheelRevolutions < 0)
-			mFirstWheelRevolutions = wheelRevolutions;
-
-		if (mLastWheelEventTime == lastWheelEventTime)
-			return;
-
-		if (mLastWheelRevolutions >= 0) {
-			float timeDifference;
-			if (lastWheelEventTime < mLastWheelEventTime)
-				timeDifference = (65535 + lastWheelEventTime - mLastWheelEventTime) / 1024.0f; // [s]
-			else
-				timeDifference = (lastWheelEventTime - mLastWheelEventTime) / 1024.0f; // [s]
-			final float distanceDifference = (wheelRevolutions - mLastWheelRevolutions) * circumference / 1000.0f; // [m]
-			final float totalDistance = (float) wheelRevolutions * (float) circumference / 1000.0f; // [m]
-			final float distance = (float) (wheelRevolutions - mFirstWheelRevolutions) * (float) circumference / 1000.0f; // [m]
-			final float speed = distanceDifference / timeDifference;
-			mWheelCadence = (wheelRevolutions - mLastWheelRevolutions) * 60.0f / timeDifference;
-
-			final Intent broadcast = new Intent(BROADCAST_WHEEL_DATA);
-			broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
-			broadcast.putExtra(EXTRA_SPEED, speed);
-			broadcast.putExtra(EXTRA_DISTANCE, distance);
-			broadcast.putExtra(EXTRA_TOTAL_DISTANCE, totalDistance);
-			LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
-		}
-		mLastWheelRevolutions = wheelRevolutions;
-		mLastWheelEventTime = lastWheelEventTime;
+	public void onDistanceChanged(final BluetoothDevice device, final float totalDistance, final float distance, final float speed) {
+		final Intent broadcast = new Intent(BROADCAST_WHEEL_DATA);
+		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
+		broadcast.putExtra(EXTRA_SPEED, speed);
+		broadcast.putExtra(EXTRA_DISTANCE, distance);
+		broadcast.putExtra(EXTRA_TOTAL_DISTANCE, totalDistance);
+		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	@Override
-	public void onCrankMeasurementReceived(final BluetoothDevice device, int crankRevolutions, int lastCrankEventTime) {
-		Logger.a(getLogSession(), "Crank rev: " + crankRevolutions + "\nLast crank event time: " + lastCrankEventTime + " ms");
-
-		if (mLastCrankEventTime == lastCrankEventTime)
-			return;
-
-		if (mLastCrankRevolutions >= 0) {
-			float timeDifference;
-			if (lastCrankEventTime < mLastCrankEventTime)
-				timeDifference = (65535 + lastCrankEventTime - mLastCrankEventTime) / 1024.0f; // [s]
-			else
-				timeDifference = (lastCrankEventTime - mLastCrankEventTime) / 1024.0f; // [s]
-
-			final float crankCadence = (crankRevolutions - mLastCrankRevolutions) * 60.0f / timeDifference;
-			if (crankCadence > 0) {
-				final float gearRatio = mWheelCadence / crankCadence;
-
-				final Intent broadcast = new Intent(BROADCAST_CRANK_DATA);
-				broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
-				broadcast.putExtra(EXTRA_GEAR_RATIO, gearRatio);
-				broadcast.putExtra(EXTRA_CADENCE, (int) crankCadence);
-				LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
-			}
-		}
-		mLastCrankRevolutions = crankRevolutions;
-		mLastCrankEventTime = lastCrankEventTime;
+	public void onCrankDataChanged(final BluetoothDevice device, final float crankCadence, final float gearRatio) {
+		final Intent broadcast = new Intent(BROADCAST_CRANK_DATA);
+		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
+		broadcast.putExtra(EXTRA_GEAR_RATIO, gearRatio);
+		broadcast.putExtra(EXTRA_CADENCE, (int) crankCadence);
+		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	/**
@@ -238,5 +181,4 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 				stopSelf();
 		}
 	};
-
 }

@@ -226,8 +226,8 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 
 			if (CSCService.BROADCAST_WHEEL_DATA.equals(action)) {
 				final float speed = intent.getFloatExtra(CSCService.EXTRA_SPEED, 0.0f); // [m/s]
-				final float distance = intent.getFloatExtra(CSCService.EXTRA_DISTANCE, CSCManagerCallbacks.NOT_AVAILABLE);
-				final float totalDistance = intent.getFloatExtra(CSCService.EXTRA_TOTAL_DISTANCE, CSCManagerCallbacks.NOT_AVAILABLE);
+				final float distance = intent.getFloatExtra(CSCService.EXTRA_DISTANCE, 0);
+				final float totalDistance = intent.getFloatExtra(CSCService.EXTRA_TOTAL_DISTANCE, 0);
 				// Update GUI
 				onMeasurementReceived(speed, distance, totalDistance);
 			} else if (CSCService.BROADCAST_CRANK_DATA.equals(action)) {
