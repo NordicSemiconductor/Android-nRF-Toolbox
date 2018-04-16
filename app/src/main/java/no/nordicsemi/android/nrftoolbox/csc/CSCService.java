@@ -45,15 +45,19 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 	private static final String TAG = "CSCService";
 
 	public static final String BROADCAST_WHEEL_DATA = "no.nordicsemi.android.nrftoolbox.csc.BROADCAST_WHEEL_DATA";
+	/** Speed in meters per second. */
 	public static final String EXTRA_SPEED = "no.nordicsemi.android.nrftoolbox.csc.EXTRA_SPEED";
-	/** Distance in meters */
+	/** Distance in meters. */
 	public static final String EXTRA_DISTANCE = "no.nordicsemi.android.nrftoolbox.csc.EXTRA_DISTANCE";
-	/** Total distance in meters */
+	/** Total distance in meters. */
 	public static final String EXTRA_TOTAL_DISTANCE = "no.nordicsemi.android.nrftoolbox.csc.EXTRA_TOTAL_DISTANCE";
 
 	public static final String BROADCAST_CRANK_DATA = "no.nordicsemi.android.nrftoolbox.csc.BROADCAST_CRANK_DATA";
 	public static final String EXTRA_GEAR_RATIO = "no.nordicsemi.android.nrftoolbox.csc.EXTRA_GEAR_RATIO";
 	public static final String EXTRA_CADENCE = "no.nordicsemi.android.nrftoolbox.csc.EXTRA_CADENCE";
+
+	public static final String BROADCAST_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.BROADCAST_BATTERY_LEVEL";
+	public static final String EXTRA_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.EXTRA_BATTERY_LEVEL";
 
 	private static final String ACTION_DISCONNECT = "no.nordicsemi.android.nrftoolbox.csc.ACTION_DISCONNECT";
 
@@ -62,6 +66,7 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 	private final static int DISCONNECT_REQ = 1;
 
 	private final LocalBinder mBinder = new CSCBinder();
+	private CSCManager mManager;
 
 	/**
 	 * This local binder is an interface for the bonded activity to operate with the RSC sensor
@@ -77,7 +82,7 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 
 	@Override
 	protected BleManager<CSCManagerCallbacks> initializeManager() {
-		return new CSCManager(this);
+		return mManager = new CSCManager(this);
 	}
 
 	@Override
@@ -102,10 +107,21 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 	protected void onRebind() {
 		// when the activity rebinds to the service, remove the notification
 		cancelNotification();
+
+		if (isConnected()) {
+			// This method will read the Battery Level value, if possible and then try to enable battery notifications (if it has NOTIFY property).
+			// If the Battery Level characteristic has only the NOTIFY property, it will only try to enable notifications.
+			mManager.readBatteryLevelCharacteristic();
+		}
 	}
 
 	@Override
 	protected void onUnbind() {
+		// When we are connected, but the application is not open, we are not really interested in battery level notifications.
+		// But we will still be receiving other values, if enabled.
+		if (isConnected())
+			mManager.disableBatteryLevelCharacteristicNotifications();
+
 		// when the activity closes we need to show the notification that user is connected to the sensor
 		createNotification(R.string.csc_notification_connected_message, 0);
 	}
@@ -126,6 +142,14 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
 		broadcast.putExtra(EXTRA_GEAR_RATIO, gearRatio);
 		broadcast.putExtra(EXTRA_CADENCE, (int) crankCadence);
+		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
+	}
+
+	@Override
+	public void onBatteryLevelChanged(final BluetoothDevice device, final int value) {
+		final Intent broadcast = new Intent(BROADCAST_BATTERY_LEVEL);
+		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
+		broadcast.putExtra(EXTRA_BATTERY_LEVEL, value);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 

@@ -81,7 +81,6 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	private E mService;
 
 	private TextView mDeviceNameView;
-	private TextView mBatteryLevelView;
 	private Button mConnectButton;
 
 	private ILogSession mLogSession;
@@ -366,7 +365,6 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		mConnectButton = findViewById(R.id.action_connect);
 		mDeviceNameView = findViewById(R.id.device_name);
-		mBatteryLevelView = findViewById(R.id.battery);
 	}
 
 	@Override
@@ -504,8 +502,6 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	public void onDeviceDisconnected(final BluetoothDevice device) {
 		mConnectButton.setText(R.string.action_connect);
 		mDeviceNameView.setText(getDefaultDeviceName());
-		if (mBatteryLevelView != null)
-			mBatteryLevelView.setText(R.string.not_available);
 
 		try {
 			Logger.d(mLogSession, "Unbinding from the service...");
@@ -524,8 +520,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 
 	@Override
 	public void onLinklossOccur(final BluetoothDevice device) {
-		if (mBatteryLevelView != null)
-			mBatteryLevelView.setText(R.string.not_available);
+		// empty default implementation
 	}
 
 	@Override
@@ -551,19 +546,6 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	@Override
 	public void onBondingFailed(final BluetoothDevice device) {
 		// empty default implementation
-	}
-
-	@Override
-	public final boolean shouldEnableBatteryLevelNotifications(final BluetoothDevice device) {
-		// This method will never be called.
-		// Please see BleProfileService#shouldEnableBatteryLevelNotifications(BluetoothDevice) instead.
-		throw new UnsupportedOperationException("This method should not be called");
-	}
-
-	@Override
-	public void onBatteryValueReceived(final BluetoothDevice device, final int value) {
-		if (mBatteryLevelView != null)
-			mBatteryLevelView.setText(getString(R.string.battery, value));
 	}
 
 	@Override

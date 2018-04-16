@@ -185,6 +185,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 		 * Returns the last received battery level value.
 		 * @param device the device of which battery level should be returned
 		 * @return battery value or -1 if no value was received or Battery Level characteristic was not found
+		 * @deprecated Keep battery value in your manager instead.
 		 */
 		public int getBatteryValue(final BluetoothDevice device) {
 			final BleManager<BleManagerCallbacks> manager = mBleManagers.get(device);
@@ -413,12 +414,6 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 			if (!manager.isConnected())
 				manager.connect(device);
 		}
-	}
-
-	@Override
-	public boolean shouldEnableBatteryLevelNotifications(final BluetoothDevice device) {
-		// By default the Battery Level notifications will be enabled only the activity is bound.
-		return mBinded;
 	}
 
 	@Override

@@ -61,7 +61,6 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	private BleManager<? extends BleManagerCallbacks> mBleManager;
 
 	private TextView mDeviceNameView;
-	private TextView mBatteryLevelView;
 	private Button mConnectButton;
 	private ILogSession mLogSession;
 
@@ -131,7 +130,6 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		mConnectButton = findViewById(R.id.action_connect);
 		mDeviceNameView = findViewById(R.id.device_name);
-		mBatteryLevelView = findViewById(R.id.battery);
 	}
 
 	@Override
@@ -274,17 +272,12 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 		runOnUiThread(() -> {
 			mConnectButton.setText(R.string.action_connect);
 			mDeviceNameView.setText(getDefaultDeviceName());
-			mBatteryLevelView.setText(R.string.not_available);
 		});
 	}
 
 	@Override
 	public void onLinklossOccur(final BluetoothDevice device) {
 		mDeviceConnected = false;
-		runOnUiThread(() -> {
-			if (mBatteryLevelView != null)
-				mBatteryLevelView.setText(R.string.not_available);
-		});
 	}
 
 	@Override
@@ -316,14 +309,6 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	public boolean shouldEnableBatteryLevelNotifications(final BluetoothDevice device) {
 		// Yes, we want battery level updates
 		return true;
-	}
-
-	@Override
-	public void onBatteryValueReceived(final BluetoothDevice device, final int value) {
-		runOnUiThread(() -> {
-			if (mBatteryLevelView != null)
-				mBatteryLevelView.setText(getString(R.string.battery, value));
-		});
 	}
 
 	@Override

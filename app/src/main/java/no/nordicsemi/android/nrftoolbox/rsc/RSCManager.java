@@ -26,6 +26,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import java.util.Deque;
 import java.util.LinkedList;
@@ -63,14 +64,14 @@ public class RSCManager extends BleManager<RSCManagerCallbacks> {
 	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 
 		@Override
-		protected Deque<Request> initGatt(final BluetoothGatt gatt) {
+		protected Deque<Request> initGatt(@NonNull final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
 			requests.add(Request.newEnableNotificationsRequest(mRSCMeasurementCharacteristic));
 			return requests;
 		}
 
 		@Override
-		public boolean isRequiredServiceSupported(final BluetoothGatt gatt) {
+		public boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(RUNNING_SPEED_AND_CADENCE_SERVICE_UUID);
 			if (service != null) {
 				mRSCMeasurementCharacteristic = service.getCharacteristic(RSC_MEASUREMENT_CHARACTERISTIC_UUID);
@@ -84,7 +85,7 @@ public class RSCManager extends BleManager<RSCManagerCallbacks> {
 		}
 
 		@Override
-		public void onCharacteristicNotified(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		public void onCharacteristicNotified(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			Logger.a(mLogSession, "\"" + RSCMeasurementParser.parse(characteristic) + "\" received");
 
 			// Decode the new data

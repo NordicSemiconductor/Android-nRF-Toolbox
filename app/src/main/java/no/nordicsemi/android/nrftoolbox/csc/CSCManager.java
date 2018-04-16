@@ -34,7 +34,10 @@ import android.support.annotation.NonNull;
 import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
+import no.nordicsemi.android.ble.ReadRequest;
+import no.nordicsemi.android.ble.Request;
 import no.nordicsemi.android.ble.callback.Data;
+import no.nordicsemi.android.ble.callback.profile.BatteryLevelCallback;
 import no.nordicsemi.android.ble.callback.profile.CyclingSpeedAndCadenceCallback;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.csc.settings.SettingsFragment;
@@ -42,16 +45,25 @@ import no.nordicsemi.android.nrftoolbox.parser.CSCMeasurementParser;
 
 public class CSCManager extends BleManager<CSCManagerCallbacks> {
 	/**
-	 * Cycling Speed and Cadence service UUID
+	 * Cycling Speed and Cadence service UUID.
 	 */
 	public final static UUID CYCLING_SPEED_AND_CADENCE_SERVICE_UUID = UUID.fromString("00001816-0000-1000-8000-00805f9b34fb");
 	/**
-	 * Cycling Speed and Cadence Measurement characteristic UUID
+	 * Cycling Speed and Cadence Measurement characteristic UUID.
 	 */
 	private static final UUID CSC_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A5B-0000-1000-8000-00805f9b34fb");
+	/**
+	 * Battery Service UUID.
+	 */
+	private final static UUID BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb");
+	/**
+	 * Battery Level characteristic UUID.
+	 */
+	private final static UUID BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb");
 
 	private final SharedPreferences preferences;
 	private BluetoothGattCharacteristic mCSCMeasurementCharacteristic;
+	private BluetoothGattCharacteristic mBatteryLevelCharacteristic;
 
 	CSCManager(final Context context) {
 		super(context);
@@ -63,18 +75,62 @@ public class CSCManager extends BleManager<CSCManagerCallbacks> {
 		return mGattCallback;
 	}
 
+	public void readBatteryLevelCharacteristic() {
+		readCharacteristic(mBatteryLevelCharacteristic)
+				.with(new BatteryLevelCallback() {
+					@Override
+					public void onBatteryValueChanged(final int batteryLevel) {
+						mCallbacks.onBatteryLevelChanged(getBluetoothDevice(), batteryLevel);
+					}
+
+					@Override
+					public void onInvalidDataReceived(final @NonNull Data data) {
+						log(LogContract.Log.Level.WARNING, "Invalid Battery Level data received: " + data);
+					}
+				})
+				.fail(status -> log(LogContract.Log.Level.WARNING, "Battery Level characteristic not found"));
+	}
+
+	public void enableBatteryLevelCharacteristicNotifications() {
+		// If the Battery Level characteristic is null, the request will be ignored
+		enableNotifications(mBatteryLevelCharacteristic)
+				.with(new BatteryLevelCallback() {
+					@Override
+					public void onBatteryValueChanged(final int batteryLevel) {
+						mCallbacks.onBatteryLevelChanged(getBluetoothDevice(), batteryLevel);
+					}
+
+					@Override
+					public void onInvalidDataReceived(final @NonNull Data data) {
+						log(LogContract.Log.Level.WARNING, "Invalid Battery Level data received: " + data);
+					}
+				})
+				.done(() -> log(LogContract.Log.Level.INFO, "Battery Level notifications enabled"))
+				.fail(status -> log(LogContract.Log.Level.WARNING, "Battery Level characteristic not found"));
+	}
+
+	public void disableBatteryLevelCharacteristicNotifications() {
+		disableNotifications(mBatteryLevelCharacteristic)
+				.done(() -> log(LogContract.Log.Level.INFO, "Battery Level notifications disabled"));
+	}
+
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving indication, etc
 	 */
 	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 
 		@Override
-		protected void initialize(final BluetoothDevice device) {
+		protected void initialize(@NonNull final BluetoothDevice device) {
+			enableBatteryLevelCharacteristicNotifications();
+
+			// CSC characteristic is required
 			enableNotifications(mCSCMeasurementCharacteristic)
 					.with(new CyclingSpeedAndCadenceCallback() {
 						@Override
-						public void onDataReceived(@NonNull final Data data) {
+						public void onDataReceived(final @NonNull Data data) {
 							log(LogContract.Log.Level.APPLICATION, "\"" + CSCMeasurementParser.parse(data) + "\" received");
+
+							// Pass through received data
 							super.onDataReceived(data);
 						}
 
@@ -94,14 +150,14 @@ public class CSCManager extends BleManager<CSCManagerCallbacks> {
 						}
 
 						@Override
-						public void onInvalidDataReceived(@NonNull final Data data) {
-							log(LogContract.Log.Level.WARNING, "Invalid data received: " + data);
+						public void onInvalidDataReceived(final @NonNull Data data) {
+							log(LogContract.Log.Level.WARNING, "Invalid CSC Measurement data received: " + data);
 						}
 					});
 		}
 
 		@Override
-		public boolean isRequiredServiceSupported(final BluetoothGatt gatt) {
+		public boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(CYCLING_SPEED_AND_CADENCE_SERVICE_UUID);
 			if (service != null) {
 				mCSCMeasurementCharacteristic = service.getCharacteristic(CSC_MEASUREMENT_CHARACTERISTIC_UUID);
@@ -110,8 +166,18 @@ public class CSCManager extends BleManager<CSCManagerCallbacks> {
 		}
 
 		@Override
+		protected boolean isOptionalServiceSupported(@NonNull final BluetoothGatt gatt) {
+			final BluetoothGattService service = gatt.getService(BATTERY_SERVICE_UUID);
+			if (service != null) {
+				mBatteryLevelCharacteristic = service.getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID);
+			}
+			return mBatteryLevelCharacteristic != null;
+		}
+
+		@Override
 		protected void onDeviceDisconnected() {
 			mCSCMeasurementCharacteristic = null;
+			mBatteryLevelCharacteristic = null;
 		}
 	};
 }

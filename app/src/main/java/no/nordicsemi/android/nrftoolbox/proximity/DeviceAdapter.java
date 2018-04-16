@@ -24,6 +24,7 @@ package no.nordicsemi.android.nrftoolbox.proximity;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -40,19 +41,20 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 	private final ProximityService.ProximityBinder mService;
 	private final List<BluetoothDevice> mDevices;
 
-	public DeviceAdapter(final ProximityService.ProximityBinder binder) {
+	DeviceAdapter(final ProximityService.ProximityBinder binder) {
 		mService = binder;
 		mDevices = mService.getManagedDevices();
 	}
 
+	@NonNull
 	@Override
-	public ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
+	public ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
 		final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_feature_proximity_item, parent, false);
 		return new ViewHolder(view);
 	}
 
 	@Override
-	public void onBindViewHolder(final ViewHolder holder, final int position) {
+	public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
 		holder.bind(mDevices.get(position));
 	}
 
@@ -88,13 +90,13 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 			notifyItemChanged(position);
 	}
 
-	public class ViewHolder extends RecyclerView.ViewHolder {
+	class ViewHolder extends RecyclerView.ViewHolder {
 		private TextView nameView;
 		private TextView addressView;
 		private TextView batteryView;
 		private ImageButton actionButton;
 
-		public ViewHolder(final View itemView) {
+		ViewHolder(final View itemView) {
 			super(itemView);
 
 			nameView = itemView.findViewById(R.id.name);
@@ -134,7 +136,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 			actionButton.setImageResource(on ? R.drawable.ic_stat_notify_proximity_silent : R.drawable.ic_stat_notify_proximity_find);
 			actionButton.setVisibility(state == BluetoothGatt.STATE_CONNECTED ? View.VISIBLE : View.GONE);
 
-			final int batteryValue = mService.getBatteryValue(device);
+			final int batteryValue = mService.getBatteryLevel(device);
 			if (batteryValue >= 0) {
 				batteryView.getCompoundDrawables()[0 /*left*/].setLevel(batteryValue);
 				batteryView.setVisibility(View.VISIBLE);

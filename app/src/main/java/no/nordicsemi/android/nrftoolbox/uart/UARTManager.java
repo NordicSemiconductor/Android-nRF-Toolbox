@@ -26,6 +26,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -66,14 +67,14 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 
 		@Override
-		protected Deque<Request> initGatt(final BluetoothGatt gatt) {
+		protected Deque<Request> initGatt(@NonNull final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
 			requests.add(Request.newEnableNotificationsRequest(mTXCharacteristic));
 			return requests;
 		}
 
 		@Override
-		public boolean isRequiredServiceSupported(final BluetoothGatt gatt) {
+		public boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(UART_SERVICE_UUID);
 			if (service != null) {
 				mRXCharacteristic = service.getCharacteristic(UART_RX_CHARACTERISTIC_UUID);
@@ -103,7 +104,7 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 		}
 
 		@Override
-		public void onCharacteristicWrite(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		public void onCharacteristicWrite(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			// When the whole buffer has been sent
 			final byte[] buffer = mOutgoingBuffer;
 			if (mBufferOffset == buffer.length) {
@@ -123,7 +124,7 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 		}
 
 		@Override
-		public void onCharacteristicNotified(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		public void onCharacteristicNotified(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			final String data = characteristic.getStringValue(0);
 			Logger.a(mLogSession, "\"" + data + "\" received");
 			mCallbacks.onDataReceived(gatt.getDevice(), data);

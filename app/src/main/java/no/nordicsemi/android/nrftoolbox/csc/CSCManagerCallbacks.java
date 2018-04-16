@@ -29,4 +29,6 @@ public interface CSCManagerCallbacks extends BleManagerCallbacks {
 	void onDistanceChanged(final BluetoothDevice device, final float totalDistance, final float distance, final float speed);
 
 	void onCrankDataChanged(final BluetoothDevice device, final float crankCadence, final float gearRatio);
+
+	void onBatteryLevelChanged(final BluetoothDevice device, final int batteryLevel);
 }

@@ -26,6 +26,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.SparseArray;
 
 import java.util.Deque;
@@ -111,7 +112,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 		return managerInstance;
 	}
 
-	public CGMSManager(Context context) {
+	public CGMSManager(final Context context) {
 		super(context);
 	}
 
@@ -126,7 +127,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 
 		@Override
-		protected Deque<Request> initGatt(final BluetoothGatt gatt) {
+		protected Deque<Request> initGatt(@NonNull final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
 			requests.add(Request.newEnableNotificationsRequest(mCGMMeasurementCharacteristic));
 			if (mCGMOpsControlPointCharacteristic != null) {
@@ -139,7 +140,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 		}
 
 		@Override
-		protected boolean isRequiredServiceSupported(final BluetoothGatt gatt) {
+		protected boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(CGMS_UUID);
 			if (service != null) {
 				mCGMMeasurementCharacteristic = service.getCharacteristic(CGM_MEASUREMENT_UUID);
@@ -150,7 +151,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 		}
 
 		@Override
-		protected boolean isOptionalServiceSupported(final BluetoothGatt gatt) {
+		protected boolean isOptionalServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(CGMS_UUID);
 			if (service != null) {
 				mCGMOpsControlPointCharacteristic = service.getCharacteristic(CGM_OPS_CONTROL_POINT_UUID);
@@ -159,7 +160,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 		}
 
 		@Override
-		public void onCharacteristicRead(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		public void onCharacteristicRead(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 		}
 
 		@Override
@@ -170,7 +171,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 		}
 
 		@Override
-		protected void onCharacteristicWrite(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		protected void onCharacteristicWrite(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			if (characteristic.getUuid().equals(RACP_UUID)) {
 				Logger.a(mLogSession, "\"" + RecordAccessControlPointParser.parse(characteristic) + "\" sent");
 			} else { // uuid == CGM_OPS_CONTROL_POINT_UUID
@@ -179,7 +180,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 		}
 
 		@Override
-		public void onCharacteristicNotified(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		public void onCharacteristicNotified(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			Logger.a(mLogSession, "\"" + CGMMeasurementParser.parse(characteristic) + "\" received");
 
 			// CGM Measurement characteristic may have one or more CGM records
@@ -201,7 +202,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 		}
 
 		@Override
-		protected void onCharacteristicIndicated(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		protected void onCharacteristicIndicated(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			if (characteristic.getUuid().equals(RACP_UUID)) {
 				Logger.a(mLogSession, "\"" + RecordAccessControlPointParser.parse(characteristic) + "\" received");
 

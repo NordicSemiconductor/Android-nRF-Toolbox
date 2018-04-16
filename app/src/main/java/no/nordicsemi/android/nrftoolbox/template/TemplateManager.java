@@ -25,6 +25,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import java.util.Deque;
 import java.util.LinkedList;
@@ -64,7 +65,7 @@ public class TemplateManager extends BleManager<TemplateManagerCallbacks> {
 	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 
 		@Override
-		protected Deque<Request> initGatt(final BluetoothGatt gatt) {
+		protected Deque<Request> initGatt(@NonNull final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
 			// TODO initialize your device, enable required notifications and indications, write what needs to be written to start working
 			requests.add(Request.newEnableNotificationsRequest(mCharacteristic));
@@ -72,7 +73,7 @@ public class TemplateManager extends BleManager<TemplateManagerCallbacks> {
 		}
 
 		@Override
-		protected boolean isRequiredServiceSupported(final BluetoothGatt gatt) {
+		protected boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(SERVICE_UUID);
 			if (service != null) {
 				mCharacteristic = service.getCharacteristic(MEASUREMENT_CHARACTERISTIC_UUID);
@@ -96,7 +97,7 @@ public class TemplateManager extends BleManager<TemplateManagerCallbacks> {
 		}
 
 		@Override
-		protected void onCharacteristicNotified(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		protected void onCharacteristicNotified(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			// TODO this method is called when a notification has been received
 			// This method may be removed from this class if not required
 
@@ -114,19 +115,19 @@ public class TemplateManager extends BleManager<TemplateManagerCallbacks> {
 		}
 
 		@Override
-		protected void onCharacteristicIndicated(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		protected void onCharacteristicIndicated(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			// TODO this method is called when an indication has been received
 			// This method may be removed from this class if not required
 		}
 
 		@Override
-		protected void onCharacteristicRead(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		protected void onCharacteristicRead(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			// TODO this method is called when the characteristic has been read
 			// This method may be removed from this class if not required
 		}
 
 		@Override
-		protected void onCharacteristicWrite(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		protected void onCharacteristicWrite(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			// TODO this method is called when the characteristic has been written
 			// This method may be removed from this class if not required
 		}

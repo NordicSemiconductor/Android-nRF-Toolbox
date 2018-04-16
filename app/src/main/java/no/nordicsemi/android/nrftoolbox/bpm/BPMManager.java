@@ -25,6 +25,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import java.util.Calendar;
 import java.util.Deque;
@@ -74,7 +75,7 @@ public class BPMManager extends BleManager<BPMManagerCallbacks> {
 	private final BleManagerGattCallback  mGattCallback = new BleManagerGattCallback() {
 
 		@Override
-		protected Deque<Request> initGatt(final BluetoothGatt gatt) {
+		protected Deque<Request> initGatt(@NonNull final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
 			if (mICPCharacteristic != null)
 				requests.add(Request.newEnableNotificationsRequest(mICPCharacteristic));
@@ -83,7 +84,7 @@ public class BPMManager extends BleManager<BPMManagerCallbacks> {
 		}
 
 		@Override
-		protected boolean isRequiredServiceSupported(final BluetoothGatt gatt) {
+		protected boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			BluetoothGattService service = gatt.getService(BP_SERVICE_UUID);
 			if (service != null) {
 				mBPMCharacteristic = service.getCharacteristic(BPM_CHARACTERISTIC_UUID);
@@ -93,7 +94,7 @@ public class BPMManager extends BleManager<BPMManagerCallbacks> {
 		}
 
 		@Override
-		protected boolean isOptionalServiceSupported(final BluetoothGatt gatt) {
+		protected boolean isOptionalServiceSupported(@NonNull final BluetoothGatt gatt) {
 			return mICPCharacteristic != null;
 		}
 
@@ -104,7 +105,7 @@ public class BPMManager extends BleManager<BPMManagerCallbacks> {
 		}
 
 		@Override
-		protected void onCharacteristicNotified(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		protected void onCharacteristicNotified(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			// Intermediate Cuff Pressure characteristic read
 			Logger.a(mLogSession, "\"" + IntermediateCuffPressureParser.parse(characteristic) + "\" received");
 
@@ -112,7 +113,7 @@ public class BPMManager extends BleManager<BPMManagerCallbacks> {
 		}
 
 		@Override
-		protected void onCharacteristicIndicated(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		protected void onCharacteristicIndicated(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			// Blood Pressure Measurement characteristic read
 			Logger.a(mLogSession, "\"" + BloodPressureMeasurementParser.parse(characteristic) + "\" received");
 

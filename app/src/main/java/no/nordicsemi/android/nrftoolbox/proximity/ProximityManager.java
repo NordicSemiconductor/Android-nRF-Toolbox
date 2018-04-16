@@ -21,10 +21,12 @@
  */
 package no.nordicsemi.android.nrftoolbox.proximity;
 
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import java.util.Deque;
 import java.util.LinkedList;
@@ -32,6 +34,7 @@ import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.Request;
+import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.parser.AlertLevelParser;
 import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
@@ -52,6 +55,7 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 
 	private BluetoothGattCharacteristic mAlertLevelCharacteristic, mLinklossCharacteristic;
 	private boolean mAlertOn;
+	private int mBatteryLevel;
 
 	public ProximityManager(final Context context) {
 		super(context);
@@ -73,14 +77,12 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 
 		@Override
-		protected Deque<Request> initGatt(final BluetoothGatt gatt) {
-			final LinkedList<Request> requests = new LinkedList<>();
-			requests.add(Request.newWriteRequest(mLinklossCharacteristic, HIGH_ALERT));
-			return requests;
+		protected void initialize(@NonNull final BluetoothDevice device) {
+			writeCharacteristic(mLinklossCharacteristic, HIGH_ALERT);
 		}
 
 		@Override
-		protected boolean isRequiredServiceSupported(final BluetoothGatt gatt) {
+		protected boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService llService = gatt.getService(LINKLOSS_SERVICE_UUID);
 			if (llService != null) {
 				mLinklossCharacteristic = llService.getCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID);
@@ -89,7 +91,7 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 		}
 
 		@Override
-		protected boolean isOptionalServiceSupported(final BluetoothGatt gatt) {
+		protected boolean isOptionalServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService iaService = gatt.getService(IMMEDIATE_ALERT_SERVICE_UUID);
 			if (iaService != null) {
 				mAlertLevelCharacteristic = iaService.getCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID);
@@ -103,11 +105,6 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 			mLinklossCharacteristic = null;
 			// Reset the alert flag
 			mAlertOn = false;
-		}
-
-		@Override
-		protected void onCharacteristicWrite(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
-			Logger.a(mLogSession, "\"" + AlertLevelParser.parse(characteristic) + "\" sent");
 		}
 	};
 
@@ -128,19 +125,27 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 		if (!isConnected())
 			return;
 
-		if (mAlertLevelCharacteristic != null) {
-			mAlertLevelCharacteristic.setValue(on ? HIGH_ALERT : NO_ALERT);
-			writeCharacteristic(mAlertLevelCharacteristic);
-			mAlertOn = on;
-		} else {
-			DebugLogger.w(TAG, "Immediate Alert Level Characteristic is not found");
-		}
+		log(LogContract.Log.Level.VERBOSE, on ? "Setting alarm to HIGH..." : "Disabling alarm...");
+		writeCharacteristic(mAlertLevelCharacteristic, on ? HIGH_ALERT : NO_ALERT)
+			.done(() ->	{
+				mAlertOn = on;
+				log(LogContract.Log.Level.APPLICATION, "\"" + AlertLevelParser.parse(mAlertLevelCharacteristic) + "\" sent");
+			})
+			.fail(status -> log(LogContract.Log.Level.APPLICATION, "Alert Level characteristic not found"));
 	}
 
 	/**
 	 * Returns true if the alert has been enabled on the proximity tag, false otherwise.
 	 */
-	public boolean isAlertEnabled() {
+	boolean isAlertEnabled() {
 		return mAlertOn;
+	}
+
+	/**
+	 * Returns the last obtained Battery Level value in percent.
+	 * @return battery level value
+	 */
+	int getBatteryLevel() {
+		return mBatteryLevel;
 	}
 }

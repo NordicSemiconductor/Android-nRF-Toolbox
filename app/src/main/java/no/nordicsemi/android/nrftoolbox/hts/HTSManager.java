@@ -25,6 +25,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import java.util.Deque;
 import java.util.LinkedList;
@@ -72,14 +73,14 @@ public class HTSManager extends BleManager<HTSManagerCallbacks> {
 	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 
 		@Override
-		protected Deque<Request> initGatt(final BluetoothGatt gatt) {
+		protected Deque<Request> initGatt(@NonNull final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
 			requests.add(Request.newEnableIndicationsRequest(mHTCharacteristic));
 			return requests;
 		}
 
 		@Override
-		protected boolean isRequiredServiceSupported(final BluetoothGatt gatt) {
+		protected boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(HT_SERVICE_UUID);
 			if (service != null) {
 				mHTCharacteristic = service.getCharacteristic(HT_MEASUREMENT_CHARACTERISTIC_UUID);
@@ -93,7 +94,7 @@ public class HTSManager extends BleManager<HTSManagerCallbacks> {
 		}
 
 		@Override
-		public void onCharacteristicIndicated(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		public void onCharacteristicIndicated(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			Logger.a(mLogSession, "\"" + TemperatureMeasurementParser.parse(characteristic) + "\" received");
 
 			try {

@@ -53,6 +53,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	public static final String BROADCAST_SERVICES_DISCOVERED = "no.nordicsemi.android.nrftoolbox.BROADCAST_SERVICES_DISCOVERED";
 	public static final String BROADCAST_DEVICE_READY = "no.nordicsemi.android.nrftoolbox.DEVICE_READY";
 	public static final String BROADCAST_BOND_STATE = "no.nordicsemi.android.nrftoolbox.BROADCAST_BOND_STATE";
+	@Deprecated
 	public static final String BROADCAST_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.BROADCAST_BATTERY_LEVEL";
 	public static final String BROADCAST_ERROR = "no.nordicsemi.android.nrftoolbox.BROADCAST_ERROR";
 
@@ -66,6 +67,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	public static final String EXTRA_BOND_STATE = "no.nordicsemi.android.nrftoolbox.EXTRA_BOND_STATE";
 	public static final String EXTRA_SERVICE_PRIMARY = "no.nordicsemi.android.nrftoolbox.EXTRA_SERVICE_PRIMARY";
 	public static final String EXTRA_SERVICE_SECONDARY = "no.nordicsemi.android.nrftoolbox.EXTRA_SERVICE_SECONDARY";
+	@Deprecated
 	public static final String EXTRA_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.EXTRA_BATTERY_LEVEL";
 	public static final String EXTRA_ERROR_MESSAGE = "no.nordicsemi.android.nrftoolbox.EXTRA_ERROR_MESSAGE";
 	public static final String EXTRA_ERROR_CODE = "no.nordicsemi.android.nrftoolbox.EXTRA_ERROR_CODE";
@@ -242,12 +244,6 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 		if (!mActivityIsChangingConfiguration)
 			onRebind();
-
-		if (!mActivityIsChangingConfiguration && mBleManager.isConnected()) {
-			// This method will read the Battery Level value, if possible and then try to enable battery notifications (if it has NOTIFY property).
-			// If the Battery Level characteristic has only the NOTIFY property, it will only try to enable notifications.
-			mBleManager.readBatteryLevel();
-		}
 	}
 
 	/**
@@ -265,10 +261,6 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 		if (!mActivityIsChangingConfiguration)
 			onUnbind();
-
-		// When we are connected, but the application is not open, we are not really interested in battery level notifications. But we will still be receiving other values, if enabled.
-		if (!mActivityIsChangingConfiguration && mBleManager.isConnected())
-			mBleManager.disableBatteryLevelNotifications();
 
 		// We want the onRebind method be called if anything else binds to it again
 		return true;
@@ -389,12 +381,6 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	 */
 	protected void onBluetoothEnabled() {
 		// empty default implementation
-	}
-
-	@Override
-	public boolean shouldEnableBatteryLevelNotifications(final BluetoothDevice device) {
-		// By default the Battery Level notifications will be enabled only the activity is bound.
-		return mBinded;
 	}
 
 	@Override

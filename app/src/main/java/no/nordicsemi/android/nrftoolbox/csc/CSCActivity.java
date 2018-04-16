@@ -52,6 +52,7 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 	private TextView mTotalDistanceView;
 	private TextView mTotalDistanceUnitView;
 	private TextView mGearRatioView;
+	private TextView mBatteryLevelView;
 
 	@Override
 	protected void onCreateView(final Bundle savedInstanceState) {
@@ -79,6 +80,7 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 		mTotalDistanceView = findViewById(R.id.distance_total);
 		mTotalDistanceUnitView = findViewById(R.id.distance_total_unit);
 		mGearRatioView = findViewById(R.id.ratio);
+		mBatteryLevelView = findViewById(R.id.battery);
 	}
 
 	@Override
@@ -94,6 +96,7 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 		mDistanceView.setText(R.string.not_available_value);
 		mTotalDistanceView.setText(R.string.not_available_value);
 		mGearRatioView.setText(R.string.not_available_value);
+		mBatteryLevelView.setText(R.string.not_available);
 
 		setUnits();
 	}
@@ -178,6 +181,18 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 		// not used
 	}
 
+	@Override
+	public void onDeviceDisconnected(final BluetoothDevice device) {
+		super.onDeviceDisconnected(device);
+		mBatteryLevelView.setText(R.string.not_available);
+	}
+
+	// This method will not be called, as CSC Service connects with autoConnect = false
+	@Override
+	public void onLinklossOccur(final BluetoothDevice device) {
+		mBatteryLevelView.setText(R.string.not_available);
+	}
+
 	private void onMeasurementReceived(float speed, float distance, float totalDistance) {
 		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		final int unit = Integer.parseInt(preferences.getString(SettingsFragment.SETTINGS_UNIT, String.valueOf(SettingsFragment.SETTINGS_UNIT_DEFAULT)));
@@ -219,6 +234,10 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 		mCadenceView.setText(String.format(Locale.US, "%d", cadence));
 	}
 
+	public void onBatteryLevelChanged(final int value) {
+		mBatteryLevelView.setText(getString(R.string.battery, value));
+	}
+
 	private final  BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
@@ -235,6 +254,10 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 				final int cadence = intent.getIntExtra(CSCService.EXTRA_CADENCE, 0);
 				// Update GUI
 				onGearRatioUpdate(ratio, cadence);
+			} else if (CSCService.BROADCAST_BATTERY_LEVEL.equals(action)) {
+				final int batteryLevel = intent.getIntExtra(CSCService.EXTRA_BATTERY_LEVEL, 0);
+				// Update GUI
+				onBatteryLevelChanged(batteryLevel);
 			}
 		}
 	};
@@ -243,6 +266,7 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 		final IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(CSCService.BROADCAST_WHEEL_DATA);
 		intentFilter.addAction(CSCService.BROADCAST_CRANK_DATA);
+		intentFilter.addAction(CSCService.BROADCAST_BATTERY_LEVEL);
 		return intentFilter;
 	}
 }

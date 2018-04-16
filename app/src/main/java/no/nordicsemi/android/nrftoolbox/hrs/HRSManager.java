@@ -25,6 +25,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import java.util.Deque;
 import java.util.LinkedList;
@@ -75,7 +76,7 @@ public class HRSManager extends BleManager<HRSManagerCallbacks> {
 	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 
 		@Override
-		protected Deque<Request> initGatt(final BluetoothGatt gatt) {
+		protected Deque<Request> initGatt(@NonNull final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
 			if (mHRLocationCharacteristic != null)
 				requests.add(Request.newReadRequest(mHRLocationCharacteristic));
@@ -84,7 +85,7 @@ public class HRSManager extends BleManager<HRSManagerCallbacks> {
 		}
 
 		@Override
-		protected boolean isRequiredServiceSupported(final BluetoothGatt gatt) {
+		protected boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(HR_SERVICE_UUID);
 			if (service != null) {
 				mHRCharacteristic = service.getCharacteristic(HR_CHARACTERISTIC_UUID);
@@ -93,7 +94,7 @@ public class HRSManager extends BleManager<HRSManagerCallbacks> {
 		}
 
 		@Override
-		protected boolean isOptionalServiceSupported(final BluetoothGatt gatt) {
+		protected boolean isOptionalServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(HR_SERVICE_UUID);
 			if (service != null) {
 				mHRLocationCharacteristic = service.getCharacteristic(HR_SENSOR_LOCATION_CHARACTERISTIC_UUID);
@@ -102,7 +103,7 @@ public class HRSManager extends BleManager<HRSManagerCallbacks> {
 		}
 
 		@Override
-		public void onCharacteristicRead(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		public void onCharacteristicRead(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			Logger.a(mLogSession, "\"" + BodySensorLocationParser.parse(characteristic) + "\" received");
 
 			final String sensorPosition = getBodySensorPosition(characteristic.getValue()[0]);
@@ -117,7 +118,7 @@ public class HRSManager extends BleManager<HRSManagerCallbacks> {
 		}
 
 		@Override
-		public void onCharacteristicNotified(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		public void onCharacteristicNotified(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			Logger.a(mLogSession, "\"" + HeartRateMeasurementParser.parse(characteristic) + "\" received");
 
 			int hrValue;

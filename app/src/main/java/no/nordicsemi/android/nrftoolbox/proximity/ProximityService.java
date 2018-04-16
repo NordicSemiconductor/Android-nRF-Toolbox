@@ -45,6 +45,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import no.nordicsemi.android.ble.BleManager;
+import no.nordicsemi.android.ble.BleManagerCallbacks;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
@@ -103,6 +104,16 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 		public boolean isImmediateAlertOn(final BluetoothDevice device) {
 			final ProximityManager manager = (ProximityManager) getBleManager(device);
 			return manager.isAlertEnabled();
+		}
+
+		/**
+		 * Returns the last received battery level value.
+		 * @param device the device of which battery level should be returned
+		 * @return battery value or -1 if no value was received or Battery Level characteristic was not found
+		 */
+		public int getBatteryLevel(final BluetoothDevice device) {
+			final ProximityManager manager = (ProximityManager) getBleManager(device);
+			return manager.getBatteryLevel();
 		}
 	}
 
@@ -225,6 +236,7 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 
 	@Override
 	public void onUnbind() {
+
 		createBackgroundNotification();
 	}
 

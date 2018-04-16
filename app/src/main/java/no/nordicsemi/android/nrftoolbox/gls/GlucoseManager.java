@@ -26,6 +26,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.util.SparseArray;
 
 import java.util.Calendar;
@@ -128,7 +129,7 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 
 		@Override
-		protected Deque<Request> initGatt(final BluetoothGatt gatt) {
+		protected Deque<Request> initGatt(@NonNull final BluetoothGatt gatt) {
 			final LinkedList<Request> requests = new LinkedList<>();
 			requests.add(Request.newEnableNotificationsRequest(mGlucoseMeasurementCharacteristic));
 			if (mGlucoseMeasurementContextCharacteristic != null) {
@@ -153,7 +154,7 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 		}
 
 		@Override
-		public boolean isRequiredServiceSupported(final BluetoothGatt gatt) {
+		public boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(GLS_SERVICE_UUID);
 			if (service != null) {
 				mGlucoseMeasurementCharacteristic = service.getCharacteristic(GM_CHARACTERISTIC);
@@ -164,7 +165,7 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 		}
 
 		@Override
-		protected boolean isOptionalServiceSupported(BluetoothGatt gatt) {
+		protected boolean isOptionalServiceSupported(@NonNull BluetoothGatt gatt) {
 			return mGlucoseMeasurementContextCharacteristic != null;
 		}
 
@@ -176,12 +177,12 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 		}
 
 		@Override
-		protected void onCharacteristicWrite(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		protected void onCharacteristicWrite(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			Logger.a(mLogSession, "\"" + RecordAccessControlPointParser.parse(characteristic) + "\" sent");
 		}
 
 		@Override
-		public void onCharacteristicNotified(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		public void onCharacteristicNotified(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			final UUID uuid = characteristic.getUuid();
 
 			if (GM_CHARACTERISTIC.equals(uuid)) {
@@ -329,7 +330,7 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 		}
 
 		@Override
-		protected void onCharacteristicIndicated(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+		protected void onCharacteristicIndicated(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			Logger.a(mLogSession, "\"" + RecordAccessControlPointParser.parse(characteristic) + "\" received");
 
 			// Record Access Control Point characteristic
