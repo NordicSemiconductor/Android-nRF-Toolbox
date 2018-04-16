@@ -187,12 +187,6 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 		mBatteryLevelView.setText(R.string.not_available);
 	}
 
-	// This method will not be called, as CSC Service connects with autoConnect = false
-	@Override
-	public void onLinklossOccur(final BluetoothDevice device) {
-		mBatteryLevelView.setText(R.string.not_available);
-	}
-
 	private void onMeasurementReceived(float speed, float distance, float totalDistance) {
 		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		final int unit = Integer.parseInt(preferences.getString(SettingsFragment.SETTINGS_UNIT, String.valueOf(SettingsFragment.SETTINGS_UNIT_DEFAULT)));

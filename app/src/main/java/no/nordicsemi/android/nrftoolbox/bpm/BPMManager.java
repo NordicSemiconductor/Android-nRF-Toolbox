@@ -21,32 +21,43 @@
  */
 package no.nordicsemi.android.nrftoolbox.bpm;
 
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.util.Calendar;
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
-import no.nordicsemi.android.ble.Request;
+import no.nordicsemi.android.ble.callback.Data;
+import no.nordicsemi.android.ble.callback.profile.BatteryLevelDataCallback;
+import no.nordicsemi.android.ble.callback.profile.BloodPressureMeasurementDataCallback;
+import no.nordicsemi.android.ble.callback.profile.IntermediateCuffPressureDataCallback;
+import no.nordicsemi.android.ble.profile.BloodPressureMeasurementCallback;
+import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.parser.BloodPressureMeasurementParser;
 import no.nordicsemi.android.nrftoolbox.parser.IntermediateCuffPressureParser;
 
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class BPMManager extends BleManager<BPMManagerCallbacks> {
-	/** Blood Pressure service UUID */
+	/** Blood Pressure service UUID. */
 	public final static UUID BP_SERVICE_UUID = UUID.fromString("00001810-0000-1000-8000-00805f9b34fb");
-	/** Blood Pressure Measurement characteristic UUID */
+	/** Blood Pressure Measurement characteristic UUID. */
 	private static final UUID BPM_CHARACTERISTIC_UUID = UUID.fromString("00002A35-0000-1000-8000-00805f9b34fb");
-	/** Intermediate Cuff Pressure characteristic UUID */
+	/** Intermediate Cuff Pressure characteristic UUID. */
 	private static final UUID ICP_CHARACTERISTIC_UUID = UUID.fromString("00002A36-0000-1000-8000-00805f9b34fb");
+	/** Battery Service UUID. */
+	private final static UUID BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb");
+	/** Battery Level characteristic UUID. */
+	private final static UUID BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb");
 
 	private BluetoothGattCharacteristic mBPMCharacteristic, mICPCharacteristic;
+	private BluetoothGattCharacteristic mBatteryLevelCharacteristic;
 
 	private static BPMManager managerInstance = null;
 
@@ -69,23 +80,99 @@ public class BPMManager extends BleManager<BPMManagerCallbacks> {
 		return mGattCallback;
 	}
 
+	public void readBatteryLevelCharacteristic() {
+		readCharacteristic(mBatteryLevelCharacteristic)
+				.with(new BatteryLevelDataCallback() {
+					@Override
+					public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
+						mCallbacks.onBatteryLevelChanged(device, batteryLevel);
+					}
+
+					@Override
+					public void onInvalidDataReceived(@NonNull final BluetoothDevice device, final @NonNull Data data) {
+						log(LogContract.Log.Level.WARNING, "Invalid Battery Level data received: " + data);
+					}
+				})
+				.fail(status -> log(LogContract.Log.Level.WARNING, "Battery Level characteristic not found"));
+	}
+
+	public void enableBatteryLevelCharacteristicNotifications() {
+		// If the Battery Level characteristic is null, the request will be ignored
+		enableNotifications(mBatteryLevelCharacteristic)
+				.with(new BatteryLevelDataCallback() {
+					@Override
+					public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
+						mCallbacks.onBatteryLevelChanged(device, batteryLevel);
+					}
+
+					@Override
+					public void onInvalidDataReceived(@NonNull final BluetoothDevice device, final @NonNull Data data) {
+						log(LogContract.Log.Level.WARNING, "Invalid Battery Level data received: " + data);
+					}
+				})
+				.done(() -> log(LogContract.Log.Level.INFO, "Battery Level notifications enabled"))
+				.fail(status -> log(LogContract.Log.Level.WARNING, "Battery Level characteristic not found"));
+	}
+
+	public void disableBatteryLevelCharacteristicNotifications() {
+		disableNotifications(mBatteryLevelCharacteristic)
+				.done(() -> log(LogContract.Log.Level.INFO, "Battery Level notifications disabled"));
+	}
+
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving notification, etc
 	 */
 	private final BleManagerGattCallback  mGattCallback = new BleManagerGattCallback() {
 
 		@Override
-		protected Deque<Request> initGatt(@NonNull final BluetoothGatt gatt) {
-			final LinkedList<Request> requests = new LinkedList<>();
-			if (mICPCharacteristic != null)
-				requests.add(Request.newEnableNotificationsRequest(mICPCharacteristic));
-			requests.add(Request.newEnableIndicationsRequest(mBPMCharacteristic));
-			return requests;
+		protected void initialize(@NonNull final BluetoothDevice device) {
+			readBatteryLevelCharacteristic();
+			enableBatteryLevelCharacteristicNotifications();
+			enableNotifications(mICPCharacteristic)
+					.with(new IntermediateCuffPressureDataCallback() {
+						@Override
+						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+							log(LogContract.Log.Level.APPLICATION, "\"" + IntermediateCuffPressureParser.parse(data) + "\" received");
+
+							// Pass through received data
+							super.onDataReceived(device, data);
+						}
+
+						@Override
+						public void onIntermediateCuffPressureReceived(@NonNull final BluetoothDevice device, final float cuffPressure, final int unit, @Nullable final Float pulseRate, @Nullable final Integer userID, @Nullable final Status status, @Nullable final Calendar calendar) {
+							mCallbacks.onIntermediateCuffPressureReceived(device, cuffPressure, unit, pulseRate, userID, status, calendar);
+						}
+
+						@Override
+						public void onInvalidDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+							log(LogContract.Log.Level.WARNING, "Invalid ICP data received: " + data);
+						}
+					});
+			enableIndications(mBPMCharacteristic)
+					.with(new BloodPressureMeasurementDataCallback() {
+						@Override
+						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+							log(LogContract.Log.Level.APPLICATION, "\"" + BloodPressureMeasurementParser.parse(data) + "\" received");
+
+							// Pass through received data
+							super.onDataReceived(device, data);
+						}
+
+						@Override
+						public void onBloodPressureMeasurementReceived(@NonNull final BluetoothDevice device, final float systolic, final float diastolic, final float meanArterialPressure, final int unit, @Nullable final Float pulseRate, @Nullable final Integer userID, @Nullable final Status status, @Nullable final Calendar calendar) {
+							mCallbacks.onBloodPressureMeasurementReceived(device, systolic, diastolic, meanArterialPressure, unit, pulseRate, userID, status, calendar);
+						}
+
+						@Override
+						public void onInvalidDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+							log(LogContract.Log.Level.WARNING, "Invalid BPM data received: " + data);
+						}
+					});
 		}
 
 		@Override
 		protected boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
-			BluetoothGattService service = gatt.getService(BP_SERVICE_UUID);
+			final BluetoothGattService service = gatt.getService(BP_SERVICE_UUID);
 			if (service != null) {
 				mBPMCharacteristic = service.getCharacteristic(BPM_CHARACTERISTIC_UUID);
 				mICPCharacteristic = service.getCharacteristic(ICP_CHARACTERISTIC_UUID);
@@ -95,6 +182,10 @@ public class BPMManager extends BleManager<BPMManagerCallbacks> {
 
 		@Override
 		protected boolean isOptionalServiceSupported(@NonNull final BluetoothGatt gatt) {
+			final BluetoothGattService service = gatt.getService(BATTERY_SERVICE_UUID);
+			if (service != null) {
+				mBatteryLevelCharacteristic = service.getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID);
+			}
 			return mICPCharacteristic != null;
 		}
 
@@ -102,70 +193,7 @@ public class BPMManager extends BleManager<BPMManagerCallbacks> {
 		protected void onDeviceDisconnected() {
 			mICPCharacteristic = null;
 			mBPMCharacteristic = null;
-		}
-
-		@Override
-		protected void onCharacteristicNotified(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			// Intermediate Cuff Pressure characteristic read
-			Logger.a(mLogSession, "\"" + IntermediateCuffPressureParser.parse(characteristic) + "\" received");
-
-			parseBPMValue(gatt, characteristic);
-		}
-
-		@Override
-		protected void onCharacteristicIndicated(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			// Blood Pressure Measurement characteristic read
-			Logger.a(mLogSession, "\"" + BloodPressureMeasurementParser.parse(characteristic) + "\" received");
-
-			parseBPMValue(gatt, characteristic);
-		}
-
-		private void parseBPMValue(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
-			// Both BPM and ICP have the same structure.
-
-			// first byte - flags
-			int offset = 0;
-			final int flags = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
-			// See BPMManagerCallbacks.UNIT_* for unit options
-			final int unit = flags & 0x01;
-			final boolean timestampPresent = (flags & 0x02) > 0;
-			final boolean pulseRatePresent = (flags & 0x04) > 0;
-
-			if (BPM_CHARACTERISTIC_UUID.equals(characteristic.getUuid())) {
-				// following bytes - systolic, diastolic and mean arterial pressure
-				final float systolic = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset);
-				final float diastolic = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset + 2);
-				final float meanArterialPressure = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset + 4);
-				offset += 6;
-				mCallbacks.onBloodPressureMeasurementRead(gatt.getDevice(), systolic, diastolic, meanArterialPressure, unit);
-			} else if (ICP_CHARACTERISTIC_UUID.equals(characteristic.getUuid())) {
-				// following bytes - cuff pressure. Diastolic and MAP are unused
-				final float cuffPressure = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset);
-				offset += 6;
-				mCallbacks.onIntermediateCuffPressureRead(gatt.getDevice(), cuffPressure, unit);
-			}
-
-			// parse timestamp if present
-			if (timestampPresent) {
-				final Calendar calendar = Calendar.getInstance();
-				calendar.set(Calendar.YEAR, characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset));
-				calendar.set(Calendar.MONTH, characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 2) - 1); // months are 1-based
-				calendar.set(Calendar.DAY_OF_MONTH, characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 3));
-				calendar.set(Calendar.HOUR_OF_DAY, characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 4));
-				calendar.set(Calendar.MINUTE, characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 5));
-				calendar.set(Calendar.SECOND, characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 6));
-				offset += 7;
-				mCallbacks.onTimestampRead(gatt.getDevice(), calendar);
-			} else
-				mCallbacks.onTimestampRead(gatt.getDevice(), null);
-
-			// parse pulse rate if present
-			if (pulseRatePresent) {
-				final float pulseRate = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset);
-				// offset += 2;
-				mCallbacks.onPulseRateRead(gatt.getDevice(), pulseRate);
-			} else
-				mCallbacks.onPulseRateRead(gatt.getDevice(), -1.0f);
+			mBatteryLevelCharacteristic = null;
 		}
 	};
 }

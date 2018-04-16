@@ -106,17 +106,19 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	}
 
 	/**
-	 * Called from {@link #onCreate(Bundle)}. This method should build the activity UI, f.e. using {@link #setContentView(int)}. Use to obtain references to
-	 * views. Connect/Disconnect button, the device name view and battery level view are manager automatically.
+	 * Called from {@link #onCreate(Bundle)}. This method should build the activity UI, i.e. using {@link #setContentView(int)}.
+	 * Use to obtain references to views. Connect/Disconnect button and the device name view are manager automatically.
 	 *
-	 * @param savedInstanceState contains the data it most recently supplied in {@link #onSaveInstanceState(Bundle)}. Note: <b>Otherwise it is null</b>.
+	 * @param savedInstanceState contains the data it most recently supplied in {@link #onSaveInstanceState(Bundle)}.
+	 *                           Note: <b>Otherwise it is null</b>.
 	 */
 	protected abstract void onCreateView(final Bundle savedInstanceState);
 
 	/**
 	 * Called after the view has been created.
 	 *
-	 * @param savedInstanceState contains the data it most recently supplied in {@link #onSaveInstanceState(Bundle)}. Note: <b>Otherwise it is null</b>.
+	 * @param savedInstanceState contains the data it most recently supplied in {@link #onSaveInstanceState(Bundle)}.
+	 *                           Note: <b>Otherwise it is null</b>.
 	 */
 	protected void onViewCreated(final Bundle savedInstanceState) {
 		// empty default implementation
@@ -146,7 +148,7 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	}
 
 	@Override
-	protected void onRestoreInstanceState(@NonNull final Bundle savedInstanceState) {
+	protected void onRestoreInstanceState(final @NonNull Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 		mDeviceConnected = savedInstanceState.getBoolean(SIS_CONNECTION_STATUS);
 		mDeviceName = savedInstanceState.getString(SIS_DEVICE_NAME);

@@ -30,6 +30,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -127,7 +128,7 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 	}
 
 	@Override
-	public void onDistanceChanged(final BluetoothDevice device, final float totalDistance, final float distance, final float speed) {
+	public void onDistanceChanged(@NonNull final BluetoothDevice device, final float totalDistance, final float distance, final float speed) {
 		final Intent broadcast = new Intent(BROADCAST_WHEEL_DATA);
 		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
 		broadcast.putExtra(EXTRA_SPEED, speed);
@@ -137,7 +138,7 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 	}
 
 	@Override
-	public void onCrankDataChanged(final BluetoothDevice device, final float crankCadence, final float gearRatio) {
+	public void onCrankDataChanged(@NonNull final BluetoothDevice device, final float crankCadence, final float gearRatio) {
 		final Intent broadcast = new Intent(BROADCAST_CRANK_DATA);
 		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
 		broadcast.putExtra(EXTRA_GEAR_RATIO, gearRatio);

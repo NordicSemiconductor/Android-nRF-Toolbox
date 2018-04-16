@@ -33,7 +33,7 @@ import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.Request;
-import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.parser.BodySensorLocationParser;
 import no.nordicsemi.android.nrftoolbox.parser.HeartRateMeasurementParser;
@@ -104,7 +104,7 @@ public class HRSManager extends BleManager<HRSManagerCallbacks> {
 
 		@Override
 		public void onCharacteristicRead(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			Logger.a(mLogSession, "\"" + BodySensorLocationParser.parse(characteristic) + "\" received");
+			log(LogContract.Log.Level.APPLICATION, "\"" + BodySensorLocationParser.parse(characteristic) + "\" received");
 
 			final String sensorPosition = getBodySensorPosition(characteristic.getValue()[0]);
 			//This will send callback to HRSActivity when HR sensor position on body is found in HR device
@@ -119,7 +119,7 @@ public class HRSManager extends BleManager<HRSManagerCallbacks> {
 
 		@Override
 		public void onCharacteristicNotified(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			Logger.a(mLogSession, "\"" + HeartRateMeasurementParser.parse(characteristic) + "\" received");
+			log(LogContract.Log.Level.APPLICATION, "\"" + HeartRateMeasurementParser.parse(characteristic) + "\" received");
 
 			int hrValue;
 			if (isHeartRateInUINT16(characteristic.getValue()[0])) {

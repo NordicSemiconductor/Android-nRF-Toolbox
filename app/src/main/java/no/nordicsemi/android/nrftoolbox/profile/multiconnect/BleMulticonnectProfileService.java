@@ -55,6 +55,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 	public static final String BROADCAST_SERVICES_DISCOVERED = "no.nordicsemi.android.nrftoolbox.BROADCAST_SERVICES_DISCOVERED";
 	public static final String BROADCAST_DEVICE_READY = "no.nordicsemi.android.nrftoolbox.DEVICE_READY";
 	public static final String BROADCAST_BOND_STATE = "no.nordicsemi.android.nrftoolbox.BROADCAST_BOND_STATE";
+	@Deprecated
 	public static final String BROADCAST_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.BROADCAST_BATTERY_LEVEL";
 	public static final String BROADCAST_ERROR = "no.nordicsemi.android.nrftoolbox.BROADCAST_ERROR";
 
@@ -63,6 +64,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 	public static final String EXTRA_BOND_STATE = "no.nordicsemi.android.nrftoolbox.EXTRA_BOND_STATE";
 	public static final String EXTRA_SERVICE_PRIMARY = "no.nordicsemi.android.nrftoolbox.EXTRA_SERVICE_PRIMARY";
 	public static final String EXTRA_SERVICE_SECONDARY = "no.nordicsemi.android.nrftoolbox.EXTRA_SERVICE_SECONDARY";
+	@Deprecated
 	public static final String EXTRA_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.EXTRA_BATTERY_LEVEL";
 	public static final String EXTRA_ERROR_MESSAGE = "no.nordicsemi.android.nrftoolbox.EXTRA_ERROR_MESSAGE";
 	public static final String EXTRA_ERROR_CODE = "no.nordicsemi.android.nrftoolbox.EXTRA_ERROR_CODE";
@@ -187,6 +189,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 		 * @return battery value or -1 if no value was received or Battery Level characteristic was not found
 		 * @deprecated Keep battery value in your manager instead.
 		 */
+		@Deprecated
 		public int getBatteryValue(final BluetoothDevice device) {
 			final BleManager<BleManagerCallbacks> manager = mBleManagers.get(device);
 			return manager.getBatteryValue();

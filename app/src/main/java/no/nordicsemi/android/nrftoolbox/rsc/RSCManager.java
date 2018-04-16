@@ -34,7 +34,7 @@ import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.Request;
-import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.parser.RSCMeasurementParser;
 
 public class RSCManager extends BleManager<RSCManagerCallbacks> {
@@ -86,7 +86,7 @@ public class RSCManager extends BleManager<RSCManagerCallbacks> {
 
 		@Override
 		public void onCharacteristicNotified(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			Logger.a(mLogSession, "\"" + RSCMeasurementParser.parse(characteristic) + "\" received");
+			log(LogContract.Log.Level.APPLICATION, "\"" + RSCMeasurementParser.parse(characteristic) + "\" received");
 
 			// Decode the new data
 			int offset = 0;

@@ -35,7 +35,7 @@ import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.Request;
-import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.parser.CGMMeasurementParser;
 import no.nordicsemi.android.nrftoolbox.parser.CGMSpecificOpsControlPointParser;
 import no.nordicsemi.android.nrftoolbox.parser.RecordAccessControlPointParser;
@@ -97,20 +97,9 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 	private BluetoothGattCharacteristic mCGMOpsControlPointCharacteristic;
 	private BluetoothGattCharacteristic mRecordAccessControlPointCharacteristic;
 
-	private static CGMSManager managerInstance = null;
 	private SparseArray<CGMSRecord> mRecords = new SparseArray<>();
 	private boolean mAbort;
 	private long mSessionStartTime;
-
-	/**
-	 * singleton implementation of HRSManager class
-	 */
-	public static synchronized CGMSManager getInstance(final Context context) {
-		if (managerInstance == null) {
-			managerInstance = new CGMSManager(context);
-		}
-		return managerInstance;
-	}
 
 	public CGMSManager(final Context context) {
 		super(context);
@@ -173,15 +162,15 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 		@Override
 		protected void onCharacteristicWrite(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			if (characteristic.getUuid().equals(RACP_UUID)) {
-				Logger.a(mLogSession, "\"" + RecordAccessControlPointParser.parse(characteristic) + "\" sent");
+				log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(characteristic) + "\" sent");
 			} else { // uuid == CGM_OPS_CONTROL_POINT_UUID
-				Logger.a(mLogSession, "\"" + CGMSpecificOpsControlPointParser.parse(characteristic) + "\" sent");
+				log(LogContract.Log.Level.APPLICATION, "\"" + CGMSpecificOpsControlPointParser.parse(characteristic) + "\" sent");
 			}
 		}
 
 		@Override
 		public void onCharacteristicNotified(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			Logger.a(mLogSession, "\"" + CGMMeasurementParser.parse(characteristic) + "\" received");
+			log(LogContract.Log.Level.APPLICATION, "\"" + CGMMeasurementParser.parse(characteristic) + "\" received");
 
 			// CGM Measurement characteristic may have one or more CGM records
 			int totalSize = characteristic.getValue().length;
@@ -204,7 +193,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 		@Override
 		protected void onCharacteristicIndicated(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			if (characteristic.getUuid().equals(RACP_UUID)) {
-				Logger.a(mLogSession, "\"" + RecordAccessControlPointParser.parse(characteristic) + "\" received");
+				log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(characteristic) + "\" received");
 
 				// Record Access Control Point characteristic
 				int offset = 0;
@@ -252,7 +241,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 					mAbort = false;
 				}
 			} else { // uuid == CGM_OPS_CONTROL_POINT_UUID
-				Logger.a(mLogSession, "\"" + CGMSpecificOpsControlPointParser.parse(characteristic) + "\" received");
+				log(LogContract.Log.Level.APPLICATION, "\"" + CGMSpecificOpsControlPointParser.parse(characteristic) + "\" received");
 			}
 		}
 	};
@@ -303,7 +292,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 	 */
 	public void clear() {
 		mRecords.clear();
-		mCallbacks.onDatasetClear(mBluetoothDevice);
+		mCallbacks.onDatasetClear(getBluetoothDevice());
 	}
 
 	/**
@@ -315,7 +304,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 			return;
 
 		clear();
-		mCallbacks.onOperationStarted(mBluetoothDevice);
+		mCallbacks.onOperationStarted(getBluetoothDevice());
 
 		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
 		setOpCode(characteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_LAST_RECORD);
@@ -331,7 +320,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 			return;
 
 		clear();
-		mCallbacks.onOperationStarted(mBluetoothDevice);
+		mCallbacks.onOperationStarted(getBluetoothDevice());
 
 		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
 		setOpCode(characteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_FIRST_RECORD);
@@ -361,7 +350,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 			return;
 
 		clear();
-		mCallbacks.onOperationStarted(mBluetoothDevice);
+		mCallbacks.onOperationStarted(getBluetoothDevice());
 
 		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
 		setOpCode(characteristic, OP_CODE_REPORT_NUMBER_OF_RECORDS, OPERATOR_ALL_RECORDS);
@@ -380,7 +369,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 		if (mRecords.size() == 0) {
 			getAllRecords();
 		} else {
-			mCallbacks.onOperationStarted(mBluetoothDevice);
+			mCallbacks.onOperationStarted(getBluetoothDevice());
 
 			// obtain the last sequence number
 			final int sequenceNumber = mRecords.keyAt(mRecords.size() - 1) + 1;
@@ -399,7 +388,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 			return;
 
 		clear();
-		mCallbacks.onOperationStarted(mBluetoothDevice);
+		mCallbacks.onOperationStarted(getBluetoothDevice());
 
 		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
 		setOpCode(characteristic, OP_CODE_DELETE_STORED_RECORDS, OPERATOR_ALL_RECORDS);

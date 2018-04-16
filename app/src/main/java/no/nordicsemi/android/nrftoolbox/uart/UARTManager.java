@@ -36,7 +36,7 @@ import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.Request;
-import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.log.LogContract;
 
 public class UARTManager extends BleManager<UARTManagerCallbacks> {
 	/** Nordic UART Service UUID */
@@ -110,7 +110,7 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 			if (mBufferOffset == buffer.length) {
 				try {
 					final String data = new String(buffer, "UTF-8");
-					Logger.a(mLogSession, "\"" + data + "\" sent");
+					log(LogContract.Log.Level.APPLICATION, "\"" + data + "\" sent");
 					mCallbacks.onDataSent(gatt.getDevice(), data);
 				} catch (final UnsupportedEncodingException e) {
 					// do nothing
@@ -126,7 +126,7 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 		@Override
 		public void onCharacteristicNotified(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
 			final String data = characteristic.getStringValue(0);
-			Logger.a(mLogSession, "\"" + data + "\" received");
+			log(LogContract.Log.Level.APPLICATION, "\"" + data + "\" received");
 			mCallbacks.onDataReceived(gatt.getDevice(), data);
 		}
 	};

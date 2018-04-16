@@ -21,14 +21,9 @@
  */
 package no.nordicsemi.android.nrftoolbox.csc;
 
-import android.bluetooth.BluetoothDevice;
-
 import no.nordicsemi.android.ble.BleManagerCallbacks;
+import no.nordicsemi.android.ble.profile.BatteryLevelCallback;
+import no.nordicsemi.android.ble.profile.CyclingSpeedAndCadenceCallback;
 
-public interface CSCManagerCallbacks extends BleManagerCallbacks {
-	void onDistanceChanged(final BluetoothDevice device, final float totalDistance, final float distance, final float speed);
-
-	void onCrankDataChanged(final BluetoothDevice device, final float crankCadence, final float gearRatio);
-
-	void onBatteryLevelChanged(final BluetoothDevice device, final int batteryLevel);
+interface CSCManagerCallbacks extends BleManagerCallbacks, CyclingSpeedAndCadenceCallback, BatteryLevelCallback {
 }

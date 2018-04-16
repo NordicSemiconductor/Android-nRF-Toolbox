@@ -36,7 +36,7 @@ import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.Request;
-import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.parser.GlucoseMeasurementContextParser;
 import no.nordicsemi.android.nrftoolbox.parser.GlucoseMeasurementParser;
 import no.nordicsemi.android.nrftoolbox.parser.RecordAccessControlPointParser;
@@ -178,7 +178,7 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 
 		@Override
 		protected void onCharacteristicWrite(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			Logger.a(mLogSession, "\"" + RecordAccessControlPointParser.parse(characteristic) + "\" sent");
+			log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(characteristic) + "\" sent");
 		}
 
 		@Override
@@ -186,7 +186,7 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 			final UUID uuid = characteristic.getUuid();
 
 			if (GM_CHARACTERISTIC.equals(uuid)) {
-				Logger.a(mLogSession, "\"" + GlucoseMeasurementParser.parse(characteristic) + "\" received");
+				log(LogContract.Log.Level.APPLICATION, "\"" + GlucoseMeasurementParser.parse(characteristic) + "\" received");
 
 				int offset = 0;
 				final int flags = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
@@ -259,7 +259,7 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 						mCallbacks.onDatasetChanged(gatt.getDevice());
 				});
 			} else if (GM_CONTEXT_CHARACTERISTIC.equals(uuid)) {
-				Logger.a(mLogSession, "\"" + GlucoseMeasurementContextParser.parse(characteristic) + "\" received");
+				log(LogContract.Log.Level.APPLICATION, "\"" + GlucoseMeasurementContextParser.parse(characteristic) + "\" received");
 
 				int offset = 0;
 				final int flags = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
@@ -331,7 +331,7 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 
 		@Override
 		protected void onCharacteristicIndicated(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			Logger.a(mLogSession, "\"" + RecordAccessControlPointParser.parse(characteristic) + "\" received");
+			log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(characteristic) + "\" received");
 
 			// Record Access Control Point characteristic
 			int offset = 0;
@@ -432,7 +432,7 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 	 */
 	public void clear() {
 		mRecords.clear();
-		mCallbacks.onOperationCompleted(mBluetoothDevice);
+		mCallbacks.onOperationCompleted(getBluetoothDevice());
 	}
 
 	/**
@@ -444,7 +444,7 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 			return;
 
 		clear();
-		mCallbacks.onOperationStarted(mBluetoothDevice);
+		mCallbacks.onOperationStarted(getBluetoothDevice());
 
 		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
 		setOpCode(characteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_LAST_RECORD);
@@ -460,7 +460,7 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 			return;
 
 		clear();
-		mCallbacks.onOperationStarted(mBluetoothDevice);
+		mCallbacks.onOperationStarted(getBluetoothDevice());
 
 		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
 		setOpCode(characteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_FIRST_RECORD);
@@ -477,7 +477,7 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 			return;
 
 		clear();
-		mCallbacks.onOperationStarted(mBluetoothDevice);
+		mCallbacks.onOperationStarted(getBluetoothDevice());
 
 		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
 		setOpCode(characteristic, OP_CODE_REPORT_NUMBER_OF_RECORDS, OPERATOR_ALL_RECORDS);
@@ -499,7 +499,7 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 		if (mRecords.size() == 0) {
 			getAllRecords();
 		} else {
-			mCallbacks.onOperationStarted(mBluetoothDevice);
+			mCallbacks.onOperationStarted(getBluetoothDevice());
 
 			// obtain the last sequence number
 			final int sequenceNumber = mRecords.keyAt(mRecords.size() - 1) + 1;
@@ -535,7 +535,7 @@ public class GlucoseManager extends BleManager<GlucoseManagerCallbacks> {
 			return;
 
 		clear();
-		mCallbacks.onOperationStarted(mBluetoothDevice);
+		mCallbacks.onOperationStarted(getBluetoothDevice());
 
 		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
 		setOpCode(characteristic, OP_CODE_DELETE_STORED_RECORDS, OPERATOR_ALL_RECORDS);

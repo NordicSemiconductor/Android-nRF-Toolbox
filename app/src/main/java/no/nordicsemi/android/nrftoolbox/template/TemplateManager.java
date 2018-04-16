@@ -33,7 +33,7 @@ import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.Request;
-import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.parser.TemplateParser;
 
 /**
@@ -101,7 +101,7 @@ public class TemplateManager extends BleManager<TemplateManagerCallbacks> {
 			// TODO this method is called when a notification has been received
 			// This method may be removed from this class if not required
 
-			Logger.a(mLogSession, "\"" + TemplateParser.parse(characteristic) + "\" received");
+			log(LogContract.Log.Level.APPLICATION, "\"" + TemplateParser.parse(characteristic) + "\" received");
 
 			int value;
 			final int flags = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);

@@ -33,7 +33,7 @@ import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.Request;
-import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.parser.TemperatureMeasurementParser;
 import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
 
@@ -95,7 +95,7 @@ public class HTSManager extends BleManager<HTSManagerCallbacks> {
 
 		@Override
 		public void onCharacteristicIndicated(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			Logger.a(mLogSession, "\"" + TemperatureMeasurementParser.parse(characteristic) + "\" received");
+			log(LogContract.Log.Level.APPLICATION, "\"" + TemperatureMeasurementParser.parse(characteristic) + "\" received");
 
 			try {
 				final double tempValue = decodeTemperature(characteristic.getValue());

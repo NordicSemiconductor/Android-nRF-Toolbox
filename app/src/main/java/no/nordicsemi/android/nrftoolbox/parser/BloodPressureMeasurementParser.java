@@ -21,18 +21,19 @@
  */
 package no.nordicsemi.android.nrftoolbox.parser;
 
-import android.bluetooth.BluetoothGattCharacteristic;
-
 import java.util.Calendar;
 import java.util.Locale;
 
+import no.nordicsemi.android.ble.callback.Data;
+
 public class BloodPressureMeasurementParser {
-	public static String parse(final BluetoothGattCharacteristic characteristic) {
+	
+	public static String parse(final Data data) {
 		final StringBuilder builder = new StringBuilder();
 
 		// first byte - flags
 		int offset = 0;
-		final int flags = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
+		final int flags = data.getIntValue(Data.FORMAT_UINT8, offset++);
 
 		final int unitType = flags & 0x01;
 		final boolean timestampPresent = (flags & 0x02) > 0;
@@ -41,9 +42,9 @@ public class BloodPressureMeasurementParser {
 		final boolean statusPresent = (flags & 0x10) > 0;
 
 		// following bytes - systolic, diastolic and mean arterial pressure 
-		final float systolic = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset);
-		final float diastolic = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset + 2);
-		final float meanArterialPressure = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset + 4);
+		final float systolic = data.getFloatValue(Data.FORMAT_SFLOAT, offset);
+		final float diastolic = data.getFloatValue(Data.FORMAT_SFLOAT, offset + 2);
+		final float meanArterialPressure = data.getFloatValue(Data.FORMAT_SFLOAT, offset + 4);
 		final String unit = unitType == 0 ? " mmHg" : " kPa";
 		offset += 6;
 		builder.append("Systolic: ").append(systolic).append(unit);
@@ -53,31 +54,31 @@ public class BloodPressureMeasurementParser {
 		// parse timestamp if present
 		if (timestampPresent) {
 			final Calendar calendar = Calendar.getInstance();
-			calendar.set(Calendar.YEAR, characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset));
-			calendar.set(Calendar.MONTH, characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 2));
-			calendar.set(Calendar.DAY_OF_MONTH, characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 3));
-			calendar.set(Calendar.HOUR_OF_DAY, characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 4));
-			calendar.set(Calendar.MINUTE, characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 5));
-			calendar.set(Calendar.SECOND, characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 6));
+			calendar.set(Calendar.YEAR, data.getIntValue(Data.FORMAT_UINT16, offset));
+			calendar.set(Calendar.MONTH, data.getIntValue(Data.FORMAT_UINT8, offset + 2));
+			calendar.set(Calendar.DAY_OF_MONTH, data.getIntValue(Data.FORMAT_UINT8, offset + 3));
+			calendar.set(Calendar.HOUR_OF_DAY, data.getIntValue(Data.FORMAT_UINT8, offset + 4));
+			calendar.set(Calendar.MINUTE, data.getIntValue(Data.FORMAT_UINT8, offset + 5));
+			calendar.set(Calendar.SECOND, data.getIntValue(Data.FORMAT_UINT8, offset + 6));
 			offset += 7;
 			builder.append(String.format(Locale.US, "\nTimestamp: %1$tT %1$te.%1$tm.%1$tY", calendar));
 		}
 
 		// parse pulse rate if present
 		if (pulseRatePresent) {
-			final float pulseRate = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset);
+			final float pulseRate = data.getFloatValue(Data.FORMAT_SFLOAT, offset);
 			offset += 2;
 			builder.append("\nPulse: ").append(pulseRate);
 		}
 
 		if (userIdPresent) {
-			final int userId = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
+			final int userId = data.getIntValue(Data.FORMAT_UINT8, offset);
 			offset += 1;
 			builder.append("\nUser ID: ").append(userId);
 		}
 
 		if (statusPresent) {
-			final int status = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+			final int status = data.getIntValue(Data.FORMAT_UINT16, offset);
 			// offset += 2;
 			if ((status & 0x0001) > 0)
 				builder.append("\nBody movement detected");
