@@ -1,7 +1,8 @@
 include ':app', ':wear', ':common'
 
-include ':ble'
+include ':ble', ':ble-common'
 project(':ble').projectDir = file('../Android-BLE-Library/ble')
+project(':ble-common').projectDir = file('../Android-BLE-Common-Library/ble-common')
 
 // Uncomment these lines if you want to import the DFULibrary as a project, not from jcenter
 // include ':dfu'

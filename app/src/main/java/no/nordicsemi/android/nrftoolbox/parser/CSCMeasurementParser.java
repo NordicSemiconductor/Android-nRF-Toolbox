@@ -21,7 +21,7 @@
  */
 package no.nordicsemi.android.nrftoolbox.parser;
 
-import no.nordicsemi.android.ble.callback.Data;
+import no.nordicsemi.android.ble.data.Data;
 
 public class CSCMeasurementParser {
 	private static final byte WHEEL_REV_DATA_PRESENT = 0x01; // 1 bit

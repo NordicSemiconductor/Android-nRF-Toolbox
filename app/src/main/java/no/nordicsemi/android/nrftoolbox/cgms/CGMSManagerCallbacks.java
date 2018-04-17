@@ -25,8 +25,9 @@ package no.nordicsemi.android.nrftoolbox.cgms;
 import android.bluetooth.BluetoothDevice;
 
 import no.nordicsemi.android.ble.BleManagerCallbacks;
+import no.nordicsemi.android.nrftoolbox.battery.BatteryManagerCallbacks;
 
-public interface CGMSManagerCallbacks extends BleManagerCallbacks {
+public interface CGMSManagerCallbacks extends BatteryManagerCallbacks {
     /**
      * Called when new CGM value has been obtained from the sensor.
      */

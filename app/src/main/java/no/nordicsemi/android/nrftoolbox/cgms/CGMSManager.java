@@ -22,6 +22,7 @@
 
 package no.nordicsemi.android.nrftoolbox.cgms;
 
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
@@ -36,62 +37,62 @@ import java.util.UUID;
 import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.Request;
 import no.nordicsemi.android.log.LogContract;
+import no.nordicsemi.android.nrftoolbox.battery.BatteryManager;
 import no.nordicsemi.android.nrftoolbox.parser.CGMMeasurementParser;
 import no.nordicsemi.android.nrftoolbox.parser.CGMSpecificOpsControlPointParser;
 import no.nordicsemi.android.nrftoolbox.parser.RecordAccessControlPointParser;
 import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
 
-public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
+public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 	private static final String TAG = "CGMSManager";
 
 	/**
 	 * Cycling Speed and Cadence service UUID
 	 */
-	public final static UUID CGMS_UUID = UUID.fromString("0000181F-0000-1000-8000-00805f9b34fb");
+	public static final UUID CGMS_UUID = UUID.fromString("0000181F-0000-1000-8000-00805f9b34fb");
 	private static final UUID CGM_MEASUREMENT_UUID = UUID.fromString("00002AA7-0000-1000-8000-00805f9b34fb");
 	private static final UUID CGM_OPS_CONTROL_POINT_UUID = UUID.fromString("00002AAC-0000-1000-8000-00805f9b34fb");
-	private final static int OP_CODE_START_SESSION = 26;
 	/**
 	 * Record Access Control Point characteristic UUID
 	 */
-	private final static UUID RACP_UUID = UUID.fromString("00002A52-0000-1000-8000-00805f9b34fb");
+	private static final UUID RACP_UUID = UUID.fromString("00002A52-0000-1000-8000-00805f9b34fb");
 
-	private final static int OP_CODE_REPORT_STORED_RECORDS = 1;
-	private final static int OP_CODE_DELETE_STORED_RECORDS = 2;
-	private final static int OP_CODE_ABORT_OPERATION = 3;
-	private final static int OP_CODE_REPORT_NUMBER_OF_RECORDS = 4;
-	private final static int OP_CODE_NUMBER_OF_STORED_RECORDS_RESPONSE = 5;
-	private final static int OP_CODE_RESPONSE_CODE = 6;
+	private static final int OP_CODE_REPORT_STORED_RECORDS = 1;
+	private static final int OP_CODE_DELETE_STORED_RECORDS = 2;
+	private static final int OP_CODE_ABORT_OPERATION = 3;
+	private static final int OP_CODE_REPORT_NUMBER_OF_RECORDS = 4;
+	private static final int OP_CODE_NUMBER_OF_STORED_RECORDS_RESPONSE = 5;
+	private static final int OP_CODE_RESPONSE_CODE = 6;
 
-	private final static int OPERATOR_NULL = 0;
-	private final static int OPERATOR_ALL_RECORDS = 1;
-	private final static int OPERATOR_LESS_THEN_OR_EQUAL = 2;
-	private final static int OPERATOR_GREATER_THEN_OR_EQUAL = 3;
-	private final static int OPERATOR_WITHING_RANGE = 4;
-	private final static int OPERATOR_FIRST_RECORD = 5;
-	private final static int OPERATOR_LAST_RECORD = 6;
+	private static final int OPERATOR_NULL = 0;
+	private static final int OPERATOR_ALL_RECORDS = 1;
+	private static final int OPERATOR_LESS_THEN_OR_EQUAL = 2;
+	private static final int OPERATOR_GREATER_THEN_OR_EQUAL = 3;
+	private static final int OPERATOR_WITHING_RANGE = 4;
+	private static final int OPERATOR_FIRST_RECORD = 5;
+	private static final int OPERATOR_LAST_RECORD = 6;
 
 	/**
 	 * The filter type is used for range operators ({@link #OPERATOR_LESS_THEN_OR_EQUAL}, {@link #OPERATOR_GREATER_THEN_OR_EQUAL}, {@link #OPERATOR_WITHING_RANGE}.<br/>
 	 * The syntax of the operand is: [Filter Type][Minimum][Maximum].<br/>
 	 * This filter selects the records by the sequence number.
 	 */
-	private final static int FILTER_TYPE_SEQUENCE_NUMBER = 1;
+	private static final int FILTER_TYPE_SEQUENCE_NUMBER = 1;
 	/**
 	 * The filter type is used for range operators ({@link #OPERATOR_LESS_THEN_OR_EQUAL}, {@link #OPERATOR_GREATER_THEN_OR_EQUAL}, {@link #OPERATOR_WITHING_RANGE}.<br/>
 	 * The syntax of the operand is: [Filter Type][Minimum][Maximum].<br/>
 	 * This filter selects the records by the user facing time (base time + offset time).
 	 */
-	private final static int FILTER_TYPE_USER_FACING_TIME = 2;
-	private final static int RESPONSE_SUCCESS = 1;
-	private final static int RESPONSE_OP_CODE_NOT_SUPPORTED = 2;
-	private final static int RESPONSE_INVALID_OPERATOR = 3;
-	private final static int RESPONSE_OPERATOR_NOT_SUPPORTED = 4;
-	private final static int RESPONSE_INVALID_OPERAND = 5;
-	private final static int RESPONSE_NO_RECORDS_FOUND = 6;
-	private final static int RESPONSE_ABORT_UNSUCCESSFUL = 7;
-	private final static int RESPONSE_PROCEDURE_NOT_COMPLETED = 8;
-	private final static int RESPONSE_OPERAND_NOT_SUPPORTED = 9;
+	private static final int FILTER_TYPE_USER_FACING_TIME = 2;
+	private static final int RESPONSE_SUCCESS = 1;
+	private static final int RESPONSE_OP_CODE_NOT_SUPPORTED = 2;
+	private static final int RESPONSE_INVALID_OPERATOR = 3;
+	private static final int RESPONSE_OPERATOR_NOT_SUPPORTED = 4;
+	private static final int RESPONSE_INVALID_OPERAND = 5;
+	private static final int RESPONSE_NO_RECORDS_FOUND = 6;
+	private static final int RESPONSE_ABORT_UNSUCCESSFUL = 7;
+	private static final int RESPONSE_PROCEDURE_NOT_COMPLETED = 8;
+	private static final int RESPONSE_OPERAND_NOT_SUPPORTED = 9;
 
 	private BluetoothGattCharacteristic mCGMMeasurementCharacteristic;
 	private BluetoothGattCharacteristic mCGMOpsControlPointCharacteristic;
@@ -101,31 +102,28 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 	private boolean mAbort;
 	private long mSessionStartTime;
 
-	public CGMSManager(final Context context) {
+	CGMSManager(final Context context) {
 		super(context);
 	}
 
 	@Override
-	protected BleManagerGattCallback getGattCallback() {
+	protected BatteryManagerGattCallback getGattCallback() {
 		return mGattCallback;
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving notification, etc
 	 */
-	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
+	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
 
 		@Override
-		protected Deque<Request> initGatt(@NonNull final BluetoothGatt gatt) {
-			final LinkedList<Request> requests = new LinkedList<>();
-			requests.add(Request.newEnableNotificationsRequest(mCGMMeasurementCharacteristic));
-			if (mCGMOpsControlPointCharacteristic != null) {
-				mSessionStartTime = System.currentTimeMillis();
-				requests.add(Request.newEnableIndicationsRequest(mCGMOpsControlPointCharacteristic));
-				requests.add(Request.newWriteRequest(mCGMOpsControlPointCharacteristic, new byte[]{OP_CODE_START_SESSION}));
-			}
-			requests.add(Request.newEnableIndicationsRequest(mRecordAccessControlPointCharacteristic));
-			return requests;
+		protected void initialize(@NonNull final BluetoothDevice device) {
+			super.initialize(device);
+			mSessionStartTime = System.currentTimeMillis();
+			enableNotifications(mCGMMeasurementCharacteristic);
+			enableIndications(mCGMOpsControlPointCharacteristic);
+			writeCharacteristic(mCGMOpsControlPointCharacteristic, CGMSData.startSession());
+			enableIndications(mRecordAccessControlPointCharacteristic);
 		}
 
 		@Override
@@ -141,6 +139,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 
 		@Override
 		protected boolean isOptionalServiceSupported(@NonNull final BluetoothGatt gatt) {
+			super.isOptionalServiceSupported(gatt); // ignore the result
 			final BluetoothGattService service = gatt.getService(CGMS_UUID);
 			if (service != null) {
 				mCGMOpsControlPointCharacteristic = service.getCharacteristic(CGM_OPS_CONTROL_POINT_UUID);
@@ -149,11 +148,8 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 		}
 
 		@Override
-		public void onCharacteristicRead(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-		}
-
-		@Override
 		protected void onDeviceDisconnected() {
+			super.onDeviceDisconnected();
 			mCGMOpsControlPointCharacteristic = null;
 			mCGMMeasurementCharacteristic = null;
 			mRecordAccessControlPointCharacteristic = null;

@@ -21,12 +21,11 @@
  */
 package no.nordicsemi.android.nrftoolbox.bpm;
 
-import no.nordicsemi.android.ble.BleManagerCallbacks;
-import no.nordicsemi.android.ble.profile.BatteryLevelCallback;
-import no.nordicsemi.android.ble.profile.BloodPressureMeasurementCallback;
-import no.nordicsemi.android.ble.profile.IntermediateCuffPressureCallback;
+import no.nordicsemi.android.ble.common.profile.BloodPressureMeasurementCallback;
+import no.nordicsemi.android.ble.common.profile.IntermediateCuffPressureCallback;
+import no.nordicsemi.android.nrftoolbox.battery.BatteryManagerCallbacks;
 
-interface BPMManagerCallbacks extends BleManagerCallbacks,
-		BloodPressureMeasurementCallback, IntermediateCuffPressureCallback, BatteryLevelCallback {
+interface BPMManagerCallbacks extends BatteryManagerCallbacks,
+		BloodPressureMeasurementCallback, IntermediateCuffPressureCallback {
 
 }

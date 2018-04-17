@@ -32,32 +32,24 @@ import android.support.annotation.Nullable;
 import java.util.Calendar;
 import java.util.UUID;
 
-import no.nordicsemi.android.ble.BleManager;
-import no.nordicsemi.android.ble.callback.Data;
-import no.nordicsemi.android.ble.callback.profile.BatteryLevelDataCallback;
-import no.nordicsemi.android.ble.callback.profile.BloodPressureMeasurementDataCallback;
-import no.nordicsemi.android.ble.callback.profile.IntermediateCuffPressureDataCallback;
-import no.nordicsemi.android.ble.profile.BloodPressureMeasurementCallback;
+import no.nordicsemi.android.ble.common.data.BloodPressureMeasurementDataCallback;
+import no.nordicsemi.android.ble.common.data.IntermediateCuffPressureDataCallback;
+import no.nordicsemi.android.ble.data.Data;
 import no.nordicsemi.android.log.LogContract;
-import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.nrftoolbox.battery.BatteryManager;
 import no.nordicsemi.android.nrftoolbox.parser.BloodPressureMeasurementParser;
 import no.nordicsemi.android.nrftoolbox.parser.IntermediateCuffPressureParser;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
-public class BPMManager extends BleManager<BPMManagerCallbacks> {
+public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 	/** Blood Pressure service UUID. */
 	public final static UUID BP_SERVICE_UUID = UUID.fromString("00001810-0000-1000-8000-00805f9b34fb");
 	/** Blood Pressure Measurement characteristic UUID. */
 	private static final UUID BPM_CHARACTERISTIC_UUID = UUID.fromString("00002A35-0000-1000-8000-00805f9b34fb");
 	/** Intermediate Cuff Pressure characteristic UUID. */
 	private static final UUID ICP_CHARACTERISTIC_UUID = UUID.fromString("00002A36-0000-1000-8000-00805f9b34fb");
-	/** Battery Service UUID. */
-	private final static UUID BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb");
-	/** Battery Level characteristic UUID. */
-	private final static UUID BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb");
 
 	private BluetoothGattCharacteristic mBPMCharacteristic, mICPCharacteristic;
-	private BluetoothGattCharacteristic mBatteryLevelCharacteristic;
 
 	private static BPMManager managerInstance = null;
 
@@ -76,58 +68,19 @@ public class BPMManager extends BleManager<BPMManagerCallbacks> {
 	}
 
 	@Override
-	protected BleManagerGattCallback getGattCallback() {
+	protected BatteryManagerGattCallback getGattCallback() {
 		return mGattCallback;
-	}
-
-	public void readBatteryLevelCharacteristic() {
-		readCharacteristic(mBatteryLevelCharacteristic)
-				.with(new BatteryLevelDataCallback() {
-					@Override
-					public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
-						mCallbacks.onBatteryLevelChanged(device, batteryLevel);
-					}
-
-					@Override
-					public void onInvalidDataReceived(@NonNull final BluetoothDevice device, final @NonNull Data data) {
-						log(LogContract.Log.Level.WARNING, "Invalid Battery Level data received: " + data);
-					}
-				})
-				.fail(status -> log(LogContract.Log.Level.WARNING, "Battery Level characteristic not found"));
-	}
-
-	public void enableBatteryLevelCharacteristicNotifications() {
-		// If the Battery Level characteristic is null, the request will be ignored
-		enableNotifications(mBatteryLevelCharacteristic)
-				.with(new BatteryLevelDataCallback() {
-					@Override
-					public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
-						mCallbacks.onBatteryLevelChanged(device, batteryLevel);
-					}
-
-					@Override
-					public void onInvalidDataReceived(@NonNull final BluetoothDevice device, final @NonNull Data data) {
-						log(LogContract.Log.Level.WARNING, "Invalid Battery Level data received: " + data);
-					}
-				})
-				.done(() -> log(LogContract.Log.Level.INFO, "Battery Level notifications enabled"))
-				.fail(status -> log(LogContract.Log.Level.WARNING, "Battery Level characteristic not found"));
-	}
-
-	public void disableBatteryLevelCharacteristicNotifications() {
-		disableNotifications(mBatteryLevelCharacteristic)
-				.done(() -> log(LogContract.Log.Level.INFO, "Battery Level notifications disabled"));
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving notification, etc
 	 */
-	private final BleManagerGattCallback  mGattCallback = new BleManagerGattCallback() {
+	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
 
 		@Override
 		protected void initialize(@NonNull final BluetoothDevice device) {
-			readBatteryLevelCharacteristic();
-			enableBatteryLevelCharacteristicNotifications();
+			super.initialize(device);
+
 			enableNotifications(mICPCharacteristic)
 					.with(new IntermediateCuffPressureDataCallback() {
 						@Override
@@ -148,6 +101,7 @@ public class BPMManager extends BleManager<BPMManagerCallbacks> {
 							log(LogContract.Log.Level.WARNING, "Invalid ICP data received: " + data);
 						}
 					});
+
 			enableIndications(mBPMCharacteristic)
 					.with(new BloodPressureMeasurementDataCallback() {
 						@Override
@@ -182,10 +136,7 @@ public class BPMManager extends BleManager<BPMManagerCallbacks> {
 
 		@Override
 		protected boolean isOptionalServiceSupported(@NonNull final BluetoothGatt gatt) {
-			final BluetoothGattService service = gatt.getService(BATTERY_SERVICE_UUID);
-			if (service != null) {
-				mBatteryLevelCharacteristic = service.getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID);
-			}
+			super.isOptionalServiceSupported(gatt); // ignore the result of this
 			return mICPCharacteristic != null;
 		}
 
@@ -193,7 +144,6 @@ public class BPMManager extends BleManager<BPMManagerCallbacks> {
 		protected void onDeviceDisconnected() {
 			mICPCharacteristic = null;
 			mBPMCharacteristic = null;
-			mBatteryLevelCharacteristic = null;
 		}
 	};
 }

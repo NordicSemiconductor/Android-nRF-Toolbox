@@ -24,7 +24,7 @@ package no.nordicsemi.android.nrftoolbox.parser;
 import java.util.Calendar;
 import java.util.Locale;
 
-import no.nordicsemi.android.ble.callback.Data;
+import no.nordicsemi.android.ble.data.Data;
 
 public class IntermediateCuffPressureParser {
 	public static String parse(final Data data) {

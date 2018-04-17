@@ -55,7 +55,7 @@ dependencies {
     // implementation project(':dfu')
 
     // Import the BLE Library
-    implementation project(':ble')
+    implementation project(':ble-common')
 
     implementation('org.simpleframework:simple-xml:2.7.1') {
         exclude group: 'stax', module: 'stax-api'
