@@ -68,7 +68,7 @@ public class BloodPressureMeasurementParser {
 		if (pulseRatePresent) {
 			final float pulseRate = data.getFloatValue(Data.FORMAT_SFLOAT, offset);
 			offset += 2;
-			builder.append("\nPulse: ").append(pulseRate);
+			builder.append("\nPulse: ").append(pulseRate).append(" bpm");;
 		}
 
 		if (userIdPresent) {

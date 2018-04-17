@@ -42,7 +42,7 @@ public class IntermediateCuffPressureParser {
 
 		// following bytes - pressure
 		final float pressure = data.getFloatValue(Data.FORMAT_SFLOAT, offset);
-		final String unit = unitType == 0 ? "mmHg" : "kPa";
+		final String unit = unitType == 0 ? " mmHg" : " kPa";
 		offset += 6;
 		builder.append("Cuff pressure: ").append(pressure).append(unit);
 
@@ -63,7 +63,7 @@ public class IntermediateCuffPressureParser {
 		if (pulseRatePresent) {
 			final float pulseRate = data.getFloatValue(Data.FORMAT_SFLOAT, offset);
 			offset += 2;
-			builder.append("\nPulse: ").append(pulseRate);
+			builder.append("\nPulse: ").append(pulseRate).append(" bpm");
 		}
 
 		if (userIdPresent) {
