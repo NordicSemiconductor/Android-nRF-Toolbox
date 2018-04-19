@@ -261,12 +261,6 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 
 		if (!mActivityIsChangingConfiguration) {
 			onRebind();
-			// This method will read the Battery Level value from each connected device, if possible and then try to enable battery notifications (if it has NOTIFY property).
-			// If the Battery Level characteristic has only the NOTIFY property, it will only try to enable notifications.
-			for (final BleManager<BleManagerCallbacks> manager : mBleManagers.values()) {
-				if (manager.isConnected())
-					manager.readBatteryLevel();
-			}
 		}
 	}
 
@@ -286,12 +280,6 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 		if (!mActivityIsChangingConfiguration) {
 			if (!mManagedDevices.isEmpty()) {
 				onUnbind();
-				// When we are connected, but the application is not open, we are not really interested in battery level notifications.
-				// But we will still be receiving other values, if enabled.
-				for (final BleManager<BleManagerCallbacks> manager : mBleManagers.values()) {
-					if (manager.isConnected())
-						manager.disableBatteryLevelNotifications();
-				}
 			} else {
 				// The last activity has disconnected from the service and there are no devices to manage. The service may be stopped.
 				stopSelf();
