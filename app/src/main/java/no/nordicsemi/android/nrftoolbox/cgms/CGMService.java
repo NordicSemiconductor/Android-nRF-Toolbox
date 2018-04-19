@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.SparseArray;
@@ -21,6 +22,10 @@ import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 
 public class CGMService extends BleProfileService implements CGMSManagerCallbacks {
     private static final String ACTION_DISCONNECT = "no.nordicsemi.android.nrftoolbox.cgms.ACTION_DISCONNECT";
+
+    public static final String BROADCAST_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.BROADCAST_BATTERY_LEVEL";
+    public static final String EXTRA_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.EXTRA_BATTERY_LEVEL";
+
     public static final String BROADCAST_NEW_CGMS_VALUE = "no.nordicsemi.android.nrftoolbox.cgms.BROADCAST_NEW_CGMS_VALUE";
     public static final String BROADCAST_DATA_SET_CLEAR = "no.nordicsemi.android.nrftoolbox.cgms.BROADCAST_DATA_SET_CLEAR";
     public static final String OPERATION_STARTED = "no.nordicsemi.android.nrftoolbox.cgms.OPERATION_STARTED";
@@ -270,5 +275,13 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     @Override
     public void onNumberOfRecordsRequested(final BluetoothDevice device, int value) {
         showToast(getResources().getQuantityString(R.plurals.gls_progress, value, value));
+    }
+
+    @Override
+    public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
+        final Intent broadcast = new Intent(BROADCAST_BATTERY_LEVEL);
+        broadcast.putExtra(EXTRA_DEVICE, device);
+        broadcast.putExtra(EXTRA_BATTERY_LEVEL, batteryLevel);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
     }
 }

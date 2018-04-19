@@ -35,17 +35,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.PopupMenu;
+import android.widget.TextView;
 
 import java.util.UUID;
 
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileServiceReadyActivity;
+import no.nordicsemi.android.nrftoolbox.proximity.ProximityService;
 
 public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMSBinder> implements PopupMenu.OnMenuItemClickListener {
 	private View mControlPanelStd;
 	private View mControlPanelAbort;
 	private ListView mRecordsListView;
+	private TextView mBatteryLevelView;
 	private CGMSRecordsAdapter mCgmsRecordsAdapter;
 
 	private CGMService.CGMSBinder mBinder;
@@ -65,6 +68,7 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 		mRecordsListView = findViewById(R.id.list);
 		mControlPanelStd = findViewById(R.id.cgms_control_std);
 		mControlPanelAbort = findViewById(R.id.cgms_control_abort);
+		mBatteryLevelView = findViewById(R.id.battery);
 
 		findViewById(R.id.action_last).setOnClickListener(v -> {
 			clearRecords();
@@ -166,10 +170,15 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 		});
 	}
 
+	public void onBatteryLevelChanged(final BluetoothDevice device, final int value) {
+		mBatteryLevelView.setText(getString(R.string.battery, value));
+	}
+
 	@Override
 	public void onDeviceDisconnected(final BluetoothDevice device) {
 		super.onDeviceDisconnected(device);
 		setOperationInProgress(false);
+		mBatteryLevelView.setText(R.string.not_available);
 	}
 
 	@Override
@@ -181,6 +190,7 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 	@Override
 	protected void setDefaultUI() {
 		clearRecords();
+		mBatteryLevelView.setText(R.string.not_available);
 	}
 
 	@Override
@@ -217,6 +227,7 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			final String action = intent.getAction();
+			final BluetoothDevice device = intent.getParcelableExtra(ProximityService.EXTRA_DEVICE);
 
 			switch (action) {
 				case CGMService.BROADCAST_NEW_CGMS_VALUE: {
@@ -236,6 +247,11 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 				case CGMService.OPERATION_STARTED:
 					// Update GUI
 					setOperationInProgress(true);
+					break;
+				case CGMService.BROADCAST_BATTERY_LEVEL:
+					final int batteryLevel = intent.getIntExtra(CGMService.EXTRA_BATTERY_LEVEL, 0);
+					// Update GUI
+					onBatteryLevelChanged(device, batteryLevel);
 					break;
 				case CGMService.OPERATION_FAILED:
 					// Update GUI
@@ -258,6 +274,7 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 		intentFilter.addAction(CGMService.OPERATION_NOT_SUPPORTED);
 		intentFilter.addAction(CGMService.OPERATION_ABORTED);
 		intentFilter.addAction(CGMService.OPERATION_FAILED);
+		intentFilter.addAction(CGMService.BROADCAST_BATTERY_LEVEL);
 		return intentFilter;
 	}
 }
