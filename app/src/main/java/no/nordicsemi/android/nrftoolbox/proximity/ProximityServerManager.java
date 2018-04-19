@@ -42,13 +42,13 @@ import no.nordicsemi.android.nrftoolbox.parser.AlertLevelParser;
 import no.nordicsemi.android.nrftoolbox.profile.multiconnect.IDeviceLogger;
 import no.nordicsemi.android.nrftoolbox.utility.ParserUtils;
 
-public class ProximityServerManager  {
+class ProximityServerManager  {
 	private final String TAG = "ProximityServerManager";
 
 	/** Immediate Alert service UUID */
-	public final static UUID IMMEDIATE_ALERT_SERVICE_UUID = UUID.fromString("00001802-0000-1000-8000-00805f9b34fb");
+	final static UUID IMMEDIATE_ALERT_SERVICE_UUID = UUID.fromString("00001802-0000-1000-8000-00805f9b34fb");
 	/** Linkloss service UUID */
-	public final static UUID LINKLOSS_SERVICE_UUID = UUID.fromString("00001803-0000-1000-8000-00805f9b34fb");
+	final static UUID LINKLOSS_SERVICE_UUID = UUID.fromString("00001803-0000-1000-8000-00805f9b34fb");
 	/** Alert Level characteristic UUID */
 	private static final UUID ALERT_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A06-0000-1000-8000-00805f9b34fb");
 
@@ -70,7 +70,7 @@ public class ProximityServerManager  {
 		void onGattServerFailed(final int error);
 	}
 
-	public ProximityServerManager(final ProximityServerManagerCallbacks callbacks) {
+	ProximityServerManager(final ProximityServerManagerCallbacks callbacks) {
 		mHandler = new Handler();
 		mCallbacks = callbacks;
 	}

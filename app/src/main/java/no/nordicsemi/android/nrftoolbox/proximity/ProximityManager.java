@@ -28,24 +28,19 @@ import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.UUID;
 
-import no.nordicsemi.android.ble.BleManager;
-import no.nordicsemi.android.ble.Request;
 import no.nordicsemi.android.log.LogContract;
-import no.nordicsemi.android.log.Logger;
+import no.nordicsemi.android.nrftoolbox.battery.BatteryManager;
 import no.nordicsemi.android.nrftoolbox.parser.AlertLevelParser;
-import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
 
-public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
+class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 	private final String TAG = "ProximityManager";
 
 	/** Immediate Alert service UUID */
-	public final static UUID IMMEDIATE_ALERT_SERVICE_UUID = UUID.fromString("00001802-0000-1000-8000-00805f9b34fb");
+	private final static UUID IMMEDIATE_ALERT_SERVICE_UUID = UUID.fromString("00001802-0000-1000-8000-00805f9b34fb");
 	/** Linkloss service UUID */
-	public final static UUID LINKLOSS_SERVICE_UUID = UUID.fromString("00001803-0000-1000-8000-00805f9b34fb");
+	final static UUID LINKLOSS_SERVICE_UUID = UUID.fromString("00001803-0000-1000-8000-00805f9b34fb");
 	/** Alert Level characteristic UUID */
 	private static final UUID ALERT_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A06-0000-1000-8000-00805f9b34fb");
 
@@ -55,9 +50,8 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 
 	private BluetoothGattCharacteristic mAlertLevelCharacteristic, mLinklossCharacteristic;
 	private boolean mAlertOn;
-	private int mBatteryLevel;
 
-	public ProximityManager(final Context context) {
+	ProximityManager(final Context context) {
 		super(context);
 	}
 
@@ -67,17 +61,18 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 	}
 
 	@Override
-	protected BleManagerGattCallback getGattCallback() {
+	protected BatteryManagerGattCallback getGattCallback() {
 		return mGattCallback;
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving indication, etc
 	 */
-	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
+	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
 
 		@Override
 		protected void initialize(@NonNull final BluetoothDevice device) {
+			super.initialize(device);
 			writeCharacteristic(mLinklossCharacteristic, HIGH_ALERT);
 		}
 
@@ -92,6 +87,7 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 
 		@Override
 		protected boolean isOptionalServiceSupported(@NonNull final BluetoothGatt gatt) {
+			super.isOptionalServiceSupported(gatt);
 			final BluetoothGattService iaService = gatt.getService(IMMEDIATE_ALERT_SERVICE_UUID);
 			if (iaService != null) {
 				mAlertLevelCharacteristic = iaService.getCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID);
@@ -101,6 +97,7 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 
 		@Override
 		protected void onDeviceDisconnected() {
+			super.onDeviceDisconnected();
 			mAlertLevelCharacteristic = null;
 			mLinklossCharacteristic = null;
 			// Reset the alert flag
@@ -139,13 +136,5 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 	 */
 	boolean isAlertEnabled() {
 		return mAlertOn;
-	}
-
-	/**
-	 * Returns the last obtained Battery Level value in percent.
-	 * @return battery level value
-	 */
-	int getBatteryLevel() {
-		return mBatteryLevel;
 	}
 }

@@ -34,9 +34,11 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -45,7 +47,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import no.nordicsemi.android.ble.BleManager;
-import no.nordicsemi.android.ble.BleManagerCallbacks;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
@@ -56,10 +57,12 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	@SuppressWarnings("unused")
 	private static final String TAG = "ProximityService";
 
+	public static final String BROADCAST_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.BROADCAST_BATTERY_LEVEL";
+	public static final String EXTRA_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.EXTRA_BATTERY_LEVEL";
+
 	private final static String ACTION_DISCONNECT = "no.nordicsemi.android.nrftoolbox.proximity.ACTION_DISCONNECT";
 	private final static String ACTION_FIND = "no.nordicsemi.android.nrftoolbox.proximity.ACTION_FIND";
 	private final static String ACTION_SILENT = "no.nordicsemi.android.nrftoolbox.proximity.ACTION_SILENT";
-	private final static String EXTRA_DEVICE = "no.nordicsemi.android.nrftoolbox.proximity.EXTRA_DEVICE";
 
 	private final static String PROXIMITY_GROUP_ID = "proximity_connected_tags";
 	private final static int NOTIFICATION_ID = 1000;
@@ -109,9 +112,10 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 		/**
 		 * Returns the last received battery level value.
 		 * @param device the device of which battery level should be returned
-		 * @return battery value or -1 if no value was received or Battery Level characteristic was not found
+		 * @return battery value or null if no value was received or Battery Level characteristic was not found,
+		 * or the device is disconnected
 		 */
-		public int getBatteryLevel(final BluetoothDevice device) {
+		public Integer getBatteryLevel(final BluetoothDevice device) {
 			final ProximityManager manager = (ProximityManager) getBleManager(device);
 			return manager.getBatteryLevel();
 		}
@@ -232,10 +236,24 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	protected void onRebind() {
 		// When the activity rebinds to the service, remove the notification
 		cancelNotifications();
+
+		// This method will read the Battery Level value from each connected device, if possible and then try to enable battery notifications (if it has NOTIFY property).
+		// If the Battery Level characteristic has only the NOTIFY property, it will only try to enable notifications.
+		for (final BluetoothDevice device : getManagedDevices()) {
+			final ProximityManager manager = (ProximityManager) getBleManager(device);
+			manager.readBatteryLevelCharacteristic();
+			manager.enableBatteryLevelCharacteristicNotifications();
+		}
 	}
 
 	@Override
 	public void onUnbind() {
+		// When we are connected, but the application is not open, we are not really interested in battery level notifications.
+		// But we will still be receiving other values, if enabled.
+		for (final BluetoothDevice device : getManagedDevices()) {
+			final ProximityManager manager = (ProximityManager) getBleManager(device);
+			manager.disableBatteryLevelCharacteristicNotifications();
+		}
 
 		createBackgroundNotification();
 	}
@@ -290,6 +308,14 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	@Override
 	public void onAlarmStopped(final BluetoothDevice device) {
 		stopAlarm(device);
+	}
+
+	@Override
+	public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
+		final Intent broadcast = new Intent(BROADCAST_BATTERY_LEVEL);
+		broadcast.putExtra(EXTRA_DEVICE, device);
+		broadcast.putExtra(EXTRA_BATTERY_LEVEL, batteryLevel);
+		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	private void createBackgroundNotification() {

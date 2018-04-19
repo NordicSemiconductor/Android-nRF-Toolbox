@@ -136,8 +136,8 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 			actionButton.setImageResource(on ? R.drawable.ic_stat_notify_proximity_silent : R.drawable.ic_stat_notify_proximity_find);
 			actionButton.setVisibility(state == BluetoothGatt.STATE_CONNECTED ? View.VISIBLE : View.GONE);
 
-			final int batteryValue = mService.getBatteryLevel(device);
-			if (batteryValue >= 0) {
+			final Integer batteryValue = mService.getBatteryLevel(device);
+			if (batteryValue != null) {
 				batteryView.getCompoundDrawables()[0 /*left*/].setLevel(batteryValue);
 				batteryView.setVisibility(View.VISIBLE);
 				batteryView.setText(batteryView.getResources().getString(R.string.battery, batteryValue));
