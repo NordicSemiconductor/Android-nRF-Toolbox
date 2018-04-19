@@ -119,10 +119,10 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 		@Override
 		protected void initialize(@NonNull final BluetoothDevice device) {
 			super.initialize(device);
-			mSessionStartTime = System.currentTimeMillis();
 			enableNotifications(mCGMMeasurementCharacteristic);
-			enableIndications(mCGMOpsControlPointCharacteristic);
-			writeCharacteristic(mCGMOpsControlPointCharacteristic, CGMSData.startSession());
+			enableIndications(mCGMOpsControlPointCharacteristic)
+				.done(() -> mSessionStartTime = System.currentTimeMillis());
+			writeCharacteristic(mCGMOpsControlPointCharacteristic, new byte[] { 26 });
 			enableIndications(mRecordAccessControlPointCharacteristic);
 		}
 

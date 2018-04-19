@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.SparseArray;
@@ -31,6 +32,9 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     public static final String OPERATION_ABORTED = "no.nordicsemi.android.nrftoolbox.cgms.OPERATION_ABORTED";
     public static final String EXTRA_CGMS_RECORD = "no.nordicsemi.android.nrftoolbox.cgms.EXTRA_CGMS_RECORD";
     public static final String EXTRA_DATA = "no.nordicsemi.android.nrftoolbox.cgms.EXTRA_DATA";
+
+    public static final String BROADCAST_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.BROADCAST_BATTERY_LEVEL";
+	public static final String EXTRA_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.EXTRA_BATTERY_LEVEL";
 
     private final static int NOTIFICATION_ID = 229;
     private final static int OPEN_ACTIVITY_REQ = 0;
@@ -213,7 +217,7 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     };
 
     @Override
-    public void onCGMValueReceived(final BluetoothDevice device, final CGMSRecord record) {
+    public void onCGMValueReceived(@NonNull final BluetoothDevice device, final CGMSRecord record) {
         final Intent broadcast = new Intent(BROADCAST_NEW_CGMS_VALUE);
         broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
         broadcast.putExtra(EXTRA_CGMS_RECORD, record);
@@ -221,7 +225,7 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     }
 
     @Override
-    public void onOperationStarted(final BluetoothDevice device) {
+    public void onOperationStarted(@NonNull final BluetoothDevice device) {
         final Intent broadcast = new Intent(OPERATION_STARTED);
         broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
         broadcast.putExtra(EXTRA_DATA, true);
@@ -229,7 +233,7 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     }
 
     @Override
-    public void onOperationCompleted(final BluetoothDevice device) {
+    public void onOperationCompleted(@NonNull final BluetoothDevice device) {
         final Intent broadcast = new Intent(OPERATION_COMPLETED);
         broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
         broadcast.putExtra(EXTRA_DATA, true);
@@ -237,7 +241,7 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     }
 
     @Override
-    public void onOperationFailed(final BluetoothDevice device) {
+    public void onOperationFailed(@NonNull final BluetoothDevice device) {
         final Intent broadcast = new Intent(OPERATION_FAILED);
         broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
         broadcast.putExtra(EXTRA_DATA, true);
@@ -245,7 +249,7 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     }
 
     @Override
-    public void onOperationAborted(final BluetoothDevice device) {
+    public void onOperationAborted(@NonNull final BluetoothDevice device) {
         final Intent broadcast = new Intent(OPERATION_ABORTED);
         broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
         broadcast.putExtra(EXTRA_DATA, true);
@@ -253,7 +257,7 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     }
 
     @Override
-    public void onOperationNotSupported(final BluetoothDevice device) {
+    public void onOperationNotSupported(@NonNull final BluetoothDevice device) {
         final Intent broadcast = new Intent(OPERATION_NOT_SUPPORTED);
         broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
         broadcast.putExtra(EXTRA_DATA, false);
@@ -261,14 +265,22 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     }
 
     @Override
-    public void onDatasetClear(final BluetoothDevice device) {
+    public void onDatasetClear(@NonNull final BluetoothDevice device) {
         final Intent broadcast = new Intent(BROADCAST_DATA_SET_CLEAR);
         broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
     }
 
     @Override
-    public void onNumberOfRecordsRequested(final BluetoothDevice device, int value) {
+    public void onNumberOfRecordsRequested(@NonNull final BluetoothDevice device, int value) {
         showToast(getResources().getQuantityString(R.plurals.gls_progress, value, value));
+    }
+
+    @Override
+    public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int value) {
+        final Intent broadcast = new Intent(BROADCAST_BATTERY_LEVEL);
+        broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
+        broadcast.putExtra(EXTRA_BATTERY_LEVEL, value);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
     }
 }
