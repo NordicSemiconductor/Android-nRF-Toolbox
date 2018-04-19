@@ -33,7 +33,7 @@ import android.support.annotation.NonNull;
 
 import java.util.UUID;
 
-import no.nordicsemi.android.ble.common.data.CyclingSpeedAndCadenceDataCallback;
+import no.nordicsemi.android.ble.common.callback.CyclingSpeedAndCadenceDataCallback;
 import no.nordicsemi.android.ble.data.Data;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.battery.BatteryManager;
