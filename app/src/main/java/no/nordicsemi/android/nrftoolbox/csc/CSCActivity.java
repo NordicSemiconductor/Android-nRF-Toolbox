@@ -187,7 +187,7 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 		mBatteryLevelView.setText(R.string.not_available);
 	}
 
-	private void onMeasurementReceived(float speed, float distance, float totalDistance) {
+	private void onMeasurementReceived(final BluetoothDevice device, float speed, float distance, float totalDistance) {
 		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		final int unit = Integer.parseInt(preferences.getString(SettingsFragment.SETTINGS_UNIT, String.valueOf(SettingsFragment.SETTINGS_UNIT_DEFAULT)));
 
@@ -223,12 +223,12 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 		mSpeedView.setText(String.format(Locale.US, "%.1f", speed));
 	}
 
-	private void onGearRatioUpdate(final float ratio, final int cadence) {
-		mGearRatioView.setText(String.format(Locale.US, "%.1f", ratio));
+	private void onGearRatioUpdate(final BluetoothDevice device, final int cadence, final float ratio) {
 		mCadenceView.setText(String.format(Locale.US, "%d", cadence));
+		mGearRatioView.setText(String.format(Locale.US, "%.1f", ratio));
 	}
 
-	public void onBatteryLevelChanged(final int value) {
+	public void onBatteryLevelChanged(final BluetoothDevice device, final int value) {
 		mBatteryLevelView.setText(getString(R.string.battery, value));
 	}
 
@@ -236,22 +236,23 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			final String action = intent.getAction();
+			final BluetoothDevice device = intent.getParcelableExtra(CSCService.EXTRA_DEVICE);
 
 			if (CSCService.BROADCAST_WHEEL_DATA.equals(action)) {
 				final float speed = intent.getFloatExtra(CSCService.EXTRA_SPEED, 0.0f); // [m/s]
 				final float distance = intent.getFloatExtra(CSCService.EXTRA_DISTANCE, 0);
 				final float totalDistance = intent.getFloatExtra(CSCService.EXTRA_TOTAL_DISTANCE, 0);
 				// Update GUI
-				onMeasurementReceived(speed, distance, totalDistance);
+				onMeasurementReceived(device, speed, distance, totalDistance);
 			} else if (CSCService.BROADCAST_CRANK_DATA.equals(action)) {
 				final float ratio = intent.getFloatExtra(CSCService.EXTRA_GEAR_RATIO, 0);
 				final int cadence = intent.getIntExtra(CSCService.EXTRA_CADENCE, 0);
 				// Update GUI
-				onGearRatioUpdate(ratio, cadence);
+				onGearRatioUpdate(device, cadence, ratio);
 			} else if (CSCService.BROADCAST_BATTERY_LEVEL.equals(action)) {
 				final int batteryLevel = intent.getIntExtra(CSCService.EXTRA_BATTERY_LEVEL, 0);
 				// Update GUI
-				onBatteryLevelChanged(batteryLevel);
+				onBatteryLevelChanged(device, batteryLevel);
 			}
 		}
 	};
