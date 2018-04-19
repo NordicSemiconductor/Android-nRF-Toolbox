@@ -22,6 +22,10 @@ import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 
 public class CGMService extends BleProfileService implements CGMSManagerCallbacks {
     private static final String ACTION_DISCONNECT = "no.nordicsemi.android.nrftoolbox.cgms.ACTION_DISCONNECT";
+
+    public static final String BROADCAST_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.BROADCAST_BATTERY_LEVEL";
+    public static final String EXTRA_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.EXTRA_BATTERY_LEVEL";
+
     public static final String BROADCAST_NEW_CGMS_VALUE = "no.nordicsemi.android.nrftoolbox.cgms.BROADCAST_NEW_CGMS_VALUE";
     public static final String BROADCAST_DATA_SET_CLEAR = "no.nordicsemi.android.nrftoolbox.cgms.BROADCAST_DATA_SET_CLEAR";
     public static final String OPERATION_STARTED = "no.nordicsemi.android.nrftoolbox.cgms.OPERATION_STARTED";
@@ -32,9 +36,6 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     public static final String OPERATION_ABORTED = "no.nordicsemi.android.nrftoolbox.cgms.OPERATION_ABORTED";
     public static final String EXTRA_CGMS_RECORD = "no.nordicsemi.android.nrftoolbox.cgms.EXTRA_CGMS_RECORD";
     public static final String EXTRA_DATA = "no.nordicsemi.android.nrftoolbox.cgms.EXTRA_DATA";
-
-    public static final String BROADCAST_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.BROADCAST_BATTERY_LEVEL";
-	public static final String EXTRA_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.EXTRA_BATTERY_LEVEL";
 
     private final static int NOTIFICATION_ID = 229;
     private final static int OPEN_ACTIVITY_REQ = 0;
@@ -277,10 +278,10 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     }
 
     @Override
-    public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int value) {
+    public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
         final Intent broadcast = new Intent(BROADCAST_BATTERY_LEVEL);
-        broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
-        broadcast.putExtra(EXTRA_BATTERY_LEVEL, value);
+        broadcast.putExtra(EXTRA_DEVICE, device);
+        broadcast.putExtra(EXTRA_BATTERY_LEVEL, batteryLevel);
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
     }
 }

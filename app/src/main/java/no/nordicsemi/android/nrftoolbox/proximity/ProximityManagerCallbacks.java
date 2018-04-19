@@ -21,8 +21,8 @@
  */
 package no.nordicsemi.android.nrftoolbox.proximity;
 
-import no.nordicsemi.android.ble.BleManagerCallbacks;
+import no.nordicsemi.android.nrftoolbox.battery.BatteryManagerCallbacks;
 
-public interface ProximityManagerCallbacks extends BleManagerCallbacks {
+interface ProximityManagerCallbacks extends BatteryManagerCallbacks {
 	// No additional methods
 }

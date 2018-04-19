@@ -23,7 +23,12 @@ package no.nordicsemi.android.nrftoolbox.proximity;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
@@ -48,6 +53,17 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 	protected void onCreateView(final Bundle savedInstanceState) {
 		setContentView(R.layout.activity_feature_proximity);
 		setGUI();
+	}
+
+	@Override
+	protected void onInitialize(final Bundle savedInstanceState) {
+		LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, makeIntentFilter());
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
 	}
 
 	private void setGUI() {
@@ -133,11 +149,11 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 			showLinklossDialog(device.getName());
 	}
 
-	@Override
-	public void onBatteryValueReceived(final BluetoothDevice device, final int value) {
+	private void onBatteryLevelChanged(final BluetoothDevice device, final int batteryLevel) {
 		if (mAdapter != null)
 			mAdapter.onBatteryValueReceived(device); // Value will be obtained from the service
 	}
+
 
 	private void showLinklossDialog(final String name) {
 		try {
@@ -146,5 +162,24 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 		} catch (final Exception e) {
 			// the activity must have been destroyed
 		}
+	}
+	private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(final Context context, final Intent intent) {
+			final String action = intent.getAction();
+			final BluetoothDevice device = intent.getParcelableExtra(ProximityService.EXTRA_DEVICE);
+
+			if (ProximityService.BROADCAST_BATTERY_LEVEL.equals(action)) {
+				final int batteryLevel = intent.getIntExtra(ProximityService.EXTRA_BATTERY_LEVEL, 0);
+				// Update GUI
+				onBatteryLevelChanged(device, batteryLevel);
+			}
+		}
+	};
+
+	private static IntentFilter makeIntentFilter() {
+		final IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(ProximityService.BROADCAST_BATTERY_LEVEL);
+		return intentFilter;
 	}
 }
