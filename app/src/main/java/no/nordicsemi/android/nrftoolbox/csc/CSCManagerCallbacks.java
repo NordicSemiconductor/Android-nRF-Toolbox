@@ -21,7 +21,7 @@
  */
 package no.nordicsemi.android.nrftoolbox.csc;
 
-import no.nordicsemi.android.ble.common.profile.CyclingSpeedAndCadenceCallback;
+import no.nordicsemi.android.ble.common.profile.csc.CyclingSpeedAndCadenceCallback;
 import no.nordicsemi.android.nrftoolbox.battery.BatteryManagerCallbacks;
 
 interface CSCManagerCallbacks extends BatteryManagerCallbacks, CyclingSpeedAndCadenceCallback {

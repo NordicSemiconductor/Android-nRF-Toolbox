@@ -31,8 +31,8 @@ import java.util.Calendar;
 import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
-import no.nordicsemi.android.ble.common.profile.BloodPressureMeasurementCallback;
-import no.nordicsemi.android.ble.common.profile.IntermediateCuffPressureCallback;
+import no.nordicsemi.android.ble.common.profile.bp.BloodPressureMeasurementCallback;
+import no.nordicsemi.android.ble.common.profile.bp.IntermediateCuffPressureCallback;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileActivity;
 

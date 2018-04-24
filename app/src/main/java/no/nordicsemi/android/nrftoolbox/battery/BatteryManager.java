@@ -10,7 +10,7 @@ import android.support.annotation.NonNull;
 import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
-import no.nordicsemi.android.ble.common.callback.BatteryLevelDataCallback;
+import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelDataCallback;
 import no.nordicsemi.android.ble.data.Data;
 import no.nordicsemi.android.log.LogContract;
 
