@@ -25,27 +25,24 @@ package no.nordicsemi.android.nrftoolbox.cgms;
 import android.bluetooth.BluetoothDevice;
 import android.support.annotation.NonNull;
 
-import no.nordicsemi.android.ble.BleManagerCallbacks;
 import no.nordicsemi.android.nrftoolbox.battery.BatteryManagerCallbacks;
 
 public interface CGMSManagerCallbacks extends BatteryManagerCallbacks {
-    /**
-     * Called when new CGM value has been obtained from the sensor.
-     */
-    void onCGMValueReceived(final @NonNull BluetoothDevice device, final CGMSRecord record);
 
-    void onOperationStarted(final @NonNull BluetoothDevice device);
+	void onCGMValueReceived(@NonNull final BluetoothDevice device, final CGMSRecord record);
 
-    void onOperationCompleted(final @NonNull BluetoothDevice device);
+	void onOperationStarted(final @NonNull BluetoothDevice device);
 
-    void onOperationFailed(final @NonNull BluetoothDevice device);
+	void onOperationCompleted(final @NonNull BluetoothDevice device);
 
-    void onOperationAborted(final @NonNull BluetoothDevice device);
+	void onOperationFailed(final @NonNull BluetoothDevice device);
 
-    void onOperationNotSupported(final @NonNull BluetoothDevice device);
+	void onOperationAborted(final @NonNull BluetoothDevice device);
 
-    void onDatasetClear(final @NonNull BluetoothDevice device);
+	void onOperationNotSupported(final @NonNull BluetoothDevice device);
 
-    void onNumberOfRecordsRequested(final @NonNull BluetoothDevice device, final int value);
+	void onDatasetCleared(final @NonNull BluetoothDevice device);
+
+	void onNumberOfRecordsRequested(final @NonNull BluetoothDevice device, final int value);
 
 }

@@ -28,20 +28,22 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.SparseArray;
 
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.UUID;
 
-import no.nordicsemi.android.ble.BleManager;
-import no.nordicsemi.android.ble.Request;
+import no.nordicsemi.android.ble.common.callback.RecordAccessControlPointDataCallback;
+import no.nordicsemi.android.ble.common.callback.cgm.CGMSpecificOpsControlPointDataCallback;
+import no.nordicsemi.android.ble.common.callback.cgm.ContinuousGlucoseMeasurementDataCallback;
+import no.nordicsemi.android.ble.common.data.RecordAccessControlPointData;
+import no.nordicsemi.android.ble.common.data.cgm.CGMSpecificOpsControlPointData;
+import no.nordicsemi.android.ble.data.Data;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.battery.BatteryManager;
 import no.nordicsemi.android.nrftoolbox.parser.CGMMeasurementParser;
 import no.nordicsemi.android.nrftoolbox.parser.CGMSpecificOpsControlPointParser;
 import no.nordicsemi.android.nrftoolbox.parser.RecordAccessControlPointParser;
-import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
 
 public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 	private static final String TAG = "CGMSManager";
@@ -50,6 +52,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 	 * Cycling Speed and Cadence service UUID
 	 */
 	public static final UUID CGMS_UUID = UUID.fromString("0000181F-0000-1000-8000-00805f9b34fb");
+	private static final UUID CGM_FEAURE_UUID = UUID.fromString("00002AA8-0000-1000-8000-00805f9b34fb");
 	private static final UUID CGM_MEASUREMENT_UUID = UUID.fromString("00002AA7-0000-1000-8000-00805f9b34fb");
 	private static final UUID CGM_OPS_CONTROL_POINT_UUID = UUID.fromString("00002AAC-0000-1000-8000-00805f9b34fb");
 	/**
@@ -57,49 +60,15 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 	 */
 	private static final UUID RACP_UUID = UUID.fromString("00002A52-0000-1000-8000-00805f9b34fb");
 
-	private static final int OP_CODE_REPORT_STORED_RECORDS = 1;
-	private static final int OP_CODE_DELETE_STORED_RECORDS = 2;
-	private static final int OP_CODE_ABORT_OPERATION = 3;
-	private static final int OP_CODE_REPORT_NUMBER_OF_RECORDS = 4;
-	private static final int OP_CODE_NUMBER_OF_STORED_RECORDS_RESPONSE = 5;
-	private static final int OP_CODE_RESPONSE_CODE = 6;
-
-	private static final int OPERATOR_NULL = 0;
-	private static final int OPERATOR_ALL_RECORDS = 1;
-	private static final int OPERATOR_LESS_THEN_OR_EQUAL = 2;
-	private static final int OPERATOR_GREATER_THEN_OR_EQUAL = 3;
-	private static final int OPERATOR_WITHING_RANGE = 4;
-	private static final int OPERATOR_FIRST_RECORD = 5;
-	private static final int OPERATOR_LAST_RECORD = 6;
-
-	/**
-	 * The filter type is used for range operators ({@link #OPERATOR_LESS_THEN_OR_EQUAL}, {@link #OPERATOR_GREATER_THEN_OR_EQUAL}, {@link #OPERATOR_WITHING_RANGE}.<br/>
-	 * The syntax of the operand is: [Filter Type][Minimum][Maximum].<br/>
-	 * This filter selects the records by the sequence number.
-	 */
-	private static final int FILTER_TYPE_SEQUENCE_NUMBER = 1;
-	/**
-	 * The filter type is used for range operators ({@link #OPERATOR_LESS_THEN_OR_EQUAL}, {@link #OPERATOR_GREATER_THEN_OR_EQUAL}, {@link #OPERATOR_WITHING_RANGE}.<br/>
-	 * The syntax of the operand is: [Filter Type][Minimum][Maximum].<br/>
-	 * This filter selects the records by the user facing time (base time + offset time).
-	 */
-	private static final int FILTER_TYPE_USER_FACING_TIME = 2;
-	private static final int RESPONSE_SUCCESS = 1;
-	private static final int RESPONSE_OP_CODE_NOT_SUPPORTED = 2;
-	private static final int RESPONSE_INVALID_OPERATOR = 3;
-	private static final int RESPONSE_OPERATOR_NOT_SUPPORTED = 4;
-	private static final int RESPONSE_INVALID_OPERAND = 5;
-	private static final int RESPONSE_NO_RECORDS_FOUND = 6;
-	private static final int RESPONSE_ABORT_UNSUCCESSFUL = 7;
-	private static final int RESPONSE_PROCEDURE_NOT_COMPLETED = 8;
-	private static final int RESPONSE_OPERAND_NOT_SUPPORTED = 9;
-
+	private BluetoothGattCharacteristic mCGMFeatureCharacteristic;
 	private BluetoothGattCharacteristic mCGMMeasurementCharacteristic;
-	private BluetoothGattCharacteristic mCGMOpsControlPointCharacteristic;
+	private BluetoothGattCharacteristic mCGMSpecificOpsControlPointCharacteristic;
 	private BluetoothGattCharacteristic mRecordAccessControlPointCharacteristic;
 
 	private SparseArray<CGMSRecord> mRecords = new SparseArray<>();
 	private boolean mAbort;
+	/** A flag set to true if the remote device supports E2E CRC. */
+	private boolean mSecured;
 	private long mSessionStartTime;
 
 	CGMSManager(final Context context) {
@@ -118,163 +87,150 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 
 		@Override
 		protected void initialize(@NonNull final BluetoothDevice device) {
+			// Enable Battery service
 			super.initialize(device);
-			enableNotifications(mCGMMeasurementCharacteristic);
-			enableIndications(mCGMOpsControlPointCharacteristic)
-				.done(() -> mSessionStartTime = System.currentTimeMillis());
-			writeCharacteristic(mCGMOpsControlPointCharacteristic, new byte[] { 26 });
-			enableIndications(mRecordAccessControlPointCharacteristic);
+
+			// Enable Continuous Glucose Measurement notifications
+			enableNotifications(mCGMMeasurementCharacteristic)
+					.with(new ContinuousGlucoseMeasurementDataCallback() {
+						@Override
+						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+							log(LogContract.Log.Level.APPLICATION, "\"" + CGMMeasurementParser.parse(mCGMMeasurementCharacteristic) + "\" received");
+							super.onDataReceived(device, data);
+						}
+
+						@Override
+						public void onContinuousGlucoseMeasurementReceived(@NonNull final BluetoothDevice device, final float glucoseConcentration, @Nullable final Float cgmTrend, @Nullable final Float cgmQuality, final CGMStatus status, final int timeOffset, final boolean secured) {
+							final long timestamp = mSessionStartTime + (timeOffset * 60000L); // Sequence number is in minutes since Start Session
+							final CGMSRecord record = new CGMSRecord(timeOffset, glucoseConcentration, timestamp);
+							mCallbacks.onCGMValueReceived(device, record);
+						}
+
+						@Override
+						public void onContinuousGlucoseMeasurementReceivedWithCrcError(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+							log(LogContract.Log.Level.WARNING, "Continuous Glucose Measurement record received with CRC error");
+						}
+					})
+					.fail((error) -> log(LogContract.Log.Level.WARNING, "Failed to enable Continuous Glucose Measurement notifications (" + error + ")"));
+
+			// Enable CGM Specific Ops indications
+			enableIndications(mCGMSpecificOpsControlPointCharacteristic)
+					.with(new CGMSpecificOpsControlPointDataCallback() {
+						@Override
+						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+							log(LogContract.Log.Level.APPLICATION, "\"" + CGMSpecificOpsControlPointParser.parse(mCGMSpecificOpsControlPointCharacteristic) + "\" received");
+							super.onDataReceived(device, data);
+						}
+
+						@Override
+						public void onCGMSpecificOpsOperationCompleted(@NonNull final BluetoothDevice device, final int requestCode, final boolean secured) {
+							switch (requestCode) {
+								case CGM_OP_CODE_START_SESSION:
+									mSessionStartTime = System.currentTimeMillis();
+									log(LogContract.Log.Level.APPLICATION, "Session started");
+									break;
+								case CGM_OP_CODE_STOP_SESSION:
+									mSessionStartTime = 0;
+									log(LogContract.Log.Level.APPLICATION, "Session stopped");
+									break;
+							}
+						}
+
+						@Override
+						public void onCGMSpecificOpsOperationError(@NonNull final BluetoothDevice device, final int requestCode, final int error, final boolean secured) {
+							switch (requestCode) {
+								case CGM_OP_CODE_START_SESSION:
+									mSessionStartTime = 0;
+									log(LogContract.Log.Level.WARNING, "Session not started, error " + error);
+									break;
+								case CGM_OP_CODE_STOP_SESSION:
+									mSessionStartTime = 0;
+									log(LogContract.Log.Level.APPLICATION, "Session stopped, error " + error);
+									break;
+							}
+						}
+
+						@Override
+						public void onCGMSpecificOpsResponseReceivedWithCrcError(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+							log(LogContract.Log.Level.ERROR, "Request failed: CRC error");
+						}
+					});
+
+			enableIndications(mRecordAccessControlPointCharacteristic)
+					.with(new RecordAccessControlPointDataCallback() {
+						@Override
+						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+							log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(mRecordAccessControlPointCharacteristic) + "\" received");
+							super.onDataReceived(device, data);
+						}
+
+						@Override
+						public void onRecordAccessOperationCompleted(@NonNull final BluetoothDevice device, final int requestCode) {
+							switch (requestCode) {
+								case RACP_OP_CODE_ABORT_OPERATION:
+									mCallbacks.onOperationAborted(device);
+									break;
+								default:
+									mCallbacks.onOperationCompleted(device);
+									break;
+							}
+						}
+
+						@Override
+						public void onRecordAccessOperationCompletedWithNoRecordsFound(@NonNull final BluetoothDevice device, final int requestCode) {
+							mCallbacks.onOperationCompleted(device);
+						}
+
+						@Override
+						public void onNumberOfRecordsReceived(@NonNull final BluetoothDevice device, final int numberOfRecords) {
+							mCallbacks.onNumberOfRecordsRequested(device, numberOfRecords);
+							if (numberOfRecords > 0) {
+								writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportNumberOfAllStoredRecords());
+							} else {
+								mCallbacks.onOperationCompleted(device);
+							}
+						}
+
+						@Override
+						public void onRecordAccessOperationError(@NonNull final BluetoothDevice device, final int requestCode, final int errorCode) {
+							log(LogContract.Log.Level.WARNING, "Record Access operation failed (error " + errorCode + ")");
+							if (errorCode == RACP_ERROR_OP_CODE_NOT_SUPPORTED) {
+								mCallbacks.onOperationNotSupported(device);
+							} else {
+								mCallbacks.onOperationFailed(device);
+							}
+						}
+					})
+					.fail((error) -> log(LogContract.Log.Level.WARNING, "Failed to enabled Record Access Control Point indications (error " + error + ")"));
+
+			// Start Continuous Glucose session
+			writeCharacteristic(mCGMSpecificOpsControlPointCharacteristic, CGMSpecificOpsControlPointData.startSession(mSecured))
+					.done(() -> log(LogContract.Log.Level.APPLICATION, "\"" + CGMSpecificOpsControlPointParser.parse(mCGMSpecificOpsControlPointCharacteristic) + "\" sent"))
+					.fail((error) -> log(LogContract.Log.Level.ERROR, "Failed to start session (error " + error + ")"));
 		}
 
 		@Override
 		protected boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(CGMS_UUID);
 			if (service != null) {
+				mCGMFeatureCharacteristic = service.getCharacteristic(CGM_FEAURE_UUID);
 				mCGMMeasurementCharacteristic = service.getCharacteristic(CGM_MEASUREMENT_UUID);
-				mCGMOpsControlPointCharacteristic = service.getCharacteristic(CGM_OPS_CONTROL_POINT_UUID);
+				mCGMSpecificOpsControlPointCharacteristic = service.getCharacteristic(CGM_OPS_CONTROL_POINT_UUID);
 				mRecordAccessControlPointCharacteristic = service.getCharacteristic(RACP_UUID);
 			}
-			return mCGMMeasurementCharacteristic != null && mCGMOpsControlPointCharacteristic != null && mRecordAccessControlPointCharacteristic != null;
-		}
-
-		@Override
-		protected boolean isOptionalServiceSupported(@NonNull final BluetoothGatt gatt) {
-			super.isOptionalServiceSupported(gatt); // ignore the result
-			final BluetoothGattService service = gatt.getService(CGMS_UUID);
-			if (service != null) {
-				mCGMOpsControlPointCharacteristic = service.getCharacteristic(CGM_OPS_CONTROL_POINT_UUID);
-			}
-			return mCGMOpsControlPointCharacteristic != null;
+			return mCGMFeatureCharacteristic != null && mCGMMeasurementCharacteristic != null &&
+					mCGMSpecificOpsControlPointCharacteristic != null && mRecordAccessControlPointCharacteristic != null;
 		}
 
 		@Override
 		protected void onDeviceDisconnected() {
 			super.onDeviceDisconnected();
-			mCGMOpsControlPointCharacteristic = null;
+			mCGMFeatureCharacteristic = null;
 			mCGMMeasurementCharacteristic = null;
+			mCGMSpecificOpsControlPointCharacteristic = null;
 			mRecordAccessControlPointCharacteristic = null;
 		}
-
-		@Override
-		protected void onCharacteristicWrite(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			if (characteristic.getUuid().equals(RACP_UUID)) {
-				log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(characteristic) + "\" sent");
-			} else { // uuid == CGM_OPS_CONTROL_POINT_UUID
-				log(LogContract.Log.Level.APPLICATION, "\"" + CGMSpecificOpsControlPointParser.parse(characteristic) + "\" sent");
-			}
-		}
-
-		@Override
-		public void onCharacteristicNotified(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			log(LogContract.Log.Level.APPLICATION, "\"" + CGMMeasurementParser.parse(characteristic) + "\" received");
-
-			// CGM Measurement characteristic may have one or more CGM records
-			int totalSize = characteristic.getValue().length;
-			int offset = 0;
-			while (offset < totalSize) {
-				final int cgmSize = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
-				final float cgmValue = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset + 2);
-				final int sequenceNumber = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset + 4);
-				final long timestamp = mSessionStartTime + (sequenceNumber * 60000L); // Sequence number is in minutes since Start Session
-
-				//This will send callback to CGMSActivity when new concentration value is received from CGMS device
-				final CGMSRecord cgmsRecord = new CGMSRecord(sequenceNumber, cgmValue, timestamp);
-				mRecords.put(cgmsRecord.sequenceNumber, cgmsRecord);
-				mCallbacks.onCGMValueReceived(gatt.getDevice(), cgmsRecord);
-
-				offset += cgmSize;
-			}
-		}
-
-		@Override
-		protected void onCharacteristicIndicated(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			if (characteristic.getUuid().equals(RACP_UUID)) {
-				log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(characteristic) + "\" received");
-
-				// Record Access Control Point characteristic
-				int offset = 0;
-				final int opCode = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
-				offset += 2; // skip the operator
-
-				if (opCode == OP_CODE_NUMBER_OF_STORED_RECORDS_RESPONSE) {
-					// We've obtained the number of all records
-					final int number = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
-
-					mCallbacks.onNumberOfRecordsRequested(gatt.getDevice(), number);
-
-					// Request the records
-					if (number > 0) {
-						final BluetoothGattCharacteristic racpCharacteristic = mRecordAccessControlPointCharacteristic;
-						setOpCode(racpCharacteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_ALL_RECORDS);
-						writeCharacteristic(racpCharacteristic);
-					} else {
-						mCallbacks.onOperationCompleted(gatt.getDevice());
-					}
-				} else if (opCode == OP_CODE_RESPONSE_CODE) {
-					final int requestedOpCode = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
-					final int responseCode = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 1);
-					DebugLogger.d(TAG, "Response result for: " + requestedOpCode + " is: " + responseCode);
-
-					switch (responseCode) {
-						case RESPONSE_SUCCESS:
-							if (!mAbort)
-								mCallbacks.onOperationCompleted(gatt.getDevice());
-							else
-								mCallbacks.onOperationAborted(gatt.getDevice());
-							break;
-						case RESPONSE_NO_RECORDS_FOUND:
-							mCallbacks.onOperationCompleted(gatt.getDevice());
-							break;
-						case RESPONSE_OP_CODE_NOT_SUPPORTED:
-							mCallbacks.onOperationNotSupported(gatt.getDevice());
-							break;
-						case RESPONSE_PROCEDURE_NOT_COMPLETED:
-						case RESPONSE_ABORT_UNSUCCESSFUL:
-						default:
-							mCallbacks.onOperationFailed(gatt.getDevice());
-							break;
-					}
-					mAbort = false;
-				}
-			} else { // uuid == CGM_OPS_CONTROL_POINT_UUID
-				log(LogContract.Log.Level.APPLICATION, "\"" + CGMSpecificOpsControlPointParser.parse(characteristic) + "\" received");
-			}
-		}
 	};
-
-	/**
-	 * Writes given operation parameters to the characteristic
-	 *
-	 * @param characteristic the characteristic to write. This must be the Record Access Control Point characteristic
-	 * @param opCode         the operation code
-	 * @param operator       the operator (see {@link #OPERATOR_NULL} and others
-	 * @param params         optional parameters (one for >=, <=, two for the range, none for other operators)
-	 */
-	private void setOpCode(final BluetoothGattCharacteristic characteristic, final int opCode, final int operator, final Integer... params) {
-		final int size = 2 + ((params.length > 0) ? 1 : 0) + params.length * 2; // 1 byte for opCode, 1 for operator, 1 for filter type (if parameters exists) and 2 for each parameter
-		characteristic.setValue(new byte[size]);
-
-		// write the operation code
-		int offset = 0;
-		characteristic.setValue(opCode, BluetoothGattCharacteristic.FORMAT_UINT8, offset);
-		offset += 1;
-
-		// write the operator. This is always present but may be equal to OPERATOR_NULL
-		characteristic.setValue(operator, BluetoothGattCharacteristic.FORMAT_UINT8, offset);
-		offset += 1;
-
-		// if parameters exists, append them. Parameters should be sorted from minimum to maximum. Currently only one or two params are allowed
-		if (params.length > 0) {
-			// our implementation use only sequence number as a filer type
-			characteristic.setValue(FILTER_TYPE_SEQUENCE_NUMBER, BluetoothGattCharacteristic.FORMAT_UINT8, offset);
-			offset += 1;
-
-			for (final Integer i : params) {
-				characteristic.setValue(i, BluetoothGattCharacteristic.FORMAT_UINT16, offset);
-				offset += 2;
-			}
-		}
-	}
 
 	/**
 	 * Returns a list of CGM records obtained from this device. The key in the array is the
@@ -288,12 +244,12 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 	 */
 	public void clear() {
 		mRecords.clear();
-		mCallbacks.onDatasetClear(getBluetoothDevice());
+		mCallbacks.onDatasetCleared(getBluetoothDevice());
 	}
 
 	/**
 	 * Sends the request to obtain the last (most recent) record from glucose device. The data will be returned to Glucose Measurement characteristic as a notification followed by Record Access
-	 * Control Point indication with status code ({@link #RESPONSE_SUCCESS} or other in case of error.
+	 * Control Point indication with status code Success or other in case of error.
 	 */
 	public void getLastRecord() {
 		if (mRecordAccessControlPointCharacteristic == null)
@@ -301,15 +257,13 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
-
-		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
-		setOpCode(characteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_LAST_RECORD);
-		writeCharacteristic(characteristic);
+		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportLastStoredRecord());
 	}
 
 	/**
-	 * Sends the request to obtain the first (oldest) record from glucose device. The data will be returned to Glucose Measurement characteristic as a notification followed by Record Access Control
-	 * Point indication with status code ({@link #RESPONSE_SUCCESS} or other in case of error.
+	 * Sends the request to obtain the first (oldest) record from glucose device.
+	 * The data will be returned to Glucose Measurement characteristic as a notification followed by Record Access Control
+	 * Point indication with status code Success or other in case of error.
 	 */
 	public void getFirstRecord() {
 		if (mRecordAccessControlPointCharacteristic == null)
@@ -317,29 +271,25 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
-
-		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
-		setOpCode(characteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_FIRST_RECORD);
-		writeCharacteristic(characteristic);
+		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportFirstStoredRecord());
 	}
 
 	/**
-	 * Sends abort operation signal to the device
+	 * Sends abort operation signal to the device.
 	 */
 	public void abort() {
 		if (mRecordAccessControlPointCharacteristic == null)
 			return;
 
 		mAbort = true;
-		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
-		setOpCode(characteristic, OP_CODE_ABORT_OPERATION, OPERATOR_NULL);
-		writeCharacteristic(characteristic);
+		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.abortOperation());
 	}
 
 	/**
-	 * Sends the request to obtain all records from glucose device. Initially we want to notify him/her about the number of the records so the {@link #OP_CODE_REPORT_NUMBER_OF_RECORDS} is send. The
-	 * data will be returned to Glucose Measurement characteristic as a notification followed by Record Access Control Point indication with status code ({@link #RESPONSE_SUCCESS} or other in case of
-	 * error.
+	 * Sends the request to obtain all records from glucose device. Initially we want to notify the user
+	 * about the number of the records so the Report Number of Stored Records request is send. The
+	 * data will be returned to Glucose Measurement characteristic as a notification followed by
+	 * Record Access Control Point indication with status code Success or other in case of error.
 	 */
 	public void getAllRecords() {
 		if (mRecordAccessControlPointCharacteristic == null)
@@ -347,16 +297,14 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
-
-		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
-		setOpCode(characteristic, OP_CODE_REPORT_NUMBER_OF_RECORDS, OPERATOR_ALL_RECORDS);
-		writeCharacteristic(characteristic);
+		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportNumberOfAllStoredRecords());
 	}
 
 	/**
-	 * Sends the request to obtain all records from glucose device. Initially we want to notify him/her about the number of the records so the {@link #OP_CODE_REPORT_NUMBER_OF_RECORDS} is send. The
-	 * data will be returned to Glucose Measurement characteristic as a notification followed by Record Access Control Point indication with status code ({@link #RESPONSE_SUCCESS} or other in case of
-	 * error.
+	 * Sends the request to obtain all records from glucose device. Initially we want to notify the user
+	 * about the number of the records so the Report Number of Stored Records request is send. The
+	 * data will be returned to Glucose Measurement characteristic as a notification followed by
+	 * Record Access Control Point indication with status code Success or other in case of error.
 	 */
 	public void refreshRecords() {
 		if (mRecordAccessControlPointCharacteristic == null)
@@ -367,28 +315,27 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 		} else {
 			mCallbacks.onOperationStarted(getBluetoothDevice());
 
-			// obtain the last sequence number
+			// Obtain the last sequence number
 			final int sequenceNumber = mRecords.keyAt(mRecords.size() - 1) + 1;
-
-			final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
-			setOpCode(characteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_GREATER_THEN_OR_EQUAL, sequenceNumber);
-			writeCharacteristic(characteristic);
+			writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber));
 			// Info:
 			// Operators OPERATOR_GREATER_THEN_OR_EQUAL, OPERATOR_LESS_THEN_OR_EQUAL and OPERATOR_RANGE are not supported by the CGMS sample from SDK
 			// The "Operation not supported" response will be received
 		}
 	}
 
+	/**
+	 * Sends the request to remove all stored records from the Continuous Glucose Monitor device.
+	 * This feature is not supported by the CGMS sample from the SDK, so monitor will answer with
+	 * the Op Code Not Supported error.
+	 */
 	public void deleteAllRecords() {
 		if (mRecordAccessControlPointCharacteristic == null)
 			return;
 
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
-
-		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
-		setOpCode(characteristic, OP_CODE_DELETE_STORED_RECORDS, OPERATOR_ALL_RECORDS);
-		writeCharacteristic(characteristic);
+		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.deleteAllStoredRecords());
 	}
 }
 
