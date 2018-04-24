@@ -76,7 +76,7 @@ public class CGMSpecificOpsControlPointParser {
 				final int calTypeSampleLocation = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
 				final int calType = calTypeSampleLocation & 0x0F;
 				final int calSampleLocation = (calTypeSampleLocation & 0xF0) >> 4;
-				// final int calNextCalibrationTime = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+				final int calNextCalibrationTime = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
 				// offset += 2;
 				// final int calCalibrationDataRecordNumber = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
 				// offset += 2;
@@ -87,7 +87,7 @@ public class CGMSpecificOpsControlPointParser {
 				builder.append("Time: ").append(calTime).append(" min\n");
 				builder.append("Type: ").append(parseType(calType)).append("\n");
 				builder.append("Sample Location: ").append(parseSampleLocation(calSampleLocation)).append("\n");
-				// builder.append("Next Calibration Time: ").append(parseNextCalibrationTime(calNextCalibrationTime)).append(" min\n"); // field ignored on Set
+				builder.append("Next Calibration Time: ").append(parseNextCalibrationTime(calNextCalibrationTime)).append(" min\n"); // field ignored on Set
 				// builder.append("Data Record Number: ").append(calCalibrationDataRecordNumber).append("\n"); // field ignored on Set
 				// parseStatus(builder, calStatus); // field ignored on Set
 				break;
