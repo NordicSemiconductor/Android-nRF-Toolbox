@@ -92,7 +92,10 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 						}
 
 						@Override
-						public void onIntermediateCuffPressureReceived(@NonNull final BluetoothDevice device, final float cuffPressure, final int unit, @Nullable final Float pulseRate, @Nullable final Integer userID, @Nullable final ICPStatus status, @Nullable final Calendar calendar) {
+						public void onIntermediateCuffPressureReceived(@NonNull final BluetoothDevice device,
+																	   final float cuffPressure, final int unit,
+																	   @Nullable final Float pulseRate, @Nullable final Integer userID,
+																	   @Nullable final BPMStatus status, @Nullable final Calendar calendar) {
 							mCallbacks.onIntermediateCuffPressureReceived(device, cuffPressure, unit, pulseRate, userID, status, calendar);
 						}
 
@@ -113,7 +116,11 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 						}
 
 						@Override
-						public void onBloodPressureMeasurementReceived(@NonNull final BluetoothDevice device, final float systolic, final float diastolic, final float meanArterialPressure, final int unit, @Nullable final Float pulseRate, @Nullable final Integer userID, @Nullable final BPMStatus status, @Nullable final Calendar calendar) {
+						public void onBloodPressureMeasurementReceived(@NonNull final BluetoothDevice device,
+																	   final float systolic, final float diastolic, final float meanArterialPressure,
+																	   final int unit, @Nullable final Float pulseRate,
+																	   @Nullable final Integer userID, @Nullable final BPMStatus status,
+																	   @Nullable final Calendar calendar) {
 							mCallbacks.onBloodPressureMeasurementReceived(device, systolic, diastolic, meanArterialPressure, unit, pulseRate, userID, status, calendar);
 						}
 

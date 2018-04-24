@@ -126,7 +126,10 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 	}
 
 	@Override
-	public void onBloodPressureMeasurementReceived(@NonNull final BluetoothDevice device, final float systolic, final float diastolic, final float meanArterialPressure, final int unit, @Nullable final Float pulseRate, @Nullable final Integer userID, @Nullable final BPMStatus status, @Nullable final Calendar calendar) {
+	public void onBloodPressureMeasurementReceived(@NonNull final BluetoothDevice device,
+												   final float systolic, final float diastolic, final float meanArterialPressure, final int unit,
+												   @Nullable final Float pulseRate, @Nullable final Integer userID,
+												   @Nullable final BPMStatus status, @Nullable final Calendar calendar) {
 		runOnUiThread(() -> {
 			mSystolicView.setText(String.valueOf(systolic));
 			mDiastolicView.setText(String.valueOf(diastolic));
@@ -147,7 +150,9 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 	}
 
 	@Override
-	public void onIntermediateCuffPressureReceived(@NonNull final BluetoothDevice device, final float cuffPressure, final int unit, @Nullable final Float pulseRate, @Nullable final Integer userID, @Nullable final ICPStatus status, @Nullable final Calendar calendar) {
+	public void onIntermediateCuffPressureReceived(@NonNull final BluetoothDevice device, final float cuffPressure, final int unit,
+												   @Nullable final Float pulseRate, @Nullable final Integer userID,
+												   @Nullable final BPMStatus status, @Nullable final Calendar calendar) {
 		runOnUiThread(() -> {
 			mSystolicView.setText(String.valueOf(cuffPressure));
 			mDiastolicView.setText(R.string.not_available_value);
