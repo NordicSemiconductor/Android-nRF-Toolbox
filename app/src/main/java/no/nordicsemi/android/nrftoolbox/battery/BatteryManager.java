@@ -48,6 +48,7 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 					.with(new BatteryLevelDataCallback() {
 						@Override
 						public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
+							log(LogContract.Log.Level.APPLICATION,"Battery Level received: " + batteryLevel + "%");
 							mBatteryLevel = batteryLevel;
 							mCallbacks.onBatteryLevelChanged(device, batteryLevel);
 						}
@@ -83,7 +84,7 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 	}
 
 	/**
-	 *
+	 * Disables Battery Level notifications on the Server.
 	 */
 	public void disableBatteryLevelCharacteristicNotifications() {
 		if (isConnected()) {
