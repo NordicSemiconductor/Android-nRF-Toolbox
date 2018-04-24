@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
+import no.nordicsemi.android.ble.callback.DataCallback;
 import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelDataCallback;
 import no.nordicsemi.android.ble.data.Data;
 import no.nordicsemi.android.log.LogContract;
@@ -42,22 +43,24 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 	@Override
 	protected abstract BatteryManagerGattCallback getGattCallback();
 
+	private DataCallback mBatteryLevelDataCallback = new BatteryLevelDataCallback() {
+		@Override
+		public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
+			log(LogContract.Log.Level.APPLICATION,"Battery Level received: " + batteryLevel + "%");
+			mBatteryLevel = batteryLevel;
+			mCallbacks.onBatteryLevelChanged(device, batteryLevel);
+		}
+
+		@Override
+		public void onInvalidDataReceived(@NonNull final BluetoothDevice device, final @NonNull Data data) {
+			log(LogContract.Log.Level.WARNING, "Invalid Battery Level data received: " + data);
+		}
+	};
+
 	public void readBatteryLevelCharacteristic() {
 		if (isConnected()) {
 			readCharacteristic(mBatteryLevelCharacteristic)
-					.with(new BatteryLevelDataCallback() {
-						@Override
-						public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
-							log(LogContract.Log.Level.APPLICATION,"Battery Level received: " + batteryLevel + "%");
-							mBatteryLevel = batteryLevel;
-							mCallbacks.onBatteryLevelChanged(device, batteryLevel);
-						}
-
-						@Override
-						public void onInvalidDataReceived(@NonNull final BluetoothDevice device, final @NonNull Data data) {
-							log(LogContract.Log.Level.WARNING, "Invalid Battery Level data received: " + data);
-						}
-					})
+					.with(mBatteryLevelDataCallback)
 					.fail(status -> log(LogContract.Log.Level.WARNING, "Battery Level characteristic not found"));
 		}
 	}
@@ -66,18 +69,7 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 		if (isConnected()) {
 			// If the Battery Level characteristic is null, the request will be ignored
 			enableNotifications(mBatteryLevelCharacteristic)
-					.with(new BatteryLevelDataCallback() {
-						@Override
-						public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
-							mBatteryLevel = batteryLevel;
-							mCallbacks.onBatteryLevelChanged(device, batteryLevel);
-						}
-
-						@Override
-						public void onInvalidDataReceived(@NonNull final BluetoothDevice device, final @NonNull Data data) {
-							log(LogContract.Log.Level.WARNING, "Invalid Battery Level data received: " + data);
-						}
-					})
+					.with(mBatteryLevelDataCallback)
 					.done(() -> log(LogContract.Log.Level.INFO, "Battery Level notifications enabled"))
 					.fail(status -> log(LogContract.Log.Level.WARNING, "Battery Level characteristic not found"));
 		}

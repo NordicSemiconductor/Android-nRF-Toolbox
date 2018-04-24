@@ -127,11 +127,6 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 							switch (requestCode) {
 								case CGM_OP_CODE_START_SESSION:
 									mSessionStartTime = System.currentTimeMillis();
-									log(LogContract.Log.Level.APPLICATION, "Session started");
-									break;
-								case CGM_OP_CODE_STOP_SESSION:
-									mSessionStartTime = 0;
-									log(LogContract.Log.Level.APPLICATION, "Session stopped");
 									break;
 							}
 						}
@@ -140,12 +135,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 						public void onCGMSpecificOpsOperationError(@NonNull final BluetoothDevice device, final int requestCode, final int error, final boolean secured) {
 							switch (requestCode) {
 								case CGM_OP_CODE_START_SESSION:
-									mSessionStartTime = 0;
-									log(LogContract.Log.Level.WARNING, "Session not started, error " + error);
-									break;
 								case CGM_OP_CODE_STOP_SESSION:
 									mSessionStartTime = 0;
-									log(LogContract.Log.Level.APPLICATION, "Session stopped, error " + error);
 									break;
 							}
 						}
@@ -185,7 +176,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 						public void onNumberOfRecordsReceived(@NonNull final BluetoothDevice device, final int numberOfRecords) {
 							mCallbacks.onNumberOfRecordsRequested(device, numberOfRecords);
 							if (numberOfRecords > 0) {
-								writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportNumberOfAllStoredRecords());
+								final int sequenceNumber = mRecords.keyAt(mRecords.size() - 1) + 1;
+								writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber));
 							} else {
 								mCallbacks.onOperationCompleted(device);
 							}
