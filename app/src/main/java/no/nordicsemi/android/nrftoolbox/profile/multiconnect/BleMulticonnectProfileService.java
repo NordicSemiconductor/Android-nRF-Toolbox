@@ -79,7 +79,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 	private List<BluetoothDevice> mManagedDevices;
 	private Handler mHandler;
 
-	protected boolean mBinded;
+	protected boolean mBound;
 	private boolean mActivityIsChangingConfiguration;
 
 	private final BroadcastReceiver mBluetoothStateBroadcastReceiver = new BroadcastReceiver() {
@@ -251,13 +251,13 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 
 	@Override
 	public IBinder onBind(final Intent intent) {
-		mBinded = true;
+		mBound = true;
 		return getBinder();
 	}
 
 	@Override
 	public final void onRebind(final Intent intent) {
-		mBinded = true;
+		mBound = true;
 
 		if (!mActivityIsChangingConfiguration) {
 			onRebind();
@@ -275,7 +275,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 
 	@Override
 	public final boolean onUnbind(final Intent intent) {
-		mBinded = false;
+		mBound = false;
 
 		if (!mActivityIsChangingConfiguration) {
 			if (!mManagedDevices.isEmpty()) {
@@ -435,7 +435,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 	public void onDeviceDisconnected(final BluetoothDevice device) {
 		// Note: if BleManager#shouldAutoConnect() for this device returned true, this callback will be
 		// invoked ONLY when user requested disconnection (using Disconnect button). If the device
-		// disconnects due to a link loss, the onLinklossOccur(BluetoothDevice) method will be called instead.
+		// disconnects due to a link loss, the onLinklossOccurred(BluetoothDevice) method will be called instead.
 
 		// We no longer want to keep the device in the service
 		mManagedDevices.remove(device);
@@ -449,13 +449,13 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 
 		// When user disconnected the last device while the activity was not bound the service can be stopped
-		if (!mBinded && mManagedDevices.isEmpty()) {
+		if (!mBound && mManagedDevices.isEmpty()) {
 			stopSelf();
 		}
 	}
 
 	@Override
-	public void onLinklossOccur(final BluetoothDevice device) {
+	public void onLinklossOccurred(final BluetoothDevice device) {
 		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
 		broadcast.putExtra(EXTRA_DEVICE, device);
 		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_LINK_LOSS);
@@ -512,7 +512,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 	}
 
 	@Override
-	public void onBonded(final BluetoothDevice device) {
+	public void onBound(final BluetoothDevice device) {
 		showToast(no.nordicsemi.android.nrftoolbox.common.R.string.bonded);
 
 		final Intent broadcast = new Intent(BROADCAST_BOND_STATE);

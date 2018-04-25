@@ -167,12 +167,12 @@ public class RSCActivity extends BleProfileServiceReadyActivity<RSCService.RSCBi
 	}
 
 	@Override
-	protected void onServiceBinded(final RSCService.RSCBinder binder) {
+	protected void onServiceBound(final RSCService.RSCBinder binder) {
 		// not used
 	}
 
 	@Override
-	protected void onServiceUnbinded() {
+	protected void onServiceUnbound() {
 		// not used
 	}
 

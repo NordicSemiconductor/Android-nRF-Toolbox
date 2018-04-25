@@ -262,7 +262,7 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	public void onDeviceConnected(final BluetoothDevice device) {
 		super.onDeviceConnected(device);
 
-		if (!mBinded) {
+		if (!mBound) {
 			createBackgroundNotification();
 		}
 	}
@@ -274,12 +274,12 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	}
 
 	@Override
-	public void onLinklossOccur(final BluetoothDevice device) {
+	public void onLinklossOccurred(final BluetoothDevice device) {
 		mServerManager.cancelConnection(device);
 		stopAlarm(device);
-		super.onLinklossOccur(device);
+		super.onLinklossOccurred(device);
 
-		if (!mBinded) {
+		if (!mBound) {
 			createBackgroundNotification();
 			if (BluetoothAdapter.getDefaultAdapter().isEnabled())
 				createLinklossNotification(device);
@@ -294,7 +294,7 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 		stopAlarm(device);
 		super.onDeviceDisconnected(device);
 
-		if (!mBinded) {
+		if (!mBound) {
 			cancelNotification(device);
 			createBackgroundNotification();
 		}

@@ -65,7 +65,7 @@ public class BleProfileService extends Service implements BleManagerCallbacks {
 	private BleManager mBleManager;
 	private Handler mHandler;
 
-	protected boolean mBinded;
+	protected boolean mBound;
 	private boolean mConnected;
 	private BluetoothDevice mBluetoothDevice;
 	private String mDeviceName;
@@ -157,18 +157,18 @@ public class BleProfileService extends Service implements BleManagerCallbacks {
 
 	@Override
 	public IBinder onBind(final Intent intent) {
-		mBinded = true;
+		mBound = true;
 		return getBinder();
 	}
 
 	@Override
 	public final void onRebind(final Intent intent) {
-		mBinded = true;
+		mBound = true;
 	}
 
 	@Override
 	public final boolean onUnbind(final Intent intent) {
-		mBinded = false;
+		mBound = false;
 
 		// We want the onRebind method be called if anything else binds to it again
 		return true;
@@ -261,7 +261,7 @@ public class BleProfileService extends Service implements BleManagerCallbacks {
 	@Override
 	public boolean shouldEnableBatteryLevelNotifications(final BluetoothDevice device) {
 		// By default the Battery Level notifications will be enabled only the activity is bound.
-		return mBinded;
+		return mBound;
 	}
 
 	@Override
@@ -304,7 +304,7 @@ public class BleProfileService extends Service implements BleManagerCallbacks {
 	}
 
 	@Override
-	public void onLinklossOccur(final BluetoothDevice device) {
+	public void onLinklossOccurred(final BluetoothDevice device) {
 		mConnected = false;
 
 		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);

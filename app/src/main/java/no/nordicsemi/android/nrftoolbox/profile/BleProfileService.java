@@ -81,7 +81,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	private BleManager<BleManagerCallbacks> mBleManager;
 	private Handler mHandler;
 
-	protected boolean mBinded;
+	protected boolean mBound;
 	private boolean mActivityIsChangingConfiguration;
 	private BluetoothDevice mBluetoothDevice;
 	private String mDeviceName;
@@ -234,13 +234,13 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 	@Override
 	public IBinder onBind(final Intent intent) {
-		mBinded = true;
+		mBound = true;
 		return getBinder();
 	}
 
 	@Override
 	public final void onRebind(final Intent intent) {
-		mBinded = true;
+		mBound = true;
 
 		if (!mActivityIsChangingConfiguration)
 			onRebind();
@@ -257,7 +257,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 	@Override
 	public final boolean onUnbind(final Intent intent) {
-		mBinded = false;
+		mBound = false;
 
 		if (!mActivityIsChangingConfiguration)
 			onUnbind();
@@ -424,7 +424,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 		// Note 2: if BleManager#shouldAutoConnect() for this device returned true, this callback will be
 		// invoked ONLY when user requested disconnection (using Disconnect button). If the device
-		// disconnects due to a link loss, the onLinklossOccur(BluetoothDevice) method will be called instead.
+		// disconnects due to a link loss, the onLinklossOccurred(BluetoothDevice) method will be called instead.
 
 		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
 		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
@@ -442,7 +442,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
-	public void onLinklossOccur(final BluetoothDevice device) {
+	public void onLinklossOccurred(final BluetoothDevice device) {
 		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
 		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_LINK_LOSS);
@@ -495,7 +495,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
-	public void onBonded(final BluetoothDevice device) {
+	public void onBound(final BluetoothDevice device) {
 		showToast(no.nordicsemi.android.nrftoolbox.common.R.string.bonded);
 
 		final Intent broadcast = new Intent(BROADCAST_BOND_STATE);

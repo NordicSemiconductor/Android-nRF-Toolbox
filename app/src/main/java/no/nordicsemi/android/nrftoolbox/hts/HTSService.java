@@ -108,7 +108,7 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 		broadcast.putExtra(EXTRA_TEMPERATURE, value);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 
-		if (!mBinded) {
+		if (!mBound) {
 			// Here we may update the notification to display the current temperature.
 			// TODO modify the notification here
 		}

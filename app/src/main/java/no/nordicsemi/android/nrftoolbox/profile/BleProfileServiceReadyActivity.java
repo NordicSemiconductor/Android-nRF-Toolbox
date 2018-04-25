@@ -112,7 +112,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 							break;
 						}
 						case BleProfileService.STATE_LINK_LOSS: {
-							onLinklossOccur(bluetoothDevice);
+							onLinklossOccurred(bluetoothDevice);
 							break;
 						}
 						case BleProfileService.STATE_CONNECTING: {
@@ -151,7 +151,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 							onBondingRequired(bluetoothDevice);
 							break;
 						case BluetoothDevice.BOND_BONDED:
-							onBonded(bluetoothDevice);
+							onBound(bluetoothDevice);
 							break;
 					}
 					break;
@@ -180,7 +180,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 			mBluetoothDevice = bleService.getBluetoothDevice();
 			mLogSession = mService.getLogSession();
 			Logger.d(mLogSession, "Activity bound to the service");
-			onServiceBinded(bleService);
+			onServiceBound(bleService);
 
 			// Update UI
 			mDeviceName = bleService.getDeviceName();
@@ -211,7 +211,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 			mDeviceName = null;
 			mBluetoothDevice = null;
 			mLogSession = null;
-			onServiceUnbinded();
+			onServiceUnbound();
 		}
 	};
 
@@ -277,7 +277,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 			mService = null;
 
 			Logger.d(mLogSession, "Activity unbound from the service");
-			onServiceUnbinded();
+			onServiceUnbound();
 			mDeviceName = null;
 			mBluetoothDevice = null;
 			mLogSession = null;
@@ -308,13 +308,13 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	 * Called when activity binds to the service. The parameter is the object returned in {@link Service#onBind(Intent)} method in your service. The method is
 	 * called when device gets connected or is created while sensor was connected before. You may use the binder as a sensor interface.
 	 */
-	protected abstract void onServiceBinded(E binder);
+	protected abstract void onServiceBound(E binder);
 
 	/**
 	 * Called when activity unbinds from the service. You may no longer use this binder because the sensor was disconnected. This method is also called when you
 	 * leave the activity being connected to the sensor in the background.
 	 */
-	protected abstract void onServiceUnbinded();
+	protected abstract void onServiceUnbound();
 
 	/**
 	 * Returns the service class for sensor communication. The service class must derive from {@link BleProfileService} in order to operate with this class.
@@ -511,7 +511,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 			mService = null;
 
 			Logger.d(mLogSession, "Activity unbound from the service");
-			onServiceUnbinded();
+			onServiceUnbound();
 			mDeviceName = null;
 			mBluetoothDevice = null;
 			mLogSession = null;
@@ -521,7 +521,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	}
 
 	@Override
-	public void onLinklossOccur(final BluetoothDevice device) {
+	public void onLinklossOccurred(final BluetoothDevice device) {
 		// empty default implementation
 	}
 
@@ -541,7 +541,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	}
 
 	@Override
-	public void onBonded(final BluetoothDevice device) {
+	public void onBound(final BluetoothDevice device) {
 		// empty default implementation
 	}
 

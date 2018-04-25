@@ -167,12 +167,12 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 	}
 
 	@Override
-	protected void onServiceBinded(final CSCService.CSCBinder binder) {
+	protected void onServiceBound(final CSCService.CSCBinder binder) {
 		// not used
 	}
 
 	@Override
-	protected void onServiceUnbinded() {
+	protected void onServiceUnbound() {
 		// not used
 	}
 

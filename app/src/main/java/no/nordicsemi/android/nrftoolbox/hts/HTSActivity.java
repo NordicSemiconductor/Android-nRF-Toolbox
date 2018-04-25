@@ -128,12 +128,12 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.RSCBi
 	}
 
 	@Override
-	protected void onServiceBinded(final HTSService.RSCBinder binder) {
+	protected void onServiceBound(final HTSService.RSCBinder binder) {
 		// not used
 	}
 
 	@Override
-	protected void onServiceUnbinded() {
+	protected void onServiceUnbound() {
 		// not used
 	}
 

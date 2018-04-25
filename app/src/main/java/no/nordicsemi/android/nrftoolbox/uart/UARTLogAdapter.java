@@ -25,6 +25,7 @@ package no.nordicsemi.android.nrftoolbox.uart;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.support.annotation.NonNull;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,7 +50,7 @@ public class UARTLogAdapter extends CursorAdapter {
 		mColors.put(Level.ERROR, Color.RED);
 	}
 
-	public UARTLogAdapter(Context context) {
+	UARTLogAdapter(@NonNull final Context context) {
 		super(context, null, 0);
 	}
 

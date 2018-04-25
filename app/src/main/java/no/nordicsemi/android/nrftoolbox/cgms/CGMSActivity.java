@@ -115,7 +115,7 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 	}
 
 	@Override
-	protected void onServiceBinded(final CGMService.CGMSBinder binder) {
+	protected void onServiceBound(final CGMService.CGMSBinder binder) {
 		mBinder = binder;
 		final SparseArray<CGMSRecord> cgmsRecords = binder.getRecords();
 		if (cgmsRecords != null && cgmsRecords.size() > 0) {
@@ -128,7 +128,7 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 	}
 
 	@Override
-	protected void onServiceUnbinded() {
+	protected void onServiceUnbound() {
 		mBinder = null;
 	}
 

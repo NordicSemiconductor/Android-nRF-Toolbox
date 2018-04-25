@@ -156,8 +156,8 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	}
 
 	@Override
-	public void onLinklossOccur(final BluetoothDevice device) {
-		super.onLinklossOccur(device);
+	public void onLinklossOccurred(final BluetoothDevice device) {
+		super.onLinklossOccurred(device);
 		sendMessageToWearables(Constants.UART.DEVICE_LINKLOSS, notNull(getDeviceName()));
 	}
 

@@ -78,12 +78,12 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 	}
 
 	@Override
-	protected void onServiceBinded(final ProximityService.ProximityBinder binder) {
+	protected void onServiceBound(final ProximityService.ProximityBinder binder) {
 		mDevicesView.setAdapter(mAdapter = new DeviceAdapter(binder));
 	}
 
 	@Override
-	protected void onServiceUnbinded() {
+	protected void onServiceUnbound() {
 		mDevicesView.setAdapter(mAdapter = null);
 	}
 
@@ -140,7 +140,7 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 	}
 
 	@Override
-	public void onLinklossOccur(final BluetoothDevice device) {
+	public void onLinklossOccurred(final BluetoothDevice device) {
 		if (mAdapter != null)
 			mAdapter.onDeviceStateChanged(device);
 

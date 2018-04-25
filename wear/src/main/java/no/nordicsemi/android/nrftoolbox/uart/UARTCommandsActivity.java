@@ -156,7 +156,7 @@ public class UARTCommandsActivity extends Activity implements UARTCommandsAdapte
 		mGoogleApiClient.unregisterConnectionFailedListener(this);
 		mGoogleApiClient = null;
 
-		// unbind if we were binded to the service.
+		// unbind if we were bound to the service.
 		unbindService(mServiceConnection);
 		LocalBroadcastManager.getInstance(this).unregisterReceiver(mServiceBroadcastReceiver);
 	}
@@ -219,7 +219,7 @@ public class UARTCommandsActivity extends Activity implements UARTCommandsAdapte
 
 	@Override
 	public void onMessageReceived(final MessageEvent messageEvent) {
-		// If the activity is binded to service it means that it has connected directly to the device. We ignore messages from the handheld.
+		// If the activity is bound to service it means that it has connected directly to the device. We ignore messages from the handheld.
 		if (mProfile != null)
 			return;
 

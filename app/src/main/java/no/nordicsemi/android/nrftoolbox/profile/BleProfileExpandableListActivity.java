@@ -278,7 +278,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	}
 
 	@Override
-	public void onLinklossOccur(final BluetoothDevice device) {
+	public void onLinklossOccurred(final BluetoothDevice device) {
 		mDeviceConnected = false;
 	}
 
@@ -298,7 +298,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	}
 
 	@Override
-	public void onBonded(final BluetoothDevice device) {
+	public void onBound(final BluetoothDevice device) {
 		showToast(R.string.bonded);
 	}
 

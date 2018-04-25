@@ -31,6 +31,7 @@ import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -57,19 +58,27 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 	private static final int LOG_SCROLLED_TO_BOTTOM = -2;
 
 	private static final int LOG_REQUEST_ID = 1;
-	private static final String[] LOG_PROJECTION = { LogContract.Log._ID, LogContract.Log.TIME, LogContract.Log.LEVEL, LogContract.Log.DATA };
+	private static final String[] LOG_PROJECTION = {LogContract.Log._ID, LogContract.Log.TIME, LogContract.Log.LEVEL, LogContract.Log.DATA};
 
-	/** The service UART interface that may be used to send data to the target. */
+	/**
+	 * The service UART interface that may be used to send data to the target.
+	 */
 	private UARTInterface mUARTInterface;
-	/** The adapter used to populate the list with log entries. */
+	/**
+	 * The adapter used to populate the list with log entries.
+	 */
 	private CursorAdapter mLogAdapter;
-	/** The log session created to log events related with the target device. */
+	/**
+	 * The log session created to log events related with the target device.
+	 */
 	private ILogSession mLogSession;
 
 	private EditText mField;
 	private Button mSendButton;
 
-	/** The last list view position. */
+	/**
+	 * The last list view position.
+	 */
 	private int mLogScrollPosition;
 
 	/**
@@ -128,7 +137,7 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mCommonBroadcastReceiver, makeIntentFilter());
+		LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mCommonBroadcastReceiver, makeIntentFilter());
 
 		// Load the last log list view scroll position
 		if (savedInstanceState != null) {
@@ -141,11 +150,11 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 		super.onStart();
 
 		/*
-		 * If the service has not been started before the following lines will not start it. However, if it's running, the Activity will be binded to it
+		 * If the service has not been started before the following lines will not start it. However, if it's running, the Activity will be bound to it
 		 * and notified via mServiceConnection.
 		 */
 		final Intent service = new Intent(getActivity(), UARTService.class);
-		getActivity().bindService(service, mServiceConnection, 0); // we pass 0 as a flag so the service will not be created if not exists
+		requireActivity().bindService(service, mServiceConnection, 0); // we pass 0 as a flag so the service will not be created if not exists
 	}
 
 	@Override
@@ -153,7 +162,7 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 		super.onStop();
 
 		try {
-			getActivity().unbindService(mServiceConnection);
+			requireActivity().unbindService(mServiceConnection);
 			mUARTInterface = null;
 		} catch (final IllegalArgumentException e) {
 			// do nothing, we were not connected to the sensor
@@ -161,7 +170,7 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 	}
 
 	@Override
-	public void onSaveInstanceState(final Bundle outState) {
+	public void onSaveInstanceState(@NonNull final Bundle outState) {
 		super.onSaveInstanceState(outState);
 
 		// Save the last log list view scroll position
@@ -172,9 +181,8 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 
 	@Override
 	public void onDestroy() {
+		LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mCommonBroadcastReceiver);
 		super.onDestroy();
-
-		LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mCommonBroadcastReceiver);
 	}
 
 	@Override
@@ -196,26 +204,27 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 	}
 
 	@Override
-	public void onViewCreated(final View view, final Bundle savedInstanceState) {
+	public void onViewCreated(@NonNull final View view, final Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
 		// Create the log adapter, initially with null cursor
-		mLogAdapter = new UARTLogAdapter(getActivity());
+		mLogAdapter = new UARTLogAdapter(requireContext());
 		setListAdapter(mLogAdapter);
 	}
 
+	@NonNull
 	@Override
 	public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
 		switch (id) {
-		case LOG_REQUEST_ID: {
-			return new CursorLoader(getActivity(), mLogSession.getSessionEntriesUri(), LOG_PROJECTION, null, null, LogContract.Log.TIME);
+			case LOG_REQUEST_ID: {
+				return new CursorLoader(requireContext(), mLogSession.getSessionEntriesUri(), LOG_PROJECTION, null, null, LogContract.Log.TIME);
+			}
 		}
-		}
-		return null;
+		throw new UnsupportedOperationException("Could not create loader with ID " + id);
 	}
 
 	@Override
-	public void onLoadFinished(final Loader<Cursor> loader, final Cursor data) {
+	public void onLoadFinished(@NonNull final Loader<Cursor> loader, final Cursor data) {
 		// Here we have to restore the old saved scroll position, or scroll to the bottom if before adding new events it was scrolled to the bottom.  
 		final ListView list = getListView();
 		final int position = mLogScrollPosition;
@@ -233,7 +242,7 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 	}
 
 	@Override
-	public void onLoaderReset(final Loader<Cursor> loader) {
+	public void onLoaderReset(@NonNull final Loader<Cursor> loader) {
 		mLogAdapter.swapCursor(null);
 	}
 
@@ -253,15 +262,17 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 	public void onServiceStarted() {
 		// The service has been started, bind to it
 		final Intent service = new Intent(getActivity(), UARTService.class);
-		getActivity().bindService(service, mServiceConnection, 0);
+		requireActivity().bindService(service, mServiceConnection, 0);
 	}
 
 	/**
 	 * This method is called when user closes the pane in horizontal orientation. The EditText is no longer visible so we need to close the soft keyboard here.
 	 */
 	public void onFragmentHidden() {
-		InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(mField.getWindowToken(), 0);
+		final InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+		if (imm != null) {
+			imm.hideSoftInputFromWindow(mField.getWindowToken(), 0);
+		}
 	}
 
 	/**

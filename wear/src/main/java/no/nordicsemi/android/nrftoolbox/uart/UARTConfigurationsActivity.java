@@ -135,7 +135,7 @@ public class UARTConfigurationsActivity extends Activity implements GoogleApiCli
 		mGoogleApiClient.unregisterConnectionFailedListener(this);
 		mGoogleApiClient = null;
 
-		// If we were binded to the service, disconnect and unbind. The service will terminate itself when disconnected.
+		// If we were bound to the service, disconnect and unbind. The service will terminate itself when disconnected.
 		if (mBinder != null) {
 			mBinder.disconnect();
 		}
@@ -182,7 +182,7 @@ public class UARTConfigurationsActivity extends Activity implements GoogleApiCli
 
 	@Override
 	public void onMessageReceived(final MessageEvent messageEvent) {
-		// If the activity is binded to service it means that it has connected directly to the device. We ignore messages from the handheld.
+		// If the activity is bound to service it means that it has connected directly to the device. We ignore messages from the handheld.
 		if (mBinder != null)
 			return;
 

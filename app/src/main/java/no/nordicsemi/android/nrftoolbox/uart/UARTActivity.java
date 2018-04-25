@@ -160,12 +160,12 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	}
 
 	@Override
-	protected void onServiceBinded(final UARTService.UARTBinder binder) {
+	protected void onServiceBound(final UARTService.UARTBinder binder) {
 		mServiceBinder = binder;
 	}
 
 	@Override
-	protected void onServiceUnbinded() {
+	protected void onServiceUnbound() {
 		mServiceBinder = null;
 	}
 

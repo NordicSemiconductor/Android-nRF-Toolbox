@@ -99,7 +99,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 							break;
 						}
 						case BleMulticonnectProfileService.STATE_LINK_LOSS: {
-							onLinklossOccur(bluetoothDevice);
+							onLinklossOccurred(bluetoothDevice);
 							break;
 						}
 						case BleMulticonnectProfileService.STATE_CONNECTING: {
@@ -138,7 +138,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 							onBondingRequired(bluetoothDevice);
 							break;
 						case BluetoothDevice.BOND_BONDED:
-							onBonded(bluetoothDevice);
+							onBound(bluetoothDevice);
 							break;
 					}
 					break;
@@ -166,7 +166,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 			final E bleService = mService = (E) service;
 			bleService.log(LogContract.Log.Level.DEBUG, "Activity bound to the service");
 			mManagedDevices.addAll(bleService.getManagedDevices());
-			onServiceBinded(bleService);
+			onServiceBound(bleService);
 
 			// and notify user if device is connected
 			for (final BluetoothDevice device : mManagedDevices) {
@@ -178,7 +178,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 		@Override
 		public void onServiceDisconnected(final ComponentName name) {
 			mService = null;
-			onServiceUnbinded();
+			onServiceUnbound();
 		}
 	};
 
@@ -238,7 +238,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 		unbindService(mServiceConnection);
 		mService = null;
 
-		onServiceUnbinded();
+		onServiceUnbound();
 	}
 
 	@Override
@@ -263,12 +263,12 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	 * Called when activity binds to the service. The parameter is the object returned in {@link Service#onBind(Intent)} method in your service.
 	 * It is safe to obtain managed devices now.
 	 */
-	protected abstract void onServiceBinded(E binder);
+	protected abstract void onServiceBound(E binder);
 
 	/**
 	 * Called when activity unbinds from the service. You may no longer use this binder methods.
 	 */
-	protected abstract void onServiceUnbinded();
+	protected abstract void onServiceUnbound();
 
 	/**
 	 * Returns the service class for sensor communication. The service class must derive from {@link BleMulticonnectProfileService} in order to operate with this class.
@@ -415,7 +415,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	}
 
 	@Override
-	public void onLinklossOccur(final BluetoothDevice device) {
+	public void onLinklossOccurred(final BluetoothDevice device) {
 		// empty default implementation
 	}
 
@@ -435,7 +435,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	}
 
 	@Override
-	public void onBonded(final BluetoothDevice device) {
+	public void onBound(final BluetoothDevice device) {
 		// empty default implementation
 	}
 

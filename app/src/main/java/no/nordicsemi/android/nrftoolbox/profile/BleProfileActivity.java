@@ -278,7 +278,7 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	}
 
 	@Override
-	public void onLinklossOccur(final BluetoothDevice device) {
+	public void onLinklossOccurred(final BluetoothDevice device) {
 		mDeviceConnected = false;
 	}
 
@@ -298,7 +298,7 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	}
 
 	@Override
-	public void onBonded(final BluetoothDevice device) {
+	public void onBound(final BluetoothDevice device) {
 		showToast(R.string.bonded);
 	}
 

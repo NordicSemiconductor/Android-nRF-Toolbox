@@ -80,12 +80,12 @@ public class TemplateActivity extends BleProfileServiceReadyActivity<TemplateSer
 	}
 
 	@Override
-	protected void onServiceBinded(final TemplateService.TemplateBinder binder) {
+	protected void onServiceBound(final TemplateService.TemplateBinder binder) {
 		// not used
 	}
 
 	@Override
-	protected void onServiceUnbinded() {
+	protected void onServiceUnbound() {
 		// not used
 	}
 

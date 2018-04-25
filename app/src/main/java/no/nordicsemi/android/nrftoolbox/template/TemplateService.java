@@ -114,7 +114,7 @@ public class TemplateService extends BleProfileService implements TemplateManage
 		broadcast.putExtra(EXTRA_DATA, value);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 
-		if (!mBinded) {
+		if (!mBound) {
 			// Here we may update the notification to display the current value.
 			// TODO modify the notification here
 		}

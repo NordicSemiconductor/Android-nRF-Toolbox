@@ -76,7 +76,7 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 	private final LocalBinder mBinder = new RSCBinder();
 
 	/**
-	 * This local binder is an interface for the binded activity to operate with the RSC sensor
+	 * This local binder is an interface for the bound activity to operate with the RSC sensor
 	 */
 	public class RSCBinder extends LocalBinder {
 		// empty
