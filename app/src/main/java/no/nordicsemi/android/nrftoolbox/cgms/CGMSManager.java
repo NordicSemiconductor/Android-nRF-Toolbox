@@ -34,7 +34,9 @@ import android.util.SparseArray;
 import java.util.UUID;
 
 import no.nordicsemi.android.ble.common.callback.RecordAccessControlPointDataCallback;
+import no.nordicsemi.android.ble.common.callback.cgm.CGMFeatureDataCallback;
 import no.nordicsemi.android.ble.common.callback.cgm.CGMSpecificOpsControlPointDataCallback;
+import no.nordicsemi.android.ble.common.callback.cgm.CGMStatusDataCallback;
 import no.nordicsemi.android.ble.common.callback.cgm.ContinuousGlucoseMeasurementDataCallback;
 import no.nordicsemi.android.ble.common.data.RecordAccessControlPointData;
 import no.nordicsemi.android.ble.common.data.cgm.CGMSpecificOpsControlPointData;
@@ -52,6 +54,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 	 * Cycling Speed and Cadence service UUID
 	 */
 	public static final UUID CGMS_UUID = UUID.fromString("0000181F-0000-1000-8000-00805f9b34fb");
+	private static final UUID CGM_STATUS_UUID = UUID.fromString("00002AA9-0000-1000-8000-00805f9b34fb");
 	private static final UUID CGM_FEAURE_UUID = UUID.fromString("00002AA8-0000-1000-8000-00805f9b34fb");
 	private static final UUID CGM_MEASUREMENT_UUID = UUID.fromString("00002AA7-0000-1000-8000-00805f9b34fb");
 	private static final UUID CGM_OPS_CONTROL_POINT_UUID = UUID.fromString("00002AAC-0000-1000-8000-00805f9b34fb");
@@ -60,15 +63,22 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 	 */
 	private static final UUID RACP_UUID = UUID.fromString("00002A52-0000-1000-8000-00805f9b34fb");
 
+	private BluetoothGattCharacteristic mCGMStatusCharacteristic;
 	private BluetoothGattCharacteristic mCGMFeatureCharacteristic;
 	private BluetoothGattCharacteristic mCGMMeasurementCharacteristic;
 	private BluetoothGattCharacteristic mCGMSpecificOpsControlPointCharacteristic;
 	private BluetoothGattCharacteristic mRecordAccessControlPointCharacteristic;
 
 	private SparseArray<CGMSRecord> mRecords = new SparseArray<>();
-	private boolean mAbort;
+
 	/** A flag set to true if the remote device supports E2E CRC. */
 	private boolean mSecured;
+	/**
+	 * A flag set when records has been requested using RACP. This is to distinguish CGM packets received
+	 * as continuous measurements or requested.
+	 */
+	private boolean mRecordAccessRequestInProgress;
+	/** The timestamp when the session has started. This is needed to display the user facing times of samples. */
 	private long mSessionStartTime;
 
 	CGMSManager(final Context context) {
@@ -90,6 +100,30 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 			// Enable Battery service
 			super.initialize(device);
 
+			// Read CGM Feature characteristic, mainly to see if the device supports E2E CRC.
+			// This is not supported in the experimental CGMS from the SDK.
+			readCharacteristic(mCGMFeatureCharacteristic)
+					.with(new CGMFeatureDataCallback() {
+						@Override
+						public void onContinuousGlucoseMonitorFeaturesReceived(@NonNull final BluetoothDevice device, @NonNull final CGMFeatures features,
+																			   final int type, final int sampleLocation, final boolean secured) {
+							mSecured = features.e2eCrcSupported;
+							log(LogContract.Log.Level.APPLICATION, "E2E CRC feature " + (mSecured ? "supported" : "not supported"));
+						}
+					}).fail(status -> log(LogContract.Log.Level.WARNING, "Could not read CGM Feature characteristic"));
+
+			// Check if the session is already started. This is not supported in the experimental CGMS from the SDK.
+			readCharacteristic(mCGMStatusCharacteristic)
+					.with(new CGMStatusDataCallback() {
+						@Override
+						public void onContinuousGlucoseMonitorStatusChanged(@NonNull final BluetoothDevice device, @NonNull final CGMStatus status, final int timeOffset, final boolean secured) {
+							if (!status.sessionStopped) {
+								mSessionStartTime = System.currentTimeMillis() - timeOffset * 60000L;
+								log(LogContract.Log.Level.APPLICATION, "Session already started");
+							}
+						}
+					}).fail(status -> log(LogContract.Log.Level.WARNING, "Could not read CGM Status characteristic"));
+
 			// Enable Continuous Glucose Measurement notifications
 			enableNotifications(mCGMMeasurementCharacteristic)
 					.with(new ContinuousGlucoseMeasurementDataCallback() {
@@ -101,8 +135,17 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 
 						@Override
 						public void onContinuousGlucoseMeasurementReceived(@NonNull final BluetoothDevice device, final float glucoseConcentration, @Nullable final Float cgmTrend, @Nullable final Float cgmQuality, final CGMStatus status, final int timeOffset, final boolean secured) {
+							// If the CGM Status characteristic has not been read and the session was already started before,
+							// estimate the Session Start Time by subtracting timeOffset minutes from the current timestamp.
+							if (mSessionStartTime == 0 && !mRecordAccessRequestInProgress) {
+								mSessionStartTime = System.currentTimeMillis() - timeOffset * 60000L;
+							}
+
+							// Calculate the sample timestamp based on the Session Start Time
 							final long timestamp = mSessionStartTime + (timeOffset * 60000L); // Sequence number is in minutes since Start Session
+
 							final CGMSRecord record = new CGMSRecord(timeOffset, glucoseConcentration, timestamp);
+							mRecords.put(record.sequenceNumber, record);
 							mCallbacks.onCGMValueReceived(device, record);
 						}
 
@@ -128,13 +171,21 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 								case CGM_OP_CODE_START_SESSION:
 									mSessionStartTime = System.currentTimeMillis();
 									break;
+								case CGM_OP_CODE_STOP_SESSION:
+									mSessionStartTime = 0;
+									break;
 							}
 						}
 
 						@Override
-						public void onCGMSpecificOpsOperationError(@NonNull final BluetoothDevice device, final int requestCode, final int error, final boolean secured) {
+						public void onCGMSpecificOpsOperationError(@NonNull final BluetoothDevice device, final int requestCode, final int errorCode, final boolean secured) {
 							switch (requestCode) {
 								case CGM_OP_CODE_START_SESSION:
+									if (errorCode == CGM_ERROR_PROCEDURE_NOT_COMPLETED) {
+										// Session was already started before.
+										// Looks like the CGM Status characteristic has not been read, otherwise we would have got the Session Start Time before.
+										// The Session Start Time will be calculated when a next CGM packet is received based on it's Time Offset.
+									}
 								case CGM_OP_CODE_STOP_SESSION:
 									mSessionStartTime = 0;
 									break;
@@ -162,6 +213,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 									mCallbacks.onOperationAborted(device);
 									break;
 								default:
+									mRecordAccessRequestInProgress = false;
 									mCallbacks.onOperationCompleted(device);
 									break;
 							}
@@ -169,6 +221,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 
 						@Override
 						public void onRecordAccessOperationCompletedWithNoRecordsFound(@NonNull final BluetoothDevice device, final int requestCode) {
+							mRecordAccessRequestInProgress = false;
 							mCallbacks.onOperationCompleted(device);
 						}
 
@@ -176,9 +229,14 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 						public void onNumberOfRecordsReceived(@NonNull final BluetoothDevice device, final int numberOfRecords) {
 							mCallbacks.onNumberOfRecordsRequested(device, numberOfRecords);
 							if (numberOfRecords > 0) {
-								final int sequenceNumber = mRecords.keyAt(mRecords.size() - 1) + 1;
-								writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber));
+								if (mRecords.size() > 0) {
+									final int sequenceNumber = mRecords.keyAt(mRecords.size() - 1) + 1;
+									writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber));
+								} else {
+									writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportAllStoredRecords());
+								}
 							} else {
+								mRecordAccessRequestInProgress = false;
 								mCallbacks.onOperationCompleted(device);
 							}
 						}
@@ -195,16 +253,19 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 					})
 					.fail((error) -> log(LogContract.Log.Level.WARNING, "Failed to enabled Record Access Control Point indications (error " + error + ")"));
 
-			// Start Continuous Glucose session
-			writeCharacteristic(mCGMSpecificOpsControlPointCharacteristic, CGMSpecificOpsControlPointData.startSession(mSecured))
-					.done(() -> log(LogContract.Log.Level.APPLICATION, "\"" + CGMSpecificOpsControlPointParser.parse(mCGMSpecificOpsControlPointCharacteristic) + "\" sent"))
-					.fail((error) -> log(LogContract.Log.Level.ERROR, "Failed to start session (error " + error + ")"));
+			// Start Continuous Glucose session if hasn't been started before
+			if (mSessionStartTime == 0L) {
+				writeCharacteristic(mCGMSpecificOpsControlPointCharacteristic, CGMSpecificOpsControlPointData.startSession(mSecured))
+						.done(() -> log(LogContract.Log.Level.APPLICATION, "\"" + CGMSpecificOpsControlPointParser.parse(mCGMSpecificOpsControlPointCharacteristic) + "\" sent"))
+						.fail((error) -> log(LogContract.Log.Level.ERROR, "Failed to start session (error " + error + ")"));
+			}
 		}
 
 		@Override
 		protected boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(CGMS_UUID);
 			if (service != null) {
+				mCGMStatusCharacteristic = service.getCharacteristic(CGM_STATUS_UUID);
 				mCGMFeatureCharacteristic = service.getCharacteristic(CGM_FEAURE_UUID);
 				mCGMMeasurementCharacteristic = service.getCharacteristic(CGM_MEASUREMENT_UUID);
 				mCGMSpecificOpsControlPointCharacteristic = service.getCharacteristic(CGM_OPS_CONTROL_POINT_UUID);
@@ -217,6 +278,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 		@Override
 		protected void onDeviceDisconnected() {
 			super.onDeviceDisconnected();
+			mCGMStatusCharacteristic = null;
 			mCGMFeatureCharacteristic = null;
 			mCGMMeasurementCharacteristic = null;
 			mCGMSpecificOpsControlPointCharacteristic = null;
@@ -249,6 +311,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
+		mRecordAccessRequestInProgress = true;
 		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportLastStoredRecord());
 	}
 
@@ -263,6 +326,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
+		mRecordAccessRequestInProgress = true;
 		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportFirstStoredRecord());
 	}
 
@@ -273,7 +337,6 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 		if (mRecordAccessControlPointCharacteristic == null)
 			return;
 
-		mAbort = true;
 		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.abortOperation());
 	}
 
@@ -289,6 +352,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
+		mRecordAccessRequestInProgress = true;
 		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportNumberOfAllStoredRecords());
 	}
 
@@ -309,6 +373,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 
 			// Obtain the last sequence number
 			final int sequenceNumber = mRecords.keyAt(mRecords.size() - 1) + 1;
+			mRecordAccessRequestInProgress = true;
 			writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber));
 			// Info:
 			// Operators OPERATOR_GREATER_THEN_OR_EQUAL, OPERATOR_LESS_THEN_OR_EQUAL and OPERATOR_RANGE are not supported by the CGMS sample from SDK
