@@ -271,8 +271,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 				mCGMSpecificOpsControlPointCharacteristic = service.getCharacteristic(CGM_OPS_CONTROL_POINT_UUID);
 				mRecordAccessControlPointCharacteristic = service.getCharacteristic(RACP_UUID);
 			}
-			return mCGMFeatureCharacteristic != null && mCGMMeasurementCharacteristic != null &&
-					mCGMSpecificOpsControlPointCharacteristic != null && mRecordAccessControlPointCharacteristic != null;
+			return mCGMMeasurementCharacteristic != null && mCGMSpecificOpsControlPointCharacteristic != null && mRecordAccessControlPointCharacteristic != null;
 		}
 
 		@Override
