@@ -96,9 +96,9 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
 
 		@Override
-		protected void initialize(@NonNull final BluetoothDevice device) {
+		protected void initialize(@NonNull final BluetoothGatt gatt) {
 			// Enable Battery service
-			super.initialize(device);
+			super.initialize(gatt);
 
 			// Read CGM Feature characteristic, mainly to see if the device supports E2E CRC.
 			// This is not supported in the experimental CGMS from the SDK.
@@ -311,7 +311,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
 		mRecordAccessRequestInProgress = true;
-		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportLastStoredRecord());
+		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportLastStoredRecord())
+				.done(() -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(mRecordAccessControlPointCharacteristic) + "\" sent"));
 	}
 
 	/**
@@ -326,7 +327,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
 		mRecordAccessRequestInProgress = true;
-		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportFirstStoredRecord());
+		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportFirstStoredRecord())
+				.done(() -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(mRecordAccessControlPointCharacteristic) + "\" sent"));
 	}
 
 	/**
@@ -336,7 +338,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 		if (mRecordAccessControlPointCharacteristic == null)
 			return;
 
-		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.abortOperation());
+		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.abortOperation())
+				.done(() -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(mRecordAccessControlPointCharacteristic) + "\" sent"));
 	}
 
 	/**
@@ -352,7 +355,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
 		mRecordAccessRequestInProgress = true;
-		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportNumberOfAllStoredRecords());
+		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportNumberOfAllStoredRecords())
+				.done(() -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(mRecordAccessControlPointCharacteristic) + "\" sent"));
 	}
 
 	/**
@@ -373,7 +377,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 			// Obtain the last sequence number
 			final int sequenceNumber = mRecords.keyAt(mRecords.size() - 1) + 1;
 			mRecordAccessRequestInProgress = true;
-			writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber));
+			writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber))
+					.done(() -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(mRecordAccessControlPointCharacteristic) + "\" sent"));
 			// Info:
 			// Operators OPERATOR_GREATER_THEN_OR_EQUAL, OPERATOR_LESS_THEN_OR_EQUAL and OPERATOR_RANGE are not supported by the CGMS sample from SDK
 			// The "Operation not supported" response will be received
@@ -391,7 +396,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
-		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.deleteAllStoredRecords());
+		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.deleteAllStoredRecords())
+				.done(() -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(mRecordAccessControlPointCharacteristic) + "\" sent"));
 	}
 }
 

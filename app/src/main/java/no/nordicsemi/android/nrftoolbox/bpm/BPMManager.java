@@ -78,8 +78,8 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
 
 		@Override
-		protected void initialize(@NonNull final BluetoothDevice device) {
-			super.initialize(device);
+		protected void initialize(@NonNull final BluetoothGatt gatt) {
+			super.initialize(gatt);
 
 			enableNotifications(mICPCharacteristic)
 					.with(new IntermediateCuffPressureDataCallback() {

@@ -140,7 +140,7 @@ public class ExpandableRecordAdapter extends BaseExpandableListAdapter {
 				} catch (final ArrayIndexOutOfBoundsException e) {
 					tmp = resources.getStringArray(R.array.gls_context_carbohydrare)[0];
 				}
-				return new Pair<>(resources.getString(R.string.gls_context_carbohydrare_title), tmp + " (" + record.context.carbohydrateUnits + " kg)");
+				return new Pair<>(resources.getString(R.string.gls_context_carbohydrare_title), tmp + " (" + record.context.carbohydrateUnits + " g)");
 			}
 			case 3: { // meal
 				try {

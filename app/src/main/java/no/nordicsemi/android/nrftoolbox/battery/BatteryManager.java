@@ -97,7 +97,7 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 	protected abstract class BatteryManagerGattCallback extends BleManagerGattCallback {
 
 		@Override
-		protected void initialize(@NonNull final BluetoothDevice device) {
+		protected void initialize(@NonNull final BluetoothGatt gatt) {
 			readBatteryLevelCharacteristic();
 			enableBatteryLevelCharacteristicNotifications();
 		}
