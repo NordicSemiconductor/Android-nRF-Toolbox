@@ -143,9 +143,9 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 			else
 				mTimestampView.setText(R.string.not_available);
 
-			mSystolicUnitView.setText(unit == BloodPressureMeasurementCallback.UNIT_mmHG ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
-			mDiastolicUnitView.setText(unit == BloodPressureMeasurementCallback.UNIT_mmHG ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
-			mMeanAPUnitView.setText(unit == BloodPressureMeasurementCallback.UNIT_mmHG ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
+			mSystolicUnitView.setText(unit == BloodPressureMeasurementCallback.UNIT_mmHg ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
+			mDiastolicUnitView.setText(unit == BloodPressureMeasurementCallback.UNIT_mmHg ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
+			mMeanAPUnitView.setText(unit == BloodPressureMeasurementCallback.UNIT_mmHg ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
 		});
 	}
 
@@ -166,7 +166,7 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 			else
 				mTimestampView.setText(R.string.not_available);
 
-			mSystolicUnitView.setText(unit == IntermediateCuffPressureCallback.UNIT_mmHG ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
+			mSystolicUnitView.setText(unit == IntermediateCuffPressureCallback.UNIT_mmHg ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
 			mDiastolicUnitView.setText(null);
 			mMeanAPUnitView.setText(null);
 		});
