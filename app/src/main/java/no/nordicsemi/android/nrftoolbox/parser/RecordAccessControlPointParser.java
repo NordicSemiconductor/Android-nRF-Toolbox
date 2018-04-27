@@ -21,7 +21,7 @@
  */
 package no.nordicsemi.android.nrftoolbox.parser;
 
-import android.bluetooth.BluetoothGattCharacteristic;
+import no.nordicsemi.android.ble.data.Data;
 
 public class RecordAccessControlPointParser {
 	private final static int OP_CODE_REPORT_STORED_RECORDS = 1;
@@ -49,10 +49,10 @@ public class RecordAccessControlPointParser {
 	private final static int RESPONSE_PROCEDURE_NOT_COMPLETED = 8;
 	private final static int RESPONSE_OPERAND_NOT_SUPPORTED = 9;
 
-	public static String parse(final BluetoothGattCharacteristic characteristic) {
+	public static String parse(final Data data) {
 		final StringBuilder builder = new StringBuilder();
-		final int opCode = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
-		final int operator = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 1);
+		final int opCode = data.getIntValue(Data.FORMAT_UINT8, 0);
+		final int operator = data.getIntValue(Data.FORMAT_UINT8, 1);
 
 		switch (opCode) {
 		case OP_CODE_REPORT_STORED_RECORDS:
@@ -63,15 +63,15 @@ public class RecordAccessControlPointParser {
 			break;
 		case OP_CODE_NUMBER_OF_STORED_RECORDS_RESPONSE: {
 			builder.append(getOpCode(opCode)).append(": ");
-			final int value = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 2);
+			final int value = data.getIntValue(Data.FORMAT_UINT16, 2);
 			builder.append(value).append("\n");
 			break;
 		}
 		case OP_CODE_RESPONSE_CODE: {
 			builder.append(getOpCode(opCode)).append(" for ");
-			final int targetOpCode = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 2);
+			final int targetOpCode = data.getIntValue(Data.FORMAT_UINT8, 2);
 			builder.append(getOpCode(targetOpCode)).append(": ");
-			final int status = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 3);
+			final int status = data.getIntValue(Data.FORMAT_UINT8, 3);
 			builder.append(getStatus(status)).append("\n");
 			break;
 		}
@@ -85,15 +85,15 @@ public class RecordAccessControlPointParser {
 			break;
 		case OPERATOR_GREATER_THEN_OR_EQUAL:
 		case OPERATOR_LESS_THEN_OR_EQUAL: {
-			final int filter = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 2);
-			final int value = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 3);
+			final int filter = data.getIntValue(Data.FORMAT_UINT8, 2);
+			final int value = data.getIntValue(Data.FORMAT_UINT16, 3);
 			builder.append("Operator: ").append(getOperator(operator)).append(" ").append(value).append(" (filter: ").append(filter).append(")\n");
 			break;
 		}
 		case OPERATOR_WITHING_RANGE: {
-			final int filter = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 2);
-			final int value1 = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 3);
-			final int value2 = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 5);
+			final int filter = data.getIntValue(Data.FORMAT_UINT8, 2);
+			final int value1 = data.getIntValue(Data.FORMAT_UINT16, 3);
+			final int value2 = data.getIntValue(Data.FORMAT_UINT16, 5);
 			builder.append("Operator: ").append(getOperator(operator)).append(" ").append(value1).append("-").append(value2).append(" (filter: ").append(filter).append(")\n");
 			break;
 		}

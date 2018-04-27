@@ -138,7 +138,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 							onBondingRequired(bluetoothDevice);
 							break;
 						case BluetoothDevice.BOND_BONDED:
-							onBound(bluetoothDevice);
+							onBonded(bluetoothDevice);
 							break;
 					}
 					break;
@@ -435,7 +435,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	}
 
 	@Override
-	public void onBound(final BluetoothDevice device) {
+	public void onBonded(final BluetoothDevice device) {
 		// empty default implementation
 	}
 

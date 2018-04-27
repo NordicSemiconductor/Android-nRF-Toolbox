@@ -67,7 +67,7 @@ public class DevicesAdapter extends WearableListView.Adapter {
 		mNotAvailable = context.getString(R.string.not_available);
 		mConnectingText = context.getString(R.string.state_connecting);
 		mAvailableText = context.getString(R.string.devices_list_available);
-		mBondedText = context.getString(R.string.devices_list_bound);
+		mBondedText = context.getString(R.string.devices_list_bonded);
 		mBondingText = context.getString(R.string.devices_list_bonding);
 		mListView = listView;
 		mHandler = new Handler();

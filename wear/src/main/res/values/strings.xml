@@ -28,7 +28,7 @@
 	<string name="devices_list_scanning">Scanning for nearby devices…</string>
 	<string name="devices_list_start_scan">Scan for nearby devices</string>
 	<string name="devices_list_available">Available</string>
-	<string name="devices_list_bound">Bound</string>
+	<string name="devices_list_bonded">Bonded</string>
 	<string name="devices_list_bonding">Bonding…</string>
 	<string name="devices_list_device_not_supported">Device not supported.</string>
 

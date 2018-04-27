@@ -298,7 +298,7 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	}
 
 	@Override
-	public void onBound(final BluetoothDevice device) {
+	public void onBonded(final BluetoothDevice device) {
 		showToast(R.string.bonded);
 	}
 

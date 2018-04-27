@@ -174,8 +174,6 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 
 	@Override
 	public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
-		runOnUiThread(() -> {
-			mBatteryLevelView.setText(getString(R.string.battery, batteryLevel));
-		});
+		runOnUiThread(() -> mBatteryLevelView.setText(getString(R.string.battery, batteryLevel)));
 	}
 }

@@ -298,7 +298,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	}
 
 	@Override
-	public void onBound(final BluetoothDevice device) {
+	public void onBonded(final BluetoothDevice device) {
 		showToast(R.string.bonded);
 	}
 

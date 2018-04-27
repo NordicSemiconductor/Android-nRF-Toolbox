@@ -21,7 +21,6 @@
  */
 package no.nordicsemi.android.nrftoolbox.proximity;
 
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
@@ -71,8 +70,8 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
 
 		@Override
-		protected void initialize(@NonNull final BluetoothDevice device) {
-			super.initialize(device);
+		protected void initialize() {
+			super.initialize();
 			writeCharacteristic(mLinklossCharacteristic, HIGH_ALERT);
 		}
 
@@ -124,11 +123,11 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 
 		log(LogContract.Log.Level.VERBOSE, on ? "Setting alarm to HIGH..." : "Disabling alarm...");
 		writeCharacteristic(mAlertLevelCharacteristic, on ? HIGH_ALERT : NO_ALERT)
-			.done(() ->	{
+			.done(device ->	{
 				mAlertOn = on;
 				log(LogContract.Log.Level.APPLICATION, "\"" + AlertLevelParser.parse(mAlertLevelCharacteristic) + "\" sent");
 			})
-			.fail(status -> log(LogContract.Log.Level.APPLICATION, "Alert Level characteristic not found"));
+			.fail((device, status) -> log(LogContract.Log.Level.APPLICATION, "Alert Level characteristic not found"));
 	}
 
 	/**

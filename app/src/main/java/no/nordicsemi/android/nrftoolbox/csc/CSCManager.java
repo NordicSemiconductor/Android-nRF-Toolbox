@@ -65,8 +65,8 @@ public class CSCManager extends BatteryManager<CSCManagerCallbacks> {
 	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
 
 		@Override
-		protected void initialize(@NonNull final BluetoothGatt gatt) {
-			super.initialize(gatt);
+		protected void initialize() {
+			super.initialize();
 
 			// CSC characteristic is required
 			enableNotifications(mCSCMeasurementCharacteristic)

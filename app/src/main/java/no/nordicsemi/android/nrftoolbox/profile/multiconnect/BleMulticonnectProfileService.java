@@ -512,7 +512,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 	}
 
 	@Override
-	public void onBound(final BluetoothDevice device) {
+	public void onBonded(final BluetoothDevice device) {
 		showToast(no.nordicsemi.android.nrftoolbox.common.R.string.bonded);
 
 		final Intent broadcast = new Intent(BROADCAST_BOND_STATE);

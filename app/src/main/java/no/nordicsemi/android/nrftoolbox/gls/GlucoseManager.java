@@ -66,7 +66,6 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 	private BluetoothGattCharacteristic mRecordAccessControlPointCharacteristic;
 
 	private final SparseArray<GlucoseRecord> mRecords = new SparseArray<>();
-	private boolean mAbort;
 	private Handler mHandler;
 	private static GlucoseManager mInstance;
 
@@ -95,8 +94,8 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
 
 		@Override
-		protected void initialize(@NonNull final BluetoothGatt gatt) {
-			super.initialize(gatt);
+		protected void initialize() {
+			super.initialize();
 
 			// The gatt.setCharacteristicNotification(...) method is called in BleManager during enabling
 			// notifications or indications (see BleManager#internalEnableNotifications/Indications).
@@ -106,11 +105,13 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 			// causing onCharacteristicChanged(...) callback never being called when a notification comes.
 			// Enabling them here, like below, solves the problem.
 			// However... the original approach works for the Battery Level CCCD, which makes it even weirder.
+			/*
 			gatt.setCharacteristicNotification(mGlucoseMeasurementCharacteristic, true);
 			if (mGlucoseMeasurementContextCharacteristic != null) {
-				gatt.setCharacteristicNotification(mGlucoseMeasurementContextCharacteristic, true);
+				device.setCharacteristicNotification(mGlucoseMeasurementContextCharacteristic, true);
 			}
-			gatt.setCharacteristicNotification(mRecordAccessControlPointCharacteristic, true);
+			device.setCharacteristicNotification(mRecordAccessControlPointCharacteristic, true);
+			*/
 
 			enableNotifications(mGlucoseMeasurementCharacteristic)
 					.with(new GlucoseMeasurementDataCallback() {
@@ -143,7 +144,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 								// if there is no context information following the measurement data,
 								// notify callback about the new record
 								if (!contextInformationFollows)
-									mCallbacks.onDatasetChanged(gatt.getDevice());
+									mCallbacks.onDatasetChanged(device);
 							});
 						}
 					});
@@ -184,7 +185,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 
 							mHandler.post(() -> {
 								// notify callback about the new record
-								mCallbacks.onDatasetChanged(gatt.getDevice());
+								mCallbacks.onDatasetChanged(device);
 							});
 						}
 					});
@@ -193,7 +194,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 					.with(new RecordAccessControlPointDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
-							log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(mRecordAccessControlPointCharacteristic) + "\" received");
+							log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" received");
 							super.onDataReceived(device, data);
 						}
 
@@ -239,7 +240,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 							}
 						}
 					})
-					.fail((error) -> log(LogContract.Log.Level.WARNING, "Failed to enabled Record Access Control Point indications (error " + error + ")"));
+					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enabled Record Access Control Point indications (error " + status + ")"));
 		}
 
 		@Override
@@ -296,7 +297,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
 		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportLastStoredRecord())
-				.done(() -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(mRecordAccessControlPointCharacteristic) + "\" sent"));
+				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"));
 	}
 
 	/**
@@ -311,7 +312,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
 		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportFirstStoredRecord())
-				.done(() -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(mRecordAccessControlPointCharacteristic) + "\" sent"));
+				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"));
 	}
 
 	/**
@@ -327,7 +328,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
 		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportNumberOfAllStoredRecords())
-				.done(() -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(mRecordAccessControlPointCharacteristic) + "\" sent"));
+				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"));
 	}
 
 	/**
@@ -354,7 +355,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 
 			writeCharacteristic(mRecordAccessControlPointCharacteristic,
 					RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber))
-					.done(() -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(mRecordAccessControlPointCharacteristic) + "\" sent"));
+					.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"));
 			// Info:
 			// Operators OPERATOR_LESS_THEN_OR_EQUAL and OPERATOR_RANGE are not supported by Nordic Semiconductor Glucose Service in SDK 4.4.2.
 		}
@@ -367,9 +368,8 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 		if (mRecordAccessControlPointCharacteristic == null)
 			return;
 
-		mAbort = true;
 		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.abortOperation())
-				.done(() -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(mRecordAccessControlPointCharacteristic) + "\" sent"));
+				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"));
 	}
 
 	/**
@@ -385,6 +385,6 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
 		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.deleteAllStoredRecords())
-				.done(() -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(mRecordAccessControlPointCharacteristic) + "\" sent"));
+				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"));
 	}
 }
