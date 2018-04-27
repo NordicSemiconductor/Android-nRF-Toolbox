@@ -23,6 +23,7 @@ package no.nordicsemi.android.nrftoolbox.gls;
 
 import android.bluetooth.BluetoothDevice;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.SparseArray;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -48,6 +49,7 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 	private View mControlPanelStd;
 	private View mControlPanelAbort;
 	private TextView mUnitView;
+	private TextView mBatteryLevelView;
 
 	@Override
 	protected void onCreateView(final Bundle savedInstanceState) {
@@ -59,6 +61,7 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 		mUnitView = findViewById(R.id.unit);
 		mControlPanelStd = findViewById(R.id.gls_control_std);
 		mControlPanelAbort = findViewById(R.id.gls_control_abort);
+		mBatteryLevelView = findViewById(R.id.battery);
 
 		findViewById(R.id.action_last).setOnClickListener(v -> mGlucoseManager.getLastRecord());
 		findViewById(R.id.action_all).setOnClickListener(v -> mGlucoseManager.getAllRecords());
@@ -125,6 +128,7 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 	@Override
 	protected void setDefaultUI() {
 		mGlucoseManager.clear();
+		mBatteryLevelView.setText(R.string.not_available);
 	}
 
 	private void setOperationInProgress(final boolean progress) {
@@ -138,6 +142,7 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 	public void onDeviceDisconnected(final BluetoothDevice device) {
 		super.onDeviceDisconnected(device);
 		setOperationInProgress(false);
+		runOnUiThread(() -> mBatteryLevelView.setText(R.string.not_available));
 	}
 
 	@Override
@@ -187,5 +192,10 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 	@Override
 	public void onNumberOfRecordsRequested(final BluetoothDevice device, final int value) {
 		showToast(getResources().getQuantityString(R.plurals.gls_progress, value, value));
+	}
+
+	@Override
+	public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
+		runOnUiThread(() -> mBatteryLevelView.setText(getString(R.string.battery, batteryLevel)));
 	}
 }
