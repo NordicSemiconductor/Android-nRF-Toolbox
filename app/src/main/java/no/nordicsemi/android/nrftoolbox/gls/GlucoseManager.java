@@ -112,8 +112,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 			}
 			device.setCharacteristicNotification(mRecordAccessControlPointCharacteristic, true);
 			*/
-
-			enableNotifications(mGlucoseMeasurementCharacteristic)
+			setNotificationCallback(mGlucoseMeasurementCharacteristic)
 					.with(new GlucoseMeasurementDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
@@ -148,7 +147,8 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 							});
 						}
 					});
-			enableNotifications(mGlucoseMeasurementContextCharacteristic)
+
+			setNotificationCallback(mGlucoseMeasurementContextCharacteristic)
 					.with(new GlucoseMeasurementContextDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
@@ -190,7 +190,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 						}
 					});
 
-			enableIndications(mRecordAccessControlPointCharacteristic)
+			setIndicationCallback(mRecordAccessControlPointCharacteristic)
 					.with(new RecordAccessControlPointDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
@@ -239,7 +239,11 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 								mCallbacks.onOperationFailed(device);
 							}
 						}
-					})
+					});
+
+			enableNotifications(mGlucoseMeasurementCharacteristic);
+			enableNotifications(mGlucoseMeasurementContextCharacteristic);
+			enableIndications(mRecordAccessControlPointCharacteristic)
 					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enabled Record Access Control Point indications (error " + status + ")"));
 		}
 

@@ -124,8 +124,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 						}
 					}).fail((device, status) -> log(LogContract.Log.Level.WARNING, "Could not read CGM Status characteristic"));
 
-			// Enable Continuous Glucose Measurement notifications
-			enableNotifications(mCGMMeasurementCharacteristic)
+			// Set notification and indication callbacks
+			setNotificationCallback(mCGMMeasurementCharacteristic)
 					.with(new ContinuousGlucoseMeasurementDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
@@ -153,11 +153,9 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 						public void onContinuousGlucoseMeasurementReceivedWithCrcError(@NonNull final BluetoothDevice device, @NonNull final Data data) {
 							log(LogContract.Log.Level.WARNING, "Continuous Glucose Measurement record received with CRC error");
 						}
-					})
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enable Continuous Glucose Measurement notifications (" + status + ")"));
+					});
 
-			// Enable CGM Specific Ops indications
-			enableIndications(mCGMSpecificOpsControlPointCharacteristic)
+			setIndicationCallback(mCGMSpecificOpsControlPointCharacteristic)
 					.with(new CGMSpecificOpsControlPointDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
@@ -198,7 +196,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 						}
 					});
 
-			enableIndications(mRecordAccessControlPointCharacteristic)
+			setIndicationCallback(mRecordAccessControlPointCharacteristic)
 					.with(new RecordAccessControlPointDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
@@ -250,7 +248,14 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 								mCallbacks.onOperationFailed(device);
 							}
 						}
-					})
+					});
+
+			// Enable notifications and indications
+			enableNotifications(mCGMMeasurementCharacteristic)
+					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enable Continuous Glucose Measurement notifications (" + status + ")"));
+			enableIndications(mCGMSpecificOpsControlPointCharacteristic)
+					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enable CGM Specific Ops Control Point indications notifications (" + status + ")"));
+			enableIndications(mRecordAccessControlPointCharacteristic)
 					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enabled Record Access Control Point indications (error " + status + ")"));
 
 			// Start Continuous Glucose session if hasn't been started before

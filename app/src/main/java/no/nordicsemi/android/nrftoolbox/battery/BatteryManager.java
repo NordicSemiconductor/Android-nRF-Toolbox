@@ -68,8 +68,9 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 	public void enableBatteryLevelCharacteristicNotifications() {
 		if (isConnected()) {
 			// If the Battery Level characteristic is null, the request will be ignored
+			setNotificationCallback(mBatteryLevelCharacteristic)
+					.with(mBatteryLevelDataCallback);
 			enableNotifications(mBatteryLevelCharacteristic)
-					.with(mBatteryLevelDataCallback)
 					.done(device -> log(LogContract.Log.Level.INFO, "Battery Level notifications enabled"))
 					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Battery Level characteristic not found"));
 		}

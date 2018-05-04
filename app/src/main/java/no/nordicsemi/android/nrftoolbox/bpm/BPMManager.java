@@ -81,31 +81,30 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 		protected void initialize() {
 			super.initialize();
 
-			enableNotifications(mICPCharacteristic)
+			setNotificationCallback(mICPCharacteristic)
 					.with(new IntermediateCuffPressureDataCallback() {
-						@Override
-						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
-							log(LogContract.Log.Level.APPLICATION, "\"" + IntermediateCuffPressureParser.parse(data) + "\" received");
+							  @Override
+							  public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+								  log(LogContract.Log.Level.APPLICATION, "\"" + IntermediateCuffPressureParser.parse(data) + "\" received");
 
-							// Pass through received data
-							super.onDataReceived(device, data);
-						}
+								  // Pass through received data
+								  super.onDataReceived(device, data);
+							  }
 
-						@Override
-						public void onIntermediateCuffPressureReceived(@NonNull final BluetoothDevice device,
-																	   final float cuffPressure, final int unit,
-																	   @Nullable final Float pulseRate, @Nullable final Integer userID,
-																	   @Nullable final BPMStatus status, @Nullable final Calendar calendar) {
-							mCallbacks.onIntermediateCuffPressureReceived(device, cuffPressure, unit, pulseRate, userID, status, calendar);
-						}
+							  @Override
+							  public void onIntermediateCuffPressureReceived(@NonNull final BluetoothDevice device,
+																			 final float cuffPressure, final int unit,
+																			 @Nullable final Float pulseRate, @Nullable final Integer userID,
+																			 @Nullable final BPMStatus status, @Nullable final Calendar calendar) {
+								  mCallbacks.onIntermediateCuffPressureReceived(device, cuffPressure, unit, pulseRate, userID, status, calendar);
+							  }
 
-						@Override
-						public void onInvalidDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
-							log(LogContract.Log.Level.WARNING, "Invalid ICP data received: " + data);
-						}
-					});
-
-			enableIndications(mBPMCharacteristic)
+							  @Override
+							  public void onInvalidDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+								  log(LogContract.Log.Level.WARNING, "Invalid ICP data received: " + data);
+							  }
+						  });
+			setIndicationCallback(mBPMCharacteristic)
 					.with(new BloodPressureMeasurementDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
@@ -129,6 +128,9 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 							log(LogContract.Log.Level.WARNING, "Invalid BPM data received: " + data);
 						}
 					});
+
+			enableNotifications(mICPCharacteristic);
+			enableIndications(mBPMCharacteristic);
 		}
 
 		@Override

@@ -69,7 +69,7 @@ public class CSCManager extends BatteryManager<CSCManagerCallbacks> {
 			super.initialize();
 
 			// CSC characteristic is required
-			enableNotifications(mCSCMeasurementCharacteristic)
+			setNotificationCallback(mCSCMeasurementCharacteristic)
 					.with(new CyclingSpeedAndCadenceDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, final @NonNull Data data) {
@@ -99,6 +99,7 @@ public class CSCManager extends BatteryManager<CSCManagerCallbacks> {
 							log(LogContract.Log.Level.WARNING, "Invalid CSC Measurement data received: " + data);
 						}
 					});
+			enableNotifications(mCSCMeasurementCharacteristic);
 		}
 
 		@Override
