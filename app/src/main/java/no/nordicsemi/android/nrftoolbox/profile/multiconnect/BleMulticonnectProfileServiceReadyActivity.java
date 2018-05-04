@@ -99,7 +99,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 							break;
 						}
 						case BleMulticonnectProfileService.STATE_LINK_LOSS: {
-							onLinklossOccurred(bluetoothDevice);
+							onLinkLossOccurred(bluetoothDevice);
 							break;
 						}
 						case BleMulticonnectProfileService.STATE_CONNECTING: {
@@ -415,7 +415,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	}
 
 	@Override
-	public void onLinklossOccurred(final BluetoothDevice device) {
+	public void onLinkLossOccurred(final BluetoothDevice device) {
 		// empty default implementation
 	}
 

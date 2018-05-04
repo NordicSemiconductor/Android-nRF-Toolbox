@@ -112,7 +112,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 							break;
 						}
 						case BleProfileService.STATE_LINK_LOSS: {
-							onLinklossOccurred(bluetoothDevice);
+							onLinkLossOccurred(bluetoothDevice);
 							break;
 						}
 						case BleProfileService.STATE_CONNECTING: {
@@ -521,7 +521,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	}
 
 	@Override
-	public void onLinklossOccurred(final BluetoothDevice device) {
+	public void onLinkLossOccurred(final BluetoothDevice device) {
 		// empty default implementation
 	}
 

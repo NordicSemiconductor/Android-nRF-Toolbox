@@ -274,10 +274,10 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	}
 
 	@Override
-	public void onLinklossOccurred(final BluetoothDevice device) {
+	public void onLinkLossOccurred(final BluetoothDevice device) {
 		mServerManager.cancelConnection(device);
 		stopAlarm(device);
-		super.onLinklossOccurred(device);
+		super.onLinkLossOccurred(device);
 
 		if (!mBound) {
 			createBackgroundNotification();

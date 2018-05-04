@@ -140,7 +140,7 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 	}
 
 	@Override
-	public void onLinklossOccurred(final BluetoothDevice device) {
+	public void onLinkLossOccurred(final BluetoothDevice device) {
 		if (mAdapter != null)
 			mAdapter.onDeviceStateChanged(device);
 
