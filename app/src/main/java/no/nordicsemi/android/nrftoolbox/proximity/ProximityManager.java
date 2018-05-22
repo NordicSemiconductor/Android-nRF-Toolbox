@@ -29,25 +29,23 @@ import android.support.annotation.NonNull;
 
 import java.util.UUID;
 
+import no.nordicsemi.android.ble.common.data.alert.AlertLevelData;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.battery.BatteryManager;
 import no.nordicsemi.android.nrftoolbox.parser.AlertLevelParser;
 
+@SuppressWarnings("WeakerAccess")
 class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 	private final String TAG = "ProximityManager";
 
+	/** Link Loss service UUID */
+	final static UUID LINKLOSS_SERVICE_UUID = UUID.fromString("00001803-0000-1000-8000-00805f9b34fb");
 	/** Immediate Alert service UUID */
 	private final static UUID IMMEDIATE_ALERT_SERVICE_UUID = UUID.fromString("00001802-0000-1000-8000-00805f9b34fb");
-	/** Linkloss service UUID */
-	final static UUID LINKLOSS_SERVICE_UUID = UUID.fromString("00001803-0000-1000-8000-00805f9b34fb");
 	/** Alert Level characteristic UUID */
 	private static final UUID ALERT_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A06-0000-1000-8000-00805f9b34fb");
 
-	private final static byte[] HIGH_ALERT = { 0x02 };
-	private final static byte[] MILD_ALERT = { 0x01 };
-	private final static byte[] NO_ALERT = { 0x00 };
-
-	private BluetoothGattCharacteristic mAlertLevelCharacteristic, mLinklossCharacteristic;
+	private BluetoothGattCharacteristic mAlertLevelCharacteristic, mLinkLossCharacteristic;
 	private boolean mAlertOn;
 
 	ProximityManager(final Context context) {
@@ -59,6 +57,7 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 		return true;
 	}
 
+	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
 		return mGattCallback;
@@ -72,16 +71,16 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 		@Override
 		protected void initialize() {
 			super.initialize();
-			writeCharacteristic(mLinklossCharacteristic, HIGH_ALERT);
+			writeCharacteristic(mLinkLossCharacteristic, AlertLevelData.highAlert());
 		}
 
 		@Override
 		protected boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService llService = gatt.getService(LINKLOSS_SERVICE_UUID);
 			if (llService != null) {
-				mLinklossCharacteristic = llService.getCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID);
+				mLinkLossCharacteristic = llService.getCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID);
 			}
-			return mLinklossCharacteristic != null;
+			return mLinkLossCharacteristic != null;
 		}
 
 		@Override
@@ -98,7 +97,7 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 		protected void onDeviceDisconnected() {
 			super.onDeviceDisconnected();
 			mAlertLevelCharacteristic = null;
-			mLinklossCharacteristic = null;
+			mLinkLossCharacteristic = null;
 			// Reset the alert flag
 			mAlertOn = false;
 		}
@@ -122,12 +121,10 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 			return;
 
 		log(LogContract.Log.Level.VERBOSE, on ? "Setting alarm to HIGH..." : "Disabling alarm...");
-		writeCharacteristic(mAlertLevelCharacteristic, on ? HIGH_ALERT : NO_ALERT)
-			.done(device ->	{
-				mAlertOn = on;
-				log(LogContract.Log.Level.APPLICATION, "\"" + AlertLevelParser.parse(mAlertLevelCharacteristic) + "\" sent");
-			})
-			.fail((device, status) -> log(LogContract.Log.Level.APPLICATION, "Alert Level characteristic not found"));
+		writeCharacteristic(mAlertLevelCharacteristic, on ? AlertLevelData.highAlert() : AlertLevelData.noAlert())
+				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + AlertLevelParser.parse(data) + "\" sent"))
+				.done(device -> mAlertOn = on)
+				.fail((device, status) -> log(LogContract.Log.Level.APPLICATION, "Alert Level characteristic not found"));
 	}
 
 	/**

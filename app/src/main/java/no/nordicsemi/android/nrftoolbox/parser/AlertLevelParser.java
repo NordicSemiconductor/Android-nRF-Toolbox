@@ -23,15 +23,21 @@ package no.nordicsemi.android.nrftoolbox.parser;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 
+import no.nordicsemi.android.ble.data.Data;
+
 public class AlertLevelParser {
+	public static String parse(final BluetoothGattCharacteristic characteristic) {
+		return parse(Data.from(characteristic));
+	}
+
 	/**
 	 * Parses the alert level.
 	 * 
-	 * @param characteristic
+	 * @param data
 	 * @return alert level in human readable format
 	 */
-	public static String parse(final BluetoothGattCharacteristic characteristic) {
-		final int value = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
+	public static String parse(final Data data) {
+		final int value = data.getIntValue(Data.FORMAT_UINT8, 0);
 
 		switch (value) {
 		case 0:
