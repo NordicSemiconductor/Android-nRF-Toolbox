@@ -46,7 +46,7 @@ dependencies {
     implementation 'com.android.support:design:27.1.1'
 
     implementation 'no.nordicsemi.android:log:2.1.1'
-    implementation 'no.nordicsemi.android.support.v18:scanner:1.0.0'
+    implementation 'no.nordicsemi.android.support.v18:scanner:1.1.0'
 
     // The DFU Library is imported automatically from jcenter:
     implementation 'no.nordicsemi.android:dfu:1.6.1'
