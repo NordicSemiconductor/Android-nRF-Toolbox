@@ -21,14 +21,9 @@
  */
 package no.nordicsemi.android.nrftoolbox.rsc;
 
-import android.bluetooth.BluetoothDevice;
+import no.nordicsemi.android.ble.common.profile.rsc.RunningSpeedAndCadenceMeasurementCallback;
+import no.nordicsemi.android.nrftoolbox.battery.BatteryManagerCallbacks;
 
-import no.nordicsemi.android.ble.BleManagerCallbacks;
+interface RSCManagerCallbacks extends BatteryManagerCallbacks, RunningSpeedAndCadenceMeasurementCallback {
 
-public interface RSCManagerCallbacks extends BleManagerCallbacks {
-	int NOT_AVAILABLE = -1;
-	int ACTIVITY_WALKING = 0;
-	int ACTIVITY_RUNNING = 1;
-
-	void onMeasurementReceived(final BluetoothDevice device, float speed, int cadence, float distance, float strideLen, int activity);
 }

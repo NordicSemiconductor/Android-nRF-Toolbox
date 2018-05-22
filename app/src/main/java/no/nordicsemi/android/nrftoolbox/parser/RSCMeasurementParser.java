@@ -21,18 +21,18 @@
  */
 package no.nordicsemi.android.nrftoolbox.parser;
 
-import android.bluetooth.BluetoothGattCharacteristic;
-
 import java.util.Locale;
+
+import no.nordicsemi.android.ble.data.Data;
 
 public class RSCMeasurementParser {
 	private static final byte INSTANTANEOUS_STRIDE_LENGTH_PRESENT = 0x01; // 1 bit
 	private static final byte TOTAL_DISTANCE_PRESENT = 0x02; // 1 bit
 	private static final byte WALKING_OR_RUNNING_STATUS_BITS = 0x04; // 1 bit
 
-	public static String parse(final BluetoothGattCharacteristic characteristic) {
+	public static String parse(final Data data) {
 		int offset = 0;
-		final int flags = characteristic.getValue()[offset]; // 1 byte
+		final int flags = data.getValue()[offset]; // 1 byte
 		offset += 1;
 
 		final boolean islmPresent = (flags & INSTANTANEOUS_STRIDE_LENGTH_PRESENT) > 0;
@@ -40,21 +40,21 @@ public class RSCMeasurementParser {
 		final boolean running = (flags & WALKING_OR_RUNNING_STATUS_BITS) > 0;
 		final boolean walking = !running;
 
-		final float instantaneousSpeed = (float) characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset) / 256.0f; // 1/256 m/s
+		final float instantaneousSpeed = (float) data.getIntValue(Data.FORMAT_UINT16, offset) / 256.0f; // 1/256 m/s
 		offset += 2;
 
-		final int instantaneousCadence = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
+		final int instantaneousCadence = data.getIntValue(Data.FORMAT_UINT8, offset);
 		offset += 1;
 
 		float instantaneousStrideLength = 0;
 		if (islmPresent) {
-			instantaneousStrideLength = (float) characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset) / 100.0f; // 1/100 m
+			instantaneousStrideLength = (float) data.getIntValue(Data.FORMAT_UINT16, offset) / 100.0f; // 1/100 m
 			offset += 2;
 		}
 
 		float totalDistance = 0;
 		if (tdPreset) {
-			totalDistance = (float) characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset) / 10.0f;
+			totalDistance = (float) data.getIntValue(Data.FORMAT_UINT32, offset) / 10.0f;
 			// offset += 4;
 		}
 

@@ -31,8 +31,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.log.Logger;
@@ -47,12 +50,16 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 	public static final String BROADCAST_RSC_MEASUREMENT = "no.nordicsemi.android.nrftoolbox.rsc.BROADCAST_RSC_MEASUREMENT";
 	public static final String EXTRA_SPEED = "no.nordicsemi.android.nrftoolbox.rsc.EXTRA_SPEED";
 	public static final String EXTRA_CADENCE = "no.nordicsemi.android.nrftoolbox.rsc.EXTRA_CADENCE";
+	public static final String EXTRA_STRIDE_LENGTH = "no.nordicsemi.android.nrftoolbox.rsc.EXTRA_STRIDE_LENGTH";
 	public static final String EXTRA_TOTAL_DISTANCE = "no.nordicsemi.android.nrftoolbox.rsc.EXTRA_TOTAL_DISTANCE";
 	public static final String EXTRA_ACTIVITY = "no.nordicsemi.android.nrftoolbox.rsc.EXTRA_ACTIVITY";
 
 	public static final String BROADCAST_STRIDES_UPDATE = "no.nordicsemi.android.nrftoolbox.rsc.BROADCAST_STRIDES_UPDATE";
 	public static final String EXTRA_STRIDES = "no.nordicsemi.android.nrftoolbox.rsc.EXTRA_STRIDES";
 	public static final String EXTRA_DISTANCE = "no.nordicsemi.android.nrftoolbox.rsc.EXTRA_DISTANCE";
+
+	public static final String BROADCAST_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.BROADCAST_BATTERY_LEVEL";
+	public static final String EXTRA_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.EXTRA_BATTERY_LEVEL";
 
 	private final static String ACTION_DISCONNECT = "no.nordicsemi.android.nrftoolbox.rsc.ACTION_DISCONNECT";
 
@@ -61,9 +68,9 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 	/** The last value of a cadence */
 	private float mCadence;
 	/** Trip distance in cm */
-	private float mDistance;
+	private long mDistance;
 	/** Stride length in cm */
-	private float mStrideLength;
+	private Integer mStrideLength;
 	/** Number of steps in the trip */
 	private int mStepsNumber;
 	private boolean mTaskInProgress;
@@ -76,9 +83,9 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 	private final LocalBinder mBinder = new RSCBinder();
 
 	/**
-	 * This local binder is an interface for the bound activity to operate with the RSC sensor
+	 * This local binder is an interface for the bound activity to operate with the RSC sensor.
 	 */
-	public class RSCBinder extends LocalBinder {
+	class RSCBinder extends LocalBinder {
 		// empty
 	}
 
@@ -114,10 +121,21 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 	protected void onRebind() {
 		// when the activity rebinds to the service, remove the notification
 		cancelNotification();
+
+		if (isConnected()) {
+			// This method will read the Battery Level value, if possible and then try to enable battery notifications (if it has NOTIFY property).
+			// If the Battery Level characteristic has only the NOTIFY property, it will only try to enable notifications.
+			mManager.readBatteryLevelCharacteristic();
+		}
 	}
 
 	@Override
 	protected void onUnbind() {
+		// When we are connected, but the application is not open, we are not really interested in battery level notifications.
+		// But we will still be receiving other values, if enabled.
+		if (isConnected())
+			mManager.disableBatteryLevelCharacteristicNotifications();
+
 		// when the activity closes we need to show the notification that user is connected to the sensor
 		createNotification(R.string.rsc_notification_connected_message, 0);
 	}
@@ -129,14 +147,14 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 				return;
 
 			mStepsNumber++;
-			mDistance += mStrideLength;
+			mDistance += mStrideLength; // [cm]
 			final Intent broadcast = new Intent(BROADCAST_STRIDES_UPDATE);
 			broadcast.putExtra(EXTRA_STRIDES, mStepsNumber);
 			broadcast.putExtra(EXTRA_DISTANCE, mDistance);
 			LocalBroadcastManager.getInstance(RSCService.this).sendBroadcast(broadcast);
 
 			if (mCadence > 0) {
-				final long interval = (long) (1000.0f * 65.0f / mCadence); // 60s + 5s for calibration in milliseconds
+				final long interval = (long) (1000.0f * 60.0f / mCadence);
 				mHandler.postDelayed(mUpdateStridesTask, interval);
 			} else {
 				mTaskInProgress = false;
@@ -145,24 +163,38 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 	};
 
 	@Override
-	public void onMeasurementReceived(final BluetoothDevice device, final float speed, final int cadence, final float totalDistance, final float strideLen, final int activity) {
+	public void onRSCMeasurementReceived(@NonNull final BluetoothDevice device, final boolean running,
+										 final float instantaneousSpeed, final int instantaneousCadence,
+										 @Nullable final Integer strideLength,
+										 @Nullable final Long totalDistance) {
 		final Intent broadcast = new Intent(BROADCAST_RSC_MEASUREMENT);
 		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
-		broadcast.putExtra(EXTRA_SPEED, speed);
-		broadcast.putExtra(EXTRA_CADENCE, cadence);
+		broadcast.putExtra(EXTRA_SPEED, instantaneousSpeed);
+		broadcast.putExtra(EXTRA_CADENCE, instantaneousCadence);
+		broadcast.putExtra(EXTRA_STRIDE_LENGTH, strideLength);
 		broadcast.putExtra(EXTRA_TOTAL_DISTANCE, totalDistance);
-		broadcast.putExtra(EXTRA_ACTIVITY, activity);
+		broadcast.putExtra(EXTRA_ACTIVITY, running);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 
 		// Start strides counter if not in progress
-		mCadence = cadence;
-		mStrideLength = strideLen;
-		if (!mTaskInProgress && cadence > 0) {
+		mCadence = instantaneousCadence;
+		if (strideLength != null) {
+			mStrideLength = strideLength;
+		}
+		if (!mTaskInProgress && strideLength != null && instantaneousCadence > 0) {
 			mTaskInProgress = true;
 
-			final long interval = (long) (1000.0f * 65.0f / mCadence); // 60s + 5s for calibration in milliseconds
+			final long interval = (long) (1000.0f * 60.0f / mCadence);
 			mHandler.postDelayed(mUpdateStridesTask, interval);
 		}
+	}
+
+	@Override
+	public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int value) {
+		final Intent broadcast = new Intent(BROADCAST_BATTERY_LEVEL);
+		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
+		broadcast.putExtra(EXTRA_BATTERY_LEVEL, value);
+		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	/**

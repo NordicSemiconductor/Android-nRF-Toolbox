@@ -53,6 +53,7 @@ public class RSCActivity extends BleProfileServiceReadyActivity<RSCService.RSCBi
 	private TextView mTotalDistanceUnitView;
 	private TextView mStridesCountView;
 	private TextView mActivityView;
+	private TextView mBatteryLevelView;
 
 	@Override
 	protected void onCreateView(final Bundle savedInstanceState) {
@@ -81,6 +82,7 @@ public class RSCActivity extends BleProfileServiceReadyActivity<RSCService.RSCBi
 		mTotalDistanceUnitView = findViewById(R.id.total_distance_unit);
 		mStridesCountView = findViewById(R.id.strides);
 		mActivityView = findViewById(R.id.activity);
+		mBatteryLevelView = findViewById(R.id.battery);
 	}
 
 	@Override
@@ -97,6 +99,7 @@ public class RSCActivity extends BleProfileServiceReadyActivity<RSCService.RSCBi
 		mTotalDistanceView.setText(R.string.not_available_value);
 		mStridesCountView.setText(R.string.not_available_value);
 		mActivityView.setText(R.string.not_available);
+		mBatteryLevelView.setText(R.string.not_available);
 
 		setUnits();
 	}
@@ -181,7 +184,13 @@ public class RSCActivity extends BleProfileServiceReadyActivity<RSCService.RSCBi
 		// not used
 	}
 
-	private void onMeasurementReceived(float speed, int cadence, float totalDistance, final int activity) {
+	@Override
+	public void onDeviceDisconnected(final BluetoothDevice device) {
+		super.onDeviceDisconnected(device);
+		mBatteryLevelView.setText(R.string.not_available);
+	}
+
+	private void onMeasurementReceived(float speed, int cadence, long totalDistance, final boolean running) {
 		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		final int unit = Integer.parseInt(preferences.getString(SettingsFragment.SETTINGS_UNIT, String.valueOf(SettingsFragment.SETTINGS_UNIT_DEFAULT)));
 
@@ -190,7 +199,7 @@ public class RSCActivity extends BleProfileServiceReadyActivity<RSCService.RSCBi
 				speed = speed * 3.6f;
 				// pass through intended
 			case SettingsFragment.SETTINGS_UNIT_M_S:
-				if (totalDistance == RSCManagerCallbacks.NOT_AVAILABLE) {
+				if (totalDistance == -1) {
 					mTotalDistanceView.setText(R.string.not_available);
 					mTotalDistanceUnitView.setText(null);
 				} else {
@@ -200,7 +209,7 @@ public class RSCActivity extends BleProfileServiceReadyActivity<RSCService.RSCBi
 				break;
 			case SettingsFragment.SETTINGS_UNIT_MPH:
 				speed = speed * 2.2369f;
-				if (totalDistance == RSCManagerCallbacks.NOT_AVAILABLE) {
+				if (totalDistance == -1) {
 					mTotalDistanceView.setText(R.string.not_available);
 					mTotalDistanceUnitView.setText(null);
 				} else {
@@ -212,11 +221,11 @@ public class RSCActivity extends BleProfileServiceReadyActivity<RSCService.RSCBi
 
 		mSpeedView.setText(String.format(Locale.US, "%.1f", speed));
 		mCadenceView.setText(String.format(Locale.US, "%d", cadence));
-		mActivityView.setText(activity == RSCManagerCallbacks.ACTIVITY_RUNNING ? R.string.rsc_running : R.string.rsc_walking);
+		mActivityView.setText(running ? R.string.rsc_running : R.string.rsc_walking);
 	}
 
-	private void onStripesUpdate(final float distance, final int strides) {
-		if (distance == RSCManagerCallbacks.NOT_AVAILABLE) {
+	private void onStripesUpdate(final long distance, final int strides) {
+		if (distance == -1) {
 			mDistanceView.setText(R.string.not_available);
 			mDistanceUnitView.setText(R.string.rsc_distance_unit_m);
 		} else {
@@ -226,8 +235,8 @@ public class RSCActivity extends BleProfileServiceReadyActivity<RSCService.RSCBi
 			switch (unit) {
 				case SettingsFragment.SETTINGS_UNIT_KM_H:
 				case SettingsFragment.SETTINGS_UNIT_M_S:
-					if (distance < 100000) { // 1 km in cm
-						mDistanceView.setText(String.format(Locale.US, "%.0f", distance / 100.0f));
+					if (distance < 100000L) { // 1 km in cm
+						mDistanceView.setText(String.format(Locale.US, "%.1f", distance / 100.0f));
 						mDistanceUnitView.setText(R.string.rsc_distance_unit_m);
 					} else {
 						mDistanceView.setText(String.format(Locale.US, "%.2f", distance / 100000.0f));
@@ -235,8 +244,8 @@ public class RSCActivity extends BleProfileServiceReadyActivity<RSCService.RSCBi
 					}
 					break;
 				case SettingsFragment.SETTINGS_UNIT_MPH:
-					if (distance < 160931) { // 1 mile in cm
-						mDistanceView.setText(String.format(Locale.US, "%.0f", distance / 91.4392f));
+					if (distance < 160931L) { // 1 mile in cm
+						mDistanceView.setText(String.format(Locale.US, "%.1f", distance / 91.4392f));
 						mDistanceUnitView.setText(R.string.rsc_distance_unit_yd);
 					} else {
 						mDistanceView.setText(String.format(Locale.US, "%.2f", distance / 160931.23f));
@@ -257,13 +266,13 @@ public class RSCActivity extends BleProfileServiceReadyActivity<RSCService.RSCBi
 			if (RSCService.BROADCAST_RSC_MEASUREMENT.equals(action)) {
 				final float speed = intent.getFloatExtra(RSCService.EXTRA_SPEED, 0.0f);
 				final int cadence = intent.getIntExtra(RSCService.EXTRA_CADENCE, 0);
-				final float totalDistance = intent.getFloatExtra(RSCService.EXTRA_TOTAL_DISTANCE, RSCManagerCallbacks.NOT_AVAILABLE);
-				final int activity = intent.getIntExtra(RSCService.EXTRA_ACTIVITY, RSCManagerCallbacks.ACTIVITY_WALKING);
+				final long totalDistance = intent.getLongExtra(RSCService.EXTRA_TOTAL_DISTANCE, -1);
+				final boolean running = intent.getBooleanExtra(RSCService.EXTRA_ACTIVITY, false);
 				// Update GUI
-				onMeasurementReceived(speed, cadence, totalDistance, activity);
+				onMeasurementReceived(speed, cadence, totalDistance, running);
 			} else if (RSCService.BROADCAST_STRIDES_UPDATE.equals(action)) {
 				final int strides = intent.getIntExtra(RSCService.EXTRA_STRIDES, 0);
-				final float distance = intent.getFloatExtra(RSCService.EXTRA_DISTANCE, 0);
+				final long distance = intent.getLongExtra(RSCService.EXTRA_DISTANCE, -1);
 				// Update GUI
 				onStripesUpdate(distance, strides);
 			}
