@@ -21,22 +21,13 @@
  */
 package no.nordicsemi.android.nrftoolbox.hts;
 
-import android.bluetooth.BluetoothDevice;
-
-import no.nordicsemi.android.ble.BleManagerCallbacks;
+import no.nordicsemi.android.ble.common.profile.ht.TemperatureMeasurementCallback;
+import no.nordicsemi.android.nrftoolbox.battery.BatteryManagerCallbacks;
 
 /**
- * Interface {@link HTSManagerCallbacks} must be implemented by {@link HTSActivity} in order to receive callbacks from {@link HTSManager}
+ * Interface {@link HTSManagerCallbacks} must be implemented by {@link HTSActivity} in order
+ * to receive callbacks from {@link HTSManager}.
  */
-public interface HTSManagerCallbacks extends BleManagerCallbacks {
-
-	/**
-	 * Called when Health Thermometer value has been received
-	 *
-	 * @param device  the bluetooth device from which the value was obtained
-	 * @param value
-	 *            the new value
-	 */
-	void onHTValueReceived(final BluetoothDevice device, double value);
+interface HTSManagerCallbacks extends BatteryManagerCallbacks, TemperatureMeasurementCallback {
 
 }

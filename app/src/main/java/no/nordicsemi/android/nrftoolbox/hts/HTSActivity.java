@@ -43,18 +43,19 @@ import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileServiceReadyActivity;
 
 /**
- * HTSActivity is the main Health Thermometer activity. It implements {@link HTSManagerCallbacks} to receive callbacks from {@link HTSManager} class. The activity supports portrait and landscape
+ * HTSActivity is the main Health Thermometer activity. It implements {@link HTSManagerCallbacks}
+ * to receive callbacks from {@link HTSManager} class. The activity supports portrait and landscape
  * orientations.
  */
-public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.RSCBinder> {
+public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.HTSBinder> {
 	@SuppressWarnings("unused")
 	private final String TAG = "HTSActivity";
 
 	private static final String VALUE = "value";
-	private static final DecimalFormat mFormattedTemp = new DecimalFormat("#0.00");
-	private TextView mHTSValue;
-	private TextView mHTSUnit;
-	private Double mValueC;
+	private TextView mTempValue;
+	private TextView mUnit;
+	private TextView mBatteryLevelView;
+	private Float mValueC;
 
 	@Override
 	protected void onCreateView(final Bundle savedInstanceState) {
@@ -76,7 +77,7 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.RSCBi
 
 		if (savedInstanceState != null) {
 			if (savedInstanceState.containsKey(VALUE))
-				mValueC = savedInstanceState.getDouble(VALUE);
+				mValueC = savedInstanceState.getFloat(VALUE);
 		}
 	}
 
@@ -87,11 +88,12 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.RSCBi
 	}
 
 	private void setGUI() {
-		mHTSValue = findViewById(R.id.text_hts_value);
-		mHTSUnit = findViewById(R.id.text_hts_unit);
+		mTempValue = findViewById(R.id.text_hts_value);
+		mUnit = findViewById(R.id.text_hts_unit);
+		mBatteryLevelView = findViewById(R.id.battery);
 
 		if (mValueC != null)
-			mHTSValue.setText(String.valueOf(mValueC));
+			mTempValue.setText(String.valueOf(mValueC));
 	}
 
 	@Override
@@ -103,7 +105,8 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.RSCBi
 	@Override
 	protected void setDefaultUI() {
 		mValueC = null;
-		mHTSValue.setText(R.string.not_available_value);
+		mTempValue.setText(R.string.not_available_value);
+		mBatteryLevelView.setText(R.string.not_available);
 
 		setUnits();
 	}
@@ -114,21 +117,21 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.RSCBi
 
 		switch (unit) {
 			case SettingsFragment.SETTINGS_UNIT_C:
-				mHTSUnit.setText(R.string.hts_unit_celsius);
+				mUnit.setText(R.string.hts_unit_celsius);
 				break;
 			case SettingsFragment.SETTINGS_UNIT_F:
-				mHTSUnit.setText(R.string.hts_unit_fahrenheit);
+				mUnit.setText(R.string.hts_unit_fahrenheit);
 				break;
 			case SettingsFragment.SETTINGS_UNIT_K:
-				mHTSUnit.setText(R.string.hts_unit_kelvin);
+				mUnit.setText(R.string.hts_unit_kelvin);
 				break;
 		}
 		if (mValueC != null)
-			setHTSValueOnView(mValueC);
+			onTemperatureMeasurementReceived(mValueC);
 	}
 
 	@Override
-	protected void onServiceBound(final HTSService.RSCBinder binder) {
+	protected void onServiceBound(final HTSService.HTSBinder binder) {
 		// not used
 	}
 
@@ -184,14 +187,20 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.RSCBi
 		// this may notify user or show some views
 	}
 
-	private void setHTSValueOnView(double value) {
+	@Override
+	public void onDeviceDisconnected(final BluetoothDevice device) {
+		super.onDeviceDisconnected(device);
+		mBatteryLevelView.setText(R.string.not_available);
+	}
+
+	private void onTemperatureMeasurementReceived(float value) {
 		mValueC = value;
 		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		final int unit = Integer.parseInt(preferences.getString(SettingsFragment.SETTINGS_UNIT, String.valueOf(SettingsFragment.SETTINGS_UNIT_DEFAULT)));
 
 		switch (unit) {
 			case SettingsFragment.SETTINGS_UNIT_F:
-				value = value * 1.8 + 32;
+				value = value * 1.8f + 32f;
 				break;
 			case SettingsFragment.SETTINGS_UNIT_K:
 				value += 273.15;
@@ -199,7 +208,11 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.RSCBi
 			case SettingsFragment.SETTINGS_UNIT_C:
 				break;
 		}
-		mHTSValue.setText(mFormattedTemp.format(value));
+		mTempValue.setText(getString(R.string.hts_value, value));
+	}
+
+	public void onBatteryLevelChanged(final int value) {
+		mBatteryLevelView.setText(getString(R.string.battery, value));
 	}
 
 	private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -208,9 +221,13 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.RSCBi
 			final String action = intent.getAction();
 
 			if (HTSService.BROADCAST_HTS_MEASUREMENT.equals(action)) {
-				final double value = intent.getDoubleExtra(HTSService.EXTRA_TEMPERATURE, 0.0f);
+				final float value = intent.getFloatExtra(HTSService.EXTRA_TEMPERATURE, 0.0f);
 				// Update GUI
-				setHTSValueOnView(value);
+				onTemperatureMeasurementReceived(value);
+			} else if (HTSService.BROADCAST_BATTERY_LEVEL.equals(action)) {
+				final int batteryLevel = intent.getIntExtra(HTSService.EXTRA_BATTERY_LEVEL, 0);
+				// Update GUI
+				onBatteryLevelChanged(batteryLevel);
 			}
 		}
 	};
@@ -218,6 +235,7 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.RSCBi
 	private static IntentFilter makeIntentFilter() {
 		final IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(HTSService.BROADCAST_HTS_MEASUREMENT);
+		intentFilter.addAction(HTSService.BROADCAST_BATTERY_LEVEL);
 		return intentFilter;
 	}
 }

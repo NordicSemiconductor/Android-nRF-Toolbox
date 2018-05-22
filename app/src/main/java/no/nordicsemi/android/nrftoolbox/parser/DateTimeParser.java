@@ -21,37 +21,37 @@
  */
 package no.nordicsemi.android.nrftoolbox.parser;
 
-import android.bluetooth.BluetoothGattCharacteristic;
-
 import java.util.Calendar;
 import java.util.Locale;
+
+import no.nordicsemi.android.ble.data.Data;
 
 public class DateTimeParser {
 	/**
 	 * Parses the date and time info.
 	 * 
-	 * @param characteristic
+	 * @param data
 	 * @return time in human readable format
 	 */
-	public static String parse(final BluetoothGattCharacteristic characteristic) {
-		return parse(characteristic, 0);
+	public static String parse(final Data data) {
+		return parse(data, 0);
 	}
 
 	/**
 	 * Parses the date and time info. This data has 7 bytes
 	 * 
-	 * @param characteristic
+	 * @param data
 	 * @param offset
 	 *            offset to start reading the time
 	 * @return time in human readable format
 	 */
-	/* package */static String parse(final BluetoothGattCharacteristic characteristic, final int offset) {
-		final int year = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
-		final int month = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 2);
-		final int day = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 3);
-		final int hours = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 4);
-		final int minutes = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 5);
-		final int seconds = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 6);
+	/* package */static String parse(final Data data, final int offset) {
+		final int year = data.getIntValue(Data.FORMAT_UINT16, offset);
+		final int month = data.getIntValue(Data.FORMAT_UINT8, offset + 2);
+		final int day = data.getIntValue(Data.FORMAT_UINT8, offset + 3);
+		final int hours = data.getIntValue(Data.FORMAT_UINT8, offset + 4);
+		final int minutes = data.getIntValue(Data.FORMAT_UINT8, offset + 5);
+		final int seconds = data.getIntValue(Data.FORMAT_UINT8, offset + 6);
 
 		final Calendar calendar = Calendar.getInstance();
 		calendar.set(year, month - 1, day, hours, minutes, seconds);

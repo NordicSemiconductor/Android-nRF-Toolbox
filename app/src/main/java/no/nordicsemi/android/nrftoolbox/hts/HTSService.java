@@ -30,19 +30,28 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
+import java.util.Calendar;
+
 import no.nordicsemi.android.ble.BleManager;
+import no.nordicsemi.android.ble.common.callback.ht.TemperatureMeasurementDataCallback;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.ToolboxApplication;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class HTSService extends BleProfileService implements HTSManagerCallbacks {
 	public static final String BROADCAST_HTS_MEASUREMENT = "no.nordicsemi.android.nrftoolbox.hts.BROADCAST_HTS_MEASUREMENT";
 	public static final String EXTRA_TEMPERATURE = "no.nordicsemi.android.nrftoolbox.hts.EXTRA_TEMPERATURE";
+
+	public static final String BROADCAST_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.BROADCAST_BATTERY_LEVEL";
+	public static final String EXTRA_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.EXTRA_BATTERY_LEVEL";
 
 	private final static String ACTION_DISCONNECT = "no.nordicsemi.android.nrftoolbox.hts.ACTION_DISCONNECT";
 
@@ -52,12 +61,12 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 
 	private HTSManager mManager;
 
-	private final LocalBinder mBinder = new RSCBinder();
+	private final LocalBinder mBinder = new HTSBinder();
 
 	/**
 	 * This local binder is an interface for the bonded activity to operate with the HTS sensor
 	 */
-	public class RSCBinder extends LocalBinder {
+	class HTSBinder extends LocalBinder {
 		// empty
 	}
 
@@ -102,16 +111,27 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	}
 
 	@Override
-	public void onHTValueReceived(final BluetoothDevice device, final double value) {
+	public void onTemperatureMeasurementReceived(final float temperature, final int unit,
+												 @Nullable final Calendar calendar,
+												 @Nullable final Integer type) {
 		final Intent broadcast = new Intent(BROADCAST_HTS_MEASUREMENT);
-		broadcast.putExtra(EXTRA_DEVICE, device);
-		broadcast.putExtra(EXTRA_TEMPERATURE, value);
+		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
+		broadcast.putExtra(EXTRA_TEMPERATURE, TemperatureMeasurementDataCallback.toCelsius(temperature, unit));
+		// ignore the rest
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 
 		if (!mBound) {
 			// Here we may update the notification to display the current temperature.
 			// TODO modify the notification here
 		}
+	}
+
+	@Override
+	public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
+		final Intent broadcast = new Intent(BROADCAST_BATTERY_LEVEL);
+		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
+		broadcast.putExtra(EXTRA_BATTERY_LEVEL, batteryLevel);
+		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	/**

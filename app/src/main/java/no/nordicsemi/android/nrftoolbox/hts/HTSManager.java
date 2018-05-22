@@ -21,27 +21,30 @@
  */
 package no.nordicsemi.android.nrftoolbox.hts;
 
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
-import java.util.Deque;
-import java.util.LinkedList;
+import java.util.Calendar;
 import java.util.UUID;
 
-import no.nordicsemi.android.ble.BleManager;
-import no.nordicsemi.android.ble.Request;
+import no.nordicsemi.android.ble.common.callback.ht.TemperatureMeasurementDataCallback;
+import no.nordicsemi.android.ble.data.Data;
 import no.nordicsemi.android.log.LogContract;
+import no.nordicsemi.android.nrftoolbox.battery.BatteryManager;
 import no.nordicsemi.android.nrftoolbox.parser.TemperatureMeasurementParser;
-import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
 
 /**
- * HTSManager class performs BluetoothGatt operations for connection, service discovery, enabling indication and reading characteristics. All operations required to connect to device with BLE HT
- * Service and reading health thermometer values are performed here. HTSActivity implements HTSManagerCallbacks in order to receive callbacks of BluetoothGatt operations
+ * HTSManager class performs BluetoothGatt operations for connection, service discovery, enabling
+ * indication and reading characteristics. All operations required to connect to device with BLE HT
+ * Service and reading health thermometer values are performed here.
+ * HTSActivity implements HTSManagerCallbacks in order to receive callbacks of BluetoothGatt operations.
  */
-public class HTSManager extends BleManager<HTSManagerCallbacks> {
+public class HTSManager extends BatteryManager<HTSManagerCallbacks> {
 	private static final String TAG = "HTSManager";
 
 	/** Health Thermometer service UUID */
@@ -51,32 +54,39 @@ public class HTSManager extends BleManager<HTSManagerCallbacks> {
 
 	private BluetoothGattCharacteristic mHTCharacteristic;
 
-	private final static int HIDE_MSB_8BITS_OUT_OF_32BITS = 0x00FFFFFF;
-	private final static int HIDE_MSB_8BITS_OUT_OF_16BITS = 0x00FF;
-	private final static int SHIFT_LEFT_8BITS = 8;
-	private final static int SHIFT_LEFT_16BITS = 16;
-	private final static int GET_BIT24 = 0x00400000;
-	private final static int FIRST_BIT_MASK = 0x01;
-
-	public HTSManager(final Context context) {
+	HTSManager(final Context context) {
 		super(context);
 	}
 
+	@NonNull
 	@Override
-	protected BleManagerGattCallback getGattCallback() {
+	protected BatteryManagerGattCallback getGattCallback() {
 		return mGattCallback;
 	}
 
 	/**
-	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving indication, etc
+	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving indication, etc.
 	 */
-	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
-
+	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
 		@Override
-		protected Deque<Request> initGatt(@NonNull final BluetoothGatt gatt) {
-			final LinkedList<Request> requests = new LinkedList<>();
-			requests.add(Request.newEnableIndicationsRequest(mHTCharacteristic));
-			return requests;
+		protected void initialize() {
+			super.initialize();
+			setIndicationCallback(mHTCharacteristic)
+					.with(new TemperatureMeasurementDataCallback() {
+						@Override
+						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+							log(LogContract.Log.Level.APPLICATION, "\"" + TemperatureMeasurementParser.parse(data) + "\" received");
+							super.onDataReceived(device, data);
+						}
+
+						@Override
+						public void onTemperatureMeasurementReceived(final float temperature, final int unit,
+																	 @Nullable final Calendar calendar,
+																	 @Nullable final Integer type) {
+							mCallbacks.onTemperatureMeasurementReceived(temperature, unit, calendar, type);
+						}
+					});
+			enableIndications(mHTCharacteristic);
 		}
 
 		@Override
@@ -90,60 +100,8 @@ public class HTSManager extends BleManager<HTSManagerCallbacks> {
 
 		@Override
 		protected void onDeviceDisconnected() {
+			super.onDeviceDisconnected();
 			mHTCharacteristic = null;
 		}
-
-		@Override
-		public void onCharacteristicIndicated(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			log(LogContract.Log.Level.APPLICATION, "\"" + TemperatureMeasurementParser.parse(characteristic) + "\" received");
-
-			try {
-				final double tempValue = decodeTemperature(characteristic.getValue());
-				mCallbacks.onHTValueReceived(gatt.getDevice(), tempValue);
-			} catch (Exception e) {
-				DebugLogger.e(TAG, "Invalid temperature value", e);
-			}
-		}
 	};
-
-	/**
-	 * This method decode temperature value received from Health Thermometer device First byte {0} of data is flag and first bit of flag shows unit information of temperature. if bit 0 has value 1
-	 * then unit is Fahrenheit and Celsius otherwise Four bytes {1 to 4} after Flag bytes represent the temperature value in IEEE-11073 32-bit Float format
-	 */
-	private double decodeTemperature(byte[] data) throws Exception {
-		double temperatureValue;
-		byte flag = data[0];
-		byte exponential = data[4];
-		short firstOctet = convertNegativeByteToPositiveShort(data[1]);
-		short secondOctet = convertNegativeByteToPositiveShort(data[2]);
-		short thirdOctet = convertNegativeByteToPositiveShort(data[3]);
-		int mantissa = ((thirdOctet << SHIFT_LEFT_16BITS) | (secondOctet << SHIFT_LEFT_8BITS) | (firstOctet)) & HIDE_MSB_8BITS_OUT_OF_32BITS;
-		mantissa = getTwosComplimentOfNegativeMantissa(mantissa);
-		temperatureValue = (mantissa * Math.pow(10, exponential));
-
-		/*
-		 * Conversion of temperature unit from Fahrenheit to Celsius if unit is in Fahrenheit
-		 * Celsius = (Fahrenheit -32) 5/9
-		 */
-		if ((flag & FIRST_BIT_MASK) != 0) {
-			temperatureValue = (float) ((temperatureValue - 32) * (5 / 9.0));
-		}
-		return temperatureValue;
-	}
-
-	private short convertNegativeByteToPositiveShort(byte octet) {
-		if (octet < 0) {
-			return (short) (octet & HIDE_MSB_8BITS_OUT_OF_16BITS);
-		} else {
-			return octet;
-		}
-	}
-
-	private int getTwosComplimentOfNegativeMantissa(int mantissa) {
-		if ((mantissa & GET_BIT24) != 0) {
-			return ((((~mantissa) & HIDE_MSB_8BITS_OUT_OF_32BITS) + 1) * (-1));
-		} else {
-			return mantissa;
-		}
-	}
 }

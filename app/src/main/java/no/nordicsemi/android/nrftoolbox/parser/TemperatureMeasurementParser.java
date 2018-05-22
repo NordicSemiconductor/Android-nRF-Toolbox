@@ -21,18 +21,18 @@
  */
 package no.nordicsemi.android.nrftoolbox.parser;
 
-import android.bluetooth.BluetoothGattCharacteristic;
-
 import java.util.Locale;
+
+import no.nordicsemi.android.ble.data.Data;
 
 public class TemperatureMeasurementParser {
 	private static final byte TEMPERATURE_UNIT_FLAG = 0x01; // 1 bit
 	private static final byte TIMESTAMP_FLAG = 0x02; // 1 bits
 	private static final byte TEMPERATURE_TYPE_FLAG = 0x04; // 1 bit
 
-	public static String parse(final BluetoothGattCharacteristic characteristic) {
+	public static String parse(final Data data) {
 		int offset = 0;
-		final int flags = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
+		final int flags = data.getIntValue(Data.FORMAT_UINT8, offset++);
 
 		/*
 		 * false 	Temperature is in Celsius degrees 
@@ -52,18 +52,18 @@ public class TemperatureMeasurementParser {
 		 */
 		final boolean temperatureTypeIncluded = (flags & TEMPERATURE_TYPE_FLAG) > 0;
 
-		final float tempValue = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_FLOAT, offset);
+		final float tempValue = data.getFloatValue(Data.FORMAT_FLOAT, offset);
 		offset += 4;
 
 		String dateTime = null;
 		if (timestampIncluded) {
-			dateTime = DateTimeParser.parse(characteristic, offset);
+			dateTime = DateTimeParser.parse(data, offset);
 			offset += 7;
 		}
 
 		String type = null;
 		if (temperatureTypeIncluded) {
-			type = TemperatureTypeParser.parse(characteristic, offset);
+			type = TemperatureTypeParser.parse(data, offset);
 			// offset++;
 		}
 

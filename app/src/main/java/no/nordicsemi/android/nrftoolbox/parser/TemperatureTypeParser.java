@@ -21,16 +21,16 @@
  */
 package no.nordicsemi.android.nrftoolbox.parser;
 
-import android.bluetooth.BluetoothGattCharacteristic;
+import no.nordicsemi.android.ble.data.Data;
 
 public class TemperatureTypeParser {
 
-	public static String parse(final BluetoothGattCharacteristic characteristic) {
-		return parse(characteristic, 0);
+	public static String parse(final Data data) {
+		return parse(data, 0);
 	}
 
-	/* package */static String parse(final BluetoothGattCharacteristic characteristic, final int offset) {
-		final int type = characteristic.getValue()[offset];
+	/* package */static String parse(final Data data, final int offset) {
+		final int type = data.getValue()[offset];
 
 		switch (type) {
 		case 1:

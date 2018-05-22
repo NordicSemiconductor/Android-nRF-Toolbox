@@ -31,6 +31,7 @@
     <string name="hts_unit_celsius">°C</string>
 	<string name="hts_unit_fahrenheit">°F</string>
 	<string name="hts_unit_kelvin">°K</string>
+	<string name="hts_value">%.2f</string>
 
 	<string name="hts_notification_action_disconnect">Disconnect</string>
     <string name="hts_notification_connected_message">%s is connected.</string>
