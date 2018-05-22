@@ -67,6 +67,7 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 		super(context);
 	}
 
+	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
 		return mGattCallback;

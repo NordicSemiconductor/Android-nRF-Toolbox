@@ -54,6 +54,7 @@ public class TemplateManager extends BleManager<TemplateManagerCallbacks> {
 		super(context);
 	}
 
+	@NonNull
 	@Override
 	protected BleManagerGattCallback getGattCallback() {
 		return mGattCallback;

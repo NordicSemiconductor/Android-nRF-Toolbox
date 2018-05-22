@@ -21,7 +21,7 @@
  */
 package no.nordicsemi.android.nrftoolbox.parser;
 
-import android.bluetooth.BluetoothGattCharacteristic;
+import no.nordicsemi.android.ble.data.Data;
 
 public class CGMSpecificOpsControlPointParser {
 	private final static int OP_SET_CGM_COMMUNICATION_INTERVAL = 1;
@@ -55,32 +55,32 @@ public class CGMSpecificOpsControlPointParser {
 
 	// TODO this parser does not support E2E-CRC!
 
-	public static String parse(final BluetoothGattCharacteristic characteristic) {
+	public static String parse(final Data data) {
 		int offset = 0;
-		final int opCode = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
+		final int opCode = data.getIntValue(Data.FORMAT_UINT8, offset++);
 
 		final StringBuilder builder = new StringBuilder();
 		builder.append(parseOpCode(opCode));
 		switch (opCode) {
 			case OP_SET_CGM_COMMUNICATION_INTERVAL:
 			case OP_CGM_COMMUNICATION_INTERVAL_RESPONSE: {
-				final int interval = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
+				final int interval = data.getIntValue(Data.FORMAT_UINT8, offset);
 				builder.append(" to ").append(interval).append(" min");
 				break;
 			}
 			case OP_SET_GLUCOSE_CALIBRATION_VALUE: {
-				final float calConcentration = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset);
+				final float calConcentration = data.getFloatValue(Data.FORMAT_SFLOAT, offset);
 				offset += 2;
-				final int calTime = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+				final int calTime = data.getIntValue(Data.FORMAT_UINT16, offset);
 				offset += 2;
-				final int calTypeSampleLocation = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
+				final int calTypeSampleLocation = data.getIntValue(Data.FORMAT_UINT8, offset++);
 				final int calType = calTypeSampleLocation & 0x0F;
 				final int calSampleLocation = (calTypeSampleLocation & 0xF0) >> 4;
-				final int calNextCalibrationTime = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+				final int calNextCalibrationTime = data.getIntValue(Data.FORMAT_UINT16, offset);
 				// offset += 2;
-				// final int calCalibrationDataRecordNumber = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+				// final int calCalibrationDataRecordNumber = data.getIntValue(Data.FORMAT_UINT16, offset);
 				// offset += 2;
-				// final int calStatus = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
+				// final int calStatus = data.getIntValue(Data.FORMAT_UINT8, offset++);
 
 				builder.append(" to:\n");
 				builder.append("Glucose Concentration of Calibration: ").append(calConcentration).append(" mg/dL\n");
@@ -93,23 +93,23 @@ public class CGMSpecificOpsControlPointParser {
 				break;
 			}
 			case OP_GET_GLUCOSE_CALIBRATION_VALUE: {
-				final int calibrationRecordNumber = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+				final int calibrationRecordNumber = data.getIntValue(Data.FORMAT_UINT16, offset);
 				builder.append(": ").append(parseRecordNumber(calibrationRecordNumber));
 				break;
 			}
 			case OP_GLUCOSE_CALIBRATION_VALUE_RESPONSE: {
-				final float calConcentration = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset);
+				final float calConcentration = data.getFloatValue(Data.FORMAT_SFLOAT, offset);
 				offset += 2;
-				final int calTime = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+				final int calTime = data.getIntValue(Data.FORMAT_UINT16, offset);
 				offset += 2;
-				final int calTypeSampleLocation = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
+				final int calTypeSampleLocation = data.getIntValue(Data.FORMAT_UINT8, offset++);
 				final int calType = calTypeSampleLocation & 0x0F;
 				final int calSampleLocation = (calTypeSampleLocation & 0xF0) >> 4;
-				final int calNextCalibrationTime = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+				final int calNextCalibrationTime = data.getIntValue(Data.FORMAT_UINT16, offset);
 				offset += 2;
-				final int calCalibrationDataRecordNumber = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+				final int calCalibrationDataRecordNumber = data.getIntValue(Data.FORMAT_UINT16, offset);
 				offset += 2;
-				final int calStatus = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
+				final int calStatus = data.getIntValue(Data.FORMAT_UINT8, offset);
 
 				builder.append(":\n");
 				if (calCalibrationDataRecordNumber > 0) {
@@ -129,7 +129,7 @@ public class CGMSpecificOpsControlPointParser {
 			case OP_SET_PATIENT_LOW_ALERT_LEVEL:
 			case OP_SET_HYPO_ALERT_LEVEL:
 			case OP_SET_HYPER_ALERT_LEVEL: {
-				final float level = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset);
+				final float level = data.getFloatValue(Data.FORMAT_SFLOAT, offset);
 				builder.append(" to: ").append(level).append(" mg/dL");
 				break;
 			}
@@ -137,25 +137,25 @@ public class CGMSpecificOpsControlPointParser {
 			case OP_PATIENT_LOW_ALERT_LEVEL_RESPONSE:
 			case OP_HYPO_ALERT_LEVEL_RESPONSE:
 			case OP_HYPER_ALERT_LEVEL_RESPONSE: {
-				final float level = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset);
+				final float level = data.getFloatValue(Data.FORMAT_SFLOAT, offset);
 				builder.append(": ").append(level).append(" mg/dL");
 				break;
 			}
 			case OP_SET_RATE_OF_DECREASE_ALERT_LEVEL:
 			case OP_SET_RATE_OF_INCREASE_ALERT_LEVEL: {
-				final float level = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset);
+				final float level = data.getFloatValue(Data.FORMAT_SFLOAT, offset);
 				builder.append(" to: ").append(level).append(" mg/dL/min");
 				break;
 			}
 			case OP_RATE_OF_DECREASE_ALERT_LEVEL_RESPONSE:
 			case OP_RATE_OF_INCREASE_ALERT_LEVEL_RESPONSE: {
-				final float level = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset);
+				final float level = data.getFloatValue(Data.FORMAT_SFLOAT, offset);
 				builder.append(": ").append(level).append(" mg/dL/min");
 				break;
 			}
 			case OP_CODE_RESPONSE_CODE:
-				final int requestOpCode = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
-				final int responseCode = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
+				final int requestOpCode = data.getIntValue(Data.FORMAT_UINT8, offset++);
+				final int responseCode = data.getIntValue(Data.FORMAT_UINT8, offset++);
 				builder.append(" to ").append(parseOpCode(requestOpCode)).append(": ").append(parseResponseCode(responseCode));
 				break;
 		}

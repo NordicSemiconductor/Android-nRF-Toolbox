@@ -65,6 +65,7 @@ public class HRSManager extends BleManager<HRSManagerCallbacks> {
 		super(context);
 	}
 
+	@NonNull
 	@Override
 	protected BleManagerGattCallback getGattCallback() {
 		return mGattCallback;

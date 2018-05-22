@@ -147,10 +147,10 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 	}
 
 	@Override
-	public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int value) {
+	public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
 		final Intent broadcast = new Intent(BROADCAST_BATTERY_LEVEL);
 		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
-		broadcast.putExtra(EXTRA_BATTERY_LEVEL, value);
+		broadcast.putExtra(EXTRA_BATTERY_LEVEL, batteryLevel);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 

@@ -33,7 +33,7 @@ import android.support.annotation.NonNull;
 
 import java.util.UUID;
 
-import no.nordicsemi.android.ble.common.callback.csc.CyclingSpeedAndCadenceDataCallback;
+import no.nordicsemi.android.ble.common.callback.csc.CyclingSpeedAndCadenceMeasurementDataCallback;
 import no.nordicsemi.android.ble.data.Data;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.battery.BatteryManager;
@@ -54,6 +54,7 @@ public class CSCManager extends BatteryManager<CSCManagerCallbacks> {
 		preferences = PreferenceManager.getDefaultSharedPreferences(context);
 	}
 
+	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
 		return mGattCallback;
@@ -70,7 +71,7 @@ public class CSCManager extends BatteryManager<CSCManagerCallbacks> {
 
 			// CSC characteristic is required
 			setNotificationCallback(mCSCMeasurementCharacteristic)
-					.with(new CyclingSpeedAndCadenceDataCallback() {
+					.with(new CyclingSpeedAndCadenceMeasurementDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, final @NonNull Data data) {
 							log(LogContract.Log.Level.APPLICATION, "\"" + CSCMeasurementParser.parse(data) + "\" received");

@@ -83,6 +83,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 		mHandler = new Handler();
 	}
 
+	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
 		return mGattCallback;
@@ -116,7 +117,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 					.with(new GlucoseMeasurementDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
-							log(LogContract.Log.Level.APPLICATION, "\"" + GlucoseMeasurementParser.parse(mGlucoseMeasurementCharacteristic) + "\" received");
+							log(LogContract.Log.Level.APPLICATION, "\"" + GlucoseMeasurementParser.parse(data) + "\" received");
 							super.onDataReceived(device, data);
 						}
 
@@ -152,7 +153,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 					.with(new GlucoseMeasurementContextDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
-							log(LogContract.Log.Level.APPLICATION, "\"" + GlucoseMeasurementContextParser.parse(mGlucoseMeasurementContextCharacteristic) + "\" received");
+							log(LogContract.Log.Level.APPLICATION, "\"" + GlucoseMeasurementContextParser.parse(data) + "\" received");
 							super.onDataReceived(device, data);
 						}
 

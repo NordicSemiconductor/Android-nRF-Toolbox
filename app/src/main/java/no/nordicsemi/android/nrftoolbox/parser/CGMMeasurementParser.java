@@ -21,9 +21,9 @@
  */
 package no.nordicsemi.android.nrftoolbox.parser;
 
-import android.bluetooth.BluetoothGattCharacteristic;
-
 import java.util.Locale;
+
+import no.nordicsemi.android.ble.data.Data;
 
 public class CGMMeasurementParser {
 	private static final int FLAGS_CGM_TREND_INFO_PRESENT = 1;
@@ -55,24 +55,24 @@ public class CGMMeasurementParser {
 	private static final int SSA_RESULT_LOWER_THAN_DEVICE_CAN_PROCESS = 1 << 22;
 	private static final int SSA_RESULT_HIGHER_THAN_DEVICE_CAN_PROCESS = 1 << 23;
 
-	public static String parse(final BluetoothGattCharacteristic characteristic) {
+	public static String parse(final Data data) {
 		// The CGM Measurement characteristic is a variable length structure containing one or more CGM Measurement records
-		int totalSize = characteristic.getValue().length;
+		int totalSize = data.getValue().length;
 
 		final StringBuilder builder = new StringBuilder();
 		int offset = 0;
 		while (offset < totalSize) {
-			offset += parseRecord(builder, characteristic, offset);
+			offset += parseRecord(builder, data, offset);
 			if (offset <  totalSize)
 				builder.append("\n\n");
 		}
 		return builder.toString();
 	}
 
-	private static int parseRecord(final StringBuilder builder, final BluetoothGattCharacteristic characteristic, int offset) {
+	private static int parseRecord(final StringBuilder builder, final Data data, int offset) {
 		// Read size and flags bytes
-		final int size = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
-		final int flags = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
+		final int size = data.getIntValue(Data.FORMAT_UINT8, offset++);
+		final int flags = data.getIntValue(Data.FORMAT_UINT8, offset++);
 
 		/*
 		 * false 	CGM Trend Information is not preset
@@ -105,18 +105,18 @@ public class CGMMeasurementParser {
 		final boolean ssaStatusOctetPresent = (flags & FLAGS_SENSOR_STATUS_ANNUNCIATION_STATUS_OCTET_PRESENT) > 0;
 
 		// Read CGM Glucose Concentration
-		final float glucoseConcentration = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset);
+		final float glucoseConcentration = data.getFloatValue(Data.FORMAT_SFLOAT, offset);
 		offset += 2;
 
 		// Read time offset
-		final int timeOffset = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+		final int timeOffset = data.getIntValue(Data.FORMAT_UINT16, offset);
 		offset += 2;
 
 		builder.append("Glucose concentration: ").append(glucoseConcentration).append(" mg/dL\n");
 		builder.append("Sequence number: ").append(timeOffset).append(" (Time Offset in min)\n");
 
 		if (ssaWarningOctetPresent) {
-			final int ssaWarningOctet = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
+			final int ssaWarningOctet = data.getIntValue(Data.FORMAT_UINT8, offset++);
 			builder.append("Warnings:\n");
 			if ((ssaWarningOctet & SSA_SESSION_STOPPED) > 0)
 				builder.append("- Session Stopped\n");
@@ -133,7 +133,7 @@ public class CGMMeasurementParser {
 		}
 
 		if (ssaCalTempOctetPresent) {
-			final int ssaCalTempOctet = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
+			final int ssaCalTempOctet = data.getIntValue(Data.FORMAT_UINT8, offset++);
 			builder.append("Cal/Temp Info:\n");
 			if ((ssaCalTempOctet & SSA_TIME_SYNC_REQUIRED) > 0)
 				builder.append("- Time Synchronization Required\n");
@@ -150,7 +150,7 @@ public class CGMMeasurementParser {
 		}
 
 		if (ssaStatusOctetPresent) {
-			final int ssaStatusOctet = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
+			final int ssaStatusOctet = data.getIntValue(Data.FORMAT_UINT8, offset++);
 			builder.append("Status:\n");
 			if ((ssaStatusOctet & SSA_RESULT_LOWER_THAN_PATIENT_LOW_LEVEL) > 0)
 				builder.append("- Result Lower then Patient Low Level\n");
@@ -171,19 +171,19 @@ public class CGMMeasurementParser {
 		}
 
 		if (cgmTrendInformationPresent) {
-			final float trend = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset);
+			final float trend = data.getFloatValue(Data.FORMAT_SFLOAT, offset);
 			offset += 2;
 			builder.append("Trend: ").append(trend).append(" mg/dL/min\n");
 		}
 
 		if (cgmQualityPresent) {
-			final float quality = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset);
+			final float quality = data.getFloatValue(Data.FORMAT_SFLOAT, offset);
 			offset += 2;
 			builder.append("Quality: ").append(quality).append("%\n");
 		}
 
 		if (size > offset + 1) {
-			final int crc = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+			final int crc = data.getIntValue(Data.FORMAT_UINT16, offset);
 			// offset += 2;
 			builder.append(String.format(Locale.US, "E2E-CRC: 0x%04X\n", crc));
 		}

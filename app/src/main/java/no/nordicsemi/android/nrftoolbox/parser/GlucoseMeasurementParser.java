@@ -22,7 +22,7 @@
 
 package no.nordicsemi.android.nrftoolbox.parser;
 
-import android.bluetooth.BluetoothGattCharacteristic;
+import no.nordicsemi.android.ble.data.Data;
 
 public class GlucoseMeasurementParser {
 	private static final int UNIT_kgpl = 0;
@@ -41,11 +41,11 @@ public class GlucoseMeasurementParser {
 	private static final int STATUS_GENERAL_DEVICE_FAULT = 0x0400;
 	private static final int STATUS_TIME_FAULT = 0x0800;
 
-	public static String parse(final BluetoothGattCharacteristic characteristic) {
+	public static String parse(final Data data) {
 		final StringBuilder builder = new StringBuilder();
 
 		int offset = 0;
-		final int flags = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
+		final int flags = data.getIntValue(Data.FORMAT_UINT8, offset);
 		offset += 1;
 
 		final boolean timeOffsetPresent = (flags & 0x01) > 0;
@@ -55,23 +55,23 @@ public class GlucoseMeasurementParser {
 		final boolean contextInfoFollows = (flags & 0x10) > 0;
 
 		// create and fill the new record
-		final int sequenceNumber = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+		final int sequenceNumber = data.getIntValue(Data.FORMAT_UINT16, offset);
 		builder.append("Sequence Number: ").append(sequenceNumber);
 		offset += 2;
 
-		builder.append("\nBase Time: ").append(DateTimeParser.parse(characteristic, offset));
+		builder.append("\nBase Time: ").append(DateTimeParser.parse(data, offset));
 		offset += 7;
 
 		if (timeOffsetPresent) {
 			// time offset is ignored in the current release
-			final int timeOffset = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+			final int timeOffset = data.getIntValue(Data.FORMAT_SINT16, offset);
 			builder.append("\nTime Offset: ").append(timeOffset).append(" min");
 			offset += 2;
 		}
 
 		if (typeAndLocationPresent) {
-			final float glucoseConcentration = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset);
-			final int typeAndLocation = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 2);
+			final float glucoseConcentration = data.getFloatValue(Data.FORMAT_SFLOAT, offset);
+			final int typeAndLocation = data.getIntValue(Data.FORMAT_UINT8, offset + 2);
 			final int type = (typeAndLocation & 0xF0) >> 4; // TODO this way or around?
 			final int sampleLocation = (typeAndLocation & 0x0F);
 			builder.append("\nGlucose Concentration: ").append(glucoseConcentration).append(concentrationUnit == UNIT_kgpl ? " kg/l" : " mol/l");
@@ -81,7 +81,7 @@ public class GlucoseMeasurementParser {
 		}
 
 		if (sensorStatusAnnunciationPresent) {
-			final int status = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+			final int status = data.getIntValue(Data.FORMAT_UINT16, offset);
 			builder.append("Status:\n").append(getStatusAnnunciation(status));
 		}
 

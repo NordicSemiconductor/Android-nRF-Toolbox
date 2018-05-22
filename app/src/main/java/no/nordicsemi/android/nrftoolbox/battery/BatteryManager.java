@@ -40,6 +40,7 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 		super(context);
 	}
 
+	@NonNull
 	@Override
 	protected abstract BatteryManagerGattCallback getGattCallback();
 

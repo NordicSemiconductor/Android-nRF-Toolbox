@@ -85,6 +85,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 		super(context);
 	}
 
+	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
 		return mGattCallback;
@@ -129,7 +130,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 					.with(new ContinuousGlucoseMeasurementDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
-							log(LogContract.Log.Level.APPLICATION, "\"" + CGMMeasurementParser.parse(mCGMMeasurementCharacteristic) + "\" received");
+							log(LogContract.Log.Level.APPLICATION, "\"" + CGMMeasurementParser.parse(data) + "\" received");
 							super.onDataReceived(device, data);
 						}
 
@@ -159,7 +160,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 					.with(new CGMSpecificOpsControlPointDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
-							log(LogContract.Log.Level.APPLICATION, "\"" + CGMSpecificOpsControlPointParser.parse(mCGMSpecificOpsControlPointCharacteristic) + "\" received");
+							log(LogContract.Log.Level.APPLICATION, "\"" + CGMSpecificOpsControlPointParser.parse(data) + "\" received");
 							super.onDataReceived(device, data);
 						}
 
@@ -261,7 +262,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 			// Start Continuous Glucose session if hasn't been started before
 			if (mSessionStartTime == 0L) {
 				writeCharacteristic(mCGMSpecificOpsControlPointCharacteristic, CGMSpecificOpsControlPointData.startSession(mSecured))
-						.done(device -> log(LogContract.Log.Level.APPLICATION, "\"" + CGMSpecificOpsControlPointParser.parse(mCGMSpecificOpsControlPointCharacteristic) + "\" sent"))
+						.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + CGMSpecificOpsControlPointParser.parse(data) + "\" sent"))
 						.fail((device, status) -> log(LogContract.Log.Level.ERROR, "Failed to start session (error " + status + ")"));
 			}
 		}

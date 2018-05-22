@@ -21,17 +21,17 @@
  */
 package no.nordicsemi.android.nrftoolbox.parser;
 
-import android.bluetooth.BluetoothGattCharacteristic;
+import no.nordicsemi.android.ble.data.Data;
 
 public class GlucoseMeasurementContextParser {
 	private static final int UNIT_kg = 0;
 	private static final int UNIT_l = 1;
 
-	public static String parse(final BluetoothGattCharacteristic characteristic) {
+	public static String parse(final Data data) {
 		final StringBuilder builder = new StringBuilder();
 
 		int offset = 0;
-		final int flags = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
+		final int flags = data.getIntValue(Data.FORMAT_UINT8, offset);
 		offset += 1;
 
 		final boolean carbohydratePresent = (flags & 0x01) > 0;
@@ -43,7 +43,7 @@ public class GlucoseMeasurementContextParser {
 		final boolean hbA1cPresent = (flags & 0x40) > 0;
 		final boolean moreFlagsPresent = (flags & 0x80) > 0;
 
-		final int sequenceNumber = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+		final int sequenceNumber = data.getIntValue(Data.FORMAT_UINT16, offset);
 		offset += 2;
 
 		if (moreFlagsPresent) // not supported yet
@@ -52,20 +52,20 @@ public class GlucoseMeasurementContextParser {
 		builder.append("Sequence number: ").append(sequenceNumber);
 
 		if (carbohydratePresent) {
-			final int carbohydrateId = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
-			final float carbohydrateUnits = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset + 1);
+			final int carbohydrateId = data.getIntValue(Data.FORMAT_UINT8, offset);
+			final float carbohydrateUnits = data.getFloatValue(Data.FORMAT_SFLOAT, offset + 1);
 			builder.append("\nCarbohydrate: ").append(getCarbohydrate(carbohydrateId)).append(" (").append(carbohydrateUnits).append(carbohydrateUnits == UNIT_kg ? "kg" : "l").append(")");
 			offset += 3;
 		}
 
 		if (mealPresent) {
-			final int meal = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
+			final int meal = data.getIntValue(Data.FORMAT_UINT8, offset);
 			builder.append("\nMeal: ").append(getMeal(meal));
 			offset += 1;
 		}
 
 		if (testerHealthPresent) {
-			final int testerHealth = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
+			final int testerHealth = data.getIntValue(Data.FORMAT_UINT8, offset);
 			final int tester = (testerHealth & 0xF0) >> 4;
 			final int health = (testerHealth & 0x0F);
 			builder.append("\nTester: ").append(getTester(tester));
@@ -74,21 +74,21 @@ public class GlucoseMeasurementContextParser {
 		}
 
 		if (exercisePresent) {
-			final int exerciseDuration = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
-			final int exerciseIntensity = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset + 2);
+			final int exerciseDuration = data.getIntValue(Data.FORMAT_UINT16, offset);
+			final int exerciseIntensity = data.getIntValue(Data.FORMAT_UINT8, offset + 2);
 			builder.append("\nExercise duration: ").append(exerciseDuration).append("s (intensity ").append(exerciseIntensity).append("%)");
 			offset += 3;
 		}
 
 		if (medicationPresent) {
-			final int medicationId = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
-			final float medicationQuantity = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset + 1);
+			final int medicationId = data.getIntValue(Data.FORMAT_UINT8, offset);
+			final float medicationQuantity = data.getFloatValue(Data.FORMAT_SFLOAT, offset + 1);
 			builder.append("\nMedication: ").append(getMedicationId(medicationId)).append(" (").append(medicationQuantity).append(medicationUnit == UNIT_kg ? "kg" : "l");
 			offset += 3;
 		}
 
 		if (hbA1cPresent) {
-			final float HbA1c = characteristic.getFloatValue(BluetoothGattCharacteristic.FORMAT_SFLOAT, offset);
+			final float HbA1c = data.getFloatValue(Data.FORMAT_SFLOAT, offset);
 			builder.append("\nHbA1c: ").append(HbA1c).append("%");
 		}
 		return builder.toString();

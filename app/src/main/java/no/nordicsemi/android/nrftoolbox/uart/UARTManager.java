@@ -56,6 +56,7 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 		super(context);
 	}
 
+	@NonNull
 	@Override
 	protected BleManagerGattCallback getGattCallback() {
 		return mGattCallback;
