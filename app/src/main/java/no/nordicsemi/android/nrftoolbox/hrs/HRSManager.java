@@ -21,33 +21,37 @@
  */
 package no.nordicsemi.android.nrftoolbox.hrs;
 
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
-import java.util.Deque;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
-import no.nordicsemi.android.ble.BleManager;
-import no.nordicsemi.android.ble.Request;
+import no.nordicsemi.android.ble.common.callback.hr.BodySensorLocationDataCallback;
+import no.nordicsemi.android.ble.common.callback.hr.HeartRateMeasurementDataCallback;
+import no.nordicsemi.android.ble.data.Data;
 import no.nordicsemi.android.log.LogContract;
-import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.battery.BatteryManager;
 import no.nordicsemi.android.nrftoolbox.parser.BodySensorLocationParser;
 import no.nordicsemi.android.nrftoolbox.parser.HeartRateMeasurementParser;
 
 /**
- * HRSManager class performs BluetoothGatt operations for connection, service discovery, enabling notification and reading characteristics. All operations required to connect to device with BLE HR
- * Service and reading heart rate values are performed here. HRSActivity implements HRSManagerCallbacks in order to receive callbacks of BluetoothGatt operations
+ * HRSManager class performs BluetoothGatt operations for connection, service discovery,
+ * enabling notification and reading characteristics.
+ * All operations required to connect to device with BLE Heart Rate Service and reading
+ * heart rate values are performed here.
  */
-public class HRSManager extends BleManager<HRSManagerCallbacks> {
-	public final static UUID HR_SERVICE_UUID = UUID.fromString("0000180D-0000-1000-8000-00805f9b34fb");
+public class HRSManager extends BatteryManager<HRSManagerCallbacks> {
+	public static final UUID HR_SERVICE_UUID = UUID.fromString("0000180D-0000-1000-8000-00805f9b34fb");
 	private static final UUID HR_SENSOR_LOCATION_CHARACTERISTIC_UUID = UUID.fromString("00002A38-0000-1000-8000-00805f9b34fb");
 	private static final UUID HR_CHARACTERISTIC_UUID = UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb");
 
-	private BluetoothGattCharacteristic mHRCharacteristic, mHRLocationCharacteristic;
+	private BluetoothGattCharacteristic mHeartRateCharacteristic, mBodySensorLocationCharacteristic;
 
 	private static HRSManager managerInstance = null;
 
@@ -61,93 +65,83 @@ public class HRSManager extends BleManager<HRSManagerCallbacks> {
 		return managerInstance;
 	}
 
-	public HRSManager(final Context context) {
+	private HRSManager(final Context context) {
 		super(context);
 	}
 
 	@NonNull
 	@Override
-	protected BleManagerGattCallback getGattCallback() {
+	protected BatteryManagerGattCallback getGattCallback() {
 		return mGattCallback;
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving notification, etc
 	 */
-	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
+	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
 
 		@Override
-		protected Deque<Request> initGatt(@NonNull final BluetoothGatt gatt) {
-			final LinkedList<Request> requests = new LinkedList<>();
-			if (mHRLocationCharacteristic != null)
-				requests.add(Request.newReadRequest(mHRLocationCharacteristic));
-			requests.add(Request.newEnableNotificationsRequest(mHRCharacteristic));
-			return requests;
+		protected void initialize() {
+			super.initialize();
+			readCharacteristic(mBodySensorLocationCharacteristic)
+					.with(new BodySensorLocationDataCallback() {
+						@Override
+						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+							log(LogContract.Log.Level.APPLICATION, "\"" + BodySensorLocationParser.parse(data) + "\" received");
+							super.onDataReceived(device, data);
+						}
+
+						@Override
+						public void onBodySensorLocationReceived(@NonNull final BluetoothDevice device,
+																 final int sensorLocation) {
+							mCallbacks.onBodySensorLocationReceived(device, sensorLocation);
+						}
+					})
+					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Body Sensor Location characteristic not found"));
+			setNotificationCallback(mHeartRateCharacteristic)
+					.with(new HeartRateMeasurementDataCallback() {
+						@Override
+						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+							log(LogContract.Log.Level.APPLICATION, "\"" + HeartRateMeasurementParser.parse(data) + "\" received");
+							super.onDataReceived(device, data);
+						}
+
+						@Override
+						public void onHeartRateMeasurementReceived(@NonNull final BluetoothDevice device,
+																   final int heartRate,
+																   @Nullable final Boolean contactDetected,
+																   @Nullable final Integer energyExpanded,
+																   @Nullable final List<Integer> rrIntervals) {
+							mCallbacks.onHeartRateMeasurementReceived(device, heartRate, contactDetected, energyExpanded, rrIntervals);
+						}
+					});
+			enableNotifications(mHeartRateCharacteristic);
 		}
 
 		@Override
 		protected boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(HR_SERVICE_UUID);
 			if (service != null) {
-				mHRCharacteristic = service.getCharacteristic(HR_CHARACTERISTIC_UUID);
+				mHeartRateCharacteristic = service.getCharacteristic(HR_CHARACTERISTIC_UUID);
 			}
-			return mHRCharacteristic != null;
+			return mHeartRateCharacteristic != null;
 		}
 
 		@Override
 		protected boolean isOptionalServiceSupported(@NonNull final BluetoothGatt gatt) {
+			super.isOptionalServiceSupported(gatt);
 			final BluetoothGattService service = gatt.getService(HR_SERVICE_UUID);
 			if (service != null) {
-				mHRLocationCharacteristic = service.getCharacteristic(HR_SENSOR_LOCATION_CHARACTERISTIC_UUID);
+				mBodySensorLocationCharacteristic = service.getCharacteristic(HR_SENSOR_LOCATION_CHARACTERISTIC_UUID);
 			}
-			return mHRLocationCharacteristic != null;
-		}
-
-		@Override
-		public void onCharacteristicRead(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			log(LogContract.Log.Level.APPLICATION, "\"" + BodySensorLocationParser.parse(characteristic) + "\" received");
-
-			final String sensorPosition = getBodySensorPosition(characteristic.getValue()[0]);
-			//This will send callback to HRSActivity when HR sensor position on body is found in HR device
-			mCallbacks.onHRSensorPositionFound(gatt.getDevice(), sensorPosition);
+			return mBodySensorLocationCharacteristic != null;
 		}
 
 		@Override
 		protected void onDeviceDisconnected() {
-			mHRLocationCharacteristic = null;
-			mHRCharacteristic = null;
-		}
-
-		@Override
-		public void onCharacteristicNotified(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			log(LogContract.Log.Level.APPLICATION, "\"" + HeartRateMeasurementParser.parse(characteristic) + "\" received");
-
-			int hrValue;
-			if (isHeartRateInUINT16(characteristic.getValue()[0])) {
-				hrValue = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 1);
-			} else {
-				hrValue = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 1);
-			}
-			//This will send callback to HRSActivity when new HR value is received from HR device
-			mCallbacks.onHRValueReceived(gatt.getDevice(), hrValue);
+			super.onDeviceDisconnected();
+			mBodySensorLocationCharacteristic = null;
+			mHeartRateCharacteristic = null;
 		}
 	};
-
-	/**
-	 * This method will decode and return Heart rate sensor position on body
-	 */
-	private String getBodySensorPosition(final byte bodySensorPositionValue) {
-		final String[] locations = getContext().getResources().getStringArray(R.array.hrs_locations);
-		if (bodySensorPositionValue > locations.length)
-			return getContext().getString(R.string.hrs_location_other);
-		return locations[bodySensorPositionValue];
-	}
-
-	/**
-	 * This method will check if Heart rate value is in 8 bits or 16 bits
-	 */
-	private boolean isHeartRateInUINT16(final byte value) {
-		return ((value & 0x01) != 0);
-	}
-
 }

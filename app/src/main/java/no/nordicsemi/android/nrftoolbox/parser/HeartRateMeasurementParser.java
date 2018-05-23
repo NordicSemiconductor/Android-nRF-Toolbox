@@ -21,11 +21,11 @@
  */
 package no.nordicsemi.android.nrftoolbox.parser;
 
-import android.bluetooth.BluetoothGattCharacteristic;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import no.nordicsemi.android.ble.data.Data;
 
 public class HeartRateMeasurementParser {
 	private static final byte HEART_RATE_VALUE_FORMAT = 0x01; // 1 bit
@@ -33,9 +33,9 @@ public class HeartRateMeasurementParser {
 	private static final byte ENERGY_EXPANDED_STATUS = 0x08; // 1 bit
 	private static final byte RR_INTERVAL = 0x10; // 1 bit
 
-	public static String parse(final BluetoothGattCharacteristic characteristic) {
+	public static String parse(final Data data) {
 		int offset = 0;
-		final int flags = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
+		final int flags = data.getIntValue(Data.FORMAT_UINT8, offset++);
 
 		/*
 		 * false 	Heart Rate Value Format is set to UINT8. Units: beats per minute (bpm) 
@@ -64,21 +64,21 @@ public class HeartRateMeasurementParser {
 		final boolean rrIntervalStatus = (flags & RR_INTERVAL) > 0;
 
 		// heart rate value is 8 or 16 bit long
-		int heartRateValue = characteristic.getIntValue(value16bit ? BluetoothGattCharacteristic.FORMAT_UINT16 : BluetoothGattCharacteristic.FORMAT_UINT8, offset++); // bits per minute
+		int heartRateValue = data.getIntValue(value16bit ? Data.FORMAT_UINT16 : Data.FORMAT_UINT8, offset++); // bits per minute
 		if (value16bit)
 			offset++;
 
 		// energy expanded value is present if a flag was set
 		int energyExpanded = -1;
 		if (energyExpandedStatus)
-			energyExpanded = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+			energyExpanded = data.getIntValue(Data.FORMAT_UINT16, offset);
 		offset += 2;
 
 		// RR-interval is set when a flag is set
 		final List<Float> rrIntervals = new ArrayList<>();
 		if (rrIntervalStatus) {
-			for (int o = offset; o < characteristic.getValue().length; o += 2) {
-				final int units = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, o);
+			for (int o = offset; o < data.getValue().length; o += 2) {
+				final int units = data.getIntValue(Data.FORMAT_UINT16, o);
 				rrIntervals.add(units * 1000.0f / 1024.0f); // RR interval is in [1/1024s]
 			}
 		}

@@ -27,6 +27,7 @@
     <dimen name="hrs_feature_title_long_margin">-152dp</dimen>
     
     <string name="hrs_default_name">DEFAULT HRM</string>
+    <string name="hrs_value">%d</string>
     <string name="hrs_value_unit">bpm</string>
     <string name="hrs_position_label">sensor position</string>
     

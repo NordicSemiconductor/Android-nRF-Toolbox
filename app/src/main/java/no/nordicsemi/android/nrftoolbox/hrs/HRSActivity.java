@@ -28,11 +28,13 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.achartengine.GraphicalView;
 
+import java.util.List;
 import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
@@ -53,8 +55,6 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 	private final static String GRAPH_COUNTER = "graph_counter";
 	private final static String HR_VALUE = "hr_value";
 
-	private final static int MAX_HR_VALUE = 65535;
-	private final static int MIN_POSITIVE_VALUE = 0;
 	private final static int REFRESH_INTERVAL = 1000; // 1 second interval
 
 	private Handler mHandler = new Handler();
@@ -64,6 +64,7 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 	private GraphicalView mGraphView;
 	private LineGraphView mLineGraph;
 	private TextView mHRSValue, mHRSPosition;
+	private TextView mBatteryLevelView;
 
 	private int mHrmValue = 0;
 	private int mCounter = 0;
@@ -78,6 +79,7 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 		mLineGraph = LineGraphView.getLineGraphView();
 		mHRSValue = findViewById(R.id.text_hrs_value);
 		mHRSPosition = findViewById(R.id.text_hrs_position);
+		mBatteryLevelView = findViewById(R.id.battery);
 		showGraph();
 	}
 
@@ -183,26 +185,6 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 		return manager;
 	}
 
-	private void setHRSValueOnView(final int value) {
-		runOnUiThread(() -> {
-			if (value >= MIN_POSITIVE_VALUE && value <= MAX_HR_VALUE) {
-				mHRSValue.setText(Integer.toString(value));
-			} else {
-				mHRSValue.setText(R.string.not_available_value);
-			}
-		});
-	}
-
-	private void setHRSPositionOnView(final String position) {
-		runOnUiThread(() -> {
-			if (position != null) {
-				mHRSPosition.setText(position);
-			} else {
-				mHRSPosition.setText(R.string.not_available);
-			}
-		});
-	}
-
 	@Override
 	public void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound) {
 		// this may notify user or show some views
@@ -214,14 +196,28 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 	}
 
 	@Override
-	public void onHRSensorPositionFound(final BluetoothDevice device, final String position) {
-		setHRSPositionOnView(position);
+	public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
+		runOnUiThread(() -> mBatteryLevelView.setText(getString(R.string.battery, batteryLevel)));
 	}
 
 	@Override
-	public void onHRValueReceived(final BluetoothDevice device, int value) {
-		mHrmValue = value;
-		setHRSValueOnView(mHrmValue);
+	public void onBodySensorLocationReceived(@NonNull final BluetoothDevice device, final int sensorLocation) {
+		runOnUiThread(() -> {
+			if (sensorLocation >= SENSOR_LOCATION_FIRST && sensorLocation <= SENSOR_LOCATION_LAST) {
+				mHRSPosition.setText(getResources().getStringArray(R.array.hrs_locations)[sensorLocation]);
+			} else {
+				mHRSPosition.setText(R.string.hrs_location_other);
+			}
+		});
+	}
+
+	@Override
+	public void onHeartRateMeasurementReceived(@NonNull final BluetoothDevice device, final int heartRate,
+											   @Nullable final Boolean contactDetected,
+											   @Nullable final Integer energyExpanded,
+											   @Nullable final List<Integer> rrIntervals) {
+		mHrmValue = heartRate;
+		runOnUiThread(() -> mHRSValue.setText(getString(R.string.hrs_value, heartRate)));
 	}
 
 	@Override
@@ -230,6 +226,7 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 		runOnUiThread(() -> {
 			mHRSValue.setText(R.string.not_available_value);
 			mHRSPosition.setText(R.string.not_available);
+			mBatteryLevelView.setText(R.string.not_available);
 			stopShowGraph();
 		});
 	}
@@ -238,6 +235,7 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 	protected void setDefaultUI() {
 		mHRSValue.setText(R.string.not_available_value);
 		mHRSPosition.setText(R.string.not_available);
+		mBatteryLevelView.setText(R.string.not_available);
 		clearGraph();
 	}
 
