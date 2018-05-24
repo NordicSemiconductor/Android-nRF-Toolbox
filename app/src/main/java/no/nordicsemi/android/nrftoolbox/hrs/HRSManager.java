@@ -47,9 +47,9 @@ import no.nordicsemi.android.nrftoolbox.parser.HeartRateMeasurementParser;
  * heart rate values are performed here.
  */
 public class HRSManager extends BatteryManager<HRSManagerCallbacks> {
-	public static final UUID HR_SERVICE_UUID = UUID.fromString("0000180D-0000-1000-8000-00805f9b34fb");
-	private static final UUID HR_SENSOR_LOCATION_CHARACTERISTIC_UUID = UUID.fromString("00002A38-0000-1000-8000-00805f9b34fb");
-	private static final UUID HR_CHARACTERISTIC_UUID = UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb");
+	static final UUID HR_SERVICE_UUID = UUID.fromString("0000180D-0000-1000-8000-00805f9b34fb");
+	private static final UUID BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID = UUID.fromString("00002A38-0000-1000-8000-00805f9b34fb");
+	private static final UUID HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb");
 
 	private BluetoothGattCharacteristic mHeartRateCharacteristic, mBodySensorLocationCharacteristic;
 
@@ -122,7 +122,7 @@ public class HRSManager extends BatteryManager<HRSManagerCallbacks> {
 		protected boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(HR_SERVICE_UUID);
 			if (service != null) {
-				mHeartRateCharacteristic = service.getCharacteristic(HR_CHARACTERISTIC_UUID);
+				mHeartRateCharacteristic = service.getCharacteristic(HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID);
 			}
 			return mHeartRateCharacteristic != null;
 		}
@@ -132,7 +132,7 @@ public class HRSManager extends BatteryManager<HRSManagerCallbacks> {
 			super.isOptionalServiceSupported(gatt);
 			final BluetoothGattService service = gatt.getService(HR_SERVICE_UUID);
 			if (service != null) {
-				mBodySensorLocationCharacteristic = service.getCharacteristic(HR_SENSOR_LOCATION_CHARACTERISTIC_UUID);
+				mBodySensorLocationCharacteristic = service.getCharacteristic(BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID);
 			}
 			return mBodySensorLocationCharacteristic != null;
 		}
