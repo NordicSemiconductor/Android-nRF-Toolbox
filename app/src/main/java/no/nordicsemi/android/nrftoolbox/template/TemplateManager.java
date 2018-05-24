@@ -199,11 +199,11 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 				// If data are longer than MTU-3, they will be chunked into multiple packets.
 				// Check out other split options, with .split(...).
 				.split()
-				// Callback called when data were sent, or added to outgoing queue is Write Without Request
-				// type has been chosen.
+				// Callback called when data were sent, or added to outgoing queue in case
+				// Write Without Request type was used.
 				.with((device, data) -> log(LogContract.Log.Level.DEBUG, data.size() + " bytes were sent"))
-				// Callback called when data were sent, or added to outgoing queue is Write Without Request
-				// type has been chosen.
+				// Callback called when data were sent, or added to outgoing queue in case
+				// Write Without Request type was used. This is called after .with(...) callback.
 				.done(device -> log(LogContract.Log.Level.APPLICATION, "Device name set to \"" + parameter + "\""))
 				// Callback called when write has failed.
 				.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to change device name"));
