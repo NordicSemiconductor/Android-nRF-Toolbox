@@ -27,8 +27,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.Menu;
+import android.view.View;
 import android.widget.TextView;
 
 import java.util.UUID;
@@ -47,7 +49,7 @@ public class TemplateActivity extends BleProfileServiceReadyActivity<TemplateSer
 
 	// TODO change view references to match your need
 	private TextView mValueView;
-	private TextView mValueUnitView;
+	private TextView mBatteryLevelView;
 
 	@Override
 	protected void onCreateView(final Bundle savedInstanceState) {
@@ -59,7 +61,9 @@ public class TemplateActivity extends BleProfileServiceReadyActivity<TemplateSer
 	private void setGUI() {
 		// TODO assign your views to fields
 		mValueView = findViewById(R.id.value);
-		mValueUnitView = findViewById(R.id.value_unit);
+		mBatteryLevelView = findViewById(R.id.battery);
+
+		findViewById(R.id.action_set_name).setOnClickListener(v -> getService().performAction("Template"));
 	}
 
 	@Override
@@ -77,16 +81,7 @@ public class TemplateActivity extends BleProfileServiceReadyActivity<TemplateSer
 	protected void setDefaultUI() {
 		// TODO clear your UI
 		mValueView.setText(R.string.not_available_value);
-	}
-
-	@Override
-	protected void onServiceBound(final TemplateService.TemplateBinder binder) {
-		// not used
-	}
-
-	@Override
-	protected void onServiceUnbound() {
-		// not used
+		mBatteryLevelView.setText(R.string.not_available);
 	}
 
 	@Override
@@ -134,24 +129,52 @@ public class TemplateActivity extends BleProfileServiceReadyActivity<TemplateSer
 	}
 
 	@Override
+	protected void onServiceBound(final TemplateService.TemplateBinder binder) {
+		// not used
+	}
+
+	@Override
+	protected void onServiceUnbound() {
+		// not used
+	}
+
+	@Override
 	public void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound) {
 		// this may notify user or show some views
 	}
 
-	private void setValueOnView(final int value) {
+	@Override
+	public void onDeviceDisconnected(final BluetoothDevice device) {
+		super.onDeviceDisconnected(device);
+		mBatteryLevelView.setText(R.string.not_available);
+	}
+
+	// Handling updates from the device
+	@SuppressWarnings("unused")
+	private void setValueOnView(@NonNull final BluetoothDevice device, final int value) {
 		// TODO assign the value to a view
 		mValueView.setText(String.valueOf(value));
+	}
+
+	@SuppressWarnings("unused")
+	public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int value) {
+		mBatteryLevelView.setText(getString(R.string.battery, value));
 	}
 
 	private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			final String action = intent.getAction();
+			final BluetoothDevice device = intent.getParcelableExtra(TemplateService.EXTRA_DEVICE);
 
 			if (TemplateService.BROADCAST_TEMPLATE_MEASUREMENT.equals(action)) {
 				final int value = intent.getIntExtra(TemplateService.EXTRA_DATA, 0);
 				// Update GUI
-				setValueOnView(value);
+				setValueOnView(device, value);
+			} else if (TemplateService.BROADCAST_BATTERY_LEVEL.equals(action)) {
+				final int batteryLevel = intent.getIntExtra(TemplateService.EXTRA_BATTERY_LEVEL, 0);
+				// Update GUI
+				onBatteryLevelChanged(device, batteryLevel);
 			}
 		}
 	};
@@ -159,6 +182,7 @@ public class TemplateActivity extends BleProfileServiceReadyActivity<TemplateSer
 	private static IntentFilter makeIntentFilter() {
 		final IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(TemplateService.BROADCAST_TEMPLATE_MEASUREMENT);
+		intentFilter.addAction(TemplateService.BROADCAST_BATTERY_LEVEL);
 		return intentFilter;
 	}
 }

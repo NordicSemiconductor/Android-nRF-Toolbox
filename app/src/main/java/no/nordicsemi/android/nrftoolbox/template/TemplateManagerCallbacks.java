@@ -21,24 +21,18 @@
  */
 package no.nordicsemi.android.nrftoolbox.template;
 
-import android.bluetooth.BluetoothDevice;
-
-import no.nordicsemi.android.ble.BleManagerCallbacks;
+import no.nordicsemi.android.nrftoolbox.battery.BatteryManagerCallbacks;
+import no.nordicsemi.android.nrftoolbox.template.callback.TemplateCharacteristicCallback;
 
 /**
- * Interface {@link TemplateManagerCallbacks} must be implemented by {@link TemplateActivity} in order to receive callbacks from {@link TemplateManager}
+ * Interface {@link TemplateManagerCallbacks} must be implemented by {@link TemplateService}
+ * in order to receive callbacks from {@link TemplateManager}
  */
-public interface TemplateManagerCallbacks extends BleManagerCallbacks {
+interface TemplateManagerCallbacks extends BatteryManagerCallbacks, TemplateCharacteristicCallback {
 
-	// TODO add more callbacks. Callbacks are called when a data has been received/written to a remote device. This is the way how the manager notifies the activity about this event.
+	// Callbacks are called when a data has been received/written to a remote device.
+	// This is the way how the manager notifies the activity about this event.
 
-	/**
-	 * Called when a value is received.
-	 *
-	 * @param device a device from which the value was obtained
-	 * @param value
-	 *            the new value
-	 */
-	void onSampleValueReceived(final BluetoothDevice device, int value);
-
+	// TODO add more callbacks.
+	// If you need, create more ...Callback interfaces and extend this interface with them.
 }

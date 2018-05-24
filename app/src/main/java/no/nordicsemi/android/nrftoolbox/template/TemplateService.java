@@ -30,6 +30,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -44,6 +45,9 @@ public class TemplateService extends BleProfileService implements TemplateManage
 	public static final String BROADCAST_TEMPLATE_MEASUREMENT = "no.nordicsemi.android.nrftoolbox.template.BROADCAST_MEASUREMENT";
 	public static final String EXTRA_DATA = "no.nordicsemi.android.nrftoolbox.template.EXTRA_DATA";
 
+	public static final String BROADCAST_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.BROADCAST_BATTERY_LEVEL";
+	public static final String EXTRA_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.EXTRA_BATTERY_LEVEL";
+
 	private final static String ACTION_DISCONNECT = "no.nordicsemi.android.nrftoolbox.template.ACTION_DISCONNECT";
 
 	private final static int NOTIFICATION_ID = 864;
@@ -55,16 +59,19 @@ public class TemplateService extends BleProfileService implements TemplateManage
 	private final LocalBinder mBinder = new TemplateBinder();
 
 	/**
-	 * This local binder is an interface for the bonded activity to operate with the HTS sensor
+	 * This local binder is an interface for the bound activity to operate with the sensor.
 	 */
-	public class TemplateBinder extends LocalBinder {
-		// empty
-		// TODO add some service API that mey be used from the Activity
+	class TemplateBinder extends LocalBinder {
+		// TODO Define service API that may be used by a bound Activity
 
-		// public void setLights(final boolean on) {
-		//     Logger.v(getLogSession(), "Light set to: " + on);
-		//     mManager.setLights(on);
-		// }
+		/**
+		 * Sends some important data to the device.
+		 *
+		 * @param parameter some parameter.
+		 */
+		public void performAction(final String parameter) {
+			mManager.performAction(parameter);
+		}
 	}
 
 	@Override
@@ -108,7 +115,7 @@ public class TemplateService extends BleProfileService implements TemplateManage
 	}
 
 	@Override
-	public void onSampleValueReceived(final BluetoothDevice device, final int value) {
+	public void onSampleValueReceived(@NonNull final BluetoothDevice device, final int value) {
 		final Intent broadcast = new Intent(BROADCAST_TEMPLATE_MEASUREMENT);
 		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
 		broadcast.putExtra(EXTRA_DATA, value);
@@ -120,14 +127,17 @@ public class TemplateService extends BleProfileService implements TemplateManage
 		}
 	}
 
+	@Override
+	public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
+
+	}
+
 	/**
-	 * Creates the notification
-	 * 
-	 * @param messageResId
-	 *            message resource id. The message must have one String parameter,<br />
-	 *            f.e. <code>&lt;string name="name"&gt;%s is connected&lt;/string&gt;</code>
-	 * @param defaults
-	 *            signals that will be used to notify the user
+	 * Creates the notification.
+	 *
+	 * @param messageResId message resource id. The message must have one String parameter,<br />
+	 *                     f.e. <code>&lt;string name="name"&gt;%s is connected&lt;/string&gt;</code>
+	 * @param defaults     signals that will be used to notify the user
 	 */
 	private void createNotification(final int messageResId, final int defaults) {
 		final Intent parentIntent = new Intent(this, FeaturesActivity.class);
@@ -138,7 +148,7 @@ public class TemplateService extends BleProfileService implements TemplateManage
 		final PendingIntent disconnectAction = PendingIntent.getBroadcast(this, DISCONNECT_REQ, disconnect, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		// both activities above have launchMode="singleTask" in the AndroidManifest.xml file, so if the task is already running, it will be resumed
-		final PendingIntent pendingIntent = PendingIntent.getActivities(this, OPEN_ACTIVITY_REQ, new Intent[] { parentIntent, targetIntent }, PendingIntent.FLAG_UPDATE_CURRENT);
+		final PendingIntent pendingIntent = PendingIntent.getActivities(this, OPEN_ACTIVITY_REQ, new Intent[]{parentIntent, targetIntent}, PendingIntent.FLAG_UPDATE_CURRENT);
 		final NotificationCompat.Builder builder = new NotificationCompat.Builder(this, ToolboxApplication.CONNECTED_DEVICE_CHANNEL);
 		builder.setContentIntent(pendingIntent);
 		builder.setContentTitle(getString(R.string.app_name)).setContentText(getString(messageResId, getDeviceName()));
@@ -172,5 +182,4 @@ public class TemplateService extends BleProfileService implements TemplateManage
 				stopSelf();
 		}
 	};
-
 }

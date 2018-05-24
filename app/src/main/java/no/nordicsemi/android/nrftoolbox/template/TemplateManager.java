@@ -21,34 +21,43 @@
  */
 package no.nordicsemi.android.nrftoolbox.template;
 
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
-import no.nordicsemi.android.ble.Request;
+import no.nordicsemi.android.ble.data.Data;
 import no.nordicsemi.android.log.LogContract;
-import no.nordicsemi.android.nrftoolbox.parser.TemplateParser;
+import no.nordicsemi.android.nrftoolbox.battery.BatteryManager;
+import no.nordicsemi.android.nrftoolbox.template.callback.TemplateDataCallback;
 
 /**
  * Modify to template manager to match your requirements.
+ * The TemplateManager extends {@link BatteryManager}, but it may easily extend {@link BleManager}
+ * instead if you don't need Battery Service support. If not, also modify the
+ * {@link TemplateManagerCallbacks} to extend {@link no.nordicsemi.android.ble.BleManagerCallbacks}
+ * and replace BatteryManagerGattCallback to BleManagerGattCallback in this class.
  */
-public class TemplateManager extends BleManager<TemplateManagerCallbacks> {
-	private static final String TAG = "TemplateManager";
-
+public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
+	// TODO Replace the services and characteristics below to match your device.
 	/** The service UUID */
-	public final static UUID SERVICE_UUID = UUID.fromString("0000180D-0000-1000-8000-00805f9b34fb"); // TODO change the UUID to your match your service
-	/** The characteristic UUID */
-	private static final UUID MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb"); // TODO change the UUID to your match your characteristic
+	static final UUID SERVICE_UUID = UUID.fromString("0000180D-0000-1000-8000-00805f9b34fb"); // Heart Rate service
+	/** A UUID of a characteristic with notify property */
+	private static final UUID MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb"); // Heart Rate Measurement
+	/** A UUID of a characteristic with read property */
+	private static final UUID READABLE_CHARACTERISTIC_UUID = UUID.fromString("00002A38-0000-1000-8000-00805f9b34fb"); // Body Sensor Location
+	/** Some other service UUID */
+	private static final UUID OTHER_SERVICE_UUID = UUID.fromString("00001800-0000-1000-8000-00805f9b34fb"); // Generic Access service
+	/** A UUID of a characteristic with write property */
+	private static final UUID WRITABLE_CHARACTERISTIC_UUID = UUID.fromString("00002A00-0000-1000-8000-00805f9b34fb"); // Device Name
 
-	// TODO add more services and characteristics, if required
-	private BluetoothGattCharacteristic mCharacteristic;
+	// TODO Add more services and characteristics references.
+	private BluetoothGattCharacteristic mRequiredCharacteristic, mDeviceNameCharacteristic, mOptionalCharacteristic;
 
 	public TemplateManager(final Context context) {
 		super(context);
@@ -56,83 +65,147 @@ public class TemplateManager extends BleManager<TemplateManagerCallbacks> {
 
 	@NonNull
 	@Override
-	protected BleManagerGattCallback getGattCallback() {
+	protected BatteryManagerGattCallback getGattCallback() {
 		return mGattCallback;
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving indication, etc
 	 */
-	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
+	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
 
 		@Override
-		protected Deque<Request> initGatt(@NonNull final BluetoothGatt gatt) {
-			final LinkedList<Request> requests = new LinkedList<>();
-			// TODO initialize your device, enable required notifications and indications, write what needs to be written to start working
-			requests.add(Request.newEnableNotificationsRequest(mCharacteristic));
-			return requests;
+		protected void initialize() {
+			// Initialize the Battery Manager. It will enable Battery Level notifications.
+			// Remove it if you don't need this feature.
+			super.initialize();
+
+			// TODO Initialize your manager here.
+			// Initialization is done once, after the device is connected. Usually it should
+			// enable notifications or indications on some characteristics, write some data or
+			// read some features / version.
+			// After the initialization is complete, the onDeviceReady(...) method will be called.
+
+			// Increase the MTU
+			requestMtu(43)
+				.with((device, mtu) -> log(LogContract.Log.Level.APPLICATION, "MTU changed to " + mtu))
+				.done(device -> {
+					// You may do some logic in here that should be done when the request finished successfully.
+					// In case of MTU this method is called also when the MTU hasn't changed, or has changed
+					// to a different (lower) value. Use .with(...) to get the MTU value.
+				})
+				.fail((device, status) -> log(LogContract.Log.Level.WARNING, "MTU change not supported"));
+
+			// Set notification callback
+			setNotificationCallback(mRequiredCharacteristic)
+				// This callback will be called each time the notification is received
+				.with(new TemplateDataCallback() {
+					@Override
+					public void onSampleValueReceived(@NonNull final BluetoothDevice device, final int value) {
+						// Let's lass received data to the service
+						mCallbacks.onSampleValueReceived(device, value);
+					}
+
+					@Override
+					public void onInvalidDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+						log(LogContract.Log.Level.WARNING, "Invalid data received: " + data);
+					}
+				});
+
+			// Enable notifications
+			enableNotifications(mRequiredCharacteristic)
+				// Method called after the data were sent (data will contain 0x0100 in this case)
+				.with((device, data) -> log(LogContract.Log.Level.DEBUG, "Data sent: " + data))
+				// Method called when the request finished successfully. This will be called after .with(..) callback
+				.done(device -> log(LogContract.Log.Level.APPLICATION, "Notifications enabled successfully"))
+				// Methods called in case of an error, for example when the characteristic does not have Notify property
+				.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enable notifications"));
 		}
 
 		@Override
 		protected boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
+			// TODO Initialize required characteristics.
+			// It should return true if all has been discovered (that is that device is supported).
 			final BluetoothGattService service = gatt.getService(SERVICE_UUID);
 			if (service != null) {
-				mCharacteristic = service.getCharacteristic(MEASUREMENT_CHARACTERISTIC_UUID);
+				mRequiredCharacteristic = service.getCharacteristic(MEASUREMENT_CHARACTERISTIC_UUID);
 			}
-			return mCharacteristic != null;
+			final BluetoothGattService otherService = gatt.getService(OTHER_SERVICE_UUID);
+			if (otherService != null) {
+				mDeviceNameCharacteristic = otherService.getCharacteristic(WRITABLE_CHARACTERISTIC_UUID);
+			}
+			return mRequiredCharacteristic != null && mDeviceNameCharacteristic != null;
+		}
+
+		@Override
+		protected boolean isOptionalServiceSupported(@NonNull final BluetoothGatt gatt) {
+			// Initialize Battery characteristic
+			super.isOptionalServiceSupported(gatt);
+
+			// TODO If there are some optional characteristics, initialize them there.
+			final BluetoothGattService service = gatt.getService(SERVICE_UUID);
+			if (service != null) {
+				mOptionalCharacteristic = service.getCharacteristic(READABLE_CHARACTERISTIC_UUID);
+			}
+			return mOptionalCharacteristic != null;
 		}
 
 		@Override
 		protected void onDeviceDisconnected() {
-			mCharacteristic = null;
-		}
+			// Release Battery Service
+			super.onDeviceDisconnected();
 
-		// TODO implement data handlers. Methods below are called after the initialization is complete.
+			// TODO Release references to your characteristics.
+			mRequiredCharacteristic = null;
+			mDeviceNameCharacteristic = null;
+			mOptionalCharacteristic = null;
+		}
 
 		@Override
 		protected void onDeviceReady() {
 			super.onDeviceReady();
 
-			// TODO initialization is now ready. The activity is being notified using TemplateManagerCallbacks#onDeviceReady() method.
-			// This method may be removed from this class if not required as the super class implementation handles this event.
-		}
+			// Initialization is now ready.
+			// The service or activity has been notified with TemplateManagerCallbacks#onDeviceReady().
+			// TODO Do some extra logic here, of remove onDeviceReady().
 
-		@Override
-		protected void onCharacteristicNotified(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			// TODO this method is called when a notification has been received
-			// This method may be removed from this class if not required
-
-			log(LogContract.Log.Level.APPLICATION, "\"" + TemplateParser.parse(characteristic) + "\" received");
-
-			int value;
-			final int flags = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
-			if ((flags & 0x01) > 0) {
-				value = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 1);
-			} else {
-				value = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 1);
-			}
-			//This will send callback to the Activity when new value is received from HR device
-			mCallbacks.onSampleValueReceived(gatt.getDevice(), value);
-		}
-
-		@Override
-		protected void onCharacteristicIndicated(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			// TODO this method is called when an indication has been received
-			// This method may be removed from this class if not required
-		}
-
-		@Override
-		protected void onCharacteristicRead(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			// TODO this method is called when the characteristic has been read
-			// This method may be removed from this class if not required
-		}
-
-		@Override
-		protected void onCharacteristicWrite(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			// TODO this method is called when the characteristic has been written
-			// This method may be removed from this class if not required
+			// Device is ready, let's read something here. Usually there is nothing else to be done
+			// here, as all had been done during initialization.
+			readCharacteristic(mOptionalCharacteristic)
+					.with((device, data) -> {
+						// Characteristic value has been read
+						// Let's do some magic with it.
+						if (data.size() > 0) {
+							final Integer value = data.getIntValue(Data.FORMAT_UINT8, 0);
+							log(LogContract.Log.Level.APPLICATION, "Value '" + value + "' has been read!");
+						} else {
+							log(LogContract.Log.Level.WARNING, "Value is empty!");
+						}
+					});
 		}
 	};
 
+	// TODO Define manager's API
 
+	/**
+	 * This method will write important data to the device.
+	 *
+	 * @param parameter parameter to be written.
+	 */
+	void performAction(final String parameter) {
+		log(LogContract.Log.Level.VERBOSE, "Changing device name to \"" + parameter + "\"");
+		// Write some data to the characteristic.
+		writeCharacteristic(mDeviceNameCharacteristic, Data.from(parameter))
+				// If data are longer than MTU-3, they will be chunked into multiple packets.
+				// Check out other split options, with .split(...).
+				.split()
+				// Callback called when data were sent, or added to outgoing queue is Write Without Request
+				// type has been chosen.
+				.with((device, data) -> log(LogContract.Log.Level.DEBUG, data.size() + " bytes were sent"))
+				// Callback called when data were sent, or added to outgoing queue is Write Without Request
+				// type has been chosen.
+				.done(device -> log(LogContract.Log.Level.APPLICATION, "Device name set to \"" + parameter + "\""))
+				// Callback called when write has failed.
+				.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to change device name"));
+	}
 }

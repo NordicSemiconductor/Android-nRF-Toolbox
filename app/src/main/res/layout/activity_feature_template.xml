@@ -79,6 +79,7 @@
 		<!-- Application section -->
 
 		<LinearLayout
+			android:id="@+id/container"
 			style="@style/Widget.List"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
@@ -130,6 +131,15 @@
 
 			</TableLayout>
 		</LinearLayout>
+
+		<Button
+			android:id="@+id/action_set_name"
+			style="@style/Widget.AppCompat.Button.Colored"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_centerHorizontal="true"
+			android:layout_below="@+id/container"
+			android:text="@string/template_action"/>
 
 		<Button
 			android:id="@+id/action_connect"

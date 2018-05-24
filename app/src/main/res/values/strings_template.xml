@@ -31,6 +31,7 @@
 	<string name="template_section_header">Values</string>
 	<string name="template_value_title">Value</string>
 	<string name="template_unit_bpm">bpm</string>
+	<string name="template_action">An action</string>
 
 	<string name="template_notification_action_disconnect">Disconnect</string>
 	<string name="template_notification_connected_message">%s is connected.</string>
