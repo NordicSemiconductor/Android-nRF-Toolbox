@@ -156,12 +156,6 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 					}
 					break;
 				}
-				case BleProfileService.BROADCAST_BATTERY_LEVEL: {
-					final int value = intent.getIntExtra(BleProfileService.EXTRA_BATTERY_LEVEL, -1);
-					if (value > 0)
-						onBatteryValueReceived(bluetoothDevice, value);
-					break;
-				}
 				case BleProfileService.BROADCAST_ERROR: {
 					final String message = intent.getStringExtra(BleProfileService.EXTRA_ERROR_MESSAGE);
 					final int errorCode = intent.getIntExtra(BleProfileService.EXTRA_ERROR_CODE, 0);
@@ -299,7 +293,6 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 		intentFilter.addAction(BleProfileService.BROADCAST_SERVICES_DISCOVERED);
 		intentFilter.addAction(BleProfileService.BROADCAST_DEVICE_READY);
 		intentFilter.addAction(BleProfileService.BROADCAST_BOND_STATE);
-		intentFilter.addAction(BleProfileService.BROADCAST_BATTERY_LEVEL);
 		intentFilter.addAction(BleProfileService.BROADCAST_ERROR);
 		return intentFilter;
 	}
