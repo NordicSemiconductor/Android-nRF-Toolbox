@@ -80,10 +80,11 @@ public class HTSManager extends BatteryManager<HTSManagerCallbacks> {
 						}
 
 						@Override
-						public void onTemperatureMeasurementReceived(final float temperature, final int unit,
+						public void onTemperatureMeasurementReceived(@NonNull final BluetoothDevice device,
+																	 final float temperature, final int unit,
 																	 @Nullable final Calendar calendar,
 																	 @Nullable final Integer type) {
-							mCallbacks.onTemperatureMeasurementReceived(temperature, unit, calendar, type);
+							mCallbacks.onTemperatureMeasurementReceived(device, temperature, unit, calendar, type);
 						}
 					});
 			enableIndications(mHTCharacteristic);

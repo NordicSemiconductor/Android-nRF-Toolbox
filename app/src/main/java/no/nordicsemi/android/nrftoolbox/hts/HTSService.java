@@ -38,7 +38,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import java.util.Calendar;
 
 import no.nordicsemi.android.ble.BleManager;
-import no.nordicsemi.android.ble.common.callback.ht.TemperatureMeasurementDataCallback;
+import no.nordicsemi.android.ble.common.profile.ht.TemperatureMeasurementCallback;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
@@ -59,6 +59,7 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	private final static int OPEN_ACTIVITY_REQ = 0;
 	private final static int DISCONNECT_REQ = 1;
 
+	@SuppressWarnings("unused")
 	private HTSManager mManager;
 
 	private final LocalBinder mBinder = new HTSBinder();
@@ -111,12 +112,13 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	}
 
 	@Override
-	public void onTemperatureMeasurementReceived(final float temperature, final int unit,
+	public void onTemperatureMeasurementReceived(@NonNull final BluetoothDevice device,
+												 final float temperature, final int unit,
 												 @Nullable final Calendar calendar,
 												 @Nullable final Integer type) {
 		final Intent broadcast = new Intent(BROADCAST_HTS_MEASUREMENT);
 		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
-		broadcast.putExtra(EXTRA_TEMPERATURE, TemperatureMeasurementDataCallback.toCelsius(temperature, unit));
+		broadcast.putExtra(EXTRA_TEMPERATURE, TemperatureMeasurementCallback.toCelsius(temperature, unit));
 		// ignore the rest
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 
