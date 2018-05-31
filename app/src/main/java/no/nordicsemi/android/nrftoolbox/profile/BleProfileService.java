@@ -34,6 +34,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
@@ -204,7 +205,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 		}
 
 		@Override
-		public void log(final int level, final String message) {
+		public void log(final int level, @NonNull final String message) {
 			Logger.log(mLogSession, level, message);
 		}
 
