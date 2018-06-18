@@ -97,7 +97,8 @@ public class HRSManager extends BatteryManager<HRSManagerCallbacks> {
 							mCallbacks.onBodySensorLocationReceived(device, sensorLocation);
 						}
 					})
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Body Sensor Location characteristic not found"));
+					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Body Sensor Location characteristic not found"))
+					.enqueue();
 			setNotificationCallback(mHeartRateCharacteristic)
 					.with(new HeartRateMeasurementDataCallback() {
 						@Override
@@ -115,7 +116,7 @@ public class HRSManager extends BatteryManager<HRSManagerCallbacks> {
 							mCallbacks.onHeartRateMeasurementReceived(device, heartRate, contactDetected, energyExpanded, rrIntervals);
 						}
 					});
-			enableNotifications(mHeartRateCharacteristic);
+			enableNotifications(mHeartRateCharacteristic).enqueue();
 		}
 
 		@Override

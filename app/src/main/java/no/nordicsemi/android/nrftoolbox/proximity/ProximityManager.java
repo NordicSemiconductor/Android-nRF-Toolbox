@@ -36,13 +36,11 @@ import no.nordicsemi.android.nrftoolbox.parser.AlertLevelParser;
 
 @SuppressWarnings("WeakerAccess")
 class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
-	private final String TAG = "ProximityManager";
-
-	/** Link Loss service UUID */
-	final static UUID LINKLOSS_SERVICE_UUID = UUID.fromString("00001803-0000-1000-8000-00805f9b34fb");
-	/** Immediate Alert service UUID */
+	/** Link Loss service UUID. */
+	final static UUID LINK_LOSS_SERVICE_UUID = UUID.fromString("00001803-0000-1000-8000-00805f9b34fb");
+	/** Immediate Alert service UUID. */
 	private final static UUID IMMEDIATE_ALERT_SERVICE_UUID = UUID.fromString("00001802-0000-1000-8000-00805f9b34fb");
-	/** Alert Level characteristic UUID */
+	/** Alert Level characteristic UUID. */
 	private static final UUID ALERT_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A06-0000-1000-8000-00805f9b34fb");
 
 	private BluetoothGattCharacteristic mAlertLevelCharacteristic, mLinkLossCharacteristic;
@@ -71,12 +69,13 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 		@Override
 		protected void initialize() {
 			super.initialize();
-			writeCharacteristic(mLinkLossCharacteristic, AlertLevelData.highAlert());
+			writeCharacteristic(mLinkLossCharacteristic, AlertLevelData.highAlert())
+					.enqueue();
 		}
 
 		@Override
 		protected boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
-			final BluetoothGattService llService = gatt.getService(LINKLOSS_SERVICE_UUID);
+			final BluetoothGattService llService = gatt.getService(LINK_LOSS_SERVICE_UUID);
 			if (llService != null) {
 				mLinkLossCharacteristic = llService.getCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID);
 			}
@@ -105,6 +104,7 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 
 	/**
 	 * Toggles the immediate alert on the target device.
+	 *
 	 * @return true if alarm has been enabled, false if disabled
 	 */
 	public boolean toggleImmediateAlert() {
@@ -114,6 +114,7 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 
 	/**
 	 * Writes the HIGH ALERT or NO ALERT command to the target device
+	 *
 	 * @param on true to enable the alarm on proximity tag, false to disable it
 	 */
 	public void writeImmediateAlert(final boolean on) {
@@ -124,7 +125,8 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 		writeCharacteristic(mAlertLevelCharacteristic, on ? AlertLevelData.highAlert() : AlertLevelData.noAlert())
 				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + AlertLevelParser.parse(data) + "\" sent"))
 				.done(device -> mAlertOn = on)
-				.fail((device, status) -> log(LogContract.Log.Level.APPLICATION, "Alert Level characteristic not found"));
+				.fail((device, status) -> log(LogContract.Log.Level.APPLICATION, "Alert Level characteristic not found"))
+				.enqueue();
 	}
 
 	/**

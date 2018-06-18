@@ -29,13 +29,10 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.UUID;
 
 import no.nordicsemi.android.ble.BleManager;
-import no.nordicsemi.android.ble.Request;
+import no.nordicsemi.android.ble.WriteRequest;
 import no.nordicsemi.android.log.LogContract;
 
 public class UARTManager extends BleManager<UARTManagerCallbacks> {
@@ -45,14 +42,11 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 	private final static UUID UART_RX_CHARACTERISTIC_UUID = UUID.fromString("6E400002-B5A3-F393-E0A9-E50E24DCCA9E");
 	/** TX characteristic UUID */
 	private final static UUID UART_TX_CHARACTERISTIC_UUID = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E");
-	/** The maximum packet size is 20 bytes. */
-	private static final int MAX_PACKET_SIZE = 20;
 
 	private BluetoothGattCharacteristic mRXCharacteristic, mTXCharacteristic;
-	private byte[] mOutgoingBuffer;
-	private int mBufferOffset;
+	private boolean mUseLongWrite = true;
 
-	public UARTManager(final Context context) {
+	UARTManager(final Context context) {
 		super(context);
 	}
 
@@ -63,15 +57,20 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 	}
 
 	/**
-	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving indication, etc
+	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving indication, etc.
 	 */
 	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 
 		@Override
-		protected Deque<Request> initGatt(@NonNull final BluetoothGatt gatt) {
-			final LinkedList<Request> requests = new LinkedList<>();
-			requests.add(Request.newEnableNotificationsRequest(mTXCharacteristic));
-			return requests;
+		protected void initialize() {
+			requestMtu(260).enqueue();
+			setNotificationCallback(mTXCharacteristic)
+					.with((device, data) -> {
+						final String text = data.getStringValue(0);
+						log(LogContract.Log.Level.APPLICATION, "\"" + text + "\" received");
+						mCallbacks.onDataReceived(device, text);
+                    });
+			enableNotifications(mTXCharacteristic).enqueue();
 		}
 
 		@Override
@@ -89,10 +88,14 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 				writeRequest = (rxProperties & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0;
 				writeCommand = (rxProperties & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) > 0;
 
-				// Set the WRITE REQUEST type when the characteristic supports it. This will allow to send long write (also if the characteristic support it).
-				// In case there is no WRITE REQUEST property, this manager will divide texts longer then 20 bytes into up to 20 bytes chunks.
+				// Set the WRITE REQUEST type when the characteristic supports it.
+				// This will allow to send long write (also if the characteristic support it).
+				// In case there is no WRITE REQUEST property, this manager will divide texts
+				// longer then MTU-3 bytes into up to MTU-3 bytes chunks.
 				if (writeRequest)
 					mRXCharacteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+				else
+					mUseLongWrite = false;
 			}
 
 			return mRXCharacteristic != null && mTXCharacteristic != null && (writeRequest || writeCommand);
@@ -102,33 +105,7 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 		protected void onDeviceDisconnected() {
 			mRXCharacteristic = null;
 			mTXCharacteristic = null;
-		}
-
-		@Override
-		public void onCharacteristicWrite(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			// When the whole buffer has been sent
-			final byte[] buffer = mOutgoingBuffer;
-			if (mBufferOffset == buffer.length) {
-				try {
-					final String data = new String(buffer, "UTF-8");
-					log(LogContract.Log.Level.APPLICATION, "\"" + data + "\" sent");
-					mCallbacks.onDataSent(gatt.getDevice(), data);
-				} catch (final UnsupportedEncodingException e) {
-					// do nothing
-				}
-				mOutgoingBuffer = null;
-			} else { // Otherwise...
-				final int length = Math.min(buffer.length - mBufferOffset, MAX_PACKET_SIZE);
-				enqueue(Request.newWriteRequest(mRXCharacteristic, buffer, mBufferOffset, length));
-				mBufferOffset += length;
-			}
-		}
-
-		@Override
-		public void onCharacteristicNotified(@NonNull final BluetoothGatt gatt, @NonNull final BluetoothGattCharacteristic characteristic) {
-			final String data = characteristic.getStringValue(0);
-			log(LogContract.Log.Level.APPLICATION, "\"" + data + "\" received");
-			mCallbacks.onDataReceived(gatt.getDevice(), data);
+			mUseLongWrite = true;
 		}
 	};
 
@@ -147,23 +124,12 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 		if (mRXCharacteristic == null)
 			return;
 
-		// An outgoing buffer may not be null if there is already another packet being sent. We do nothing in this case.
-		if (!TextUtils.isEmpty(text) && mOutgoingBuffer == null) {
-			final byte[] buffer = mOutgoingBuffer = text.getBytes();
-			mBufferOffset = 0;
-
-			// Depending on whether the characteristic has the WRITE REQUEST property or not, we will either send it as it is (hoping the long write is implemented),
-			// or divide it into up to 20 bytes chunks and send them one by one.
-			final boolean writeRequest = (mRXCharacteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0;
-
-			if (!writeRequest) { // no WRITE REQUEST property
-				final int length = Math.min(buffer.length, MAX_PACKET_SIZE);
-				mBufferOffset += length;
-				enqueue(Request.newWriteRequest(mRXCharacteristic, buffer, 0, length));
-			} else { // there is WRITE REQUEST property, let's try Long Write
-				mBufferOffset = buffer.length;
-				enqueue(Request.newWriteRequest(mRXCharacteristic, buffer, 0, buffer.length));
+		if (!TextUtils.isEmpty(text)) {
+			final WriteRequest request = writeCharacteristic(mRXCharacteristic, text.getBytes());
+			if (!mUseLongWrite) {
+				request.split();
 			}
+			request.enqueue();
 		}
 	}
 }

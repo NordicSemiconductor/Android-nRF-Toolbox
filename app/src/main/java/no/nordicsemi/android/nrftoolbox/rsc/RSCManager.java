@@ -30,12 +30,8 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.UUID;
 
-import no.nordicsemi.android.ble.BleManager;
-import no.nordicsemi.android.ble.Request;
 import no.nordicsemi.android.ble.common.callback.rsc.RunningSpeedAndCadenceMeasurementDataCallback;
 import no.nordicsemi.android.ble.data.Data;
 import no.nordicsemi.android.log.LogContract;
@@ -85,7 +81,7 @@ public class RSCManager extends BatteryManager<RSCManagerCallbacks> {
 									instantaneousCadence, strideLength, totalDistance);
 						}
 					});
-			enableNotifications(mRSCMeasurementCharacteristic);
+			enableNotifications(mRSCMeasurementCharacteristic).enqueue();
 		}
 
 		@Override

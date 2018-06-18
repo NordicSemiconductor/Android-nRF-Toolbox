@@ -17,7 +17,8 @@ import no.nordicsemi.android.log.LogContract;
 
 /**
  * The Ble Manager with Battery Service support.
- * @param <T> The profile callbacks type
+ *
+ * @param <T> The profile callbacks type.
  * @see BleManager
  */
 @SuppressWarnings("WeakerAccess")
@@ -62,7 +63,8 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 		if (isConnected()) {
 			readCharacteristic(mBatteryLevelCharacteristic)
 					.with(mBatteryLevelDataCallback)
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Battery Level characteristic not found"));
+					.fail((device, status) -> log(LogContract.Log.Level.WARNING,"Battery Level characteristic not found"))
+					.enqueue();
 		}
 	}
 
@@ -73,7 +75,8 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 					.with(mBatteryLevelDataCallback);
 			enableNotifications(mBatteryLevelCharacteristic)
 					.done(device -> log(LogContract.Log.Level.INFO, "Battery Level notifications enabled"))
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Battery Level characteristic not found"));
+					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Battery Level characteristic not found"))
+					.enqueue();
 		}
 	}
 
@@ -83,7 +86,8 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 	public void disableBatteryLevelCharacteristicNotifications() {
 		if (isConnected()) {
 			disableNotifications(mBatteryLevelCharacteristic)
-					.done(device -> log(LogContract.Log.Level.INFO, "Battery Level notifications disabled"));
+					.done(device -> log(LogContract.Log.Level.INFO, "Battery Level notifications disabled"))
+					.enqueue();
 		}
 	}
 

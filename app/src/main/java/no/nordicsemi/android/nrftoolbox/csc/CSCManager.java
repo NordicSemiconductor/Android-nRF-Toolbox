@@ -82,25 +82,29 @@ public class CSCManager extends BatteryManager<CSCManagerCallbacks> {
 
 						@Override
 						public float getWheelCircumference() {
-							return Integer.parseInt(preferences.getString(SettingsFragment.SETTINGS_WHEEL_SIZE, String.valueOf(SettingsFragment.SETTINGS_WHEEL_SIZE_DEFAULT)));
+							return Integer.parseInt(preferences.getString(SettingsFragment.SETTINGS_WHEEL_SIZE,
+                                    String.valueOf(SettingsFragment.SETTINGS_WHEEL_SIZE_DEFAULT)));
 						}
 
 						@Override
-						public void onDistanceChanged(@NonNull final BluetoothDevice device, final float totalDistance, final float distance, final float speed) {
+						public void onDistanceChanged(@NonNull final BluetoothDevice device,
+                                                      final float totalDistance, final float distance, final float speed) {
 							mCallbacks.onDistanceChanged(device, totalDistance, distance, speed);
 						}
 
 						@Override
-						public void onCrankDataChanged(@NonNull final BluetoothDevice device, final float crankCadence, final float gearRatio) {
+						public void onCrankDataChanged(@NonNull final BluetoothDevice device,
+                                                       final float crankCadence, final float gearRatio) {
 							mCallbacks.onCrankDataChanged(device, crankCadence, gearRatio);
 						}
 
 						@Override
-						public void onInvalidDataReceived(@NonNull final BluetoothDevice device, final @NonNull Data data) {
+						public void onInvalidDataReceived(@NonNull final BluetoothDevice device,
+                                                          final @NonNull Data data) {
 							log(LogContract.Log.Level.WARNING, "Invalid CSC Measurement data received: " + data);
 						}
 					});
-			enableNotifications(mCSCMeasurementCharacteristic);
+			enableNotifications(mCSCMeasurementCharacteristic).enqueue();
 		}
 
 		@Override

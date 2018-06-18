@@ -45,8 +45,6 @@ import no.nordicsemi.android.nrftoolbox.parser.TemperatureMeasurementParser;
  * HTSActivity implements HTSManagerCallbacks in order to receive callbacks of BluetoothGatt operations.
  */
 public class HTSManager extends BatteryManager<HTSManagerCallbacks> {
-	private static final String TAG = "HTSManager";
-
 	/** Health Thermometer service UUID */
 	public final static UUID HT_SERVICE_UUID = UUID.fromString("00001809-0000-1000-8000-00805f9b34fb");
 	/** Health Thermometer Measurement characteristic UUID */
@@ -87,7 +85,7 @@ public class HTSManager extends BatteryManager<HTSManagerCallbacks> {
 							mCallbacks.onTemperatureMeasurementReceived(device, temperature, unit, calendar, type);
 						}
 					});
-			enableIndications(mHTCharacteristic);
+			enableIndications(mHTCharacteristic).enqueue();
 		}
 
 		@Override

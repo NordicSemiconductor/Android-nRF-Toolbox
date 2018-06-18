@@ -40,12 +40,6 @@ import no.nordicsemi.android.nrftoolbox.profile.multiconnect.BleMulticonnectProf
 import no.nordicsemi.android.nrftoolbox.widget.DividerItemDecoration;
 
 public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivity<ProximityService.ProximityBinder> {
-	private static final String TAG = "ProximityActivity";
-
-	// This is not used any more. Server is created always after the service is started or
-	// after Bluetooth adapter is enabled.
-	// public static final String PREFS_GATT_SERVER_ENABLED = "prefs_gatt_server_enabled";
-
 	private RecyclerView mDevicesView;
 	private DeviceAdapter mAdapter;
 
@@ -99,7 +93,7 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 
 	@Override
 	protected UUID getFilterUUID() {
-		return ProximityManager.LINKLOSS_SERVICE_UUID;
+		return ProximityManager.LINK_LOSS_SERVICE_UUID;
 	}
 
 	@Override
@@ -146,18 +140,19 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 
 		// The link loss may also be called when Bluetooth adapter was disabled
 		if (BluetoothAdapter.getDefaultAdapter().isEnabled())
-			showLinklossDialog(device.getName());
+			showLinkLossDialog(device.getName());
 	}
 
+	@SuppressWarnings("unused")
 	private void onBatteryLevelChanged(final BluetoothDevice device, final int batteryLevel) {
 		if (mAdapter != null)
 			mAdapter.onBatteryValueReceived(device); // Value will be obtained from the service
 	}
 
 
-	private void showLinklossDialog(final String name) {
+	private void showLinkLossDialog(final String name) {
 		try {
-			final LinklossFragment dialog = LinklossFragment.getInstance(name);
+			final LinkLossFragment dialog = LinkLossFragment.getInstance(name);
 			dialog.show(getSupportFragmentManager(), "scan_fragment");
 		} catch (final Exception e) {
 			// the activity must have been destroyed

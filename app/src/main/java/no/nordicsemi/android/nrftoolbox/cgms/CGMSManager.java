@@ -48,19 +48,13 @@ import no.nordicsemi.android.nrftoolbox.parser.CGMSpecificOpsControlPointParser;
 import no.nordicsemi.android.nrftoolbox.parser.RecordAccessControlPointParser;
 
 public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
-	private static final String TAG = "CGMSManager";
-
-	/**
-	 * Cycling Speed and Cadence service UUID
-	 */
+	/** Cycling Speed and Cadence service UUID. */
 	public static final UUID CGMS_UUID = UUID.fromString("0000181F-0000-1000-8000-00805f9b34fb");
 	private static final UUID CGM_STATUS_UUID = UUID.fromString("00002AA9-0000-1000-8000-00805f9b34fb");
-	private static final UUID CGM_FEAURE_UUID = UUID.fromString("00002AA8-0000-1000-8000-00805f9b34fb");
+	private static final UUID CGM_FEATURE_UUID = UUID.fromString("00002AA8-0000-1000-8000-00805f9b34fb");
 	private static final UUID CGM_MEASUREMENT_UUID = UUID.fromString("00002AA7-0000-1000-8000-00805f9b34fb");
 	private static final UUID CGM_OPS_CONTROL_POINT_UUID = UUID.fromString("00002AAC-0000-1000-8000-00805f9b34fb");
-	/**
-	 * Record Access Control Point characteristic UUID
-	 */
+	/** Record Access Control Point characteristic UUID. */
 	private static final UUID RACP_UUID = UUID.fromString("00002A52-0000-1000-8000-00805f9b34fb");
 
 	private BluetoothGattCharacteristic mCGMStatusCharacteristic;
@@ -111,7 +105,9 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 							mSecured = features.e2eCrcSupported;
 							log(LogContract.Log.Level.APPLICATION, "E2E CRC feature " + (mSecured ? "supported" : "not supported"));
 						}
-					}).fail((device, status) -> log(LogContract.Log.Level.WARNING, "Could not read CGM Feature characteristic"));
+					})
+					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Could not read CGM Feature characteristic"))
+					.enqueue();
 
 			// Check if the session is already started. This is not supported in the experimental CGMS from the SDK.
 			readCharacteristic(mCGMStatusCharacteristic)
@@ -123,7 +119,9 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 								log(LogContract.Log.Level.APPLICATION, "Session already started");
 							}
 						}
-					}).fail((device, status) -> log(LogContract.Log.Level.WARNING, "Could not read CGM Status characteristic"));
+					})
+					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Could not read CGM Status characteristic"))
+					.enqueue();
 
 			// Set notification and indication callbacks
 			setNotificationCallback(mCGMMeasurementCharacteristic)
@@ -135,7 +133,13 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 						}
 
 						@Override
-						public void onContinuousGlucoseMeasurementReceived(@NonNull final BluetoothDevice device, final float glucoseConcentration, @Nullable final Float cgmTrend, @Nullable final Float cgmQuality, final CGMStatus status, final int timeOffset, final boolean secured) {
+						public void onContinuousGlucoseMeasurementReceived(@NonNull final BluetoothDevice device,
+                                                                           final float glucoseConcentration,
+                                                                           @Nullable final Float cgmTrend,
+                                                                           @Nullable final Float cgmQuality,
+                                                                           final CGMStatus status,
+                                                                           final int timeOffset,
+                                                                           final boolean secured) {
 							// If the CGM Status characteristic has not been read and the session was already started before,
 							// estimate the Session Start Time by subtracting timeOffset minutes from the current timestamp.
 							if (mSessionStartTime == 0 && !mRecordAccessRequestInProgress) {
@@ -151,7 +155,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 						}
 
 						@Override
-						public void onContinuousGlucoseMeasurementReceivedWithCrcError(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+						public void onContinuousGlucoseMeasurementReceivedWithCrcError(@NonNull final BluetoothDevice device,
+                                                                                       @NonNull final Data data) {
 							log(LogContract.Log.Level.WARNING, "Continuous Glucose Measurement record received with CRC error");
 						}
 					});
@@ -165,7 +170,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 						}
 
 						@Override
-						public void onCGMSpecificOpsOperationCompleted(@NonNull final BluetoothDevice device, final int requestCode, final boolean secured) {
+						public void onCGMSpecificOpsOperationCompleted(@NonNull final BluetoothDevice device,
+                                                                       final int requestCode, final boolean secured) {
 							switch (requestCode) {
 								case CGM_OP_CODE_START_SESSION:
 									mSessionStartTime = System.currentTimeMillis();
@@ -176,14 +182,19 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 							}
 						}
 
-						@Override
-						public void onCGMSpecificOpsOperationError(@NonNull final BluetoothDevice device, final int requestCode, final int errorCode, final boolean secured) {
+						@SuppressWarnings("StatementWithEmptyBody")
+                        @Override
+						public void onCGMSpecificOpsOperationError(@NonNull final BluetoothDevice device,
+                                                                   final int requestCode, final int errorCode,
+                                                                   final boolean secured) {
 							switch (requestCode) {
 								case CGM_OP_CODE_START_SESSION:
 									if (errorCode == CGM_ERROR_PROCEDURE_NOT_COMPLETED) {
 										// Session was already started before.
-										// Looks like the CGM Status characteristic has not been read, otherwise we would have got the Session Start Time before.
-										// The Session Start Time will be calculated when a next CGM packet is received based on it's Time Offset.
+										// Looks like the CGM Status characteristic has not been read,
+                                        // otherwise we would have got the Session Start Time before.
+										// The Session Start Time will be calculated when a next CGM
+                                        // packet is received based on it's Time Offset.
 									}
 								case CGM_OP_CODE_STOP_SESSION:
 									mSessionStartTime = 0;
@@ -192,7 +203,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 						}
 
 						@Override
-						public void onCGMSpecificOpsResponseReceivedWithCrcError(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+						public void onCGMSpecificOpsResponseReceivedWithCrcError(@NonNull final BluetoothDevice device,
+                                                                                 @NonNull final Data data) {
 							log(LogContract.Log.Level.ERROR, "Request failed: CRC error");
 						}
 					});
@@ -219,7 +231,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 						}
 
 						@Override
-						public void onRecordAccessOperationCompletedWithNoRecordsFound(@NonNull final BluetoothDevice device, final int requestCode) {
+						public void onRecordAccessOperationCompletedWithNoRecordsFound(@NonNull final BluetoothDevice device,
+                                                                                       final int requestCode) {
 							mRecordAccessRequestInProgress = false;
 							mCallbacks.onOperationCompleted(device);
 						}
@@ -230,9 +243,11 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 							if (numberOfRecords > 0) {
 								if (mRecords.size() > 0) {
 									final int sequenceNumber = mRecords.keyAt(mRecords.size() - 1) + 1;
-									writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber));
+									writeCharacteristic(mRecordAccessControlPointCharacteristic,
+                                            RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber));
 								} else {
-									writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportAllStoredRecords());
+									writeCharacteristic(mRecordAccessControlPointCharacteristic,
+                                            RecordAccessControlPointData.reportAllStoredRecords());
 								}
 							} else {
 								mRecordAccessRequestInProgress = false;
@@ -241,7 +256,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 						}
 
 						@Override
-						public void onRecordAccessOperationError(@NonNull final BluetoothDevice device, final int requestCode, final int errorCode) {
+						public void onRecordAccessOperationError(@NonNull final BluetoothDevice device,
+                                                                 final int requestCode, final int errorCode) {
 							log(LogContract.Log.Level.WARNING, "Record Access operation failed (error " + errorCode + ")");
 							if (errorCode == RACP_ERROR_OP_CODE_NOT_SUPPORTED) {
 								mCallbacks.onOperationNotSupported(device);
@@ -253,17 +269,21 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 
 			// Enable notifications and indications
 			enableNotifications(mCGMMeasurementCharacteristic)
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enable Continuous Glucose Measurement notifications (" + status + ")"));
+					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enable Continuous Glucose Measurement notifications (" + status + ")"))
+					.enqueue();
 			enableIndications(mCGMSpecificOpsControlPointCharacteristic)
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enable CGM Specific Ops Control Point indications notifications (" + status + ")"));
+					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enable CGM Specific Ops Control Point indications notifications (" + status + ")"))
+					.enqueue();
 			enableIndications(mRecordAccessControlPointCharacteristic)
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enabled Record Access Control Point indications (error " + status + ")"));
+					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enabled Record Access Control Point indications (error " + status + ")"))
+					.enqueue();
 
 			// Start Continuous Glucose session if hasn't been started before
 			if (mSessionStartTime == 0L) {
 				writeCharacteristic(mCGMSpecificOpsControlPointCharacteristic, CGMSpecificOpsControlPointData.startSession(mSecured))
 						.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + CGMSpecificOpsControlPointParser.parse(data) + "\" sent"))
-						.fail((device, status) -> log(LogContract.Log.Level.ERROR, "Failed to start session (error " + status + ")"));
+						.fail((device, status) -> log(LogContract.Log.Level.ERROR, "Failed to start session (error " + status + ")"))
+						.enqueue();
 			}
 		}
 
@@ -272,12 +292,14 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 			final BluetoothGattService service = gatt.getService(CGMS_UUID);
 			if (service != null) {
 				mCGMStatusCharacteristic = service.getCharacteristic(CGM_STATUS_UUID);
-				mCGMFeatureCharacteristic = service.getCharacteristic(CGM_FEAURE_UUID);
+				mCGMFeatureCharacteristic = service.getCharacteristic(CGM_FEATURE_UUID);
 				mCGMMeasurementCharacteristic = service.getCharacteristic(CGM_MEASUREMENT_UUID);
 				mCGMSpecificOpsControlPointCharacteristic = service.getCharacteristic(CGM_OPS_CONTROL_POINT_UUID);
 				mRecordAccessControlPointCharacteristic = service.getCharacteristic(RACP_UUID);
 			}
-			return mCGMMeasurementCharacteristic != null && mCGMSpecificOpsControlPointCharacteristic != null && mRecordAccessControlPointCharacteristic != null;
+			return mCGMMeasurementCharacteristic != null
+                    && mCGMSpecificOpsControlPointCharacteristic != null
+                    && mRecordAccessControlPointCharacteristic != null;
 		}
 
 		@Override
@@ -307,8 +329,9 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 	}
 
 	/**
-	 * Sends the request to obtain the last (most recent) record from glucose device. The data will be returned to Glucose Measurement characteristic as a notification followed by Record Access
-	 * Control Point indication with status code Success or other in case of error.
+	 * Sends the request to obtain the last (most recent) record from glucose device.
+     * The data will be returned to Glucose Measurement characteristic as a notification followed by
+     * Record Access Control Point indication with status code Success or other in case of error.
 	 */
 	public void getLastRecord() {
 		if (mRecordAccessControlPointCharacteristic == null)
@@ -318,13 +341,14 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 		mCallbacks.onOperationStarted(getBluetoothDevice());
 		mRecordAccessRequestInProgress = true;
 		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportLastStoredRecord())
-				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"));
+				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
+				.enqueue();
 	}
 
 	/**
 	 * Sends the request to obtain the first (oldest) record from glucose device.
-	 * The data will be returned to Glucose Measurement characteristic as a notification followed by Record Access Control
-	 * Point indication with status code Success or other in case of error.
+	 * The data will be returned to Glucose Measurement characteristic as a notification followed by
+     * Record Access Control Point indication with status code Success or other in case of error.
 	 */
 	public void getFirstRecord() {
 		if (mRecordAccessControlPointCharacteristic == null)
@@ -334,7 +358,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 		mCallbacks.onOperationStarted(getBluetoothDevice());
 		mRecordAccessRequestInProgress = true;
 		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportFirstStoredRecord())
-				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"));
+				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
+				.enqueue();
 	}
 
 	/**
@@ -345,7 +370,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 			return;
 
 		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.abortOperation())
-				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"));
+				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
+				.enqueue();
 	}
 
 	/**
@@ -362,7 +388,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 		mCallbacks.onOperationStarted(getBluetoothDevice());
 		mRecordAccessRequestInProgress = true;
 		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportNumberOfAllStoredRecords())
-				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"));
+				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
+				.enqueue();
 	}
 
 	/**
@@ -384,7 +411,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 			final int sequenceNumber = mRecords.keyAt(mRecords.size() - 1) + 1;
 			mRecordAccessRequestInProgress = true;
 			writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber))
-					.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"));
+					.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
+					.enqueue();
 			// Info:
 			// Operators OPERATOR_GREATER_THEN_OR_EQUAL, OPERATOR_LESS_THEN_OR_EQUAL and OPERATOR_RANGE are not supported by the CGMS sample from SDK
 			// The "Operation not supported" response will be received
@@ -403,7 +431,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
 		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.deleteAllStoredRecords())
-				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"));
+				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
+				.enqueue();
 	}
 }
 

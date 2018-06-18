@@ -121,7 +121,8 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 																	   final int unit, @Nullable final Float pulseRate,
 																	   @Nullable final Integer userID, @Nullable final BPMStatus status,
 																	   @Nullable final Calendar calendar) {
-							mCallbacks.onBloodPressureMeasurementReceived(device, systolic, diastolic, meanArterialPressure, unit, pulseRate, userID, status, calendar);
+							mCallbacks.onBloodPressureMeasurementReceived(device, systolic, diastolic,
+                                    meanArterialPressure, unit, pulseRate, userID, status, calendar);
 						}
 
 						@Override
@@ -130,8 +131,8 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 						}
 					});
 
-			enableNotifications(mICPCharacteristic);
-			enableIndications(mBPMCharacteristic);
+			enableNotifications(mICPCharacteristic).enqueue();
+			enableIndications(mBPMCharacteristic).enqueue();
 		}
 
 		@Override

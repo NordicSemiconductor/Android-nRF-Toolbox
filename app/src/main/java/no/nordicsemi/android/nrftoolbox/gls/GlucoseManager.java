@@ -222,9 +222,11 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 							if (numberOfRecords > 0) {
 								if (mRecords.size() > 0) {
 									final int sequenceNumber = mRecords.keyAt(mRecords.size() - 1) + 1;
-									writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber));
+									writeCharacteristic(mRecordAccessControlPointCharacteristic,
+											RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber));
 								} else {
-									writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportAllStoredRecords());
+									writeCharacteristic(mRecordAccessControlPointCharacteristic,
+											RecordAccessControlPointData.reportAllStoredRecords());
 								}
 							} else {
 								mCallbacks.onOperationCompleted(device);
@@ -232,7 +234,8 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 						}
 
 						@Override
-						public void onRecordAccessOperationError(@NonNull final BluetoothDevice device, final int requestCode, final int errorCode) {
+						public void onRecordAccessOperationError(@NonNull final BluetoothDevice device,
+																 final int requestCode, final int errorCode) {
 							log(LogContract.Log.Level.WARNING, "Record Access operation failed (error " + errorCode + ")");
 							if (errorCode == RACP_ERROR_OP_CODE_NOT_SUPPORTED) {
 								mCallbacks.onOperationNotSupported(device);
@@ -242,10 +245,11 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 						}
 					});
 
-			enableNotifications(mGlucoseMeasurementCharacteristic);
-			enableNotifications(mGlucoseMeasurementContextCharacteristic);
+			enableNotifications(mGlucoseMeasurementCharacteristic).enqueue();
+			enableNotifications(mGlucoseMeasurementContextCharacteristic).enqueue();
 			enableIndications(mRecordAccessControlPointCharacteristic)
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enabled Record Access Control Point indications (error " + status + ")"));
+					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enabled Record Access Control Point indications (error " + status + ")"))
+					.enqueue();
 		}
 
 		@Override
@@ -302,7 +306,8 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
 		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportLastStoredRecord())
-				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"));
+				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
+				.enqueue();
 	}
 
 	/**
@@ -317,7 +322,8 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
 		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportFirstStoredRecord())
-				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"));
+				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
+				.enqueue();
 	}
 
 	/**
@@ -333,7 +339,8 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
 		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.reportNumberOfAllStoredRecords())
-				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"));
+				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
+				.enqueue();
 	}
 
 	/**
@@ -360,7 +367,8 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 
 			writeCharacteristic(mRecordAccessControlPointCharacteristic,
 					RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber))
-					.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"));
+					.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
+					.enqueue();
 			// Info:
 			// Operators OPERATOR_LESS_THEN_OR_EQUAL and OPERATOR_RANGE are not supported by Nordic Semiconductor Glucose Service in SDK 4.4.2.
 		}
@@ -374,14 +382,13 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 			return;
 
 		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.abortOperation())
-				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"));
+				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
+				.enqueue();
 	}
 
 	/**
 	 * Sends the request to delete all data from the device. A Record Access Control Point indication
 	 * with status code Success (or other in case of error) will be send.
-	 *
-	 * FIXME This method is not supported by Nordic Semiconductor Glucose Service in SDK 4.4.2.
 	 */
 	public void deleteAllRecords() {
 		if (mRecordAccessControlPointCharacteristic == null)
@@ -390,6 +397,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 		clear();
 		mCallbacks.onOperationStarted(getBluetoothDevice());
 		writeCharacteristic(mRecordAccessControlPointCharacteristic, RecordAccessControlPointData.deleteAllStoredRecords())
-				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"));
+				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
+				.enqueue();
 	}
 }

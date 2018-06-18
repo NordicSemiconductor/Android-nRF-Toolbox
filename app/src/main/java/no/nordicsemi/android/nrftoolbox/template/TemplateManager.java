@@ -45,15 +45,25 @@ import no.nordicsemi.android.nrftoolbox.template.callback.TemplateDataCallback;
  */
 public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 	// TODO Replace the services and characteristics below to match your device.
-	/** The service UUID */
+	/**
+	 * The service UUID
+	 */
 	static final UUID SERVICE_UUID = UUID.fromString("0000180D-0000-1000-8000-00805f9b34fb"); // Heart Rate service
-	/** A UUID of a characteristic with notify property */
+	/**
+	 * A UUID of a characteristic with notify property
+	 */
 	private static final UUID MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb"); // Heart Rate Measurement
-	/** A UUID of a characteristic with read property */
+	/**
+	 * A UUID of a characteristic with read property
+	 */
 	private static final UUID READABLE_CHARACTERISTIC_UUID = UUID.fromString("00002A38-0000-1000-8000-00805f9b34fb"); // Body Sensor Location
-	/** Some other service UUID */
+	/**
+	 * Some other service UUID
+	 */
 	private static final UUID OTHER_SERVICE_UUID = UUID.fromString("00001800-0000-1000-8000-00805f9b34fb"); // Generic Access service
-	/** A UUID of a characteristic with write property */
+	/**
+	 * A UUID of a characteristic with write property
+	 */
 	private static final UUID WRITABLE_CHARACTERISTIC_UUID = UUID.fromString("00002A00-0000-1000-8000-00805f9b34fb"); // Device Name
 
 	// TODO Add more services and characteristics references.
@@ -88,38 +98,40 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 
 			// Increase the MTU
 			requestMtu(43)
-				.with((device, mtu) -> log(LogContract.Log.Level.APPLICATION, "MTU changed to " + mtu))
-				.done(device -> {
-					// You may do some logic in here that should be done when the request finished successfully.
-					// In case of MTU this method is called also when the MTU hasn't changed, or has changed
-					// to a different (lower) value. Use .with(...) to get the MTU value.
-				})
-				.fail((device, status) -> log(LogContract.Log.Level.WARNING, "MTU change not supported"));
+					.with((device, mtu) -> log(LogContract.Log.Level.APPLICATION, "MTU changed to " + mtu))
+					.done(device -> {
+						// You may do some logic in here that should be done when the request finished successfully.
+						// In case of MTU this method is called also when the MTU hasn't changed, or has changed
+						// to a different (lower) value. Use .with(...) to get the MTU value.
+					})
+					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "MTU change not supported"))
+					.enqueue();
 
 			// Set notification callback
 			setNotificationCallback(mRequiredCharacteristic)
-				// This callback will be called each time the notification is received
-				.with(new TemplateDataCallback() {
-					@Override
-					public void onSampleValueReceived(@NonNull final BluetoothDevice device, final int value) {
-						// Let's lass received data to the service
-						mCallbacks.onSampleValueReceived(device, value);
-					}
+					// This callback will be called each time the notification is received
+					.with(new TemplateDataCallback() {
+						@Override
+						public void onSampleValueReceived(@NonNull final BluetoothDevice device, final int value) {
+							// Let's lass received data to the service
+							mCallbacks.onSampleValueReceived(device, value);
+						}
 
-					@Override
-					public void onInvalidDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
-						log(LogContract.Log.Level.WARNING, "Invalid data received: " + data);
-					}
-				});
+						@Override
+						public void onInvalidDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+							log(LogContract.Log.Level.WARNING, "Invalid data received: " + data);
+						}
+					});
 
 			// Enable notifications
 			enableNotifications(mRequiredCharacteristic)
-				// Method called after the data were sent (data will contain 0x0100 in this case)
-				.with((device, data) -> log(LogContract.Log.Level.DEBUG, "Data sent: " + data))
-				// Method called when the request finished successfully. This will be called after .with(..) callback
-				.done(device -> log(LogContract.Log.Level.APPLICATION, "Notifications enabled successfully"))
-				// Methods called in case of an error, for example when the characteristic does not have Notify property
-				.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enable notifications"));
+					// Method called after the data were sent (data will contain 0x0100 in this case)
+					.with((device, data) -> log(LogContract.Log.Level.DEBUG, "Data sent: " + data))
+					// Method called when the request finished successfully. This will be called after .with(..) callback
+					.done(device -> log(LogContract.Log.Level.APPLICATION, "Notifications enabled successfully"))
+					// Methods called in case of an error, for example when the characteristic does not have Notify property
+					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enable notifications"))
+					.enqueue();
 		}
 
 		@Override
@@ -181,7 +193,8 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 						} else {
 							log(LogContract.Log.Level.WARNING, "Value is empty!");
 						}
-					});
+					})
+                    .enqueue();
 		}
 	};
 
@@ -206,6 +219,7 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 				// Write Without Request type was used. This is called after .with(...) callback.
 				.done(device -> log(LogContract.Log.Level.APPLICATION, "Device name set to \"" + parameter + "\""))
 				// Callback called when write has failed.
-				.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to change device name"));
+				.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to change device name"))
+                .enqueue();
 	}
 }

@@ -29,13 +29,13 @@ import android.support.v7.app.AlertDialog;
 
 import no.nordicsemi.android.nrftoolbox.R;
 
-public class LinklossFragment extends DialogFragment {
+public class LinkLossFragment extends DialogFragment {
 	private static final String ARG_NAME = "name";
 
 	private String mName;
 
-	public static LinklossFragment getInstance(String name) {
-		final LinklossFragment fragment = new LinklossFragment();
+	public static LinkLossFragment getInstance(String name) {
+		final LinkLossFragment fragment = new LinkLossFragment();
 
 		final Bundle args = new Bundle();
 		args.putString(ARG_NAME, name);
