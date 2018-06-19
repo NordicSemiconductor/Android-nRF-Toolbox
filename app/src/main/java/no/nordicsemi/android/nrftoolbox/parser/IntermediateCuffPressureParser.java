@@ -21,11 +21,9 @@
  */
 package no.nordicsemi.android.nrftoolbox.parser;
 
-import java.util.Calendar;
-import java.util.Locale;
-
 import no.nordicsemi.android.ble.data.Data;
 
+@SuppressWarnings("ConstantConditions")
 public class IntermediateCuffPressureParser {
 	public static String parse(final Data data) {
 		final StringBuilder builder = new StringBuilder();
@@ -48,15 +46,8 @@ public class IntermediateCuffPressureParser {
 
 		// parse timestamp if present
 		if (timestampPresent) {
-			final Calendar calendar = Calendar.getInstance();
-			calendar.set(Calendar.YEAR, data.getIntValue(Data.FORMAT_UINT16, offset));
-			calendar.set(Calendar.MONTH, data.getIntValue(Data.FORMAT_UINT8, offset + 2));
-			calendar.set(Calendar.DAY_OF_MONTH, data.getIntValue(Data.FORMAT_UINT8, offset + 3));
-			calendar.set(Calendar.HOUR_OF_DAY, data.getIntValue(Data.FORMAT_UINT8, offset + 4));
-			calendar.set(Calendar.MINUTE, data.getIntValue(Data.FORMAT_UINT8, offset + 5));
-			calendar.set(Calendar.SECOND, data.getIntValue(Data.FORMAT_UINT8, offset + 6));
+			builder.append("Timestamp: ").append(DateTimeParser.parse(data, offset));
 			offset += 7;
-			builder.append(String.format(Locale.US, "\nTimestamp: %1$tT %1$te.%1$tm.%1$tY", calendar));
 		}
 
 		// parse pulse rate if present

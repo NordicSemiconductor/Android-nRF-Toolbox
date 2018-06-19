@@ -27,6 +27,7 @@ import java.util.Locale;
 
 import no.nordicsemi.android.ble.data.Data;
 
+@SuppressWarnings("ConstantConditions")
 public class HeartRateMeasurementParser {
 	private static final byte HEART_RATE_VALUE_FORMAT = 0x01; // 1 bit
 	private static final byte SENSOR_CONTACT_STATUS = 0x06; // 2 bits

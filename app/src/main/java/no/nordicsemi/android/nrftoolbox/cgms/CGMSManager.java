@@ -68,11 +68,14 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 	/** A flag set to true if the remote device supports E2E CRC. */
 	private boolean mSecured;
 	/**
-	 * A flag set when records has been requested using RACP. This is to distinguish CGM packets received
-	 * as continuous measurements or requested.
+	 * A flag set when records has been requested using RACP. This is to distinguish CGM packets
+	 * received as continuous measurements or requested.
 	 */
 	private boolean mRecordAccessRequestInProgress;
-	/** The timestamp when the session has started. This is needed to display the user facing times of samples. */
+	/**
+	 * The timestamp when the session has started. This is needed to display the user facing
+	 * times of samples.
+	 */
 	private long mSessionStartTime;
 
 	CGMSManager(final Context context) {
@@ -86,7 +89,8 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 	}
 
 	/**
-	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving notification, etc
+	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
+	 * receiving notification, etc.
 	 */
 	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
 
@@ -375,9 +379,9 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 	}
 
 	/**
-	 * Sends the request to obtain all records from glucose device. Initially we want to notify the user
-	 * about the number of the records so the Report Number of Stored Records request is send. The
-	 * data will be returned to Glucose Measurement characteristic as a notification followed by
+	 * Sends the request to obtain all records from glucose device. Initially we want to notify the
+	 * user about the number of the records so the Report Number of Stored Records request is send.
+	 * The data will be returned to Glucose Measurement characteristic as a notification followed by
 	 * Record Access Control Point indication with status code Success or other in case of error.
 	 */
 	public void getAllRecords() {
@@ -393,9 +397,9 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 	}
 
 	/**
-	 * Sends the request to obtain all records from glucose device. Initially we want to notify the user
-	 * about the number of the records so the Report Number of Stored Records request is send. The
-	 * data will be returned to Glucose Measurement characteristic as a notification followed by
+	 * Sends the request to obtain all records from glucose device. Initially we want to notify the
+	 * user about the number of the records so the Report Number of Stored Records request is send.
+	 * The data will be returned to Glucose Measurement characteristic as a notification followed by
 	 * Record Access Control Point indication with status code Success or other in case of error.
 	 */
 	public void refreshRecords() {

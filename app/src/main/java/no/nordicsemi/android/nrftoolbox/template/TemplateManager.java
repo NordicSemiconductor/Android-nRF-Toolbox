@@ -34,6 +34,7 @@ import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.data.Data;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.battery.BatteryManager;
+import no.nordicsemi.android.nrftoolbox.parser.TemplateParser;
 import no.nordicsemi.android.nrftoolbox.template.callback.TemplateDataCallback;
 
 /**
@@ -46,23 +47,23 @@ import no.nordicsemi.android.nrftoolbox.template.callback.TemplateDataCallback;
 public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 	// TODO Replace the services and characteristics below to match your device.
 	/**
-	 * The service UUID
+	 * The service UUID.
 	 */
 	static final UUID SERVICE_UUID = UUID.fromString("0000180D-0000-1000-8000-00805f9b34fb"); // Heart Rate service
 	/**
-	 * A UUID of a characteristic with notify property
+	 * A UUID of a characteristic with notify property.
 	 */
 	private static final UUID MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb"); // Heart Rate Measurement
 	/**
-	 * A UUID of a characteristic with read property
+	 * A UUID of a characteristic with read property.
 	 */
 	private static final UUID READABLE_CHARACTERISTIC_UUID = UUID.fromString("00002A38-0000-1000-8000-00805f9b34fb"); // Body Sensor Location
 	/**
-	 * Some other service UUID
+	 * Some other service UUID.
 	 */
 	private static final UUID OTHER_SERVICE_UUID = UUID.fromString("00001800-0000-1000-8000-00805f9b34fb"); // Generic Access service
 	/**
-	 * A UUID of a characteristic with write property
+	 * A UUID of a characteristic with write property.
 	 */
 	private static final UUID WRITABLE_CHARACTERISTIC_UUID = UUID.fromString("00002A00-0000-1000-8000-00805f9b34fb"); // Device Name
 
@@ -80,7 +81,8 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 	}
 
 	/**
-	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving indication, etc
+	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
+	 * receiving indication, etc.
 	 */
 	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
 
@@ -111,6 +113,12 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 			setNotificationCallback(mRequiredCharacteristic)
 					// This callback will be called each time the notification is received
 					.with(new TemplateDataCallback() {
+						@Override
+						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+							log(LogContract.Log.Level.APPLICATION, TemplateParser.parse(data));
+							super.onDataReceived(device, data);
+						}
+
 						@Override
 						public void onSampleValueReceived(@NonNull final BluetoothDevice device, final int value) {
 							// Let's lass received data to the service
@@ -194,7 +202,7 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 							log(LogContract.Log.Level.WARNING, "Value is empty!");
 						}
 					})
-                    .enqueue();
+					.enqueue();
 		}
 	};
 
@@ -220,6 +228,6 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 				.done(device -> log(LogContract.Log.Level.APPLICATION, "Device name set to \"" + parameter + "\""))
 				// Callback called when write has failed.
 				.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to change device name"))
-                .enqueue();
+				.enqueue();
 	}
 }

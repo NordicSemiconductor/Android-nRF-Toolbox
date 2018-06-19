@@ -25,6 +25,7 @@ import java.util.Locale;
 
 import no.nordicsemi.android.ble.data.Data;
 
+@SuppressWarnings("ConstantConditions")
 public class CGMMeasurementParser {
 	private static final int FLAGS_CGM_TREND_INFO_PRESENT = 1;
 	private static final int FLAGS_CGM_QUALITY_PRESENT = 1 << 1;

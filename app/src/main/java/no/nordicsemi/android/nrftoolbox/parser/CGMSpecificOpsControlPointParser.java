@@ -23,6 +23,7 @@ package no.nordicsemi.android.nrftoolbox.parser;
 
 import no.nordicsemi.android.ble.data.Data;
 
+@SuppressWarnings("ConstantConditions")
 public class CGMSpecificOpsControlPointParser {
 	private final static int OP_SET_CGM_COMMUNICATION_INTERVAL = 1;
 	private final static int OP_GET_CGM_COMMUNICATION_INTERVAL = 2;

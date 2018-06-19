@@ -24,6 +24,7 @@ package no.nordicsemi.android.nrftoolbox.parser;
 import java.util.Calendar;
 import java.util.Locale;
 
+import no.nordicsemi.android.ble.common.callback.DateTimeDataCallback;
 import no.nordicsemi.android.ble.data.Data;
 
 public class DateTimeParser {
@@ -46,16 +47,7 @@ public class DateTimeParser {
 	 * @return time in human readable format
 	 */
 	/* package */static String parse(final Data data, final int offset) {
-		final int year = data.getIntValue(Data.FORMAT_UINT16, offset);
-		final int month = data.getIntValue(Data.FORMAT_UINT8, offset + 2);
-		final int day = data.getIntValue(Data.FORMAT_UINT8, offset + 3);
-		final int hours = data.getIntValue(Data.FORMAT_UINT8, offset + 4);
-		final int minutes = data.getIntValue(Data.FORMAT_UINT8, offset + 5);
-		final int seconds = data.getIntValue(Data.FORMAT_UINT8, offset + 6);
-
-		final Calendar calendar = Calendar.getInstance();
-		calendar.set(year, month - 1, day, hours, minutes, seconds);
-
+		final Calendar calendar = DateTimeDataCallback.readDateTime(data, offset);
 		return String.format(Locale.US, "%1$te %1$tb %1$tY, %1$tH:%1$tM:%1$tS", calendar);
 	}
 }

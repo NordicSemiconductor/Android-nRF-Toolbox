@@ -61,7 +61,8 @@ public class CSCManager extends BatteryManager<CSCManagerCallbacks> {
 	}
 
 	/**
-	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving indication, etc
+	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
+	 * receiving indication, etc.
 	 */
 	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
 

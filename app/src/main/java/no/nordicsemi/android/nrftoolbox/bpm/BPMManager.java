@@ -54,7 +54,7 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 	private static BPMManager managerInstance = null;
 
 	/**
-	 * Returns the singleton implementation of BPMManager
+	 * Returns the singleton implementation of BPMManager.
 	 */
 	public static synchronized BPMManager getBPMManager(final Context context) {
 		if (managerInstance == null) {
@@ -74,7 +74,8 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 	}
 
 	/**
-	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving notification, etc
+	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
+	 * receiving notification, etc.
 	 */
 	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
 
@@ -131,7 +132,10 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 						}
 					});
 
-			enableNotifications(mICPCharacteristic).enqueue();
+			enableNotifications(mICPCharacteristic)
+					.fail((device, status) -> log(LogContract.Log.Level.WARNING,
+							"Intermediate Cuff Pressure characteristic not found"))
+					.enqueue();
 			enableIndications(mBPMCharacteristic).enqueue();
 		}
 

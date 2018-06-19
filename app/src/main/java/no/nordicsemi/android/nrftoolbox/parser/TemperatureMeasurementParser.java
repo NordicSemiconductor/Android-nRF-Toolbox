@@ -25,6 +25,7 @@ import java.util.Locale;
 
 import no.nordicsemi.android.ble.data.Data;
 
+@SuppressWarnings("ConstantConditions")
 public class TemperatureMeasurementParser {
 	private static final byte TEMPERATURE_UNIT_FLAG = 0x01; // 1 bit
 	private static final byte TIMESTAMP_FLAG = 0x02; // 1 bits

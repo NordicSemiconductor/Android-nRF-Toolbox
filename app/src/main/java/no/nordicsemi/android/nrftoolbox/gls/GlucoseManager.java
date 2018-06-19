@@ -70,7 +70,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 	private static GlucoseManager mInstance;
 
 	/**
-	 * Returns the singleton implementation of GlucoseManager
+	 * Returns the singleton implementation of GlucoseManager.
 	 */
 	public static GlucoseManager getGlucoseManager(final Context context) {
 		if (mInstance == null)
@@ -90,7 +90,8 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 	}
 
 	/**
-	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving notification, etc
+	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
+	 * receiving notification, etc.
 	 */
 	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
 
@@ -98,14 +99,16 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 		protected void initialize() {
 			super.initialize();
 
-			// The gatt.setCharacteristicNotification(...) method is called in BleManager during enabling
-			// notifications or indications (see BleManager#internalEnableNotifications/Indications).
+			// The gatt.setCharacteristicNotification(...) method is called in BleManager during
+			// enabling notifications or indications
+			// (see BleManager#internalEnableNotifications/Indications).
 			// However, on Samsung S3 with Android 4.3 it looks like the 2 gatt calls
 			// (gatt.setCharacteristicNotification(...) and gatt.writeDescriptor(...)) are called
-			// too quickly, or from a wrong thread, and in result the notification listener is not set,
-			// causing onCharacteristicChanged(...) callback never being called when a notification comes.
-			// Enabling them here, like below, solves the problem.
-			// However... the original approach works for the Battery Level CCCD, which makes it even weirder.
+			// too quickly, or from a wrong thread, and in result the notification listener is not
+			// set, causing onCharacteristicChanged(...) callback never being called when a
+			// notification comes. Enabling them here, like below, solves the problem.
+			// However... the original approach works for the Battery Level CCCD, which makes it
+			// even weirder.
 			/*
 			gatt.setCharacteristicNotification(mGlucoseMeasurementCharacteristic, true);
 			if (mGlucoseMeasurementContextCharacteristic != null) {
@@ -280,7 +283,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 	/**
 	 * Returns all records as a sparse array where sequence number is the key.
 	 *
-	 * @return the records list
+	 * @return the records list.
 	 */
 	public SparseArray<GlucoseRecord> getRecords() {
 		return mRecords;
@@ -312,8 +315,8 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 
 	/**
 	 * Sends the request to obtain the first (oldest) record from glucose device. The data will be
-	 * returned to Glucose Measurement characteristic as a notification followed by Record Access Control
-	 * Point indication with status code Success or other in case of error.
+	 * returned to Glucose Measurement characteristic as a notification followed by Record Access
+	 * Control Point indication with status code Success or other in case of error.
 	 */
 	public void getFirstRecord() {
 		if (mRecordAccessControlPointCharacteristic == null)
@@ -344,14 +347,14 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 	}
 
 	/**
-	 * Sends the request to obtain from the glucose device all records newer than the newest one from local storage.
-	 * The data will be returned to Glucose Measurement characteristic as a notification
-	 * followed by Record Access Control Point indication with status code Success or other in case of error.
+	 * Sends the request to obtain from the glucose device all records newer than the newest one
+	 * from local storage. The data will be returned to Glucose Measurement characteristic as
+	 * a notification followed by Record Access Control Point indication with status code Success
+	 * or other in case of error.
 	 * <p>
 	 * Refresh button will not download records older than the oldest in the local memory.
-	 * I.e. if you have pressed Last and then Refresh, than it will try to get only newer records.
+	 * E.g. if you have pressed Last and then Refresh, than it will try to get only newer records.
 	 * However if there are no records, it will download all existing (using {@link #getAllRecords()}).
-	 * </p>
 	 */
 	public void refreshRecords() {
 		if (mRecordAccessControlPointCharacteristic == null)
@@ -375,7 +378,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 	}
 
 	/**
-	 * Sends abort operation signal to the device
+	 * Sends abort operation signal to the device.
 	 */
 	public void abort() {
 		if (mRecordAccessControlPointCharacteristic == null)
@@ -387,8 +390,8 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 	}
 
 	/**
-	 * Sends the request to delete all data from the device. A Record Access Control Point indication
-	 * with status code Success (or other in case of error) will be send.
+	 * Sends the request to delete all data from the device. A Record Access Control Point
+	 * indication with status code Success (or other in case of error) will be send.
 	 */
 	public void deleteAllRecords() {
 		if (mRecordAccessControlPointCharacteristic == null)

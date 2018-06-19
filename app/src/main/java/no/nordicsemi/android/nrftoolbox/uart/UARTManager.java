@@ -57,7 +57,8 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 	}
 
 	/**
-	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving indication, etc.
+	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
+	 * receiving indication, etc.
 	 */
 	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
 

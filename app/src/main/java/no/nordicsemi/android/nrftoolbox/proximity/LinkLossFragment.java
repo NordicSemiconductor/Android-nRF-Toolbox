@@ -52,9 +52,10 @@ public class LinkLossFragment extends DialogFragment {
 	}
 
 	@NonNull
-    @Override
+	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
-		return new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.app_name)).setMessage(getString(R.string.proximity_notification_linkloss_alert, mName))
+		return new AlertDialog.Builder(requireContext())
+				.setTitle(getString(R.string.app_name)).setMessage(getString(R.string.proximity_notification_linkloss_alert, mName))
 				.setPositiveButton(R.string.ok, null).create();
 	}
 }

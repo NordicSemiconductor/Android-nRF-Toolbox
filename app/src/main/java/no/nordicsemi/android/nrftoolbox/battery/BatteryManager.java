@@ -35,7 +35,7 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 	/**
 	 * The manager constructor.
 	 *
-	 * @param context context
+	 * @param context context.
 	 */
 	public BatteryManager(final Context context) {
 		super(context);

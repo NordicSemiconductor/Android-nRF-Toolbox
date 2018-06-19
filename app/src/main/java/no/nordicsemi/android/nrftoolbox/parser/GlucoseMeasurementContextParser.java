@@ -23,6 +23,7 @@ package no.nordicsemi.android.nrftoolbox.parser;
 
 import no.nordicsemi.android.ble.data.Data;
 
+@SuppressWarnings("ConstantConditions")
 public class GlucoseMeasurementContextParser {
 	private static final int UNIT_kg = 0;
 	private static final int UNIT_l = 1;

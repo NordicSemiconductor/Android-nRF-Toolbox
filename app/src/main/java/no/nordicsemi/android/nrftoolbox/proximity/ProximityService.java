@@ -85,13 +85,15 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	private final static int MAX_ATTEMPTS = 1;
 
 	/**
-	 * This local binder is an interface for the bonded activity to operate with the proximity sensor
+	 * This local binder is an interface for the bonded activity to operate with the proximity
+	 * sensor.
 	 */
 	public class ProximityBinder extends LocalBinder {
 		/**
 		 * Toggles the Immediate Alert on given remote device.
-		 * @param device the connected device
-		 * @return true if alarm has been enabled, false if disabled
+		 *
+		 * @param device the connected device.
+		 * @return True if alarm has been enabled, false if disabled.
 		 */
 		public boolean toggleImmediateAlert(final BluetoothDevice device) {
 			final ProximityManager manager = (ProximityManager) getBleManager(device);
@@ -99,10 +101,11 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 		}
 
 		/**
-		 * Returns the current alarm state on given device. This value is not read from the device, it's just the last value written to it
-		 * (initially false).
-		 * @param device the connected device
-		 * @return true if alarm has been enabled, false if disabled
+		 * Returns the current alarm state on given device. This value is not read from the device,
+		 * it's just the last value written to it (initially false).
+		 *
+		 * @param device the connected device.
+		 * @return True if alarm has been enabled, false if disabled.
 		 */
 		public boolean isImmediateAlertOn(final BluetoothDevice device) {
 			final ProximityManager manager = (ProximityManager) getBleManager(device);
@@ -111,9 +114,10 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 
 		/**
 		 * Returns the last received battery level value.
-		 * @param device the device of which battery level should be returned
-		 * @return battery value or null if no value was received or Battery Level characteristic was not found,
-		 * or the device is disconnected
+		 *
+		 * @param device the device of which battery level should be returned.
+		 * @return Battery value or null if no value was received or Battery Level characteristic
+		 * was not found, or the device is disconnected.
 		 */
 		public Integer getBatteryLevel(final BluetoothDevice device) {
 			final ProximityManager manager = (ProximityManager) getBleManager(device);
@@ -132,7 +136,8 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	}
 
 	/**
-	 * This broadcast receiver listens for {@link #ACTION_DISCONNECT} that may be fired by pressing Disconnect action button on the notification.
+	 * This broadcast receiver listens for {@link #ACTION_DISCONNECT} that may be fired by pressing
+	 * Disconnect action button on the notification.
 	 */
 	private final BroadcastReceiver mDisconnectActionBroadcastReceiver = new BroadcastReceiver() {
 		@Override
@@ -144,7 +149,8 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	};
 
 	/**
-	 * This broadcast receiver listens for {@link #ACTION_FIND} or {@link #ACTION_SILENT} that may be fired by pressing Find me action button on the notification.
+	 * This broadcast receiver listens for {@link #ACTION_FIND} or {@link #ACTION_SILENT} that may
+	 * be fired by pressing Find me action button on the notification.
 	 */
 	private final BroadcastReceiver mToggleAlarmActionBroadcastReceiver = new BroadcastReceiver() {
 		@Override
@@ -200,7 +206,8 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 			public void run() {
 				final Runnable that = this;
 				// Start the GATT Server only if Bluetooth is enabled
-				mServerManager.openGattServer(ProximityService.this, new ProximityServerManager.OnServerOpenCallback() {
+				mServerManager.openGattServer(ProximityService.this,
+						new ProximityServerManager.OnServerOpenCallback() {
 					@Override
 					public void onGattServerOpen() {
 						// We are now ready to reconnect devices
@@ -237,8 +244,10 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 		// When the activity rebinds to the service, remove the notification
 		cancelNotifications();
 
-		// This method will read the Battery Level value from each connected device, if possible and then try to enable battery notifications (if it has NOTIFY property).
-		// If the Battery Level characteristic has only the NOTIFY property, it will only try to enable notifications.
+		// This method will read the Battery Level value from each connected device, if possible
+		// and then try to enable battery notifications (if it has NOTIFY property).
+		// If the Battery Level characteristic has only the NOTIFY property, it will only try to
+		// enable notifications.
 		for (final BluetoothDevice device : getManagedDevices()) {
 			final ProximityManager manager = (ProximityManager) getBleManager(device);
 			manager.readBatteryLevelCharacteristic();
@@ -248,8 +257,8 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 
 	@Override
 	public void onUnbind() {
-		// When we are connected, but the application is not open, we are not really interested in battery level notifications.
-		// But we will still be receiving other values, if enabled.
+		// When we are connected, but the application is not open, we are not really interested
+		// in battery level notifications. But we will still be receiving other values, if enabled.
 		for (final BluetoothDevice device : getManagedDevices()) {
 			final ProximityManager manager = (ProximityManager) getBleManager(device);
 			manager.disableBatteryLevelCharacteristicNotifications();
@@ -282,7 +291,7 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 		if (!mBound) {
 			createBackgroundNotification();
 			if (BluetoothAdapter.getDefaultAdapter().isEnabled())
-				createLinklossNotification(device);
+				createLinkLossNotification(device);
 			else
 				cancelNotification(device);
 		}
@@ -329,7 +338,9 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	private void createSummaryNotification() {
 		final NotificationCompat.Builder builder = getNotificationBuilder();
 		builder.setColor(ContextCompat.getColor(this, R.color.actionBarColorDark));
-		builder.setShowWhen(false).setDefaults(0).setOngoing(true); // an ongoing notification will not be shown on Android Wear
+		builder.setShowWhen(false).setDefaults(0);
+		// An ongoing notification will not be shown on Android Wear.
+		builder.setOngoing(true);
 		builder.setGroup(PROXIMITY_GROUP_ID).setGroupSummary(true);
 		builder.setContentTitle(getString(R.string.app_name));
 
@@ -340,8 +351,8 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 			final int numberOfManagedDevices = managedDevices.size();
 			if (numberOfManagedDevices == 1) {
 				final String name = getDeviceName(managedDevices.get(0));
-				// We don't use plurals here, as we only have the default language and 'one' is not in every language (versions differ in %d or %s)
-				// and throw an exception in e.g. in Chinese
+				// We don't use plurals here, as we only have the default language and 'one' is not
+				// in every language (versions differ in %d or %s) and throw an exception in e.g. in Chinese.
 				builder.setContentText(getString(R.string.proximity_notification_text_nothing_connected_one_disconnected, name));
 			} else {
 				builder.setContentText(getString(R.string.proximity_notification_text_nothing_connected_number_disconnected, numberOfManagedDevices));
@@ -390,27 +401,36 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	private void createNotificationForConnectedDevice(final BluetoothDevice device) {
 		final NotificationCompat.Builder builder = getNotificationBuilder();
 		builder.setColor(ContextCompat.getColor(this, R.color.actionBarColorDark));
-		builder.setGroup(PROXIMITY_GROUP_ID).setDefaults(0).setOngoing(true); // an ongoing notification will not be shown on Android Wear
+		builder.setGroup(PROXIMITY_GROUP_ID).setDefaults(0);
+		// An ongoing notification will not be shown on Android Wear.
+		builder.setOngoing(true);
 		builder.setContentTitle(getString(R.string.proximity_notification_text, getDeviceName(device)));
 
 		// Add DISCONNECT action
 		final Intent disconnect = new Intent(ACTION_DISCONNECT);
 		disconnect.putExtra(EXTRA_DEVICE, device);
-		final PendingIntent disconnectAction = PendingIntent.getBroadcast(this, DISCONNECT_REQ + device.hashCode(), disconnect, PendingIntent.FLAG_UPDATE_CURRENT);
+		final PendingIntent disconnectAction =
+				PendingIntent.getBroadcast(this, DISCONNECT_REQ + device.hashCode(),
+						disconnect, PendingIntent.FLAG_UPDATE_CURRENT);
 		builder.addAction(new NotificationCompat.Action(R.drawable.ic_action_bluetooth, getString(R.string.proximity_action_disconnect), disconnectAction));
-		builder.setSortKey(getDeviceName(device) + device.getAddress()); // This will keep the same order of notification even after an action was clicked on one of them
+		// This will keep the same order of notification even after an action was clicked on one of them.
+		builder.setSortKey(getDeviceName(device) + device.getAddress());
 
 		// Add FIND or SILENT action
 		final ProximityManager manager = (ProximityManager) getBleManager(device);
 		if (manager.isAlertEnabled()) {
 			final Intent silentAllIntent = new Intent(ACTION_SILENT);
 			silentAllIntent.putExtra(EXTRA_DEVICE, device);
-			final PendingIntent silentAction = PendingIntent.getBroadcast(this, SILENT_REQ + device.hashCode(), silentAllIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+			final PendingIntent silentAction =
+					PendingIntent.getBroadcast(this, SILENT_REQ + device.hashCode(),
+							silentAllIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 			builder.addAction(new NotificationCompat.Action(R.drawable.ic_stat_notify_proximity_silent, getString(R.string.proximity_action_silent), silentAction));
 		} else {
 			final Intent findAllIntent = new Intent(ACTION_FIND);
 			findAllIntent.putExtra(EXTRA_DEVICE, device);
-			final PendingIntent findAction = PendingIntent.getBroadcast(this, FIND_REQ + device.hashCode(), findAllIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+			final PendingIntent findAction =
+					PendingIntent.getBroadcast(this, FIND_REQ + device.hashCode(),
+							findAllIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 			builder.addAction(new NotificationCompat.Action(R.drawable.ic_stat_notify_proximity_find, getString(R.string.proximity_action_find), findAction));
 		}
 
@@ -422,15 +442,18 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	/**
 	 * Creates a notification showing information about a device that got disconnected.
 	 */
-	private void createLinklossNotification(final BluetoothDevice device) {
+	private void createLinkLossNotification(final BluetoothDevice device) {
 		final NotificationCompat.Builder builder = getNotificationBuilder();
 		builder.setColor(ContextCompat.getColor(this, R.color.orange));
 
 		final Uri notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-		builder.setSound(notificationUri, AudioManager.STREAM_ALARM); // make sure the sound is played even in DND mode
+		// Make sure the sound is played even in DND mode
+		builder.setSound(notificationUri, AudioManager.STREAM_ALARM);
 		builder.setPriority(NotificationCompat.PRIORITY_HIGH);
 		builder.setCategory(NotificationCompat.CATEGORY_ALARM);
-		builder.setShowWhen(true).setOngoing(false); // an ongoing notification would not be shown on Android Wear
+		builder.setShowWhen(true);
+		// An ongoing notification would not be shown on Android Wear.
+		builder.setOngoing(false);
 		// This notification is to be shown not in a group
 
 		final String name = getDeviceName(device);

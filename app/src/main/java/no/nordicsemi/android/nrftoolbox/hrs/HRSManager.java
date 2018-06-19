@@ -56,7 +56,7 @@ public class HRSManager extends BatteryManager<HRSManagerCallbacks> {
 	private static HRSManager managerInstance = null;
 
 	/**
-	 * singleton implementation of HRSManager class
+	 * Singleton implementation of HRSManager class.
 	 */
 	public static synchronized HRSManager getInstance(final Context context) {
 		if (managerInstance == null) {
@@ -76,7 +76,8 @@ public class HRSManager extends BatteryManager<HRSManagerCallbacks> {
 	}
 
 	/**
-	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving notification, etc
+	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
+	 * receiving notification, etc.
 	 */
 	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
 

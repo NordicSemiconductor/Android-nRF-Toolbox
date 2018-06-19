@@ -62,7 +62,8 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 	}
 
 	/**
-	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving indication, etc
+	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
+	 * receiving indication, etc.
 	 */
 	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
 
@@ -105,7 +106,7 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 	/**
 	 * Toggles the immediate alert on the target device.
 	 *
-	 * @return true if alarm has been enabled, false if disabled
+	 * @return True if alarm has been enabled, false if disabled.
 	 */
 	public boolean toggleImmediateAlert() {
 		writeImmediateAlert(!mAlertOn);
@@ -113,9 +114,9 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 	}
 
 	/**
-	 * Writes the HIGH ALERT or NO ALERT command to the target device
+	 * Writes the HIGH ALERT or NO ALERT command to the target device.
 	 *
-	 * @param on true to enable the alarm on proximity tag, false to disable it
+	 * @param on true to enable the alarm on proximity tag, false to disable it.
 	 */
 	public void writeImmediateAlert(final boolean on) {
 		if (!isConnected())

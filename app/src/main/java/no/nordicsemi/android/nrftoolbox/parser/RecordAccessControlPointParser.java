@@ -23,6 +23,7 @@ package no.nordicsemi.android.nrftoolbox.parser;
 
 import no.nordicsemi.android.ble.data.Data;
 
+@SuppressWarnings("ConstantConditions")
 public class RecordAccessControlPointParser {
 	private final static int OP_CODE_REPORT_STORED_RECORDS = 1;
 	private final static int OP_CODE_DELETE_STORED_RECORDS = 2;

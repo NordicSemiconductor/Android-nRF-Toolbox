@@ -25,6 +25,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 
 import no.nordicsemi.android.ble.data.Data;
 
+@SuppressWarnings("ConstantConditions")
 public class AlertLevelParser {
 	public static String parse(final BluetoothGattCharacteristic characteristic) {
 		return parse(Data.from(characteristic));

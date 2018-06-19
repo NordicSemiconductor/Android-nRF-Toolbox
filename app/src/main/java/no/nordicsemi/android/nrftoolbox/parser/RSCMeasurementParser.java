@@ -25,6 +25,7 @@ import java.util.Locale;
 
 import no.nordicsemi.android.ble.data.Data;
 
+@SuppressWarnings("ConstantConditions")
 public class RSCMeasurementParser {
 	private static final byte INSTANTANEOUS_STRIDE_LENGTH_PRESENT = 0x01; // 1 bit
 	private static final byte TOTAL_DISTANCE_PRESENT = 0x02; // 1 bit

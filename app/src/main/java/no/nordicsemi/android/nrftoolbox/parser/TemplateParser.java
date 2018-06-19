@@ -21,21 +21,24 @@
  */
 package no.nordicsemi.android.nrftoolbox.parser;
 
-import android.bluetooth.BluetoothGattCharacteristic;
+import no.nordicsemi.android.ble.data.Data;
 
 // TODO this method may be used for developing purposes to log the data from your device using the nRF Logger application.
+
+@SuppressWarnings("ConstantConditions")
 public class TemplateParser {
 	// TODO add some flags, if needed
 	private static final byte HEART_RATE_VALUE_FORMAT = 0x01; // 1 bit
 
 	/**
 	 * This method converts the value of the characteristic to the String. The String is then logged in the nRF logger log session
-	 * @param characteristic the characteristic to be parsed
+	 * @param data the characteristic data to be parsed
 	 * @return human readable value of the characteristic
 	 */
-	public static String parse(final BluetoothGattCharacteristic characteristic) {
+	@SuppressWarnings("UnusedAssignment")
+	public static String parse(final Data data) {
 		int offset = 0;
-		final int flags = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
+		final int flags = data.getIntValue(Data.FORMAT_UINT8, offset++);
 
 		/*
 		 * In the template we are using the HRM values as an example.
@@ -45,14 +48,12 @@ public class TemplateParser {
 		final boolean value16bit = (flags & HEART_RATE_VALUE_FORMAT) > 0;
 
 		// heart rate value is 8 or 16 bit long
-		int value = characteristic.getIntValue(value16bit ? BluetoothGattCharacteristic.FORMAT_UINT16 : BluetoothGattCharacteristic.FORMAT_UINT8, offset++); // bits per minute
+		int value = data.getIntValue(value16bit ? Data.FORMAT_UINT16 : Data.FORMAT_UINT8, offset++); // bits per minute
 		if (value16bit)
 			offset++;
 
 		// TODO parse more data
 
-		final StringBuilder builder = new StringBuilder();
-		builder.append("Template Measurement: ").append(value).append(" bpm");
-		return builder.toString();
+		return "Template Measurement: " + value + " bpm";
 	}
 }

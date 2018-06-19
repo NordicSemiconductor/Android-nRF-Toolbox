@@ -24,6 +24,7 @@ package no.nordicsemi.android.nrftoolbox.parser;
 
 import no.nordicsemi.android.ble.data.Data;
 
+@SuppressWarnings("ConstantConditions")
 public class GlucoseMeasurementParser {
 	private static final int UNIT_kgpl = 0;
 	private static final int UNIT_molpl = 1;

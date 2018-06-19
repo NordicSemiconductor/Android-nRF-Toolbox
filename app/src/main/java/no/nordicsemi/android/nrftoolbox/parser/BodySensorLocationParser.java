@@ -23,6 +23,7 @@ package no.nordicsemi.android.nrftoolbox.parser;
 
 import no.nordicsemi.android.ble.data.Data;
 
+@SuppressWarnings("ConstantConditions")
 public class BodySensorLocationParser {
 
 	public static String parse(final Data data) {

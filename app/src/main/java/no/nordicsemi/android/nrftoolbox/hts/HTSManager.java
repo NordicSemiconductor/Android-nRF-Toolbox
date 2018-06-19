@@ -63,7 +63,8 @@ public class HTSManager extends BatteryManager<HTSManagerCallbacks> {
 	}
 
 	/**
-	 * BluetoothGatt callbacks for connection/disconnection, service discovery, receiving indication, etc.
+	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
+	 * receiving indication, etc..
 	 */
 	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
 		@Override
