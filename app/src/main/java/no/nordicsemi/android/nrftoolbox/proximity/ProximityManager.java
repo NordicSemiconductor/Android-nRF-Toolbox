@@ -41,7 +41,7 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 
 	/** Immediate Alert service UUID */
 	public final static UUID IMMEDIATE_ALERT_SERVICE_UUID = UUID.fromString("00001802-0000-1000-8000-00805f9b34fb");
-	/** Linkloss service UUID */
+	/** Link Loss service UUID */
 	public final static UUID LINKLOSS_SERVICE_UUID = UUID.fromString("00001803-0000-1000-8000-00805f9b34fb");
 	/** Alert Level characteristic UUID */
 	private static final UUID ALERT_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A06-0000-1000-8000-00805f9b34fb");
@@ -129,8 +129,7 @@ public class ProximityManager extends BleManager<ProximityManagerCallbacks> {
 			return;
 
 		if (mAlertLevelCharacteristic != null) {
-			mAlertLevelCharacteristic.setValue(on ? HIGH_ALERT : NO_ALERT);
-			writeCharacteristic(mAlertLevelCharacteristic);
+			writeCharacteristic(mAlertLevelCharacteristic, on ? HIGH_ALERT : NO_ALERT);
 			mAlertOn = on;
 		} else {
 			DebugLogger.w(TAG, "Immediate Alert Level Characteristic is not found");

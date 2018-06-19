@@ -71,13 +71,15 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 	private final static int OPERATOR_LAST_RECORD = 6;
 
 	/**
-	 * The filter type is used for range operators ({@link #OPERATOR_LESS_THEN_OR_EQUAL}, {@link #OPERATOR_GREATER_THEN_OR_EQUAL}, {@link #OPERATOR_WITHING_RANGE}.<br/>
+	 * The filter type is used for range operators ({@link #OPERATOR_LESS_THEN_OR_EQUAL},
+	 * {@link #OPERATOR_GREATER_THEN_OR_EQUAL}, {@link #OPERATOR_WITHING_RANGE}.<br/>
 	 * The syntax of the operand is: [Filter Type][Minimum][Maximum].<br/>
 	 * This filter selects the records by the sequence number.
 	 */
 	private final static int FILTER_TYPE_SEQUENCE_NUMBER = 1;
 	/**
-	 * The filter type is used for range operators ({@link #OPERATOR_LESS_THEN_OR_EQUAL}, {@link #OPERATOR_GREATER_THEN_OR_EQUAL}, {@link #OPERATOR_WITHING_RANGE}.<br/>
+	 * The filter type is used for range operators ({@link #OPERATOR_LESS_THEN_OR_EQUAL},
+	 * {@link #OPERATOR_GREATER_THEN_OR_EQUAL}, {@link #OPERATOR_WITHING_RANGE}.<br/>
 	 * The syntax of the operand is: [Filter Type][Minimum][Maximum].<br/>
 	 * This filter selects the records by the user facing time (base time + offset time).
 	 */
@@ -219,8 +221,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 					// Request the records
 					if (number > 0) {
 						final BluetoothGattCharacteristic racpCharacteristic = mRecordAccessControlPointCharacteristic;
-						setOpCode(racpCharacteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_ALL_RECORDS);
-						writeCharacteristic(racpCharacteristic);
+						writeCharacteristic(racpCharacteristic, getOpCode(OP_CODE_REPORT_STORED_RECORDS, OPERATOR_ALL_RECORDS));
 					} else {
 						mCallbacks.onOperationCompleted(gatt.getDevice());
 					}
@@ -259,35 +260,34 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 	/**
 	 * Writes given operation parameters to the characteristic
 	 *
-	 * @param characteristic the characteristic to write. This must be the Record Access Control Point characteristic
-	 * @param opCode         the operation code
-	 * @param operator       the operator (see {@link #OPERATOR_NULL} and others
-	 * @param params         optional parameters (one for >=, <=, two for the range, none for other operators)
+	 * @param opCode   the operation code
+	 * @param operator the operator (see {@link #OPERATOR_NULL} and others
+	 * @param params   optional parameters (one for >=, <=, two for the range, none for other operators)
 	 */
-	private void setOpCode(final BluetoothGattCharacteristic characteristic, final int opCode, final int operator, final Integer... params) {
-		final int size = 2 + ((params.length > 0) ? 1 : 0) + params.length * 2; // 1 byte for opCode, 1 for operator, 1 for filter type (if parameters exists) and 2 for each parameter
-		characteristic.setValue(new byte[size]);
+	private byte[] getOpCode(final int opCode, final int operator, final Integer... params) {
+		// 1 byte for opCode, 1 for operator, 1 for filter type (if parameters exists) and 2 for each parameter
+		final int size = 2 + ((params.length > 0) ? 1 : 0) + params.length * 2;
+		final byte[] data = new byte[size];
 
-		// write the operation code
+		// Write the operation code
 		int offset = 0;
-		characteristic.setValue(opCode, BluetoothGattCharacteristic.FORMAT_UINT8, offset);
-		offset += 1;
+		data[offset++] = (byte) opCode;
 
-		// write the operator. This is always present but may be equal to OPERATOR_NULL
-		characteristic.setValue(operator, BluetoothGattCharacteristic.FORMAT_UINT8, offset);
-		offset += 1;
+		// Write the operator. This is always present but may be equal to OPERATOR_NULL
+		data[offset++] = (byte) operator;
 
-		// if parameters exists, append them. Parameters should be sorted from minimum to maximum. Currently only one or two params are allowed
+		// If parameters exists, append them. Parameters should be sorted from minimum to maximum.
+		// Currently only one or two params are allowed
 		if (params.length > 0) {
-			// our implementation use only sequence number as a filer type
-			characteristic.setValue(FILTER_TYPE_SEQUENCE_NUMBER, BluetoothGattCharacteristic.FORMAT_UINT8, offset);
-			offset += 1;
+			// Our implementation use only sequence number as a filer type
+			data[offset++] = FILTER_TYPE_SEQUENCE_NUMBER;
 
 			for (final Integer i : params) {
-				characteristic.setValue(i, BluetoothGattCharacteristic.FORMAT_UINT16, offset);
-				offset += 2;
+				data[offset++] = (byte) (i & 0xFF);
+				data[offset++] = (byte) ((i >> 8) & 0xFF);
 			}
 		}
+		return data;
 	}
 
 	/**
@@ -306,7 +306,8 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 	}
 
 	/**
-	 * Sends the request to obtain the last (most recent) record from glucose device. The data will be returned to Glucose Measurement characteristic as a notification followed by Record Access
+	 * Sends the request to obtain the last (most recent) record from glucose device. The data will
+	 * be returned to Glucose Measurement characteristic as a notification followed by Record Access
 	 * Control Point indication with status code ({@link #RESPONSE_SUCCESS} or other in case of error.
 	 */
 	public void getLastRecord() {
@@ -317,13 +318,13 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 		mCallbacks.onOperationStarted(mBluetoothDevice);
 
 		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
-		setOpCode(characteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_LAST_RECORD);
-		writeCharacteristic(characteristic);
+		writeCharacteristic(characteristic, getOpCode(OP_CODE_REPORT_STORED_RECORDS, OPERATOR_LAST_RECORD));
 	}
 
 	/**
-	 * Sends the request to obtain the first (oldest) record from glucose device. The data will be returned to Glucose Measurement characteristic as a notification followed by Record Access Control
-	 * Point indication with status code ({@link #RESPONSE_SUCCESS} or other in case of error.
+	 * Sends the request to obtain the first (oldest) record from glucose device. The data will be
+	 * returned to Glucose Measurement characteristic as a notification followed by Record Access
+	 * Control Point indication with status code ({@link #RESPONSE_SUCCESS} or other in case of error.
 	 */
 	public void getFirstRecord() {
 		if (mRecordAccessControlPointCharacteristic == null)
@@ -333,8 +334,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 		mCallbacks.onOperationStarted(mBluetoothDevice);
 
 		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
-		setOpCode(characteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_FIRST_RECORD);
-		writeCharacteristic(characteristic);
+		writeCharacteristic(characteristic, getOpCode(OP_CODE_REPORT_STORED_RECORDS, OPERATOR_FIRST_RECORD));
 	}
 
 	/**
@@ -346,14 +346,15 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 
 		mAbort = true;
 		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
-		setOpCode(characteristic, OP_CODE_ABORT_OPERATION, OPERATOR_NULL);
-		writeCharacteristic(characteristic);
+		writeCharacteristic(characteristic, getOpCode(OP_CODE_ABORT_OPERATION, OPERATOR_NULL));
 	}
 
 	/**
-	 * Sends the request to obtain all records from glucose device. Initially we want to notify him/her about the number of the records so the {@link #OP_CODE_REPORT_NUMBER_OF_RECORDS} is send. The
-	 * data will be returned to Glucose Measurement characteristic as a notification followed by Record Access Control Point indication with status code ({@link #RESPONSE_SUCCESS} or other in case of
-	 * error.
+	 * Sends the request to obtain all records from glucose device. Initially we want to notify
+	 * him/her about the number of the records so the {@link #OP_CODE_REPORT_NUMBER_OF_RECORDS}
+	 * is send. The data will be returned to Glucose Measurement characteristic as a notification
+	 * followed by Record Access Control Point indication with status code ({@link #RESPONSE_SUCCESS}
+	 * or other in case of error.
 	 */
 	public void getAllRecords() {
 		if (mRecordAccessControlPointCharacteristic == null)
@@ -363,14 +364,15 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 		mCallbacks.onOperationStarted(mBluetoothDevice);
 
 		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
-		setOpCode(characteristic, OP_CODE_REPORT_NUMBER_OF_RECORDS, OPERATOR_ALL_RECORDS);
-		writeCharacteristic(characteristic);
+		writeCharacteristic(characteristic, getOpCode(OP_CODE_REPORT_NUMBER_OF_RECORDS, OPERATOR_ALL_RECORDS));
 	}
 
 	/**
-	 * Sends the request to obtain all records from glucose device. Initially we want to notify him/her about the number of the records so the {@link #OP_CODE_REPORT_NUMBER_OF_RECORDS} is send. The
-	 * data will be returned to Glucose Measurement characteristic as a notification followed by Record Access Control Point indication with status code ({@link #RESPONSE_SUCCESS} or other in case of
-	 * error.
+	 * Sends the request to obtain all records from glucose device. Initially we want to notify
+	 * him/her about the number of the records so the {@link #OP_CODE_REPORT_NUMBER_OF_RECORDS}
+	 * is send. The data will be returned to Glucose Measurement characteristic as a notification
+	 * followed by Record Access Control Point indication with status code ({@link #RESPONSE_SUCCESS}
+	 * or other in case of error.
 	 */
 	public void refreshRecords() {
 		if (mRecordAccessControlPointCharacteristic == null)
@@ -385,8 +387,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 			final int sequenceNumber = mRecords.keyAt(mRecords.size() - 1) + 1;
 
 			final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
-			setOpCode(characteristic, OP_CODE_REPORT_STORED_RECORDS, OPERATOR_GREATER_THEN_OR_EQUAL, sequenceNumber);
-			writeCharacteristic(characteristic);
+			writeCharacteristic(characteristic, getOpCode(OP_CODE_REPORT_STORED_RECORDS, OPERATOR_GREATER_THEN_OR_EQUAL, sequenceNumber));
 			// Info:
 			// Operators OPERATOR_GREATER_THEN_OR_EQUAL, OPERATOR_LESS_THEN_OR_EQUAL and OPERATOR_RANGE are not supported by the CGMS sample from SDK
 			// The "Operation not supported" response will be received
@@ -401,8 +402,7 @@ public class CGMSManager extends BleManager<CGMSManagerCallbacks> {
 		mCallbacks.onOperationStarted(mBluetoothDevice);
 
 		final BluetoothGattCharacteristic characteristic = mRecordAccessControlPointCharacteristic;
-		setOpCode(characteristic, OP_CODE_DELETE_STORED_RECORDS, OPERATOR_ALL_RECORDS);
-		writeCharacteristic(characteristic);
+		writeCharacteristic(characteristic, getOpCode(OP_CODE_DELETE_STORED_RECORDS, OPERATOR_ALL_RECORDS));
 	}
 }
 
