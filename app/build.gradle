@@ -29,7 +29,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
     }
 }
-
 dependencies {
     implementation project(':common')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -50,11 +49,18 @@ dependencies {
 
     // The DFU Library is imported automatically from jcenter:
     implementation 'no.nordicsemi.android:dfu:1.6.1'
-    // if you desire to build the DFU Library, clone the https://github.com/NordicSemiconductor/Android-DFU-Library project into DFULibrary folder,
-    // add it as a module into the project structure and uncomment the following line (and also the according lines in the settings.gradle):
+    // if you desire to build the DFU Library, clone the
+    // https://github.com/NordicSemiconductor/Android-DFU-Library project into DFULibrary folder,
+    // add it as a module into the project structure and uncomment the following line
+    // (and also the according lines in the settings.gradle):
     // implementation project(':dfu')
 
     // Import the BLE Library
+    // The BLE Common Library depends on BLE Library. It is enough to include the first one.
+    // implementation 'no.nordicsemi.android:ble-common:2.0-alpha1'
+    // The BLE Common Library may be included from jcenter. If you want to modify the code,
+    // clone both projects from GitHub and replace the line above with the following
+    // (and also the according lines in the settings.gradle):
     implementation project(':ble-common')
 
     implementation('org.simpleframework:simple-xml:2.7.1') {
@@ -62,3 +68,4 @@ dependencies {
         exclude group: 'xpp3', module: 'xpp3'
     }
 }
+
