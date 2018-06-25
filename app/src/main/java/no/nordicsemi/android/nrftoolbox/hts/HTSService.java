@@ -58,6 +58,8 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	private final static int NOTIFICATION_ID = 267;
 	private final static int OPEN_ACTIVITY_REQ = 0;
 	private final static int DISCONNECT_REQ = 1;
+	/** The last received temperature value in Celsius degrees. */
+	private Float mTemp;
 
 	@SuppressWarnings("unused")
 	private HTSManager mManager;
@@ -68,7 +70,14 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	 * This local binder is an interface for the bonded activity to operate with the HTS sensor
 	 */
 	class HTSBinder extends LocalBinder {
-		// empty
+		/**
+		 * Returns the last received temperature value.
+		 *
+		 * @return Temperature value in Celsius.
+		 */
+		Float getTemperature() {
+			return mTemp;
+		}
 	}
 
 	@Override
@@ -112,13 +121,21 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	}
 
 	@Override
+	public void onDeviceDisconnected(final BluetoothDevice device) {
+		super.onDeviceDisconnected(device);
+		mTemp = null;
+	}
+
+	@Override
 	public void onTemperatureMeasurementReceived(@NonNull final BluetoothDevice device,
 												 final float temperature, final int unit,
 												 @Nullable final Calendar calendar,
 												 @Nullable final Integer type) {
+		mTemp = TemperatureMeasurementCallback.toCelsius(temperature, unit);
+
 		final Intent broadcast = new Intent(BROADCAST_HTS_MEASUREMENT);
 		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
-		broadcast.putExtra(EXTRA_TEMPERATURE, TemperatureMeasurementCallback.toCelsius(temperature, unit));
+		broadcast.putExtra(EXTRA_TEMPERATURE, mTemp);
 		// ignore the rest
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 
