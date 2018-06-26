@@ -241,29 +241,34 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	}
 
 	@Override
-	protected void onResume() {
-		super.onResume();
+	protected void onStart() {
+		super.onStart();
 
 		/*
-		 * If the service has not been started before, the following lines will not start it. However, if it's running, the Activity will bind to it and
-		 * notified via mServiceConnection.
+		 * If the service has not been started before, the following lines will not start it.
+		 * However, if it's running, the Activity will bind to it and notified via mServiceConnection.
 		 */
 		final Intent service = new Intent(this, getServiceClass());
-		bindService(service, mServiceConnection, 0); // we pass 0 as a flag so the service will not be created if not exists
+		// We pass 0 as a flag so the service will not be created if not exists.
+		bindService(service, mServiceConnection, 0);
 
 		/*
-		 * * - When user exited the UARTActivity while being connected, the log session is kept in the service. We may not get it before binding to it so in this
-		 * case this event will not be logged (mLogSession is null until onServiceConnected(..) is called). It will, however, be logged after the orientation changes.
+		 * When user exited the UARTActivity while being connected, the log session is kept in
+		 * the service. We may not get it before binding to it so in this case this event will
+		 * not be logged (mLogSession is null until onServiceConnected(..) is called).
+		 * It will, however, be logged after the orientation changes.
 		 */
 	}
 
 	@Override
-	protected void onPause() {
-		super.onPause();
+	protected void onStop() {
+		super.onStop();
 
 		try {
-			// We don't want to perform some operations (e.g. disable Battery Level notifications) in the service if we are just rotating the screen.
-			// However, when the activity will disappear, we may want to disable some device features to reduce the battery consumption.
+			// We don't want to perform some operations (e.g. disable Battery Level notifications)
+			// in the service if we are just rotating the screen. However, when the activity will
+			// disappear, we may want to disable some device features to reduce the battery
+			// consumption.
 			if (mService != null)
 				mService.setActivityIsChangingConfiguration(isChangingConfigurations());
 

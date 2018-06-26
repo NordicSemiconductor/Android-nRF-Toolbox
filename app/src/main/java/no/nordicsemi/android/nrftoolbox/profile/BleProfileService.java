@@ -25,7 +25,6 @@ import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -46,6 +45,7 @@ import no.nordicsemi.android.log.ILogSession;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.log.Logger;
 
+@SuppressWarnings("unused")
 public abstract class BleProfileService extends Service implements BleManagerCallbacks {
 	@SuppressWarnings("unused")
 	private static final String TAG = "BleProfileService";
@@ -136,7 +136,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 				return;
 			}
 
-			mBleManager.disconnect();
+			mBleManager.disconnect().enqueue();
 		}
 
 		/**
@@ -324,14 +324,13 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 		Logger.i(mLogSession, "Service started");
 
-		final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
-		final BluetoothAdapter adapter = bluetoothManager.getAdapter();
+		final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
 		final String deviceAddress = intent.getStringExtra(EXTRA_DEVICE_ADDRESS);
 		mBluetoothDevice = adapter.getRemoteDevice(deviceAddress);
 
 		mBleManager.setLogger(mLogSession);
 		onServiceStarted();
-		mBleManager.connect(mBluetoothDevice);
+		mBleManager.connect(mBluetoothDevice).enqueue();
 		return START_REDELIVER_INTENT;
 	}
 

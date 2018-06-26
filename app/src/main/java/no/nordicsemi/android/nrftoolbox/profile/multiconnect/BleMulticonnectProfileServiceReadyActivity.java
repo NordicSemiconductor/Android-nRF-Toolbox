@@ -209,8 +209,8 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	}
 
 	@Override
-	protected void onResume() {
-		super.onResume();
+	protected void onStart() {
+		super.onStart();
 
 		/*
 		 * In comparison to BleProfileServiceReadyActivity this activity always starts the service when started.
@@ -223,8 +223,8 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	}
 
 	@Override
-	protected void onPause() {
-		super.onPause();
+	protected void onStop() {
+		super.onStop();
 
 		if (mService != null) {
 			// We don't want to perform some operations (e.g. disable Battery Level notifications) in the service if we are just rotating the screen.

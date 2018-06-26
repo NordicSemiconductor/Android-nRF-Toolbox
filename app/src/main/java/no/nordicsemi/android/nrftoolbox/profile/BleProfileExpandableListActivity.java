@@ -136,7 +136,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 
 	@Override
 	public void onBackPressed() {
-		mBleManager.disconnect();
+		mBleManager.disconnect().enqueue();
 		super.onBackPressed();
 	}
 
@@ -203,7 +203,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 				setDefaultUI();
 				showDeviceScanningDialog(getFilterUUID());
 			} else {
-				mBleManager.disconnect();
+				mBleManager.disconnect().enqueue();
 			}
 		} else {
 			showBLEDialog();
@@ -240,7 +240,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 		}
 		mDeviceName = name;
 		mBleManager.setLogger(mLogSession);
-		mBleManager.connect(device);
+		mBleManager.connect(device).enqueue();
 	}
 
 	@Override

@@ -136,7 +136,7 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 
 	@Override
 	public void onBackPressed() {
-		mBleManager.disconnect();
+		mBleManager.disconnect().enqueue();
 		super.onBackPressed();
 	}
 
@@ -203,7 +203,7 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 				setDefaultUI();
 				showDeviceScanningDialog(getFilterUUID());
 			} else {
-				mBleManager.disconnect();
+				mBleManager.disconnect().enqueue();
 			}
 		} else {
 			showBLEDialog();
@@ -240,7 +240,7 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 		}
 		mDeviceName = name;
 		mBleManager.setLogger(mLogSession);
-		mBleManager.connect(device);
+		mBleManager.connect(device).enqueue();
 	}
 
 	@Override
