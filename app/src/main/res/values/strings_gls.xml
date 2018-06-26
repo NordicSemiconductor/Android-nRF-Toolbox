@@ -161,7 +161,8 @@
 	</string-array>
 	<string name="gls_context_hba1c_title">HbA1c</string>
 	<string name="gls_context_hba1c">%f%%</string>
-    
+
+	<string name="gls_progress_zero">No records found</string>
 	<plurals name="gls_progress">
 		<item quantity="zero">No records found</item>
 		<item quantity="one">Downloading %d record</item>
