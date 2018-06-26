@@ -29,7 +29,9 @@ import android.support.annotation.NonNull;
 
 import java.util.UUID;
 
+import no.nordicsemi.android.ble.callback.FailCallback;
 import no.nordicsemi.android.ble.common.data.alert.AlertLevelData;
+import no.nordicsemi.android.ble.error.GattError;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.battery.BatteryManager;
 import no.nordicsemi.android.nrftoolbox.parser.AlertLevelParser;
@@ -71,6 +73,8 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 		protected void initialize() {
 			super.initialize();
 			writeCharacteristic(mLinkLossCharacteristic, AlertLevelData.highAlert())
+					.done(device -> log(LogContract.Log.Level.INFO, "Link loss alert level set"))
+					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to set link loss level: " + status))
 					.enqueue();
 		}
 
@@ -105,12 +109,9 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 
 	/**
 	 * Toggles the immediate alert on the target device.
-	 *
-	 * @return True if alarm has been enabled, false if disabled.
 	 */
-	public boolean toggleImmediateAlert() {
+	public void toggleImmediateAlert() {
 		writeImmediateAlert(!mAlertOn);
-		return mAlertOn;
 	}
 
 	/**
@@ -122,11 +123,19 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 		if (!isConnected())
 			return;
 
-		log(LogContract.Log.Level.VERBOSE, on ? "Setting alarm to HIGH..." : "Disabling alarm...");
 		writeCharacteristic(mAlertLevelCharacteristic, on ? AlertLevelData.highAlert() : AlertLevelData.noAlert())
-				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + AlertLevelParser.parse(data) + "\" sent"))
-				.done(device -> mAlertOn = on)
-				.fail((device, status) -> log(LogContract.Log.Level.APPLICATION, "Alert Level characteristic not found"))
+				.before(device -> log(LogContract.Log.Level.VERBOSE,
+						on ? "Setting alarm to HIGH..." : "Disabling alarm..."))
+				.with((device, data) -> log(LogContract.Log.Level.APPLICATION,
+						"\"" + AlertLevelParser.parse(data) + "\" sent"))
+				.done(device -> {
+					mAlertOn = on;
+					mCallbacks.onRemoteAlarmSwitched(device, on);
+				})
+				.fail((device, status) -> log(LogContract.Log.Level.WARNING,
+						status == FailCallback.REASON_NULL_ATTRIBUTE ?
+								"Alert Level characteristic not found" :
+								GattError.parse(status)))
 				.enqueue();
 	}
 

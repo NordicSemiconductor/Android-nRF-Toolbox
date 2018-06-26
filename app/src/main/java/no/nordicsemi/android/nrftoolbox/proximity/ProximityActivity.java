@@ -149,6 +149,11 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 			mAdapter.onBatteryValueReceived(device); // Value will be obtained from the service
 	}
 
+	@SuppressWarnings("unused")
+	private void onRemoteAlarmSwitched(final BluetoothDevice device, final boolean on) {
+		if (mAdapter != null)
+			mAdapter.onDeviceStateChanged(device); // Value will be obtained from the service
+	}
 
 	private void showLinkLossDialog(final String name) {
 		try {
@@ -158,6 +163,7 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 			// the activity must have been destroyed
 		}
 	}
+
 	private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
@@ -168,6 +174,10 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 				final int batteryLevel = intent.getIntExtra(ProximityService.EXTRA_BATTERY_LEVEL, 0);
 				// Update GUI
 				onBatteryLevelChanged(device, batteryLevel);
+			} else if (ProximityService.BROADCAST_ALARM_SWITCHED.equals(action)) {
+				final boolean on = intent.getBooleanExtra(ProximityService.EXTRA_ALARM_STATE, false);
+				// Update GUI
+				onRemoteAlarmSwitched(device, on);
 			}
 		}
 	};
@@ -175,6 +185,7 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 	private static IntentFilter makeIntentFilter() {
 		final IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(ProximityService.BROADCAST_BATTERY_LEVEL);
+		intentFilter.addAction(ProximityService.BROADCAST_ALARM_SWITCHED);
 		return intentFilter;
 	}
 }

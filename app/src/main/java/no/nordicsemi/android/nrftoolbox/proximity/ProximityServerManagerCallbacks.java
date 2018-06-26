@@ -22,9 +22,10 @@
 package no.nordicsemi.android.nrftoolbox.proximity;
 
 import android.bluetooth.BluetoothDevice;
+import android.support.annotation.NonNull;
 
 public interface ProximityServerManagerCallbacks {
-	void onAlarmTriggered(final BluetoothDevice device);
+	void onAlarmTriggered(@NonNull final BluetoothDevice device);
 
-	void onAlarmStopped(final BluetoothDevice device);
+	void onAlarmStopped(@NonNull final BluetoothDevice device);
 }

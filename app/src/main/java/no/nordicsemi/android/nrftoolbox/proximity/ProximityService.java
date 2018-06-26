@@ -60,6 +60,9 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	public static final String BROADCAST_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.BROADCAST_BATTERY_LEVEL";
 	public static final String EXTRA_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.EXTRA_BATTERY_LEVEL";
 
+	public static final String BROADCAST_ALARM_SWITCHED = "no.nordicsemi.android.nrftoolbox.BROADCAST_ALARM_SWITCHED";
+	public static final String EXTRA_ALARM_STATE = "no.nordicsemi.android.nrftoolbox.EXTRA_ALARM_STATE";
+
 	private final static String ACTION_DISCONNECT = "no.nordicsemi.android.nrftoolbox.proximity.ACTION_DISCONNECT";
 	private final static String ACTION_FIND = "no.nordicsemi.android.nrftoolbox.proximity.ACTION_FIND";
 	private final static String ACTION_SILENT = "no.nordicsemi.android.nrftoolbox.proximity.ACTION_SILENT";
@@ -93,11 +96,10 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 		 * Toggles the Immediate Alert on given remote device.
 		 *
 		 * @param device the connected device.
-		 * @return True if alarm has been enabled, false if disabled.
 		 */
-		public boolean toggleImmediateAlert(final BluetoothDevice device) {
+		public void toggleImmediateAlert(final BluetoothDevice device) {
 			final ProximityManager manager = (ProximityManager) getBleManager(device);
-			return manager.toggleImmediateAlert();
+			manager.toggleImmediateAlert();
 		}
 
 		/**
@@ -165,7 +167,6 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 					break;
 			}
 			mBinder.toggleImmediateAlert(device);
-			createNotificationForConnectedDevice(device);
 		}
 	};
 
@@ -310,13 +311,25 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	}
 
 	@Override
-	public void onAlarmTriggered(final BluetoothDevice device) {
+	public void onAlarmTriggered(@NonNull final BluetoothDevice device) {
 		playAlarm(device);
 	}
 
 	@Override
-	public void onAlarmStopped(final BluetoothDevice device) {
+	public void onAlarmStopped(@NonNull final BluetoothDevice device) {
 		stopAlarm(device);
+	}
+
+	@Override
+	public void onRemoteAlarmSwitched(@NonNull final BluetoothDevice device, final boolean on) {
+		final Intent broadcast = new Intent(BROADCAST_ALARM_SWITCHED);
+		broadcast.putExtra(EXTRA_DEVICE, device);
+		broadcast.putExtra(EXTRA_ALARM_STATE, on);
+		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
+
+		if (!mBound) {
+			createBackgroundNotification();
+		}
 	}
 
 	@Override
@@ -386,6 +399,7 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 				// If there are more, just write number of them
 				text.append(getString(R.string.proximity_notification_text_nothing_connected_number_disconnected, numberOfDisconnectedDevices));
 			}
+			text.append(".");
 			builder.setContentText(text);
 		}
 
@@ -457,8 +471,8 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 		// This notification is to be shown not in a group
 
 		final String name = getDeviceName(device);
-		builder.setContentTitle(getString(R.string.proximity_notification_linkloss_alert, name));
-		builder.setTicker(getString(R.string.proximity_notification_linkloss_alert, name));
+		builder.setContentTitle(getString(R.string.proximity_notification_link_loss_alert, name));
+		builder.setTicker(getString(R.string.proximity_notification_link_loss_alert, name));
 
 		final Notification notification = builder.build();
 		final NotificationManagerCompat nm = NotificationManagerCompat.from(this);

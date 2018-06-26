@@ -23,7 +23,6 @@
 package no.nordicsemi.android.nrftoolbox.proximity;
 
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -31,6 +30,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.List;
@@ -95,6 +95,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 		private TextView addressView;
 		private TextView batteryView;
 		private ImageButton actionButton;
+		private ProgressBar progress;
 
 		ViewHolder(final View itemView) {
 			super(itemView);
@@ -103,14 +104,13 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 			addressView = itemView.findViewById(R.id.address);
 			batteryView = itemView.findViewById(R.id.battery);
 			actionButton = itemView.findViewById(R.id.action_find_silent);
+			progress = itemView.findViewById(R.id.progress);
 
 			// Configure FIND / SILENT button
 			actionButton.setOnClickListener(v -> {
 				final int position = getAdapterPosition();
 				final BluetoothDevice device = mDevices.get(position);
-				final boolean on = mService.toggleImmediateAlert(device);
-
-				actionButton.setImageResource(on ? R.drawable.ic_stat_notify_proximity_silent : R.drawable.ic_stat_notify_proximity_find);
+				mService.toggleImmediateAlert(device);
 			});
 
 			// Configure Disconnect button
@@ -124,7 +124,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 		}
 
 		private void bind(final BluetoothDevice device) {
-			final int state = mService.getConnectionState(device);
+			final boolean ready = mService.isReady(device);
 
 			String name = device.getName();
 			if (TextUtils.isEmpty(name))
@@ -134,14 +134,15 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 
 			final boolean on = mService.isImmediateAlertOn(device);
 			actionButton.setImageResource(on ? R.drawable.ic_stat_notify_proximity_silent : R.drawable.ic_stat_notify_proximity_find);
-			actionButton.setVisibility(state == BluetoothGatt.STATE_CONNECTED ? View.VISIBLE : View.GONE);
+			actionButton.setVisibility(ready ? View.VISIBLE : View.GONE);
+			progress.setVisibility(ready ? View.GONE : View.VISIBLE);
 
 			final Integer batteryValue = mService.getBatteryLevel(device);
 			if (batteryValue != null) {
 				batteryView.getCompoundDrawables()[0 /*left*/].setLevel(batteryValue);
 				batteryView.setVisibility(View.VISIBLE);
 				batteryView.setText(batteryView.getResources().getString(R.string.battery, batteryValue));
-				batteryView.setAlpha(state == BluetoothGatt.STATE_CONNECTED ? 1.0f : 0.5f);
+				batteryView.setAlpha(ready ? 1.0f : 0.5f);
 			} else {
 				batteryView.setVisibility(View.GONE);
 			}

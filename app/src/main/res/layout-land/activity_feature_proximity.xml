@@ -71,7 +71,8 @@
 			<android.support.v7.widget.RecyclerView
 				android:id="@android:id/list"
 				android:layout_width="match_parent"
-				android:layout_height="match_parent"/>
+				android:layout_height="match_parent"
+				tools:listitem="@layout/activity_feature_proximity_item"/>
 		</LinearLayout>
 
 		<Button
@@ -83,7 +84,7 @@
 			android:layout_centerHorizontal="true"
 			android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
 			android:onClick="onAddDeviceClicked"
-			android:text="@string/action_connect"/>
+			android:text="@string/action_add_device"/>
 
 		<ImageView
 			android:layout_width="wrap_content"

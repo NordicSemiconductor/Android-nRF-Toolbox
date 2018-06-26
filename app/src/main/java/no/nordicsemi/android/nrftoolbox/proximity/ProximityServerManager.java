@@ -245,7 +245,7 @@ class ProximityServerManager  {
 		public void onConnectionStateChange(final BluetoothDevice device, final int status, final int newState) {
 			mLogger.log(device, LogContract.Log.Level.DEBUG,
 					"[Server callback] Connection state changed with status: " + status
-							+ " and new state: " + stateToString(newState) + " (" + newState + ")");
+							+ " and new state: " + newState + " (" + stateToString(newState) + ")");
 			if (status == BluetoothGatt.GATT_SUCCESS) {
 				if (newState == BluetoothGatt.STATE_CONNECTED) {
 					mLogger.log(device, LogContract.Log.Level.INFO,

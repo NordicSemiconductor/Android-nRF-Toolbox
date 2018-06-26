@@ -24,6 +24,7 @@
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="?android:attr/listPreferredItemHeightSmall"
+	xmlns:tools="http://schemas.android.com/tools"
 	android:paddingBottom="2dp"
 	android:paddingEnd="8dp"
 	android:paddingStart="8dp"
@@ -40,9 +41,9 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:ellipsize="marquee"
-			android:layout_toRightOf="@+id/icon"
 			android:gravity="center_vertical"
 			android:textSize="20sp"
+			tools:text="Nordic_Prox"
 			android:textColor="@android:color/black"
 			android:singleLine="true"/>
 
@@ -51,6 +52,7 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:textSize="12sp"
+			tools:text="AA:BB:CC:DD:EE:FF"
 			android:layout_below="@+id/name"
 			android:lines="1"/>
 
@@ -64,24 +66,32 @@
 			android:layout_toRightOf="@+id/address"
 			android:drawableLeft="@drawable/ic_battery"
 			android:layout_marginLeft="4dp"
+			tools:visibility="visible"
+			tools:text="100%"
 			android:visibility="gone"/>
 
 	</RelativeLayout>
 
-	<ImageButton
+	<ProgressBar
+		android:id="@+id/progress"
+		style="?android:progressBarStyleSmall"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginRight="16dp"/>
+
+	<android.support.v7.widget.AppCompatImageButton
 		android:id="@+id/action_find_silent"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:backgroundTint="@color/actionBarColorDark"
 		app:backgroundTint="@color/actionBarColorDark"
 		android:src="@drawable/ic_stat_notify_proximity_find"
+		tools:visibility="visible"
 		android:visibility="gone"/>
 
-	<ImageButton
+	<android.support.v7.widget.AppCompatImageButton
 		android:id="@+id/action_disconnect"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:backgroundTint="@color/orange"
 		app:backgroundTint="@color/orange"
 		android:src="@drawable/ic_action_disconnect"/>
 
