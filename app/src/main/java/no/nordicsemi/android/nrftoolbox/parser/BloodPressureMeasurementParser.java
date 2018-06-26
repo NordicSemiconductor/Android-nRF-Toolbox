@@ -51,7 +51,7 @@ public class BloodPressureMeasurementParser {
 
 		// parse timestamp if present
 		if (timestampPresent) {
-			builder.append("Timestamp: ").append(DateTimeParser.parse(data, offset));
+			builder.append("\nTimestamp: ").append(DateTimeParser.parse(data, offset));
 			offset += 7;
 		}
 
