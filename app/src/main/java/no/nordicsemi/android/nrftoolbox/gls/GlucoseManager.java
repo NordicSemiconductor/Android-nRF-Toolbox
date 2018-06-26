@@ -226,10 +226,12 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 								if (mRecords.size() > 0) {
 									final int sequenceNumber = mRecords.keyAt(mRecords.size() - 1) + 1;
 									writeCharacteristic(mRecordAccessControlPointCharacteristic,
-											RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber));
+											RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber))
+											.enqueue();
 								} else {
 									writeCharacteristic(mRecordAccessControlPointCharacteristic,
-											RecordAccessControlPointData.reportAllStoredRecords());
+											RecordAccessControlPointData.reportAllStoredRecords())
+											.enqueue();
 								}
 							} else {
 								mCallbacks.onOperationCompleted(device);
