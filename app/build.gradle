@@ -55,9 +55,9 @@ dependencies {
     // (and also the according lines in the settings.gradle):
     // implementation project(':dfu')
 
-    // Import the BLE Library
+    // Import the BLE Common Library.
     // The BLE Common Library depends on BLE Library. It is enough to include the first one.
-    // implementation 'no.nordicsemi.android:ble-common:2.0-alpha1'
+    // implementation 'no.nordicsemi.android:ble-common:2.0-alpha2'
     // The BLE Common Library may be included from jcenter. If you want to modify the code,
     // clone both projects from GitHub and replace the line above with the following
     // (and also the according lines in the settings.gradle):
