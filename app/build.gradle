@@ -29,6 +29,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
     }
 }
+
 dependencies {
     implementation project(':common')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -68,4 +69,3 @@ dependencies {
         exclude group: 'xpp3', module: 'xpp3'
     }
 }
-

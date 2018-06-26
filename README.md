@@ -18,7 +18,11 @@ Since version 1.10.0 the *nRF Toolbox* also supports the **Nordic UART Service**
 
 ### How to import to Android Studio
 
-nRF Toolbox depends on [Android BLE Library](https://github.com/NordicSemiconductor/Android-BLE-Library/) which has to be cloned into the same root folder as this app.
+The production version of nRF Toolbox depends on [Android BLE Library](https://github.com/NordicSemiconductor/Android-BLE-Library/) version 1.2.0, which is available on jcenter.
+
+**Note:** It is recommended to use the *develop* branch of this project. The new version will soon replace the current one. It is using the BLE Library v2 which is now in alpha version. Its API and stability has been improved.
+
+You may also include the BLE Library as a module. Clone the library project to the same root folder.
 
 If you are having issue like [#40](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/issues/40) or [#41](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/issues/41), the correct folders structure should look like this:
 
@@ -26,11 +30,15 @@ If you are having issue like [#40](https://github.com/NordicSemiconductor/Androi
 
 If you prefer a different name for BLE library, update the [*settings.gradle*](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/blob/master/settings.gradle) file.
 
+**Note:** The nRF Toolbox app on *develop* branch depends on [Android BLE Common Library](https://github.com/NordicSemiconductor/Android-BLE-Common-Library/), which depends on the BLE Library v2.
+
 *DFULibrary* folder is optional, as the library is downloaded from jcenter repository automatically. Clone it only when you want to modify the code (not recommended).
 
 If you get ["Missing Feature Watch" error](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/issues/41#issuecomment-355291101), switch the configuration to 'app'.
 
 ### BleManager and how to use it
+
+**Note:** This section applies only to BLE Library v.1.x. The API has changed in v.2.x of the library.
 
 The nRF Toolbox application is a reference design demonstrating how to use the BLE API on Android. The main class responsible for managing connection to a single device is called [BleManager](https://github.com/NordicSemiconductor/Android-BLE-Library/blob/master/ble/src/main/java/no/nordicsemi/android/ble/BleManager.java). Each of the profiles listed above is using this manager and overriding it to add some profile-related functionality. The BleManager sends events using the [BleManagerCallbacks](https://github.com/NordicSemiconductor/Android-BLE-Library/blob/master/ble/src/main/java/no/nordicsemi/android/ble/BleManagerCallbacks.java) interface, which should be implemented by your controller. A profile's BleManager should override the BleManager and implement required methods, that is:
 * ```Deque<Request> initGatt(BluetoothGatt)``` - method that defines initialization queue
