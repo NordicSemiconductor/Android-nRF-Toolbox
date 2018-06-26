@@ -44,6 +44,13 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 	private final static UUID UART_TX_CHARACTERISTIC_UUID = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E");
 
 	private BluetoothGattCharacteristic mRXCharacteristic, mTXCharacteristic;
+	/**
+	 * A flag indicating whether Long Write can be used. It's set to false if the UART RX
+	 * characteristic has only PROPERTY_WRITE_NO_RESPONSE property and no PROPERTY_WRITE.
+	 * If you set it to false here, it will never use Long Write.
+	 *
+	 * TODO change this flag if you don't want to use Long Write even with Write Request.
+	 */
 	private boolean mUseLongWrite = true;
 
 	UARTManager(final Context context) {
@@ -64,13 +71,13 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 
 		@Override
 		protected void initialize() {
-			requestMtu(260).enqueue();
 			setNotificationCallback(mTXCharacteristic)
 					.with((device, data) -> {
 						final String text = data.getStringValue(0);
 						log(LogContract.Log.Level.APPLICATION, "\"" + text + "\" received");
 						mCallbacks.onDataReceived(device, text);
-                    });
+					});
+			requestMtu(260).enqueue();
 			enableNotifications(mTXCharacteristic).enqueue();
 		}
 
@@ -126,8 +133,11 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 			return;
 
 		if (!TextUtils.isEmpty(text)) {
-			final WriteRequest request = writeCharacteristic(mRXCharacteristic, text.getBytes());
+			final WriteRequest request = writeCharacteristic(mRXCharacteristic, text.getBytes())
+					.with((device, data) -> log(LogContract.Log.Level.APPLICATION,
+							"\"" + data.getStringValue(0) + "\" sent"));
 			if (!mUseLongWrite) {
+				// This will automatically split the long data into MTU-3-byte long packets.
 				request.split();
 			}
 			request.enqueue();
