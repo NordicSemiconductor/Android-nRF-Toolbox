@@ -124,8 +124,7 @@
 	</style>
 
 	<style name="AppTheme" parent="@style/AppThemeBase">
-		<item name="android:selectableItemBackground">@drawable/abc_item_background_holo_light
-		</item>
+		<item name="android:selectableItemBackground">@drawable/abc_item_background_holo_light</item>
 	</style>
 
 	<style name="AppTheme.TranslucentStatusBar">
