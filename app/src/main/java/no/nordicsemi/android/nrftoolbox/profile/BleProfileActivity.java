@@ -51,6 +51,7 @@ import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.scanner.ScannerFragment;
 import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
 
+@SuppressWarnings("unused")
 public abstract class BleProfileActivity extends AppCompatActivity implements BleManagerCallbacks, ScannerFragment.OnDeviceSelectedListener {
 	private static final String TAG = "BaseProfileActivity";
 
@@ -228,6 +229,15 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 		return null;
 	}
 
+	/**
+	 * This method returns whether autoConnect option should be used.
+	 *
+	 * @return true to use autoConnect feature, false (default) otherwise.
+	 */
+	protected boolean shouldAutoConnect() {
+		return false;
+	}
+
 	@Override
 	public void onDeviceSelected(final BluetoothDevice device, final String name) {
 		final int titleId = getLoggerProfileTitle();
@@ -240,7 +250,10 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 		}
 		mDeviceName = name;
 		mBleManager.setLogger(mLogSession);
-		mBleManager.connect(device).enqueue();
+		mBleManager.connect(device)
+				.useAutoConnect(shouldAutoConnect())
+				.retry(3, 100)
+				.enqueue();
 	}
 
 	@Override

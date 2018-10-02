@@ -117,11 +117,12 @@ public class UARTManager extends BleManager<UARTManagerCallbacks> {
 		}
 	};
 
-	@Override
+	// This has been moved to the service in BleManager v2.0.
+	/*@Override
 	protected boolean shouldAutoConnect() {
 		// We want the connection to be kept
 		return true;
-	}
+	}*/
 
 	/**
 	 * Sends the given text to RX characteristic.

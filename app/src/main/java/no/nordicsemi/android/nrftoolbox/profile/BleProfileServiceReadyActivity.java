@@ -69,6 +69,7 @@ import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
  * listens for it. When entering back to the activity, activity will to bind to the service and refresh UI.
  * </p>
  */
+@SuppressWarnings("unused")
 public abstract class BleProfileServiceReadyActivity<E extends BleProfileService.LocalBinder> extends AppCompatActivity implements
 		ScannerFragment.OnDeviceSelectedListener, BleManagerCallbacks {
 	private static final String TAG = "BleProfileServiceReadyActivity";

@@ -313,6 +313,15 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	@SuppressWarnings("rawtypes")
 	protected abstract BleManager initializeManager();
 
+	/**
+	 * This method returns whether autoConnect option should be used.
+	 *
+	 * @return true to use autoConnect feature, false (default) otherwise.
+	 */
+	protected boolean shouldAutoConnect() {
+		return false;
+	}
+
 	@Override
 	public int onStartCommand(final Intent intent, final int flags, final int startId) {
 		if (intent == null || !intent.hasExtra(EXTRA_DEVICE_ADDRESS))
@@ -330,7 +339,10 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 
 		mBleManager.setLogger(mLogSession);
 		onServiceStarted();
-		mBleManager.connect(mBluetoothDevice).enqueue();
+		mBleManager.connect(mBluetoothDevice)
+				.useAutoConnect(shouldAutoConnect())
+				.retry(3, 100)
+				.enqueue();
 		return START_REDELIVER_INTENT;
 	}
 

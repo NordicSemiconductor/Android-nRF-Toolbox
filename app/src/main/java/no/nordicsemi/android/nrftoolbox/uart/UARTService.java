@@ -96,6 +96,11 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	}
 
 	@Override
+	protected boolean shouldAutoConnect() {
+		return true;
+	}
+
+	@Override
 	public void onCreate() {
 		super.onCreate();
 
@@ -130,12 +135,6 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	protected void onUnbind() {
 		// when the activity closes we need to show the notification that user is connected to the sensor
 		createNotification(R.string.uart_notification_connected_message, 0);
-	}
-
-	@Override
-	public boolean shouldEnableBatteryLevelNotifications(final BluetoothDevice device) {
-		// No UI in UART profile for Battery Level information
-		return false;
 	}
 
 	@Override
