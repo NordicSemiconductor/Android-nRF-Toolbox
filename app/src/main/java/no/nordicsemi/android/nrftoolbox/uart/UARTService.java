@@ -138,7 +138,7 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	}
 
 	@Override
-	public void onDeviceConnected(final BluetoothDevice device) {
+	public void onDeviceConnected(@NonNull final BluetoothDevice device) {
 		super.onDeviceConnected(device);
 		sendMessageToWearables(Constants.UART.DEVICE_CONNECTED, notNull(getDeviceName()));
 	}
@@ -149,13 +149,13 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	}
 
 	@Override
-	public void onDeviceDisconnected(final BluetoothDevice device) {
+	public void onDeviceDisconnected(@NonNull final BluetoothDevice device) {
 		super.onDeviceDisconnected(device);
 		sendMessageToWearables(Constants.UART.DEVICE_DISCONNECTED, notNull(getDeviceName()));
 	}
 
 	@Override
-	public void onLinkLossOccurred(final BluetoothDevice device) {
+	public void onLinkLossOccurred(@NonNull final BluetoothDevice device) {
 		super.onLinkLossOccurred(device);
 		sendMessageToWearables(Constants.UART.DEVICE_LINKLOSS, notNull(getDeviceName()));
 	}

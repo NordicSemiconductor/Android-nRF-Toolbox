@@ -43,7 +43,6 @@ import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.BleManagerCallbacks;
 import no.nordicsemi.android.ble.utils.ILogger;
 import no.nordicsemi.android.log.ILogSession;
-import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.log.Logger;
 
 @SuppressWarnings("unused")
@@ -397,7 +396,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
-	public void onDeviceConnecting(final BluetoothDevice device) {
+	public void onDeviceConnecting(@NonNull final BluetoothDevice device) {
 		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
 		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_CONNECTING);
@@ -405,7 +404,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
-	public void onDeviceConnected(final BluetoothDevice device) {
+	public void onDeviceConnected(@NonNull final BluetoothDevice device) {
 		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
 		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_CONNECTED);
 		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
@@ -414,7 +413,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
-	public void onDeviceDisconnecting(final BluetoothDevice device) {
+	public void onDeviceDisconnecting(@NonNull final BluetoothDevice device) {
 		// Notify user about changing the state to DISCONNECTING
 		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
 		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
@@ -432,7 +431,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
-	public void onDeviceDisconnected(final BluetoothDevice device) {
+	public void onDeviceDisconnected(@NonNull final BluetoothDevice device) {
 		// Note 1: Do not use the device argument here unless you change calling onDeviceDisconnected from the binder above
 
 		// Note 2: if BleManager#shouldAutoConnect() for this device returned true, this callback will be
@@ -455,7 +454,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
-	public void onLinkLossOccurred(final BluetoothDevice device) {
+	public void onLinkLossOccurred(@NonNull final BluetoothDevice device) {
 		final Intent broadcast = new Intent(BROADCAST_CONNECTION_STATE);
 		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_CONNECTION_STATE, STATE_LINK_LOSS);
@@ -463,7 +462,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
-	public void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound) {
+	public void onServicesDiscovered(@NonNull final BluetoothDevice device, final boolean optionalServicesFound) {
 		final Intent broadcast = new Intent(BROADCAST_SERVICES_DISCOVERED);
 		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_SERVICE_PRIMARY, true);
@@ -472,14 +471,14 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
-	public void onDeviceReady(final BluetoothDevice device) {
+	public void onDeviceReady(@NonNull final BluetoothDevice device) {
 		final Intent broadcast = new Intent(BROADCAST_DEVICE_READY);
 		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 	}
 
 	@Override
-	public void onDeviceNotSupported(final BluetoothDevice device) {
+	public void onDeviceNotSupported(@NonNull final BluetoothDevice device) {
 		final Intent broadcast = new Intent(BROADCAST_SERVICES_DISCOVERED);
 		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_SERVICE_PRIMARY, false);
@@ -490,7 +489,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
-	public void onBatteryValueReceived(final BluetoothDevice device, final int value) {
+	public void onBatteryValueReceived(@NonNull final BluetoothDevice device, final int value) {
 		final Intent broadcast = new Intent(BROADCAST_BATTERY_LEVEL);
 		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_BATTERY_LEVEL, value);
@@ -498,7 +497,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
-	public void onBondingRequired(final BluetoothDevice device) {
+	public void onBondingRequired(@NonNull final BluetoothDevice device) {
 		showToast(no.nordicsemi.android.nrftoolbox.common.R.string.bonding);
 
 		final Intent broadcast = new Intent(BROADCAST_BOND_STATE);
@@ -508,7 +507,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
-	public void onBonded(final BluetoothDevice device) {
+	public void onBonded(@NonNull final BluetoothDevice device) {
 		showToast(no.nordicsemi.android.nrftoolbox.common.R.string.bonded);
 
 		final Intent broadcast = new Intent(BROADCAST_BOND_STATE);
@@ -518,7 +517,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
-	public void onBondingFailed(final BluetoothDevice device) {
+	public void onBondingFailed(@NonNull final BluetoothDevice device) {
 		showToast(no.nordicsemi.android.nrftoolbox.common.R.string.bonding_failed);
 
 		final Intent broadcast = new Intent(BROADCAST_BOND_STATE);
@@ -528,7 +527,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	}
 
 	@Override
-	public void onError(final BluetoothDevice device, final String message, final int errorCode) {
+	public void onError(@NonNull final BluetoothDevice device, @NonNull final String message, final int errorCode) {
 		final Intent broadcast = new Intent(BROADCAST_ERROR);
 		broadcast.putExtra(EXTRA_DEVICE, mBluetoothDevice);
 		broadcast.putExtra(EXTRA_ERROR_MESSAGE, message);
