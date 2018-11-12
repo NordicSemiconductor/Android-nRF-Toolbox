@@ -24,6 +24,7 @@ package no.nordicsemi.android.nrftoolbox.gls;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,30 +33,38 @@ import android.widget.TextView;
 
 import no.nordicsemi.android.nrftoolbox.R;
 
-public class ExpandableRecordAdapter extends BaseExpandableListAdapter {
+public class ExpandableRecordAdapter extends BaseExpandableListAdapter {;
 	private final GlucoseManager mGlucoseManager;
 	private final LayoutInflater mInflater;
 	private final Context mContext;
+	private SparseArray<GlucoseRecord> mRecords;
 
 	public ExpandableRecordAdapter(final Context context, final GlucoseManager manager) {
 		mGlucoseManager = manager;
 		mContext = context;
 		mInflater = LayoutInflater.from(context);
+		mRecords = manager.getRecords().clone();
+	}
+
+	@Override
+	public void notifyDataSetChanged() {
+		mRecords = mGlucoseManager.getRecords().clone();
+		super.notifyDataSetChanged();
 	}
 
 	@Override
 	public int getGroupCount() {
-		return mGlucoseManager.getRecords().size();
+		return mRecords.size();
 	}
 
 	@Override
-	public Object getGroup(int groupPosition) {
-		return mGlucoseManager.getRecords().valueAt(groupPosition);
+	public Object getGroup(final int groupPosition) {
+		return mRecords.valueAt(groupPosition);
 	}
 
 	@Override
 	public long getGroupId(final int groupPosition) {
-		return mGlucoseManager.getRecords().keyAt(groupPosition);
+		return mRecords.keyAt(groupPosition);
 	}
 
 	@Override

@@ -140,11 +140,9 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 							record.sampleLocation = sampleLocation != null ? sampleLocation : 0;
 							record.status = status != null ? status.value : 0;
 
-							// data set modifications must be done in UI thread
+							// insert the new record to storage
+							mRecords.put(record.sequenceNumber, record);
 							mHandler.post(() -> {
-								// insert the new record to storage
-								mRecords.put(record.sequenceNumber, record);
-
 								// if there is no context information following the measurement data,
 								// notify callback about the new record
 								if (!contextInformationFollows)
