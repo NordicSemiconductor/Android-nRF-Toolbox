@@ -37,10 +37,10 @@ import org.achartengine.GraphicalView;
 import java.util.List;
 import java.util.UUID;
 
-import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileActivity;
+import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
 
 /**
  * HRSActivity is the main Heart rate activity. It implements HRSManagerCallbacks to receive callbacks from HRSManager class. The activity supports portrait and landscape orientations. The activity
@@ -179,19 +179,19 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 	}
 
 	@Override
-	protected BleManager<HRSManagerCallbacks> initializeManager() {
+	protected LoggableBleManager<HRSManagerCallbacks> initializeManager() {
 		final HRSManager manager = HRSManager.getInstance(getApplicationContext());
 		manager.setGattCallbacks(this);
 		return manager;
 	}
 
 	@Override
-	public void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound) {
+	public void onServicesDiscovered(@NonNull final BluetoothDevice device, final boolean optionalServicesFound) {
 		// this may notify user or show some views
 	}
 
 	@Override
-	public void onDeviceReady(final BluetoothDevice device) {
+	public void onDeviceReady(@NonNull final BluetoothDevice device) {
 		startShowGraph();
 	}
 
@@ -221,7 +221,7 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 	}
 
 	@Override
-	public void onDeviceDisconnected(final BluetoothDevice device) {
+	public void onDeviceDisconnected(@NonNull final BluetoothDevice device) {
 		super.onDeviceDisconnected(device);
 		runOnUiThread(() -> {
 			mHRSValue.setText(R.string.not_available_value);

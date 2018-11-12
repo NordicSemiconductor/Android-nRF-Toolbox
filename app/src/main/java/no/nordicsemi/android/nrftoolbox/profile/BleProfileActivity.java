@@ -41,7 +41,6 @@ import android.widget.Toast;
 
 import java.util.UUID;
 
-import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.BleManagerCallbacks;
 import no.nordicsemi.android.log.ILogSession;
 import no.nordicsemi.android.log.LocalLogSession;
@@ -59,7 +58,7 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	private static final String SIS_DEVICE_NAME = "device_name";
 	protected static final int REQUEST_ENABLE_BT = 2;
 
-	private BleManager<? extends BleManagerCallbacks> mBleManager;
+	private LoggableBleManager<? extends BleManagerCallbacks> mBleManager;
 
 	private TextView mDeviceNameView;
 	private Button mConnectButton;
@@ -262,7 +261,7 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	}
 
 	@Override
-	public void onDeviceConnecting(final BluetoothDevice device) {
+	public void onDeviceConnecting(@NonNull final BluetoothDevice device) {
 		runOnUiThread(() -> {
 			mDeviceNameView.setText(mDeviceName != null ? mDeviceName : getString(R.string.not_available));
 			mConnectButton.setText(R.string.action_connecting);
@@ -270,18 +269,18 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	}
 
 	@Override
-	public void onDeviceConnected(final BluetoothDevice device) {
+	public void onDeviceConnected(@NonNull final BluetoothDevice device) {
 		mDeviceConnected = true;
 		runOnUiThread(() -> mConnectButton.setText(R.string.action_disconnect));
 	}
 
 	@Override
-	public void onDeviceDisconnecting(final BluetoothDevice device) {
+	public void onDeviceDisconnecting(@NonNull final BluetoothDevice device) {
 		runOnUiThread(() -> mConnectButton.setText(R.string.action_disconnecting));
 	}
 
 	@Override
-	public void onDeviceDisconnected(final BluetoothDevice device) {
+	public void onDeviceDisconnected(@NonNull final BluetoothDevice device) {
 		mDeviceConnected = false;
 		mBleManager.close();
 		runOnUiThread(() -> {
@@ -291,43 +290,43 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	}
 
 	@Override
-	public void onLinkLossOccurred(final BluetoothDevice device) {
+	public void onLinkLossOccurred(@NonNull final BluetoothDevice device) {
 		mDeviceConnected = false;
 	}
 
 	@Override
-	public void onServicesDiscovered(final BluetoothDevice device, boolean optionalServicesFound) {
+	public void onServicesDiscovered(@NonNull final BluetoothDevice device, boolean optionalServicesFound) {
 		// this may notify user or show some views
 	}
 
 	@Override
-	public void onDeviceReady(final BluetoothDevice device) {
+	public void onDeviceReady(@NonNull final BluetoothDevice device) {
 		// empty default implementation
 	}
 
 	@Override
-	public void onBondingRequired(final BluetoothDevice device) {
+	public void onBondingRequired(@NonNull final BluetoothDevice device) {
 		showToast(R.string.bonding);
 	}
 
 	@Override
-	public void onBonded(final BluetoothDevice device) {
+	public void onBonded(@NonNull final BluetoothDevice device) {
 		showToast(R.string.bonded);
 	}
 
 	@Override
-	public void onBondingFailed(final BluetoothDevice device) {
+	public void onBondingFailed(@NonNull final BluetoothDevice device) {
 		showToast(R.string.bonding_failed);
 	}
 
 	@Override
-	public void onError(final BluetoothDevice device, final String message, final int errorCode) {
+	public void onError(@NonNull final BluetoothDevice device, @NonNull final String message, final int errorCode) {
 		DebugLogger.e(TAG, "Error occurred: " + message + ",  error code: " + errorCode);
 		showToast(message + " (" + errorCode + ")");
 	}
 
 	@Override
-	public void onDeviceNotSupported(final BluetoothDevice device) {
+	public void onDeviceNotSupported(@NonNull final BluetoothDevice device) {
 		showToast(R.string.not_supported);
 	}
 
@@ -368,7 +367,7 @@ public abstract class BleProfileActivity extends AppCompatActivity implements Bl
 	 *
 	 * @return the manager that was created
 	 */
-	protected abstract BleManager<? extends BleManagerCallbacks> initializeManager();
+	protected abstract LoggableBleManager<? extends BleManagerCallbacks> initializeManager();
 
 	/**
 	 * Restores the default UI before reconnecting

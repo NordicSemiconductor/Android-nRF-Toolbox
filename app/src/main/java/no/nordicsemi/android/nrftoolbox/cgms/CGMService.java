@@ -9,18 +9,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.SparseArray;
 
-import no.nordicsemi.android.ble.BleManager;
-import no.nordicsemi.android.ble.common.profile.cgm.CGMTypes;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.ToolboxApplication;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
+import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
 
 public class CGMService extends BleProfileService implements CGMSManagerCallbacks {
 	private static final String ACTION_DISCONNECT = "no.nordicsemi.android.nrftoolbox.cgms.ACTION_DISCONNECT";
@@ -133,7 +131,7 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
 	}
 
 	@Override
-	protected BleManager initializeManager() {
+	protected LoggableBleManager<CGMSManagerCallbacks> initializeManager() {
 		return mManager = new CGMSManager(this);
 	}
 

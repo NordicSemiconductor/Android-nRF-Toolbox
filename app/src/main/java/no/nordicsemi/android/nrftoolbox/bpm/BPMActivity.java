@@ -30,11 +30,11 @@ import android.widget.TextView;
 import java.util.Calendar;
 import java.util.UUID;
 
-import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.common.profile.bp.BloodPressureMeasurementCallback;
 import no.nordicsemi.android.ble.common.profile.bp.IntermediateCuffPressureCallback;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileActivity;
+import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
 
 // TODO The BPMActivity should be rewritten to use the service approach, like other do.
 public class BPMActivity extends BleProfileActivity implements BPMManagerCallbacks {
@@ -90,7 +90,7 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 	}
 
 	@Override
-	protected BleManager<BPMManagerCallbacks> initializeManager() {
+	protected LoggableBleManager<BPMManagerCallbacks> initializeManager() {
 		final BPMManager manager = BPMManager.getBPMManager(getApplicationContext());
 		manager.setGattCallbacks(this);
 		return manager;
@@ -110,17 +110,17 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 	}
 
 	@Override
-	public void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound) {
+	public void onServicesDiscovered(@NonNull final BluetoothDevice device, final boolean optionalServicesFound) {
 		// this may notify user or show some views
 	}
 
 	@Override
-	public void onDeviceReady(final BluetoothDevice device) {
+	public void onDeviceReady(@NonNull final BluetoothDevice device) {
 		// this may notify user
 	}
 
 	@Override
-	public void onDeviceDisconnected(final BluetoothDevice device) {
+	public void onDeviceDisconnected(@NonNull final BluetoothDevice device) {
 		super.onDeviceDisconnected(device);
 		runOnUiThread(() -> mBatteryLevelView.setText(R.string.not_available));
 	}

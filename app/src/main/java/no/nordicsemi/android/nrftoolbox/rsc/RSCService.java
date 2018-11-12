@@ -35,14 +35,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
-import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.ToolboxApplication;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
+import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
 
 public class RSCService extends BleProfileService implements RSCManagerCallbacks {
 	private static final String TAG = "RSCService";
@@ -95,7 +94,7 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 	}
 
 	@Override
-	protected BleManager<RSCManagerCallbacks> initializeManager() {
+	protected LoggableBleManager<RSCManagerCallbacks> initializeManager() {
 		return mManager = new RSCManager(this);
 	}
 

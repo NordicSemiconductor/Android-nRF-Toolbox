@@ -42,12 +42,12 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
-import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.ToolboxApplication;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
+import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
 import no.nordicsemi.android.nrftoolbox.wearable.common.Constants;
 
 public class UARTService extends BleProfileService implements UARTManagerCallbacks {
@@ -91,7 +91,7 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	}
 
 	@Override
-	protected BleManager<UARTManagerCallbacks> initializeManager() {
+	protected LoggableBleManager<UARTManagerCallbacks> initializeManager() {
 		return mManager = new UARTManager(this);
 	}
 

@@ -47,6 +47,7 @@ import no.nordicsemi.android.ble.BleManagerCallbacks;
 import no.nordicsemi.android.ble.utils.ILogger;
 import no.nordicsemi.android.log.ILogSession;
 import no.nordicsemi.android.log.LogContract;
+import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
 
 public abstract class BleMulticonnectProfileService extends Service implements BleManagerCallbacks {
 	@SuppressWarnings("unused")
@@ -76,7 +77,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 	public static final int STATE_CONNECTING = 2;
 	public static final int STATE_DISCONNECTING = 3;
 
-	private HashMap<BluetoothDevice, BleManager<BleManagerCallbacks>> mBleManagers;
+	private HashMap<BluetoothDevice, LoggableBleManager<BleManagerCallbacks>> mBleManagers;
 	private List<BluetoothDevice> mManagedDevices;
 	private Handler mHandler;
 
@@ -137,7 +138,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 				return;
 			mManagedDevices.add(device);
 
-			BleManager<BleManagerCallbacks> manager = mBleManagers.get(device);
+			LoggableBleManager<BleManagerCallbacks> manager = mBleManagers.get(device);
 			if (manager != null) {
 				if (session != null)
 					manager.setLogger(session);
@@ -350,7 +351,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 	 * @return a new BleManager object
 	 */
 	@SuppressWarnings("rawtypes")
-	protected abstract BleManager initializeManager();
+	protected abstract LoggableBleManager initializeManager();
 
 	@Override
 	public int onStartCommand(final Intent intent, final int flags, final int startId) {

@@ -46,11 +46,11 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.ToolboxApplication;
+import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
 import no.nordicsemi.android.nrftoolbox.profile.multiconnect.BleMulticonnectProfileService;
 
 public class ProximityService extends BleMulticonnectProfileService implements ProximityManagerCallbacks, ProximityServerManagerCallbacks {
@@ -133,7 +133,7 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 	}
 
 	@Override
-	protected BleManager<ProximityManagerCallbacks> initializeManager() {
+	protected LoggableBleManager<ProximityManagerCallbacks> initializeManager() {
 		return new ProximityManager(this);
 	}
 

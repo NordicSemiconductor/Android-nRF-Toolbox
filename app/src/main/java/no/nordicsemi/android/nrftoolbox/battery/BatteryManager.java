@@ -14,6 +14,7 @@ import no.nordicsemi.android.ble.callback.DataReceivedCallback;
 import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelDataCallback;
 import no.nordicsemi.android.ble.data.Data;
 import no.nordicsemi.android.log.LogContract;
+import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
 
 /**
  * The Ble Manager with Battery Service support.
@@ -22,7 +23,7 @@ import no.nordicsemi.android.log.LogContract;
  * @see BleManager
  */
 @SuppressWarnings("WeakerAccess")
-public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends BleManager<T> {
+public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends LoggableBleManager<T> {
 	/** Battery Service UUID. */
 	private final static UUID BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb");
 	/** Battery Level characteristic UUID. */

@@ -37,13 +37,13 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.Calendar;
 
-import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.common.profile.ht.TemperatureMeasurementCallback;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.ToolboxApplication;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
+import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
 
 @SuppressWarnings("FieldCanBeLocal")
 public class HTSService extends BleProfileService implements HTSManagerCallbacks {
@@ -86,7 +86,7 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	}
 
 	@Override
-	protected BleManager<HTSManagerCallbacks> initializeManager() {
+	protected LoggableBleManager<HTSManagerCallbacks> initializeManager() {
 		return mManager = new HTSManager(this);
 	}
 

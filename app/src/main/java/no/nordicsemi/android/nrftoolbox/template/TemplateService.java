@@ -34,12 +34,12 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
-import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.ToolboxApplication;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
+import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
 
 public class TemplateService extends BleProfileService implements TemplateManagerCallbacks {
 	public static final String BROADCAST_TEMPLATE_MEASUREMENT = "no.nordicsemi.android.nrftoolbox.template.BROADCAST_MEASUREMENT";
@@ -80,7 +80,7 @@ public class TemplateService extends BleProfileService implements TemplateManage
 	}
 
 	@Override
-	protected BleManager<TemplateManagerCallbacks> initializeManager() {
+	protected LoggableBleManager<TemplateManagerCallbacks> initializeManager() {
 		return mManager = new TemplateManager(this);
 	}
 

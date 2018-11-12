@@ -79,7 +79,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	public static final int STATE_CONNECTING = 2;
 	public static final int STATE_DISCONNECTING = 3;
 
-	private BleManager<BleManagerCallbacks> mBleManager;
+	private LoggableBleManager<BleManagerCallbacks> mBleManager;
 	private Handler mHandler;
 
 	protected boolean mBound;
@@ -311,7 +311,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 	 * @return a new BleManager object
 	 */
 	@SuppressWarnings("rawtypes")
-	protected abstract BleManager initializeManager();
+	protected abstract LoggableBleManager initializeManager();
 
 	/**
 	 * This method returns whether autoConnect option should be used.

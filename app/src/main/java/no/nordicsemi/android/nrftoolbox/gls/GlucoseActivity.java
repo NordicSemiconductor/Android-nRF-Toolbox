@@ -34,9 +34,9 @@ import android.widget.TextView;
 
 import java.util.UUID;
 
-import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileExpandableListActivity;
+import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
 
 // TODO The GlucoseActivity should be rewritten to use the service approach, like other do.
 public class GlucoseActivity extends BleProfileExpandableListActivity implements PopupMenu.OnMenuItemClickListener, GlucoseManagerCallbacks {
@@ -80,7 +80,7 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 	}
 
 	@Override
-	protected BleManager<GlucoseManagerCallbacks> initializeManager() {
+	protected LoggableBleManager<GlucoseManagerCallbacks> initializeManager() {
 		GlucoseManager manager = mGlucoseManager = GlucoseManager.getGlucoseManager(getApplicationContext());
 		manager.setGattCallbacks(this);
 		return manager;

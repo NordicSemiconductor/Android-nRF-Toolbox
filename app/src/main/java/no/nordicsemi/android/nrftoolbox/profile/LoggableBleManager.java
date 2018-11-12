@@ -1,0 +1,45 @@
+package no.nordicsemi.android.nrftoolbox.profile;
+
+import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
+import no.nordicsemi.android.ble.BleManager;
+import no.nordicsemi.android.ble.BleManagerCallbacks;
+import no.nordicsemi.android.log.ILogSession;
+import no.nordicsemi.android.log.LogContract;
+import no.nordicsemi.android.log.Logger;
+
+/**
+ * The manager that logs to nRF Logger. If nRF Logger is not installed, logs are ignored.
+ *
+ * @param <T> the callbacks class.
+ */
+public abstract class LoggableBleManager<T extends BleManagerCallbacks> extends BleManager<T> {
+	private ILogSession mLogSession;
+
+	/**
+	 * The manager constructor.
+	 * <p>
+	 * After constructing the manager, the callbacks object must be set with
+	 * {@link #setGattCallbacks(BleManagerCallbacks)}.
+	 *
+	 * @param context the context.
+	 */
+	public LoggableBleManager(@NonNull final Context context) {
+		super(context);
+	}
+
+	/**
+	 * Sets the log session to log into.
+	 * @param session
+	 */
+	public void setLogger(@Nullable final ILogSession session) {
+		mLogSession = session;
+	}
+
+	@Override
+	public void log(final int priority, @NonNull final String message) {
+		Logger.log(mLogSession, LogContract.Log.Level.fromPriority(priority), message);
+	}
+}

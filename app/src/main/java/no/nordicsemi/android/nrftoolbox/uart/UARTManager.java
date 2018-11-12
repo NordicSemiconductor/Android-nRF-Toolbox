@@ -31,11 +31,11 @@ import android.text.TextUtils;
 
 import java.util.UUID;
 
-import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.WriteRequest;
 import no.nordicsemi.android.log.LogContract;
+import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
 
-public class UARTManager extends BleManager<UARTManagerCallbacks> {
+public class UARTManager extends LoggableBleManager<UARTManagerCallbacks> {
 	/** Nordic UART Service UUID */
 	private final static UUID UART_SERVICE_UUID = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E");
 	/** RX characteristic UUID */

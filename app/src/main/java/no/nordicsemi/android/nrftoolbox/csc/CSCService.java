@@ -34,12 +34,12 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
-import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.ToolboxApplication;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
+import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
 
 public class CSCService extends BleProfileService implements CSCManagerCallbacks {
 	@SuppressWarnings("unused")
@@ -82,7 +82,7 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 	}
 
 	@Override
-	protected BleManager<CSCManagerCallbacks> initializeManager() {
+	protected LoggableBleManager<CSCManagerCallbacks> initializeManager() {
 		return mManager = new CSCManager(this);
 	}
 

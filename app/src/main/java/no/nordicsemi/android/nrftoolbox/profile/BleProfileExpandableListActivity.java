@@ -40,7 +40,6 @@ import android.widget.Toast;
 
 import java.util.UUID;
 
-import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.BleManagerCallbacks;
 import no.nordicsemi.android.log.ILogSession;
 import no.nordicsemi.android.log.LocalLogSession;
@@ -58,7 +57,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	private static final String SIS_DEVICE_NAME = "device_name";
 	protected static final int REQUEST_ENABLE_BT = 2;
 
-	private BleManager<? extends BleManagerCallbacks> mBleManager;
+	private LoggableBleManager<? extends BleManagerCallbacks> mBleManager;
 
 	private TextView mDeviceNameView;
 	private Button mConnectButton;
@@ -367,7 +366,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	 *
 	 * @return the manager that was created
 	 */
-	protected abstract BleManager<? extends BleManagerCallbacks> initializeManager();
+	protected abstract LoggableBleManager<? extends BleManagerCallbacks> initializeManager();
 
 	/**
 	 * Restores the default UI before reconnecting
