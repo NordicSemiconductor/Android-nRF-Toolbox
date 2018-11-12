@@ -3,6 +3,7 @@ package no.nordicsemi.android.nrftoolbox.profile;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import no.nordicsemi.android.ble.BleManager;
 import no.nordicsemi.android.ble.BleManagerCallbacks;
@@ -32,7 +33,8 @@ public abstract class LoggableBleManager<T extends BleManagerCallbacks> extends 
 
 	/**
 	 * Sets the log session to log into.
-	 * @param session
+	 *
+	 * @param session nRF Logger log session to log inti, or null, if nRF Logger is not installed.
 	 */
 	public void setLogger(@Nullable final ILogSession session) {
 		mLogSession = session;
@@ -41,5 +43,6 @@ public abstract class LoggableBleManager<T extends BleManagerCallbacks> extends 
 	@Override
 	public void log(final int priority, @NonNull final String message) {
 		Logger.log(mLogSession, LogContract.Log.Level.fromPriority(priority), message);
+		Log.println(priority, "BleManager", message);
 	}
 }
