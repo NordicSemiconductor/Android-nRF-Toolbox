@@ -28,6 +28,7 @@ import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.util.List;
 import java.util.UUID;
@@ -98,7 +99,7 @@ public class HRSManager extends BatteryManager<HRSManagerCallbacks> {
 							mCallbacks.onBodySensorLocationReceived(device, sensorLocation);
 						}
 					})
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Body Sensor Location characteristic not found"))
+					.fail((device, status) -> log(Log.WARN, "Body Sensor Location characteristic not found"))
 					.enqueue();
 			setNotificationCallback(mHeartRateCharacteristic)
 					.with(new HeartRateMeasurementDataCallback() {

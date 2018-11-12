@@ -26,6 +26,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import java.util.UUID;
 
@@ -73,8 +74,8 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 		protected void initialize() {
 			super.initialize();
 			writeCharacteristic(mLinkLossCharacteristic, AlertLevelData.highAlert())
-					.done(device -> log(LogContract.Log.Level.INFO, "Link loss alert level set"))
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to set link loss level: " + status))
+					.done(device -> log(Log.INFO, "Link loss alert level set"))
+					.fail((device, status) -> log(Log.WARN, "Failed to set link loss level: " + status))
 					.enqueue();
 		}
 
@@ -124,7 +125,7 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 			return;
 
 		writeCharacteristic(mAlertLevelCharacteristic, on ? AlertLevelData.highAlert() : AlertLevelData.noAlert())
-				.before(device -> log(LogContract.Log.Level.VERBOSE,
+				.before(device -> log(Log.VERBOSE,
 						on ? "Setting alarm to HIGH..." : "Disabling alarm..."))
 				.with((device, data) -> log(LogContract.Log.Level.APPLICATION,
 						"\"" + AlertLevelParser.parse(data) + "\" sent"))
@@ -132,7 +133,7 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 					mAlertOn = on;
 					mCallbacks.onRemoteAlarmSwitched(device, on);
 				})
-				.fail((device, status) -> log(LogContract.Log.Level.WARNING,
+				.fail((device, status) -> log(Log.WARN,
 						status == FailCallback.REASON_NULL_ATTRIBUTE ?
 								"Alert Level characteristic not found" :
 								GattError.parse(status)))

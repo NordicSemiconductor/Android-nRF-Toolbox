@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import java.util.UUID;
 
@@ -52,7 +53,7 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 
 		@Override
 		public void onInvalidDataReceived(@NonNull final BluetoothDevice device, final @NonNull Data data) {
-			log(LogContract.Log.Level.WARNING, "Invalid Battery Level data received: " + data);
+			log(Log.WARN, "Invalid Battery Level data received: " + data);
 		}
 	};
 
@@ -60,7 +61,7 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 		if (isConnected()) {
 			readCharacteristic(mBatteryLevelCharacteristic)
 					.with(mBatteryLevelDataCallback)
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING,"Battery Level characteristic not found"))
+					.fail((device, status) -> log(Log.WARN,"Battery Level characteristic not found"))
 					.enqueue();
 		}
 	}
@@ -71,8 +72,8 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 			setNotificationCallback(mBatteryLevelCharacteristic)
 					.with(mBatteryLevelDataCallback);
 			enableNotifications(mBatteryLevelCharacteristic)
-					.done(device -> log(LogContract.Log.Level.INFO, "Battery Level notifications enabled"))
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Battery Level characteristic not found"))
+					.done(device -> log(Log.INFO, "Battery Level notifications enabled"))
+					.fail((device, status) -> log(Log.WARN, "Battery Level characteristic not found"))
 					.enqueue();
 		}
 	}
@@ -83,7 +84,7 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 	public void disableBatteryLevelCharacteristicNotifications() {
 		if (isConnected()) {
 			disableNotifications(mBatteryLevelCharacteristic)
-					.done(device -> log(LogContract.Log.Level.INFO, "Battery Level notifications disabled"))
+					.done(device -> log(Log.INFO, "Battery Level notifications disabled"))
 					.enqueue();
 		}
 	}

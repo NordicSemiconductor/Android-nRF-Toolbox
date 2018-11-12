@@ -28,6 +28,7 @@ import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.util.Calendar;
 import java.util.UUID;
@@ -103,7 +104,7 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 
 							  @Override
 							  public void onInvalidDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
-								  log(LogContract.Log.Level.WARNING, "Invalid ICP data received: " + data);
+								  log(Log.WARN, "Invalid ICP data received: " + data);
 							  }
 						  });
 			setIndicationCallback(mBPMCharacteristic)
@@ -128,12 +129,12 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 
 						@Override
 						public void onInvalidDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
-							log(LogContract.Log.Level.WARNING, "Invalid BPM data received: " + data);
+							log(Log.WARN, "Invalid BPM data received: " + data);
 						}
 					});
 
 			enableNotifications(mICPCharacteristic)
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING,
+					.fail((device, status) -> log(Log.WARN,
 							"Intermediate Cuff Pressure characteristic not found"))
 					.enqueue();
 			enableIndications(mBPMCharacteristic).enqueue();

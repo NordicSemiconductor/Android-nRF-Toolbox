@@ -35,6 +35,7 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -395,7 +396,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 		for (final BleManager<BleManagerCallbacks> manager : mBleManagers.values()) {
 			// Service is being destroyed, no need to disconnect manually.
 			manager.close();
-			manager.log(LogContract.Log.Level.INFO, "Service destroyed");
+			manager.log(Log.INFO, "Service destroyed");
 		}
 		mBleManagers.clear();
 		mManagedDevices.clear();

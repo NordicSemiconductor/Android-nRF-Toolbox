@@ -38,6 +38,7 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -164,7 +165,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 		@Override
 		public void onServiceConnected(final ComponentName name, final IBinder service) {
 			final E bleService = mService = (E) service;
-			bleService.log(LogContract.Log.Level.DEBUG, "Activity bound to the service");
+			bleService.log(Log.DEBUG, "Activity bound to the service");
 			mManagedDevices.addAll(bleService.getManagedDevices());
 			onServiceBound(bleService);
 
@@ -232,7 +233,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 			mService.setActivityIsChangingConfiguration(isChangingConfigurations());
 			// Log it here as there is no callback when the service gets unbound
 			// and the mService will not be available later (the activity doesn't keep log sessions)
-			mService.log(LogContract.Log.Level.DEBUG, "Activity unbound from the service");
+			mService.log(Log.DEBUG, "Activity unbound from the service");
 		}
 
 		unbindService(mServiceConnection);

@@ -29,6 +29,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.util.SparseArray;
 
 import java.util.Calendar;
@@ -241,7 +242,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 						@Override
 						public void onRecordAccessOperationError(@NonNull final BluetoothDevice device,
 																 final int requestCode, final int errorCode) {
-							log(LogContract.Log.Level.WARNING, "Record Access operation failed (error " + errorCode + ")");
+							log(Log.WARN, "Record Access operation failed (error " + errorCode + ")");
 							if (errorCode == RACP_ERROR_OP_CODE_NOT_SUPPORTED) {
 								mCallbacks.onOperationNotSupported(device);
 							} else {
@@ -253,7 +254,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 			enableNotifications(mGlucoseMeasurementCharacteristic).enqueue();
 			enableNotifications(mGlucoseMeasurementContextCharacteristic).enqueue();
 			enableIndications(mRecordAccessControlPointCharacteristic)
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enabled Record Access Control Point indications (error " + status + ")"))
+					.fail((device, status) -> log(Log.WARN, "Failed to enabled Record Access Control Point indications (error " + status + ")"))
 					.enqueue();
 		}
 

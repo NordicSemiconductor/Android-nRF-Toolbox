@@ -29,6 +29,7 @@ import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.util.SparseArray;
 
 import java.util.UUID;
@@ -110,7 +111,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 							log(LogContract.Log.Level.APPLICATION, "E2E CRC feature " + (mSecured ? "supported" : "not supported"));
 						}
 					})
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Could not read CGM Feature characteristic"))
+					.fail((device, status) -> log(Log.WARN, "Could not read CGM Feature characteristic"))
 					.enqueue();
 
 			// Check if the session is already started. This is not supported in the experimental CGMS from the SDK.
@@ -124,7 +125,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 							}
 						}
 					})
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Could not read CGM Status characteristic"))
+					.fail((device, status) -> log(Log.WARN, "Could not read CGM Status characteristic"))
 					.enqueue();
 
 			// Set notification and indication callbacks
@@ -161,7 +162,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 						@Override
 						public void onContinuousGlucoseMeasurementReceivedWithCrcError(@NonNull final BluetoothDevice device,
                                                                                        @NonNull final Data data) {
-							log(LogContract.Log.Level.WARNING, "Continuous Glucose Measurement record received with CRC error");
+							log(Log.WARN, "Continuous Glucose Measurement record received with CRC error");
 						}
 					});
 
@@ -209,7 +210,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 						@Override
 						public void onCGMSpecificOpsResponseReceivedWithCrcError(@NonNull final BluetoothDevice device,
                                                                                  @NonNull final Data data) {
-							log(LogContract.Log.Level.ERROR, "Request failed: CRC error");
+							log(Log.ERROR, "Request failed: CRC error");
 						}
 					});
 
@@ -264,7 +265,7 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 						@Override
 						public void onRecordAccessOperationError(@NonNull final BluetoothDevice device,
                                                                  final int requestCode, final int errorCode) {
-							log(LogContract.Log.Level.WARNING, "Record Access operation failed (error " + errorCode + ")");
+							log(Log.WARN, "Record Access operation failed (error " + errorCode + ")");
 							if (errorCode == RACP_ERROR_OP_CODE_NOT_SUPPORTED) {
 								mCallbacks.onOperationNotSupported(device);
 							} else {
@@ -275,13 +276,13 @@ public class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 
 			// Enable notifications and indications
 			enableNotifications(mCGMMeasurementCharacteristic)
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enable Continuous Glucose Measurement notifications (" + status + ")"))
+					.fail((device, status) -> log(Log.WARN, "Failed to enable Continuous Glucose Measurement notifications (" + status + ")"))
 					.enqueue();
 			enableIndications(mCGMSpecificOpsControlPointCharacteristic)
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enable CGM Specific Ops Control Point indications notifications (" + status + ")"))
+					.fail((device, status) -> log(Log.WARN, "Failed to enable CGM Specific Ops Control Point indications notifications (" + status + ")"))
 					.enqueue();
 			enableIndications(mRecordAccessControlPointCharacteristic)
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enabled Record Access Control Point indications (error " + status + ")"))
+					.fail((device, status) -> log(Log.WARN, "Failed to enabled Record Access Control Point indications (error " + status + ")"))
 					.enqueue();
 
 			// Start Continuous Glucose session if hasn't been started before

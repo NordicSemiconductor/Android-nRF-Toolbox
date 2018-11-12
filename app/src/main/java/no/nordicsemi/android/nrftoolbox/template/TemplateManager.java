@@ -27,6 +27,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import java.util.UUID;
 
@@ -106,7 +107,7 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 						// In case of MTU this method is called also when the MTU hasn't changed, or has changed
 						// to a different (lower) value. Use .with(...) to get the MTU value.
 					})
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "MTU change not supported"))
+					.fail((device, status) -> log(Log.WARN, "MTU change not supported"))
 					.enqueue();
 
 			// Set notification callback
@@ -127,18 +128,18 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 
 						@Override
 						public void onInvalidDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
-							log(LogContract.Log.Level.WARNING, "Invalid data received: " + data);
+							log(Log.WARN, "Invalid data received: " + data);
 						}
 					});
 
 			// Enable notifications
 			enableNotifications(mRequiredCharacteristic)
 					// Method called after the data were sent (data will contain 0x0100 in this case)
-					.with((device, data) -> log(LogContract.Log.Level.DEBUG, "Data sent: " + data))
+					.with((device, data) -> log(Log.DEBUG, "Data sent: " + data))
 					// Method called when the request finished successfully. This will be called after .with(..) callback
 					.done(device -> log(LogContract.Log.Level.APPLICATION, "Notifications enabled successfully"))
 					// Methods called in case of an error, for example when the characteristic does not have Notify property
-					.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to enable notifications"))
+					.fail((device, status) -> log(Log.WARN, "Failed to enable notifications"))
 					.enqueue();
 		}
 
@@ -199,7 +200,7 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 							final Integer value = data.getIntValue(Data.FORMAT_UINT8, 0);
 							log(LogContract.Log.Level.APPLICATION, "Value '" + value + "' has been read!");
 						} else {
-							log(LogContract.Log.Level.WARNING, "Value is empty!");
+							log(Log.WARN, "Value is empty!");
 						}
 					})
 					.enqueue();
@@ -214,7 +215,7 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 	 * @param parameter parameter to be written.
 	 */
 	void performAction(final String parameter) {
-		log(LogContract.Log.Level.VERBOSE, "Changing device name to \"" + parameter + "\"");
+		log(Log.VERBOSE, "Changing device name to \"" + parameter + "\"");
 		// Write some data to the characteristic.
 		writeCharacteristic(mDeviceNameCharacteristic, Data.from(parameter))
 				// If data are longer than MTU-3, they will be chunked into multiple packets.
@@ -222,12 +223,12 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 				.split()
 				// Callback called when data were sent, or added to outgoing queue in case
 				// Write Without Request type was used.
-				.with((device, data) -> log(LogContract.Log.Level.DEBUG, data.size() + " bytes were sent"))
+				.with((device, data) -> log(Log.DEBUG, data.size() + " bytes were sent"))
 				// Callback called when data were sent, or added to outgoing queue in case
 				// Write Without Request type was used. This is called after .with(...) callback.
 				.done(device -> log(LogContract.Log.Level.APPLICATION, "Device name set to \"" + parameter + "\""))
 				// Callback called when write has failed.
-				.fail((device, status) -> log(LogContract.Log.Level.WARNING, "Failed to change device name"))
+				.fail((device, status) -> log(Log.WARN, "Failed to change device name"))
 				.enqueue();
 	}
 }

@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import java.util.UUID;
 
@@ -102,7 +103,7 @@ public class CSCManager extends BatteryManager<CSCManagerCallbacks> {
 						@Override
 						public void onInvalidDataReceived(@NonNull final BluetoothDevice device,
                                                           final @NonNull Data data) {
-							log(LogContract.Log.Level.WARNING, "Invalid CSC Measurement data received: " + data);
+							log(Log.WARN, "Invalid CSC Measurement data received: " + data);
 						}
 					});
 			enableNotifications(mCSCMeasurementCharacteristic).enqueue();

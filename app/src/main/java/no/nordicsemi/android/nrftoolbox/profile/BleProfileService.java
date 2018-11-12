@@ -36,6 +36,7 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import no.nordicsemi.android.ble.BleManager;
@@ -95,7 +96,7 @@ public abstract class BleProfileService extends Service implements BleManagerCal
 			final ILogger logger = getBinder();
 
 			final String stateString = "[Broadcast] Action received: " + BluetoothAdapter.ACTION_STATE_CHANGED + ", state changed to " + state2String(state);
-			logger.log(LogContract.Log.Level.DEBUG, stateString);
+			logger.log(Log.DEBUG, stateString);
 
 			switch (state) {
 				case BluetoothAdapter.STATE_ON:
