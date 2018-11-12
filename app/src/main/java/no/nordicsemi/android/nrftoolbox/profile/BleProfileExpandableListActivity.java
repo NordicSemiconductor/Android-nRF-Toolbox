@@ -50,6 +50,7 @@ import no.nordicsemi.android.nrftoolbox.app.ExpandableListActivity;
 import no.nordicsemi.android.nrftoolbox.scanner.ScannerFragment;
 import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
 
+@SuppressWarnings("unused")
 public abstract class BleProfileExpandableListActivity extends ExpandableListActivity implements BleManagerCallbacks, ScannerFragment.OnDeviceSelectedListener {
 	private static final String TAG = "BaseProfileActivity";
 
@@ -100,6 +101,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	/**
 	 * You may do some initialization here. This method is called from {@link #onCreate(Bundle)} before the view was created.
 	 */
+	@SuppressWarnings("unused")
 	protected void onInitialize(final Bundle savedInstanceState) {
 		// empty default implementation
 	}
@@ -119,6 +121,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	 * @param savedInstanceState contains the data it most recently supplied in {@link #onSaveInstanceState(Bundle)}.
 	 *                           Note: <b>Otherwise it is null</b>.
 	 */
+	@SuppressWarnings("unused")
 	protected void onViewCreated(final Bundle savedInstanceState) {
 		// empty default implementation
 	}
@@ -171,6 +174,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	 * @param itemId the menu item id
 	 * @return <code>true</code> if action has been handled
 	 */
+	@SuppressWarnings("unused")
 	protected boolean onOptionsItemSelected(final int itemId) {
 		// Overwrite when using menu other than R.menu.help
 		return false;
@@ -260,7 +264,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	}
 
 	@Override
-	public void onDeviceConnecting(final BluetoothDevice device) {
+	public void onDeviceConnecting(@NonNull final BluetoothDevice device) {
 		runOnUiThread(() -> {
 			mDeviceNameView.setText(mDeviceName != null ? mDeviceName : getString(R.string.not_available));
 			mConnectButton.setText(R.string.action_connecting);
@@ -268,18 +272,18 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	}
 
 	@Override
-	public void onDeviceConnected(final BluetoothDevice device) {
+	public void onDeviceConnected(@NonNull final BluetoothDevice device) {
 		mDeviceConnected = true;
 		runOnUiThread(() -> mConnectButton.setText(R.string.action_disconnect));
 	}
 
 	@Override
-	public void onDeviceDisconnecting(final BluetoothDevice device) {
+	public void onDeviceDisconnecting(@NonNull final BluetoothDevice device) {
 		runOnUiThread(() -> mConnectButton.setText(R.string.action_disconnecting));
 	}
 
 	@Override
-	public void onDeviceDisconnected(final BluetoothDevice device) {
+	public void onDeviceDisconnected(@NonNull final BluetoothDevice device) {
 		mDeviceConnected = false;
 		mBleManager.close();
 		runOnUiThread(() -> {
@@ -289,43 +293,43 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	}
 
 	@Override
-	public void onLinkLossOccurred(final BluetoothDevice device) {
+	public void onLinkLossOccurred(@NonNull final BluetoothDevice device) {
 		mDeviceConnected = false;
 	}
 
 	@Override
-	public void onServicesDiscovered(final BluetoothDevice device, boolean optionalServicesFound) {
+	public void onServicesDiscovered(@NonNull final BluetoothDevice device, boolean optionalServicesFound) {
 		// this may notify user or show some views
 	}
 
 	@Override
-	public void onDeviceReady(final BluetoothDevice device) {
+	public void onDeviceReady(@NonNull final BluetoothDevice device) {
 		// empty default implementation
 	}
 
 	@Override
-	public void onBondingRequired(final BluetoothDevice device) {
+	public void onBondingRequired(@NonNull final BluetoothDevice device) {
 		showToast(R.string.bonding);
 	}
 
 	@Override
-	public void onBonded(final BluetoothDevice device) {
+	public void onBonded(@NonNull final BluetoothDevice device) {
 		showToast(R.string.bonded);
 	}
 
 	@Override
-	public void onBondingFailed(final BluetoothDevice device) {
+	public void onBondingFailed(@NonNull final BluetoothDevice device) {
 		showToast(R.string.bonding_failed);
 	}
 
 	@Override
-	public void onError(final BluetoothDevice device, final String message, final int errorCode) {
+	public void onError(@NonNull final BluetoothDevice device, @NonNull final String message, final int errorCode) {
 		DebugLogger.e(TAG, "Error occurred: " + message + ",  error code: " + errorCode);
 		showToast(message + " (" + errorCode + ")");
 	}
 
 	@Override
-	public void onDeviceNotSupported(final BluetoothDevice device) {
+	public void onDeviceNotSupported(@NonNull final BluetoothDevice device) {
 		showToast(R.string.not_supported);
 	}
 

@@ -139,7 +139,7 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 	}
 
 	@Override
-	public void onDeviceDisconnected(final BluetoothDevice device) {
+	public void onDeviceDisconnected(@NonNull final BluetoothDevice device) {
 		super.onDeviceDisconnected(device);
 		setOperationInProgress(false);
 		runOnUiThread(() -> mBatteryLevelView.setText(R.string.not_available));
