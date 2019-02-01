@@ -1,4 +1,4 @@
--libraryjars ../app/libs
+-libraryjars ../app/libs/achartengine-1.2.0.jar
 -optimizationpasses 5
 -dontusemixedcaseclassnames
 -dontskipnonpubliclibraryclasses
