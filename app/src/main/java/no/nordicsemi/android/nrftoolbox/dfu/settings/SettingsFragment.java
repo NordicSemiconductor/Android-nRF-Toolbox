@@ -24,22 +24,20 @@ package no.nordicsemi.android.nrftoolbox.dfu.settings;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceFragment;
-import android.preference.PreferenceScreen;
 import androidx.appcompat.app.AlertDialog;
 import android.text.TextUtils;
 
+import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceScreen;
 import no.nordicsemi.android.dfu.DfuServiceInitiator;
 import no.nordicsemi.android.dfu.DfuSettingsConstants;
 import no.nordicsemi.android.nrftoolbox.R;
 
-public class SettingsFragment extends PreferenceFragment implements DfuSettingsConstants, SharedPreferences.OnSharedPreferenceChangeListener {
+public class SettingsFragment extends PreferenceFragmentCompat implements DfuSettingsConstants, SharedPreferences.OnSharedPreferenceChangeListener {
 	public static final String SETTINGS_KEEP_BOND = "settings_keep_bond";
 
 	@Override
-	public void onCreate(final Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
+	public void onCreatePreferences(final Bundle savedInstanceState, final String rootKey) {
 		addPreferencesFromResource(R.xml.settings_dfu);
 
 		// set initial values
@@ -70,7 +68,7 @@ public class SettingsFragment extends PreferenceFragment implements DfuSettingsC
 		if (SETTINGS_PACKET_RECEIPT_NOTIFICATION_ENABLED.equals(key)) {
 			final boolean disabled = !preferences.getBoolean(SETTINGS_PACKET_RECEIPT_NOTIFICATION_ENABLED, true);
 			if (disabled && Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-				new AlertDialog.Builder(getActivity()).setMessage(R.string.dfu_settings_dfu_number_of_packets_info).setTitle(R.string.dfu_settings_dfu_information)
+				new AlertDialog.Builder(requireContext()).setMessage(R.string.dfu_settings_dfu_number_of_packets_info).setTitle(R.string.dfu_settings_dfu_information)
 						.setPositiveButton(R.string.ok, null).show();
 			}
 		} else if (SETTINGS_NUMBER_OF_PACKETS.equals(key)) {
@@ -78,7 +76,7 @@ public class SettingsFragment extends PreferenceFragment implements DfuSettingsC
 		} else if (SETTINGS_MBR_SIZE.equals(key)) {
 			updateMBRSize();
 		} else if (SETTINGS_ASSUME_DFU_NODE.equals(key) && sharedPreferences.getBoolean(key, false)) {
-			new AlertDialog.Builder(getActivity()).setMessage(R.string.dfu_settings_dfu_assume_dfu_mode_info).setTitle(R.string.dfu_settings_dfu_information)
+			new AlertDialog.Builder(requireContext()).setMessage(R.string.dfu_settings_dfu_assume_dfu_mode_info).setTitle(R.string.dfu_settings_dfu_information)
 					.setPositiveButton(R.string.ok, null)
 					.show();
 		}
@@ -98,7 +96,7 @@ public class SettingsFragment extends PreferenceFragment implements DfuSettingsC
 
 		final int valueInt = Integer.parseInt(value);
 		if (valueInt > 200 && Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-			new AlertDialog.Builder(getActivity()).setMessage(R.string.dfu_settings_dfu_number_of_packets_info).setTitle(R.string.dfu_settings_dfu_information)
+			new AlertDialog.Builder(requireContext()).setMessage(R.string.dfu_settings_dfu_number_of_packets_info).setTitle(R.string.dfu_settings_dfu_information)
 					.setPositiveButton(R.string.ok, null)
 					.show();
 		}

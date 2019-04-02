@@ -62,7 +62,11 @@ public class TemplateActivity extends BleProfileServiceReadyActivity<TemplateSer
 		mValueView = findViewById(R.id.value);
 		mBatteryLevelView = findViewById(R.id.battery);
 
-		findViewById(R.id.action_set_name).setOnClickListener(v -> getService().performAction("Template"));
+		findViewById(R.id.action_set_name).setOnClickListener(v -> {
+			if (isDeviceConnected()) {
+				getService().performAction("Template");
+			}
+		});
 	}
 
 	@Override

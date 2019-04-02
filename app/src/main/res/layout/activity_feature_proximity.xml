@@ -37,14 +37,14 @@
 
 		<!-- The size of text below must be fixed, therefore dp are used instead of sp -->
 
-		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+		<androidx.appcompat.widget.AppCompatTextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_centerVertical="true"
 			android:layout_marginLeft="@dimen/proximity_feature_title_long_margin"
 			android:rotation="270"
 			android:text="@string/proximity_feature_title_long"
-			android:textColor="@color/darkGray"
+			android:textColor="@color/verticalTitleColor"
 			android:textSize="32dp"
 			android:textStyle="bold"/>
 
@@ -62,7 +62,7 @@
 			android:layout_weight="1"
 			android:orientation="vertical">
 
-			<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+			<androidx.appcompat.widget.AppCompatTextView
 				style="@style/Widget.ListTitle"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
@@ -75,7 +75,7 @@
 				tools:listitem="@layout/activity_feature_proximity_item"/>
 		</LinearLayout>
 
-		<Button
+		<com.google.android.material.button.MaterialButton
 			android:id="@+id/action_connect"
 			style="@style/Widget.Connect"
 			android:layout_width="wrap_content"
@@ -85,14 +85,6 @@
 			android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
 			android:onClick="onAddDeviceClicked"
 			android:text="@string/action_add_device"/>
-
-		<ImageView
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_alignParentBottom="true"
-			android:layout_centerHorizontal="true"
-			android:layout_marginBottom="6dp"
-			android:src="@drawable/background_title"/>
 
 	</no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout>
 </LinearLayout>

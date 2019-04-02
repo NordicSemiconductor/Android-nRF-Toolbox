@@ -1,0 +1,142 @@
+<!--
+  ~ Copyright (c) 2018, Nordic Semiconductor
+  ~ All rights reserved.
+  ~
+  ~ Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+  ~
+  ~ 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+  ~
+  ~ 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the
+  ~ documentation and/or other materials provided with the distribution.
+  ~
+  ~ 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this
+  ~ software without specific prior written permission.
+  ~
+  ~ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ~ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ~ HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ~ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+  ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+  ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="600dp"
+    android:height="440dp"
+    android:viewportHeight="440"
+    android:viewportWidth="597">
+    <path
+        android:name="background"
+        android:fillColor="@color/colorNordicLogoBottom"
+        android:pathData="M0,26L600,370L600,440L0,440Z"/>
+    <path
+        android:name="top_triangle"
+        android:fillAlpha="0.6"
+        android:fillColor="@color/colorNordicLogo"
+        android:pathData="M317.186,167.257c0,0 -0.1,0 -0.1,0.1c-0.2,0.1 -0.3,0.2 -0.5,0.2L301.086,176.457l18,10.4V166.857C318.486,166.857 317.786,167.057 317.186,167.257z"
+        android:strokeAlpha="0.6"/>
+    <path
+        android:name="bottom_triangle"
+        android:fillAlpha="0.8"
+        android:fillColor="@color/colorNordicLogo"
+        android:pathData="M285.486,229.957l16.4,-9.5l-18,-10.4l0,20.3C284.386,230.457 284.886,230.257 285.486,229.957z"
+        android:strokeAlpha="0.8"/>
+    <path
+        android:name="bottom_half"
+        android:fillAlpha="0.5"
+        android:fillColor="@color/colorNordicLogo"
+        android:pathData="M337.486,219.357L300.586,198.057l0,0l-1.7,-1L265.586,177.757c-0.2,0.6 -0.4,1.2 -0.4,1.9c0,0.1 0,0.3 0,0.4v38.2c0,1.2 0.7,2.3 1.7,2.9l15.2,8.9c0.5,0.3 1.1,0.4 1.7,0.4l0,-19.5l0,-0.8L318.286,230.057c0.1,0.1 0.2,0.1 0.3,0.1c0,0 0.1,0 0.1,0c1,0.4 1.8,0.1 2.7,-0.5l5.8,-3.3l9.2,-5.5C336.886,220.557 337.286,219.957 337.486,219.357z"
+        android:strokeAlpha="0.5"/>
+    <path
+        android:name="top_half"
+        android:fillColor="@color/colorNordicLogo"
+        android:pathData="M337.686,194.157V179.657c0,-1.9 -1,-3.6 -2.6,-4.5L321.686,167.457C320.886,167.057 319.986,166.857 319.086,166.857v20.1L288.986,169.457l-3.4,-1.9c-1.5,-0.8 -2.8,-0.9 -4.3,-0.2c0,0 -0.1,0 -0.1,0.1c-0.2,0.1 -0.3,0.2 -0.5,0.3l-5.3,3.1l-7.6,4.4c0,0 0,0 0,0c-1,0.6 -1.8,1.5 -2.3,2.6c0,0 33.3,19.2 33.3,19.2l1.7,1l0,0l36.9,21.3c0.2,-0.7 0.2,-1.9 0.2,-1.9V194.157z"/>
+    <path
+        android:name="N"
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M255.286,272.957l-4.1,0L239.286,256.357h0l0,16.7l-4.4,0l0,-24.3l4.1,0l11.8,16.7h0l0,-16.7l4.4,0L255.286,272.957z"/>
+    <path
+        android:name="O"
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M285.086,260.857c0,7.5 -5.5,12.7 -12.7,12.7c-7.2,0 -12.7,-5.1 -12.7,-12.7c0,-7.5 5.5,-12.7 12.7,-12.7C279.586,248.157 285.086,253.357 285.086,260.857zM264.586,260.857c0,4.8 3.3,8.1 7.8,8.1c4.6,0 7.8,-3.3 7.8,-8.1c0,-4.8 -3.3,-8.1 -7.8,-8.1C267.886,252.757 264.586,256.057 264.586,260.857z"/>
+    <path
+        android:name="R"
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M295.986,263.257l-1.7,0l0,9.7l-4.4,0l0,-24.3l8.9,0c4.8,0 7.8,3 7.8,7.4c0,3.6 -2.1,6.3 -5.7,7l7.2,9.9l-5.6,0L295.986,263.257zM294.386,259.357l3.8,0c2.6,0 3.8,-1.2 3.8,-3.3c0,-2 -1.2,-3.3 -3.8,-3.3l-3.8,0L294.386,259.357z"/>
+    <path
+        android:name="D"
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M332.386,260.857c0,7.6 -5.3,12.1 -12.6,12.1l-7.8,0l0,-24.3l7.8,0C327.086,248.657 332.386,253.257 332.386,260.857zM316.486,252.757l0,16.1l3.5,0c4.4,0 7.6,-2.8 7.6,-8s-3.3,-8 -7.6,-8L316.486,252.757z"/>
+    <path
+        android:name="I"
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M341.586,272.957l-4.5,0l0,-24.3l4.5,0L341.586,272.957z"/>
+    <path
+        android:name="C"
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M346.386,260.857c0,-7.7 5.4,-12.7 13.1,-12.7c3.7,0 6.5,1.1 8.7,2.7l-2.6,3.9c-1.5,-1 -3.5,-2 -6.1,-2c-4.7,0 -8.2,3.2 -8.2,8.1c0,5 3.5,8.1 8.2,8.1c2.6,0 4.6,-1 6.1,-2l2.6,3.9c-2.2,1.5 -4.9,2.7 -8.7,2.7C351.886,273.457 346.386,268.457 346.386,260.857z"/>
+    <path
+        android:name="s"
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M234.286,287.657l0.7,-1.5c0.7,0.4 1.6,0.8 2.4,0.8c0.8,0 1.3,-0.4 1.3,-0.9c0,-0.5 -0.3,-0.8 -0.9,-1.2l-1.5,-1c-1,-0.7 -1.4,-1.4 -1.4,-2.4c0,-1.4 1,-2.3 2.7,-2.3c0.9,0 1.8,0.2 2.6,0.6l-0.7,1.5c-0.7,-0.3 -1.3,-0.6 -1.9,-0.6c-0.7,0 -0.9,0.3 -0.9,0.7c0,0.3 0.2,0.6 0.7,0.9l1.6,1.1c1,0.7 1.5,1.4 1.5,2.5c0,1.7 -1.2,2.6 -3.1,2.6C236.186,288.557 235.086,288.257 234.286,287.657"/>
+    <path
+        android:name="e"
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M249.486,286.857l0,1.5l-5.4,0l0,-9l5.3,0l0,1.5l-3.7,0l0,1.8h3.4l0,1.5l-3.4,0l0,2.6H249.486z"/>
+    <path
+        android:name="m"
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M262.686,288.357h-1.7l-0.9,-5.8h0l-1.7,4.5H257.286l-1.7,-4.5h0l-0.9,5.8h-1.7l1.6,-9h1.2l2,5.1h0l2,-5.1h1.2L262.686,288.357z"/>
+    <path
+        android:name="i"
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M267.986,288.357H266.286l0,-9h1.7L267.986,288.357z"/>
+    <path
+        android:name="c"
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M271.386,283.857c0,-2.8 2,-4.7 4.9,-4.7c1.4,0 2.4,0.4 3.2,1l-0.9,1.4c-0.6,-0.4 -1.3,-0.7 -2.3,-0.7c-1.7,0 -3,1.2 -3,3c0,1.8 1.3,3 3,3c1,0 1.7,-0.4 2.3,-0.7l0.9,1.4c-0.8,0.6 -1.8,1 -3.2,1C273.386,288.557 271.386,286.757 271.386,283.857z"/>
+    <path
+        android:name="o"
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M291.586,283.857c0,2.8 -2,4.7 -4.7,4.7c-2.7,0 -4.7,-1.9 -4.7,-4.7s2,-4.7 4.7,-4.7C289.486,279.157 291.586,281.057 291.586,283.857zM283.986,283.857c0,1.8 1.2,3 2.9,3c1.7,0 2.9,-1.2 2.9,-3c0,-1.8 -1.2,-3 -2.9,-3C285.186,280.857 283.986,282.057 283.986,283.857z"/>
+    <path
+        android:name="n"
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M302.586,288.357h-1.5l-4.4,-6.2h0l0,6.2h-1.6l0,-9h1.5l4.4,6.2h0l0,-6.2h1.6L302.586,288.357z"/>
+    <path
+        android:name="d"
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M314.186,283.857c0,2.8 -2,4.5 -4.7,4.5l-2.9,0l0,-9l2.9,0C312.186,279.357 314.186,281.057 314.186,283.857zM308.286,280.857l0,6l1.3,0c1.6,0 2.8,-1 2.8,-3c0,-1.9 -1.2,-3 -2.8,-3H308.286z"/>
+    <path
+        android:name="u"
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M324.986,284.757c0,2.3 -1.3,3.7 -3.7,3.7c-2.4,0 -3.7,-1.5 -3.7,-3.7l0,-5.4l1.7,0l0,5.3c0,1.3 0.8,2.1 2,2.1c1.2,0 2,-0.8 2,-2.1l0,-5.3l1.7,0L324.986,284.757z"/>
+    <path
+        android:name="c2"
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M328.386,283.857c0,-2.8 2,-4.7 4.9,-4.7c1.4,0 2.4,0.4 3.2,1l-0.9,1.4c-0.6,-0.4 -1.3,-0.7 -2.3,-0.7c-1.7,0 -3,1.2 -3,3c0,1.8 1.3,3 3,3c1,0 1.7,-0.4 2.3,-0.7l0.9,1.4c-0.8,0.6 -1.8,1 -3.2,1C330.486,288.557 328.386,286.657 328.386,283.857z"/>
+    <path
+        android:name="t"
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M345.686,280.857H343.286l0,7.4l-1.6,0l0,-7.4l-2.5,0v-1.5l6.5,0V280.857z"/>
+    <path
+        android:name="o2"
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M357.686,283.857c0,2.8 -2,4.7 -4.7,4.7c-2.7,0 -4.7,-1.9 -4.7,-4.7c0,-2.8 2,-4.7 4.7,-4.7C355.586,279.157 357.686,281.057 357.686,283.857zM350.086,283.857c0,1.8 1.2,3 2.9,3c1.7,0 2.9,-1.2 2.9,-3c0,-1.8 -1.2,-3 -2.9,-3C351.286,280.857 350.086,282.057 350.086,283.857z"/>
+    <path
+        android:name="r"
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M363.286,284.757h-0.6v3.6h-1.6l0,-9l3.3,0c1.8,0 2.9,1.1 2.9,2.7c0,1.3 -0.8,2.3 -2.1,2.6l2.7,3.7h-2.1L363.286,284.757zM362.686,283.357h1.4c0.9,0 1.4,-0.4 1.4,-1.2c0,-0.7 -0.4,-1.2 -1.4,-1.2h-1.4L362.686,283.357z"/>
+    <path
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M373.186,251.657v1.3h-0.2l0,-2.8l1.2,0c0.5,0 0.9,0.2 0.9,0.7c0,0.3 -0.1,0.6 -0.5,0.7c0.2,0.1 0.5,0.2 0.5,0.7v0.1c0,0.2 0,0.5 0,0.6h-0.3c0,-0.1 0,-0.4 0,-0.6v-0.1c0,-0.5 -0.2,-0.6 -0.7,-0.6H373.186zM373.186,251.457h0.9c0.5,0 0.7,-0.2 0.7,-0.6c0,-0.3 -0.3,-0.5 -0.7,-0.5h-0.9V251.457z"/>
+    <path
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M375.186,253.057h-0.4l0,-0.1c0,-0.1 0,-0.3 0,-0.5l0,-0.2c0,-0.4 -0.1,-0.5 -0.7,-0.5H373.286v1.3h-0.4v-3h1.3c0.6,0 1,0.3 1,0.8c0,0.3 -0.1,0.5 -0.4,0.7c0.2,0.1 0.3,0.4 0.3,0.7v0.1C375.086,252.557 375.086,252.857 375.186,253.057L375.186,253.057zM374.886,252.857h0.1c0,-0.1 0,-0.3 0,-0.5v-0.1c0,-0.5 -0.2,-0.6 -0.4,-0.6l-0.3,-0.1l0.3,-0.1c0.3,-0.1 0.5,-0.3 0.5,-0.6c0,-0.6 -0.6,-0.7 -0.9,-0.7h-1.2V252.857h0.1v-1.3h1c0.5,0 0.8,0.1 0.8,0.7l0,0.2C374.886,252.657 374.886,252.757 374.886,252.857zM374.086,251.557h-1v-1.2h1c0.7,0 0.8,0.3 0.8,0.6C374.886,251.357 374.586,251.557 374.086,251.557zM373.286,251.357l0.8,0c0.6,0 0.7,-0.3 0.7,-0.5c0,-0.1 0,-0.4 -0.7,-0.4H373.286V251.357z"/>
+    <path
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M373.986,254.157c-1.5,0 -2.7,-1.2 -2.7,-2.7c0,-1.5 1.2,-2.7 2.7,-2.7c1.5,0 2.7,1.2 2.7,2.7C376.586,252.957 375.386,254.157 373.986,254.157zM373.986,249.157c-1.3,0 -2.4,1.1 -2.4,2.4c0,1.3 1.1,2.4 2.4,2.4c1.3,0 2.4,-1.1 2.4,-2.4C376.386,250.157 375.286,249.157 373.986,249.157z"/>
+    <path
+        android:fillColor="@color/colorNordicLogoText"
+        android:pathData="M373.986,254.257c-1.5,0 -2.7,-1.2 -2.7,-2.7c0,-1.5 1.2,-2.7 2.7,-2.7c1.5,0 2.7,1.2 2.7,2.7C376.686,253.057 375.486,254.257 373.986,254.257zM373.986,248.957c-1.4,0 -2.6,1.2 -2.6,2.6c0,1.4 1.2,2.6 2.6,2.6c1.4,0 2.6,-1.2 2.6,-2.6C376.486,250.057 375.386,248.957 373.986,248.957zM373.986,253.957c-1.4,0 -2.5,-1.1 -2.5,-2.5c0,-1.4 1.1,-2.5 2.5,-2.5c1.4,0 2.5,1.1 2.5,2.5C376.486,252.857 375.286,253.957 373.986,253.957zM373.986,249.157c-1.3,0 -2.3,1 -2.3,2.3c0,1.3 1,2.3 2.3,2.3c1.3,0 2.3,-1 2.3,-2.3S375.286,249.157 373.986,249.157z"/>
+</vector>

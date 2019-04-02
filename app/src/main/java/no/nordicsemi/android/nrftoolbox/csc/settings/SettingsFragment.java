@@ -24,12 +24,12 @@ package no.nordicsemi.android.nrftoolbox.csc.settings;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceFragment;
-import android.preference.PreferenceScreen;
+import androidx.preference.PreferenceScreen;
 
+import androidx.preference.PreferenceFragmentCompat;
 import no.nordicsemi.android.nrftoolbox.R;
 
-public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
 	public static final String SETTINGS_WHEEL_SIZE = "settings_wheel_size";
 	public static final int SETTINGS_WHEEL_SIZE_DEFAULT = 2340;
 	public static final String SETTINGS_UNIT = "settings_csc_unit";
@@ -38,11 +38,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 	public static final int SETTINGS_UNIT_MPH = 2; // [m/s]
 	public static final int SETTINGS_UNIT_DEFAULT = SETTINGS_UNIT_KM_H;
 
-
 	@Override
-	public void onCreate(final Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
+	public void onCreatePreferences(final Bundle savedInstanceState, final String rootKey) {
 		addPreferencesFromResource(R.xml.settings_csc);
 
 		// set initial values

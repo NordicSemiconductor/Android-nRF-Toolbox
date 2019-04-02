@@ -25,18 +25,17 @@ package no.nordicsemi.android.nrftoolbox.template.settings;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 
+import androidx.preference.PreferenceFragmentCompat;
 import no.nordicsemi.android.nrftoolbox.R;
 
-public class SettingsFragment extends PreferenceFragment {
+public class SettingsFragment extends PreferenceFragmentCompat {
 	public static final String SETTINGS_DATA = "settings_template_data"; // TODO values matching those in settings_template.xml file in /res/xml
 	public static final int SETTINGS_VARIANT_A = 0;
 	public static final int SETTINGS_VARIANT_B = 1;
 	public static final int SETTINGS_VARIANT_DEFAULT = SETTINGS_VARIANT_A;
 
 	@Override
-	public void onCreate(final Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
+	public void onCreatePreferences(final Bundle savedInstanceState, final String rootKey) {
 		addPreferencesFromResource(R.xml.settings_template);
 	}
 }

@@ -24,7 +24,7 @@
 	<string name="dfu_feature_title">DFU</string>
 	<string name="dfu_service_title">nRF Toolbox DFU Proxy</string>
 	<string name="dfu_settings_title">DFU Settings</string>
-	<string name="dfu_lib_version">DFU Library version 1.8.0</string>
+	<string name="dfu_lib_version">DFU Library version 1.9.0</string>
 
 	<string name="dfu_feature_title_long">DEVICE FIRMWARE UPDATE</string>
 	<dimen name="dfu_feature_title_long_margin">-186dp</dimen>
@@ -73,7 +73,7 @@
 	<string name="dfu_settings_dfu_packets_receipt_notification_label">Packets receipt notification procedure</string>
 	<string name="dfu_settings_dfu_number_of_packets_label">Number of packets</string>
 	<string name="dfu_settings_dfu_mbr_size">MBR size</string>
-	<string name="dfu_settings_dfu_mbr_size_title">MBR size (4096 on nRF51, 12288 on nRF52)</string>
+	<string name="dfu_settings_dfu_mbr_size_title">MBR size (by default 4096 bytes)</string>
 	<string name="dfu_settings_dfu_keep_bond">Keep bond information</string>
 	<string name="dfu_settings_dfu_assume_dfu_mode">External MCU DFU</string>
 	<string name="dfu_settings_dfu_assume_dfu_mode_info">Check this switch to ON if you want to perform a DFU operation without jumping to the bootloader mode on a device

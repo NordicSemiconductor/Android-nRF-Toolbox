@@ -32,6 +32,8 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.net.Uri;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -92,7 +94,7 @@ public class FeaturesActivity extends AppCompatActivity {
 		drawer.addDrawerListener(mDrawerToggle);
 
 		// setup plug-ins in the drawer
-		setupPluginsInDrawer((ViewGroup) drawer.findViewById(R.id.plugin_container));
+		setupPluginsInDrawer(drawer.findViewById(R.id.plugin_container));
 
 		// configure the app grid
 		final GridView grid = findViewById(R.id.grid);
@@ -132,7 +134,7 @@ public class FeaturesActivity extends AppCompatActivity {
 	}
 
 	@Override
-	public void onConfigurationChanged(final Configuration newConfig) {
+	public void onConfigurationChanged(@NonNull final Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 		mDrawerToggle.onConfigurationChanged(newConfig);
 	}
@@ -168,7 +170,7 @@ public class FeaturesActivity extends AppCompatActivity {
 		final TextView nrfConnectItem = container.findViewById(R.id.link_mcp);
 		if (nrfConnectInfo == null) {
 			nrfConnectItem.setTextColor(Color.GRAY);
-			ColorMatrix grayscale = new ColorMatrix();
+			final ColorMatrix grayscale = new ColorMatrix();
 			grayscale.setSaturation(0.0f);
 			nrfConnectItem.getCompoundDrawables()[0].mutate().setColorFilter(new ColorMatrixColorFilter(grayscale));
 		}

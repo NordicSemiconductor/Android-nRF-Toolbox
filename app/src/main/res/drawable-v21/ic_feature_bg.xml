@@ -21,13 +21,13 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="#0081b7" >
+    android:color="@color/featurePressedColor" >
 
     <item>
         <shape xmlns:android="http://schemas.android.com/apk/res/android" >
             <corners android:radius="10dp" />
 
-            <solid android:color="#FF0099da" />
+            <solid android:color="@color/featureColor" />
             
             <size android:width="24dp" android:height="24dp"/>
         </shape>

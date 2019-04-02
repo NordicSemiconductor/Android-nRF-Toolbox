@@ -21,18 +21,49 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <resources>
+    <color name="featureColor">@color/nordicBlue</color>
+    <color name="featurePressedColor">@color/nordicBlueDark</color>
     <color name="featureTitleColor">#939597</color>
-    <color name="actionBarColor">#009CDE</color>
-    <color name="actionBarColorDark">#0081B7</color>
-    <color name="nordicBackground">#FFF5F5F5</color>
-    <color name="backgroundColor">#E6E7E8</color>
-    <color name="orange">#DC582A</color>
-    <color name="dark_orange">#9E3F1E</color>
+    <color name="actionBarColor">@color/nordicBlue</color>
+    <color name="actionBarColorDark">@color/nordicBlueDark</color>
+    <color name="nordicBackground">@color/lightGray</color>
+    <color name="backgroundColor">@color/nordicLightGray</color>
+    <color name="orange">@color/nordicFall</color>
+    <color name="dark_orange">#FFC96B1A</color>
     <color name="light_orange">#EFB5A0</color>
-    <color name="headerBackgroundColor">#009ada</color>
-    <color name="headerBackgroundColorDark">#0081B7</color>
-    <color name="headerTextColor">#FFFFFF</color>
-    <color name="actionBarMenuTextColor">#FFFFFF</color>
+    <color name="headerBackgroundColor">@color/nordicBlue</color>
+    <color name="headerBackgroundColorDark">@color/nordicBlueDark</color>
+    <color name="headerTextColor">@color/white</color>
+    <color name="actionBarMenuTextColor">@color/white</color>
     
-    <color name="darkGray">#AAABAF</color>
+    <color name="verticalTitleColor">@color/nordicMediumGray</color>
+
+    <!--
+		Nordic logo on splash screen.
+		When using light/dark top background, consider changing status bar to light/dark
+		in styles-v23.
+	-->
+    <color name="colorNordicLogo">@color/nordicBlue</color>
+    <color name="colorNordicLogoText">@color/black</color>
+    <color name="colorNordicLogoBottom">@color/white</color>
+    <color name="colorNordicLogoTop">@color/nordicLightGray</color>
+
+    <!-- Nordic colors -->
+    <color name="nordicBlue">#FF00A9CE</color>
+    <color name="nordicBlueDark">#FF0090B0</color>
+    <color name="nordicSky">#FF6AD1E3</color>
+    <color name="nordicBlueslate">#FF0033A0</color>
+    <color name="nordicLake">#FF0077C8</color>
+    <color name="nordicLightGray">#FFD9E1E2</color>
+    <color name="nordicMediumGray">#FF768692</color>
+    <color name="nordicDarkGray">#FF333F48</color>
+    <color name="nordicGrass">#FFD0DF00</color>
+    <color name="nordicSun">#FFFFCD00</color>
+    <color name="nordicRed">#FFEE2F4E</color>
+    <color name="nordicFall">#FFF58220</color>
+
+    <!-- Common -->
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="lightGray">#FFF5F5F5</color>
 </resources>
