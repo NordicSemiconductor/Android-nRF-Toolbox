@@ -25,9 +25,10 @@ package no.nordicsemi.android.nrftoolbox.hts.settings;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 
+import androidx.preference.PreferenceFragmentCompat;
 import no.nordicsemi.android.nrftoolbox.R;
 
-public class SettingsFragment extends PreferenceFragment {
+public class SettingsFragment extends PreferenceFragmentCompat {
 	public static final String SETTINGS_UNIT = "settings_hts_unit";
 	public static final int SETTINGS_UNIT_C = 0; // [C]
 	public static final int SETTINGS_UNIT_F = 1; // [F]
@@ -35,9 +36,7 @@ public class SettingsFragment extends PreferenceFragment {
 	public static final int SETTINGS_UNIT_DEFAULT = SETTINGS_UNIT_C;
 
 	@Override
-	public void onCreate(final Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
+	public void onCreatePreferences(final Bundle savedInstanceState, final String rootKey) {
 		addPreferencesFromResource(R.xml.settings_hts);
 	}
 }

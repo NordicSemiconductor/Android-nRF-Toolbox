@@ -54,7 +54,7 @@
 		<activity
 			android:name="no.nordicsemi.android.nrftoolbox.SplashscreenActivity"
 			android:label="@string/app_name"
-			android:theme="@style/AppTheme.Fullscreen" >
+			android:theme="@style/AppTheme.SplashScreen" >
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 

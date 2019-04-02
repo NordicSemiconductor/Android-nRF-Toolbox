@@ -30,14 +30,6 @@
 		android:id="@+id/toolbar_actionbar"
 		layout="@layout/toolbar"/>
 
-	<ImageView
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_alignParentBottom="true"
-		android:layout_centerHorizontal="true"
-		android:layout_marginBottom="6dp"
-		android:src="@drawable/background_title"/>
-
 	<FrameLayout
 		android:id="@+id/content"
 		style="@style/HeaderShadow"

@@ -20,7 +20,7 @@
   ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
-<android.support.v4.widget.DrawerLayout android:id="@+id/drawer_layout"
+<androidx.drawerlayout.widget.DrawerLayout android:id="@+id/drawer_layout"
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
@@ -44,13 +44,6 @@
 			android:layout_height="0dp"
 			android:layout_weight="1">
 
-			<ImageView
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_gravity="bottom|center"
-				android:layout_marginBottom="6dp"
-				android:src="@drawable/background_title"/>
-
 			<GridView
 				android:id="@+id/grid"
 				android:layout_width="match_parent"
@@ -67,7 +60,7 @@
 				android:scrollbarStyle="outsideOverlay"
 				android:stretchMode="columnWidth"/>
 
-			<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+			<androidx.appcompat.widget.AppCompatTextView
 				android:id="@android:id/empty"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -77,7 +70,7 @@
 	</LinearLayout>
 
 	<!-- The navigation drawer -->
-	<android.support.design.widget.NavigationView
+	<com.google.android.material.navigation.NavigationView
 		android:layout_width="@dimen/navdrawer_width"
 		android:layout_height="match_parent"
 		android:layout_gravity="start"
@@ -90,6 +83,6 @@
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:layout_gravity="start"/>
-	</android.support.design.widget.NavigationView>
+	</com.google.android.material.navigation.NavigationView>
 
-</android.support.v4.widget.DrawerLayout>
+</androidx.drawerlayout.widget.DrawerLayout>

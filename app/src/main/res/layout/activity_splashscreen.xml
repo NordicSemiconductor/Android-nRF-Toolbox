@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2015, Nordic Semiconductor
+  ~ Copyright (c) 2018, Nordic Semiconductor
   ~ All rights reserved.
   ~
   ~ Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -19,25 +20,26 @@
   ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+
+<!--
+	This has to be a CoordinatorLayout, or any other layout that dispatches insets
+	to its children, as the image is to be drawn behind status bar as well.
+-->
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	tools:context=".SplashscreenActivity">
+	android:fitsSystemWindows="true"
+	tools:context=".SplashscreenActivity"
+	tools:ignore="ContentDescription">
 
-	<ImageView
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_gravity="center"
-		android:layout_marginBottom="70dp"
-		android:scaleType="center"
-		android:src="@drawable/nordic_logo"/>
-
-	<ImageView
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_gravity="bottom|center"
-		android:layout_marginBottom="6dp"
-		android:src="@drawable/background_title"/>
-
-</merge>
+	<androidx.appcompat.widget.AppCompatImageView
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:fitsSystemWindows="true"
+		android:scaleType="centerCrop"
+		android:background="@color/colorNordicLogoTop"
+		app:srcCompat="@drawable/nordic_logo"/>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

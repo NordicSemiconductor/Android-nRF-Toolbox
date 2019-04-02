@@ -28,18 +28,18 @@
 
 	<!-- The size of text below must be fixed, therefore dp are used instead of sp -->
 
-	<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+	<androidx.appcompat.widget.AppCompatTextView
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_centerVertical="true"
 		android:layout_marginLeft="@dimen/uart_feature_title_long_margin"
 		android:rotation="270"
 		android:text="@string/uart_feature_title_long"
-		android:textColor="@color/darkGray"
+		android:textColor="@color/verticalTitleColor"
 		android:textSize="32dp"
 		android:textStyle="bold"/>
 
-	<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+	<androidx.appcompat.widget.AppCompatTextView
 		android:id="@+id/device_name"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
@@ -76,7 +76,7 @@
 
 	</LinearLayout>
 
-	<Button
+	<com.google.android.material.button.MaterialButton
 		android:id="@+id/action_connect"
 		style="@style/Widget.Connect"
 		android:layout_width="wrap_content"
@@ -91,13 +91,5 @@
 		android:layout_width="wrap_content"
 		android:layout_height="@dimen/activity_vertical_margin_bottom"
 		android:layout_alignParentBottom="true"/>
-
-	<ImageView
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_alignParentBottom="true"
-		android:layout_centerHorizontal="true"
-		android:layout_marginBottom="6dp"
-		android:src="@drawable/background_title"/>
 
 </RelativeLayout>

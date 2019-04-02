@@ -21,22 +21,23 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent">
 
 	<LinearLayout
 		android:layout_width="match_parent"
-		android:layout_height="match_parent"
+		android:layout_height="wrap_content"
 		android:orientation="vertical">
 
-		<ImageView
+		<androidx.appcompat.widget.AppCompatImageView
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginBottom="8dp"
 			android:background="@color/actionBarColorDark"
 			android:paddingBottom="30dp"
 			android:paddingTop="@dimen/navdrawer_padding_top"
-			android:src="@drawable/nordic_logo_horiz_dark"/>
+			app:srcCompat="@drawable/nordic_logo_horiz_white"/>
 
 		<LinearLayout
 			android:id="@+id/plugin_container"
@@ -44,7 +45,7 @@
 			android:layout_height="wrap_content"
 			android:orientation="vertical">
 
-			<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+			<androidx.appcompat.widget.AppCompatTextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:gravity="center_vertical"

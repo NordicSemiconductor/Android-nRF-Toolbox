@@ -42,6 +42,6 @@
     </string-array>
     <string name="hrs_location_other">Reserved</string>
     
-    <string name="hrs_about_text">HRM (Heart Rate Monitor) profile allows you to connect to your Heart Rate sensor (f.e. a belt). 
+    <string name="hrs_about_text">HRM (Heart Rate Monitor) profile allows you to connect to your Heart Rate sensor (e.g. a belt).
         It shows you the current rate, location of the sensor and a historic data on the graph.</string>
 </resources>

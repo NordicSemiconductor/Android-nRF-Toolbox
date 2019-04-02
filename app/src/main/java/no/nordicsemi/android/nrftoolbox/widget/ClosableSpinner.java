@@ -25,7 +25,7 @@ package no.nordicsemi.android.nrftoolbox.widget;
 import android.content.Context;
 import android.util.AttributeSet;
 
-public class ClosableSpinner extends android.support.v7.widget.AppCompatSpinner {
+public class ClosableSpinner extends androidx.appcompat.widget.AppCompatSpinner {
 	public ClosableSpinner(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	}

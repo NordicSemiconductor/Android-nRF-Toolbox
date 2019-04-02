@@ -44,20 +44,17 @@
         <item name="android:elevation">2dp</item>
     </style>
 
-    <style name="Widget.Connect" parent="@android:style/Widget.Material.Light.Button">
-        <item name="android:background">@drawable/button</item>
-        <item name="android:textColor">#FFFFFF</item>
-        <item name="android:paddingLeft">40dp</item>
-        <item name="android:paddingRight">40dp</item>
-        <item name="android:elevation">2dp</item>
-        <item name="android:stateListAnimator">@animator/click_animator</item>
-    </style>
-
     <style name="AppTheme" parent="@style/AppThemeBase">        
         <!-- Empty -->
     </style>
 
     <style name="AppTheme.TranslucentStatusBar">
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="AppTheme.SplashScreen">
+        <item name="colorPrimaryDark">@android:color/transparent</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>

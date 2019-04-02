@@ -24,9 +24,9 @@ package no.nordicsemi.android.nrftoolbox;
 import android.app.Dialog;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
+import androidx.appcompat.app.AlertDialog;
 
 public class AppHelpFragment extends DialogFragment {
 	private static final String ARG_TEXT = "ARG_TEXT";

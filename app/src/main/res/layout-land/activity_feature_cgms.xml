@@ -37,14 +37,14 @@
 
         <!-- The size of text below must be fixed, therefore dp are used instead of sp -->
 
-        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="@dimen/cgms_feature_title_long_margin"
             android:rotation="270"
             android:text="@string/cgms_feature_title_long"
-            android:textColor="@color/darkGray"
+            android:textColor="@color/verticalTitleColor"
             android:textSize="32dp"
             android:textStyle="bold"/>
 
@@ -62,7 +62,7 @@
             android:textColor="#FFFFFF"
             android:textSize="12sp"/>
 
-        <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/device_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -103,13 +103,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-                    <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         style="@style/Widget.ListTitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/gls_section_data"/>
 
-                    <no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+                    <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/unit"
                         style="@style/Widget.ListTitle"
                         android:layout_width="wrap_content"
@@ -146,7 +146,7 @@
                 android:layout_marginTop="@dimen/feature_vertical_margin_top"
                 android:orientation="vertical">
 
-                <no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+                <androidx.appcompat.widget.AppCompatTextView
                     style="@style/Widget.ListTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -160,25 +160,25 @@
                     android:gravity="center_horizontal"
                     android:orientation="vertical">
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
                         android:id="@+id/action_all"
-                        style="?android:attr/buttonBarButtonStyle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:minWidth="0dp"
                         android:text="@string/gls_action_all"/>
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
                         android:id="@+id/action_last"
-                        style="?android:attr/buttonBarButtonStyle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:minWidth="0dp"
                         android:text="@string/gls_action_last"/>
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
                         android:id="@+id/action_more"
-                        style="?android:attr/buttonBarButtonStyle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:minWidth="0dp"
@@ -205,7 +205,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/action_connect"
             style="@style/Widget.Connect"
             android:layout_width="wrap_content"
@@ -215,14 +215,6 @@
             android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
             android:onClick="onConnectClicked"
             android:text="@string/action_connect"/>
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="6dp"
-            android:src="@drawable/background_title"/>
 
     </no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout>
 </LinearLayout>

@@ -24,6 +24,7 @@
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:orientation="vertical"
 	tools:context=".dfu.DfuActivity">
 
@@ -38,18 +39,18 @@
 
 		<!-- The size of text below must be fixed, therefore dp are used instead of sp -->
 
-		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+		<androidx.appcompat.widget.AppCompatTextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_centerVertical="true"
 			android:layout_marginLeft="@dimen/dfu_feature_title_long_margin"
 			android:rotation="270"
 			android:text="@string/dfu_feature_title_long"
-			android:textColor="@color/darkGray"
+			android:textColor="@color/verticalTitleColor"
 			android:textSize="32dp"
 			android:textStyle="bold"/>
 
-		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+		<androidx.appcompat.widget.AppCompatTextView
 			android:id="@+id/device_name"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
@@ -62,7 +63,7 @@
 			android:textAllCaps="true"
 			android:textAppearance="?android:attr/textAppearanceLarge"/>
 
-		<Button
+		<com.google.android.material.button.MaterialButton
 			android:id="@+id/action_connect"
 			style="@style/Widget.Connect"
 			android:layout_width="wrap_content"
@@ -72,14 +73,6 @@
 			android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
 			android:onClick="onConnectClicked"
 			android:text="@string/action_select"/>
-
-		<ImageView
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_alignParentBottom="true"
-			android:layout_centerHorizontal="true"
-			android:layout_marginBottom="6dp"
-			android:src="@drawable/background_title"/>
 
 		<LinearLayout
 			android:layout_width="match_parent"
@@ -100,7 +93,7 @@
 				android:layout_marginTop="@dimen/feature_vertical_margin_top"
 				android:orientation="vertical">
 
-				<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+				<androidx.appcompat.widget.AppCompatTextView
 					style="@style/Widget.ListTitle"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
@@ -115,12 +108,12 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content">
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						<androidx.appcompat.widget.AppCompatTextView
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="@string/dfu_file_name_label"/>
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+						<androidx.appcompat.widget.AppCompatTextView
 							android:id="@+id/file_name"
 							android:layout_width="0dp"
 							android:layout_height="wrap_content"
@@ -135,12 +128,12 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content">
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						<androidx.appcompat.widget.AppCompatTextView
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="@string/dfu_file_type_label"/>
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+						<androidx.appcompat.widget.AppCompatTextView
 							android:id="@+id/file_type"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
@@ -152,12 +145,12 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content">
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						<androidx.appcompat.widget.AppCompatTextView
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="@string/dfu_file_scope_label"/>
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+						<androidx.appcompat.widget.AppCompatTextView
 							android:id="@+id/file_scope"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
@@ -169,12 +162,12 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content">
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						<androidx.appcompat.widget.AppCompatTextView
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="@string/dfu_file_size_label"/>
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+						<androidx.appcompat.widget.AppCompatTextView
 							android:id="@+id/file_size"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
@@ -186,12 +179,12 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content">
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+						<androidx.appcompat.widget.AppCompatTextView
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:text="@string/dfu_file_status_label"/>
 
-						<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+						<androidx.appcompat.widget.AppCompatTextView
 							android:id="@+id/file_status"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
@@ -210,7 +203,8 @@
 					android:orientation="horizontal"
 					android:paddingLeft="42dp">
 
-					<Button
+					<com.google.android.material.button.MaterialButton
+						app:backgroundTint="@color/nordicLake"
 						android:id="@+id/action_select_file"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
@@ -239,13 +233,14 @@
 				android:layout_marginTop="15dp"
 				android:orientation="vertical">
 
-				<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+				<androidx.appcompat.widget.AppCompatTextView
 					style="@style/Widget.ListTitle"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:text="@string/dfu_section_dfu_header"/>
 
-				<Button
+				<com.google.android.material.button.MaterialButton
+					app:backgroundTint="@color/button_color"
 					android:id="@+id/action_upload"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
@@ -254,7 +249,7 @@
 					android:onClick="onUploadClicked"
 					android:text="@string/dfu_action_upload"/>
 
-				<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+				<androidx.appcompat.widget.AppCompatTextView
 					android:id="@+id/textviewUploading"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
@@ -271,7 +266,7 @@
 					android:max="100"
 					android:visibility="invisible"/>
 
-				<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+				<androidx.appcompat.widget.AppCompatTextView
 					android:id="@+id/textviewProgress"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"

@@ -23,7 +23,7 @@
 package no.nordicsemi.android.nrftoolbox.profile.multiconnect;
 
 import android.bluetooth.BluetoothDevice;
-import android.support.annotation.StringRes;
+import androidx.annotation.StringRes;
 
 public interface IDeviceLogger {
 	/**

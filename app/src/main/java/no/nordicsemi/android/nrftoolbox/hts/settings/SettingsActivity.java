@@ -23,8 +23,8 @@
 package no.nordicsemi.android.nrftoolbox.hts.settings;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 
 import no.nordicsemi.android.nrftoolbox.R;
@@ -41,7 +41,7 @@ public class SettingsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		// Display the fragment as the main content.
-        getFragmentManager().beginTransaction().replace(R.id.content, new SettingsFragment()).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.content, new SettingsFragment()).commit();
 	}
 
 	@Override

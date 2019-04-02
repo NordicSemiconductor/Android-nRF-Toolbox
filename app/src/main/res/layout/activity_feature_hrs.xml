@@ -37,14 +37,14 @@
 
 		<!-- The size of text below must be fixed, therefore dp are used instead of sp -->
 
-		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetBoldTextView
+		<androidx.appcompat.widget.AppCompatTextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_centerVertical="true"
 			android:layout_marginLeft="@dimen/hrs_feature_title_long_margin"
 			android:rotation="270"
 			android:text="@string/hrs_feature_title_long"
-			android:textColor="@color/darkGray"
+			android:textColor="@color/verticalTitleColor"
 			android:textSize="32dp"
 			android:textStyle="bold"/>
 
@@ -62,7 +62,7 @@
 			android:textColor="#FFFFFF"
 			android:textSize="12sp"/>
 
-		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+		<androidx.appcompat.widget.AppCompatTextView
 			android:id="@+id/device_name"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
@@ -76,7 +76,7 @@
 			android:textAllCaps="true"
 			android:textAppearance="?android:attr/textAppearanceLarge"/>
 
-		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+		<androidx.appcompat.widget.AppCompatTextView
 			android:id="@+id/text_hrs_value"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
@@ -89,7 +89,7 @@
 			android:text="@string/not_available_value"
 			android:textSize="45sp"/>
 
-		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+		<androidx.appcompat.widget.AppCompatTextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_alignParentRight="true"
@@ -99,7 +99,7 @@
 			android:text="@string/hrs_value_unit"
 			android:textSize="16sp"/>
 
-		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+		<androidx.appcompat.widget.AppCompatTextView
 			android:id="@+id/text_hrs_position"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
@@ -112,7 +112,7 @@
 			android:text="@string/not_available"
 			android:textSize="35sp"/>
 
-		<no.nordicsemi.android.nrftoolbox.widget.TrebuchetTextView
+		<androidx.appcompat.widget.AppCompatTextView
 			android:id="@+id/text_hrs_position_label"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
@@ -132,7 +132,7 @@
 			android:layout_marginRight="@dimen/feature_horizontal_margin"
 			android:layout_marginTop="10dp"/>
 
-		<Button
+		<com.google.android.material.button.MaterialButton
 			android:id="@+id/action_connect"
 			style="@style/Widget.Connect"
 			android:layout_width="wrap_content"
@@ -142,14 +142,6 @@
 			android:layout_marginBottom="@dimen/activity_vertical_margin_bottom"
 			android:onClick="onConnectClicked"
 			android:text="@string/action_connect"/>
-
-		<ImageView
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_alignParentBottom="true"
-			android:layout_centerHorizontal="true"
-			android:layout_marginBottom="6dp"
-			android:src="@drawable/background_title"/>
 
 	</no.nordicsemi.android.nrftoolbox.widget.ForegroundRelativeLayout>
 </LinearLayout>

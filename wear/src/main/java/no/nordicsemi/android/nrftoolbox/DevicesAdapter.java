@@ -37,6 +37,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import no.nordicsemi.android.support.v18.scanner.BluetoothLeScannerCompat;
 import no.nordicsemi.android.support.v18.scanner.ScanCallback;
 import no.nordicsemi.android.support.v18.scanner.ScanResult;
@@ -73,16 +74,18 @@ public class DevicesAdapter extends WearableListView.Adapter {
 		mHandler = new Handler();
 
 		final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-		mDevices.addAll(bluetoothAdapter.getBondedDevices());
+		if (bluetoothAdapter != null)
+			mDevices.addAll(bluetoothAdapter.getBondedDevices());
 	}
 
+	@NonNull
 	@Override
-	public WearableListView.ViewHolder onCreateViewHolder(final ViewGroup viewGroup, final int position) {
+	public WearableListView.ViewHolder onCreateViewHolder(@NonNull final ViewGroup viewGroup, final int position) {
 		return new ItemViewHolder(mInflater.inflate(R.layout.device_item, viewGroup, false));
 	}
 
 	@Override
-	public void onBindViewHolder(final WearableListView.ViewHolder holder, final int position) {
+	public void onBindViewHolder(@NonNull final WearableListView.ViewHolder holder, final int position) {
 		final ItemViewHolder viewHolder = (ItemViewHolder) holder;
 
 		if (position < mDevices.size()) {
@@ -163,11 +166,11 @@ public class DevicesAdapter extends WearableListView.Adapter {
 		return mAvailableText;
 	}
 
-	private Runnable mStopScanTask = () -> stopLeScan();
+	private Runnable mStopScanTask = this::stopLeScan;
 
 	private ScanCallback mScanCallback = new ScanCallback() {
 		@Override
-		public void onScanResult(final int callbackType, final ScanResult result) {
+		public void onScanResult(final int callbackType, @NonNull final ScanResult result) {
 			// empty
 		}
 

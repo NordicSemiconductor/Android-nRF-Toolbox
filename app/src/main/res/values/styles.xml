@@ -32,20 +32,20 @@
 	</style>
 
 	<!-- Style used by the Toolbar -->
-	<style name="ActionBarThemeOverlay" parent="@style/ThemeOverlay.AppCompat.ActionBar">
-		<item name="android:textColorPrimary">#000</item>
+	<style name="ActionBarThemeOverlay" parent="@style/ThemeOverlay.MaterialComponents.ActionBar">
+		<item name="android:textColorPrimary">#FFF</item>
 		<item name="android:textColorSecondary">#8fff</item>
 		<item name="colorControlNormal">#fff</item>
 		<item name="colorControlHighlight">#3fff</item>
 	</style>
 
 	<!-- Style used by the Toolbar's overflow menu -->
-	<style name="ActionBarPopupThemeOverlay" parent="ThemeOverlay.AppCompat.Light">
+	<style name="ActionBarPopupThemeOverlay" parent="ThemeOverlay.MaterialComponents.Light">
 		<item name="colorControlNormal">@color/actionBarColorDark</item>
 	</style>
 
 	<!-- Style used by the Toolbar -->
-	<style name="ActionBar.TitleText" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+	<style name="ActionBar.TitleText" parent="TextAppearance.MaterialComponents.Caption">
 		<item name="android:textColor">#fff</item>
 		<item name="android:textSize">18sp</item>
 	</style>
@@ -88,37 +88,40 @@
 		<item name="android:textStyle">bold</item>
 	</style>
 
-	<style name="Widget.Button" parent="@style/Widget.AppCompat.Button">
+	<style name="Widget.Button" parent="@style/Widget.MaterialComponents.Button.TextButton">
 		<item name="android:minWidth">160dip</item>
 	</style>
 
-	<style name="Widget.Connect" parent="@android:style/Widget.Holo.Light.Button">
-		<item name="android:background">@drawable/button</item>
-		<item name="android:textColor">#FFFFFF</item>
-		<item name="android:paddingLeft">40dp</item>
-		<item name="android:paddingRight">40dp</item>
+	<style name="ConnectTheme" parent="ThemeOverlay.MaterialComponents">
+		<item name="colorPrimary">@color/black</item>
+		<item name="colorOnPrimary">@color/white</item>
 	</style>
 
-	<style name="TextAppearanceTitle" parent="@style/TextAppearance.AppCompat.Caption">
+	<style name="Widget.Connect" parent="@style/Widget.MaterialComponents.Button">
+		<item name="android:theme">@style/ConnectTheme</item>
+		<item name="android:minWidth">200dp</item>
+		<item name="android:minHeight">52dp</item>
+	</style>
+
+	<style name="TextAppearanceTitle" parent="@style/TextAppearance.MaterialComponents.Caption">
 		<item name="android:textColor">?attr/colorAccent</item>
 		<item name="android:textStyle">bold</item>
 	</style>
 
 	<!-- Application theme. -->
-	<style name="AppTheme.DialogTheme" parent="@style/Theme.AppCompat.Light.Dialog.Alert">
-		<item name="colorPrimary">@color/actionBarColor</item>
-		<item name="colorPrimaryDark">@color/actionBarColorDark</item>
-		<item name="colorAccent">@color/actionBarColorDark</item>
+	<style name="AppTheme.DialogTheme" parent="@style/Theme.MaterialComponents.Light.Dialog.Alert">
+		<item name="colorPrimary">@color/nordicLake</item>
+		<item name="colorAccent">@color/nordicLake</item>
 	</style>
 
-	<style name="AppThemeBase" parent="@style/Theme.AppCompat.Light.NoActionBar">
+	<style name="AppThemeBase" parent="@style/Theme.MaterialComponents.Light.NoActionBar">
 		<item name="android:windowBackground">@color/nordicBackground</item>
 		<item name="android:spinnerItemStyle">@style/ActionBar.SpinnerTitle</item>
 		<item name="actionMenuTextColor">@color/actionBarMenuTextColor</item>
 		<item name="alertDialogTheme">@style/AppTheme.DialogTheme</item>
 		<item name="colorPrimary">@color/actionBarColor</item>
 		<item name="colorPrimaryDark">@color/actionBarColorDark</item>
-		<item name="colorAccent">@color/actionBarColorDark</item>
+		<item name="colorAccent">@color/nordicLake</item>
 		<item name="buttonStyle">@style/Widget.Button</item>
 		<item name="android:spinnerStyle">@style/Widget.AppCompat.Spinner</item> <!-- Required on pre-Lollipop to draw new spinner. -->
 	</style>
@@ -140,8 +143,8 @@
 		<item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
 	</style>
 
-	<style name="AppTheme.Fullscreen" parent="@style/Theme.AppCompat.Light.NoActionBar">
-		<item name="android:windowBackground">@color/nordicBackground</item>
+	<style name="AppTheme.SplashScreen">
+		<item name="colorPrimaryDark">@android:color/transparent</item>
 	</style>
 
 </resources>
