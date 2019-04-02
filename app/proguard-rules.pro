@@ -1,4 +1,3 @@
--libraryjars ../app/libs
 -optimizationpasses 5
 -dontusemixedcaseclassnames
 -dontskipnonpubliclibraryclasses
