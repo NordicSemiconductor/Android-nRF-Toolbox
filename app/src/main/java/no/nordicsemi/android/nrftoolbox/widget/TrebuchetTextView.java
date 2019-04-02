@@ -27,7 +27,7 @@ import android.util.AttributeSet;
 
 import no.nordicsemi.android.nrftoolbox.R;
 
-public class TrebuchetTextView extends android.support.v7.widget.AppCompatTextView {
+public class TrebuchetTextView extends androidx.appcompat.widget.AppCompatTextView {
 
 	public TrebuchetTextView(Context context) {
 		super(context);

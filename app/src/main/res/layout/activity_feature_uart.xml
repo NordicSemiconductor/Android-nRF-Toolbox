@@ -36,7 +36,7 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent">
 
-		<android.support.v4.widget.SlidingPaneLayout
+		<androidx.slidingpanelayout.widget.SlidingPaneLayout
 			android:id="@+id/sliding_pane"
 			android:layout_width="match_parent"
 			android:layout_height="match_parent">
@@ -55,6 +55,6 @@
 				android:layout_height="match_parent"
 				tools:layout="@layout/fragment_feature_uart_control"/>
 
-		</android.support.v4.widget.SlidingPaneLayout>
+		</androidx.slidingpanelayout.widget.SlidingPaneLayout>
 	</FrameLayout>
 </LinearLayout>

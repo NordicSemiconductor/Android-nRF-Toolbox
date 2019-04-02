@@ -29,30 +29,9 @@
 -keep public class * extends android.preference.Preference
 -keep public class com.android.vending.licensing.ILicensingService
 
-# The support library contains references to newer platform versions.
+# The AndroidX library contains references to newer platform versions.
 # Don't warn about those in case this app is linking against an older platform version.
--dontwarn android.support.**
-
-# android-support-design
--dontwarn android.support.design.**
--keep class android.support.design.** { *; }
--keep interface android.support.design.** { *; }
--keep,includedescriptorclasses class android.support.transition.** { *; }
--keep public class android.support.design.R$* { *; }
-
-# android-support-v4
--dontwarn android.support.v4.**
--dontnote android.support.v4.**
--keep interface android.support.v4.app.** { *; }
--keep class android.support.v4.app.** { *; }
--keep class android.support.v4.** { *; }
-
-# android-support-v7
--dontwarn android.support.v7.**
--dontnote android.support.v7.**
--keep interface android.support.v7.internal.** { *; }
--keep class android.support.v7.internal.** { *; }
--keep class android.support.v7.** { *; }
+-dontwarn androidx.**
 
 -keep class com.google.android.gms.**
 -dontwarn com.google.android.gms.**
@@ -74,6 +53,7 @@
 # (the rt.jar has them)
 -dontwarn com.bea.xml.stream.XMLWriterBase
 -dontwarn javax.xml.stream.events.**
+-dontwarn javax.xml.stream.**
 
 # Simple XML
 -keep public class org.simpleframework.** { *; }

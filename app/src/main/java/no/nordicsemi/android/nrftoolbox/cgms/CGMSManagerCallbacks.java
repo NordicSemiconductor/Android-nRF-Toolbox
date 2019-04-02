@@ -23,7 +23,7 @@
 package no.nordicsemi.android.nrftoolbox.cgms;
 
 import android.bluetooth.BluetoothDevice;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import no.nordicsemi.android.nrftoolbox.battery.BatteryManagerCallbacks;
 

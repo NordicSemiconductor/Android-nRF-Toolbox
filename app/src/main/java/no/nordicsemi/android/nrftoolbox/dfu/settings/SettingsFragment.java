@@ -26,9 +26,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
-import android.support.v7.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.text.TextUtils;
 
+import no.nordicsemi.android.dfu.DfuServiceInitiator;
 import no.nordicsemi.android.dfu.DfuSettingsConstants;
 import no.nordicsemi.android.nrftoolbox.R;
 
@@ -107,7 +108,7 @@ public class SettingsFragment extends PreferenceFragment implements DfuSettingsC
 		final PreferenceScreen screen = getPreferenceScreen();
 		final SharedPreferences preferences = getPreferenceManager().getSharedPreferences();
 
-		final String value = preferences.getString(SETTINGS_MBR_SIZE, String.valueOf(SETTINGS_DEFAULT_MBR_SIZE));
+		final String value = preferences.getString(SETTINGS_MBR_SIZE, String.valueOf(DfuServiceInitiator.DEFAULT_MBR_SIZE));
 		screen.findPreference(SETTINGS_MBR_SIZE).setSummary(value);
 	}
 }

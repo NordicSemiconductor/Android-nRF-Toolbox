@@ -19,8 +19,8 @@ package no.nordicsemi.android.nrftoolbox.app;
 import android.app.Activity;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View;
@@ -191,7 +191,7 @@ public class ExpandableListActivity extends AppCompatActivity implements
 	/**
 	 * Updates the screen state (current list and other views) when the content changes.
 	 * 
-	 * @see android.support.v7.app.AppCompatActivity#onContentChanged()
+	 * @see androidx.appcompat.app.AppCompatActivity#onContentChanged()
 	 */
 	@Override
 	public void onContentChanged() {

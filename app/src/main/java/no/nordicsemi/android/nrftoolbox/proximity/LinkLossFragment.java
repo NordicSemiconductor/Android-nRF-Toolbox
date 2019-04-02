@@ -23,9 +23,9 @@ package no.nordicsemi.android.nrftoolbox.proximity;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
+import androidx.appcompat.app.AlertDialog;
 
 import no.nordicsemi.android.nrftoolbox.R;
 

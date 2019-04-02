@@ -1,7 +1,7 @@
 package no.nordicsemi.android.nrftoolbox.template.callback;
 
 import android.bluetooth.BluetoothDevice;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import no.nordicsemi.android.ble.callback.profile.ProfileDataCallback;
 import no.nordicsemi.android.ble.data.Data;

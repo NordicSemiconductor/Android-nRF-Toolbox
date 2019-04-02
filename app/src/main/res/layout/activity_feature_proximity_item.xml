@@ -79,7 +79,7 @@
 		android:layout_height="wrap_content"
 		android:layout_marginRight="16dp"/>
 
-	<android.support.v7.widget.AppCompatImageButton
+	<androidx.appcompat.widget.AppCompatImageButton
 		android:id="@+id/action_find_silent"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
@@ -88,7 +88,7 @@
 		tools:visibility="visible"
 		android:visibility="gone"/>
 
-	<android.support.v7.widget.AppCompatImageButton
+	<androidx.appcompat.widget.AppCompatImageButton
 		android:id="@+id/action_disconnect"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
