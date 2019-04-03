@@ -21,10 +21,10 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:orientation="vertical"
 	tools:context=".dfu.DfuActivity">
 
@@ -77,10 +77,10 @@
 		<LinearLayout
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
-			android:gravity="center_horizontal"
-			android:orientation="vertical"
+			android:layout_alignParentStart="true"
 			android:layout_alignParentTop="true"
-			android:layout_alignParentStart="true">
+			android:gravity="center_horizontal"
+			android:orientation="vertical">
 
 			<!-- Application section -->
 
@@ -204,12 +204,12 @@
 					android:paddingLeft="42dp">
 
 					<com.google.android.material.button.MaterialButton
-						app:backgroundTint="@color/nordicLake"
 						android:id="@+id/action_select_file"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:onClick="onSelectFileClicked"
-						android:text="@string/dfu_action_select_file"/>
+						android:text="@string/dfu_action_select_file"
+						app:backgroundTint="@color/button_color"/>
 
 					<ImageView
 						android:layout_width="wrap_content"
@@ -240,14 +240,14 @@
 					android:text="@string/dfu_section_dfu_header"/>
 
 				<com.google.android.material.button.MaterialButton
-					app:backgroundTint="@color/button_color"
 					android:id="@+id/action_upload"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:layout_margin="@dimen/feature_section_padding"
 					android:enabled="false"
 					android:onClick="onUploadClicked"
-					android:text="@string/dfu_action_upload"/>
+					android:text="@string/dfu_action_upload"
+					app:backgroundTint="@color/button_color"/>
 
 				<androidx.appcompat.widget.AppCompatTextView
 					android:id="@+id/textviewUploading"
@@ -279,8 +279,8 @@
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:layout_marginRight="@dimen/feature_horizontal_margin"
 				android:layout_gravity="right"
+				android:layout_marginRight="@dimen/feature_horizontal_margin"
 				android:text="@string/dfu_lib_version"
 				android:textSize="12sp"/>
 		</LinearLayout>
