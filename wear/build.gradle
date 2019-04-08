@@ -39,7 +39,7 @@ configurations.all() { configuration -> exclude group: "org.apache.httpcomponent
 
 dependencies {
     implementation project(':common')
-    implementation 'androidx.recyclerview:recyclerview:1.1.0-alpha03'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0-alpha04'
     implementation 'androidx.percentlayout:percentlayout:1.0.0'
     implementation 'com.google.android.support:wearable:2.4.0'
     compileOnly 'com.google.android.wearable:wearable:2.4.0'
