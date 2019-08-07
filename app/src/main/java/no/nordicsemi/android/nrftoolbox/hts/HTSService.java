@@ -30,6 +30,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -110,14 +112,12 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 
 	@Override
 	protected void onRebind() {
-		// when the activity rebinds to the service, remove the notification
-		cancelNotification();
+		stopForegroundService();
 	}
 
 	@Override
 	protected void onUnbind() {
-		// when the activity closes we need to show the notification that user is connected to the sensor
-		createNotification(R.string.hts_notification_connected_message, 0);
+		startForegroundService();
 	}
 
 	@Override
@@ -154,15 +154,41 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	}
 
 	/**
+	 * Sets the service as a foreground service
+	 */
+	private void startForegroundService(){
+		// when the activity closes we need to show the notification that user is connected to the peripheral sensor
+		// We start the service as a foreground service as Android 8.0 (Oreo) onwards kills any running background services
+		final Notification notification = createNotification(R.string.uart_notification_connected_message, 0);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			startForeground(NOTIFICATION_ID, notification);
+		} else {
+			final NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+			nm.notify(NOTIFICATION_ID, notification);
+		}
+	}
+
+	/**
+	 * Stops the service as a foreground service
+	 */
+	private void stopForegroundService(){
+		// when the activity rebinds to the service, remove the notification and stop the foreground service
+		// on devices running Android 8.0 (Oreo) or above
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			stopForeground(true);
+		} else {
+			cancelNotification();
+		}
+	}
+
+	/**
 	 * Creates the notification
-	 * 
-	 * @param messageResId
+	 *  @param messageResId
 	 *            message resource id. The message must have one String parameter,<br />
 	 *            f.e. <code>&lt;string name="name"&gt;%s is connected&lt;/string&gt;</code>
 	 * @param defaults
-	 *            signals that will be used to notify the user
 	 */
-	private void createNotification(final int messageResId, final int defaults) {
+	private Notification createNotification(final int messageResId, final int defaults) {
 		final Intent parentIntent = new Intent(this, FeaturesActivity.class);
 		parentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		final Intent targetIntent = new Intent(this, HTSActivity.class);
@@ -179,9 +205,7 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 		builder.setShowWhen(defaults != 0).setDefaults(defaults).setAutoCancel(true).setOngoing(true);
 		builder.addAction(new NotificationCompat.Action(R.drawable.ic_action_bluetooth, getString(R.string.hts_notification_action_disconnect), disconnectAction));
 
-		final Notification notification = builder.build();
-		final NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		nm.notify(NOTIFICATION_ID, notification);
+		return builder.build();
 	}
 
 	/**
