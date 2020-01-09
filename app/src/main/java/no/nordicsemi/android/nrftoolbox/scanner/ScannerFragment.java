@@ -198,7 +198,7 @@ public class ScannerFragment extends DialogFragment {
 		switch (requestCode) {
 			case REQUEST_PERMISSION_REQ_CODE: {
 				if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-					// We have been granted the Manifest.permission.ACCESS_COARSE_LOCATION permission. Now we may proceed with scanning.
+					// We have been granted the Manifest.permission.ACCESS_FINE_LOCATION permission. Now we may proceed with scanning.
 					startScan();
 				} else {
 					mPermissionRationale.setVisibility(View.VISIBLE);
@@ -218,14 +218,14 @@ public class ScannerFragment extends DialogFragment {
 		// Since Android 6.0 we need to obtain either Manifest.permission.ACCESS_COARSE_LOCATION or Manifest.permission.ACCESS_FINE_LOCATION to be able to scan for
 		// Bluetooth LE devices. This is related to beacons as proximity devices.
 		// On API older than Marshmallow the following code does nothing.
-		if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+		if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 			// When user pressed Deny and still wants to use this functionality, show the rationale
-			if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) && mPermissionRationale.getVisibility() == View.GONE) {
+			if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) && mPermissionRationale.getVisibility() == View.GONE) {
 				mPermissionRationale.setVisibility(View.VISIBLE);
 				return;
 			}
 
-			requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION_REQ_CODE);
+			requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_REQ_CODE);
 			return;
 		}
 
