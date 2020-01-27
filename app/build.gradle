@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.0"
+    buildToolsVersion "29.0.2"
 
     defaultConfig {
         applicationId "no.nordicsemi.android.nrftoolbox"
@@ -17,12 +17,10 @@ android {
     buildTypes {
         debug {
             minifyEnabled true
-            useProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         release {
             minifyEnabled true
-            useProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -42,15 +40,15 @@ dependencies {
     //noinspection GradleDependency
     implementation 'com.google.android.gms:play-services-wearable:10.2.0'
 
-    implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
-    implementation 'androidx.preference:preference:1.1.0-rc01'
-    implementation 'com.google.android.material:material:1.1.0-alpha09'
+    implementation 'androidx.appcompat:appcompat:1.2.0-alpha01'
+    implementation 'androidx.preference:preference:1.1.0'
+    implementation 'com.google.android.material:material:1.2.0-alpha04'
 
     implementation 'no.nordicsemi.android:log:2.2.0'
-    implementation 'no.nordicsemi.android.support.v18:scanner:1.4.0'
+    implementation 'no.nordicsemi.android.support.v18:scanner:1.4.3'
 
     // The DFU Library is imported automatically from jcenter:
-    implementation 'no.nordicsemi.android:dfu:1.9.0'
+    implementation 'no.nordicsemi.android:dfu:1.9.1'
     // if you desire to build the DFU Library, clone the
     // https://github.com/NordicSemiconductor/Android-DFU-Library project into DFULibrary folder,
     // add it as a module into the project structure and uncomment the following line

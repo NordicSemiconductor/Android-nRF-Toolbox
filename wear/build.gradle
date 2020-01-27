@@ -3,12 +3,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
 
     defaultConfig {
         applicationId "no.nordicsemi.android.nrftoolbox"
         minSdkVersion 23
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 282726903 // target: 28, version: 2.6.0, build: 68, multi-APK: 01
         versionName "2.7.2"
         resConfigs "en"
@@ -19,12 +19,10 @@ android {
     buildTypes {
         debug {
             minifyEnabled true
-            useProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         release {
             minifyEnabled true
-            useProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -39,12 +37,12 @@ configurations.all() { configuration -> exclude group: "org.apache.httpcomponent
 
 dependencies {
     implementation project(':common')
-    implementation 'androidx.recyclerview:recyclerview:1.1.0-alpha04'
+    implementation 'androidx.recyclerview:recyclerview:1.2.0-alpha01'
     implementation 'androidx.percentlayout:percentlayout:1.0.0'
-    implementation 'com.google.android.support:wearable:2.4.0'
-    compileOnly 'com.google.android.wearable:wearable:2.4.0'
+    implementation 'com.google.android.support:wearable:2.5.0'
+    compileOnly 'com.google.android.wearable:wearable:2.5.0'
 
-    implementation 'no.nordicsemi.android.support.v18:scanner:1.4.0'
+    implementation 'no.nordicsemi.android.support.v18:scanner:1.4.3'
 
     // uncomment to enable the Wear UI Library
     // https://developer.android.com/training/wearables/ui/wear-ui-library.html
