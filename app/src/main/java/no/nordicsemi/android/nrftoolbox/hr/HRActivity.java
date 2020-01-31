@@ -19,7 +19,7 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package no.nordicsemi.android.nrftoolbox.hrs;
+package no.nordicsemi.android.nrftoolbox.hr;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -49,7 +49,7 @@ import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
  * uses external library AChartEngine to show real time graph of HR values.
  */
 // TODO The HRSActivity should be rewritten to use the service approach, like other do.
-public class HRSActivity extends BleProfileActivity implements HRSManagerCallbacks {
+public class HRActivity extends BleProfileActivity implements HRManagerCallbacks {
 	@SuppressWarnings("unused")
 	private final String TAG = "HRSActivity";
 
@@ -151,7 +151,7 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 
 	@Override
 	protected UUID getFilterUUID() {
-		return HRSManager.HR_SERVICE_UUID;
+		return HRManager.HR_SERVICE_UUID;
 	}
 
 	private void updateGraph(final int hrmValue) {
@@ -181,8 +181,8 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 	}
 
 	@Override
-	protected LoggableBleManager<HRSManagerCallbacks> initializeManager() {
-		final HRSManager manager = HRSManager.getInstance(getApplicationContext());
+	protected LoggableBleManager<HRManagerCallbacks> initializeManager() {
+		final HRManager manager = HRManager.getInstance(getApplicationContext());
 		manager.setManagerCallbacks(this);
 		return manager;
 	}

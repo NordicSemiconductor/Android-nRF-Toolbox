@@ -20,10 +20,9 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.nrftoolbox.hts.settings;
+package no.nordicsemi.android.nrftoolbox.ht.settings;
 
 import android.os.Bundle;
-import android.preference.PreferenceFragment;
 
 import androidx.preference.PreferenceFragmentCompat;
 import no.nordicsemi.android.nrftoolbox.R;

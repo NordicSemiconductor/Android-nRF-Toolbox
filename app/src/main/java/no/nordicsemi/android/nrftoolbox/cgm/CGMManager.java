@@ -20,7 +20,7 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.nrftoolbox.cgms;
+package no.nordicsemi.android.nrftoolbox.cgm;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
@@ -49,7 +49,7 @@ import no.nordicsemi.android.nrftoolbox.parser.CGMMeasurementParser;
 import no.nordicsemi.android.nrftoolbox.parser.CGMSpecificOpsControlPointParser;
 import no.nordicsemi.android.nrftoolbox.parser.RecordAccessControlPointParser;
 
-class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
+class CGMManager extends BatteryManager<CGMManagerCallbacks> {
 	/** Cycling Speed and Cadence service UUID. */
 	static final UUID CGMS_UUID = UUID.fromString("0000181F-0000-1000-8000-00805f9b34fb");
 	private static final UUID CGM_STATUS_UUID = UUID.fromString("00002AA9-0000-1000-8000-00805f9b34fb");
@@ -65,7 +65,7 @@ class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 	private BluetoothGattCharacteristic cgmSpecificOpsControlPointCharacteristic;
 	private BluetoothGattCharacteristic recordAccessControlPointCharacteristic;
 
-	private SparseArray<CGMSRecord> records = new SparseArray<>();
+	private SparseArray<CGMRecord> records = new SparseArray<>();
 
 	/** A flag set to true if the remote device supports E2E CRC. */
 	private boolean secured;
@@ -80,7 +80,7 @@ class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 	 */
 	private long sessionStartTime;
 
-	CGMSManager(final Context context) {
+	CGMManager(final Context context) {
 		super(context);
 	}
 
@@ -108,8 +108,8 @@ class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 						@Override
 						public void onContinuousGlucoseMonitorFeaturesReceived(@NonNull final BluetoothDevice device, @NonNull final CGMFeatures features,
 																			   final int type, final int sampleLocation, final boolean secured) {
-							CGMSManager.this.secured = features.e2eCrcSupported;
-							log(LogContract.Log.Level.APPLICATION, "E2E CRC feature " + (CGMSManager.this.secured ? "supported" : "not supported"));
+							CGMManager.this.secured = features.e2eCrcSupported;
+							log(LogContract.Log.Level.APPLICATION, "E2E CRC feature " + (CGMManager.this.secured ? "supported" : "not supported"));
 						}
 					})
 					.fail((device, status) -> log(Log.WARN, "Could not read CGM Feature characteristic"))
@@ -155,7 +155,7 @@ class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 							// Calculate the sample timestamp based on the Session Start Time
 							final long timestamp = sessionStartTime + (timeOffset * 60000L); // Sequence number is in minutes since Start Session
 
-							final CGMSRecord record = new CGMSRecord(timeOffset, glucoseConcentration, timestamp);
+							final CGMRecord record = new CGMRecord(timeOffset, glucoseConcentration, timestamp);
 							records.put(record.sequenceNumber, record);
 							callbacks.onCGMValueReceived(device, record);
 						}
@@ -332,7 +332,7 @@ class CGMSManager extends BatteryManager<CGMSManagerCallbacks> {
 	/**
 	 * Returns a list of CGM records obtained from this device. The key in the array is the
 	 */
-	SparseArray<CGMSRecord> getRecords() {
+	SparseArray<CGMRecord> getRecords() {
 		return records;
 	}
 

@@ -19,7 +19,7 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package no.nordicsemi.android.nrftoolbox.hts;
+package no.nordicsemi.android.nrftoolbox.ht;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -41,12 +41,13 @@ import no.nordicsemi.android.nrftoolbox.battery.BatteryManager;
 import no.nordicsemi.android.nrftoolbox.parser.TemperatureMeasurementParser;
 
 /**
- * HTSManager class performs BluetoothGatt operations for connection, service discovery, enabling
- * indication and reading characteristics. All operations required to connect to device with BLE HT
- * Service and reading health thermometer values are performed here.
- * HTSActivity implements HTSManagerCallbacks in order to receive callbacks of BluetoothGatt operations.
+ * {@link HTManager} class performs {@link BluetoothGatt} operations for connection, service discovery,
+ * enabling indication and reading characteristics. All operations required to connect to device
+ * with BLE HT Service and reading health thermometer values are performed here.
+ * {@link HTActivity} implements {@link HTManagerCallbacks} in order to receive callbacks of
+ * {@link BluetoothGatt} operations.
  */
-public class HTSManager extends BatteryManager<HTSManagerCallbacks> {
+public class HTManager extends BatteryManager<HTManagerCallbacks> {
 	/** Health Thermometer service UUID */
 	final static UUID HT_SERVICE_UUID = UUID.fromString("00001809-0000-1000-8000-00805f9b34fb");
 	/** Health Thermometer Measurement characteristic UUID */
@@ -54,7 +55,7 @@ public class HTSManager extends BatteryManager<HTSManagerCallbacks> {
 
 	private BluetoothGattCharacteristic htCharacteristic;
 
-	HTSManager(final Context context) {
+	HTManager(final Context context) {
 		super(context);
 	}
 
@@ -82,7 +83,8 @@ public class HTSManager extends BatteryManager<HTSManagerCallbacks> {
 
 						@Override
 						public void onTemperatureMeasurementReceived(@NonNull final BluetoothDevice device,
-																	 final float temperature, @TemperatureUnit final int unit,
+																	 final float temperature,
+																	 @TemperatureUnit final int unit,
 																	 @Nullable final Calendar calendar,
 																	 @Nullable @TemperatureType final Integer type) {
 							callbacks.onTemperatureMeasurementReceived(device, temperature, unit, calendar, type);

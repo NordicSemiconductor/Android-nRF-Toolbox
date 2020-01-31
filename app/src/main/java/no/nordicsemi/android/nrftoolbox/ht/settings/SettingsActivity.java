@@ -19,12 +19,38 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package no.nordicsemi.android.nrftoolbox.hrs;
 
-import no.nordicsemi.android.ble.common.profile.hr.BodySensorLocationCallback;
-import no.nordicsemi.android.ble.common.profile.hr.HeartRateMeasurementCallback;
-import no.nordicsemi.android.nrftoolbox.battery.BatteryManagerCallbacks;
+package no.nordicsemi.android.nrftoolbox.ht.settings;
 
-interface HRSManagerCallbacks extends BatteryManagerCallbacks, BodySensorLocationCallback, HeartRateMeasurementCallback {
+import android.os.Bundle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import android.view.MenuItem;
 
+import no.nordicsemi.android.nrftoolbox.R;
+
+public class SettingsActivity extends AppCompatActivity {
+
+	@Override
+	protected void onCreate(final Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_settings);
+
+        final Toolbar toolbar  = findViewById(R.id.toolbar_actionbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+		// Display the fragment as the main content.
+        getSupportFragmentManager().beginTransaction().replace(R.id.content, new SettingsFragment()).commit();
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(final MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			onBackPressed();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
 }

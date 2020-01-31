@@ -20,7 +20,7 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.nrftoolbox.hts;
+package no.nordicsemi.android.nrftoolbox.ht;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -50,7 +50,7 @@ import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
 
 @SuppressWarnings("FieldCanBeLocal")
-public class HTSService extends BleProfileService implements HTSManagerCallbacks {
+public class HTService extends BleProfileService implements HTManagerCallbacks {
 	public static final String BROADCAST_HTS_MEASUREMENT = "no.nordicsemi.android.nrftoolbox.hts.BROADCAST_HTS_MEASUREMENT";
 	public static final String EXTRA_TEMPERATURE = "no.nordicsemi.android.nrftoolbox.hts.EXTRA_TEMPERATURE";
 
@@ -66,7 +66,7 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	private Float temp;
 
 	@SuppressWarnings("unused")
-	private HTSManager manager;
+	private HTManager manager;
 
 	private final LocalBinder minder = new HTSBinder();
 
@@ -90,8 +90,8 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	}
 
 	@Override
-	protected LoggableBleManager<HTSManagerCallbacks> initializeManager() {
-		return manager = new HTSManager(this);
+	protected LoggableBleManager<HTManagerCallbacks> initializeManager() {
+		return manager = new HTManager(this);
 	}
 
 	@Override
@@ -194,7 +194,7 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	private Notification createNotification(final int messageResId, final int defaults) {
 		final Intent parentIntent = new Intent(this, FeaturesActivity.class);
 		parentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		final Intent targetIntent = new Intent(this, HTSActivity.class);
+		final Intent targetIntent = new Intent(this, HTActivity.class);
 
 		final Intent disconnect = new Intent(ACTION_DISCONNECT);
 		final PendingIntent disconnectAction = PendingIntent.getBroadcast(this, DISCONNECT_REQ, disconnect, PendingIntent.FLAG_UPDATE_CURRENT);

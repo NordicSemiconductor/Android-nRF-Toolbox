@@ -19,7 +19,7 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package no.nordicsemi.android.nrftoolbox.hts;
+package no.nordicsemi.android.nrftoolbox.ht;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -38,17 +38,17 @@ import android.widget.TextView;
 import java.util.UUID;
 
 import no.nordicsemi.android.nrftoolbox.R;
-import no.nordicsemi.android.nrftoolbox.hts.settings.SettingsActivity;
-import no.nordicsemi.android.nrftoolbox.hts.settings.SettingsFragment;
+import no.nordicsemi.android.nrftoolbox.ht.settings.SettingsActivity;
+import no.nordicsemi.android.nrftoolbox.ht.settings.SettingsFragment;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileServiceReadyActivity;
 
 /**
- * HTSActivity is the main Health Thermometer activity. It implements {@link HTSManagerCallbacks}
- * to receive callbacks from {@link HTSManager} class. The activity supports portrait and landscape
+ * HTSActivity is the main Health Thermometer activity. It implements {@link HTManagerCallbacks}
+ * to receive callbacks from {@link HTManager} class. The activity supports portrait and landscape
  * orientations.
  */
-public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.HTSBinder> {
+public class HTActivity extends BleProfileServiceReadyActivity<HTService.HTSBinder> {
 	@SuppressWarnings("unused")
 	private final String TAG = "HTSActivity";
 
@@ -111,7 +111,7 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.HTSBi
 	}
 
 	@Override
-	protected void onServiceBound(final HTSService.HTSBinder binder) {
+	protected void onServiceBound(final HTService.HTSBinder binder) {
 		onTemperatureMeasurementReceived(binder.getTemperature());
 	}
 
@@ -154,12 +154,12 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.HTSBi
 
 	@Override
 	protected UUID getFilterUUID() {
-		return HTSManager.HT_SERVICE_UUID;
+		return HTManager.HT_SERVICE_UUID;
 	}
 
 	@Override
 	protected Class<? extends BleProfileService> getServiceClass() {
-		return HTSService.class;
+		return HTService.class;
 	}
 
 	@Override
@@ -204,12 +204,12 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.HTSBi
 		public void onReceive(final Context context, final Intent intent) {
 			final String action = intent.getAction();
 
-			if (HTSService.BROADCAST_HTS_MEASUREMENT.equals(action)) {
-				final float value = intent.getFloatExtra(HTSService.EXTRA_TEMPERATURE, 0.0f);
+			if (HTService.BROADCAST_HTS_MEASUREMENT.equals(action)) {
+				final float value = intent.getFloatExtra(HTService.EXTRA_TEMPERATURE, 0.0f);
 				// Update GUI
 				onTemperatureMeasurementReceived(value);
-			} else if (HTSService.BROADCAST_BATTERY_LEVEL.equals(action)) {
-				final int batteryLevel = intent.getIntExtra(HTSService.EXTRA_BATTERY_LEVEL, 0);
+			} else if (HTService.BROADCAST_BATTERY_LEVEL.equals(action)) {
+				final int batteryLevel = intent.getIntExtra(HTService.EXTRA_BATTERY_LEVEL, 0);
 				// Update GUI
 				onBatteryLevelChanged(batteryLevel);
 			}
@@ -218,8 +218,8 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.HTSBi
 
 	private static IntentFilter makeIntentFilter() {
 		final IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction(HTSService.BROADCAST_HTS_MEASUREMENT);
-		intentFilter.addAction(HTSService.BROADCAST_BATTERY_LEVEL);
+		intentFilter.addAction(HTService.BROADCAST_HTS_MEASUREMENT);
+		intentFilter.addAction(HTService.BROADCAST_BATTERY_LEVEL);
 		return intentFilter;
 	}
 }

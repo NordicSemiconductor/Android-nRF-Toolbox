@@ -37,11 +37,11 @@ import java.util.List;
 
 import no.nordicsemi.android.nrftoolbox.R;
 
-public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder> {
+class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder> {
 	private final ProximityService.ProximityBinder service;
 	private final List<BluetoothDevice> devices;
 
-	DeviceAdapter(final ProximityService.ProximityBinder binder) {
+	DeviceAdapter(@NonNull final ProximityService.ProximityBinder binder) {
 		service = binder;
 		devices = service.getManagedDevices();
 	}
@@ -63,7 +63,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 		return devices.size();
 	}
 
-	public void onDeviceAdded(final BluetoothDevice device) {
+	void onDeviceAdded(final BluetoothDevice device) {
 		final int position = devices.indexOf(device);
 		if (position == -1) {
 			notifyItemInserted(devices.size() - 1);
@@ -74,17 +74,17 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 		}
 	}
 
-	public void onDeviceRemoved(final BluetoothDevice device) {
+	void onDeviceRemoved(final BluetoothDevice device) {
 		notifyDataSetChanged(); // we don't have position of the removed device here
 	}
 
-	public void onDeviceStateChanged(final BluetoothDevice device) {
+	void onDeviceStateChanged(final BluetoothDevice device) {
 		final int position = devices.indexOf(device);
 		if (position >= 0)
 			notifyItemChanged(position);
 	}
 
-	public void onBatteryValueReceived(final BluetoothDevice device) {
+	void onBatteryValueReceived(final BluetoothDevice device) {
 		final int position = devices.indexOf(device);
 		if (position >= 0)
 			notifyItemChanged(position);
@@ -123,7 +123,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 			});
 		}
 
-		private void bind(final BluetoothDevice device) {
+		private void bind(@NonNull final BluetoothDevice device) {
 			final boolean ready = service.isReady(device);
 
 			String name = device.getName();

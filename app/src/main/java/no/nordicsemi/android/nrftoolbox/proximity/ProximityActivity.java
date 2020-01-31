@@ -159,7 +159,7 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 
 	private void showLinkLossDialog(final String name) {
 		try {
-			final LinkLossFragment dialog = LinkLossFragment.getInstance(name);
+			final LinkLossDialogFragment dialog = LinkLossDialogFragment.getInstance(name);
 			dialog.show(getSupportFragmentManager(), "scan_fragment");
 		} catch (final Exception e) {
 			// the activity must have been destroyed

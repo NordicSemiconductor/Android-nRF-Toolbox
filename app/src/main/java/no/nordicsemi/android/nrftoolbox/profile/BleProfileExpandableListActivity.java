@@ -143,7 +143,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	}
 
 	@Override
-	protected void onSaveInstanceState(final Bundle outState) {
+	protected void onSaveInstanceState(@NonNull final Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putBoolean(SIS_CONNECTION_STATUS, deviceConnected);
 		outState.putString(SIS_DEVICE_NAME, deviceName);

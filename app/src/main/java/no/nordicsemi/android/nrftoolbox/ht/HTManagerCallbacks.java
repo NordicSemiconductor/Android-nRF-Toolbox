@@ -19,15 +19,15 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package no.nordicsemi.android.nrftoolbox.hts;
+package no.nordicsemi.android.nrftoolbox.ht;
 
 import no.nordicsemi.android.ble.common.profile.ht.TemperatureMeasurementCallback;
 import no.nordicsemi.android.nrftoolbox.battery.BatteryManagerCallbacks;
 
 /**
- * Interface {@link HTSManagerCallbacks} must be implemented by {@link HTSActivity} in order
- * to receive callbacks from {@link HTSManager}.
+ * Interface {@link HTManagerCallbacks} must be implemented by {@link HTActivity} in order
+ * to receive callbacks from {@link HTManager}.
  */
-interface HTSManagerCallbacks extends BatteryManagerCallbacks, TemperatureMeasurementCallback {
+interface HTManagerCallbacks extends BatteryManagerCallbacks, TemperatureMeasurementCallback {
 
 }

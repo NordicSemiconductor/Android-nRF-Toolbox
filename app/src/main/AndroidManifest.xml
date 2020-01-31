@@ -119,7 +119,7 @@
 			android:name="no.nordicsemi.android.nrftoolbox.dfu.NotificationActivity"
 			android:label="@string/dfu_feature_title" />
 		<activity
-			android:name="no.nordicsemi.android.nrftoolbox.hrs.HRSActivity"
+			android:name="no.nordicsemi.android.nrftoolbox.hr.HRActivity"
 			android:icon="@drawable/ic_hrs_feature"
 			android:label="@string/hrs_feature_title" >
 			<intent-filter>
@@ -129,7 +129,7 @@
 			</intent-filter>
 		</activity>
 		<activity
-			android:name="no.nordicsemi.android.nrftoolbox.hts.HTSActivity"
+			android:name="no.nordicsemi.android.nrftoolbox.ht.HTActivity"
 			android:icon="@drawable/ic_hts_feature"
 			android:label="@string/hts_feature_title" >
 			<intent-filter>
@@ -139,7 +139,7 @@
 			</intent-filter>
 		</activity>
 		<activity
-			android:name="no.nordicsemi.android.nrftoolbox.hts.settings.SettingsActivity"
+			android:name="no.nordicsemi.android.nrftoolbox.ht.settings.SettingsActivity"
 			android:label="@string/hts_settings_title" />
 		<activity
 			android:name="no.nordicsemi.android.nrftoolbox.bpm.BPMActivity"
@@ -212,7 +212,7 @@
 				<category android:name="no.nordicsemi.android.nrftoolbox.LAUNCHER" />
 			</intent-filter>
 		</activity>
-		<activity android:name="no.nordicsemi.android.nrftoolbox.cgms.CGMSActivity"
+		<activity android:name="no.nordicsemi.android.nrftoolbox.cgm.CGMSActivity"
 			android:icon="@drawable/ic_cgms_feature"
 			android:label="@string/cgms_feature_title"
 			android:launchMode="singleTask">
@@ -250,7 +250,7 @@
 		</activity>
 
 		<service
-			android:name="no.nordicsemi.android.nrftoolbox.cgms.CGMService"
+			android:name="no.nordicsemi.android.nrftoolbox.cgm.CGMService"
 			android:label="@string/cgms_feature_title" />
 		<service
 			android:name="no.nordicsemi.android.nrftoolbox.rsc.RSCService"
@@ -259,7 +259,7 @@
 			android:name="no.nordicsemi.android.nrftoolbox.csc.CSCService"
 			android:label="@string/csc_feature_title" />
 		<service
-			android:name="no.nordicsemi.android.nrftoolbox.hts.HTSService"
+			android:name="no.nordicsemi.android.nrftoolbox.ht.HTService"
 			android:label="@string/hts_feature_title" />
 		<service
 			android:name="no.nordicsemi.android.nrftoolbox.uart.UARTService"

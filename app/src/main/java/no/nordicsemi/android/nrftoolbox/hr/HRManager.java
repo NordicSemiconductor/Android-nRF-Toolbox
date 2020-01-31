@@ -19,7 +19,7 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package no.nordicsemi.android.nrftoolbox.hrs;
+package no.nordicsemi.android.nrftoolbox.hr;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -50,26 +50,26 @@ import no.nordicsemi.android.nrftoolbox.parser.HeartRateMeasurementParser;
  * All operations required to connect to device with BLE Heart Rate Service and reading
  * heart rate values are performed here.
  */
-public class HRSManager extends BatteryManager<HRSManagerCallbacks> {
+public class HRManager extends BatteryManager<HRManagerCallbacks> {
 	static final UUID HR_SERVICE_UUID = UUID.fromString("0000180D-0000-1000-8000-00805f9b34fb");
 	private static final UUID BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID = UUID.fromString("00002A38-0000-1000-8000-00805f9b34fb");
 	private static final UUID HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb");
 
 	private BluetoothGattCharacteristic heartRateCharacteristic, bodySensorLocationCharacteristic;
 
-	private static HRSManager managerInstance = null;
+	private static HRManager managerInstance = null;
 
 	/**
 	 * Singleton implementation of HRSManager class.
 	 */
-	public static synchronized HRSManager getInstance(final Context context) {
+	public static synchronized HRManager getInstance(final Context context) {
 		if (managerInstance == null) {
-			managerInstance = new HRSManager(context);
+			managerInstance = new HRManager(context);
 		}
 		return managerInstance;
 	}
 
-	private HRSManager(final Context context) {
+	private HRManager(final Context context) {
 		super(context);
 	}
 

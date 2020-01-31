@@ -1,4 +1,4 @@
-package no.nordicsemi.android.nrftoolbox.cgms;
+package no.nordicsemi.android.nrftoolbox.cgm;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -17,13 +17,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import no.nordicsemi.android.nrftoolbox.R;
 
-class CGMSRecordsAdapter extends BaseAdapter {
+class CGMRecordsAdapter extends BaseAdapter {
 	private final static SimpleDateFormat timeFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.US);
 
-	private List<CGMSRecord> records;
+	private List<CGMRecord> records;
 	private LayoutInflater inflater;
 
-	CGMSRecordsAdapter(@NonNull final Context context) {
+	CGMRecordsAdapter(@NonNull final Context context) {
 		records = new ArrayList<>();
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
@@ -58,15 +58,15 @@ class CGMSRecordsAdapter extends BaseAdapter {
 			viewHolder = (ViewHolder) view.getTag();
 		}
 
-		final CGMSRecord cgmsRecord = records.get(position);
-		viewHolder.concentration.setText(String.valueOf(cgmsRecord.glucoseConcentration));
-		viewHolder.details.setText(viewHolder.details.getResources().getString(R.string.cgms_details, cgmsRecord.sequenceNumber));
-		viewHolder.time.setText(timeFormat.format(new Date(cgmsRecord.timestamp)));
+		final CGMRecord CGMRecord = records.get(position);
+		viewHolder.concentration.setText(String.valueOf(CGMRecord.glucoseConcentration));
+		viewHolder.details.setText(viewHolder.details.getResources().getString(R.string.cgms_details, CGMRecord.sequenceNumber));
+		viewHolder.time.setText(timeFormat.format(new Date(CGMRecord.timestamp)));
 
 		return view;
 	}
 
-	void addItem(final CGMSRecord record) {
+	void addItem(final CGMRecord record) {
 		records.add(record);
 	}
 

@@ -1,4 +1,4 @@
-package no.nordicsemi.android.nrftoolbox.cgms;
+package no.nordicsemi.android.nrftoolbox.cgm;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -21,7 +21,7 @@ import no.nordicsemi.android.nrftoolbox.ToolboxApplication;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
 
-public class CGMService extends BleProfileService implements CGMSManagerCallbacks {
+public class CGMService extends BleProfileService implements CGMManagerCallbacks {
     private static final String ACTION_DISCONNECT = "no.nordicsemi.android.nrftoolbox.cgms.ACTION_DISCONNECT";
 
     public static final String BROADCAST_BATTERY_LEVEL = "no.nordicsemi.android.nrftoolbox.BROADCAST_BATTERY_LEVEL";
@@ -42,7 +42,7 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     private final static int OPEN_ACTIVITY_REQ = 0;
     private final static int DISCONNECT_REQ = 1;
 
-    private CGMSManager manager;
+    private CGMManager manager;
     private final LocalBinder binder = new CGMSBinder();
 
     /**
@@ -55,7 +55,7 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
          *
          * @return the records list
          */
-        SparseArray<CGMSRecord> getRecords() {
+        SparseArray<CGMRecord> getRecords() {
             return manager.getRecords();
         }
 
@@ -70,7 +70,7 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
         /**
          * Sends the request to obtain the first (oldest) record from glucose device.
          * The data will be returned to Glucose Measurement characteristic as a notification followed by Record Access Control
-         * Point indication with status code ({@link CGMSManager# RESPONSE_SUCCESS} or other in case of error.
+         * Point indication with status code ({@link CGMManager# RESPONSE_SUCCESS} or other in case of error.
          */
         void getFirstRecord() {
             if (manager != null)
@@ -132,8 +132,8 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     }
 
     @Override
-    protected LoggableBleManager<CGMSManagerCallbacks> initializeManager() {
-        return manager = new CGMSManager(this);
+    protected LoggableBleManager<CGMManagerCallbacks> initializeManager() {
+        return manager = new CGMManager(this);
     }
 
 
@@ -243,7 +243,7 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     };
 
     @Override
-    public void onCGMValueReceived(@NonNull final BluetoothDevice device, @NonNull final CGMSRecord record) {
+    public void onCGMValueReceived(@NonNull final BluetoothDevice device, @NonNull final CGMRecord record) {
         final Intent broadcast = new Intent(BROADCAST_NEW_CGMS_VALUE);
         broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
         broadcast.putExtra(EXTRA_CGMS_RECORD, record);

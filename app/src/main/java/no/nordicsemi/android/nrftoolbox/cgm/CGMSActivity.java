@@ -20,7 +20,7 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.nrftoolbox.cgms;
+package no.nordicsemi.android.nrftoolbox.cgm;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -51,7 +51,7 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 	private View controlPanelAbort;
 	private ListView recordsListView;
 	private TextView batteryLevelView;
-	private CGMSRecordsAdapter cgmsRecordsAdapter;
+	private CGMRecordsAdapter CGMRecordsAdapter;
 
 	private CGMService.CGMSBinder binder;
 
@@ -102,12 +102,12 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 		});
 	}
 
-	private void loadAdapter(SparseArray<CGMSRecord> records) {
-		cgmsRecordsAdapter.clear();
+	private void loadAdapter(SparseArray<CGMRecord> records) {
+		CGMRecordsAdapter.clear();
 		for (int i = 0; i < records.size(); i++) {
-			cgmsRecordsAdapter.addItem(records.valueAt(i));
+			CGMRecordsAdapter.addItem(records.valueAt(i));
 		}
-		cgmsRecordsAdapter.notifyDataSetChanged();
+		CGMRecordsAdapter.notifyDataSetChanged();
 	}
 
 	@Override
@@ -119,11 +119,11 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 	@Override
 	protected void onServiceBound(final CGMService.CGMSBinder binder) {
 		this.binder = binder;
-		final SparseArray<CGMSRecord> cgmsRecords = binder.getRecords();
+		final SparseArray<CGMRecord> cgmsRecords = binder.getRecords();
 		if (cgmsRecords != null && cgmsRecords.size() > 0) {
-			if (cgmsRecordsAdapter == null) {
-				cgmsRecordsAdapter = new CGMSRecordsAdapter(CGMSActivity.this);
-				recordsListView.setAdapter(cgmsRecordsAdapter);
+			if (CGMRecordsAdapter == null) {
+				CGMRecordsAdapter = new CGMRecordsAdapter(CGMSActivity.this);
+				recordsListView.setAdapter(CGMRecordsAdapter);
 			}
 			loadAdapter(cgmsRecords);
 		}
@@ -156,7 +156,7 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 
 	@Override
 	protected UUID getFilterUUID() {
-		return CGMSManager.CGMS_UUID;
+		return CGMManager.CGMS_UUID;
 	}
 
 	@Override
@@ -219,9 +219,9 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 	}
 
 	private void clearRecords() {
-		if (cgmsRecordsAdapter != null) {
-			cgmsRecordsAdapter.clear();
-			cgmsRecordsAdapter.notifyDataSetChanged();
+		if (CGMRecordsAdapter != null) {
+			CGMRecordsAdapter.clear();
+			CGMRecordsAdapter.notifyDataSetChanged();
 		}
 	}
 
@@ -233,13 +233,13 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 
 			switch (action) {
 				case CGMService.BROADCAST_NEW_CGMS_VALUE: {
-					CGMSRecord cgmsRecord = intent.getExtras().getParcelable(CGMService.EXTRA_CGMS_RECORD);
-					if (cgmsRecordsAdapter == null) {
-						cgmsRecordsAdapter = new CGMSRecordsAdapter(CGMSActivity.this);
-						recordsListView.setAdapter(cgmsRecordsAdapter);
+					CGMRecord CGMRecord = intent.getExtras().getParcelable(CGMService.EXTRA_CGMS_RECORD);
+					if (CGMRecordsAdapter == null) {
+						CGMRecordsAdapter = new CGMRecordsAdapter(CGMSActivity.this);
+						recordsListView.setAdapter(CGMRecordsAdapter);
 					}
-					cgmsRecordsAdapter.addItem(cgmsRecord);
-					cgmsRecordsAdapter.notifyDataSetChanged();
+					CGMRecordsAdapter.addItem(CGMRecord);
+					CGMRecordsAdapter.notifyDataSetChanged();
 					break;
 				}
 				case CGMService.BROADCAST_DATA_SET_CLEAR:

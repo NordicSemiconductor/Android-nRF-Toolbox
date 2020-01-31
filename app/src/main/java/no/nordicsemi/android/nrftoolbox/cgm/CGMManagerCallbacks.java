@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Nordic Semiconductor
+ * Copyright (c) 2016, Nordic Semiconductor
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -20,37 +20,29 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.nrftoolbox.hts.settings;
+package no.nordicsemi.android.nrftoolbox.cgm;
 
-import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import android.view.MenuItem;
+import android.bluetooth.BluetoothDevice;
+import androidx.annotation.NonNull;
 
-import no.nordicsemi.android.nrftoolbox.R;
+import no.nordicsemi.android.nrftoolbox.battery.BatteryManagerCallbacks;
 
-public class SettingsActivity extends AppCompatActivity {
+interface CGMManagerCallbacks extends BatteryManagerCallbacks {
 
-	@Override
-	protected void onCreate(final Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+	void onCGMValueReceived(@NonNull final BluetoothDevice device, @NonNull final CGMRecord record);
 
-        final Toolbar toolbar  = findViewById(R.id.toolbar_actionbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+	void onOperationStarted(final @NonNull BluetoothDevice device);
 
-		// Display the fragment as the main content.
-        getSupportFragmentManager().beginTransaction().replace(R.id.content, new SettingsFragment()).commit();
-	}
+	void onOperationCompleted(final @NonNull BluetoothDevice device);
 
-	@Override
-	public boolean onOptionsItemSelected(final MenuItem item) {
-		switch (item.getItemId()) {
-		case android.R.id.home:
-			onBackPressed();
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}
+	void onOperationFailed(final @NonNull BluetoothDevice device);
+
+	void onOperationAborted(final @NonNull BluetoothDevice device);
+
+	void onOperationNotSupported(final @NonNull BluetoothDevice device);
+
+	void onDataSetCleared(final @NonNull BluetoothDevice device);
+
+	void onNumberOfRecordsRequested(final @NonNull BluetoothDevice device, final int value);
+
 }

@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<?xml version="1.0" encoding="utf-8"?><!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ~ Copyright (c) 2015, Nordic Semiconductor
   ~ All rights reserved.
   ~
@@ -21,11 +20,11 @@
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<androidx.appcompat.widget.Toolbar
-	android:id="@+id/toolbar_actionbar"
-	style="@style/HeaderBar"
+<com.google.android.material.appbar.MaterialToolbar
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:id="@+id/toolbar_actionbar"
+	style="@style/HeaderBar"
 	android:layout_width="match_parent"
 	android:layout_height="?actionBarSize"
 	android:theme="@style/ActionBarThemeOverlay"
@@ -36,5 +35,5 @@
 		android:id="@+id/toolbar_spinner"
 		android:layout_width="wrap_content"
 		android:layout_height="48dp"
-		android:minWidth="160dp"/>
-</androidx.appcompat.widget.Toolbar>
+		android:minWidth="160dp" />
+</com.google.android.material.appbar.MaterialToolbar>
