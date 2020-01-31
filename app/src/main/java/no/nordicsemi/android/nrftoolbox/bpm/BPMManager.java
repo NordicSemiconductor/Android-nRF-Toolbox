@@ -71,14 +71,14 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
-		return gattCallback;
+		return new BloodPressureManagerGattCallback();
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
 	 * receiving notification, etc.
 	 */
-	private final BatteryManagerGattCallback gattCallback = new BatteryManagerGattCallback() {
+	private class BloodPressureManagerGattCallback extends BatteryManagerGattCallback {
 
 		@Override
 		protected void initialize() {
@@ -161,5 +161,5 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 			icpCharacteristic = null;
 			bpmCharacteristic = null;
 		}
-	};
+	}
 }

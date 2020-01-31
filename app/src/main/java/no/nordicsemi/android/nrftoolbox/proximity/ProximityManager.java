@@ -63,14 +63,14 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
-		return gattCallback;
+		return new ProximityManagerGattCallback();
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
 	 * receiving indication, etc.
 	 */
-	private final BatteryManagerGattCallback gattCallback = new BatteryManagerGattCallback() {
+	private class ProximityManagerGattCallback extends BatteryManagerGattCallback {
 
 		@Override
 		protected void initialize() {
@@ -127,7 +127,7 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 			// Reset the alert flag
 			alertOn = false;
 		}
-	};
+	}
 
 	/**
 	 * Toggles the immediate alert on the target device.

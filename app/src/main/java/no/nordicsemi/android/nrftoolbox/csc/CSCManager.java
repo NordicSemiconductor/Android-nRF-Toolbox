@@ -60,14 +60,14 @@ public class CSCManager extends BatteryManager<CSCManagerCallbacks> {
 	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
-		return gattCallback;
+		return new CSCManagerGattCallback();
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
 	 * receiving indication, etc.
 	 */
-	private final BatteryManagerGattCallback gattCallback = new BatteryManagerGattCallback() {
+	private class CSCManagerGattCallback extends BatteryManagerGattCallback {
 
 		@Override
 		protected void initialize() {
@@ -128,5 +128,5 @@ public class CSCManager extends BatteryManager<CSCManagerCallbacks> {
 			super.onDeviceDisconnected();
 			cscMeasurementCharacteristic = null;
 		}
-	};
+	}
 }

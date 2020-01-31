@@ -60,14 +60,14 @@ public class UARTManager extends LoggableBleManager<UARTManagerCallbacks> {
 	@NonNull
 	@Override
 	protected BleManagerGattCallback getGattCallback() {
-		return gattCallback;
+		return new UARTManagerGattCallback();
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
 	 * receiving indication, etc.
 	 */
-	private final BleManagerGattCallback gattCallback = new BleManagerGattCallback() {
+	private class UARTManagerGattCallback extends BleManagerGattCallback {
 
 		@Override
 		protected void initialize() {
@@ -115,7 +115,7 @@ public class UARTManager extends LoggableBleManager<UARTManagerCallbacks> {
 			txCharacteristic = null;
 			useLongWrite = true;
 		}
-	};
+	}
 
 	// This has been moved to the service in BleManager v2.0.
 	/*@Override

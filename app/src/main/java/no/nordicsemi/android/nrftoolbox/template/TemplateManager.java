@@ -78,14 +78,14 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
-		return gattCallback;
+		return new TemplateManagerGattCallback();
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
 	 * receiving indication, etc.
 	 */
-	private final BatteryManagerGattCallback gattCallback = new BatteryManagerGattCallback() {
+	private class TemplateManagerGattCallback extends BatteryManagerGattCallback {
 
 		@Override
 		protected void initialize() {
@@ -205,7 +205,7 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 					})
 					.enqueue();
 		}
-	};
+	}
 
 	// TODO Define manager's API
 

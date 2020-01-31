@@ -87,14 +87,14 @@ class CGMManager extends BatteryManager<CGMManagerCallbacks> {
 	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
-		return gattCallback;
+		return new CGMManagerGattCallback();
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
 	 * receiving notification, etc.
 	 */
-	private final BatteryManagerGattCallback gattCallback = new BatteryManagerGattCallback() {
+	private class CGMManagerGattCallback extends BatteryManagerGattCallback {
 
 		@Override
 		protected void initialize() {
@@ -327,7 +327,7 @@ class CGMManager extends BatteryManager<CGMManagerCallbacks> {
 			cgmSpecificOpsControlPointCharacteristic = null;
 			recordAccessControlPointCharacteristic = null;
 		}
-	};
+	}
 
 	/**
 	 * Returns a list of CGM records obtained from this device. The key in the array is the

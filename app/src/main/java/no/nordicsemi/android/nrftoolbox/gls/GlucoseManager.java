@@ -88,14 +88,14 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
-		return gattCallback;
+		return new GlucoseManagerGattCallback();
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
 	 * receiving notification, etc.
 	 */
-	private final BatteryManagerGattCallback gattCallback = new BatteryManagerGattCallback() {
+	private class GlucoseManagerGattCallback extends BatteryManagerGattCallback {
 
 		@Override
 		protected void initialize() {
@@ -285,7 +285,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 			glucoseMeasurementContextCharacteristic = null;
 			recordAccessControlPointCharacteristic = null;
 		}
-	};
+	}
 
 	/**
 	 * Returns all records as a sparse array where sequence number is the key.

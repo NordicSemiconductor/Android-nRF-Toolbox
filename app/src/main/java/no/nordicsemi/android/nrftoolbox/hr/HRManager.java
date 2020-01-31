@@ -76,14 +76,14 @@ public class HRManager extends BatteryManager<HRManagerCallbacks> {
 	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
-		return gattCallback;
+		return new HeartRateManagerCallback();
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
 	 * receiving notification, etc.
 	 */
-	private final BatteryManagerGattCallback gattCallback = new BatteryManagerGattCallback() {
+	private final class HeartRateManagerCallback extends BatteryManagerGattCallback {
 
 		@Override
 		protected void initialize() {
@@ -149,5 +149,5 @@ public class HRManager extends BatteryManager<HRManagerCallbacks> {
 			bodySensorLocationCharacteristic = null;
 			heartRateCharacteristic = null;
 		}
-	};
+	}
 }

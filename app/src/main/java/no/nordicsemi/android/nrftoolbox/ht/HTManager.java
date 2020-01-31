@@ -62,14 +62,14 @@ public class HTManager extends BatteryManager<HTManagerCallbacks> {
 	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
-		return gattCallback;
+		return new HTManagerGattCallback();
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
 	 * receiving indication, etc..
 	 */
-	private final BatteryManagerGattCallback gattCallback = new BatteryManagerGattCallback() {
+	private class HTManagerGattCallback extends BatteryManagerGattCallback {
 		@Override
 		protected void initialize() {
 			super.initialize();
@@ -107,5 +107,5 @@ public class HTManager extends BatteryManager<HTManagerCallbacks> {
 			super.onDeviceDisconnected();
 			htCharacteristic = null;
 		}
-	};
+	}
 }
