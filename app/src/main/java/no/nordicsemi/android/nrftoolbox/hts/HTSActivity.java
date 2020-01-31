@@ -29,6 +29,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+
+import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.view.Menu;
 import android.widget.TextView;
@@ -50,9 +52,9 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.HTSBi
 	@SuppressWarnings("unused")
 	private final String TAG = "HTSActivity";
 
-	private TextView mTempValue;
-	private TextView mUnit;
-	private TextView mBatteryLevelView;
+	private TextView tempValueView;
+	private TextView unitView;
+	private TextView batteryLevelView;
 
 	@Override
 	protected void onCreateView(final Bundle savedInstanceState) {
@@ -62,19 +64,19 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.HTSBi
 
 	@Override
 	protected void onInitialize(final Bundle savedInstanceState) {
-		LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, makeIntentFilter());
+		LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, makeIntentFilter());
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
 	}
 
 	private void setGUI() {
-		mTempValue = findViewById(R.id.text_hts_value);
-		mUnit = findViewById(R.id.text_hts_unit);
-		mBatteryLevelView = findViewById(R.id.battery);
+		tempValueView = findViewById(R.id.text_hts_value);
+		unitView = findViewById(R.id.text_hts_unit);
+		batteryLevelView = findViewById(R.id.battery);
 	}
 
 	@Override
@@ -85,8 +87,8 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.HTSBi
 
 	@Override
 	protected void setDefaultUI() {
-		mTempValue.setText(R.string.not_available_value);
-		mBatteryLevelView.setText(R.string.not_available);
+		tempValueView.setText(R.string.not_available_value);
+		batteryLevelView.setText(R.string.not_available);
 
 		setUnits();
 	}
@@ -97,13 +99,13 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.HTSBi
 
 		switch (unit) {
 			case SettingsFragment.SETTINGS_UNIT_C:
-				mUnit.setText(R.string.hts_unit_celsius);
+				this.unitView.setText(R.string.hts_unit_celsius);
 				break;
 			case SettingsFragment.SETTINGS_UNIT_F:
-				mUnit.setText(R.string.hts_unit_fahrenheit);
+				this.unitView.setText(R.string.hts_unit_fahrenheit);
 				break;
 			case SettingsFragment.SETTINGS_UNIT_K:
-				mUnit.setText(R.string.hts_unit_kelvin);
+				this.unitView.setText(R.string.hts_unit_kelvin);
 				break;
 		}
 	}
@@ -161,14 +163,14 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.HTSBi
 	}
 
 	@Override
-	public void onServicesDiscovered(final BluetoothDevice device, boolean optionalServicesFound) {
+	public void onServicesDiscovered(@NonNull final BluetoothDevice device, boolean optionalServicesFound) {
 		// this may notify user or show some views
 	}
 
 	@Override
-	public void onDeviceDisconnected(final BluetoothDevice device) {
+	public void onDeviceDisconnected(@NonNull final BluetoothDevice device) {
 		super.onDeviceDisconnected(device);
-		mBatteryLevelView.setText(R.string.not_available);
+		batteryLevelView.setText(R.string.not_available);
 	}
 
 	private void onTemperatureMeasurementReceived(Float value) {
@@ -187,17 +189,17 @@ public class HTSActivity extends BleProfileServiceReadyActivity<HTSService.HTSBi
 				case SettingsFragment.SETTINGS_UNIT_C:
 					break;
 			}
-			mTempValue.setText(getString(R.string.hts_value, value));
+			tempValueView.setText(getString(R.string.hts_value, value));
 		} else {
-			mTempValue.setText(R.string.not_available_value);
+			tempValueView.setText(R.string.not_available_value);
 		}
 	}
 
 	public void onBatteryLevelChanged(final int value) {
-		mBatteryLevelView.setText(getString(R.string.battery, value));
+		batteryLevelView.setText(getString(R.string.battery, value));
 	}
 
-	private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			final String action = intent.getAction();

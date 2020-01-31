@@ -40,11 +40,11 @@ import no.nordicsemi.android.nrftoolbox.parser.RSCMeasurementParser;
 
 public class RSCManager extends BatteryManager<RSCManagerCallbacks> {
 	/** Running Speed and Cadence Measurement service UUID */
-	public static final UUID RUNNING_SPEED_AND_CADENCE_SERVICE_UUID = UUID.fromString("00001814-0000-1000-8000-00805f9b34fb");
+	static final UUID RUNNING_SPEED_AND_CADENCE_SERVICE_UUID = UUID.fromString("00001814-0000-1000-8000-00805f9b34fb");
 	/** Running Speed and Cadence Measurement characteristic UUID */
 	private static final UUID RSC_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A53-0000-1000-8000-00805f9b34fb");
 
-	private BluetoothGattCharacteristic mRSCMeasurementCharacteristic;
+	private BluetoothGattCharacteristic rscMeasurementCharacteristic;
 
 	RSCManager(final Context context) {
 		super(context);
@@ -53,19 +53,19 @@ public class RSCManager extends BatteryManager<RSCManagerCallbacks> {
 	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
-		return mGattCallback;
+		return gattCallback;
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
 	 * receiving indication, etc.
 	 */
-	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
+	private final BatteryManagerGattCallback gattCallback = new BatteryManagerGattCallback() {
 
 		@Override
 		protected void initialize() {
 			super.initialize();
-			setNotificationCallback(mRSCMeasurementCharacteristic)
+			setNotificationCallback(rscMeasurementCharacteristic)
 					.with(new RunningSpeedAndCadenceMeasurementDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
@@ -78,26 +78,26 @@ public class RSCManager extends BatteryManager<RSCManagerCallbacks> {
 															 final float instantaneousSpeed, final int instantaneousCadence,
 															 @Nullable final Integer strideLength,
 															 @Nullable final Long totalDistance) {
-							mCallbacks.onRSCMeasurementReceived(device, running, instantaneousSpeed,
+							callbacks.onRSCMeasurementReceived(device, running, instantaneousSpeed,
 									instantaneousCadence, strideLength, totalDistance);
 						}
 					});
-			enableNotifications(mRSCMeasurementCharacteristic).enqueue();
+			enableNotifications(rscMeasurementCharacteristic).enqueue();
 		}
 
 		@Override
 		public boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(RUNNING_SPEED_AND_CADENCE_SERVICE_UUID);
 			if (service != null) {
-				mRSCMeasurementCharacteristic = service.getCharacteristic(RSC_MEASUREMENT_CHARACTERISTIC_UUID);
+				rscMeasurementCharacteristic = service.getCharacteristic(RSC_MEASUREMENT_CHARACTERISTIC_UUID);
 			}
-			return mRSCMeasurementCharacteristic != null;
+			return rscMeasurementCharacteristic != null;
 		}
 
 		@Override
 		protected void onDeviceDisconnected() {
 			super.onDeviceDisconnected();
-			mRSCMeasurementCharacteristic = null;
+			rscMeasurementCharacteristic = null;
 		}
 	};
 }

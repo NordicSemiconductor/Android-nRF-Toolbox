@@ -28,6 +28,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.SparseArray;
 import android.view.MenuInflater;
@@ -45,13 +47,13 @@ import no.nordicsemi.android.nrftoolbox.profile.BleProfileServiceReadyActivity;
 import no.nordicsemi.android.nrftoolbox.proximity.ProximityService;
 
 public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMSBinder> implements PopupMenu.OnMenuItemClickListener {
-	private View mControlPanelStd;
-	private View mControlPanelAbort;
-	private ListView mRecordsListView;
-	private TextView mBatteryLevelView;
-	private CGMSRecordsAdapter mCgmsRecordsAdapter;
+	private View controlPanelStd;
+	private View controlPanelAbort;
+	private ListView recordsListView;
+	private TextView batteryLevelView;
+	private CGMSRecordsAdapter cgmsRecordsAdapter;
 
-	private CGMService.CGMSBinder mBinder;
+	private CGMService.CGMSBinder binder;
 
 	@Override
 	protected void onCreateView(Bundle savedInstanceState) {
@@ -61,32 +63,32 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 
 	@Override
 	protected void onInitialize(Bundle savedInstanceState) {
-		LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, makeIntentFilter());
+		LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, makeIntentFilter());
 	}
 
 	private void setGUI() {
-		mRecordsListView = findViewById(R.id.list);
-		mControlPanelStd = findViewById(R.id.cgms_control_std);
-		mControlPanelAbort = findViewById(R.id.cgms_control_abort);
-		mBatteryLevelView = findViewById(R.id.battery);
+		recordsListView = findViewById(R.id.list);
+		controlPanelStd = findViewById(R.id.cgms_control_std);
+		controlPanelAbort = findViewById(R.id.cgms_control_abort);
+		batteryLevelView = findViewById(R.id.battery);
 
 		findViewById(R.id.action_last).setOnClickListener(v -> {
 			clearRecords();
-			if (mBinder != null) {
-				mBinder.clear();
-				mBinder.getLastRecord();
+			if (binder != null) {
+				binder.clear();
+				binder.getLastRecord();
 			}
 		});
 		findViewById(R.id.action_all).setOnClickListener(v -> {
 			clearRecords();
-			if (mBinder != null) {
+			if (binder != null) {
 				clearRecords();
-				mBinder.getAllRecords();
+				binder.getAllRecords();
 			}
 		});
 		findViewById(R.id.action_abort).setOnClickListener(v -> {
-			if (mBinder != null) {
-				mBinder.abort();
+			if (binder != null) {
+				binder.abort();
 			}
 		});
 
@@ -101,27 +103,27 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 	}
 
 	private void loadAdapter(SparseArray<CGMSRecord> records) {
-		mCgmsRecordsAdapter.clear();
+		cgmsRecordsAdapter.clear();
 		for (int i = 0; i < records.size(); i++) {
-			mCgmsRecordsAdapter.addItem(records.valueAt(i));
+			cgmsRecordsAdapter.addItem(records.valueAt(i));
 		}
-		mCgmsRecordsAdapter.notifyDataSetChanged();
+		cgmsRecordsAdapter.notifyDataSetChanged();
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
 	}
 
 	@Override
 	protected void onServiceBound(final CGMService.CGMSBinder binder) {
-		mBinder = binder;
+		this.binder = binder;
 		final SparseArray<CGMSRecord> cgmsRecords = binder.getRecords();
 		if (cgmsRecords != null && cgmsRecords.size() > 0) {
-			if (mCgmsRecordsAdapter == null) {
-				mCgmsRecordsAdapter = new CGMSRecordsAdapter(CGMSActivity.this);
-				mRecordsListView.setAdapter(mCgmsRecordsAdapter);
+			if (cgmsRecordsAdapter == null) {
+				cgmsRecordsAdapter = new CGMSRecordsAdapter(CGMSActivity.this);
+				recordsListView.setAdapter(cgmsRecordsAdapter);
 			}
 			loadAdapter(cgmsRecords);
 		}
@@ -129,7 +131,7 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 
 	@Override
 	protected void onServiceUnbound() {
-		mBinder = null;
+		binder = null;
 	}
 
 	@Override
@@ -158,31 +160,31 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 	}
 
 	@Override
-	public void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound) {
+	public void onServicesDiscovered(@NonNull final BluetoothDevice device, final boolean optionalServicesFound) {
 		// this may notify user or show some views
 	}
 
 	private void setOperationInProgress(final boolean progress) {
 		runOnUiThread(() -> {
 			// setSupportProgressBarIndeterminateVisibility(progress);
-			mControlPanelStd.setVisibility(!progress ? View.VISIBLE : View.GONE);
-			mControlPanelAbort.setVisibility(progress ? View.VISIBLE : View.GONE);
+			controlPanelStd.setVisibility(!progress ? View.VISIBLE : View.GONE);
+			controlPanelAbort.setVisibility(progress ? View.VISIBLE : View.GONE);
 		});
 	}
 
-	public void onBatteryLevelChanged(final BluetoothDevice device, final int value) {
-		mBatteryLevelView.setText(getString(R.string.battery, value));
+	public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int value) {
+		batteryLevelView.setText(getString(R.string.battery, value));
 	}
 
 	@Override
-	public void onDeviceDisconnected(final BluetoothDevice device) {
+	public void onDeviceDisconnected(@NonNull final BluetoothDevice device) {
 		super.onDeviceDisconnected(device);
 		setOperationInProgress(false);
-		mBatteryLevelView.setText(R.string.not_available);
+		batteryLevelView.setText(R.string.not_available);
 	}
 
 	@Override
-	public void onError(final BluetoothDevice device, final String message, final int errorCode) {
+	public void onError(@NonNull final BluetoothDevice device, @NonNull final String message, final int errorCode) {
 		super.onError(device, message, errorCode);
 		setOperationInProgress(false);
 	}
@@ -190,40 +192,40 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 	@Override
 	protected void setDefaultUI() {
 		clearRecords();
-		mBatteryLevelView.setText(R.string.not_available);
+		batteryLevelView.setText(R.string.not_available);
 	}
 
 	@Override
 	public boolean onMenuItemClick(MenuItem menuItem) {
 		switch (menuItem.getItemId()) {
 			case R.id.action_refresh:
-				if(mBinder != null)
-                	mBinder.refreshRecords();
+				if(binder != null)
+                	binder.refreshRecords();
 				break;
 			case R.id.action_first:
-				if (mBinder != null)
-					mBinder.getFirstRecord();
+				if (binder != null)
+					binder.getFirstRecord();
 				break;
 			case R.id.action_clear:
-				if (mBinder != null)
-					mBinder.clear();
+				if (binder != null)
+					binder.clear();
 				break;
 			case R.id.action_delete_all:
-				if (mBinder != null)
-					mBinder.deleteAllRecords();
+				if (binder != null)
+					binder.deleteAllRecords();
 				break;
 		}
 		return true;
 	}
 
 	private void clearRecords() {
-		if (mCgmsRecordsAdapter != null) {
-			mCgmsRecordsAdapter.clear();
-			mCgmsRecordsAdapter.notifyDataSetChanged();
+		if (cgmsRecordsAdapter != null) {
+			cgmsRecordsAdapter.clear();
+			cgmsRecordsAdapter.notifyDataSetChanged();
 		}
 	}
 
-	private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			final String action = intent.getAction();
@@ -232,12 +234,12 @@ public class CGMSActivity extends BleProfileServiceReadyActivity<CGMService.CGMS
 			switch (action) {
 				case CGMService.BROADCAST_NEW_CGMS_VALUE: {
 					CGMSRecord cgmsRecord = intent.getExtras().getParcelable(CGMService.EXTRA_CGMS_RECORD);
-					if (mCgmsRecordsAdapter == null) {
-						mCgmsRecordsAdapter = new CGMSRecordsAdapter(CGMSActivity.this);
-						mRecordsListView.setAdapter(mCgmsRecordsAdapter);
+					if (cgmsRecordsAdapter == null) {
+						cgmsRecordsAdapter = new CGMSRecordsAdapter(CGMSActivity.this);
+						recordsListView.setAdapter(cgmsRecordsAdapter);
 					}
-					mCgmsRecordsAdapter.addItem(cgmsRecord);
-					mCgmsRecordsAdapter.notifyDataSetChanged();
+					cgmsRecordsAdapter.addItem(cgmsRecord);
+					cgmsRecordsAdapter.notifyDataSetChanged();
 					break;
 				}
 				case CGMService.BROADCAST_DATA_SET_CLEAR:

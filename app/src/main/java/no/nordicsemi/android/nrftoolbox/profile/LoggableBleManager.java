@@ -17,13 +17,13 @@ import no.nordicsemi.android.log.Logger;
  * @param <T> the callbacks class.
  */
 public abstract class LoggableBleManager<T extends BleManagerCallbacks> extends BleManager<T> {
-	private ILogSession mLogSession;
+	private ILogSession logSession;
 
 	/**
 	 * The manager constructor.
 	 * <p>
 	 * After constructing the manager, the callbacks object must be set with
-	 * {@link #setGattCallbacks(BleManagerCallbacks)}.
+	 * {@link #setManagerCallbacks(BleManagerCallbacks)}.
 	 *
 	 * @param context the context.
 	 */
@@ -37,12 +37,12 @@ public abstract class LoggableBleManager<T extends BleManagerCallbacks> extends 
 	 * @param session nRF Logger log session to log inti, or null, if nRF Logger is not installed.
 	 */
 	public void setLogger(@Nullable final ILogSession session) {
-		mLogSession = session;
+		logSession = session;
 	}
 
 	@Override
 	public void log(final int priority, @NonNull final String message) {
-		Logger.log(mLogSession, LogContract.Log.Level.fromPriority(priority), message);
+		Logger.log(logSession, LogContract.Log.Level.fromPriority(priority), message);
 		Log.println(priority, "BleManager", message);
 	}
 }

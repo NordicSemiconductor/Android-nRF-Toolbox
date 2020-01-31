@@ -33,6 +33,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.core.content.ContextCompat;
@@ -70,17 +71,17 @@ public class ScannerFragment extends DialogFragment {
 
 	private final static int REQUEST_PERMISSION_REQ_CODE = 34; // any 8-bit number
 
-	private BluetoothAdapter mBluetoothAdapter;
-	private OnDeviceSelectedListener mListener;
-	private DeviceListAdapter mAdapter;
-	private final Handler mHandler = new Handler();
-	private Button mScanButton;
+	private BluetoothAdapter bluetoothAdapter;
+	private OnDeviceSelectedListener listener;
+	private DeviceListAdapter adapter;
+	private final Handler handler = new Handler();
+	private Button scanButton;
 
-	private View mPermissionRationale;
+	private View permissionRationale;
 
-	private ParcelUuid mUuid;
+	private ParcelUuid uuid;
 
-	private boolean mIsScanning = false;
+	private boolean scanning = false;
 
 	public static ScannerFragment getInstance(final UUID uuid) {
 		final ScannerFragment fragment = new ScannerFragment();
@@ -106,7 +107,7 @@ public class ScannerFragment extends DialogFragment {
 		 *            always returns <code>null</code>, i.e. Sony Xperia Z1 (C6903) with Android 4.3.
 		 *            The name has to be parsed manually form the Advertisement packet.
 		 */
-		void onDeviceSelected(final BluetoothDevice device, final String name);
+		void onDeviceSelected(@NonNull final BluetoothDevice device, @Nullable final String name);
 
 		/**
 		 * Fired when scanner dialog has been cancelled without selecting a device.
@@ -118,10 +119,10 @@ public class ScannerFragment extends DialogFragment {
 	 * This will make sure that {@link OnDeviceSelectedListener} interface is implemented by activity.
 	 */
 	@Override
-	public void onAttach(final Context context) {
+	public void onAttach(@NonNull final Context context) {
 		super.onAttach(context);
 		try {
-			this.mListener = (OnDeviceSelectedListener) context;
+			this.listener = (OnDeviceSelectedListener) context;
 		} catch (final ClassCastException e) {
 			throw new ClassCastException(context.toString() + " must implement OnDeviceSelectedListener");
 		}
@@ -133,12 +134,12 @@ public class ScannerFragment extends DialogFragment {
 
 		final Bundle args = getArguments();
 		if (args != null && args.containsKey(PARAM_UUID)) {
-			mUuid = args.getParcelable(PARAM_UUID);
+			uuid = args.getParcelable(PARAM_UUID);
 		}
 
 		final BluetoothManager manager = (BluetoothManager) requireContext().getSystemService(Context.BLUETOOTH_SERVICE);
 		if (manager != null) {
-			mBluetoothAdapter = manager.getAdapter();
+			bluetoothAdapter = manager.getAdapter();
 		}
 	}
 
@@ -152,27 +153,28 @@ public class ScannerFragment extends DialogFragment {
     @Override
 	public Dialog onCreateDialog(final Bundle savedInstanceState) {
 		final AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-		final View dialogView = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_device_selection, null);
+		final View dialogView = LayoutInflater.from(requireContext())
+				.inflate(R.layout.fragment_device_selection, null);
 		final ListView listview = dialogView.findViewById(android.R.id.list);
 
 		listview.setEmptyView(dialogView.findViewById(android.R.id.empty));
-		listview.setAdapter(mAdapter = new DeviceListAdapter(getActivity()));
+		listview.setAdapter(adapter = new DeviceListAdapter());
 
 		builder.setTitle(R.string.scanner_title);
 		final AlertDialog dialog = builder.setView(dialogView).create();
 		listview.setOnItemClickListener((parent, view, position, id) -> {
 			stopScan();
 			dialog.dismiss();
-			final ExtendedBluetoothDevice d = (ExtendedBluetoothDevice) mAdapter.getItem(position);
-			mListener.onDeviceSelected(d.device, d.name);
+			final ExtendedBluetoothDevice d = (ExtendedBluetoothDevice) adapter.getItem(position);
+			listener.onDeviceSelected(d.device, d.name);
 		});
 
-		mPermissionRationale = dialogView.findViewById(R.id.permission_rationale); // this is not null only on API23+
+		permissionRationale = dialogView.findViewById(R.id.permission_rationale); // this is not null only on API23+
 
-		mScanButton = dialogView.findViewById(R.id.action_cancel);
-		mScanButton.setOnClickListener(v -> {
+		scanButton = dialogView.findViewById(R.id.action_cancel);
+		scanButton.setOnClickListener(v -> {
 			if (v.getId() == R.id.action_cancel) {
-				if (mIsScanning) {
+				if (scanning) {
 					dialog.cancel();
 				} else {
 					startScan();
@@ -187,10 +189,10 @@ public class ScannerFragment extends DialogFragment {
 	}
 
 	@Override
-	public void onCancel(DialogInterface dialog) {
+	public void onCancel(@NonNull DialogInterface dialog) {
 		super.onCancel(dialog);
 
-		mListener.onDialogCanceled();
+		listener.onDialogCanceled();
 	}
 
 	@Override
@@ -201,7 +203,7 @@ public class ScannerFragment extends DialogFragment {
 					// We have been granted the Manifest.permission.ACCESS_FINE_LOCATION permission. Now we may proceed with scanning.
 					startScan();
 				} else {
-					mPermissionRationale.setVisibility(View.VISIBLE);
+					permissionRationale.setVisibility(View.VISIBLE);
 					Toast.makeText(getActivity(), R.string.no_required_permission, Toast.LENGTH_SHORT).show();
 				}
 				break;
@@ -210,7 +212,7 @@ public class ScannerFragment extends DialogFragment {
 	}
 
 	/**
-	 * Scan for 5 seconds and then stop scanning when a BluetoothLE device is found then mLEScanCallback
+	 * Scan for 5 seconds and then stop scanning when a BluetoothLE device is found then lEScanCallback
 	 * is activated This will perform regular scan for custom BLE Service UUID and then filter out.
 	 * using class ScannerServiceParser
 	 */
@@ -220,8 +222,8 @@ public class ScannerFragment extends DialogFragment {
 		// On API older than Marshmallow the following code does nothing.
 		if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 			// When user pressed Deny and still wants to use this functionality, show the rationale
-			if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) && mPermissionRationale.getVisibility() == View.GONE) {
-				mPermissionRationale.setVisibility(View.VISIBLE);
+			if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) && permissionRationale.getVisibility() == View.GONE) {
+				permissionRationale.setVisibility(View.VISIBLE);
 				return;
 			}
 
@@ -230,23 +232,23 @@ public class ScannerFragment extends DialogFragment {
 		}
 
 		// Hide the rationale message, we don't need it anymore.
-		if (mPermissionRationale != null)
-			mPermissionRationale.setVisibility(View.GONE);
+		if (permissionRationale != null)
+			permissionRationale.setVisibility(View.GONE);
 
-		mAdapter.clearDevices();
-		mScanButton.setText(R.string.scanner_action_cancel);
+		adapter.clearDevices();
+		scanButton.setText(R.string.scanner_action_cancel);
 
 		final BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
 		final ScanSettings settings = new ScanSettings.Builder()
 				.setLegacy(false)
 				.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).setReportDelay(1000).setUseHardwareBatchingIfSupported(false).build();
 		final List<ScanFilter> filters = new ArrayList<>();
-		filters.add(new ScanFilter.Builder().setServiceUuid(mUuid).build());
+		filters.add(new ScanFilter.Builder().setServiceUuid(uuid).build());
 		scanner.startScan(filters, settings, scanCallback);
 
-		mIsScanning = true;
-		mHandler.postDelayed(() -> {
-			if (mIsScanning) {
+		scanning = true;
+		handler.postDelayed(() -> {
+			if (scanning) {
 				stopScan();
 			}
 		}, SCAN_DURATION);
@@ -256,25 +258,25 @@ public class ScannerFragment extends DialogFragment {
 	 * Stop scan if user tap Cancel button
 	 */
 	private void stopScan() {
-		if (mIsScanning) {
-			mScanButton.setText(R.string.scanner_action_scan);
+		if (scanning) {
+			scanButton.setText(R.string.scanner_action_scan);
 
 			final BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
 			scanner.stopScan(scanCallback);
 
-			mIsScanning = false;
+			scanning = false;
 		}
 	}
 
 	private ScanCallback scanCallback = new ScanCallback() {
 		@Override
-		public void onScanResult(final int callbackType, final ScanResult result) {
+		public void onScanResult(final int callbackType, @NonNull final ScanResult result) {
 			// do nothing
 		}
 
 		@Override
-		public void onBatchScanResults(final List<ScanResult> results) {
-			mAdapter.update(results);
+		public void onBatchScanResults(@NonNull final List<ScanResult> results) {
+			adapter.update(results);
 		}
 
 		@Override
@@ -284,7 +286,7 @@ public class ScannerFragment extends DialogFragment {
 	};
 
 	private void addBoundDevices() {
-		final Set<BluetoothDevice> devices = mBluetoothAdapter.getBondedDevices();
-		mAdapter.addBondedDevices(devices);
+		final Set<BluetoothDevice> devices = bluetoothAdapter.getBondedDevices();
+		adapter.addBondedDevices(devices);
 	}
 }

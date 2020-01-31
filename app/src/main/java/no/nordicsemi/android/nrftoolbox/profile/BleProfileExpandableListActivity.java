@@ -58,14 +58,14 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	private static final String SIS_DEVICE_NAME = "device_name";
 	protected static final int REQUEST_ENABLE_BT = 2;
 
-	private LoggableBleManager<? extends BleManagerCallbacks> mBleManager;
+	private LoggableBleManager<? extends BleManagerCallbacks> bleManager;
 
-	private TextView mDeviceNameView;
-	private Button mConnectButton;
-	private ILogSession mLogSession;
+	private TextView deviceNameView;
+	private Button connectButton;
+	private ILogSession logSession;
 
-	private boolean mDeviceConnected = false;
-	private String mDeviceName;
+	private boolean deviceConnected = false;
+	private String deviceName;
 
 	@Override
 	protected final void onCreate(final Bundle savedInstanceState) {
@@ -82,7 +82,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 		 * Services. The Service should implement ManagerCallbacks interface. The application Activity may communicate with such Service using binding,
 		 * broadcast listeners, local broadcast listeners (see support.v4 library), or messages. See the Proximity profile for Service approach.
 		 */
-		mBleManager = initializeManager();
+		bleManager = initializeManager();
 
 		// In onInitialize method a final class may register local broadcast receivers that will listen for events from the service
 		onInitialize(savedInstanceState);
@@ -132,33 +132,33 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	protected final void setUpView() {
 		// set GUI
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		mConnectButton = findViewById(R.id.action_connect);
-		mDeviceNameView = findViewById(R.id.device_name);
+		connectButton = findViewById(R.id.action_connect);
+		deviceNameView = findViewById(R.id.device_name);
 	}
 
 	@Override
 	public void onBackPressed() {
-		mBleManager.disconnect().enqueue();
+		bleManager.disconnect().enqueue();
 		super.onBackPressed();
 	}
 
 	@Override
 	protected void onSaveInstanceState(final Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putBoolean(SIS_CONNECTION_STATUS, mDeviceConnected);
-		outState.putString(SIS_DEVICE_NAME, mDeviceName);
+		outState.putBoolean(SIS_CONNECTION_STATUS, deviceConnected);
+		outState.putString(SIS_DEVICE_NAME, deviceName);
 	}
 
 	@Override
 	protected void onRestoreInstanceState(final @NonNull Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
-		mDeviceConnected = savedInstanceState.getBoolean(SIS_CONNECTION_STATUS);
-		mDeviceName = savedInstanceState.getString(SIS_DEVICE_NAME);
+		deviceConnected = savedInstanceState.getBoolean(SIS_CONNECTION_STATUS);
+		deviceName = savedInstanceState.getString(SIS_DEVICE_NAME);
 
-		if (mDeviceConnected) {
-			mConnectButton.setText(R.string.action_disconnect);
+		if (deviceConnected) {
+			connectButton.setText(R.string.action_disconnect);
 		} else {
-			mConnectButton.setText(R.string.action_connect);
+			connectButton.setText(R.string.action_connect);
 		}
 	}
 
@@ -202,11 +202,11 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	 */
 	public void onConnectClicked(final View view) {
 		if (isBLEEnabled()) {
-			if (!mDeviceConnected) {
+			if (!deviceConnected) {
 				setDefaultUI();
 				showDeviceScanningDialog(getFilterUUID());
 			} else {
-				mBleManager.disconnect().enqueue();
+				bleManager.disconnect().enqueue();
 			}
 		} else {
 			showBLEDialog();
@@ -241,18 +241,18 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	}
 
 	@Override
-	public void onDeviceSelected(final BluetoothDevice device, final String name) {
+	public void onDeviceSelected(@NonNull final BluetoothDevice device, final String name) {
 		final int titleId = getLoggerProfileTitle();
 		if (titleId > 0) {
-			mLogSession = Logger.newSession(getApplicationContext(), getString(titleId), device.getAddress(), name);
+			logSession = Logger.newSession(getApplicationContext(), getString(titleId), device.getAddress(), name);
 			// If nRF Logger is not installed we may want to use local logger
-			if (mLogSession == null && getLocalAuthorityLogger() != null) {
-				mLogSession = LocalLogSession.newSession(getApplicationContext(), getLocalAuthorityLogger(), device.getAddress(), name);
+			if (logSession == null && getLocalAuthorityLogger() != null) {
+				logSession = LocalLogSession.newSession(getApplicationContext(), getLocalAuthorityLogger(), device.getAddress(), name);
 			}
 		}
-		mDeviceName = name;
-		mBleManager.setLogger(mLogSession);
-		mBleManager.connect(device)
+		deviceName = name;
+		bleManager.setLogger(logSession);
+		bleManager.connect(device)
 				.useAutoConnect(shouldAutoConnect())
 				.retry(3, 100)
 				.enqueue();
@@ -266,35 +266,35 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	@Override
 	public void onDeviceConnecting(@NonNull final BluetoothDevice device) {
 		runOnUiThread(() -> {
-			mDeviceNameView.setText(mDeviceName != null ? mDeviceName : getString(R.string.not_available));
-			mConnectButton.setText(R.string.action_connecting);
+			deviceNameView.setText(deviceName != null ? deviceName : getString(R.string.not_available));
+			connectButton.setText(R.string.action_connecting);
 		});
 	}
 
 	@Override
 	public void onDeviceConnected(@NonNull final BluetoothDevice device) {
-		mDeviceConnected = true;
-		runOnUiThread(() -> mConnectButton.setText(R.string.action_disconnect));
+		deviceConnected = true;
+		runOnUiThread(() -> connectButton.setText(R.string.action_disconnect));
 	}
 
 	@Override
 	public void onDeviceDisconnecting(@NonNull final BluetoothDevice device) {
-		runOnUiThread(() -> mConnectButton.setText(R.string.action_disconnecting));
+		runOnUiThread(() -> connectButton.setText(R.string.action_disconnecting));
 	}
 
 	@Override
 	public void onDeviceDisconnected(@NonNull final BluetoothDevice device) {
-		mDeviceConnected = false;
-		mBleManager.close();
+		deviceConnected = false;
+		bleManager.close();
 		runOnUiThread(() -> {
-			mConnectButton.setText(R.string.action_connect);
-			mDeviceNameView.setText(getDefaultDeviceName());
+			connectButton.setText(R.string.action_connect);
+			deviceNameView.setText(getDefaultDeviceName());
 		});
 	}
 
 	@Override
 	public void onLinkLossOccurred(@NonNull final BluetoothDevice device) {
-		mDeviceConnected = false;
+		deviceConnected = false;
 	}
 
 	@Override
@@ -355,14 +355,14 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	 * Returns <code>true</code> if the device is connected. Services may not have been discovered yet.
 	 */
 	protected boolean isDeviceConnected() {
-		return mDeviceConnected;
+		return deviceConnected;
 	}
 
 	/**
 	 * Returns the name of the device that the phone is currently connected to or was connected last time
 	 */
 	protected String getDeviceName() {
-		return mDeviceName;
+		return deviceName;
 	}
 
 	/**
@@ -420,7 +420,7 @@ public abstract class BleProfileExpandableListActivity extends ExpandableListAct
 	 * @return the logger session or <code>null</code>
 	 */
 	protected ILogSession getLogSession() {
-		return mLogSession;
+		return logSession;
 	}
 
 	private void ensureBLESupported() {

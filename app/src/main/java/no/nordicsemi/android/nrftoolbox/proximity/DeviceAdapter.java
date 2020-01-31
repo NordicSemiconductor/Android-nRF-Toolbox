@@ -38,12 +38,12 @@ import java.util.List;
 import no.nordicsemi.android.nrftoolbox.R;
 
 public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder> {
-	private final ProximityService.ProximityBinder mService;
-	private final List<BluetoothDevice> mDevices;
+	private final ProximityService.ProximityBinder service;
+	private final List<BluetoothDevice> devices;
 
 	DeviceAdapter(final ProximityService.ProximityBinder binder) {
-		mService = binder;
-		mDevices = mService.getManagedDevices();
+		service = binder;
+		devices = service.getManagedDevices();
 	}
 
 	@NonNull
@@ -55,18 +55,18 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 
 	@Override
 	public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-		holder.bind(mDevices.get(position));
+		holder.bind(devices.get(position));
 	}
 
 	@Override
 	public int getItemCount() {
-		return mDevices.size();
+		return devices.size();
 	}
 
 	public void onDeviceAdded(final BluetoothDevice device) {
-		final int position = mDevices.indexOf(device);
+		final int position = devices.indexOf(device);
 		if (position == -1) {
-			notifyItemInserted(mDevices.size() - 1);
+			notifyItemInserted(devices.size() - 1);
 		} else {
 			// This may happen when Bluetooth adapter was switched off and on again
 			// while there were devices on the list.
@@ -79,13 +79,13 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 	}
 
 	public void onDeviceStateChanged(final BluetoothDevice device) {
-		final int position = mDevices.indexOf(device);
+		final int position = devices.indexOf(device);
 		if (position >= 0)
 			notifyItemChanged(position);
 	}
 
 	public void onBatteryValueReceived(final BluetoothDevice device) {
-		final int position = mDevices.indexOf(device);
+		final int position = devices.indexOf(device);
 		if (position >= 0)
 			notifyItemChanged(position);
 	}
@@ -109,22 +109,22 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 			// Configure FIND / SILENT button
 			actionButton.setOnClickListener(v -> {
 				final int position = getAdapterPosition();
-				final BluetoothDevice device = mDevices.get(position);
-				mService.toggleImmediateAlert(device);
+				final BluetoothDevice device = devices.get(position);
+				service.toggleImmediateAlert(device);
 			});
 
 			// Configure Disconnect button
 			itemView.findViewById(R.id.action_disconnect).setOnClickListener(v -> {
 				final int position = getAdapterPosition();
-				final BluetoothDevice device = mDevices.get(position);
-				mService.disconnect(device);
+				final BluetoothDevice device = devices.get(position);
+				service.disconnect(device);
 				// The device might have not been connected, so there will be no callback
 				onDeviceRemoved(device);
 			});
 		}
 
 		private void bind(final BluetoothDevice device) {
-			final boolean ready = mService.isReady(device);
+			final boolean ready = service.isReady(device);
 
 			String name = device.getName();
 			if (TextUtils.isEmpty(name))
@@ -132,12 +132,12 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 			nameView.setText(name);
 			addressView.setText(device.getAddress());
 
-			final boolean on = mService.isImmediateAlertOn(device);
+			final boolean on = service.isImmediateAlertOn(device);
 			actionButton.setImageResource(on ? R.drawable.ic_stat_notify_proximity_silent : R.drawable.ic_stat_notify_proximity_find);
 			actionButton.setVisibility(ready ? View.VISIBLE : View.GONE);
 			progress.setVisibility(ready ? View.GONE : View.VISIBLE);
 
-			final Integer batteryValue = mService.getBatteryLevel(device);
+			final Integer batteryValue = service.getBatteryLevel(device);
 			if (batteryValue != null) {
 				batteryView.getCompoundDrawables()[0 /*left*/].setLevel(batteryValue);
 				batteryView.setVisibility(View.VISIBLE);

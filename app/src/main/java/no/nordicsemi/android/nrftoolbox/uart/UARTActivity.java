@@ -115,28 +115,28 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	private final static int SELECT_FILE_REQ = 2678; // random
 	private final static int PERMISSION_REQ = 24; // random, 8-bit
 
-	UARTConfigurationSynchronizer mWearableSynchronizer;
+	UARTConfigurationSynchronizer wearableSynchronizer;
 
 	/** The current configuration. */
-	private UartConfiguration mConfiguration;
-	private DatabaseHelper mDatabaseHelper;
-	private SharedPreferences mPreferences;
-	private UARTConfigurationsAdapter mConfigurationsAdapter;
-	private ClosableSpinner mConfigurationSpinner;
-	private SlidingPaneLayout mSlider;
-	private View mContainer;
-	private UARTService.UARTBinder mServiceBinder;
-	private ConfigurationListener mConfigurationListener;
-	private boolean mEditMode;
+	private UartConfiguration configuration;
+	private DatabaseHelper databaseHelper;
+	private SharedPreferences preferences;
+	private UARTConfigurationsAdapter configurationsAdapter;
+	private ClosableSpinner configurationSpinner;
+	private SlidingPaneLayout slider;
+	private View container;
+	private UARTService.UARTBinder serviceBinder;
+	private ConfigurationListener configurationListener;
+	private boolean editMode;
 
 	public interface ConfigurationListener {
 		void onConfigurationModified();
-		void onConfigurationChanged(final UartConfiguration configuration);
+		void onConfigurationChanged(@NonNull final UartConfiguration configuration);
 		void setEditMode(final boolean editMode);
 	}
 
 	public void setConfigurationListener(final ConfigurationListener listener) {
-		mConfigurationListener = listener;
+		configurationListener = listener;
 	}
 
 	@Override
@@ -161,23 +161,23 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 	@Override
 	protected void onServiceBound(final UARTService.UARTBinder binder) {
-		mServiceBinder = binder;
+		serviceBinder = binder;
 	}
 
 	@Override
 	protected void onServiceUnbound() {
-		mServiceBinder = null;
+		serviceBinder = null;
 	}
 
 	@Override
 	protected void onInitialize(final Bundle savedInstanceState) {
-		mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		mDatabaseHelper = new DatabaseHelper(this);
-		ensureFirstConfiguration(mDatabaseHelper);
-		mConfigurationsAdapter = new UARTConfigurationsAdapter(this, this, mDatabaseHelper.getConfigurationsNames());
+		preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		databaseHelper = new DatabaseHelper(this);
+		ensureFirstConfiguration(databaseHelper);
+		configurationsAdapter = new UARTConfigurationsAdapter(this, this, databaseHelper.getConfigurationsNames());
 
 		// Initialize Wearable synchronizer
-		mWearableSynchronizer = UARTConfigurationSynchronizer.from(this, this);
+		wearableSynchronizer = UARTConfigurationSynchronizer.from(this, this);
 	}
 
 	/**
@@ -186,12 +186,12 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	@Override
 	public void onConnected(final Bundle bundle) {
 		// Ensure the Wearable API was connected
-		if (!mWearableSynchronizer.hasConnectedApi())
+		if (!wearableSynchronizer.hasConnectedApi())
 			return;
 
-		if (!mPreferences.getBoolean(PREFS_WEAR_SYNCED, false)) {
+		if (!preferences.getBoolean(PREFS_WEAR_SYNCED, false)) {
 			new Thread(() -> {
-				final Cursor cursor = mDatabaseHelper.getConfigurations();
+				final Cursor cursor = databaseHelper.getConfigurations();
 				try {
 					while (cursor.moveToNext()) {
 						final long id = cursor.getLong(0 /* _ID */);
@@ -200,12 +200,12 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 							final Format format = new Format(new HyphenStyle());
 							final Serializer serializer = new Persister(format);
 							final UartConfiguration configuration = serializer.read(UartConfiguration.class, xml);
-							mWearableSynchronizer.onConfigurationAddedOrEdited(id, configuration).await();
+							wearableSynchronizer.onConfigurationAddedOrEdited(id, configuration).await();
 						} catch (final Exception e) {
 							Log.w(TAG, "Deserializing configuration with id " + id + " failed", e);
 						}
 					}
-					mPreferences.edit().putBoolean(PREFS_WEAR_SYNCED, true).apply();
+					preferences.edit().putBoolean(PREFS_WEAR_SYNCED, true).apply();
 				} finally {
 					cursor.close();
 				}
@@ -225,16 +225,16 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		mWearableSynchronizer.close();
+		wearableSynchronizer.close();
 	}
 
 	@Override
 	protected void onCreateView(final Bundle savedInstanceState) {
 		setContentView(R.layout.activity_feature_uart);
 
-		mContainer = findViewById(R.id.container);
+		container = findViewById(R.id.container);
 		// Setup the sliding pane if it exists
-		final SlidingPaneLayout slidingPane = mSlider = findViewById(R.id.sliding_pane);
+		final SlidingPaneLayout slidingPane = slider = findViewById(R.id.sliding_pane);
 		if (slidingPane != null) {
 			slidingPane.setSliderFadeColor(Color.TRANSPARENT);
 			slidingPane.setShadowResourceLeft(R.drawable.shadow_r);
@@ -253,34 +253,34 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	protected void onViewCreated(final Bundle savedInstanceState) {
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-		final ClosableSpinner configurationSpinner = mConfigurationSpinner = findViewById(R.id.toolbar_spinner);
+		final ClosableSpinner configurationSpinner = this.configurationSpinner = findViewById(R.id.toolbar_spinner);
 		configurationSpinner.setOnItemSelectedListener(this);
-		configurationSpinner.setAdapter(mConfigurationsAdapter);
-		configurationSpinner.setSelection(mConfigurationsAdapter.getItemPosition(mPreferences.getLong(PREFS_CONFIGURATION, 0)));
+		configurationSpinner.setAdapter(configurationsAdapter);
+		configurationSpinner.setSelection(configurationsAdapter.getItemPosition(preferences.getLong(PREFS_CONFIGURATION, 0)));
 	}
 
 	@Override
 	protected void onRestoreInstanceState(final @NonNull Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 
-		mEditMode = savedInstanceState.getBoolean(SIS_EDIT_MODE);
-		setEditMode(mEditMode, false);
+		editMode = savedInstanceState.getBoolean(SIS_EDIT_MODE);
+		setEditMode(editMode, false);
 	}
 
 	@Override
-	public void onSaveInstanceState(final Bundle outState) {
+	public void onSaveInstanceState(@NonNull final Bundle outState) {
 		super.onSaveInstanceState(outState);
 
-		outState.putBoolean(SIS_EDIT_MODE, mEditMode);
+		outState.putBoolean(SIS_EDIT_MODE, editMode);
 	}
 
 	@Override
-	public void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound) {
+	public void onServicesDiscovered(@NonNull final BluetoothDevice device, final boolean optionalServicesFound) {
 		// do nothing
 	}
 
 	@Override
-	public void onDeviceSelected(final BluetoothDevice device, final String name) {
+	public void onDeviceSelected(@NonNull final BluetoothDevice device, final String name) {
 		// The super method starts the service
 		super.onDeviceSelected(device, name);
 
@@ -306,8 +306,8 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 	@Override
 	public void send(final String text) {
-		if (mServiceBinder != null)
-			mServiceBinder.send(text);
+		if (serviceBinder != null)
+			serviceBinder.send(text);
 	}
 
 	public void setEditMode(final boolean editMode) {
@@ -317,11 +317,11 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 	@Override
 	public void onBackPressed() {
-		if (mSlider != null && mSlider.isOpen()) {
-			mSlider.closePane();
+		if (slider != null && slider.isOpen()) {
+			slider.closePane();
 			return;
 		}
-		if (mEditMode) {
+		if (editMode) {
 			setEditMode(false);
 			return;
 		}
@@ -331,31 +331,31 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	@Override
 	public boolean onCreateOptionsMenu(final Menu menu) {
 		getMenuInflater().inflate(R.menu.uart_menu_configurations, menu);
-		getMenuInflater().inflate(mEditMode ? R.menu.uart_menu_config : R.menu.uart_menu, menu);
+		getMenuInflater().inflate(editMode ? R.menu.uart_menu_config : R.menu.uart_menu, menu);
 
-		final int configurationsCount = mDatabaseHelper.getConfigurationsCount();
+		final int configurationsCount = databaseHelper.getConfigurationsCount();
 		menu.findItem(R.id.action_remove).setVisible(configurationsCount > 1);
 		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
 	protected boolean onOptionsItemSelected(int itemId) {
-		final String name = mConfiguration.getName();
+		final String name = configuration.getName();
 		switch (itemId) {
 			case R.id.action_configure:
-				setEditMode(!mEditMode);
+				setEditMode(!editMode);
 				return true;
 			case R.id.action_show_log:
-				mSlider.openPane();
+				slider.openPane();
 				return true;
 			case R.id.action_share: {
-				final String xml = mDatabaseHelper.getConfiguration(mConfigurationSpinner.getSelectedItemId());
+				final String xml = databaseHelper.getConfiguration(configurationSpinner.getSelectedItemId());
 
 				final Intent intent = new Intent(Intent.ACTION_SEND);
 				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				intent.setType("text/xml");
 				intent.putExtra(Intent.EXTRA_TEXT, xml);
-				intent.putExtra(Intent.EXTRA_SUBJECT, mConfiguration.getName());
+				intent.putExtra(Intent.EXTRA_SUBJECT, configuration.getName());
 				try {
 					startActivity(intent);
 				} catch (final ActivityNotFoundException e) {
@@ -384,17 +384,17 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 				return true;
 			}
 			case R.id.action_remove: {
-				mDatabaseHelper.removeDeletedServerConfigurations(); // just to be sure nothing has left
-				final UartConfiguration removedConfiguration = mConfiguration;
-				final long id = mDatabaseHelper.deleteConfiguration(name);
+				databaseHelper.removeDeletedServerConfigurations(); // just to be sure nothing has left
+				final UartConfiguration removedConfiguration = configuration;
+				final long id = databaseHelper.deleteConfiguration(name);
 				if (id >= 0)
-					mWearableSynchronizer.onConfigurationDeleted(id);
+					wearableSynchronizer.onConfigurationDeleted(id);
 				refreshConfigurations();
 
-				final Snackbar snackbar = Snackbar.make(mContainer, R.string.uart_configuration_deleted, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_undo, v -> {
-					final long id1 = mDatabaseHelper.restoreDeletedServerConfiguration(name);
+				final Snackbar snackbar = Snackbar.make(container, R.string.uart_configuration_deleted, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_undo, v -> {
+					final long id1 = databaseHelper.restoreDeletedServerConfiguration(name);
 					if (id1 >= 0)
-						mWearableSynchronizer.onConfigurationAddedOrEdited(id1, removedConfiguration);
+						wearableSynchronizer.onConfigurationAddedOrEdited(id1, removedConfiguration);
 					refreshConfigurations();
 				});
 				snackbar.setDuration(5000); // This is not an error
@@ -425,11 +425,11 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
 		if (position > 0) { // FIXME this is called twice after rotation.
 			try {
-				final String xml = mDatabaseHelper.getConfiguration(id);
+				final String xml = databaseHelper.getConfiguration(id);
 				final Format format = new Format(new HyphenStyle());
 				final Serializer serializer = new Persister(format);
-				mConfiguration = serializer.read(UartConfiguration.class, xml);
-				mConfigurationListener.onConfigurationChanged(mConfiguration);
+				configuration = serializer.read(UartConfiguration.class, xml);
+				configurationListener.onConfigurationChanged(configuration);
 			} catch (final Exception e) {
 				Log.e(TAG, "Selecting configuration failed", e);
 
@@ -441,11 +441,11 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 				else
 					message = "Unknown error";
 				final String msg = message;
-				Snackbar.make(mContainer, R.string.uart_configuration_loading_failed, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_details, v -> new AlertDialog.Builder(UARTActivity.this).setMessage(msg).setTitle(R.string.uart_action_details).setPositiveButton(R.string.ok, null).show()).show();
+				Snackbar.make(container, R.string.uart_configuration_loading_failed, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_details, v -> new AlertDialog.Builder(UARTActivity.this).setMessage(msg).setTitle(R.string.uart_action_details).setPositiveButton(R.string.ok, null).show()).show();
 				return;
 			}
 
-			mPreferences.edit().putLong(PREFS_CONFIGURATION, id).apply();
+			preferences.edit().putLong(PREFS_CONFIGURATION, id).apply();
 		}
 	}
 
@@ -457,7 +457,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	@Override
 	public void onNewConfigurationClick() {
 		// No item has been selected. We must close the spinner manually.
-		mConfigurationSpinner.close();
+		configurationSpinner.close();
 
 		// Open the dialog
 		final DialogFragment fragment = UARTNewConfigurationDialogFragment.getInstance(null, false);
@@ -469,7 +469,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	@Override
 	public void onImportClick() {
 		// No item has been selected. We must close the spinner manually.
-		mConfigurationSpinner.close();
+		configurationSpinner.close();
 
 		final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 		intent.setType("text/xml");
@@ -542,25 +542,25 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	}
 
 	public void onCommandChanged(final int index, final String message, final boolean active, final int eol, final int iconIndex) {
-		final Command command = mConfiguration.getCommands()[index];
+		final Command command = configuration.getCommands()[index];
 
 		command.setCommand(message);
 		command.setActive(active);
 		command.setEol(eol);
 		command.setIconIndex(iconIndex);
-		mConfigurationListener.onConfigurationModified();
+		configurationListener.onConfigurationModified();
 		saveConfiguration();
 	}
 
 	@Override
 	public void onNewConfiguration(final String name, final boolean duplicate) {
-		final boolean exists = mDatabaseHelper.configurationExists(name);
+		final boolean exists = databaseHelper.configurationExists(name);
 		if (exists) {
 			Toast.makeText(this, R.string.uart_configuration_name_already_taken, Toast.LENGTH_LONG).show();
 			return;
 		}
 
-		UartConfiguration configuration = mConfiguration;
+		UartConfiguration configuration = this.configuration;
 		if (!duplicate)
 			configuration = new UartConfiguration();
 		configuration.setName(name);
@@ -573,10 +573,10 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			serializer.write(configuration, writer);
 			final String xml = writer.toString();
 
-			final long id = mDatabaseHelper.addConfiguration(name, xml);
-			mWearableSynchronizer.onConfigurationAddedOrEdited(id, configuration);
+			final long id = databaseHelper.addConfiguration(name, xml);
+			wearableSynchronizer.onConfigurationAddedOrEdited(id, configuration);
 			refreshConfigurations();
-			selectConfiguration(mConfigurationsAdapter.getItemPosition(id));
+			selectConfiguration(configurationsAdapter.getItemPosition(id));
 		} catch (final Exception e) {
 			Log.e(TAG, "Error while creating a new configuration", e);
 		}
@@ -584,25 +584,25 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 	@Override
 	public void onRenameConfiguration(final String newName) {
-		final boolean exists = mDatabaseHelper.configurationExists(newName);
+		final boolean exists = databaseHelper.configurationExists(newName);
 		if (exists) {
 			Toast.makeText(this, R.string.uart_configuration_name_already_taken, Toast.LENGTH_LONG).show();
 			return;
 		}
 
-		final String oldName = mConfiguration.getName();
-		mConfiguration.setName(newName);
+		final String oldName = configuration.getName();
+		configuration.setName(newName);
 
 		try {
 			final Format format = new Format(new HyphenStyle());
 			final Strategy strategy = new VisitorStrategy(new CommentVisitor());
 			final Serializer serializer = new Persister(strategy, format);
 			final StringWriter writer = new StringWriter();
-			serializer.write(mConfiguration, writer);
+			serializer.write(configuration, writer);
 			final String xml = writer.toString();
 
-			mDatabaseHelper.renameConfiguration(oldName, newName, xml);
-			mWearableSynchronizer.onConfigurationAddedOrEdited(mPreferences.getLong(PREFS_CONFIGURATION, 0), mConfiguration);
+			databaseHelper.renameConfiguration(oldName, newName, xml);
+			wearableSynchronizer.onConfigurationAddedOrEdited(preferences.getLong(PREFS_CONFIGURATION, 0), configuration);
 			refreshConfigurations();
 		} catch (final Exception e) {
 			Log.e(TAG, "Error while renaming configuration", e);
@@ -610,13 +610,13 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	}
 
 	private void refreshConfigurations() {
-		mConfigurationsAdapter.swapCursor(mDatabaseHelper.getConfigurationsNames());
-		mConfigurationsAdapter.notifyDataSetChanged();
+		configurationsAdapter.swapCursor(databaseHelper.getConfigurationsNames());
+		configurationsAdapter.notifyDataSetChanged();
 		invalidateOptionsMenu();
 	}
 
 	private void selectConfiguration(final int position) {
-		mConfigurationSpinner.setSelection(position);
+		configurationSpinner.setSelection(position);
 	}
 
 	/**
@@ -629,8 +629,8 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	 */
 	@SuppressLint("NewApi")
 	private void setEditMode(final boolean editMode, final boolean change) {
-		mEditMode = editMode;
-		mConfigurationListener.setEditMode(editMode);
+		this.editMode = editMode;
+		configurationListener.setEditMode(editMode);
 		if (!change) {
 			final ColorDrawable color = new ColorDrawable();
 			int darkColor = 0;
@@ -664,8 +664,8 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 				anim.start();
 			}
 
-			if (mSlider != null && editMode) {
-				mSlider.closePane();
+			if (slider != null && editMode) {
+				slider.closePane();
 			}
 		}
 	}
@@ -674,7 +674,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	 * Saves the given configuration in the database.
 	 */
 	private void saveConfiguration() {
-		final UartConfiguration configuration = mConfiguration;
+		final UartConfiguration configuration = this.configuration;
 		try {
 			final Format format = new Format(new HyphenStyle());
 			final Strategy strategy = new VisitorStrategy(new CommentVisitor());
@@ -683,8 +683,8 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			serializer.write(configuration, writer);
 			final String xml = writer.toString();
 
-			mDatabaseHelper.updateConfiguration(configuration.getName(), xml);
-			mWearableSynchronizer.onConfigurationAddedOrEdited(mPreferences.getLong(PREFS_CONFIGURATION, 0), configuration);
+			databaseHelper.updateConfiguration(configuration.getName(), xml);
+			wearableSynchronizer.onConfigurationAddedOrEdited(preferences.getLong(PREFS_CONFIGURATION, 0), configuration);
 		} catch (final Exception e) {
 			Log.e(TAG, "Error while creating a new configuration", e);
 		}
@@ -708,11 +708,11 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			final UartConfiguration configuration = serializer.read(UartConfiguration.class, xml);
 
 			final String name = configuration.getName();
-			if (!mDatabaseHelper.configurationExists(name)) {
-				final long id = mDatabaseHelper.addConfiguration(name, xml);
-				mWearableSynchronizer.onConfigurationAddedOrEdited(id, configuration);
+			if (!databaseHelper.configurationExists(name)) {
+				final long id = databaseHelper.addConfiguration(name, xml);
+				wearableSynchronizer.onConfigurationAddedOrEdited(id, configuration);
 				refreshConfigurations();
-				new Handler().post(() -> selectConfiguration(mConfigurationsAdapter.getItemPosition(id)));
+				new Handler().post(() -> selectConfiguration(configurationsAdapter.getItemPosition(id)));
 			} else {
 				Toast.makeText(this, R.string.uart_configuration_name_already_taken, Toast.LENGTH_LONG).show();
 			}
@@ -727,7 +727,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			else
 				message = "Unknown error";
 			final String msg = message;
-			Snackbar.make(mContainer, R.string.uart_configuration_loading_failed, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_details, v -> new AlertDialog.Builder(UARTActivity.this).setMessage(msg).setTitle(R.string.uart_action_details).setPositiveButton(R.string.ok, null).show()).show();
+			Snackbar.make(container, R.string.uart_configuration_loading_failed, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_details, v -> new AlertDialog.Builder(UARTActivity.this).setMessage(msg).setTitle(R.string.uart_action_details).setPositiveButton(R.string.ok, null).show()).show();
 		}
 	}
 
@@ -740,13 +740,13 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 		if (!serverFolder.exists())
 			serverFolder.mkdir();
 
-		final String fileName = mConfiguration.getName() + ".xml";
+		final String fileName = configuration.getName() + ".xml";
 		final File file = new File(serverFolder, fileName);
 		try {
 			file.createNewFile();
 			final FileOutputStream fos = new FileOutputStream(file);
 			final OutputStreamWriter writer = new OutputStreamWriter(fos);
-			writer.append(mDatabaseHelper.getConfiguration(mConfigurationSpinner.getSelectedItemId()));
+			writer.append(databaseHelper.getConfiguration(configurationSpinner.getSelectedItemId()));
 			writer.close();
 
 			// Notify user about the file
@@ -768,21 +768,21 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	 * Converts the old configuration, stored in preferences, into the first XML configuration and saves it to the database.
 	 * If there is already any configuration in the database this method does nothing.
 	 */
-	private void ensureFirstConfiguration(final DatabaseHelper mDatabaseHelper) {
+	private void ensureFirstConfiguration(final DatabaseHelper databaseHelper) {
 		// This method ensures that the "old", single configuration has been saved to the database.
-		if (mDatabaseHelper.getConfigurationsCount() == 0) {
+		if (databaseHelper.getConfigurationsCount() == 0) {
 			final UartConfiguration configuration = new UartConfiguration();
 			configuration.setName("First configuration");
 			final Command[] commands = configuration.getCommands();
 
 			for (int i = 0; i < 9; ++i) {
-				final String cmd = mPreferences.getString(PREFS_BUTTON_COMMAND + i, null);
+				final String cmd = preferences.getString(PREFS_BUTTON_COMMAND + i, null);
 				if (cmd != null) {
 					final Command command = new Command();
 					command.setCommand(cmd);
-					command.setActive(mPreferences.getBoolean(PREFS_BUTTON_ENABLED + i, false));
+					command.setActive(preferences.getBoolean(PREFS_BUTTON_ENABLED + i, false));
 					command.setEol(0); // default one
-					command.setIconIndex(mPreferences.getInt(PREFS_BUTTON_ICON + i, 0));
+					command.setIconIndex(preferences.getInt(PREFS_BUTTON_ICON + i, 0));
 					commands[i] = command;
 				}
 			}
@@ -795,7 +795,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 				serializer.write(configuration, writer);
 				final String xml = writer.toString();
 
-				mDatabaseHelper.addConfiguration(configuration.getName(), xml);
+				databaseHelper.addConfiguration(configuration.getName(), xml);
 			} catch (final Exception e) {
 				Log.e(TAG, "Error while creating default configuration", e);
 			}

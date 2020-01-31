@@ -47,6 +47,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import no.nordicsemi.android.ble.BleServerManagerCallbacks;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
@@ -54,7 +55,7 @@ import no.nordicsemi.android.nrftoolbox.ToolboxApplication;
 import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
 import no.nordicsemi.android.nrftoolbox.profile.multiconnect.BleMulticonnectProfileService;
 
-public class ProximityService extends BleMulticonnectProfileService implements ProximityManagerCallbacks, ProximityServerManagerCallbacks {
+public class ProximityService extends BleMulticonnectProfileService implements ProximityManagerCallbacks, BleServerManagerCallbacks {
     @SuppressWarnings("unused")
     private static final String TAG = "ProximityService";
 
@@ -75,30 +76,27 @@ public class ProximityService extends BleMulticonnectProfileService implements P
     private final static int FIND_REQ = 2;
     private final static int SILENT_REQ = 3;
 
-    private final ProximityBinder mBinder = new ProximityBinder();
-    private ProximityServerManager mServerManager;
-    private MediaPlayer mMediaPlayer;
-    private int mOriginalVolume;
+    private final ProximityBinder binder = new ProximityBinder();
+    private ProximityServerManager serverManager;
+    private MediaPlayer mediaPlayer;
+    private int originalVolume;
     /**
      * When a device starts an alarm on the phone it is added to this list.
      * Alarm is disabled when this list is empty.
      */
-    private List<BluetoothDevice> mDevicesWithAlarm;
-
-    private int mAttempt;
-    private final static int MAX_ATTEMPTS = 1;
+    private List<BluetoothDevice> devicesWithAlarm;
 
     /**
      * This local binder is an interface for the bonded activity to operate with the proximity
      * sensor.
      */
-    public class ProximityBinder extends LocalBinder {
+    class ProximityBinder extends LocalBinder {
         /**
          * Toggles the Immediate Alert on given remote device.
          *
          * @param device the connected device.
          */
-        public void toggleImmediateAlert(final BluetoothDevice device) {
+        void toggleImmediateAlert(final BluetoothDevice device) {
             final ProximityManager manager = (ProximityManager) getBleManager(device);
             manager.toggleImmediateAlert();
         }
@@ -110,7 +108,7 @@ public class ProximityService extends BleMulticonnectProfileService implements P
          * @param device the connected device.
          * @return True if alarm has been enabled, false if disabled.
          */
-        public boolean isImmediateAlertOn(final BluetoothDevice device) {
+        boolean isImmediateAlertOn(final BluetoothDevice device) {
             final ProximityManager manager = (ProximityManager) getBleManager(device);
             return manager.isAlertEnabled();
         }
@@ -122,7 +120,7 @@ public class ProximityService extends BleMulticonnectProfileService implements P
          * @return Battery value or null if no value was received or Battery Level characteristic
          * was not found, or the device is disconnected.
          */
-        public Integer getBatteryLevel(final BluetoothDevice device) {
+        Integer getBatteryLevel(final BluetoothDevice device) {
             final ProximityManager manager = (ProximityManager) getBleManager(device);
             return manager.getBatteryLevel();
         }
@@ -130,24 +128,31 @@ public class ProximityService extends BleMulticonnectProfileService implements P
 
     @Override
     protected LocalBinder getBinder() {
-        return mBinder;
+        return binder;
     }
 
     @Override
     protected LoggableBleManager<ProximityManagerCallbacks> initializeManager() {
-        return new ProximityManager(this);
+        final ProximityManager manager = new ProximityManager(this);
+        manager.useServer(serverManager);
+        return manager;
+    }
+
+    @Override
+    protected boolean shouldAutoConnect() {
+        return true;
     }
 
     /**
      * This broadcast receiver listens for {@link #ACTION_DISCONNECT} that may be fired by pressing
      * Disconnect action button on the notification.
      */
-    private final BroadcastReceiver mDisconnectActionBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver disconnectActionBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             final BluetoothDevice device = intent.getParcelableExtra(EXTRA_DEVICE);
-            mBinder.log(device, LogContract.Log.Level.INFO, "[Notification] DISCONNECT action pressed");
-            mBinder.disconnect(device);
+            binder.log(device, LogContract.Log.Level.INFO, "[Notification] DISCONNECT action pressed");
+            binder.disconnect(device);
         }
     };
 
@@ -155,34 +160,34 @@ public class ProximityService extends BleMulticonnectProfileService implements P
      * This broadcast receiver listens for {@link #ACTION_FIND} or {@link #ACTION_SILENT} that may
      * be fired by pressing Find me action button on the notification.
      */
-    private final BroadcastReceiver mToggleAlarmActionBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver toggleAlarmActionBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             final BluetoothDevice device = intent.getParcelableExtra(EXTRA_DEVICE);
             switch (intent.getAction()) {
                 case ACTION_FIND:
-                    mBinder.log(device, LogContract.Log.Level.INFO, "[Notification] FIND action pressed");
+                    binder.log(device, LogContract.Log.Level.INFO, "[Notification] FIND action pressed");
                     break;
                 case ACTION_SILENT:
-                    mBinder.log(device, LogContract.Log.Level.INFO, "[Notification] SILENT action pressed");
+                    binder.log(device, LogContract.Log.Level.INFO, "[Notification] SILENT action pressed");
                     break;
             }
-            mBinder.toggleImmediateAlert(device);
+            binder.toggleImmediateAlert(device);
         }
     };
 
     @Override
     protected void onServiceCreated() {
-        mServerManager = new ProximityServerManager(this);
-        mServerManager.setLogger(mBinder);
+        serverManager = new ProximityServerManager(this);
+        serverManager.setManagerCallbacks(this);
 
         initializeAlarm();
 
-        registerReceiver(mDisconnectActionBroadcastReceiver, new IntentFilter(ACTION_DISCONNECT));
+        registerReceiver(disconnectActionBroadcastReceiver, new IntentFilter(ACTION_DISCONNECT));
         final IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_FIND);
         filter.addAction(ACTION_SILENT);
-        registerReceiver(mToggleAlarmActionBroadcastReceiver, filter);
+        registerReceiver(toggleAlarmActionBroadcastReceiver, filter);
     }
 
     @Override
@@ -190,55 +195,34 @@ public class ProximityService extends BleMulticonnectProfileService implements P
         cancelNotifications();
 
         // Close the GATT server. If it hasn't been opened this method does nothing
-        mServerManager.closeGattServer();
+        serverManager.close();
+        serverManager = null;
 
         releaseAlarm();
 
-        unregisterReceiver(mDisconnectActionBroadcastReceiver);
-        unregisterReceiver(mToggleAlarmActionBroadcastReceiver);
+        unregisterReceiver(disconnectActionBroadcastReceiver);
+        unregisterReceiver(toggleAlarmActionBroadcastReceiver);
 
         super.onServiceStopped();
     }
 
     @Override
     protected void onBluetoothEnabled() {
-        mAttempt = 0;
-        getHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                final Runnable that = this;
-                // Start the GATT Server only if Bluetooth is enabled
-                mServerManager.openGattServer(ProximityService.this,
-                        new ProximityServerManager.OnServerOpenCallback() {
-                            @Override
-                            public void onGattServerOpen() {
-                                // We are now ready to reconnect devices
-                                ProximityService.super.onBluetoothEnabled();
-                            }
+        // First, open the server. onServerReady() will be called when all services were added.
+        serverManager.open();
+    }
 
-                            @Override
-                            public void onGattServerFailed(final int error) {
-                                mServerManager.closeGattServer();
-
-                                if (mAttempt < MAX_ATTEMPTS) {
-                                    mAttempt++;
-                                    getHandler().postDelayed(that, 2000);
-                                } else {
-                                    showToast(getString(R.string.proximity_server_error, error));
-                                    // GATT server failed to start, but we may connect as a client
-                                    ProximityService.super.onBluetoothEnabled();
-                                }
-                            }
-                        });
-            }
-        });
+    @Override
+    public void onServerReady() {
+        // This will start reconnecting to devices that will previously connected.
+        super.onBluetoothEnabled();
     }
 
     @Override
     protected void onBluetoothDisabled() {
         super.onBluetoothDisabled();
         // Close the GATT server
-        mServerManager.closeGattServer();
+        serverManager.close();
     }
 
     @Override
@@ -270,27 +254,25 @@ public class ProximityService extends BleMulticonnectProfileService implements P
     }
 
     @Override
-    public void onDeviceConnected(final BluetoothDevice device) {
+    public void onDeviceConnected(@NonNull final BluetoothDevice device) {
         super.onDeviceConnected(device);
 
-        if (!mBound) {
+        if (!bound) {
             createBackgroundNotification();
         }
     }
 
     @Override
-    public void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound) {
-        super.onServicesDiscovered(device, optionalServicesFound);
-        mServerManager.openConnection(device);
+    public void onDeviceConnectedToServer(@NonNull final BluetoothDevice device) {
+        binder.log(Log.INFO, device.getAddress() + " connected to server");
     }
 
     @Override
-    public void onLinkLossOccurred(final BluetoothDevice device) {
-        mServerManager.cancelConnection(device);
+    public void onLinkLossOccurred(@NonNull final BluetoothDevice device) {
         stopAlarm(device);
         super.onLinkLossOccurred(device);
 
-        if (!mBound) {
+        if (!bound) {
             createBackgroundNotification();
             if (BluetoothAdapter.getDefaultAdapter().isEnabled())
                 createLinkLossNotification(device);
@@ -300,25 +282,19 @@ public class ProximityService extends BleMulticonnectProfileService implements P
     }
 
     @Override
-    public void onDeviceDisconnected(final BluetoothDevice device) {
-        mServerManager.cancelConnection(device);
+    public void onDeviceDisconnected(@NonNull final BluetoothDevice device) {
         stopAlarm(device);
         super.onDeviceDisconnected(device);
 
-        if (!mBound) {
+        if (!bound) {
             cancelNotification(device);
             createBackgroundNotification();
         }
     }
 
     @Override
-    public void onAlarmTriggered(@NonNull final BluetoothDevice device) {
-        playAlarm(device);
-    }
-
-    @Override
-    public void onAlarmStopped(@NonNull final BluetoothDevice device) {
-        stopAlarm(device);
+    public void onDeviceDisconnectedFromServer(@NonNull final BluetoothDevice device) {
+        binder.log(Log.INFO, device.getAddress() + " disconnected from server");
     }
 
     @Override
@@ -328,9 +304,17 @@ public class ProximityService extends BleMulticonnectProfileService implements P
         broadcast.putExtra(EXTRA_ALARM_STATE, on);
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 
-        if (!mBound) {
+        if (!bound) {
             createBackgroundNotification();
         }
+    }
+
+    @Override
+    public void onLocalAlarmSwitched(@NonNull final BluetoothDevice device, final boolean on) {
+        if (on)
+            playAlarm(device);
+        else
+            stopAlarm(device);
     }
 
     @Override
@@ -537,36 +521,36 @@ public class ProximityService extends BleMulticonnectProfileService implements P
     }
 
     private void initializeAlarm() {
-        mDevicesWithAlarm = new LinkedList<>();
-        mMediaPlayer = new MediaPlayer();
-        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
-        mMediaPlayer.setLooping(true);
-        mMediaPlayer.setVolume(1.0f, 1.0f);
+        devicesWithAlarm = new LinkedList<>();
+        mediaPlayer = new MediaPlayer();
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
+        mediaPlayer.setLooping(true);
+        mediaPlayer.setVolume(1.0f, 1.0f);
         try {
-            mMediaPlayer.setDataSource(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM));
+            mediaPlayer.setDataSource(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM));
         } catch (final IOException e) {
             Log.e(TAG, "Initialize Alarm failed: ", e);
         }
     }
 
     private void releaseAlarm() {
-        mMediaPlayer.release();
-        mMediaPlayer = null;
+        mediaPlayer.release();
+        mediaPlayer = null;
     }
 
     private void playAlarm(final BluetoothDevice device) {
-        final boolean alarmPlaying = !mDevicesWithAlarm.isEmpty();
-        if (!mDevicesWithAlarm.contains(device))
-            mDevicesWithAlarm.add(device);
+        final boolean alarmPlaying = !devicesWithAlarm.isEmpty();
+        if (!devicesWithAlarm.contains(device))
+            devicesWithAlarm.add(device);
 
         if (!alarmPlaying) {
             // Save the current alarm volume and set it to max
             final AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-            mOriginalVolume = am.getStreamVolume(AudioManager.STREAM_ALARM);
+            originalVolume = am.getStreamVolume(AudioManager.STREAM_ALARM);
             am.setStreamVolume(AudioManager.STREAM_ALARM, am.getStreamMaxVolume(AudioManager.STREAM_ALARM), AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
             try {
-                mMediaPlayer.prepare();
-                mMediaPlayer.start();
+                mediaPlayer.prepare();
+                mediaPlayer.start();
             } catch (final IOException e) {
                 Log.e(TAG, "Prepare Alarm failed: ", e);
             }
@@ -574,12 +558,12 @@ public class ProximityService extends BleMulticonnectProfileService implements P
     }
 
     private void stopAlarm(final BluetoothDevice device) {
-        mDevicesWithAlarm.remove(device);
-        if (mDevicesWithAlarm.isEmpty() && mMediaPlayer.isPlaying()) {
-            mMediaPlayer.stop();
+        devicesWithAlarm.remove(device);
+        if (devicesWithAlarm.isEmpty() && mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
             // Restore original volume
             final AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-            am.setStreamVolume(AudioManager.STREAM_ALARM, mOriginalVolume, 0);
+            am.setStreamVolume(AudioManager.STREAM_ALARM, originalVolume, 0);
         }
     }
 

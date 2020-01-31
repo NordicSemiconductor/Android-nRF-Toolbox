@@ -38,9 +38,9 @@ import no.nordicsemi.android.nrftoolbox.R;
 
 public class ForegroundLinearLayout extends LinearLayout {
 
-	private Drawable mForegroundSelector;
-	private Rect mRectPadding;
-	private boolean mUseBackgroundPadding = false;
+	private Drawable foregroundSelector;
+	private Rect rectPadding;
+	private boolean useBackgroundPadding = false;
 
 	public ForegroundLinearLayout(Context context) {
 		super(context);
@@ -65,9 +65,9 @@ public class ForegroundLinearLayout extends LinearLayout {
 
 		if (this.getBackground() instanceof NinePatchDrawable) {
 			final NinePatchDrawable npd = (NinePatchDrawable) this.getBackground();
-			mRectPadding = new Rect();
-			if (npd.getPadding(mRectPadding)) {
-			 mUseBackgroundPadding = true;
+			rectPadding = new Rect();
+			if (npd.getPadding(rectPadding)) {
+			 useBackgroundPadding = true;
 			}
 		}
 	}
@@ -76,8 +76,8 @@ public class ForegroundLinearLayout extends LinearLayout {
 	protected void drawableStateChanged() {
 		super.drawableStateChanged();
 
-		if (mForegroundSelector != null && mForegroundSelector.isStateful()) {
-			mForegroundSelector.setState(getDrawableState());
+		if (foregroundSelector != null && foregroundSelector.isStateful()) {
+			foregroundSelector.setState(getDrawableState());
 		}
 	}
 
@@ -85,11 +85,11 @@ public class ForegroundLinearLayout extends LinearLayout {
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
 
-		if (mForegroundSelector != null) {
-			if (mUseBackgroundPadding) {
-				mForegroundSelector.setBounds(mRectPadding.left, mRectPadding.top, w - mRectPadding.right, h - mRectPadding.bottom);
+		if (foregroundSelector != null) {
+			if (useBackgroundPadding) {
+				foregroundSelector.setBounds(rectPadding.left, rectPadding.top, w - rectPadding.right, h - rectPadding.bottom);
 			} else {
-				mForegroundSelector.setBounds(0, 0, w, h);
+				foregroundSelector.setBounds(0, 0, w, h);
 			}
 		}
 	}
@@ -98,30 +98,30 @@ public class ForegroundLinearLayout extends LinearLayout {
 	protected void dispatchDraw(@NonNull Canvas canvas) {
 		super.dispatchDraw(canvas);
 
-		if (mForegroundSelector != null) {
-			mForegroundSelector.draw(canvas);
+		if (foregroundSelector != null) {
+			foregroundSelector.draw(canvas);
 		}
 	}
 
 	@Override
 	protected boolean verifyDrawable(Drawable who) {
-		return super.verifyDrawable(who) || (who == mForegroundSelector);
+		return super.verifyDrawable(who) || (who == foregroundSelector);
 	}
 
 	@Override
 	public void jumpDrawablesToCurrentState() {
 		super.jumpDrawablesToCurrentState();
-		if (mForegroundSelector != null) mForegroundSelector.jumpToCurrentState();
+		if (foregroundSelector != null) foregroundSelector.jumpToCurrentState();
 	}
 
 	public void setForeground(Drawable drawable) {
-		if (mForegroundSelector != drawable) {
-			if (mForegroundSelector != null) {
-				mForegroundSelector.setCallback(null);
-				unscheduleDrawable(mForegroundSelector);
+		if (foregroundSelector != drawable) {
+			if (foregroundSelector != null) {
+				foregroundSelector.setCallback(null);
+				unscheduleDrawable(foregroundSelector);
 			}
 
-			mForegroundSelector = drawable;
+			foregroundSelector = drawable;
 
 			if (drawable != null) {
 				setWillNotDraw(false);
@@ -141,8 +141,8 @@ public class ForegroundLinearLayout extends LinearLayout {
 	@Override
 	public void drawableHotspotChanged(float x, float y) {
 		super.drawableHotspotChanged(x, y);
-		if (mForegroundSelector != null) {
-			mForegroundSelector.setHotspot(x, y);
+		if (foregroundSelector != null) {
+			foregroundSelector.setHotspot(x, y);
 		}
 	}
 } 

@@ -41,15 +41,15 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 	@SuppressWarnings("unused")
 	private static final String TAG = "BPMActivity";
 
-	private TextView mSystolicView;
-	private TextView mSystolicUnitView;
-	private TextView mDiastolicView;
-	private TextView mDiastolicUnitView;
-	private TextView mMeanAPView;
-	private TextView mMeanAPUnitView;
-	private TextView mPulseView;
-	private TextView mTimestampView;
-	private TextView mBatteryLevelView;
+	private TextView systolicView;
+	private TextView systolicUnitView;
+	private TextView diastolicView;
+	private TextView diastolicUnitView;
+	private TextView meanAPView;
+	private TextView meanAPUnitView;
+	private TextView pulseView;
+	private TextView timestampView;
+	private TextView batteryLevelView;
 
 	@Override
 	protected void onCreateView(final Bundle savedInstanceState) {
@@ -58,15 +58,15 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 	}
 
 	private void setGUI() {
-		mSystolicView = findViewById(R.id.systolic);
-		mSystolicUnitView = findViewById(R.id.systolic_unit);
-		mDiastolicView = findViewById(R.id.diastolic);
-		mDiastolicUnitView = findViewById(R.id.diastolic_unit);
-		mMeanAPView = findViewById(R.id.mean_ap);
-		mMeanAPUnitView = findViewById(R.id.mean_ap_unit);
-		mPulseView = findViewById(R.id.pulse);
-		mTimestampView = findViewById(R.id.timestamp);
-		mBatteryLevelView = findViewById(R.id.battery);
+		systolicView = findViewById(R.id.systolic);
+		systolicUnitView = findViewById(R.id.systolic_unit);
+		diastolicView = findViewById(R.id.diastolic);
+		diastolicUnitView = findViewById(R.id.diastolic_unit);
+		meanAPView = findViewById(R.id.mean_ap);
+		meanAPUnitView = findViewById(R.id.mean_ap_unit);
+		pulseView = findViewById(R.id.pulse);
+		timestampView = findViewById(R.id.timestamp);
+		batteryLevelView = findViewById(R.id.battery);
 	}
 
 	@Override
@@ -92,21 +92,21 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 	@Override
 	protected LoggableBleManager<BPMManagerCallbacks> initializeManager() {
 		final BPMManager manager = BPMManager.getBPMManager(getApplicationContext());
-		manager.setGattCallbacks(this);
+		manager.setManagerCallbacks(this);
 		return manager;
 	}
 
 	@Override
 	protected void setDefaultUI() {
-		mSystolicView.setText(R.string.not_available_value);
-		mSystolicUnitView.setText(null);
-		mDiastolicView.setText(R.string.not_available_value);
-		mDiastolicUnitView.setText(null);
-		mMeanAPView.setText(R.string.not_available_value);
-		mMeanAPUnitView.setText(null);
-		mPulseView.setText(R.string.not_available_value);
-		mTimestampView.setText(R.string.not_available);
-		mBatteryLevelView.setText(R.string.not_available);
+		systolicView.setText(R.string.not_available_value);
+		systolicUnitView.setText(null);
+		diastolicView.setText(R.string.not_available_value);
+		diastolicUnitView.setText(null);
+		meanAPView.setText(R.string.not_available_value);
+		meanAPUnitView.setText(null);
+		pulseView.setText(R.string.not_available_value);
+		timestampView.setText(R.string.not_available);
+		batteryLevelView.setText(R.string.not_available);
 	}
 
 	@Override
@@ -122,7 +122,7 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 	@Override
 	public void onDeviceDisconnected(@NonNull final BluetoothDevice device) {
 		super.onDeviceDisconnected(device);
-		runOnUiThread(() -> mBatteryLevelView.setText(R.string.not_available));
+		runOnUiThread(() -> batteryLevelView.setText(R.string.not_available));
 	}
 
 	@Override
@@ -131,21 +131,21 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 												   @Nullable final Float pulseRate, @Nullable final Integer userID,
 												   @Nullable final BPMStatus status, @Nullable final Calendar calendar) {
 		runOnUiThread(() -> {
-			mSystolicView.setText(String.valueOf(systolic));
-			mDiastolicView.setText(String.valueOf(diastolic));
-			mMeanAPView.setText(String.valueOf(meanArterialPressure));
+			systolicView.setText(String.valueOf(systolic));
+			diastolicView.setText(String.valueOf(diastolic));
+			meanAPView.setText(String.valueOf(meanArterialPressure));
 			if (pulseRate != null)
-				mPulseView.setText(String.valueOf(pulseRate));
+				pulseView.setText(String.valueOf(pulseRate));
 			else
-				mPulseView.setText(R.string.not_available_value);
+				pulseView.setText(R.string.not_available_value);
 			if (calendar != null)
-				mTimestampView.setText(getString(R.string.bpm_timestamp, calendar));
+				timestampView.setText(getString(R.string.bpm_timestamp, calendar));
 			else
-				mTimestampView.setText(R.string.not_available);
+				timestampView.setText(R.string.not_available);
 
-			mSystolicUnitView.setText(unit == BloodPressureMeasurementCallback.UNIT_mmHg ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
-			mDiastolicUnitView.setText(unit == BloodPressureMeasurementCallback.UNIT_mmHg ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
-			mMeanAPUnitView.setText(unit == BloodPressureMeasurementCallback.UNIT_mmHg ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
+			systolicUnitView.setText(unit == BloodPressureMeasurementCallback.UNIT_mmHg ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
+			diastolicUnitView.setText(unit == BloodPressureMeasurementCallback.UNIT_mmHg ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
+			meanAPUnitView.setText(unit == BloodPressureMeasurementCallback.UNIT_mmHg ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
 		});
 	}
 
@@ -154,26 +154,26 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 												   @Nullable final Float pulseRate, @Nullable final Integer userID,
 												   @Nullable final BPMStatus status, @Nullable final Calendar calendar) {
 		runOnUiThread(() -> {
-			mSystolicView.setText(String.valueOf(cuffPressure));
-			mDiastolicView.setText(R.string.not_available_value);
-			mMeanAPView.setText(R.string.not_available_value);
+			systolicView.setText(String.valueOf(cuffPressure));
+			diastolicView.setText(R.string.not_available_value);
+			meanAPView.setText(R.string.not_available_value);
 			if (pulseRate != null)
-				mPulseView.setText(String.valueOf(pulseRate));
+				pulseView.setText(String.valueOf(pulseRate));
 			else
-				mPulseView.setText(R.string.not_available_value);
+				pulseView.setText(R.string.not_available_value);
 			if (calendar != null)
-				mTimestampView.setText(getString(R.string.bpm_timestamp, calendar));
+				timestampView.setText(getString(R.string.bpm_timestamp, calendar));
 			else
-				mTimestampView.setText(R.string.not_available);
+				timestampView.setText(R.string.not_available);
 
-			mSystolicUnitView.setText(unit == IntermediateCuffPressureCallback.UNIT_mmHg ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
-			mDiastolicUnitView.setText(null);
-			mMeanAPUnitView.setText(null);
+			systolicUnitView.setText(unit == IntermediateCuffPressureCallback.UNIT_mmHg ? R.string.bpm_unit_mmhg : R.string.bpm_unit_kpa);
+			diastolicUnitView.setText(null);
+			meanAPUnitView.setText(null);
 		});
 	}
 
 	@Override
 	public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
-		runOnUiThread(() -> mBatteryLevelView.setText(getString(R.string.battery, batteryLevel)));
+		runOnUiThread(() -> batteryLevelView.setText(getString(R.string.battery, batteryLevel)));
 	}
 }

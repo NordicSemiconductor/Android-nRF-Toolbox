@@ -13,62 +13,65 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import no.nordicsemi.android.nrftoolbox.R;
 
-public class CGMSRecordsAdapter extends BaseAdapter {
-	private final static SimpleDateFormat mTimeFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.US);
+class CGMSRecordsAdapter extends BaseAdapter {
+	private final static SimpleDateFormat timeFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.US);
 
-	private List<CGMSRecord> mRecords;
-	private LayoutInflater mInflater;
+	private List<CGMSRecord> records;
+	private LayoutInflater inflater;
 
-	public CGMSRecordsAdapter(final Context context) {
-		mRecords = new ArrayList<>();
-		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	CGMSRecordsAdapter(@NonNull final Context context) {
+		records = new ArrayList<>();
+		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
 	@Override
 	public int getCount() {
-		return mRecords.size();
+		return records.size();
 	}
 
 	@Override
-	public Object getItem(int i) {
+	public Object getItem(final int i) {
 		return null;
 	}
 
 	@Override
-	public long getItemId(int i) {
+	public long getItemId(final int i) {
 		return i;
 	}
 
 	@Override
-	public View getView(final int position, View convertView, ViewGroup parent) {
+	public View getView(final int position, @Nullable final View convertView, @NonNull final ViewGroup parent) {
 		ViewHolder viewHolder;
-		if (convertView == null) {
-			convertView = mInflater.inflate(R.layout.activity_feature_cgms_item, parent, false);
+		View view = convertView;
+		if (view == null) {
+			view = inflater.inflate(R.layout.activity_feature_cgms_item, parent, false);
 			viewHolder = new ViewHolder();
-			viewHolder.concentration = convertView.findViewById(R.id.cgms_concentration);
-			viewHolder.time = convertView.findViewById(R.id.time);
-			viewHolder.details = convertView.findViewById(R.id.details);
-			convertView.setTag(viewHolder);
+			viewHolder.concentration = view.findViewById(R.id.cgms_concentration);
+			viewHolder.time = view.findViewById(R.id.time);
+			viewHolder.details = view.findViewById(R.id.details);
+			view.setTag(viewHolder);
 		} else {
-			viewHolder = (ViewHolder) convertView.getTag();
+			viewHolder = (ViewHolder) view.getTag();
 		}
 
-		final CGMSRecord cgmsRecord = mRecords.get(position);
+		final CGMSRecord cgmsRecord = records.get(position);
 		viewHolder.concentration.setText(String.valueOf(cgmsRecord.glucoseConcentration));
 		viewHolder.details.setText(viewHolder.details.getResources().getString(R.string.cgms_details, cgmsRecord.sequenceNumber));
-		viewHolder.time.setText(mTimeFormat.format(new Date(cgmsRecord.timestamp)));
+		viewHolder.time.setText(timeFormat.format(new Date(cgmsRecord.timestamp)));
 
-		return convertView;
+		return view;
 	}
 
-	public void addItem(final CGMSRecord record) {
-		mRecords.add(record);
+	void addItem(final CGMSRecord record) {
+		records.add(record);
 	}
 
-	public void clear() {
-		mRecords.clear();
+	void clear() {
+		records.clear();
 	}
 
 	private static class ViewHolder {

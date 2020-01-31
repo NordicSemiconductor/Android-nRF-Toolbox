@@ -24,11 +24,12 @@ package no.nordicsemi.android.nrftoolbox.uart;
 
 import android.bluetooth.BluetoothDevice;
 
+import androidx.annotation.NonNull;
 import no.nordicsemi.android.ble.BleManagerCallbacks;
 
 public interface UARTManagerCallbacks extends BleManagerCallbacks {
 
-	void onDataReceived(final BluetoothDevice device, final String data);
+	void onDataReceived(@NonNull final BluetoothDevice device, final String data);
 
-	void onDataSent(final BluetoothDevice device, final String data);
+	void onDataSent(@NonNull final BluetoothDevice device, final String data);
 }

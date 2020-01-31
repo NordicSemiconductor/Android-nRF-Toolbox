@@ -42,8 +42,8 @@ import no.nordicsemi.android.nrftoolbox.wearable.common.Constants;
 public class UARTConfigurationSynchronizer {
 	private static final String WEAR_URI_PREFIX = "wear:"; // no / at the end as the path already has it
 
-	private static UARTConfigurationSynchronizer mInstance;
-	private GoogleApiClient mGoogleApiClient;
+	private static UARTConfigurationSynchronizer instance;
+	private GoogleApiClient googleApiClient;
 
 	/**
 	 * Initializes the synchronizer.
@@ -51,11 +51,11 @@ public class UARTConfigurationSynchronizer {
 	 * @param listener the connection callbacks listener
 	 */
 	public static UARTConfigurationSynchronizer from(final Context context, final GoogleApiClient.ConnectionCallbacks listener) {
-		if (mInstance == null)
-			mInstance = new UARTConfigurationSynchronizer();
+		if (instance == null)
+			instance = new UARTConfigurationSynchronizer();
 
-		mInstance.init(context, listener);
-		return mInstance;
+		instance.init(context, listener);
+		return instance;
 	}
 
 	private UARTConfigurationSynchronizer() {
@@ -63,30 +63,31 @@ public class UARTConfigurationSynchronizer {
 	}
 
 	private void init(final Context context, final GoogleApiClient.ConnectionCallbacks listener) {
-		if (mGoogleApiClient != null)
+		if (googleApiClient != null)
 			return;
 
-		mGoogleApiClient = new GoogleApiClient.Builder(context)
+		googleApiClient = new GoogleApiClient.Builder(context)
 				.addApiIfAvailable(Wearable.API)
 				.addConnectionCallbacks(listener)
 				.build();
-		mGoogleApiClient.connect();
+		googleApiClient.connect();
 	}
 
 	/**
 	 * Closes the synchronizer.
 	 */
 	public void close() {
-		if (mGoogleApiClient != null)
-			mGoogleApiClient.disconnect();
-		mGoogleApiClient = null;
+		if (googleApiClient != null)
+			googleApiClient.disconnect();
+		googleApiClient = null;
 	}
 
 	/**
 	 * Returns true if Wearable API has been connected.
 	 */
+	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 	public boolean hasConnectedApi() {
-		return mGoogleApiClient != null && mGoogleApiClient.isConnected() && mGoogleApiClient.hasConnectedApi(Wearable.API);
+		return googleApiClient != null && googleApiClient.isConnected() && googleApiClient.hasConnectedApi(Wearable.API);
 	}
 
 	/**
@@ -113,7 +114,7 @@ public class UARTConfigurationSynchronizer {
 		}
 		map.putDataMapArrayList(Constants.UART.Configuration.COMMANDS, commands);
 		final PutDataRequest request = mapRequest.asPutDataRequest();
-		return Wearable.DataApi.putDataItem(mGoogleApiClient, request);
+		return Wearable.DataApi.putDataItem(googleApiClient, request);
 	}
 
 	/**
@@ -121,10 +122,11 @@ public class UARTConfigurationSynchronizer {
 	 * Call this when configuration has been deleted.
 	 * @return pending result
 	 */
+	@SuppressWarnings("UnusedReturnValue")
 	public PendingResult<DataApi.DeleteDataItemsResult> onConfigurationDeleted(final long id) {
 		if (!hasConnectedApi())
 			return null;
-		return Wearable.DataApi.deleteDataItems(mGoogleApiClient, id2Uri(id));
+		return Wearable.DataApi.deleteDataItems(googleApiClient, id2Uri(id));
 	}
 
 	/**

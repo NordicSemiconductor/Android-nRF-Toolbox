@@ -24,6 +24,8 @@ package no.nordicsemi.android.nrftoolbox.uart;
 
 import android.content.Context;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,12 +42,12 @@ public class UARTControlFragment extends Fragment implements GridView.OnItemClic
 	private final static String TAG = "UARTControlFragment";
 	private final static String SIS_EDIT_MODE = "sis_edit_mode";
 
-	private UartConfiguration mConfiguration;
-	private UARTButtonAdapter mAdapter;
-	private boolean mEditMode;
+	private UartConfiguration configuration;
+	private UARTButtonAdapter adapter;
+	private boolean editMode;
 
 	@Override
-	public void onAttach(final Context context) {
+	public void onAttach(@NonNull final Context context) {
 		super.onAttach(context);
 
 		try {
@@ -60,19 +62,19 @@ public class UARTControlFragment extends Fragment implements GridView.OnItemClic
 		super.onCreate(savedInstanceState);
 
 		if (savedInstanceState != null) {
-			mEditMode = savedInstanceState.getBoolean(SIS_EDIT_MODE);
+			editMode = savedInstanceState.getBoolean(SIS_EDIT_MODE);
 		}
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		((UARTActivity)getActivity()).setConfigurationListener(null);
+		((UARTActivity)requireActivity()).setConfigurationListener(null);
 	}
 
 	@Override
 	public void onSaveInstanceState(final Bundle outState) {
-		outState.putBoolean(SIS_EDIT_MODE, mEditMode);
+		outState.putBoolean(SIS_EDIT_MODE, editMode);
 	}
 
 	@Override
@@ -80,23 +82,23 @@ public class UARTControlFragment extends Fragment implements GridView.OnItemClic
 		final View view = inflater.inflate(R.layout.fragment_feature_uart_control, container, false);
 
 		final GridView grid = view.findViewById(R.id.grid);
-		grid.setAdapter(mAdapter = new UARTButtonAdapter(mConfiguration));
+		grid.setAdapter(adapter = new UARTButtonAdapter(configuration));
 		grid.setOnItemClickListener(this);
-		mAdapter.setEditMode(mEditMode);
+		adapter.setEditMode(editMode);
 
 		return view;
 	}
 
 	@Override
 	public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
-		if (mEditMode) {
-			Command command = mConfiguration.getCommands()[position];
+		if (editMode) {
+			Command command = configuration.getCommands()[position];
 			if (command == null)
-				mConfiguration.getCommands()[position] = command = new Command();
+				configuration.getCommands()[position] = command = new Command();
 			final UARTEditDialog dialog = UARTEditDialog.getInstance(position, command);
 			dialog.show(getChildFragmentManager(), null);
 		} else {
-			final Command command = (Command)mAdapter.getItem(position);
+			final Command command = (Command)adapter.getItem(position);
 			final Command.Eol eol = command.getEol();
 			String text = command.getCommand();
 			if (text == null)
@@ -109,25 +111,25 @@ public class UARTControlFragment extends Fragment implements GridView.OnItemClic
 					text = text.replaceAll("\n", "\r");
 					break;
 			}
-			final UARTInterface uart = (UARTInterface) getActivity();
+			final UARTInterface uart = (UARTInterface) requireActivity();
 			uart.send(text);
 		}
 	}
 
 	@Override
 	public void onConfigurationModified() {
-		mAdapter.notifyDataSetChanged();
+		adapter.notifyDataSetChanged();
 	}
 
 	@Override
-	public void onConfigurationChanged(final UartConfiguration configuration) {
-		mConfiguration = configuration;
-		mAdapter.setConfiguration(configuration);
+	public void onConfigurationChanged(@NonNull final UartConfiguration configuration) {
+		this.configuration = configuration;
+		adapter.setConfiguration(configuration);
 	}
 
 	@Override
 	public void setEditMode(final boolean editMode) {
-		mEditMode = editMode;
-		mAdapter.setEditMode(mEditMode);
+		this.editMode = editMode;
+		adapter.setEditMode(editMode);
 	}
 }

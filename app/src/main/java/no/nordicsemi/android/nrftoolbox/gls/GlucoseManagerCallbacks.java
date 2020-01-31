@@ -23,22 +23,23 @@ package no.nordicsemi.android.nrftoolbox.gls;
 
 import android.bluetooth.BluetoothDevice;
 
+import androidx.annotation.NonNull;
 import no.nordicsemi.android.ble.BleManagerCallbacks;
 import no.nordicsemi.android.nrftoolbox.battery.BatteryManagerCallbacks;
 
 public interface GlucoseManagerCallbacks extends BatteryManagerCallbacks {
 
-	void onOperationStarted(final BluetoothDevice device);
+	void onOperationStarted(@NonNull final BluetoothDevice device);
 
-	void onOperationCompleted(final BluetoothDevice device);
+	void onOperationCompleted(@NonNull final BluetoothDevice device);
 
-	void onOperationFailed(final BluetoothDevice device);
+	void onOperationFailed(@NonNull final BluetoothDevice device);
 
-	void onOperationAborted(final BluetoothDevice device);
+	void onOperationAborted(@NonNull final BluetoothDevice device);
 
-	void onOperationNotSupported(final BluetoothDevice device);
+	void onOperationNotSupported(@NonNull final BluetoothDevice device);
 
-	void onDatasetChanged(final BluetoothDevice device);
+	void onDataSetChanged(@NonNull final BluetoothDevice device);
 
-	void onNumberOfRecordsRequested(final BluetoothDevice device, final int value);
+	void onNumberOfRecordsRequested(@NonNull final BluetoothDevice device, final int value);
 }

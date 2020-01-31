@@ -31,58 +31,60 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.uart.domain.UartConfiguration;
 
 public class UARTConfigurationsAdapter extends WearableListView.Adapter {
-	private final LayoutInflater mInflater;
-	private List<UartConfiguration> mConfigurations;
+	private final LayoutInflater inflater;
+	private List<UartConfiguration> configurations;
 
 	public UARTConfigurationsAdapter(final Context context) {
-		mInflater = LayoutInflater.from(context);
+		inflater = LayoutInflater.from(context);
 	}
 
 	/**
 	 * Populates the adapter with list of configurations.
 	 */
 	public void setConfigurations(final List<UartConfiguration> configurations) {
-		mConfigurations = configurations;
+		this.configurations = configurations;
 		notifyDataSetChanged();
 	}
 
+	@NonNull
 	@Override
-	public WearableListView.ViewHolder onCreateViewHolder(final ViewGroup viewGroup, final int viewType) {
-		return new ConfigurationViewHolder(mInflater.inflate(R.layout.configuration_item, viewGroup, false));
+	public WearableListView.ViewHolder onCreateViewHolder(@NonNull final ViewGroup viewGroup, final int viewType) {
+		return new ConfigurationViewHolder(inflater.inflate(R.layout.configuration_item, viewGroup, false));
 	}
 
 	@Override
-	public void onBindViewHolder(final WearableListView.ViewHolder holder, final int position) {
+	public void onBindViewHolder(@NonNull final WearableListView.ViewHolder holder, final int position) {
 		final ConfigurationViewHolder viewHolder = (ConfigurationViewHolder) holder;
-		viewHolder.setConfiguration(mConfigurations.get(position));
+		viewHolder.setConfiguration(configurations.get(position));
 	}
 
 	@Override
 	public int getItemCount() {
-		return mConfigurations != null ? mConfigurations.size() : 0;
+		return configurations != null ? configurations.size() : 0;
 	}
 
 	public static class ConfigurationViewHolder extends WearableListView.ViewHolder {
-		private UartConfiguration mConfiguration;
-		private TextView mName;
+		private UartConfiguration configuration;
+		private TextView name;
 
 		public ConfigurationViewHolder(final View itemView) {
 			super(itemView);
 
-			mName = itemView.findViewById(R.id.name);
+			name = itemView.findViewById(R.id.name);
 		}
 
 		private void setConfiguration(final UartConfiguration configuration) {
-			mConfiguration = configuration;
-			mName.setText(configuration.getName());
+			this.configuration = configuration;
+			name.setText(configuration.getName());
 		}
 
 		public UartConfiguration getConfiguration() {
-			return mConfiguration;
+			return configuration;
 		}
 	}
 }

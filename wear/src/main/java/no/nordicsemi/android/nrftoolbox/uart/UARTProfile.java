@@ -59,36 +59,36 @@ public class UARTProfile extends BleProfile {
 		return service != null && service.getCharacteristic(UART_TX_CHARACTERISTIC_UUID) != null && service.getCharacteristic(UART_RX_CHARACTERISTIC_UUID) != null;
 	}
 
-	private BluetoothGattCharacteristic mTXCharacteristic;
-	private BluetoothGattCharacteristic mRXCharacteristic;
-	private byte[] mOutgoingBuffer;
-	private int mBufferOffset;
+	private BluetoothGattCharacteristic tXCharacteristic;
+	private BluetoothGattCharacteristic rXCharacteristic;
+	private byte[] outgoingBuffer;
+	private int bufferOffset;
 
 	@Override
 	protected Deque<BleManager.Request> initGatt(final BluetoothGatt gatt) {
 		final BluetoothGattService service = gatt.getService(UART_SERVICE_UUID);
-		mTXCharacteristic = service.getCharacteristic(UART_TX_CHARACTERISTIC_UUID);
-		mRXCharacteristic = service.getCharacteristic(UART_RX_CHARACTERISTIC_UUID);
+		tXCharacteristic = service.getCharacteristic(UART_TX_CHARACTERISTIC_UUID);
+		rXCharacteristic = service.getCharacteristic(UART_RX_CHARACTERISTIC_UUID);
 
-		final int rxProperties = mRXCharacteristic.getProperties();
+		final int rxProperties = rXCharacteristic.getProperties();
 		boolean writeRequest = (rxProperties & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0;
 
 		// Set the WRITE REQUEST type when the characteristic supports it. This will allow to send long write (also if the characteristic support it).
 		// In case there is no WRITE REQUEST property, this manager will divide texts longer then 20 bytes into up to 20 bytes chunks.
 		if (writeRequest)
-			mRXCharacteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+			rXCharacteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
 
 		// We don't want to enable notifications on TX characteristic as we are not showing them here. A watch may be just used to send data. At least now.
 //		final LinkedList<BleProfileApi.Request> requests = new LinkedList<>();
-//		requests.add(BleProfileApi.Request.newEnableNotificationsRequest(mTXCharacteristic));
+//		requests.add(BleProfileApi.Request.newEnableNotificationsRequest(tXCharacteristic));
 //		return requests;
 		return null;
 	}
 
 	@Override
 	protected void release() {
-		mTXCharacteristic = null;
-		mRXCharacteristic = null;
+		tXCharacteristic = null;
+		rXCharacteristic = null;
 	}
 
 	@Override
@@ -102,13 +102,13 @@ public class UARTProfile extends BleProfile {
 	@Override
 	protected void onCharacteristicWrite(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
 		// When the whole buffer has been sent
-		final byte[] buffer = mOutgoingBuffer;
-		if (mBufferOffset == buffer.length) {
-			mOutgoingBuffer = null;
+		final byte[] buffer = outgoingBuffer;
+		if (bufferOffset == buffer.length) {
+			outgoingBuffer = null;
 		} else { // Otherwise...
-			final int length = Math.min(buffer.length - mBufferOffset, MAX_PACKET_SIZE);
-			getApi().enqueue(BleProfileApi.Request.newWriteRequest(mRXCharacteristic, buffer, mBufferOffset, length));
-			mBufferOffset += length;
+			final int length = Math.min(buffer.length - bufferOffset, MAX_PACKET_SIZE);
+			getApi().enqueue(BleProfileApi.Request.newWriteRequest(rXCharacteristic, buffer, bufferOffset, length));
+			bufferOffset += length;
 		}
 	}
 
@@ -118,25 +118,25 @@ public class UARTProfile extends BleProfile {
 	 */
 	public void send(final String text) {
 		// Are we connected?
-		if (mRXCharacteristic == null)
+		if (rXCharacteristic == null)
 			return;
 
 		// An outgoing buffer may not be null if there is already another packet being sent. We do nothing in this case.
-		if (!TextUtils.isEmpty(text) && mOutgoingBuffer == null) {
-			final byte[] buffer = mOutgoingBuffer = text.getBytes();
-			mBufferOffset = 0;
+		if (!TextUtils.isEmpty(text) && outgoingBuffer == null) {
+			final byte[] buffer = outgoingBuffer = text.getBytes();
+			bufferOffset = 0;
 
 			// Depending on whether the characteristic has the WRITE REQUEST property or not, we will either send it as it is (hoping the long write is implemented),
 			// or divide it into up to 20 bytes chunks and send them one by one.
-			final boolean writeRequest = (mRXCharacteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0;
+			final boolean writeRequest = (rXCharacteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0;
 
 			if (!writeRequest) { // no WRITE REQUEST property
 				final int length = Math.min(buffer.length, MAX_PACKET_SIZE);
-				mBufferOffset += length;
-				getApi().enqueue(BleProfileApi.Request.newWriteRequest(mRXCharacteristic, buffer, 0, length));
+				bufferOffset += length;
+				getApi().enqueue(BleProfileApi.Request.newWriteRequest(rXCharacteristic, buffer, 0, length));
 			} else { // there is WRITE REQUEST property, let's try Long Write
-				mBufferOffset = buffer.length;
-				getApi().enqueue(BleProfileApi.Request.newWriteRequest(mRXCharacteristic, buffer, 0, buffer.length));
+				bufferOffset = buffer.length;
+				getApi().enqueue(BleProfileApi.Request.newWriteRequest(rXCharacteristic, buffer, 0, buffer.length));
 			}
 		}
 	}

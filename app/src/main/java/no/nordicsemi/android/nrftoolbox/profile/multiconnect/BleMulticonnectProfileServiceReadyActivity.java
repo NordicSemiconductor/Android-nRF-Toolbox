@@ -24,7 +24,6 @@ package no.nordicsemi.android.nrftoolbox.profile.multiconnect;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -35,9 +34,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -49,6 +45,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import no.nordicsemi.android.ble.BleManagerCallbacks;
 import no.nordicsemi.android.log.ILogSession;
 import no.nordicsemi.android.log.LocalLogSession;
@@ -71,19 +71,24 @@ import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
  * listens for updates from them. When entering back to the activity, activity will to bind to the service and refresh UI.
  * </p>
  */
+@SuppressWarnings("unused")
 public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMulticonnectProfileService.LocalBinder> extends AppCompatActivity implements
 		ScannerFragment.OnDeviceSelectedListener, BleManagerCallbacks {
 	private static final String TAG = "BleMulticonnectProfileServiceReadyActivity";
 
 	protected static final int REQUEST_ENABLE_BT = 2;
 
-	private E mService;
-	private List<BluetoothDevice> mManagedDevices;
+	private E service;
+	private List<BluetoothDevice> managedDevices;
 
-	private final BroadcastReceiver mCommonBroadcastReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver commonBroadcastReceiver = new BroadcastReceiver() {
+		@SuppressWarnings("deprecation")
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			final BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BleMulticonnectProfileService.EXTRA_DEVICE);
+			if (bluetoothDevice == null)
+				return;
+
 			final String action = intent.getAction();
 			switch (action) {
 				case BleMulticonnectProfileService.BROADCAST_CONNECTION_STATE: {
@@ -159,17 +164,17 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 		}
 	};
 
-	private ServiceConnection mServiceConnection = new ServiceConnection() {
+	private ServiceConnection serviceConnection = new ServiceConnection() {
 		@SuppressWarnings("unchecked")
 		@Override
 		public void onServiceConnected(final ComponentName name, final IBinder service) {
-			final E bleService = mService = (E) service;
+			final E bleService = BleMulticonnectProfileServiceReadyActivity.this.service = (E) service;
 			bleService.log(Log.DEBUG, "Activity bound to the service");
-			mManagedDevices.addAll(bleService.getManagedDevices());
+			managedDevices.addAll(bleService.getManagedDevices());
 			onServiceBound(bleService);
 
 			// and notify user if device is connected
-			for (final BluetoothDevice device : mManagedDevices) {
+			for (final BluetoothDevice device : managedDevices) {
 				if (bleService.isConnected(device))
 					onDeviceConnected(device);
 			}
@@ -177,7 +182,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 
 		@Override
 		public void onServiceDisconnected(final ComponentName name) {
-			mService = null;
+			service = null;
 			onServiceUnbound();
 		}
 	};
@@ -185,7 +190,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	@Override
 	protected final void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mManagedDevices = new ArrayList<>();
+		managedDevices = new ArrayList<>();
 
 		ensureBLESupported();
 		if (!isBLEEnabled()) {
@@ -205,7 +210,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 		// View is ready to be used
 		onViewCreated(savedInstanceState);
 
-		LocalBroadcastManager.getInstance(this).registerReceiver(mCommonBroadcastReceiver, makeIntentFilter());
+		LocalBroadcastManager.getInstance(this).registerReceiver(commonBroadcastReceiver, makeIntentFilter());
 	}
 
 	@Override
@@ -214,29 +219,29 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 
 		/*
 		 * In comparison to BleProfileServiceReadyActivity this activity always starts the service when started.
-		 * Connecting to a device is done by calling mService.connect(BluetoothDevice) method, not startService(...) like there.
+		 * Connecting to a device is done by calling service.connect(BluetoothDevice) method, not startService(...) like there.
 		 * The service will stop itself when all devices it manages were disconnected and unmanaged and the last activity unbinds from it.
 		 */
 		final Intent service = new Intent(this, getServiceClass());
 		startService(service);
-		bindService(service, mServiceConnection, 0);
+		bindService(service, serviceConnection, 0);
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
 
-		if (mService != null) {
+		if (service != null) {
 			// We don't want to perform some operations (e.g. disable Battery Level notifications) in the service if we are just rotating the screen.
 			// However, when the activity will disappear, we may want to disable some device features to reduce the battery consumption.
-			mService.setActivityIsChangingConfiguration(isChangingConfigurations());
+			service.setActivityIsChangingConfiguration(isChangingConfigurations());
 			// Log it here as there is no callback when the service gets unbound
-			// and the mService will not be available later (the activity doesn't keep log sessions)
-			mService.log(Log.DEBUG, "Activity unbound from the service");
+			// and the service will not be available later (the activity doesn't keep log sessions)
+			service.log(Log.DEBUG, "Activity unbound from the service");
 		}
 
-		unbindService(mServiceConnection);
-		mService = null;
+		unbindService(serviceConnection);
+		service = null;
 
 		onServiceUnbound();
 	}
@@ -245,7 +250,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	protected void onDestroy() {
 		super.onDestroy();
 
-		LocalBroadcastManager.getInstance(this).unregisterReceiver(mCommonBroadcastReceiver);
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(commonBroadcastReceiver);
 	}
 
 	private static IntentFilter makeIntentFilter() {
@@ -284,7 +289,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	 * @return the service binder or <code>null</code>
 	 */
 	protected E getService() {
-		return mService;
+		return service;
 	}
 
 	/**
@@ -309,7 +314,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	 * @param savedInstanceState contains the data it most recently supplied in {@link #onSaveInstanceState(Bundle)}.
 	 *                           Note: <b>Otherwise it is null</b>.
 	 */
-	protected void onViewCreated(final Bundle savedInstanceState) {
+	protected void onViewCreated(@SuppressWarnings("unused") final Bundle savedInstanceState) {
 		// empty default implementation
 	}
 
@@ -333,7 +338,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	 * @param itemId the menu item id
 	 * @return <code>true</code> if action has been handled
 	 */
-	protected boolean onOptionsItemSelected(final int itemId) {
+	protected boolean onOptionsItemSelected(@SuppressWarnings("unused") final int itemId) {
 		// Overwrite when using menu other than R.menu.help
 		return false;
 	}
@@ -385,7 +390,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	}
 
 	@Override
-	public void onDeviceSelected(final BluetoothDevice device, final String name) {
+	public void onDeviceSelected(@NonNull final BluetoothDevice device, final String name) {
 		final int titleId = getLoggerProfileTitle();
 		ILogSession logSession = null;
 		if (titleId > 0) {
@@ -396,7 +401,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 			}
 		}
 
-		mService.connect(device, logSession);
+		service.connect(device, logSession);
 	}
 
 	@Override
@@ -405,64 +410,66 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	}
 
 	@Override
-	public void onDeviceConnecting(final BluetoothDevice device) {
+	public void onDeviceConnecting(@NonNull final BluetoothDevice device) {
 		// empty default implementation
 	}
 
 	@Override
-	public void onDeviceDisconnecting(final BluetoothDevice device) {
+	public void onDeviceDisconnecting(@NonNull final BluetoothDevice device) {
 		// empty default implementation
 	}
 
 	@Override
-	public void onLinkLossOccurred(final BluetoothDevice device) {
+	public void onLinkLossOccurred(@NonNull final BluetoothDevice device) {
 		// empty default implementation
 	}
 
 	@Override
-	public void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound) {
+	public void onServicesDiscovered(@NonNull final BluetoothDevice device, final boolean optionalServicesFound) {
 		// empty default implementation
 	}
 
 	@Override
-	public void onDeviceReady(final BluetoothDevice device) {
+	public void onDeviceReady(@NonNull final BluetoothDevice device) {
 		// empty default implementation
 	}
 
 	@Override
-	public void onBondingRequired(final BluetoothDevice device) {
+	public void onBondingRequired(@NonNull final BluetoothDevice device) {
 		// empty default implementation
 	}
 
 	@Override
-	public void onBonded(final BluetoothDevice device) {
+	public void onBonded(@NonNull final BluetoothDevice device) {
 		// empty default implementation
 	}
 
 	@Override
-	public void onBondingFailed(final BluetoothDevice device) {
+	public void onBondingFailed(@NonNull final BluetoothDevice device) {
 		// empty default implementation
 	}
 
 	@Override
-	public void onDeviceNotSupported(final BluetoothDevice device) {
+	public void onDeviceNotSupported(@NonNull final BluetoothDevice device) {
 		showToast(R.string.not_supported);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
-	public final boolean shouldEnableBatteryLevelNotifications(final BluetoothDevice device) {
+	public final boolean shouldEnableBatteryLevelNotifications(@NonNull final BluetoothDevice device) {
 		// This method will never be called.
 		// Please see BleMulticonnectProfileService#shouldEnableBatteryLevelNotifications(BluetoothDevice) instead.
 		throw new UnsupportedOperationException("This method should not be called");
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
-	public void onBatteryValueReceived(final BluetoothDevice device, final int value) {
+	public void onBatteryValueReceived(@NonNull final BluetoothDevice device, final int value) {
 		// empty default implementation
 	}
 
 	@Override
-	public void onError(final BluetoothDevice device, final String message, final int errorCode) {
+	public void onError(@NonNull final BluetoothDevice device, @NonNull final String message, final int errorCode) {
 		DebugLogger.e(TAG, "Error occurred: " + message + ",  error code: " + errorCode);
 		showToast(message + " (" + errorCode + ")");
 	}
@@ -506,7 +513,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	 * @return unmodifiable list of managed devices
 	 */
 	protected List<BluetoothDevice> getManagedDevices() {
-		return Collections.unmodifiableList(mManagedDevices);
+		return Collections.unmodifiableList(managedDevices);
 	}
 
 	/**
@@ -514,7 +521,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	 * @param device the device to check if it's connected
 	 */
 	protected boolean isDeviceConnected(final BluetoothDevice device) {
-		return mService != null && mService.isConnected(device);
+		return service != null && service.isConnected(device);
 	}
 
 	/**
@@ -537,8 +544,7 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 	}
 
 	protected boolean isBLEEnabled() {
-		final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-		final BluetoothAdapter adapter = bluetoothManager.getAdapter();
+		final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
 		return adapter != null && adapter.isEnabled();
 	}
 

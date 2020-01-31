@@ -36,7 +36,12 @@ public class ZipInfoFragment extends DialogFragment {
 	@Override
 	@NonNull
 	public Dialog onCreateDialog(final Bundle savedInstanceState) {
-		final View view = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_zip_info, null);
-		return new AlertDialog.Builder(getActivity()).setView(view).setTitle(R.string.dfu_file_info).setPositiveButton(R.string.ok, null).create();
+		final View view = LayoutInflater.from(requireContext())
+				.inflate(R.layout.fragment_zip_info, null);
+		return new AlertDialog.Builder(requireContext())
+				.setView(view)
+				.setTitle(R.string.dfu_file_info)
+				.setPositiveButton(R.string.ok, null)
+				.create();
 	}
 }

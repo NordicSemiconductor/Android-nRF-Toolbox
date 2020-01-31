@@ -39,7 +39,8 @@ public class NotificationActivity extends Activity {
 			final Intent parentIntent = new Intent(this, FeaturesActivity.class);
 			parentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			final Intent startAppIntent = new Intent(this, DfuActivity.class);
-			startAppIntent.putExtras(getIntent().getExtras());
+			if (getIntent() != null && getIntent().getExtras() != null)
+				startAppIntent.putExtras(getIntent().getExtras());
 			startActivities(new Intent[] { parentIntent, startAppIntent });
 		}
 

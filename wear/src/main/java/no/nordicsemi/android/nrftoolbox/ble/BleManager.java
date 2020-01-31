@@ -76,37 +76,37 @@ public class BleManager implements BleProfileApi {
 	private final static UUID GENERIC_ATTRIBUTE_SERVICE = UUID.fromString("00001801-0000-1000-8000-00805f9b34fb");
 	private final static UUID SERVICE_CHANGED_CHARACTERISTIC = UUID.fromString("00002A05-0000-1000-8000-00805f9b34fb");
 
-	private final Object mLock = new Object();
+	private final Object lock = new Object();
 
-	protected final BleManagerCallbacks mCallbacks;
-	private final Context mContext;
-	private final Handler mHandler;
-	protected BluetoothDevice mBluetoothDevice;
-	protected BleProfile mProfile;
-	private BluetoothGatt mBluetoothGatt;
-	private BleManagerGattCallback mGattCallback;
+	protected final BleManagerCallbacks callbacks;
+	private final Context context;
+	private final Handler handler;
+	protected BluetoothDevice bluetoothDevice;
+	protected BleProfile profile;
+	private BluetoothGatt bluetoothGatt;
+	private BleManagerGattCallback gattCallback;
 	/**
 	 * This flag is set to false only when the {@link #shouldAutoConnect()} method returns true and the device got disconnected without calling {@link #disconnect()} method.
 	 * If {@link #shouldAutoConnect()} returns false (default) this is always set to true.
 	 */
-	private boolean mUserDisconnected;
+	private boolean userDisconnected;
 	/**
 	 * Flag set to true when {@link #shouldAutoConnect()} method returned <code>true</code>. The first connection attempt is done with <code>autoConnect</code>
 	 * flag set to false (to make the first connection quick) but on connection lost the manager will call {@link #connect(BluetoothDevice)} again.
 	 * This time this method will call {@link BluetoothGatt#connect()} which always uses <code>autoConnect</code> equal true.
 	 */
-	private boolean mInitialConnection;
+	private boolean initialConnection;
 	/** Flag set to true when the device is connected. */
-	private boolean mConnected;
-	private int mConnectionState = BluetoothGatt.STATE_DISCONNECTED;
+	private boolean connected;
+	private int connectionState = BluetoothGatt.STATE_DISCONNECTED;
 	/** Last received battery value or -1 if value wasn't received. */
-	private int mBatteryValue = -1;
+	private int batteryValue = -1;
 	/**
 	 * The current MTU (Maximum Transfer Unit). The maximum number of bytes that can be sent in a single packet is MTU-3.
 	 */
-	private int mMtu = 23;
+	private int mtu = 23;
 
-	private final BroadcastReceiver mBluetoothStateBroadcastReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver bluetoothStateBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.STATE_OFF);
@@ -115,9 +115,9 @@ public class BleManager implements BleProfileApi {
 			switch (state) {
 				case BluetoothAdapter.STATE_TURNING_OFF:
 				case BluetoothAdapter.STATE_OFF:
-					if (mConnected && previousState != BluetoothAdapter.STATE_TURNING_OFF && previousState != BluetoothAdapter.STATE_OFF) {
+					if (connected && previousState != BluetoothAdapter.STATE_TURNING_OFF && previousState != BluetoothAdapter.STATE_OFF) {
 						// The connection is killed by the system, no need to gently disconnect
-						mGattCallback.notifyDeviceDisconnected(mBluetoothDevice);
+						gattCallback.notifyDeviceDisconnected(bluetoothDevice);
 					}
 					close();
 					break;
@@ -125,7 +125,7 @@ public class BleManager implements BleProfileApi {
 		}
 	};
 
-	private BroadcastReceiver mBondingBroadcastReceiver = new BroadcastReceiver() {
+	private BroadcastReceiver bondingBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
@@ -133,40 +133,40 @@ public class BleManager implements BleProfileApi {
 			final int previousBondState = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, -1);
 
 			// Skip other devices
-			if (mBluetoothGatt == null || !device.getAddress().equals(mBluetoothGatt.getDevice().getAddress()))
+			if (bluetoothGatt == null || !device.getAddress().equals(bluetoothGatt.getDevice().getAddress()))
 				return;
 
 			DebugLogger.i(TAG, "Bond state changed for: " + device.getName() + " new state: " + bondState + " previous: " + previousBondState);
 
 			switch (bondState) {
 				case BluetoothDevice.BOND_BONDING:
-					mCallbacks.onBondingRequired(device);
+					callbacks.onBondingRequired(device);
 					break;
 				case BluetoothDevice.BOND_BONDED:
-					mCallbacks.onBonded(device);
+					callbacks.onBonded(device);
 
 					// Start initializing again.
 					// In fact, bonding forces additional, internal service discovery (at least on Nexus devices), so this method may safely be used to start this process again.
-					mBluetoothGatt.discoverServices();
+					bluetoothGatt.discoverServices();
 					break;
 			}
 		}
 	};
 
 	public BleManager(final Context context, final BleManagerCallbacks callbacks) {
-		mCallbacks = callbacks;
-		mContext = context;
-		mHandler = new Handler();
+		this.callbacks = callbacks;
+		this.context = context;
+		this.handler = new Handler();
 
 		// Register bonding broadcast receiver
-		context.registerReceiver(mBondingBroadcastReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
+		context.registerReceiver(bondingBroadcastReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
 	}
 
 	/**
 	 * Returns the Profile API. Profile may be null if service discovery has not been performed or the device does not match any profile.
 	 */
 	public BleProfile getProfile() {
-		return mProfile;
+		return profile;
 	}
 
 	/**
@@ -176,7 +176,7 @@ public class BleManager implements BleProfileApi {
 	 */
 	@Override
 	public Context getContext() {
-		return mContext;
+		return context;
 	}
 
 	/**
@@ -207,11 +207,11 @@ public class BleManager implements BleProfileApi {
 	 * @param device a device to connect to
 	 */
 	public void connect(final BluetoothDevice device) {
-		if (mConnected)
+		if (connected)
 			return;
 
-		synchronized (mLock) {
-			if (mBluetoothGatt != null) {
+		synchronized (lock) {
+			if (bluetoothGatt != null) {
 				// There are 2 ways of reconnecting to the same device:
 				// 1. Reusing the same BluetoothGatt object and calling connect() - this will force the autoConnect flag to true
 				// 2. Closing it and reopening a new instance of BluetoothGatt object.
@@ -219,9 +219,9 @@ public class BleManager implements BleProfileApi {
 				// device.connectGatt(...) can't be called immediately or service discovery
 				// may never finish on some older devices (Nexus 4, Android 5.0.1).
 				// If shouldAutoConnect() method returned false we can't call gatt.connect() and have to close gatt and open it again.
-				if (!mInitialConnection) {
-					mBluetoothGatt.close();
-					mBluetoothGatt = null;
+				if (!initialConnection) {
+					bluetoothGatt.close();
+					bluetoothGatt = null;
 					try {
 						Thread.sleep(200); // Is 200 ms enough?
 					} catch (final InterruptedException e) {
@@ -230,29 +230,29 @@ public class BleManager implements BleProfileApi {
 				} else {
 					// Instead, the gatt.connect() method will be used to reconnect to the same device.
 					// This method forces autoConnect = true even if the gatt was created with this flag set to false.
-					mInitialConnection = false;
-					mConnectionState = BluetoothGatt.STATE_CONNECTING;
-					mCallbacks.onDeviceConnecting(device);
-					mBluetoothGatt.connect();
+					initialConnection = false;
+					connectionState = BluetoothGatt.STATE_CONNECTING;
+					callbacks.onDeviceConnecting(device);
+					bluetoothGatt.connect();
 					return;
 				}
 			} else {
 				// Register bonding broadcast receiver
-				mContext.registerReceiver(mBluetoothStateBroadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
-				mContext.registerReceiver(mBondingBroadcastReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
+				context.registerReceiver(bluetoothStateBroadcastReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+				context.registerReceiver(bondingBroadcastReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
 			}
 		}
 
 		final boolean shouldAutoConnect = shouldAutoConnect();
-		mUserDisconnected = !shouldAutoConnect; // We will receive Linkloss events only when the device is connected with autoConnect=true
+		userDisconnected = !shouldAutoConnect; // We will receive Linkloss events only when the device is connected with autoConnect=true
 		// The first connection will always be done with autoConnect = false to make the connection quick.
 		// If the shouldAutoConnect() method returned true, the manager will automatically try to reconnect to this device on link loss.
 		if (shouldAutoConnect)
-			mInitialConnection = true;
-		mBluetoothDevice = device;
-		mConnectionState = BluetoothGatt.STATE_CONNECTING;
-		mCallbacks.onDeviceConnecting(device);
-		mBluetoothGatt = device.connectGatt(mContext, false, mGattCallback = new BleManagerGattCallback());
+			initialConnection = true;
+		bluetoothDevice = device;
+		connectionState = BluetoothGatt.STATE_CONNECTING;
+		callbacks.onDeviceConnecting(device);
+		bluetoothGatt = device.connectGatt(context, false, gattCallback = new BleManagerGattCallback());
 	}
 
 	/**
@@ -260,19 +260,19 @@ public class BleManager implements BleProfileApi {
 	 * @return true if device is to be disconnected. False if it was already disconnected.
 	 */
 	public boolean disconnect() {
-		mUserDisconnected = true;
-		mInitialConnection = false;
+		userDisconnected = true;
+		initialConnection = false;
 
-		if (mBluetoothGatt != null) {
-			mConnectionState = BluetoothGatt.STATE_DISCONNECTING;
-			mCallbacks.onDeviceDisconnecting(mBluetoothGatt.getDevice());
-			final boolean wasConnected = mConnected;
-			mBluetoothGatt.disconnect();
+		if (bluetoothGatt != null) {
+			connectionState = BluetoothGatt.STATE_DISCONNECTING;
+			callbacks.onDeviceDisconnecting(bluetoothGatt.getDevice());
+			final boolean wasConnected = connected;
+			bluetoothGatt.disconnect();
 
 			if (!wasConnected) {
 				// There will be no callback, the connection attempt will be stopped
-				mConnectionState = BluetoothGatt.STATE_DISCONNECTED;
-				mCallbacks.onDeviceDisconnected(mBluetoothGatt.getDevice());
+				connectionState = BluetoothGatt.STATE_DISCONNECTED;
+				callbacks.onDeviceDisconnected(bluetoothGatt.getDevice());
 			}
 			return true;
 		}
@@ -283,7 +283,7 @@ public class BleManager implements BleProfileApi {
 	 * This method returns true if the device is connected. Services could have not been discovered yet.
 	 */
 	public boolean isConnected() {
-		return mConnected;
+		return connected;
 	}
 
 	/**
@@ -295,7 +295,7 @@ public class BleManager implements BleProfileApi {
 	 * @return the connection state
 	 */
 	public int getConnectionState() {
-		return mConnectionState;
+		return connectionState;
 	}
 
 	/**
@@ -303,7 +303,7 @@ public class BleManager implements BleProfileApi {
 	 * @return the last battery level value in percent
 	 */
 	public int getBatteryValue() {
-		return mBatteryValue;
+		return batteryValue;
 	}
 
 	/**
@@ -311,21 +311,21 @@ public class BleManager implements BleProfileApi {
 	 */
 	public void close() {
 		try {
-			mContext.unregisterReceiver(mBluetoothStateBroadcastReceiver);
-			mContext.unregisterReceiver(mBondingBroadcastReceiver);
+			context.unregisterReceiver(bluetoothStateBroadcastReceiver);
+			context.unregisterReceiver(bondingBroadcastReceiver);
 		} catch (Exception e) {
 			// the receiver must have been not registered or unregistered before
 		}
-		synchronized (mLock) {
-			if (mBluetoothGatt != null) {
-				mBluetoothGatt.close();
-				mBluetoothGatt = null;
+		synchronized (lock) {
+			if (bluetoothGatt != null) {
+				bluetoothGatt.close();
+				bluetoothGatt = null;
 			}
-			mConnected = false;
-			mInitialConnection = false;
-			mConnectionState = BluetoothGatt.STATE_DISCONNECTED;
-			mGattCallback = null;
-			mBluetoothDevice = null;
+			connected = false;
+			initialConnection = false;
+			connectionState = BluetoothGatt.STATE_DISCONNECTED;
+			gattCallback = null;
+			bluetoothDevice = null;
 		}
 	}
 
@@ -341,7 +341,7 @@ public class BleManager implements BleProfileApi {
 	 * @return true if pairing has started, false if it was already paired or an immediate error occur.
 	 */
 	private boolean internalCreateBond() {
-		final BluetoothDevice device = mBluetoothDevice;
+		final BluetoothDevice device = bluetoothDevice;
 		if (device == null)
 			return false;
 
@@ -359,7 +359,7 @@ public class BleManager implements BleProfileApi {
 	 * the Service Changed characteristic or this characteristic does not have the CCCD.
 	 */
 	private boolean ensureServiceChangedEnabled() {
-		final BluetoothGatt gatt = mBluetoothGatt;
+		final BluetoothGatt gatt = bluetoothGatt;
 		if (gatt == null)
 			return false;
 
@@ -385,7 +385,7 @@ public class BleManager implements BleProfileApi {
 	}
 
 	private boolean internalEnableNotifications(final BluetoothGattCharacteristic characteristic) {
-		final BluetoothGatt gatt = mBluetoothGatt;
+		final BluetoothGatt gatt = bluetoothGatt;
 		if (gatt == null || characteristic == null)
 			return false;
 
@@ -409,7 +409,7 @@ public class BleManager implements BleProfileApi {
 	}
 
 	private boolean internalEnableIndications(final BluetoothGattCharacteristic characteristic) {
-		final BluetoothGatt gatt = mBluetoothGatt;
+		final BluetoothGatt gatt = bluetoothGatt;
 		if (gatt == null || characteristic == null)
 			return false;
 
@@ -433,7 +433,7 @@ public class BleManager implements BleProfileApi {
 	}
 
 	private boolean internalReadCharacteristic(final BluetoothGattCharacteristic characteristic) {
-		final BluetoothGatt gatt = mBluetoothGatt;
+		final BluetoothGatt gatt = bluetoothGatt;
 		if (gatt == null || characteristic == null)
 			return false;
 
@@ -451,7 +451,7 @@ public class BleManager implements BleProfileApi {
 	}
 
 	private boolean internalWriteCharacteristic(final BluetoothGattCharacteristic characteristic) {
-		final BluetoothGatt gatt = mBluetoothGatt;
+		final BluetoothGatt gatt = bluetoothGatt;
 		if (gatt == null || characteristic == null)
 			return false;
 
@@ -469,7 +469,7 @@ public class BleManager implements BleProfileApi {
 	}
 
 	private boolean internalReadDescriptor(final BluetoothGattDescriptor descriptor) {
-		final BluetoothGatt gatt = mBluetoothGatt;
+		final BluetoothGatt gatt = bluetoothGatt;
 		if (gatt == null || descriptor == null)
 			return false;
 
@@ -482,7 +482,7 @@ public class BleManager implements BleProfileApi {
 	}
 
 	private boolean internalWriteDescriptor(final BluetoothGattDescriptor descriptor) {
-		final BluetoothGatt gatt = mBluetoothGatt;
+		final BluetoothGatt gatt = bluetoothGatt;
 		if (gatt == null || descriptor == null)
 			return false;
 
@@ -495,7 +495,7 @@ public class BleManager implements BleProfileApi {
 	}
 
 	private boolean internalReadBatteryLevel() {
-		final BluetoothGatt gatt = mBluetoothGatt;
+		final BluetoothGatt gatt = bluetoothGatt;
 		if (gatt == null)
 			return false;
 
@@ -524,7 +524,7 @@ public class BleManager implements BleProfileApi {
 	}
 
 	private boolean internalSetBatteryNotifications(final boolean enable) {
-		final BluetoothGatt gatt = mBluetoothGatt;
+		final BluetoothGatt gatt = bluetoothGatt;
 		if (gatt == null) {
 			return false;
 		}
@@ -566,7 +566,7 @@ public class BleManager implements BleProfileApi {
 	 * @return the result of {@link BluetoothGatt#writeDescriptor(BluetoothGattDescriptor)}
 	 */
 	private boolean internalWriteDescriptorWorkaround(final BluetoothGattDescriptor descriptor) {
-		final BluetoothGatt gatt = mBluetoothGatt;
+		final BluetoothGatt gatt = bluetoothGatt;
 		if (gatt == null || descriptor == null)
 			return false;
 
@@ -585,18 +585,19 @@ public class BleManager implements BleProfileApi {
 
 	@Override
 	public final int getMtu() {
-		return mMtu;
+		return mtu;
 	}
 
 	@Override
 	public final void overrideMtu(final int mtu) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-			mMtu = mtu;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			BleManager.this.mtu = mtu;
+		}
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	private boolean internalRequestMtu(final int mtu) {
-		final BluetoothGatt gatt = mBluetoothGatt;
+		final BluetoothGatt gatt = bluetoothGatt;
 		if (gatt == null)
 			return false;
 
@@ -605,12 +606,13 @@ public class BleManager implements BleProfileApi {
 
 	@Override
 	public final boolean requestConnectionPriority(final int priority) {
-		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && enqueue(Request.newConnectionPriorityRequest(priority));
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+				&& enqueue(Request.newConnectionPriorityRequest(priority));
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	private boolean internalRequestConnectionPriority(final int priority) {
-		final BluetoothGatt gatt = mBluetoothGatt;
+		final BluetoothGatt gatt = bluetoothGatt;
 		if (gatt == null)
 			return false;
 
@@ -619,10 +621,10 @@ public class BleManager implements BleProfileApi {
 
 	@Override
 	public boolean enqueue(final Request request) {
-		if (mGattCallback != null) {
+		if (gattCallback != null) {
 			// Add the new task to the end of the queue
-			mGattCallback.mTaskQueue.add(request);
-			mGattCallback.nextRequest();
+			gattCallback.taskQueue.add(request);
+			gattCallback.nextRequest();
 			return true;
 		}
 		return false;
@@ -639,10 +641,10 @@ public class BleManager implements BleProfileApi {
 		private final static String ERROR_MTU_REQUEST = "Error on mtu request";
 		private final static String ERROR_CONNECTION_PRIORITY_REQUEST = "Error on connection priority request";
 
-		private final Queue<Request> mTaskQueue = new LinkedList<>();
-		private Deque<Request> mInitQueue;
-		private boolean mInitInProgress;
-		private boolean mOperationInProgress = true;
+		private final Queue<Request> taskQueue = new LinkedList<>();
+		private Deque<Request> initQueue;
+		private boolean initInProgress;
+		private boolean operationInProgress = true;
 		/**
 		 * This flag is required to resume operations after the connection priority request was made.
 		 * It is used only on Android Oreo and newer, as only there there is onConnectionUpdated callback.
@@ -650,36 +652,36 @@ public class BleManager implements BleProfileApi {
 		 * when such request wasn't made, this flag ensures the nextRequest() method won't be called
 		 * during another operation.
 		 */
-		private boolean mConnectionPriorityOperationInProgress = false;
+		private boolean connectionPriorityOperationInProgress = false;
 
 		private void notifyDeviceDisconnected(final BluetoothDevice device) {
-			mConnected = false;
-			mConnectionState = BluetoothGatt.STATE_DISCONNECTED;
-			if (mUserDisconnected) {
-				mCallbacks.onDeviceDisconnected(device);
+			connected = false;
+			connectionState = BluetoothGatt.STATE_DISCONNECTED;
+			if (userDisconnected) {
+				callbacks.onDeviceDisconnected(device);
 				close();
 			} else {
-				mCallbacks.onLinklossOccurred(device);
+				callbacks.onLinklossOccurred(device);
 				// We are not closing the connection here as the device should try to reconnect automatically.
 				// This may be only called when the shouldAutoConnect() method returned true.
 			}
-			if (mProfile != null)
-				mProfile.release();
+			if (profile != null)
+				profile.release();
 		}
 
 		private void onError(final BluetoothDevice device, final String message, final int errorCode) {
-			mCallbacks.onError(device, message, errorCode);
-			if (mProfile != null)
-				mProfile.onError(message, errorCode);
+			callbacks.onError(device, message, errorCode);
+			if (profile != null)
+				profile.onError(message, errorCode);
 		}
 
 		@Override
 		public final void onConnectionStateChange(final BluetoothGatt gatt, final int status, final int newState) {
 			if (status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothProfile.STATE_CONNECTED) {
 				// Notify the parent activity/service
-				mConnected = true;
-				mConnectionState = BluetoothGatt.STATE_CONNECTED;
-				mCallbacks.onDeviceConnected(gatt.getDevice());
+				connected = true;
+				connectionState = BluetoothGatt.STATE_CONNECTED;
+				callbacks.onDeviceConnected(gatt.getDevice());
 
 				/*
 				 * The onConnectionStateChange event is triggered just after the Android connects to a device.
@@ -699,7 +701,7 @@ public class BleManager implements BleProfileApi {
 				 */
 				final boolean bonded = gatt.getDevice().getBondState() == BluetoothDevice.BOND_BONDED;
 				final int delay = bonded ? 1600 : 0; // around 1600 ms is required when connection interval is ~45ms.
-				mHandler.postDelayed(() -> {
+				handler.postDelayed(() -> {
 					// Some proximity tags (e.g. nRF PROXIMITY) initialize bonding automatically when connected.
 					if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_BONDING) {
 						gatt.discoverServices();
@@ -707,16 +709,16 @@ public class BleManager implements BleProfileApi {
 				}, delay);
 			} else {
 				if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-					mOperationInProgress = true; // no more calls are possible
-					mInitQueue = null;
-					mTaskQueue.clear();
-					final boolean wasConnected = mConnected;
-					// if (mConnected) { // Checking mConnected prevents from calling onDeviceDisconnected if connection attempt failed. This check is not necessary
-						notifyDeviceDisconnected(gatt.getDevice()); // This sets the mConnected flag to false
+					operationInProgress = true; // no more calls are possible
+					initQueue = null;
+					taskQueue.clear();
+					final boolean wasConnected = connected;
+					// if (connected) { // Checking connected prevents from calling onDeviceDisconnected if connection attempt failed. This check is not necessary
+						notifyDeviceDisconnected(gatt.getDevice()); // This sets the connected flag to false
 					// }
 					// Try to reconnect if the initial connection was lost because of a link loss or timeout, and shouldAutoConnect() returned true during connection attempt.
 					// This time it will set the autoConnect flag to true (gatt.connect() forces autoConnect true)
-					if (mInitialConnection) {
+					if (initialConnection) {
 						connect(gatt.getDevice());
 					}
 
@@ -725,7 +727,7 @@ public class BleManager implements BleProfileApi {
 				}
 
 				// TODO Should the disconnect method be called or the connection is still valid? Does this ever happen?
-				mProfile.onError(ERROR_CONNECTION_STATE_CHANGE, status);
+				profile.onError(ERROR_CONNECTION_STATE_CHANGE, status);
 			}
 		}
 
@@ -735,31 +737,31 @@ public class BleManager implements BleProfileApi {
 				final BleProfile profile = BleProfileProvider.findProfile(gatt);
 				if (profile != null) {
 					profile.setApi(BleManager.this);
-					mProfile = profile;
+					BleManager.this.profile = profile;
 
 					// Obtain the queue of initialization requests
-					mInitInProgress = true;
-					mInitQueue = profile.initGatt(gatt);
+					initInProgress = true;
+					initQueue = profile.initGatt(gatt);
 
 					// Before we start executing the initialization queue some other tasks need to be done.
-					if (mInitQueue == null)
-						mInitQueue = new LinkedList<>();
+					if (initQueue == null)
+						initQueue = new LinkedList<>();
 
 					// Note, that operations are added in reverse order to the front of the queue.
 
 					// 3. Enable Battery Level notifications if required (if this char. does not exist, this operation will be skipped)
-					if (mCallbacks.shouldEnableBatteryLevelNotifications(gatt.getDevice()))
-						mInitQueue.addFirst(Request.newEnableBatteryLevelNotificationsRequest());
+					if (callbacks.shouldEnableBatteryLevelNotifications(gatt.getDevice()))
+						initQueue.addFirst(Request.newEnableBatteryLevelNotificationsRequest());
 					// 2. Read Battery Level characteristic (if such does not exist, this will be skipped)
-					mInitQueue.addFirst(Request.newReadBatteryLevelRequest());
+					initQueue.addFirst(Request.newReadBatteryLevelRequest());
 					// 1. On devices running Android 4.3-6.0 the Service Changed characteristic needs to be enabled by the app (for bonded devices)
 					if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
-						mInitQueue.addFirst(Request.newEnableServiceChangedIndicationsRequest());
+						initQueue.addFirst(Request.newEnableServiceChangedIndicationsRequest());
 
-					mOperationInProgress = false;
+					operationInProgress = false;
 					nextRequest();
 				} else {
-					mCallbacks.onDeviceNotSupported(gatt.getDevice());
+					callbacks.onDeviceNotSupported(gatt.getDevice());
 					disconnect();
 				}
 			} else {
@@ -773,13 +775,13 @@ public class BleManager implements BleProfileApi {
 			if (status == BluetoothGatt.GATT_SUCCESS) {
 				if (isBatteryLevelCharacteristic(characteristic)) {
 					final int batteryValue = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
-					mBatteryValue = batteryValue;
-					mProfile.onBatteryValueReceived(gatt, batteryValue);
+					BleManager.this.batteryValue = batteryValue;
+					profile.onBatteryValueReceived(gatt, batteryValue);
 				} else {
 					// The value has been read. Notify the profile and proceed with the initialization queue.
-					mProfile.onCharacteristicRead(gatt, characteristic);
+					profile.onCharacteristicRead(gatt, characteristic);
 				}
-				mOperationInProgress = false;
+				operationInProgress = false;
 				nextRequest();
 			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
@@ -797,8 +799,8 @@ public class BleManager implements BleProfileApi {
 		public final void onCharacteristicWrite(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic, final int status) {
 			if (status == BluetoothGatt.GATT_SUCCESS) {
 				// The value has been written. Notify the profile and proceed with the initialization queue.
-				mProfile.onCharacteristicWrite(gatt, characteristic);
-				mOperationInProgress = false;
+				profile.onCharacteristicWrite(gatt, characteristic);
+				operationInProgress = false;
 				nextRequest();
 			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
@@ -816,8 +818,8 @@ public class BleManager implements BleProfileApi {
 		public void onDescriptorRead(final BluetoothGatt gatt, final BluetoothGattDescriptor descriptor, final int status) {
 			if (status == BluetoothGatt.GATT_SUCCESS) {
 				// The value has been read. Notify the profile and proceed with the initialization queue.
-				mProfile.onDescriptorRead(gatt, descriptor);
-				mOperationInProgress = false;
+				profile.onDescriptorRead(gatt, descriptor);
+				operationInProgress = false;
 				nextRequest();
 			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
@@ -835,8 +837,8 @@ public class BleManager implements BleProfileApi {
 		public final void onDescriptorWrite(final BluetoothGatt gatt, final BluetoothGattDescriptor descriptor, final int status) {
 			if (status == BluetoothGatt.GATT_SUCCESS) {
 				// The value has been written. Notify the profile and proceed with the initialization queue.
-				mProfile.onDescriptorWrite(gatt, descriptor);
-				mOperationInProgress = false;
+				profile.onDescriptorWrite(gatt, descriptor);
+				operationInProgress = false;
 				nextRequest();
 			} else if (status == BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION) {
 				if (gatt.getDevice().getBondState() != BluetoothDevice.BOND_NONE) {
@@ -854,16 +856,16 @@ public class BleManager implements BleProfileApi {
 		public final void onCharacteristicChanged(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
 			if (isBatteryLevelCharacteristic(characteristic)) {
 				final int batteryValue = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
-				mBatteryValue = batteryValue;
-				mProfile.onBatteryValueReceived(gatt, batteryValue);
+				BleManager.this.batteryValue = batteryValue;
+				profile.onBatteryValueReceived(gatt, batteryValue);
 			} else {
 				final BluetoothGattDescriptor cccd = characteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_DESCRIPTOR_UUID);
 				final boolean notifications = cccd == null || cccd.getValue() == null || cccd.getValue().length != 2 || cccd.getValue()[0] == 0x01;
 
 				if (notifications) {
-					mProfile.onCharacteristicNotified(gatt, characteristic);
+					profile.onCharacteristicNotified(gatt, characteristic);
 				} else { // indications
-					mProfile.onCharacteristicIndicated(gatt, characteristic);
+					profile.onCharacteristicIndicated(gatt, characteristic);
 				}
 			}
 		}
@@ -871,12 +873,12 @@ public class BleManager implements BleProfileApi {
 		@Override
 		public void onMtuChanged(final BluetoothGatt gatt, final int mtu, final int status) {
 			if (status == BluetoothGatt.GATT_SUCCESS) {
-				mProfile.onMtuChanged(mtu);
+				profile.onMtuChanged(mtu);
 			} else {
 				DebugLogger.e(TAG, "onMtuChanged error: " + status + ", mtu: " + mtu);
 				onError(gatt.getDevice(), ERROR_MTU_REQUEST, status);
 			}
-			mOperationInProgress = false;
+			operationInProgress = false;
 			nextRequest();
 		}
 
@@ -896,16 +898,16 @@ public class BleManager implements BleProfileApi {
 		 */
 		public void onConnectionUpdated(final BluetoothGatt gatt, final int interval, final int latency, final int timeout,	final int status) {
 			if (status == BluetoothGatt.GATT_SUCCESS) {
-				mProfile.onConnectionUpdated(interval, latency, timeout);
+				profile.onConnectionUpdated(interval, latency, timeout);
 			} else if (status == 0x3b) { // HCI_ERR_UNACCEPT_CONN_INTERVAL
 				DebugLogger.e(TAG, "onConnectionUpdated received status: Unacceptable connection interval, interval: " + interval + ", latency: " + latency + ", timeout: " + timeout);
 			} else {
 				DebugLogger.e(TAG, "onConnectionUpdated received status: " + status + ", interval: " + interval + ", latency: " + latency + ", timeout: " + timeout);
-				mCallbacks.onError(gatt.getDevice(), ERROR_CONNECTION_PRIORITY_REQUEST, status);
+				callbacks.onError(gatt.getDevice(), ERROR_CONNECTION_PRIORITY_REQUEST, status);
 			}
-			if (mConnectionPriorityOperationInProgress) {
-				mConnectionPriorityOperationInProgress = false;
-				mOperationInProgress = false;
+			if (connectionPriorityOperationInProgress) {
+				connectionPriorityOperationInProgress = false;
+				operationInProgress = false;
 				nextRequest();
 			}
 		}
@@ -915,28 +917,28 @@ public class BleManager implements BleProfileApi {
 		 * the {@link BleManagerCallbacks#onDeviceReady(BluetoothDevice)} callback is called.
 		 */
 		private void nextRequest() {
-			if (mOperationInProgress)
+			if (operationInProgress)
 				return;
 
 			// Get the first request from the init queue
-			Request request = mInitQueue != null ? mInitQueue.poll() : null;
+			Request request = initQueue != null ? initQueue.poll() : null;
 
 			// Are we done with initializing?
 			if (request == null) {
-				if (mInitInProgress) {
-					mInitQueue = null; // release the queue
-					mInitInProgress = false;
-					mCallbacks.onDeviceReady(mBluetoothDevice);
+				if (initInProgress) {
+					initQueue = null; // release the queue
+					initInProgress = false;
+					callbacks.onDeviceReady(bluetoothDevice);
 				}
 				// If so, we can continue with the task queue
-				request = mTaskQueue.poll();
+				request = taskQueue.poll();
 				if (request == null) {
 					// Nothing to be done for now
 					return;
 				}
 			}
 
-			mOperationInProgress = true;
+			operationInProgress = true;
 			boolean result = false;
 			switch (request.type) {
 				case CREATE_BOND: {
@@ -994,15 +996,15 @@ public class BleManager implements BleProfileApi {
 				}
 				case REQUEST_CONNECTION_PRIORITY: {
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-						mConnectionPriorityOperationInProgress = true;
+						connectionPriorityOperationInProgress = true;
 						result = internalRequestConnectionPriority(request.value);
 					} else {
 						result = internalRequestConnectionPriority(request.value);
 						// There is no callback for requestConnectionPriority(...) before Android Oreo.\
 						// Let's give it some time to finish as the request is an asynchronous operation.
 						if (result) {
-							mHandler.postDelayed(() -> {
-								mOperationInProgress = false;
+							handler.postDelayed(() -> {
+								operationInProgress = false;
 								nextRequest();
 							}, 100);
 						}
@@ -1013,8 +1015,8 @@ public class BleManager implements BleProfileApi {
 			// The result may be false if given characteristic or descriptor were not found on the device.
 			// In that case, proceed with next operation and ignore the one that failed.
 			if (!result) {
-				mConnectionPriorityOperationInProgress = false;
-				mOperationInProgress = false;
+				connectionPriorityOperationInProgress = false;
+				operationInProgress = false;
 				nextRequest();
 			}
 		}

@@ -26,6 +26,8 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
+
+import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.util.Log;
@@ -35,6 +37,7 @@ import java.util.UUID;
 
 import no.nordicsemi.android.ble.common.callback.hr.BodySensorLocationDataCallback;
 import no.nordicsemi.android.ble.common.callback.hr.HeartRateMeasurementDataCallback;
+import no.nordicsemi.android.ble.common.profile.hr.BodySensorLocation;
 import no.nordicsemi.android.ble.data.Data;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.battery.BatteryManager;
@@ -52,7 +55,7 @@ public class HRSManager extends BatteryManager<HRSManagerCallbacks> {
 	private static final UUID BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID = UUID.fromString("00002A38-0000-1000-8000-00805f9b34fb");
 	private static final UUID HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb");
 
-	private BluetoothGattCharacteristic mHeartRateCharacteristic, mBodySensorLocationCharacteristic;
+	private BluetoothGattCharacteristic heartRateCharacteristic, bodySensorLocationCharacteristic;
 
 	private static HRSManager managerInstance = null;
 
@@ -73,19 +76,19 @@ public class HRSManager extends BatteryManager<HRSManagerCallbacks> {
 	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
-		return mGattCallback;
+		return gattCallback;
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
 	 * receiving notification, etc.
 	 */
-	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
+	private final BatteryManagerGattCallback gattCallback = new BatteryManagerGattCallback() {
 
 		@Override
 		protected void initialize() {
 			super.initialize();
-			readCharacteristic(mBodySensorLocationCharacteristic)
+			readCharacteristic(bodySensorLocationCharacteristic)
 					.with(new BodySensorLocationDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
@@ -95,13 +98,13 @@ public class HRSManager extends BatteryManager<HRSManagerCallbacks> {
 
 						@Override
 						public void onBodySensorLocationReceived(@NonNull final BluetoothDevice device,
-																 final int sensorLocation) {
-							mCallbacks.onBodySensorLocationReceived(device, sensorLocation);
+																 @BodySensorLocation final int sensorLocation) {
+							callbacks.onBodySensorLocationReceived(device, sensorLocation);
 						}
 					})
 					.fail((device, status) -> log(Log.WARN, "Body Sensor Location characteristic not found"))
 					.enqueue();
-			setNotificationCallback(mHeartRateCharacteristic)
+			setNotificationCallback(heartRateCharacteristic)
 					.with(new HeartRateMeasurementDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
@@ -111,23 +114,23 @@ public class HRSManager extends BatteryManager<HRSManagerCallbacks> {
 
 						@Override
 						public void onHeartRateMeasurementReceived(@NonNull final BluetoothDevice device,
-																   final int heartRate,
+																   @IntRange(from = 0) final int heartRate,
 																   @Nullable final Boolean contactDetected,
-																   @Nullable final Integer energyExpanded,
+																   @Nullable @IntRange(from = 0) final Integer energyExpanded,
 																   @Nullable final List<Integer> rrIntervals) {
-							mCallbacks.onHeartRateMeasurementReceived(device, heartRate, contactDetected, energyExpanded, rrIntervals);
+							callbacks.onHeartRateMeasurementReceived(device, heartRate, contactDetected, energyExpanded, rrIntervals);
 						}
 					});
-			enableNotifications(mHeartRateCharacteristic).enqueue();
+			enableNotifications(heartRateCharacteristic).enqueue();
 		}
 
 		@Override
 		protected boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(HR_SERVICE_UUID);
 			if (service != null) {
-				mHeartRateCharacteristic = service.getCharacteristic(HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID);
+				heartRateCharacteristic = service.getCharacteristic(HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID);
 			}
-			return mHeartRateCharacteristic != null;
+			return heartRateCharacteristic != null;
 		}
 
 		@Override
@@ -135,16 +138,16 @@ public class HRSManager extends BatteryManager<HRSManagerCallbacks> {
 			super.isOptionalServiceSupported(gatt);
 			final BluetoothGattService service = gatt.getService(HR_SERVICE_UUID);
 			if (service != null) {
-				mBodySensorLocationCharacteristic = service.getCharacteristic(BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID);
+				bodySensorLocationCharacteristic = service.getCharacteristic(BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID);
 			}
-			return mBodySensorLocationCharacteristic != null;
+			return bodySensorLocationCharacteristic != null;
 		}
 
 		@Override
 		protected void onDeviceDisconnected() {
 			super.onDeviceDisconnected();
-			mBodySensorLocationCharacteristic = null;
-			mHeartRateCharacteristic = null;
+			bodySensorLocationCharacteristic = null;
+			heartRateCharacteristic = null;
 		}
 	};
 }

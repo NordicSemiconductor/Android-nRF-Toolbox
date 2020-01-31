@@ -32,7 +32,7 @@ import no.nordicsemi.android.nrftoolbox.R;
 public class LinkLossFragment extends DialogFragment {
 	private static final String ARG_NAME = "name";
 
-	private String mName;
+	private String name;
 
 	public static LinkLossFragment getInstance(String name) {
 		final LinkLossFragment fragment = new LinkLossFragment();
@@ -48,7 +48,7 @@ public class LinkLossFragment extends DialogFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		mName = getArguments().getString(ARG_NAME);
+		name = getArguments().getString(ARG_NAME);
 	}
 
 	@NonNull
@@ -56,7 +56,7 @@ public class LinkLossFragment extends DialogFragment {
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		return new AlertDialog.Builder(requireContext())
 				.setTitle(getString(R.string.app_name))
-				.setMessage(getString(R.string.proximity_notification_link_loss_alert, mName))
+				.setMessage(getString(R.string.proximity_notification_link_loss_alert, name))
 				.setPositiveButton(R.string.ok, null)
 				.create();
 	}

@@ -29,6 +29,8 @@ import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+
+import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
 import android.util.Log;
 
@@ -43,12 +45,12 @@ import no.nordicsemi.android.nrftoolbox.parser.CSCMeasurementParser;
 
 public class CSCManager extends BatteryManager<CSCManagerCallbacks> {
 	/** Cycling Speed and Cadence service UUID. */
-	public final static UUID CYCLING_SPEED_AND_CADENCE_SERVICE_UUID = UUID.fromString("00001816-0000-1000-8000-00805f9b34fb");
+	final static UUID CYCLING_SPEED_AND_CADENCE_SERVICE_UUID = UUID.fromString("00001816-0000-1000-8000-00805f9b34fb");
 	/** Cycling Speed and Cadence Measurement characteristic UUID. */
 	private final static UUID CSC_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A5B-0000-1000-8000-00805f9b34fb");
 
 	private final SharedPreferences preferences;
-	private BluetoothGattCharacteristic mCSCMeasurementCharacteristic;
+	private BluetoothGattCharacteristic cscMeasurementCharacteristic;
 
 	CSCManager(final Context context) {
 		super(context);
@@ -58,21 +60,21 @@ public class CSCManager extends BatteryManager<CSCManagerCallbacks> {
 	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
-		return mGattCallback;
+		return gattCallback;
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
 	 * receiving indication, etc.
 	 */
-	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
+	private final BatteryManagerGattCallback gattCallback = new BatteryManagerGattCallback() {
 
 		@Override
 		protected void initialize() {
 			super.initialize();
 
 			// CSC characteristic is required
-			setNotificationCallback(mCSCMeasurementCharacteristic)
+			setNotificationCallback(cscMeasurementCharacteristic)
 					.with(new CyclingSpeedAndCadenceMeasurementDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, final @NonNull Data data) {
@@ -90,38 +92,41 @@ public class CSCManager extends BatteryManager<CSCManagerCallbacks> {
 
 						@Override
 						public void onDistanceChanged(@NonNull final BluetoothDevice device,
-                                                      final float totalDistance, final float distance, final float speed) {
-							mCallbacks.onDistanceChanged(device, totalDistance, distance, speed);
+													  @FloatRange(from = 0) final float totalDistance,
+													  @FloatRange(from = 0) final float distance,
+													  @FloatRange(from = 0) final float speed) {
+							callbacks.onDistanceChanged(device, totalDistance, distance, speed);
 						}
 
 						@Override
 						public void onCrankDataChanged(@NonNull final BluetoothDevice device,
-                                                       final float crankCadence, final float gearRatio) {
-							mCallbacks.onCrankDataChanged(device, crankCadence, gearRatio);
+													   @FloatRange(from = 0) final float crankCadence,
+													   final float gearRatio) {
+							callbacks.onCrankDataChanged(device, crankCadence, gearRatio);
 						}
 
 						@Override
 						public void onInvalidDataReceived(@NonNull final BluetoothDevice device,
-                                                          final @NonNull Data data) {
+                                                          @NonNull final Data data) {
 							log(Log.WARN, "Invalid CSC Measurement data received: " + data);
 						}
 					});
-			enableNotifications(mCSCMeasurementCharacteristic).enqueue();
+			enableNotifications(cscMeasurementCharacteristic).enqueue();
 		}
 
 		@Override
 		public boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(CYCLING_SPEED_AND_CADENCE_SERVICE_UUID);
 			if (service != null) {
-				mCSCMeasurementCharacteristic = service.getCharacteristic(CSC_MEASUREMENT_CHARACTERISTIC_UUID);
+				cscMeasurementCharacteristic = service.getCharacteristic(CSC_MEASUREMENT_CHARACTERISTIC_UUID);
 			}
-			return mCSCMeasurementCharacteristic != null;
+			return cscMeasurementCharacteristic != null;
 		}
 
 		@Override
 		protected void onDeviceDisconnected() {
 			super.onDeviceDisconnected();
-			mCSCMeasurementCharacteristic = null;
+			cscMeasurementCharacteristic = null;
 		}
 	};
 }

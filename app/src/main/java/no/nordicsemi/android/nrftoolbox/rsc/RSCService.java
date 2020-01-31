@@ -45,6 +45,7 @@ import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
 
 public class RSCService extends BleProfileService implements RSCManagerCallbacks {
+    @SuppressWarnings("unused")
     private static final String TAG = "RSCService";
 
     public static final String BROADCAST_RSC_MEASUREMENT = "no.nordicsemi.android.nrftoolbox.rsc.BROADCAST_RSC_MEASUREMENT";
@@ -63,32 +64,32 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 
     private final static String ACTION_DISCONNECT = "no.nordicsemi.android.nrftoolbox.rsc.ACTION_DISCONNECT";
 
-    private RSCManager mManager;
+    private RSCManager manager;
 
     /**
      * The last value of a cadence
      */
-    private float mCadence;
+    private float cadence;
     /**
      * Trip distance in cm
      */
-    private long mDistance;
+    private long distance;
     /**
      * Stride length in cm
      */
-    private Integer mStrideLength;
+    private Integer strideLength;
     /**
      * Number of steps in the trip
      */
-    private int mStepsNumber;
-    private boolean mTaskInProgress;
-    private final Handler mHandler = new Handler();
+    private int stepsNumber;
+    private boolean taskInProgress;
+    private final Handler handler = new Handler();
 
     private final static int NOTIFICATION_ID = 200;
     private final static int OPEN_ACTIVITY_REQ = 0;
     private final static int DISCONNECT_REQ = 1;
 
-    private final LocalBinder mBinder = new RSCBinder();
+    private final LocalBinder binder = new RSCBinder();
 
     /**
      * This local binder is an interface for the bound activity to operate with the RSC sensor.
@@ -99,12 +100,12 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 
     @Override
     protected LocalBinder getBinder() {
-        return mBinder;
+        return binder;
     }
 
     @Override
     protected LoggableBleManager<RSCManagerCallbacks> initializeManager() {
-        return mManager = new RSCManager(this);
+        return manager = new RSCManager(this);
     }
 
     @Override
@@ -113,14 +114,14 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
 
         final IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_DISCONNECT);
-        registerReceiver(mDisconnectActionBroadcastReceiver, filter);
+        registerReceiver(disconnectActionBroadcastReceiver, filter);
     }
 
     @Override
     public void onDestroy() {
         // when user has disconnected from the sensor, we have to cancel the notification that we've created some milliseconds before using unbindService
         stopForegroundService();
-        unregisterReceiver(mDisconnectActionBroadcastReceiver);
+        unregisterReceiver(disconnectActionBroadcastReceiver);
 
         super.onDestroy();
     }
@@ -132,7 +133,7 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
         if (isConnected()) {
             // This method will read the Battery Level value, if possible and then try to enable battery notifications (if it has NOTIFY property).
             // If the Battery Level characteristic has only the NOTIFY property, it will only try to enable notifications.
-            mManager.readBatteryLevelCharacteristic();
+            manager.readBatteryLevelCharacteristic();
         }
     }
 
@@ -141,29 +142,29 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
         // When we are connected, but the application is not open, we are not really interested in battery level notifications.
         // But we will still be receiving other values, if enabled.
         if (isConnected())
-            mManager.disableBatteryLevelCharacteristicNotifications();
+            manager.disableBatteryLevelCharacteristicNotifications();
 
         startForegroundService();
     }
 
-    private final Runnable mUpdateStridesTask = new Runnable() {
+    private final Runnable updateStridesTask = new Runnable() {
         @Override
         public void run() {
             if (!isConnected())
                 return;
 
-            mStepsNumber++;
-            mDistance += mStrideLength; // [cm]
+            stepsNumber++;
+            distance += strideLength; // [cm]
             final Intent broadcast = new Intent(BROADCAST_STRIDES_UPDATE);
-            broadcast.putExtra(EXTRA_STRIDES, mStepsNumber);
-            broadcast.putExtra(EXTRA_DISTANCE, mDistance);
+            broadcast.putExtra(EXTRA_STRIDES, stepsNumber);
+            broadcast.putExtra(EXTRA_DISTANCE, distance);
             LocalBroadcastManager.getInstance(RSCService.this).sendBroadcast(broadcast);
 
-            if (mCadence > 0) {
-                final long interval = (long) (1000.0f * 60.0f / mCadence);
-                mHandler.postDelayed(mUpdateStridesTask, interval);
+            if (cadence > 0) {
+                final long interval = (long) (1000.0f * 60.0f / cadence);
+                handler.postDelayed(updateStridesTask, interval);
             } else {
-                mTaskInProgress = false;
+                taskInProgress = false;
             }
         }
     };
@@ -183,15 +184,15 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 
         // Start strides counter if not in progress
-        mCadence = instantaneousCadence;
+        cadence = instantaneousCadence;
         if (strideLength != null) {
-            mStrideLength = strideLength;
+            this.strideLength = strideLength;
         }
-        if (!mTaskInProgress && strideLength != null && instantaneousCadence > 0) {
-            mTaskInProgress = true;
+        if (!taskInProgress && strideLength != null && instantaneousCadence > 0) {
+            taskInProgress = true;
 
-            final long interval = (long) (1000.0f * 60.0f / mCadence);
-            mHandler.postDelayed(mUpdateStridesTask, interval);
+            final long interval = (long) (1000.0f * 60.0f / cadence);
+            handler.postDelayed(updateStridesTask, interval);
         }
     }
 
@@ -238,6 +239,7 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
      *                     f.e. <code>&lt;string name="name"&gt;%s is connected&lt;/string&gt;</code>
      * @param defaults
      */
+    @SuppressWarnings("SameParameterValue")
     private Notification createNotification(final int messageResId, final int defaults) {
         final Intent parentIntent = new Intent(this, FeaturesActivity.class);
         parentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -269,7 +271,7 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
     /**
      * This broadcast receiver listens for {@link #ACTION_DISCONNECT} that may be fired by pressing Disconnect action button on the notification.
      */
-    private final BroadcastReceiver mDisconnectActionBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver disconnectActionBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             Logger.i(getLogSession(), "[Notification] Disconnect action pressed");

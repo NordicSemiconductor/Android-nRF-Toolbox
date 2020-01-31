@@ -42,29 +42,29 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     private final static int OPEN_ACTIVITY_REQ = 0;
     private final static int DISCONNECT_REQ = 1;
 
-    private CGMSManager mManager;
-    private final LocalBinder mBinder = new CGMSBinder();
+    private CGMSManager manager;
+    private final LocalBinder binder = new CGMSBinder();
 
     /**
      * This local binder is an interface for the bonded activity to operate with the RSC sensor
      */
 
-    public class CGMSBinder extends LocalBinder {
+    class CGMSBinder extends LocalBinder {
         /**
          * Returns all records as a sparse array where sequence number is the key.
          *
          * @return the records list
          */
-        public SparseArray<CGMSRecord> getRecords() {
-            return mManager.getRecords();
+        SparseArray<CGMSRecord> getRecords() {
+            return manager.getRecords();
         }
 
         /**
          * Clears the records list locally
          */
-        public void clear() {
-            if (mManager != null)
-                mManager.clear();
+        void clear() {
+            if (manager != null)
+                manager.clear();
         }
 
         /**
@@ -72,9 +72,9 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
          * The data will be returned to Glucose Measurement characteristic as a notification followed by Record Access Control
          * Point indication with status code ({@link CGMSManager# RESPONSE_SUCCESS} or other in case of error.
          */
-        public void getFirstRecord() {
-            if (mManager != null)
-                mManager.getFirstRecord();
+        void getFirstRecord() {
+            if (manager != null)
+                manager.getFirstRecord();
         }
 
         /**
@@ -82,9 +82,9 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
          * The data will be returned to Glucose Measurement characteristic as a notification followed by Record Access
          * Control Point indication with status code Success or other in case of error.
          */
-        public void getLastRecord() {
-            if (mManager != null)
-                mManager.getLastRecord();
+        void getLastRecord() {
+            if (manager != null)
+                manager.getLastRecord();
         }
 
         /**
@@ -93,9 +93,9 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
          * The data will be returned to Glucose Measurement characteristic as a series of notifications followed
          * by Record Access Control Point indication with status code Success or other in case of error.
          */
-        public void getAllRecords() {
-            if (mManager != null)
-                mManager.getAllRecords();
+        void getAllRecords() {
+            if (manager != null)
+                manager.getAllRecords();
         }
 
         /**
@@ -104,36 +104,36 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
          * characteristic as a series of notifications followed by Record Access Control Point
          * indication with status code Success or other in case of error.
          */
-        public void refreshRecords() {
-            if (mManager != null)
-                mManager.refreshRecords();
+        void refreshRecords() {
+            if (manager != null)
+                manager.refreshRecords();
         }
 
         /**
          * Sends abort operation signal to the device
          */
-        public void abort() {
-            if (mManager != null)
-                mManager.abort();
+        void abort() {
+            if (manager != null)
+                manager.abort();
         }
 
         /**
          * Sends Delete op code with All stored records parameter. This method may not be supported by the SDK sample.
          */
-        public void deleteAllRecords() {
-            if (mManager != null)
-                mManager.deleteAllRecords();
+        void deleteAllRecords() {
+            if (manager != null)
+                manager.deleteAllRecords();
         }
     }
 
     @Override
     protected LocalBinder getBinder() {
-        return mBinder;
+        return binder;
     }
 
     @Override
     protected LoggableBleManager<CGMSManagerCallbacks> initializeManager() {
-        return mManager = new CGMSManager(this);
+        return manager = new CGMSManager(this);
     }
 
 
@@ -142,14 +142,14 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
         super.onCreate();
         final IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_DISCONNECT);
-        registerReceiver(mDisconnectActionBroadcastReceiver, filter);
+        registerReceiver(disconnectActionBroadcastReceiver, filter);
     }
 
     @Override
     public void onDestroy() {
         // when user has disconnected from the sensor, we have to cancel the notification that we've created some milliseconds before using unbindService
         stopForegroundService();
-        unregisterReceiver(mDisconnectActionBroadcastReceiver);
+        unregisterReceiver(disconnectActionBroadcastReceiver);
 
         super.onDestroy();
     }
@@ -199,6 +199,7 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
      *                     f.e. <code>&lt;string name="name"&gt;%s is connected&lt;/string&gt;</code>
      * @param defaults     signals that will be used to notify the user
      */
+    @SuppressWarnings("SameParameterValue")
     private Notification createNotification(final int messageResId, final int defaults) {
         final Intent parentIntent = new Intent(this, FeaturesActivity.class);
         parentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -230,7 +231,7 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     /**
      * This broadcast receiver listens for {@link #ACTION_DISCONNECT} that may be fired by pressing Disconnect action button on the notification.
      */
-    private final BroadcastReceiver mDisconnectActionBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver disconnectActionBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             Logger.i(getLogSession(), "[Notification] Disconnect action pressed");
@@ -242,7 +243,7 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     };
 
     @Override
-    public void onCGMValueReceived(@NonNull final BluetoothDevice device, final CGMSRecord record) {
+    public void onCGMValueReceived(@NonNull final BluetoothDevice device, @NonNull final CGMSRecord record) {
         final Intent broadcast = new Intent(BROADCAST_NEW_CGMS_VALUE);
         broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
         broadcast.putExtra(EXTRA_CGMS_RECORD, record);
@@ -290,7 +291,7 @@ public class CGMService extends BleProfileService implements CGMSManagerCallback
     }
 
     @Override
-    public void onDatasetCleared(@NonNull final BluetoothDevice device) {
+    public void onDataSetCleared(@NonNull final BluetoothDevice device) {
         final Intent broadcast = new Intent(BROADCAST_DATA_SET_CLEAR);
         broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);

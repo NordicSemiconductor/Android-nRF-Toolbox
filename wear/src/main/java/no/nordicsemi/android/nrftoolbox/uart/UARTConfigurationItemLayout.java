@@ -43,19 +43,19 @@ public class UARTConfigurationItemLayout extends LinearLayout implements Wearabl
 	private static final float SHRINK_LABEL_ALPHA = .5f;
 	private static final float EXPAND_LABEL_ALPHA = 1f;
 
-	private float mExpandCircleRadius;
-	private float mShrinkCircleRadius;
+	private float expandCircleRadius;
+	private float shrinkCircleRadius;
 
-	private ObjectAnimator mExpandCircleAnimator;
-	private ObjectAnimator mFadeInLabelAnimator;
-	private AnimatorSet mExpandAnimator;
+	private ObjectAnimator expandCircleAnimator;
+	private ObjectAnimator fadeInLabelAnimator;
+	private AnimatorSet expandAnimator;
 
-	private ObjectAnimator mShrinkCircleAnimator;
-	private ObjectAnimator mFadeOutLabelAnimator;
-	private AnimatorSet mShrinkAnimator;
+	private ObjectAnimator shrinkCircleAnimator;
+	private ObjectAnimator fadeOutLabelAnimator;
+	private AnimatorSet shrinkAnimator;
 
-	private TextView mName;
-	private CircledImageView mIcon;
+	private TextView name;
+	private CircledImageView icon;
 
 	public UARTConfigurationItemLayout(final Context context) {
 		this(context, null, 0);
@@ -73,53 +73,53 @@ public class UARTConfigurationItemLayout extends LinearLayout implements Wearabl
 	protected void onFinishInflate() {
 		super.onFinishInflate();
 
-		mName = findViewById(R.id.name);
-		mIcon = findViewById(R.id.icon);
-		mExpandCircleRadius = mIcon.getCircleRadius();
-		mShrinkCircleRadius = mExpandCircleRadius * SHRINK_CIRCLE_RATIO;
+		name = findViewById(R.id.name);
+		icon = findViewById(R.id.icon);
+		expandCircleRadius = icon.getCircleRadius();
+		shrinkCircleRadius = expandCircleRadius * SHRINK_CIRCLE_RATIO;
 
-		mShrinkCircleAnimator = ObjectAnimator.ofFloat(mIcon, "circleRadius", mExpandCircleRadius, mShrinkCircleRadius);
-		mFadeOutLabelAnimator = ObjectAnimator.ofFloat(mName, "alpha",	EXPAND_LABEL_ALPHA, SHRINK_LABEL_ALPHA);
-		mShrinkAnimator = new AnimatorSet().setDuration(ANIMATION_DURATION_MS);
-		mShrinkAnimator.playTogether(mShrinkCircleAnimator, mFadeOutLabelAnimator);
+		shrinkCircleAnimator = ObjectAnimator.ofFloat(icon, "circleRadius", expandCircleRadius, shrinkCircleRadius);
+		fadeOutLabelAnimator = ObjectAnimator.ofFloat(name, "alpha",	EXPAND_LABEL_ALPHA, SHRINK_LABEL_ALPHA);
+		shrinkAnimator = new AnimatorSet().setDuration(ANIMATION_DURATION_MS);
+		shrinkAnimator.playTogether(shrinkCircleAnimator, fadeOutLabelAnimator);
 
-		mExpandCircleAnimator = ObjectAnimator.ofFloat(mIcon, "circleRadius", mShrinkCircleRadius, mExpandCircleRadius);
-		mFadeInLabelAnimator = ObjectAnimator.ofFloat(mName, "alpha", SHRINK_LABEL_ALPHA, EXPAND_LABEL_ALPHA);
-		mExpandAnimator = new AnimatorSet().setDuration(ANIMATION_DURATION_MS);
-		mExpandAnimator.playTogether(mExpandCircleAnimator, mFadeInLabelAnimator);
+		expandCircleAnimator = ObjectAnimator.ofFloat(icon, "circleRadius", shrinkCircleRadius, expandCircleRadius);
+		fadeInLabelAnimator = ObjectAnimator.ofFloat(name, "alpha", SHRINK_LABEL_ALPHA, EXPAND_LABEL_ALPHA);
+		expandAnimator = new AnimatorSet().setDuration(ANIMATION_DURATION_MS);
+		expandAnimator.playTogether(expandCircleAnimator, fadeInLabelAnimator);
 	}
 
 	@Override
 	public void onCenterPosition(final boolean animate) {
 		if (animate) {
-			mShrinkAnimator.cancel();
-			if (!mExpandAnimator.isRunning()) {
-				mExpandCircleAnimator.setFloatValues(mIcon.getCircleRadius(), mExpandCircleRadius);
-				mFadeInLabelAnimator.setFloatValues(mName.getAlpha(), EXPAND_LABEL_ALPHA);
-				mExpandAnimator.start();
+			shrinkAnimator.cancel();
+			if (!expandAnimator.isRunning()) {
+				expandCircleAnimator.setFloatValues(icon.getCircleRadius(), expandCircleRadius);
+				fadeInLabelAnimator.setFloatValues(name.getAlpha(), EXPAND_LABEL_ALPHA);
+				expandAnimator.start();
 			}
 		} else {
-			mExpandAnimator.cancel();
-			mIcon.setCircleRadius(mExpandCircleRadius);
-			mName.setAlpha(EXPAND_LABEL_ALPHA);
+			expandAnimator.cancel();
+			icon.setCircleRadius(expandCircleRadius);
+			name.setAlpha(EXPAND_LABEL_ALPHA);
 		}
-		mIcon.setEnabled(true);
+		icon.setEnabled(true);
 	}
 
 	@Override
 	public void onNonCenterPosition(final boolean animate) {
 		if (animate) {
-			mExpandAnimator.cancel();
-			if (!mShrinkAnimator.isRunning()) {
-				mShrinkCircleAnimator.setFloatValues(mIcon.getCircleRadius(), mShrinkCircleRadius);
-				mFadeOutLabelAnimator.setFloatValues(mName.getAlpha(), SHRINK_LABEL_ALPHA);
-				mShrinkAnimator.start();
+			expandAnimator.cancel();
+			if (!shrinkAnimator.isRunning()) {
+				shrinkCircleAnimator.setFloatValues(icon.getCircleRadius(), shrinkCircleRadius);
+				fadeOutLabelAnimator.setFloatValues(name.getAlpha(), SHRINK_LABEL_ALPHA);
+				shrinkAnimator.start();
 			}
 		} else {
-			mShrinkAnimator.cancel();
-			mIcon.setCircleRadius(mShrinkCircleRadius);
-			mName.setAlpha(SHRINK_LABEL_ALPHA);
+			shrinkAnimator.cancel();
+			icon.setCircleRadius(shrinkCircleRadius);
+			name.setAlpha(SHRINK_LABEL_ALPHA);
 		}
-		mIcon.setEnabled(false);
+		icon.setEnabled(false);
 	}
 }

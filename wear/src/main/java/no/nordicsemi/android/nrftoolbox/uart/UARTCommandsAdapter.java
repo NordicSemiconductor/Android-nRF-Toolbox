@@ -34,21 +34,21 @@ import no.nordicsemi.android.nrftoolbox.uart.domain.Command;
 import no.nordicsemi.android.nrftoolbox.uart.domain.UartConfiguration;
 
 public class UARTCommandsAdapter extends GridPagerAdapter {
-	private final OnCommandSelectedListener mListener;
-	private UartConfiguration mConfiguration;
+	private final OnCommandSelectedListener listener;
+	private UartConfiguration configuration;
 
 	public interface OnCommandSelectedListener {
 		void onCommandSelected(final Command command);
 	}
 
 	public UARTCommandsAdapter(final UartConfiguration configuration, final OnCommandSelectedListener listener) {
-		this.mConfiguration = configuration;
-		this.mListener = listener;
+		this.configuration = configuration;
+		this.listener = listener;
 	}
 
 	public void setConfiguration(final UartConfiguration configuration) {
 		// Configuration is null when it has been deleted on the handheld
-		this.mConfiguration = configuration;
+		this.configuration = configuration;
 		notifyDataSetChanged();
 	}
 
@@ -59,7 +59,7 @@ public class UARTCommandsAdapter extends GridPagerAdapter {
 
 	@Override
 	public int getColumnCount(final int row) {
-		final int count = mConfiguration != null ? mConfiguration.getCommands().length : 0;
+		final int count = configuration != null ? configuration.getCommands().length : 0;
 		return count > 0 ? count : 1; // Empty view
 	}
 
@@ -68,13 +68,13 @@ public class UARTCommandsAdapter extends GridPagerAdapter {
 		final View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.action_item, viewGroup, false);
 		viewGroup.addView(view);
 
-		final Command[] commands = mConfiguration != null ? mConfiguration.getCommands() : null;
+		final Command[] commands = configuration != null ? configuration.getCommands() : null;
 		if (commands != null && commands.length > 0) {
 			final Command command = commands[column];
 
 			final CircularButton icon = view.findViewById(R.id.icon);
 			icon.getImageDrawable().setLevel(command.getIconIndex());
-			icon.setOnClickListener(v -> mListener.onCommandSelected(command));
+			icon.setOnClickListener(v -> listener.onCommandSelected(command));
 		} else {
 			// Hide the icon
 			view.findViewById(R.id.icon).setVisibility(View.GONE);

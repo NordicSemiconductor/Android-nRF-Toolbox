@@ -61,12 +61,12 @@ public class FeaturesActivity extends AppCompatActivity {
 	private static final String NRF_CONNECT_CLASS = NRF_CONNECT_PACKAGE + ".DeviceListActivity";
 	private static final String NRF_CONNECT_MARKET_URI = "market://details?id=no.nordicsemi.android.mcp";
 
-	// Extras that can be passed from NFC (see SplashscreenActivity)
+	// Extras that can be passed from NFC (see SplashScreenActivity)
 	public static final String EXTRA_APP = "application/vnd.no.nordicsemi.type.app";
 	public static final String EXTRA_ADDRESS = "application/vnd.no.nordicsemi.type.address";
 
-	private DrawerLayout mDrawerLayout;
-	private ActionBarDrawerToggle mDrawerToggle;
+	private DrawerLayout drawerLayout;
+	private ActionBarDrawerToggle drawerToggle;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -80,18 +80,18 @@ public class FeaturesActivity extends AppCompatActivity {
 		if (!ensureBLEExists())
 			finish();
 
-		final DrawerLayout drawer = mDrawerLayout = findViewById(R.id.drawer_layout);
+		final DrawerLayout drawer = drawerLayout = findViewById(R.id.drawer_layout);
 		drawer.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
 		// Set the drawer toggle as the DrawerListener
-		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
+		drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.drawer_open, R.string.drawer_close) {
             @Override
             public void onDrawerSlide(final View drawerView, final float slideOffset) {
                 // Disable the Hamburger icon animation
                 super.onDrawerSlide(drawerView, 0);
             }
         };
-		drawer.addDrawerListener(mDrawerToggle);
+		drawer.addDrawerListener(drawerToggle);
 
 		// setup plug-ins in the drawer
 		setupPluginsInDrawer(drawer.findViewById(R.id.plugin_container));
@@ -130,23 +130,24 @@ public class FeaturesActivity extends AppCompatActivity {
 	protected void onPostCreate(final Bundle savedInstanceState) {
 		super.onPostCreate(savedInstanceState);
 		// Sync the toggle state after onRestoreInstanceState has occurred.
-		mDrawerToggle.syncState();
+		drawerToggle.syncState();
 	}
 
 	@Override
 	public void onConfigurationChanged(@NonNull final Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-		mDrawerToggle.onConfigurationChanged(newConfig);
+		drawerToggle.onConfigurationChanged(newConfig);
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(final MenuItem item) {
+	public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
 		// Pass the event to ActionBarDrawerToggle, if it returns
 		// true, then it has handled the app icon touch event
-		if (mDrawerToggle.onOptionsItemSelected(item)) {
+		if (drawerToggle.onOptionsItemSelected(item)) {
 			return true;
 		}
 
+		//noinspection SwitchStatementWithTooFewBranches
 		switch (item.getItemId()) {
 		case R.id.action_about:
 			final AppHelpFragment fragment = AppHelpFragment.getInstance(R.string.about_text, true);
@@ -185,7 +186,7 @@ public class FeaturesActivity extends AppCompatActivity {
 			} catch (final ActivityNotFoundException e) {
 				Toast.makeText(FeaturesActivity.this, R.string.no_application_play, Toast.LENGTH_SHORT).show();
 			}
-			mDrawerLayout.closeDrawers();
+			drawerLayout.closeDrawers();
 		});
 
 		// look for other plug-ins
@@ -206,7 +207,7 @@ public class FeaturesActivity extends AppCompatActivity {
 				intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				startActivity(intent);
-				mDrawerLayout.closeDrawers();
+				drawerLayout.closeDrawers();
 			});
 			container.addView(item);
 		}

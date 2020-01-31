@@ -50,7 +50,7 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 	/** Intermediate Cuff Pressure characteristic UUID. */
 	private static final UUID ICP_CHARACTERISTIC_UUID = UUID.fromString("00002A36-0000-1000-8000-00805f9b34fb");
 
-	private BluetoothGattCharacteristic mBPMCharacteristic, mICPCharacteristic;
+	private BluetoothGattCharacteristic bpmCharacteristic, icpCharacteristic;
 
 	private static BPMManager managerInstance = null;
 
@@ -71,20 +71,20 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
-		return mGattCallback;
+		return gattCallback;
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
 	 * receiving notification, etc.
 	 */
-	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
+	private final BatteryManagerGattCallback gattCallback = new BatteryManagerGattCallback() {
 
 		@Override
 		protected void initialize() {
 			super.initialize();
 
-			setNotificationCallback(mICPCharacteristic)
+			setNotificationCallback(icpCharacteristic)
 					.with(new IntermediateCuffPressureDataCallback() {
 							  @Override
 							  public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
@@ -99,7 +99,7 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 																			 final float cuffPressure, final int unit,
 																			 @Nullable final Float pulseRate, @Nullable final Integer userID,
 																			 @Nullable final BPMStatus status, @Nullable final Calendar calendar) {
-								  mCallbacks.onIntermediateCuffPressureReceived(device, cuffPressure, unit, pulseRate, userID, status, calendar);
+								  callbacks.onIntermediateCuffPressureReceived(device, cuffPressure, unit, pulseRate, userID, status, calendar);
 							  }
 
 							  @Override
@@ -107,7 +107,7 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 								  log(Log.WARN, "Invalid ICP data received: " + data);
 							  }
 						  });
-			setIndicationCallback(mBPMCharacteristic)
+			setIndicationCallback(bpmCharacteristic)
 					.with(new BloodPressureMeasurementDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
@@ -123,7 +123,7 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 																	   final int unit, @Nullable final Float pulseRate,
 																	   @Nullable final Integer userID, @Nullable final BPMStatus status,
 																	   @Nullable final Calendar calendar) {
-							mCallbacks.onBloodPressureMeasurementReceived(device, systolic, diastolic,
+							callbacks.onBloodPressureMeasurementReceived(device, systolic, diastolic,
                                     meanArterialPressure, unit, pulseRate, userID, status, calendar);
 						}
 
@@ -133,33 +133,33 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 						}
 					});
 
-			enableNotifications(mICPCharacteristic)
+			enableNotifications(icpCharacteristic)
 					.fail((device, status) -> log(Log.WARN,
 							"Intermediate Cuff Pressure characteristic not found"))
 					.enqueue();
-			enableIndications(mBPMCharacteristic).enqueue();
+			enableIndications(bpmCharacteristic).enqueue();
 		}
 
 		@Override
 		protected boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(BP_SERVICE_UUID);
 			if (service != null) {
-				mBPMCharacteristic = service.getCharacteristic(BPM_CHARACTERISTIC_UUID);
-				mICPCharacteristic = service.getCharacteristic(ICP_CHARACTERISTIC_UUID);
+				bpmCharacteristic = service.getCharacteristic(BPM_CHARACTERISTIC_UUID);
+				icpCharacteristic = service.getCharacteristic(ICP_CHARACTERISTIC_UUID);
 			}
-			return mBPMCharacteristic != null;
+			return bpmCharacteristic != null;
 		}
 
 		@Override
 		protected boolean isOptionalServiceSupported(@NonNull final BluetoothGatt gatt) {
 			super.isOptionalServiceSupported(gatt); // ignore the result of this
-			return mICPCharacteristic != null;
+			return icpCharacteristic != null;
 		}
 
 		@Override
 		protected void onDeviceDisconnected() {
-			mICPCharacteristic = null;
-			mBPMCharacteristic = null;
+			icpCharacteristic = null;
+			bpmCharacteristic = null;
 		}
 	};
 }

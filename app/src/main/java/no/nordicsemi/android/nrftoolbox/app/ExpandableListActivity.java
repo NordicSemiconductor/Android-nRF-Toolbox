@@ -16,6 +16,7 @@
 
 package no.nordicsemi.android.nrftoolbox.app;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -133,13 +134,15 @@ import no.nordicsemi.android.nrftoolbox.R;
  * @see #setListAdapter
  * @see android.widget.ExpandableListView
  */
+@SuppressLint("Registered")
+@SuppressWarnings("unused")
 public class ExpandableListActivity extends AppCompatActivity implements
 		OnCreateContextMenuListener,
 		ExpandableListView.OnChildClickListener, ExpandableListView.OnGroupCollapseListener,
 		ExpandableListView.OnGroupExpandListener {
-	ExpandableListAdapter mAdapter;
-	ExpandableListView mList;
-	boolean mFinishedStart = false;
+	ExpandableListAdapter adapter;
+	ExpandableListView list;
+	boolean finishedStart = false;
 
 	/**
 	 * Override this to populate the context menu when an item is long pressed. menuInfo will contain an
@@ -196,34 +199,34 @@ public class ExpandableListActivity extends AppCompatActivity implements
 	@Override
 	public void onContentChanged() {
 		super.onContentChanged();
-		View emptyView = findViewById(R.id.empty);
-		mList = findViewById(R.id.list);
-		if (mList == null) {
+		final View emptyView = findViewById(R.id.empty);
+		list = findViewById(R.id.list);
+		if (list == null) {
 			throw new RuntimeException(
 					"Your content must have a ExpandableListView whose id attribute is " +
 							"'R.id.list'");
 		}
 		if (emptyView != null) {
-			mList.setEmptyView(emptyView);
+			list.setEmptyView(emptyView);
 		}
-		mList.setOnChildClickListener(this);
-		mList.setOnGroupExpandListener(this);
-		mList.setOnGroupCollapseListener(this);
+		list.setOnChildClickListener(this);
+		list.setOnGroupExpandListener(this);
+		list.setOnGroupCollapseListener(this);
 
-		if (mFinishedStart) {
-			setListAdapter(mAdapter);
+		if (finishedStart) {
+			setListAdapter(adapter);
 		}
-		mFinishedStart = true;
+		finishedStart = true;
 	}
 
 	/**
 	 * Provide the adapter for the expandable list.
 	 */
-	public void setListAdapter(ExpandableListAdapter adapter) {
+	public void setListAdapter(final ExpandableListAdapter adapter) {
 		synchronized (this) {
 			ensureList();
-			mAdapter = adapter;
-			mList.setAdapter(adapter);
+			this.adapter = adapter;
+			list.setAdapter(adapter);
 		}
 	}
 
@@ -234,18 +237,18 @@ public class ExpandableListActivity extends AppCompatActivity implements
 	 */
 	public ExpandableListView getExpandableListView() {
 		ensureList();
-		return mList;
+		return list;
 	}
 
 	/**
 	 * Get the ExpandableListAdapter associated with this activity's ExpandableListView.
 	 */
 	public ExpandableListAdapter getExpandableListAdapter() {
-		return mAdapter;
+		return adapter;
 	}
 
 	private void ensureList() {
-		if (mList != null) {
+		if (list != null) {
 			return;
 		}
 		setContentView(R.layout.expandable_list_content);
@@ -257,7 +260,7 @@ public class ExpandableListActivity extends AppCompatActivity implements
 	 * @return The ID of the currently selected group or child.
 	 */
 	public long getSelectedId() {
-		return mList.getSelectedId();
+		return list.getSelectedId();
 	}
 
 	/**
@@ -267,7 +270,7 @@ public class ExpandableListActivity extends AppCompatActivity implements
 	 * @return A packed position representation containing the currently selected group or child's position and type.
 	 */
 	public long getSelectedPosition() {
-		return mList.getSelectedPosition();
+		return list.getSelectedPosition();
 	}
 
 	/**
@@ -282,8 +285,8 @@ public class ExpandableListActivity extends AppCompatActivity implements
 	 *            Whether the child's group should be expanded if it is collapsed.
 	 * @return Whether the selection was successfully set on the child.
 	 */
-	public boolean setSelectedChild(int groupPosition, int childPosition, boolean shouldExpandGroup) {
-		return mList.setSelectedChild(groupPosition, childPosition, shouldExpandGroup);
+	public boolean setSelectedChild(final int groupPosition, final int childPosition, final boolean shouldExpandGroup) {
+		return list.setSelectedChild(groupPosition, childPosition, shouldExpandGroup);
 	}
 
 	/**
@@ -292,8 +295,8 @@ public class ExpandableListActivity extends AppCompatActivity implements
 	 * @param groupPosition
 	 *            The position of the group that should be selected.
 	 */
-	public void setSelectedGroup(int groupPosition) {
-		mList.setSelectedGroup(groupPosition);
+	public void setSelectedGroup(final int groupPosition) {
+		list.setSelectedGroup(groupPosition);
 	}
 
 }

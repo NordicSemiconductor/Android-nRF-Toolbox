@@ -40,9 +40,9 @@ public class UARTNewConfigurationDialogFragment extends DialogFragment implement
 	private static final String NAME = "name";
 	private static final String DUPLICATE = "duplicate";
 
-	private EditText mEditText;
+	private EditText editText;
 
-	private NewConfigurationDialogListener mListener;
+	private NewConfigurationDialogListener listener;
 
 	public interface NewConfigurationDialogListener {
 		/**
@@ -60,11 +60,11 @@ public class UARTNewConfigurationDialogFragment extends DialogFragment implement
 	}
 
 	@Override
-	public void onAttach(final Context context) {
+	public void onAttach(@NonNull final Context context) {
 		super.onAttach(context);
 
 		if (context instanceof NewConfigurationDialogListener) {
-			mListener = (NewConfigurationDialogListener) context;
+			listener = (NewConfigurationDialogListener) context;
 		} else {
 			throw new IllegalArgumentException("The parent activity must implement NewConfigurationDialogListener");
 		}
@@ -73,7 +73,7 @@ public class UARTNewConfigurationDialogFragment extends DialogFragment implement
 	@Override
 	public void onDetach() {
 		super.onDetach();
-		mListener = null;
+		listener = null;
 	}
 
 	public static DialogFragment getInstance(final String name, final boolean duplicate) {
@@ -90,22 +90,25 @@ public class UARTNewConfigurationDialogFragment extends DialogFragment implement
 	@Override
 	@NonNull
 	public Dialog onCreateDialog(final Bundle savedInstanceState) {
-		final Context context = getActivity();
-
-		final Bundle args = getArguments();
+		final Bundle args = requireArguments();
 		final String oldName = args.getString(NAME);
 		final boolean duplicate = args.getBoolean(DUPLICATE);
 		final int titleResId = duplicate || oldName == null ? R.string.uart_new_configuration_title : R.string.uart_rename_configuration_title;
 
-		final LayoutInflater inflater = LayoutInflater.from(getActivity());
+		final LayoutInflater inflater = LayoutInflater.from(requireContext());
 		final View view = inflater.inflate(R.layout.feature_uart_dialog_new_configuration, null);
-		final EditText editText = mEditText = view.findViewById(R.id.name);
+		final EditText editText = this.editText = view.findViewById(R.id.name);
 		editText.setText(args.getString(NAME));
 		final View actionClear = view.findViewById(R.id.action_clear);
 		actionClear.setOnClickListener(v -> editText.setText(null));
 
-		final AlertDialog dialog = new AlertDialog.Builder(context).setTitle(titleResId).setView(view).setNegativeButton(R.string.cancel, null)
-				.setPositiveButton(R.string.ok, null).setCancelable(false).show(); // this must be show() or the getButton() below will return null.
+		final AlertDialog dialog = new AlertDialog.Builder(requireContext())
+				.setTitle(titleResId)
+				.setView(view)
+				.setNegativeButton(R.string.cancel, null)
+				.setPositiveButton(R.string.ok, null)
+				.setCancelable(false)
+				.show(); // this must be show() or the getButton() below will return null.
 
 		final Button okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
 		okButton.setOnClickListener(this);
@@ -115,19 +118,20 @@ public class UARTNewConfigurationDialogFragment extends DialogFragment implement
 
 	@Override
 	public void onClick(final View v) {
-		final String newName = mEditText.getText().toString().trim();
+		final String newName = editText.getText().toString().trim();
 		if (TextUtils.isEmpty(newName)) {
-			mEditText.setError(getString(R.string.uart_empty_name_error));
+			editText.setError(getString(R.string.uart_empty_name_error));
 			return;
 		}
 
-		final String oldName = getArguments().getString(NAME);
-		final boolean duplicate = getArguments().getBoolean(DUPLICATE);
+		final Bundle args = requireArguments();
+		final String oldName = args.getString(NAME);
+		final boolean duplicate = args.getBoolean(DUPLICATE);
 
 		if (duplicate || TextUtils.isEmpty(oldName))
-			mListener.onNewConfiguration(newName, duplicate);
+			listener.onNewConfiguration(newName, duplicate);
 		else {
-			mListener.onRenameConfiguration(newName);
+			listener.onRenameConfiguration(newName);
 		}
 		dismiss();
 	}

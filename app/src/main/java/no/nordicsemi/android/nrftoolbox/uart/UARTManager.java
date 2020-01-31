@@ -43,7 +43,7 @@ public class UARTManager extends LoggableBleManager<UARTManagerCallbacks> {
 	/** TX characteristic UUID */
 	private final static UUID UART_TX_CHARACTERISTIC_UUID = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E");
 
-	private BluetoothGattCharacteristic mRXCharacteristic, mTXCharacteristic;
+	private BluetoothGattCharacteristic rxCharacteristic, txCharacteristic;
 	/**
 	 * A flag indicating whether Long Write can be used. It's set to false if the UART RX
 	 * characteristic has only PROPERTY_WRITE_NO_RESPONSE property and no PROPERTY_WRITE.
@@ -51,7 +51,7 @@ public class UARTManager extends LoggableBleManager<UARTManagerCallbacks> {
 	 *
 	 * TODO change this flag if you don't want to use Long Write even with Write Request.
 	 */
-	private boolean mUseLongWrite = true;
+	private boolean useLongWrite = true;
 
 	UARTManager(final Context context) {
 		super(context);
@@ -60,39 +60,39 @@ public class UARTManager extends LoggableBleManager<UARTManagerCallbacks> {
 	@NonNull
 	@Override
 	protected BleManagerGattCallback getGattCallback() {
-		return mGattCallback;
+		return gattCallback;
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
 	 * receiving indication, etc.
 	 */
-	private final BleManagerGattCallback mGattCallback = new BleManagerGattCallback() {
+	private final BleManagerGattCallback gattCallback = new BleManagerGattCallback() {
 
 		@Override
 		protected void initialize() {
-			setNotificationCallback(mTXCharacteristic)
+			setNotificationCallback(txCharacteristic)
 					.with((device, data) -> {
 						final String text = data.getStringValue(0);
 						log(LogContract.Log.Level.APPLICATION, "\"" + text + "\" received");
-						mCallbacks.onDataReceived(device, text);
+						callbacks.onDataReceived(device, text);
 					});
 			requestMtu(260).enqueue();
-			enableNotifications(mTXCharacteristic).enqueue();
+			enableNotifications(txCharacteristic).enqueue();
 		}
 
 		@Override
 		public boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(UART_SERVICE_UUID);
 			if (service != null) {
-				mRXCharacteristic = service.getCharacteristic(UART_RX_CHARACTERISTIC_UUID);
-				mTXCharacteristic = service.getCharacteristic(UART_TX_CHARACTERISTIC_UUID);
+				rxCharacteristic = service.getCharacteristic(UART_RX_CHARACTERISTIC_UUID);
+				txCharacteristic = service.getCharacteristic(UART_TX_CHARACTERISTIC_UUID);
 			}
 
 			boolean writeRequest = false;
 			boolean writeCommand = false;
-			if (mRXCharacteristic != null) {
-				final int rxProperties = mRXCharacteristic.getProperties();
+			if (rxCharacteristic != null) {
+				final int rxProperties = rxCharacteristic.getProperties();
 				writeRequest = (rxProperties & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0;
 				writeCommand = (rxProperties & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) > 0;
 
@@ -101,19 +101,19 @@ public class UARTManager extends LoggableBleManager<UARTManagerCallbacks> {
 				// In case there is no WRITE REQUEST property, this manager will divide texts
 				// longer then MTU-3 bytes into up to MTU-3 bytes chunks.
 				if (writeRequest)
-					mRXCharacteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+					rxCharacteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
 				else
-					mUseLongWrite = false;
+					useLongWrite = false;
 			}
 
-			return mRXCharacteristic != null && mTXCharacteristic != null && (writeRequest || writeCommand);
+			return rxCharacteristic != null && txCharacteristic != null && (writeRequest || writeCommand);
 		}
 
 		@Override
 		protected void onDeviceDisconnected() {
-			mRXCharacteristic = null;
-			mTXCharacteristic = null;
-			mUseLongWrite = true;
+			rxCharacteristic = null;
+			txCharacteristic = null;
+			useLongWrite = true;
 		}
 	};
 
@@ -130,14 +130,14 @@ public class UARTManager extends LoggableBleManager<UARTManagerCallbacks> {
 	 */
 	public void send(final String text) {
 		// Are we connected?
-		if (mRXCharacteristic == null)
+		if (rxCharacteristic == null)
 			return;
 
 		if (!TextUtils.isEmpty(text)) {
-			final WriteRequest request = writeCharacteristic(mRXCharacteristic, text.getBytes())
+			final WriteRequest request = writeCharacteristic(rxCharacteristic, text.getBytes())
 					.with((device, data) -> log(LogContract.Log.Level.APPLICATION,
 							"\"" + data.getStringValue(0) + "\" sent"));
-			if (!mUseLongWrite) {
+			if (!useLongWrite) {
 				// This will automatically split the long data into MTU-3-byte long packets.
 				request.split();
 			}

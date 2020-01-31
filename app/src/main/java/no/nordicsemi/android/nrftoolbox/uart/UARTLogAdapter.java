@@ -39,15 +39,15 @@ import no.nordicsemi.android.log.LogContract.Log.Level;
 import no.nordicsemi.android.nrftoolbox.R;
 
 public class UARTLogAdapter extends CursorAdapter {
-	private static final SparseIntArray mColors = new SparseIntArray();
+	private static final SparseIntArray colors = new SparseIntArray();
 
 	static {
-		mColors.put(Level.DEBUG, 0xFF009CDE);
-		mColors.put(Level.VERBOSE, 0xFFB8B056);
-		mColors.put(Level.INFO, Color.BLACK);
-		mColors.put(Level.APPLICATION, 0xFF238C0F);
-		mColors.put(Level.WARNING, 0xFFD77926);
-		mColors.put(Level.ERROR, Color.RED);
+		colors.put(Level.DEBUG, 0xFF009CDE);
+		colors.put(Level.VERBOSE, 0xFFB8B056);
+		colors.put(Level.INFO, Color.BLACK);
+		colors.put(Level.APPLICATION, 0xFF238C0F);
+		colors.put(Level.WARNING, 0xFFD77926);
+		colors.put(Level.ERROR, Color.RED);
 	}
 
 	UARTLogAdapter(@NonNull final Context context) {
@@ -74,7 +74,7 @@ public class UARTLogAdapter extends CursorAdapter {
 
 		final int level = cursor.getInt(2 /* LEVEL */);
 		holder.data.setText(cursor.getString(3 /* DATA */));
-		holder.data.setTextColor(mColors.get(level));
+		holder.data.setTextColor(colors.get(level));
 	}
 
 	@Override

@@ -40,6 +40,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import java.util.Calendar;
 
 import no.nordicsemi.android.ble.common.profile.ht.TemperatureMeasurementCallback;
+import no.nordicsemi.android.ble.common.profile.ht.TemperatureType;
+import no.nordicsemi.android.ble.common.profile.ht.TemperatureUnit;
 import no.nordicsemi.android.log.Logger;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
@@ -61,12 +63,12 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	private final static int OPEN_ACTIVITY_REQ = 0;
 	private final static int DISCONNECT_REQ = 1;
 	/** The last received temperature value in Celsius degrees. */
-	private Float mTemp;
+	private Float temp;
 
 	@SuppressWarnings("unused")
-	private HTSManager mManager;
+	private HTSManager manager;
 
-	private final LocalBinder mBinder = new HTSBinder();
+	private final LocalBinder minder = new HTSBinder();
 
 	/**
 	 * This local binder is an interface for the bonded activity to operate with the HTS sensor
@@ -78,18 +80,18 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 		 * @return Temperature value in Celsius.
 		 */
 		Float getTemperature() {
-			return mTemp;
+			return temp;
 		}
 	}
 
 	@Override
 	protected LocalBinder getBinder() {
-		return mBinder;
+		return minder;
 	}
 
 	@Override
 	protected LoggableBleManager<HTSManagerCallbacks> initializeManager() {
-		return mManager = new HTSManager(this);
+		return manager = new HTSManager(this);
 	}
 
 	@Override
@@ -98,14 +100,14 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 
 		final IntentFilter filter = new IntentFilter();
 		filter.addAction(ACTION_DISCONNECT);
-		registerReceiver(mDisconnectActionBroadcastReceiver, filter);
+		registerReceiver(disconnectActionBroadcastReceiver, filter);
 	}
 
 	@Override
 	public void onDestroy() {
 		// when user has disconnected from the sensor, we have to cancel the notification that we've created some milliseconds before using unbindService
 		cancelNotification();
-		unregisterReceiver(mDisconnectActionBroadcastReceiver);
+		unregisterReceiver(disconnectActionBroadcastReceiver);
 
 		super.onDestroy();
 	}
@@ -121,25 +123,25 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	}
 
 	@Override
-	public void onDeviceDisconnected(final BluetoothDevice device) {
+	public void onDeviceDisconnected(@NonNull final BluetoothDevice device) {
 		super.onDeviceDisconnected(device);
-		mTemp = null;
+		temp = null;
 	}
 
 	@Override
 	public void onTemperatureMeasurementReceived(@NonNull final BluetoothDevice device,
-												 final float temperature, final int unit,
+												 final float temperature, @TemperatureUnit final int unit,
 												 @Nullable final Calendar calendar,
-												 @Nullable final Integer type) {
-		mTemp = TemperatureMeasurementCallback.toCelsius(temperature, unit);
+												 @Nullable @TemperatureType final Integer type) {
+		temp = TemperatureMeasurementCallback.toCelsius(temperature, unit);
 
 		final Intent broadcast = new Intent(BROADCAST_HTS_MEASUREMENT);
 		broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
-		broadcast.putExtra(EXTRA_TEMPERATURE, mTemp);
+		broadcast.putExtra(EXTRA_TEMPERATURE, temp);
 		// ignore the rest
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 
-		if (!mBound) {
+		if (!bound) {
 			// Here we may update the notification to display the current temperature.
 			// TODO modify the notification here
 		}
@@ -188,6 +190,7 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	 *            f.e. <code>&lt;string name="name"&gt;%s is connected&lt;/string&gt;</code>
 	 * @param defaults
 	 */
+	@SuppressWarnings("SameParameterValue")
 	private Notification createNotification(final int messageResId, final int defaults) {
 		final Intent parentIntent = new Intent(this, FeaturesActivity.class);
 		parentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -219,7 +222,7 @@ public class HTSService extends BleProfileService implements HTSManagerCallbacks
 	/**
 	 * This broadcast receiver listens for {@link #ACTION_DISCONNECT} that may be fired by pressing Disconnect action button on the notification.
 	 */
-	private final BroadcastReceiver mDisconnectActionBroadcastReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver disconnectActionBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			Logger.i(getLogSession(), "[Notification] Disconnect action pressed");

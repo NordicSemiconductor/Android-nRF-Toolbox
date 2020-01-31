@@ -57,19 +57,23 @@ public class AppHelpFragment extends DialogFragment {
 	@Override
     @NonNull
 	public Dialog onCreateDialog(final Bundle savedInstanceState) {
-		final Bundle args = getArguments();
+		final Bundle args = requireArguments();
 		final StringBuilder text = new StringBuilder(getString(args.getInt(ARG_TEXT)));
 
 		final boolean appendVersion = args.getBoolean(ARG_VERSION);
 		if (appendVersion) {
 			try {
-				final String version = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0).versionName;
+				final String version = requireContext().getPackageManager()
+						.getPackageInfo(requireContext().getPackageName(), 0).versionName;
 				text.append(getString(R.string.about_version, version));
 			} catch (final NameNotFoundException e) {
 				// do nothing
 			}
 		}
-		return new AlertDialog.Builder(getActivity()).setTitle(R.string.about_title).setMessage(text)
-				.setPositiveButton(R.string.ok, null).create();
+		return new AlertDialog.Builder(requireContext())
+				.setTitle(R.string.about_title)
+				.setMessage(text)
+				.setPositiveButton(R.string.ok, null)
+				.create();
 	}
 }

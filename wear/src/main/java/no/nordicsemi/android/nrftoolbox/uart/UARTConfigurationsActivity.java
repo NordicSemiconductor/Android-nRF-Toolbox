@@ -60,11 +60,11 @@ import no.nordicsemi.android.nrftoolbox.uart.domain.UartConfiguration;
 
 public class UARTConfigurationsActivity extends Activity implements GoogleApiClient.ConnectionCallbacks,
 		DataApi.DataListener, GoogleApiClient.OnConnectionFailedListener, WearableListView.ClickListener, MessageApi.MessageListener {
-	private UARTConfigurationsAdapter mAdapter;
-	private GoogleApiClient mGoogleApiClient;
-	private BleProfileService.LocalBinder mBinder;
+	private UARTConfigurationsAdapter adapter;
+	private GoogleApiClient googleApiClient;
+	private BleProfileService.LocalBinder binder;
 
-	private BroadcastReceiver mServiceBroadcastReceiver = new BroadcastReceiver() {
+	private BroadcastReceiver serviceBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			final String action = intent.getAction();
@@ -87,15 +87,15 @@ public class UARTConfigurationsActivity extends Activity implements GoogleApiCli
 		}
 	};
 
-	private ServiceConnection mServiceConnection = new ServiceConnection() {
+	private ServiceConnection serviceConnection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(final ComponentName name, final IBinder service) {
-			mBinder = (BleProfileService.LocalBinder) service;
+			binder = (BleProfileService.LocalBinder) service;
 		}
 
 		@Override
 		public void onServiceDisconnected(final ComponentName name) {
-			mBinder = null;
+			binder = null;
 		}
 	};
 
@@ -107,13 +107,13 @@ public class UARTConfigurationsActivity extends Activity implements GoogleApiCli
 		// Check if the WEAR device is connected to the UART device itself, or by the phone.
 		// Binding will fail if we are using phone as proxy as the service has not been started before.
 		final Intent service = new Intent(this, BleProfileService.class);
-		bindService(service, mServiceConnection, 0);
+		bindService(service, serviceConnection, 0);
 
 		final WearableListView listView = findViewById(R.id.list);
 		listView.setClickListener(this);
-		listView.setAdapter(mAdapter = new UARTConfigurationsAdapter(this));
+		listView.setAdapter(adapter = new UARTConfigurationsAdapter(this));
 
-		mGoogleApiClient = new GoogleApiClient.Builder(this)
+		googleApiClient = new GoogleApiClient.Builder(this)
 				.addApi(Wearable.API)
 				.addConnectionCallbacks(this)
 				.addOnConnectionFailedListener(this)
@@ -124,48 +124,48 @@ public class UARTConfigurationsActivity extends Activity implements GoogleApiCli
 		final IntentFilter filter = new IntentFilter();
 		filter.addAction(BleProfileService.BROADCAST_CONNECTION_STATE);
 		filter.addAction(BleProfileService.BROADCAST_ERROR);
-		LocalBroadcastManager.getInstance(this).registerReceiver(mServiceBroadcastReceiver, filter);
+		LocalBroadcastManager.getInstance(this).registerReceiver(serviceBroadcastReceiver, filter);
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		mGoogleApiClient.unregisterConnectionCallbacks(this);
-		mGoogleApiClient.unregisterConnectionFailedListener(this);
-		mGoogleApiClient = null;
+		googleApiClient.unregisterConnectionCallbacks(this);
+		googleApiClient.unregisterConnectionFailedListener(this);
+		googleApiClient = null;
 
 		// If we were bound to the service, disconnect and unbind. The service will terminate itself when disconnected.
-		if (mBinder != null) {
-			mBinder.disconnect();
+		if (binder != null) {
+			binder.disconnect();
 		}
-		unbindService(mServiceConnection);
-		LocalBroadcastManager.getInstance(this).unregisterReceiver(mServiceBroadcastReceiver);
+		unbindService(serviceConnection);
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(serviceBroadcastReceiver);
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		mGoogleApiClient.connect();
+		googleApiClient.connect();
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		Wearable.MessageApi.removeListener(mGoogleApiClient, this);
-		Wearable.DataApi.removeListener(mGoogleApiClient, this);
-		mGoogleApiClient.disconnect();
+		Wearable.MessageApi.removeListener(googleApiClient, this);
+		Wearable.DataApi.removeListener(googleApiClient, this);
+		googleApiClient.disconnect();
 	}
 
 	@Override
 	public void onConnected(final Bundle bundle) {
-		Wearable.DataApi.addListener(mGoogleApiClient, this);
-		Wearable.MessageApi.addListener(mGoogleApiClient, this);
+		Wearable.DataApi.addListener(googleApiClient, this);
+		Wearable.MessageApi.addListener(googleApiClient, this);
 		populateConfigurations();
 	}
 
 	@Override
 	public void onConnectionSuspended(final int cause) {
-		Wearable.DataApi.removeListener(mGoogleApiClient, this);
+		Wearable.DataApi.removeListener(googleApiClient, this);
 		finish();
 	}
 
@@ -182,7 +182,7 @@ public class UARTConfigurationsActivity extends Activity implements GoogleApiCli
 	@Override
 	public void onMessageReceived(final MessageEvent messageEvent) {
 		// If the activity is bound to service it means that it has connected directly to the device. We ignore messages from the handheld.
-		if (mBinder != null)
+		if (binder != null)
 			return;
 
 		switch (messageEvent.getPath()) {
@@ -215,8 +215,8 @@ public class UARTConfigurationsActivity extends Activity implements GoogleApiCli
 	 * This method read the UART configurations from the DataApi and populates the adapter with them.
 	 */
 	private void populateConfigurations() {
-		if (mGoogleApiClient.isConnected()) {
-			final PendingResult<DataItemBuffer> results = Wearable.DataApi.getDataItems(mGoogleApiClient, Uri.parse("wear:" + Constants.UART.CONFIGURATIONS), DataApi.FILTER_PREFIX);
+		if (googleApiClient.isConnected()) {
+			final PendingResult<DataItemBuffer> results = Wearable.DataApi.getDataItems(googleApiClient, Uri.parse("wear:" + Constants.UART.CONFIGURATIONS), DataApi.FILTER_PREFIX);
 			results.setResultCallback(dataItems -> {
 				final List<UartConfiguration> configurations = new ArrayList<>(dataItems.getCount());
 				for (int i = 0; i < dataItems.getCount(); ++i) {
@@ -226,7 +226,7 @@ public class UARTConfigurationsActivity extends Activity implements GoogleApiCli
 					final UartConfiguration configuration = new UartConfiguration(dataMap, id);
 					configurations.add(configuration);
 				}
-				mAdapter.setConfigurations(configurations);
+				adapter.setConfigurations(configurations);
 				dataItems.release();
 			});
 		}

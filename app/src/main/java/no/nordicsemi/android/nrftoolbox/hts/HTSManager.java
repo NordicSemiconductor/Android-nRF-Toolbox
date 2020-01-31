@@ -33,6 +33,8 @@ import java.util.Calendar;
 import java.util.UUID;
 
 import no.nordicsemi.android.ble.common.callback.ht.TemperatureMeasurementDataCallback;
+import no.nordicsemi.android.ble.common.profile.ht.TemperatureType;
+import no.nordicsemi.android.ble.common.profile.ht.TemperatureUnit;
 import no.nordicsemi.android.ble.data.Data;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.battery.BatteryManager;
@@ -46,11 +48,11 @@ import no.nordicsemi.android.nrftoolbox.parser.TemperatureMeasurementParser;
  */
 public class HTSManager extends BatteryManager<HTSManagerCallbacks> {
 	/** Health Thermometer service UUID */
-	public final static UUID HT_SERVICE_UUID = UUID.fromString("00001809-0000-1000-8000-00805f9b34fb");
+	final static UUID HT_SERVICE_UUID = UUID.fromString("00001809-0000-1000-8000-00805f9b34fb");
 	/** Health Thermometer Measurement characteristic UUID */
 	private static final UUID HT_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A1C-0000-1000-8000-00805f9b34fb");
 
-	private BluetoothGattCharacteristic mHTCharacteristic;
+	private BluetoothGattCharacteristic htCharacteristic;
 
 	HTSManager(final Context context) {
 		super(context);
@@ -59,18 +61,18 @@ public class HTSManager extends BatteryManager<HTSManagerCallbacks> {
 	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
-		return mGattCallback;
+		return gattCallback;
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
 	 * receiving indication, etc..
 	 */
-	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
+	private final BatteryManagerGattCallback gattCallback = new BatteryManagerGattCallback() {
 		@Override
 		protected void initialize() {
 			super.initialize();
-			setIndicationCallback(mHTCharacteristic)
+			setIndicationCallback(htCharacteristic)
 					.with(new TemperatureMeasurementDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
@@ -80,28 +82,28 @@ public class HTSManager extends BatteryManager<HTSManagerCallbacks> {
 
 						@Override
 						public void onTemperatureMeasurementReceived(@NonNull final BluetoothDevice device,
-																	 final float temperature, final int unit,
+																	 final float temperature, @TemperatureUnit final int unit,
 																	 @Nullable final Calendar calendar,
-																	 @Nullable final Integer type) {
-							mCallbacks.onTemperatureMeasurementReceived(device, temperature, unit, calendar, type);
+																	 @Nullable @TemperatureType final Integer type) {
+							callbacks.onTemperatureMeasurementReceived(device, temperature, unit, calendar, type);
 						}
 					});
-			enableIndications(mHTCharacteristic).enqueue();
+			enableIndications(htCharacteristic).enqueue();
 		}
 
 		@Override
 		protected boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(HT_SERVICE_UUID);
 			if (service != null) {
-				mHTCharacteristic = service.getCharacteristic(HT_MEASUREMENT_CHARACTERISTIC_UUID);
+				htCharacteristic = service.getCharacteristic(HT_MEASUREMENT_CHARACTERISTIC_UUID);
 			}
-			return mHTCharacteristic != null;
+			return htCharacteristic != null;
 		}
 
 		@Override
 		protected void onDeviceDisconnected() {
 			super.onDeviceDisconnected();
-			mHTCharacteristic = null;
+			htCharacteristic = null;
 		}
 	};
 }

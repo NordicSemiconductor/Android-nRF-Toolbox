@@ -5,11 +5,11 @@ import android.os.Parcelable;
 
 class CGMSRecord implements Parcelable{
     /** Record sequence number. */
-    protected int sequenceNumber;
+    int sequenceNumber;
     /** The base time of the measurement (start time + sequenceNumber of minutes). */
-    protected long timestamp;
+    long timestamp;
     /** The glucose concentration in mg/dL. */
-    protected float glucoseConcentration;
+    float glucoseConcentration;
 
     CGMSRecord(final int sequenceNumber, final float glucoseConcentration, final long timestamp) {
         this.sequenceNumber = sequenceNumber;

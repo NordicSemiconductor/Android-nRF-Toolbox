@@ -65,12 +65,12 @@ public class UARTCommandsActivity extends Activity implements UARTCommandsAdapte
 
 	public static final String CONFIGURATION = "configuration";
 
-	private GoogleApiClient mGoogleApiClient;
-	private UARTCommandsAdapter mAdapter;
-	private UARTProfile mProfile;
-	private long mConfigurationId;
+	private GoogleApiClient googleApiClient;
+	private UARTCommandsAdapter adapter;
+	private UARTProfile profile;
+	private long configurationId;
 
-	private BroadcastReceiver mServiceBroadcastReceiver = new BroadcastReceiver() {
+	private BroadcastReceiver serviceBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			final String action = intent.getAction();
@@ -100,16 +100,16 @@ public class UARTCommandsActivity extends Activity implements UARTCommandsAdapte
 		}
 	};
 
-	private ServiceConnection mServiceConnection = new ServiceConnection() {
+	private ServiceConnection serviceConnection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(final ComponentName name, final IBinder service) {
 			final BleProfileService.LocalBinder binder = (BleProfileService.LocalBinder) service;
-			mProfile = (UARTProfile) binder.getProfile();
+			profile = (UARTProfile) binder.getProfile();
 		}
 
 		@Override
 		public void onServiceDisconnected(final ComponentName name) {
-			mProfile = null;
+			profile = null;
 		}
 	};
 
@@ -120,22 +120,22 @@ public class UARTCommandsActivity extends Activity implements UARTCommandsAdapte
 
 		final Intent intent = getIntent();
 		final UartConfiguration configuration = intent.getParcelableExtra(CONFIGURATION);
-		mConfigurationId = configuration.getId();
+		configurationId = configuration.getId();
 
 		// Check if the WEAR device is connected to the UART device itself, or by the phone.
 		// Binding will fail if we are using phone as proxy as the service has not been started before.
 		final Intent service = new Intent(this, BleProfileService.class);
-		bindService(service, mServiceConnection, 0);
+		bindService(service, serviceConnection, 0);
 
 		// Set up tht grid
 		final GridViewPager pager = findViewById(R.id.pager);
-		pager.setAdapter(mAdapter = new UARTCommandsAdapter(configuration, this));
+		pager.setAdapter(adapter = new UARTCommandsAdapter(configuration, this));
 
 		final DotsPageIndicator dotsPageIndicator = findViewById(R.id.page_indicator);
 		dotsPageIndicator.setPager(pager);
 
 		// Configure Google API client
-		mGoogleApiClient = new GoogleApiClient.Builder(this)
+		googleApiClient = new GoogleApiClient.Builder(this)
 				.addApi(Wearable.API)
 				.addConnectionCallbacks(this)
 				.addOnConnectionFailedListener(this)
@@ -146,39 +146,39 @@ public class UARTCommandsActivity extends Activity implements UARTCommandsAdapte
 		filter.addAction(BleProfileService.BROADCAST_CONNECTION_STATE);
 		filter.addAction(BleProfileService.BROADCAST_ERROR);
 		filter.addAction(UARTProfile.BROADCAST_DATA_RECEIVED);
-		LocalBroadcastManager.getInstance(this).registerReceiver(mServiceBroadcastReceiver, filter);
+		LocalBroadcastManager.getInstance(this).registerReceiver(serviceBroadcastReceiver, filter);
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		mGoogleApiClient.unregisterConnectionCallbacks(this);
-		mGoogleApiClient.unregisterConnectionFailedListener(this);
-		mGoogleApiClient = null;
+		googleApiClient.unregisterConnectionCallbacks(this);
+		googleApiClient.unregisterConnectionFailedListener(this);
+		googleApiClient = null;
 
 		// unbind if we were bound to the service.
-		unbindService(mServiceConnection);
-		LocalBroadcastManager.getInstance(this).unregisterReceiver(mServiceBroadcastReceiver);
+		unbindService(serviceConnection);
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(serviceBroadcastReceiver);
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		mGoogleApiClient.connect();
+		googleApiClient.connect();
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		Wearable.MessageApi.removeListener(mGoogleApiClient, this);
-		Wearable.DataApi.removeListener(mGoogleApiClient, this);
-		mGoogleApiClient.disconnect();
+		Wearable.MessageApi.removeListener(googleApiClient, this);
+		Wearable.DataApi.removeListener(googleApiClient, this);
+		googleApiClient.disconnect();
 	}
 
 	@Override
 	public void onConnected(final Bundle bundle) {
-		Wearable.DataApi.addListener(mGoogleApiClient, this);
-		Wearable.MessageApi.addListener(mGoogleApiClient, this);
+		Wearable.DataApi.addListener(googleApiClient, this);
+		Wearable.MessageApi.addListener(googleApiClient, this);
 	}
 
 	@Override
@@ -198,7 +198,7 @@ public class UARTCommandsActivity extends Activity implements UARTCommandsAdapte
 			final long id = ContentUris.parseId(item.getUri());
 
 			// Update the configuration only if ID matches
-			if (id != mConfigurationId)
+			if (id != configurationId)
 				continue;
 
 			// Configuration added or edited
@@ -207,12 +207,12 @@ public class UARTCommandsActivity extends Activity implements UARTCommandsAdapte
 				final UartConfiguration configuration = new UartConfiguration(dataMap, id);
 
 				// Update UI on UI thread
-				runOnUiThread(() -> mAdapter.setConfiguration(configuration));
+				runOnUiThread(() -> adapter.setConfiguration(configuration));
 			} else if (event.getType() == DataEvent.TYPE_DELETED) {
 				// Configuration removed
 
 				// Update UI on UI thread
-				runOnUiThread(() -> mAdapter.setConfiguration(null));
+				runOnUiThread(() -> adapter.setConfiguration(null));
 			}
 		}
 	}
@@ -220,7 +220,7 @@ public class UARTCommandsActivity extends Activity implements UARTCommandsAdapte
 	@Override
 	public void onMessageReceived(final MessageEvent messageEvent) {
 		// If the activity is bound to service it means that it has connected directly to the device. We ignore messages from the handheld.
-		if (mProfile != null)
+		if (profile != null)
 			return;
 
 		switch (messageEvent.getPath()) {
@@ -246,8 +246,8 @@ public class UARTCommandsActivity extends Activity implements UARTCommandsAdapte
 				break;
 		}
 
-		if (mProfile != null)
-			mProfile.send(text);
+		if (profile != null)
+			profile.send(text);
 		else
 			sendMessageToHandheld(this, text);
 	}

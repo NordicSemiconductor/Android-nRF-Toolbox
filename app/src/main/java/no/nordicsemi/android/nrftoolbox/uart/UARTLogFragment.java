@@ -63,28 +63,28 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 	/**
 	 * The service UART interface that may be used to send data to the target.
 	 */
-	private UARTInterface mUARTInterface;
+	private UARTInterface uartInterface;
 	/**
 	 * The adapter used to populate the list with log entries.
 	 */
-	private CursorAdapter mLogAdapter;
+	private CursorAdapter logAdapter;
 	/**
 	 * The log session created to log events related with the target device.
 	 */
-	private ILogSession mLogSession;
+	private ILogSession logSession;
 
-	private EditText mField;
-	private Button mSendButton;
+	private EditText field;
+	private Button sendButton;
 
 	/**
 	 * The last list view position.
 	 */
-	private int mLogScrollPosition;
+	private int logScrollPosition;
 
 	/**
 	 * The receiver that listens for {@link BleProfileService#BROADCAST_CONNECTION_STATE} action.
 	 */
-	private final BroadcastReceiver mCommonBroadcastReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver commonBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			// This receiver listens only for the BleProfileService.BROADCAST_CONNECTION_STATE action, no need to check it.
@@ -109,15 +109,15 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 		}
 	};
 
-	private ServiceConnection mServiceConnection = new ServiceConnection() {
+	private ServiceConnection serviceConnection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(final ComponentName name, final IBinder service) {
 			final UARTService.UARTBinder bleService = (UARTService.UARTBinder) service;
-			mUARTInterface = bleService;
-			mLogSession = bleService.getLogSession();
+			uartInterface = bleService;
+			logSession = bleService.getLogSession();
 
 			// Start the loader
-			if (mLogSession != null) {
+			if (logSession != null) {
 				getLoaderManager().restartLoader(LOG_REQUEST_ID, null, UARTLogFragment.this);
 			}
 
@@ -129,7 +129,7 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 		@Override
 		public void onServiceDisconnected(final ComponentName name) {
 			onDeviceDisconnected();
-			mUARTInterface = null;
+			uartInterface = null;
 		}
 	};
 
@@ -137,11 +137,11 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mCommonBroadcastReceiver, makeIntentFilter());
+		LocalBroadcastManager.getInstance(requireContext()).registerReceiver(commonBroadcastReceiver, makeIntentFilter());
 
 		// Load the last log list view scroll position
 		if (savedInstanceState != null) {
-			mLogScrollPosition = savedInstanceState.getInt(SIS_LOG_SCROLL_POSITION);
+			logScrollPosition = savedInstanceState.getInt(SIS_LOG_SCROLL_POSITION);
 		}
 	}
 
@@ -151,10 +151,10 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 
 		/*
 		 * If the service has not been started before the following lines will not start it. However, if it's running, the Activity will be bound to it
-		 * and notified via mServiceConnection.
+		 * and notified via serviceConnection.
 		 */
 		final Intent service = new Intent(getActivity(), UARTService.class);
-		requireActivity().bindService(service, mServiceConnection, 0); // we pass 0 as a flag so the service will not be created if not exists
+		requireActivity().bindService(service, serviceConnection, 0); // we pass 0 as a flag so the service will not be created if not exists
 	}
 
 	@Override
@@ -162,8 +162,8 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 		super.onStop();
 
 		try {
-			requireActivity().unbindService(mServiceConnection);
-			mUARTInterface = null;
+			requireActivity().unbindService(serviceConnection);
+			uartInterface = null;
 		} catch (final IllegalArgumentException e) {
 			// do nothing, we were not connected to the sensor
 		}
@@ -181,7 +181,7 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 
 	@Override
 	public void onDestroy() {
-		LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mCommonBroadcastReceiver);
+		LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(commonBroadcastReceiver);
 		super.onDestroy();
 	}
 
@@ -189,7 +189,7 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 	public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.fragment_feature_uart_log, container, false);
 
-		final EditText field = mField = view.findViewById(R.id.field);
+		final EditText field = this.field = view.findViewById(R.id.field);
 		field.setOnEditorActionListener((v, actionId, event) -> {
 			if (actionId == EditorInfo.IME_ACTION_SEND) {
 				onSendClicked();
@@ -198,7 +198,7 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 			return false;
 		});
 
-		final Button sendButton = mSendButton = view.findViewById(R.id.action_send);
+		final Button sendButton = this.sendButton = view.findViewById(R.id.action_send);
 		sendButton.setOnClickListener(v -> onSendClicked());
 		return view;
 	}
@@ -208,8 +208,8 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 		super.onViewCreated(view, savedInstanceState);
 
 		// Create the log adapter, initially with null cursor
-		mLogAdapter = new UARTLogAdapter(requireContext());
-		setListAdapter(mLogAdapter);
+		logAdapter = new UARTLogAdapter(requireContext());
+		setListAdapter(logAdapter);
 	}
 
 	@NonNull
@@ -217,7 +217,7 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 	public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
 		switch (id) {
 			case LOG_REQUEST_ID: {
-				return new CursorLoader(requireContext(), mLogSession.getSessionEntriesUri(), LOG_PROJECTION, null, null, LogContract.Log.TIME);
+				return new CursorLoader(requireContext(), logSession.getSessionEntriesUri(), LOG_PROJECTION, null, null, LogContract.Log.TIME);
 			}
 		}
 		throw new UnsupportedOperationException("Could not create loader with ID " + id);
@@ -227,10 +227,10 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 	public void onLoadFinished(@NonNull final Loader<Cursor> loader, final Cursor data) {
 		// Here we have to restore the old saved scroll position, or scroll to the bottom if before adding new events it was scrolled to the bottom.  
 		final ListView list = getListView();
-		final int position = mLogScrollPosition;
+		final int position = logScrollPosition;
 		final boolean scrolledToBottom = position == LOG_SCROLLED_TO_BOTTOM || (list.getCount() > 0 && list.getLastVisiblePosition() == list.getCount() - 1);
 
-		mLogAdapter.swapCursor(data);
+		logAdapter.swapCursor(data);
 
 		if (position > LOG_SCROLL_NULL) {
 			list.setSelectionFromTop(position, 0);
@@ -238,21 +238,21 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 			if (scrolledToBottom)
 				list.setSelection(list.getCount() - 1);
 		}
-		mLogScrollPosition = LOG_SCROLL_NULL;
+		logScrollPosition = LOG_SCROLL_NULL;
 	}
 
 	@Override
 	public void onLoaderReset(@NonNull final Loader<Cursor> loader) {
-		mLogAdapter.swapCursor(null);
+		logAdapter.swapCursor(null);
 	}
 
 	private void onSendClicked() {
-		final String text = mField.getText().toString();
+		final String text = field.getText().toString();
 
-		mUARTInterface.send(text);
+		uartInterface.send(text);
 
-		mField.setText(null);
-		mField.requestFocus();
+		field.setText(null);
+		field.requestFocus();
 	}
 
 	/**
@@ -262,7 +262,7 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 	public void onServiceStarted() {
 		// The service has been started, bind to it
 		final Intent service = new Intent(getActivity(), UARTService.class);
-		requireActivity().bindService(service, mServiceConnection, 0);
+		requireActivity().bindService(service, serviceConnection, 0);
 	}
 
 	/**
@@ -271,7 +271,7 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 	public void onFragmentHidden() {
 		final InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 		if (imm != null) {
-			imm.hideSoftInputFromWindow(mField.getWindowToken(), 0);
+			imm.hideSoftInputFromWindow(field.getWindowToken(), 0);
 		}
 	}
 
@@ -279,16 +279,16 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 	 * Method called when the target device has connected.
 	 */
 	protected void onDeviceConnected() {
-		mField.setEnabled(true);
-		mSendButton.setEnabled(true);
+		field.setEnabled(true);
+		sendButton.setEnabled(true);
 	}
 
 	/**
 	 * Method called when user disconnected from the target UART device or the connection was lost.
 	 */
 	protected void onDeviceDisconnected() {
-		mField.setEnabled(false);
-		mSendButton.setEnabled(false);
+		field.setEnabled(false);
+		sendButton.setEnabled(false);
 	}
 
 	private static IntentFilter makeIntentFilter() {

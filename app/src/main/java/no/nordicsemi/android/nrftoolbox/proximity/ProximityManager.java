@@ -21,8 +21,10 @@
  */
 package no.nordicsemi.android.nrftoolbox.proximity;
 
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import androidx.annotation.NonNull;
@@ -31,6 +33,7 @@ import android.util.Log;
 import java.util.UUID;
 
 import no.nordicsemi.android.ble.callback.FailCallback;
+import no.nordicsemi.android.ble.common.callback.alert.AlertLevelDataCallback;
 import no.nordicsemi.android.ble.common.data.alert.AlertLevelData;
 import no.nordicsemi.android.ble.error.GattError;
 import no.nordicsemi.android.log.LogContract;
@@ -42,50 +45,67 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 	/** Link Loss service UUID. */
 	final static UUID LINK_LOSS_SERVICE_UUID = UUID.fromString("00001803-0000-1000-8000-00805f9b34fb");
 	/** Immediate Alert service UUID. */
-	private final static UUID IMMEDIATE_ALERT_SERVICE_UUID = UUID.fromString("00001802-0000-1000-8000-00805f9b34fb");
+	final static UUID IMMEDIATE_ALERT_SERVICE_UUID = UUID.fromString("00001802-0000-1000-8000-00805f9b34fb");
 	/** Alert Level characteristic UUID. */
-	private static final UUID ALERT_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A06-0000-1000-8000-00805f9b34fb");
+	final static UUID ALERT_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A06-0000-1000-8000-00805f9b34fb");
 
-	private BluetoothGattCharacteristic mAlertLevelCharacteristic, mLinkLossCharacteristic;
-	private boolean mAlertOn;
+	// Client characteristics.
+	private BluetoothGattCharacteristic alertLevelCharacteristic, linkLossCharacteristic;
+	// Server characteristics.
+	private BluetoothGattCharacteristic localAlertLevelCharacteristic;
+	/** A flag indicating whether the alarm on the connected proximity tag has been activated. */
+	private boolean alertOn;
 
 	ProximityManager(final Context context) {
 		super(context);
 	}
 
-	@Override
-	protected boolean shouldAutoConnect() {
-		return true;
-	}
-
 	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
-		return mGattCallback;
+		return gattCallback;
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
 	 * receiving indication, etc.
 	 */
-	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
+	private final BatteryManagerGattCallback gattCallback = new BatteryManagerGattCallback() {
 
 		@Override
 		protected void initialize() {
 			super.initialize();
-			writeCharacteristic(mLinkLossCharacteristic, AlertLevelData.highAlert())
+			// This callback will be called whenever local Alert Level char is written
+			// by a connected proximity tag.
+			setWriteCallback(localAlertLevelCharacteristic)
+					.with(new AlertLevelDataCallback() {
+						@Override
+						public void onAlertLevelChanged(@NonNull final BluetoothDevice device, final int level) {
+							callbacks.onLocalAlarmSwitched(device, level != ALERT_NONE);
+						}
+					});
+			// After connection, set the Link Loss behaviour on the tag.
+			writeCharacteristic(linkLossCharacteristic, AlertLevelData.highAlert())
 					.done(device -> log(Log.INFO, "Link loss alert level set"))
 					.fail((device, status) -> log(Log.WARN, "Failed to set link loss level: " + status))
 					.enqueue();
 		}
 
 		@Override
+		protected void onServerReady(@NonNull final BluetoothGattServer server) {
+			final BluetoothGattService immediateAlertService = server.getService(IMMEDIATE_ALERT_SERVICE_UUID);
+			if (immediateAlertService != null) {
+				localAlertLevelCharacteristic = immediateAlertService.getCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID);
+			}
+		}
+
+		@Override
 		protected boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService llService = gatt.getService(LINK_LOSS_SERVICE_UUID);
 			if (llService != null) {
-				mLinkLossCharacteristic = llService.getCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID);
+				linkLossCharacteristic = llService.getCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID);
 			}
-			return mLinkLossCharacteristic != null;
+			return linkLossCharacteristic != null;
 		}
 
 		@Override
@@ -93,18 +113,19 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 			super.isOptionalServiceSupported(gatt);
 			final BluetoothGattService iaService = gatt.getService(IMMEDIATE_ALERT_SERVICE_UUID);
 			if (iaService != null) {
-				mAlertLevelCharacteristic = iaService.getCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID);
+				alertLevelCharacteristic = iaService.getCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID);
 			}
-			return mAlertLevelCharacteristic != null;
+			return alertLevelCharacteristic != null;
 		}
 
 		@Override
 		protected void onDeviceDisconnected() {
 			super.onDeviceDisconnected();
-			mAlertLevelCharacteristic = null;
-			mLinkLossCharacteristic = null;
+			alertLevelCharacteristic = null;
+			linkLossCharacteristic = null;
+			localAlertLevelCharacteristic = null;
 			// Reset the alert flag
-			mAlertOn = false;
+			alertOn = false;
 		}
 	};
 
@@ -112,7 +133,7 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 	 * Toggles the immediate alert on the target device.
 	 */
 	public void toggleImmediateAlert() {
-		writeImmediateAlert(!mAlertOn);
+		writeImmediateAlert(!alertOn);
 	}
 
 	/**
@@ -124,14 +145,14 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 		if (!isConnected())
 			return;
 
-		writeCharacteristic(mAlertLevelCharacteristic, on ? AlertLevelData.highAlert() : AlertLevelData.noAlert())
+		writeCharacteristic(alertLevelCharacteristic, on ? AlertLevelData.highAlert() : AlertLevelData.noAlert())
 				.before(device -> log(Log.VERBOSE,
 						on ? "Setting alarm to HIGH..." : "Disabling alarm..."))
 				.with((device, data) -> log(LogContract.Log.Level.APPLICATION,
 						"\"" + AlertLevelParser.parse(data) + "\" sent"))
 				.done(device -> {
-					mAlertOn = on;
-					mCallbacks.onRemoteAlarmSwitched(device, on);
+					alertOn = on;
+					callbacks.onRemoteAlarmSwitched(device, on);
 				})
 				.fail((device, status) -> log(Log.WARN,
 						status == FailCallback.REASON_NULL_ATTRIBUTE ?
@@ -144,6 +165,6 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 	 * Returns true if the alert has been enabled on the proximity tag, false otherwise.
 	 */
 	boolean isAlertEnabled() {
-		return mAlertOn;
+		return alertOn;
 	}
 }

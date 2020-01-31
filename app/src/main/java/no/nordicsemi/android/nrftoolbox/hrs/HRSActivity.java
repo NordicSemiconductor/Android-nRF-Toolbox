@@ -27,6 +27,8 @@ import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
+
+import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.view.ViewGroup;
@@ -57,17 +59,17 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 
 	private final static int REFRESH_INTERVAL = 1000; // 1 second interval
 
-	private Handler mHandler = new Handler();
+	private Handler handler = new Handler();
 
 	private boolean isGraphInProgress = false;
 
-	private GraphicalView mGraphView;
-	private LineGraphView mLineGraph;
-	private TextView mHRSValue, mHRSPosition;
-	private TextView mBatteryLevelView;
+	private GraphicalView graphView;
+	private LineGraphView lineGraph;
+	private TextView hrValueView, hrLocationView;
+	private TextView batteryLevelView;
 
-	private int mHrmValue = 0;
-	private int mCounter = 0;
+	private int hrValue = 0;
+	private int counter = 0;
 
 	@Override
 	protected void onCreateView(final Bundle savedInstanceState) {
@@ -76,17 +78,17 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 	}
 
 	private void setGUI() {
-		mLineGraph = LineGraphView.getLineGraphView();
-		mHRSValue = findViewById(R.id.text_hrs_value);
-		mHRSPosition = findViewById(R.id.text_hrs_position);
-		mBatteryLevelView = findViewById(R.id.battery);
+		lineGraph = LineGraphView.getLineGraphView();
+		hrValueView = findViewById(R.id.text_hrs_value);
+		hrLocationView = findViewById(R.id.text_hrs_position);
+		batteryLevelView = findViewById(R.id.battery);
 		showGraph();
 	}
 
 	private void showGraph() {
-		mGraphView = mLineGraph.getView(this);
+		graphView = lineGraph.getView(this);
 		ViewGroup layout = findViewById(R.id.graph_hrs);
-		layout.addView(mGraphView);
+		layout.addView(graphView);
 	}
 
 	@Override
@@ -109,20 +111,20 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 		super.onRestoreInstanceState(savedInstanceState);
 
 		isGraphInProgress = savedInstanceState.getBoolean(GRAPH_STATUS);
-		mCounter = savedInstanceState.getInt(GRAPH_COUNTER);
-		mHrmValue = savedInstanceState.getInt(HR_VALUE);
+		counter = savedInstanceState.getInt(GRAPH_COUNTER);
+		hrValue = savedInstanceState.getInt(HR_VALUE);
 
 		if (isGraphInProgress)
 			startShowGraph();
 	}
 
 	@Override
-	protected void onSaveInstanceState(final Bundle outState) {
+	protected void onSaveInstanceState(@NonNull final Bundle outState) {
 		super.onSaveInstanceState(outState);
 
 		outState.putBoolean(GRAPH_STATUS, isGraphInProgress);
-		outState.putInt(GRAPH_COUNTER, mCounter);
-		outState.putInt(HR_VALUE, mHrmValue);
+		outState.putInt(GRAPH_COUNTER, counter);
+		outState.putInt(HR_VALUE, hrValue);
 	}
 
 	@Override
@@ -153,35 +155,35 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 	}
 
 	private void updateGraph(final int hrmValue) {
-		mCounter++;
-		mLineGraph.addValue(new Point(mCounter, hrmValue));
-		mGraphView.repaint();
+		counter++;
+		lineGraph.addValue(new Point(counter, hrmValue));
+		graphView.repaint();
 	}
 
-	private Runnable mRepeatTask = new Runnable() {
+	private Runnable repeatTask = new Runnable() {
 		@Override
 		public void run() {
-			if (mHrmValue > 0)
-				updateGraph(mHrmValue);
+			if (hrValue > 0)
+				updateGraph(hrValue);
 			if (isGraphInProgress)
-				mHandler.postDelayed(mRepeatTask, REFRESH_INTERVAL);
+				handler.postDelayed(repeatTask, REFRESH_INTERVAL);
 		}
 	};
 
 	void startShowGraph() {
 		isGraphInProgress = true;
-		mRepeatTask.run();
+		repeatTask.run();
 	}
 
 	void stopShowGraph() {
 		isGraphInProgress = false;
-		mHandler.removeCallbacks(mRepeatTask);
+		handler.removeCallbacks(repeatTask);
 	}
 
 	@Override
 	protected LoggableBleManager<HRSManagerCallbacks> initializeManager() {
 		final HRSManager manager = HRSManager.getInstance(getApplicationContext());
-		manager.setGattCallbacks(this);
+		manager.setManagerCallbacks(this);
 		return manager;
 	}
 
@@ -197,52 +199,53 @@ public class HRSActivity extends BleProfileActivity implements HRSManagerCallbac
 
 	@Override
 	public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
-		runOnUiThread(() -> mBatteryLevelView.setText(getString(R.string.battery, batteryLevel)));
+		runOnUiThread(() -> this.batteryLevelView.setText(getString(R.string.battery, batteryLevel)));
 	}
 
 	@Override
 	public void onBodySensorLocationReceived(@NonNull final BluetoothDevice device, final int sensorLocation) {
 		runOnUiThread(() -> {
 			if (sensorLocation >= SENSOR_LOCATION_FIRST && sensorLocation <= SENSOR_LOCATION_LAST) {
-				mHRSPosition.setText(getResources().getStringArray(R.array.hrs_locations)[sensorLocation]);
+				hrLocationView.setText(getResources().getStringArray(R.array.hrs_locations)[sensorLocation]);
 			} else {
-				mHRSPosition.setText(R.string.hrs_location_other);
+				hrLocationView.setText(R.string.hrs_location_other);
 			}
 		});
 	}
 
 	@Override
-	public void onHeartRateMeasurementReceived(@NonNull final BluetoothDevice device, final int heartRate,
+	public void onHeartRateMeasurementReceived(@NonNull final BluetoothDevice device,
+											   @IntRange(from = 0) final int heartRate,
 											   @Nullable final Boolean contactDetected,
-											   @Nullable final Integer energyExpanded,
+											   @Nullable @IntRange(from = 0) final Integer energyExpanded,
 											   @Nullable final List<Integer> rrIntervals) {
-		mHrmValue = heartRate;
-		runOnUiThread(() -> mHRSValue.setText(getString(R.string.hrs_value, heartRate)));
+		hrValue = heartRate;
+		runOnUiThread(() -> hrValueView.setText(getString(R.string.hrs_value, heartRate)));
 	}
 
 	@Override
 	public void onDeviceDisconnected(@NonNull final BluetoothDevice device) {
 		super.onDeviceDisconnected(device);
 		runOnUiThread(() -> {
-			mHRSValue.setText(R.string.not_available_value);
-			mHRSPosition.setText(R.string.not_available);
-			mBatteryLevelView.setText(R.string.not_available);
+			hrValueView.setText(R.string.not_available_value);
+			hrLocationView.setText(R.string.not_available);
+			batteryLevelView.setText(R.string.not_available);
 			stopShowGraph();
 		});
 	}
 
 	@Override
 	protected void setDefaultUI() {
-		mHRSValue.setText(R.string.not_available_value);
-		mHRSPosition.setText(R.string.not_available);
-		mBatteryLevelView.setText(R.string.not_available);
+		hrValueView.setText(R.string.not_available_value);
+		hrLocationView.setText(R.string.not_available);
+		batteryLevelView.setText(R.string.not_available);
 		clearGraph();
 	}
 
 	private void clearGraph() {
-		mLineGraph.clearGraph();
-		mGraphView.repaint();
-		mCounter = 0;
-		mHrmValue = 0;
+		lineGraph.clearGraph();
+		graphView.repaint();
+		counter = 0;
+		hrValue = 0;
 	}
 }

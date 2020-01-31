@@ -34,34 +34,37 @@ import org.achartengine.model.XYMultipleSeriesDataset;
 import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 
+import androidx.annotation.NonNull;
+
 /**
  * This class uses external library AChartEngine to show dynamic real time line graph for HR values
  */
-public class LineGraphView {
+class LineGraphView {
 	//TimeSeries will hold the data in x,y format for single chart
-	private TimeSeries mSeries = new TimeSeries("Heart Rate");
+	private TimeSeries series = new TimeSeries("Heart Rate");
 	//XYMultipleSeriesDataset will contain all the TimeSeries
-	private XYMultipleSeriesDataset mDataset = new XYMultipleSeriesDataset();
+	private XYMultipleSeriesDataset dataSet = new XYMultipleSeriesDataset();
 	//XYMultipleSeriesRenderer will contain all XYSeriesRenderer and it can be used to set the properties of whole Graph
-	private XYMultipleSeriesRenderer mMultiRenderer = new XYMultipleSeriesRenderer();
-	private static LineGraphView mInstance = null;
+	private XYMultipleSeriesRenderer multiRenderer = new XYMultipleSeriesRenderer();
+	private static LineGraphView instance = null;
 
 	/**
-	 * singleton implementation of LineGraphView class
+	 * Singleton implementation of LineGraphView class
 	 */
-	public static synchronized LineGraphView getLineGraphView() {
-		if (mInstance == null) {
-			mInstance = new LineGraphView();
+	@NonNull
+	static synchronized LineGraphView getLineGraphView() {
+		if (instance == null) {
+			instance = new LineGraphView();
 		}
-		return mInstance;
+		return instance;
 	}
 
 	/**
 	 * This constructor will set some properties of single chart and some properties of whole graph
 	 */
-	public LineGraphView() {
-		//add single line chart mSeries
-		mDataset.addSeries(mSeries);
+	private LineGraphView() {
+		//add single line chart series
+		dataSet.addSeries(series);
 
 		//XYSeriesRenderer is used to set the properties like chart color, style of each point, etc. of single chart
 		final XYSeriesRenderer seriesRenderer = new XYSeriesRenderer();
@@ -71,7 +74,7 @@ public class LineGraphView {
 		seriesRenderer.setPointStyle(PointStyle.SQUARE);
 		seriesRenderer.setFillPoints(true);
 
-		final XYMultipleSeriesRenderer renderer = mMultiRenderer;
+		final XYMultipleSeriesRenderer renderer = multiRenderer;
 		//set whole graph background color to transparent color
 		renderer.setBackgroundColor(Color.TRANSPARENT);
 		renderer.setMargins(new int[] { 50, 65, 40, 5 }); // top, left, bottom, right
@@ -99,23 +102,22 @@ public class LineGraphView {
 	/**
 	 * return graph view to activity
 	 */
-	public GraphicalView getView(Context context) {
-		final GraphicalView graphView = ChartFactory.getLineChartView(context, mDataset, mMultiRenderer);
-		return graphView;
+	GraphicalView getView(@NonNull final Context context) {
+		return ChartFactory.getLineChartView(context, dataSet, multiRenderer);
 	}
 
 	/**
 	 * add new x,y value to chart
 	 */
-	public void addValue(Point p) {
-		mSeries.add(p.x, p.y);
+	void addValue(@NonNull final Point p) {
+		series.add(p.x, p.y);
 	}
 
 	/**
 	 * clear all previous values of chart
 	 */
-	public void clearGraph() {
-		mSeries.clear();
+	void clearGraph() {
+		series.clear();
 	}
 
 }

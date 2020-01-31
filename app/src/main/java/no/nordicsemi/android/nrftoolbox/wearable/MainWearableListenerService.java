@@ -42,6 +42,7 @@ public class MainWearableListenerService extends WearableListenerService {
 				// A disconnect message was sent. The information which profile should be disconnected is in the data.
 				final String profile = new String(messageEvent.getData());
 
+				//noinspection SwitchStatementWithTooFewBranches
 				switch (profile) {
 					// Currently only UART profile has Wear support
 					case Constants.UART.PROFILE: {

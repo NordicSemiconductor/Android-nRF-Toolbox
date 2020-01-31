@@ -23,32 +23,34 @@ package no.nordicsemi.android.nrftoolbox.gls;
 
 import java.util.Calendar;
 
+@SuppressWarnings("unused")
 public class GlucoseRecord {
-	public static final int UNIT_kgpl = 0;
-	public static final int UNIT_molpl = 1;
+	static final int UNIT_kgpl = 0;
+	private static final int UNIT_molpl = 1;
 
 	/** Record sequence number */
-	protected int sequenceNumber;
+	int sequenceNumber;
 	/** The base time of the measurement */
-	protected Calendar time;
+	Calendar time;
 	/** Time offset of the record */
-	protected int timeOffset;
+	int timeOffset;
 	/** The glucose concentration. 0 if not present */
-	protected float glucoseConcentration;
+	float glucoseConcentration;
 	/** Concentration unit. One of the following: {@link GlucoseRecord#UNIT_kgpl}, {@link GlucoseRecord#UNIT_molpl} */
-	protected int unit;
+	int unit;
 	/** The type of the record. 0 if not present */
-	protected int type;
+	int type;
 	/** The sample location. 0 if unknown */
-	protected int sampleLocation;
+	int sampleLocation;
 	/** Sensor status annunciation flags. 0 if not present */
-	protected int status;
+	int status;
 
 	protected MeasurementContext context;
 
-	public static class MeasurementContext {
-		public static final int UNIT_kg = 0;
-		public static final int UNIT_l = 1;
+	@SuppressWarnings("unused")
+	static class MeasurementContext {
+		static final int UNIT_kg = 0;
+		static final int UNIT_l = 1;
 
 		/**
 		 * One of the following:<br/>
@@ -61,9 +63,9 @@ public class GlucoseRecord {
 		 * 6 Supper<br/>
 		 * 7 Brunch
 		 */
-		protected int carbohydrateId;
+		int carbohydrateId;
 		/** Number of kilograms of carbohydrate */
-		protected float carbohydrateUnits;
+		float carbohydrateUnits;
 		/**
 		 * One of the following:<br/>
 		 * 0 Not present<br/>
@@ -73,7 +75,7 @@ public class GlucoseRecord {
 		 * 4 Casual (snacks, drinks, etc.)<br/>
 		 * 5 Bedtime
 		 */
-		protected int meal;
+		int meal;
 		/**
 		 * One of the following:<br/>
 		 * 0 Not present<br/>
@@ -82,7 +84,7 @@ public class GlucoseRecord {
 		 * 3 Lab test<br/>
 		 * 15 Tester value not available
 		 */
-		protected int tester;
+		int tester;
 		/**
 		 * One of the following:<br/>
 		 * 0 Not present<br/>
@@ -93,11 +95,11 @@ public class GlucoseRecord {
 		 * 5 No health issues<br/>
 		 * 15 Tester value not available
 		 */
-		protected int health;
+		int health;
 		/** Exercise duration in seconds. 0 if not present */
-		protected int exerciseDuration;
+		int exerciseDuration;
 		/** Exercise intensity in percent. 0 if not present */
-		protected int exerciseIntensity;
+		int exerciseIntensity;
 		/**
 		 * One of the following:<br/>
 		 * 0 Not present<br/>
@@ -107,12 +109,12 @@ public class GlucoseRecord {
 		 * 4 Long acting insulin<br/>
 		 * 5 Pre-mixed insulin
 		 */
-		protected int medicationId;
+		int medicationId;
 		/** Quantity of medication. See {@link #medicationUnit} for the unit. */
-		protected float medicationQuantity;
+		float medicationQuantity;
 		/** One of the following: {@link GlucoseRecord.MeasurementContext#UNIT_kg}, {@link GlucoseRecord.MeasurementContext#UNIT_l}. */
-		protected int medicationUnit;
+		int medicationUnit;
 		/** HbA1c value. 0 if not present */
-		protected float HbA1c;
+		float HbA1c;
 	}
 }

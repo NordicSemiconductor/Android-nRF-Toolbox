@@ -27,6 +27,7 @@ import androidx.annotation.NonNull;
 import no.nordicsemi.android.nrftoolbox.battery.BatteryManagerCallbacks;
 
 interface ProximityManagerCallbacks extends BatteryManagerCallbacks {
-	// No additional methods
     void onRemoteAlarmSwitched(@NonNull final BluetoothDevice device, final boolean on);
+
+	void onLocalAlarmSwitched(@NonNull final BluetoothDevice device, final boolean on);
 }

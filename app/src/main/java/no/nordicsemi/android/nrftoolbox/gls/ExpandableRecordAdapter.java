@@ -34,44 +34,44 @@ import android.widget.TextView;
 import no.nordicsemi.android.nrftoolbox.R;
 
 public class ExpandableRecordAdapter extends BaseExpandableListAdapter {;
-	private final GlucoseManager mGlucoseManager;
-	private final LayoutInflater mInflater;
-	private final Context mContext;
-	private SparseArray<GlucoseRecord> mRecords;
+	private final GlucoseManager glucoseManager;
+	private final LayoutInflater inflater;
+	private final Context context;
+	private SparseArray<GlucoseRecord> records;
 
 	public ExpandableRecordAdapter(final Context context, final GlucoseManager manager) {
-		mGlucoseManager = manager;
-		mContext = context;
-		mInflater = LayoutInflater.from(context);
-		mRecords = manager.getRecords().clone();
+		glucoseManager = manager;
+		this.context = context;
+		inflater = LayoutInflater.from(context);
+		records = manager.getRecords().clone();
 	}
 
 	@Override
 	public void notifyDataSetChanged() {
-		mRecords = mGlucoseManager.getRecords().clone();
+		records = glucoseManager.getRecords().clone();
 		super.notifyDataSetChanged();
 	}
 
 	@Override
 	public int getGroupCount() {
-		return mRecords.size();
+		return records.size();
 	}
 
 	@Override
 	public Object getGroup(final int groupPosition) {
-		return mRecords.valueAt(groupPosition);
+		return records.valueAt(groupPosition);
 	}
 
 	@Override
 	public long getGroupId(final int groupPosition) {
-		return mRecords.keyAt(groupPosition);
+		return records.keyAt(groupPosition);
 	}
 
 	@Override
 	public View getGroupView(final int position, boolean isExpanded, final View convertView, final ViewGroup parent) {
 		View view = convertView;
 		if (view == null) {
-			view = mInflater.inflate(R.layout.activity_feature_gls_item, parent, false);
+			view = inflater.inflate(R.layout.activity_feature_gls_item, parent, false);
 
 			final GroupViewHolder holder = new GroupViewHolder();
 			holder.time = view.findViewById(R.id.time);
@@ -83,16 +83,16 @@ public class ExpandableRecordAdapter extends BaseExpandableListAdapter {;
 		if (record == null)
 			return view; // this may happen during closing the activity
 		final GroupViewHolder holder = (GroupViewHolder) view.getTag();
-		holder.time.setText(mContext.getString(R.string.gls_timestamp, record.time));
+		holder.time.setText(context.getString(R.string.gls_timestamp, record.time));
 		try {
-			holder.details.setText(mContext.getResources().getStringArray(R.array.gls_type)[record.type]);
+			holder.details.setText(context.getResources().getStringArray(R.array.gls_type)[record.type]);
 		} catch (final ArrayIndexOutOfBoundsException e) {
-			holder.details.setText(mContext.getResources().getStringArray(R.array.gls_type)[0]);
+			holder.details.setText(context.getResources().getStringArray(R.array.gls_type)[0]);
 		}
 		if (record.unit == GlucoseRecord.UNIT_kgpl) {
-			holder.concentration.setText(mContext.getString(R.string.gls_value, record.glucoseConcentration * 100000.0f));
+			holder.concentration.setText(context.getString(R.string.gls_value, record.glucoseConcentration * 100000.0f));
 		} else {
-			holder.concentration.setText(mContext.getString(R.string.gls_value, record.glucoseConcentration * 1000.0f));
+			holder.concentration.setText(context.getString(R.string.gls_value, record.glucoseConcentration * 1000.0f));
 		}
 		return view;
 	}
@@ -123,7 +123,7 @@ public class ExpandableRecordAdapter extends BaseExpandableListAdapter {;
 
 	@Override
 	public Object getChild(final int groupPosition, final int childPosition) {
-		final Resources resources = mContext.getResources();
+		final Resources resources = context.getResources();
 		final GlucoseRecord record = (GlucoseRecord) getGroup(groupPosition);
 		String tmp;
 		switch (childIdToItemId(childPosition, record)) {
@@ -226,7 +226,7 @@ public class ExpandableRecordAdapter extends BaseExpandableListAdapter {;
 	public View getChildView(final int groupPosition, final int childPosition, final boolean isLastChild, final View convertView, final ViewGroup parent) {
 		View view = convertView;
 		if (view == null) {
-			view = mInflater.inflate(R.layout.activity_feature_gls_subitem, parent, false);
+			view = inflater.inflate(R.layout.activity_feature_gls_subitem, parent, false);
 			final ChildViewHolder holder = new ChildViewHolder();
 			holder.title = view.findViewById(android.R.id.text1);
 			holder.details = view.findViewById(android.R.id.text2);

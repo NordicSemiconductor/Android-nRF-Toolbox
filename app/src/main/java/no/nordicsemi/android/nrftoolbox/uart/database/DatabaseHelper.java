@@ -28,6 +28,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
+@SuppressWarnings("UnusedReturnValue")
 public class DatabaseHelper {
 	/** Database file name */
 	private static final String DATABASE_NAME = "toolbox_uart.db";
@@ -41,23 +42,27 @@ public class DatabaseHelper {
 
     private static final String[] ID_PROJECTION = new String[] { BaseColumns._ID };
 	private static final String[] NAME_PROJECTION = new String[] { BaseColumns._ID, NameColumns.NAME };
-	private static final String[] XML_PROJECTION = new String[] { BaseColumns._ID, ConfigurationContract.Configuration.XML };
-	private static final String[] CONFIGURATION_PROJECTION = new String[] { BaseColumns._ID, NameColumns.NAME, ConfigurationContract.Configuration.XML };
+	private static final String[] XML_PROJECTION = new String[] {
+			BaseColumns._ID, ConfigurationContract.Configuration.XML
+	};
+	private static final String[] CONFIGURATION_PROJECTION = new String[] {
+			BaseColumns._ID, NameColumns.NAME, ConfigurationContract.Configuration.XML
+	};
 
 	private static final String ID_SELECTION = BaseColumns._ID + "=?";
 	private static final String NAME_SELECTION = NameColumns.NAME + "=?";
 	private static final String DELETED_SELECTION = UndoColumns.DELETED + "=1";
 	private static final String NOT_DELETED_SELECTION = UndoColumns.DELETED + "=0";
 
-	private static SQLiteHelper mDatabaseHelper;
-	private static SQLiteDatabase mDatabase;
-	private final ContentValues mValues = new ContentValues();
-	private final String[] mSingleArg = new String[1];
+	private static SQLiteHelper databaseHelper;
+	private static SQLiteDatabase database;
+	private final ContentValues values = new ContentValues();
+	private final String[] singleArg = new String[1];
 
 	public DatabaseHelper(final Context context) {
-		if (mDatabaseHelper == null) {
-			mDatabaseHelper = new SQLiteHelper(context);
-			mDatabase = mDatabaseHelper.getWritableDatabase();
+		if (databaseHelper == null) {
+			databaseHelper = new SQLiteHelper(context);
+			database = databaseHelper.getWritableDatabase();
 		}
 	}
 
@@ -65,11 +70,9 @@ public class DatabaseHelper {
 	 * Returns number of saved configurations.
 	 */
 	public int getConfigurationsCount() {
-		final Cursor cursor = mDatabase.query(Tables.CONFIGURATIONS, ID_PROJECTION, NOT_DELETED_SELECTION, null, null, null, null);
-		try {
+		try (Cursor cursor = database.query(Tables.CONFIGURATIONS, ID_PROJECTION, NOT_DELETED_SELECTION,
+				null, null, null, null)) {
 			return cursor.getCount();
-		} finally {
-			cursor.close();
 		}
 	}
 
@@ -78,91 +81,95 @@ public class DatabaseHelper {
 	 * @return cursor
 	 */
 	public Cursor getConfigurations() {
-		return mDatabase.query(Tables.CONFIGURATIONS, CONFIGURATION_PROJECTION, NOT_DELETED_SELECTION, null, null, null, ConfigurationContract.Configuration.NAME + " ASC");
+		return database.query(Tables.CONFIGURATIONS, CONFIGURATION_PROJECTION, NOT_DELETED_SELECTION,
+				null, null, null, ConfigurationContract.Configuration.NAME + " ASC");
 	}
 
 	/**
 	 * Returns the list of names of all saved configurations.
+	 *
 	 * @return cursor
 	 */
 	public Cursor getConfigurationsNames() {
-		return mDatabase.query(Tables.CONFIGURATIONS, NAME_PROJECTION, NOT_DELETED_SELECTION, null, null, null, ConfigurationContract.Configuration.NAME + " ASC");
+		return database.query(Tables.CONFIGURATIONS, NAME_PROJECTION, NOT_DELETED_SELECTION,
+				null, null, null, ConfigurationContract.Configuration.NAME + " ASC");
 	}
 
 	/**
 	 * Returns the XML wth the configuration by id.
+	 *
 	 * @param id the configuration id in the DB
 	 * @return the XML with configuration or null
 	 */
 	public String getConfiguration(final long id) {
-		mSingleArg[0] = String.valueOf(id);
+		singleArg[0] = String.valueOf(id);
 
-		final Cursor cursor = mDatabase.query(Tables.CONFIGURATIONS, XML_PROJECTION, ID_SELECTION, mSingleArg, null, null, null);
-		try {
+		try (Cursor cursor = database.query(Tables.CONFIGURATIONS, XML_PROJECTION, ID_SELECTION,
+				singleArg, null, null, null)) {
 			if (cursor.moveToNext())
 				return cursor.getString(1 /* XML */);
 			return null;
-		} finally {
-			cursor.close();
 		}
 	}
 
 	/**
 	 * Adds new configuration to the database.
+	 *
 	 * @param name the configuration name
 	 * @param configuration the XML
 	 * @return the id or -1 if error occurred
 	 */
 	public long addConfiguration(final String name, final String configuration) {
-		final ContentValues values = mValues;
+		final ContentValues values = this.values;
 		values.clear();
 		values.put(ConfigurationContract.Configuration.NAME, name);
 		values.put(ConfigurationContract.Configuration.XML, configuration);
 		values.put(ConfigurationContract.Configuration.DELETED, 0);
-		return mDatabase.replace(Tables.CONFIGURATIONS, null, values);
+		return database.replace(Tables.CONFIGURATIONS, null, values);
 	}
 
 	/**
-	 * Updates the configuration with the given name with the new XML
+	 * Updates the configuration with the given name with the new XML.
+	 *
 	 * @param name the configuration name to be updated
 	 * @param configuration the new XML with configuration
 	 * @return number of rows updated
 	 */
 	public int updateConfiguration(final String name, final String configuration) {
-		mSingleArg[0] = name;
+		singleArg[0] = name;
 
-		final ContentValues values = mValues;
+		final ContentValues values = this.values;
 		values.clear();
 		values.put(ConfigurationContract.Configuration.XML, configuration);
 		values.put(ConfigurationContract.Configuration.DELETED, 0);
-		return mDatabase.update(Tables.CONFIGURATIONS, values, NAME_SELECTION, mSingleArg);
+		return database.update(Tables.CONFIGURATIONS, values, NAME_SELECTION, singleArg);
 	}
 
 	/**
-	 * Marks the configuration with given name as deleted. If may be restored or removed permanently afterwards.
+	 * Marks the configuration with given name as deleted. If may be restored or removed permanently
+	 * afterwards.
+	 *
 	 * @param name the configuration name
 	 * @return id of the deleted configuration
 	 */
 	public long deleteConfiguration(final String name) {
-		mSingleArg[0] = name;
+		singleArg[0] = name;
 
-		final ContentValues values = mValues;
+		final ContentValues values = this.values;
 		values.clear();
 		values.put(ConfigurationContract.Configuration.DELETED, 1);
-		mDatabase.update(Tables.CONFIGURATIONS, values, NAME_SELECTION, mSingleArg);
+		database.update(Tables.CONFIGURATIONS, values, NAME_SELECTION, singleArg);
 
-		final Cursor cursor = mDatabase.query(Tables.CONFIGURATIONS, ID_PROJECTION, NAME_SELECTION, mSingleArg, null, null, null);
-		try {
+		try (Cursor cursor = database.query(Tables.CONFIGURATIONS, ID_PROJECTION, NAME_SELECTION,
+				singleArg, null, null, null)) {
 			if (cursor.moveToNext())
 				return cursor.getLong(0 /* _ID */);
 			return -1;
-		} finally {
-			cursor.close();
 		}
 	}
 
 	public int removeDeletedServerConfigurations() {
-		return mDatabase.delete(Tables.CONFIGURATIONS, DELETED_SELECTION, null);
+		return database.delete(Tables.CONFIGURATIONS, DELETED_SELECTION, null);
 	}
 
 	/**
@@ -170,20 +177,18 @@ public class DatabaseHelper {
 	 * @return the DI of the restored configuration.
 	 */
 	public long restoreDeletedServerConfiguration(final String name) {
-		mSingleArg[0] = name;
+		singleArg[0] = name;
 
-		final ContentValues values = mValues;
+		final ContentValues values = this.values;
 		values.clear();
 		values.put(ConfigurationContract.Configuration.DELETED, 0);
-		mDatabase.update(Tables.CONFIGURATIONS, values, NAME_SELECTION, mSingleArg);
+		database.update(Tables.CONFIGURATIONS, values, NAME_SELECTION, singleArg);
 
-		final Cursor cursor = mDatabase.query(Tables.CONFIGURATIONS, ID_PROJECTION, NAME_SELECTION, mSingleArg, null, null, null);
-		try {
+		try (Cursor cursor = database.query(Tables.CONFIGURATIONS, ID_PROJECTION, NAME_SELECTION, singleArg,
+				null, null, null)) {
 			if (cursor.moveToNext())
 				return cursor.getLong(0 /* _ID */);
 			return -1;
-		} finally {
-			cursor.close();
 		}
 	}
 
@@ -195,13 +200,13 @@ public class DatabaseHelper {
 	 * @return number of rows affected
 	 */
 	public int renameConfiguration(final String oldName, final String newName, final String configuration) {
-		mSingleArg[0] = oldName;
+		singleArg[0] = oldName;
 
-		final ContentValues values = mValues;
+		final ContentValues values = this.values;
 		values.clear();
 		values.put(ConfigurationContract.Configuration.NAME, newName);
 		values.put(ConfigurationContract.Configuration.XML, configuration);
-		return mDatabase.update(Tables.CONFIGURATIONS, values, NAME_SELECTION, mSingleArg);
+		return database.update(Tables.CONFIGURATIONS, values, NAME_SELECTION, singleArg);
 	}
 
 	/**
@@ -210,13 +215,11 @@ public class DatabaseHelper {
 	 * @return true if such name exists, false otherwise
 	 */
 	public boolean configurationExists(final String name) {
-		mSingleArg[0] = name;
+		singleArg[0] = name;
 
-		final Cursor cursor = mDatabase.query(Tables.CONFIGURATIONS, NAME_PROJECTION, NAME_SELECTION + " AND " + NOT_DELETED_SELECTION, mSingleArg, null, null, null);
-		try {
+		try (Cursor cursor = database.query(Tables.CONFIGURATIONS, NAME_PROJECTION, NAME_SELECTION
+				+ " AND " + NOT_DELETED_SELECTION, singleArg, null, null, null)) {
 			return cursor.getCount() > 0;
-		} finally {
-			cursor.close();
 		}
 	}
 
@@ -233,12 +236,13 @@ public class DatabaseHelper {
 		 * ----------------------------------------------------------------------------
 		 * </pre>
 		 */
-		private static final String CREATE_CONFIGURATIONS = "CREATE TABLE " + Tables.CONFIGURATIONS+ "(" + ConfigurationContract.Configuration._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-				+ ConfigurationContract.Configuration.NAME + " TEXT UNIQUE NOT NULL, " + ConfigurationContract.Configuration.XML + " TEXT NOT NULL, " + ConfigurationContract.Configuration.DELETED +" INTEGER NOT NULL DEFAULT(0))";
+		private static final String CREATE_CONFIGURATIONS = "CREATE TABLE " + Tables.CONFIGURATIONS
+				+ "(" + ConfigurationContract.Configuration._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+				+ ConfigurationContract.Configuration.NAME + " TEXT UNIQUE NOT NULL, "
+				+ ConfigurationContract.Configuration.XML + " TEXT NOT NULL, "
+				+ ConfigurationContract.Configuration.DELETED +" INTEGER NOT NULL DEFAULT(0))";
 
-		private static final String DROP_IF_EXISTS = "DROP TABLE IF EXISTS ";
-
-		public SQLiteHelper(Context context) {
+		SQLiteHelper(Context context) {
 			super(context, DATABASE_NAME, null, DATABASE_VERSION);
 		}
 
@@ -250,6 +254,7 @@ public class DatabaseHelper {
 		@Override
 		public void onUpgrade(final SQLiteDatabase db, final int oldVersion, final int newVersion) {
 			// This method does nothing for now.
+			//noinspection SwitchStatementWithTooFewBranches
 			switch (oldVersion) {
 				case 1:
 					// do nothing

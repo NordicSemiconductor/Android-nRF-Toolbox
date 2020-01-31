@@ -29,6 +29,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import no.nordicsemi.android.nrftoolbox.R;
 
 /**
@@ -36,38 +38,38 @@ import no.nordicsemi.android.nrftoolbox.R;
  * URLs are specified in res/values/strings_dfu.xml.
  */
 public class FileBrowserAppsAdapter extends BaseAdapter {
-	private final LayoutInflater mInflater;
-	private final Resources mResources;
+	private final LayoutInflater inflater;
+	private final Resources resources;
 
 	public FileBrowserAppsAdapter(final Context context) {
-		mInflater = LayoutInflater.from(context);
-		mResources = context.getResources();
+		inflater = LayoutInflater.from(context);
+		resources = context.getResources();
 	}
 
 	@Override
 	public int getCount() {
-		return mResources.getStringArray(R.array.dfu_app_file_browser).length;
+		return resources.getStringArray(R.array.dfu_app_file_browser).length;
 	}
 
 	@Override
-	public Object getItem(int position) {
-		return mResources.getStringArray(R.array.dfu_app_file_browser_action)[position];
+	public Object getItem(final int position) {
+		return resources.getStringArray(R.array.dfu_app_file_browser_action)[position];
 	}
 
 	@Override
-	public long getItemId(int position) {
+	public long getItemId(final int position) {
 		return position;
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
+	public View getView(final int position, @Nullable final View convertView, @NonNull final ViewGroup parent) {
 		View view = convertView;
 		if (view == null) {
-			view = mInflater.inflate(R.layout.app_file_browser_item, parent, false);
+			view = inflater.inflate(R.layout.app_file_browser_item, parent, false);
 		}
 
 		final TextView item = (TextView) view;
-		item.setText(mResources.getStringArray(R.array.dfu_app_file_browser)[position]);
+		item.setText(resources.getStringArray(R.array.dfu_app_file_browser)[position]);
 		item.getCompoundDrawablesRelative()[0].setLevel(position);
 		return view;
 	}

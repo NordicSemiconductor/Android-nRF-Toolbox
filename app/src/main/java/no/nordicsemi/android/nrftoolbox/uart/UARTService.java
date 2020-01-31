@@ -82,26 +82,26 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
     private final static int OPEN_ACTIVITY_REQ = 67; // random
     private final static int DISCONNECT_REQ = 97; // random
 
-    private GoogleApiClient mGoogleApiClient;
-    private UARTManager mManager;
+    private GoogleApiClient googleApiClient;
+    private UARTManager manager;
 
-    private final LocalBinder mBinder = new UARTBinder();
+    private final LocalBinder binder = new UARTBinder();
 
     public class UARTBinder extends LocalBinder implements UARTInterface {
         @Override
         public void send(final String text) {
-            mManager.send(text);
+            manager.send(text);
         }
     }
 
     @Override
     protected LocalBinder getBinder() {
-        return mBinder;
+        return binder;
     }
 
     @Override
     protected LoggableBleManager<UARTManagerCallbacks> initializeManager() {
-        return mManager = new UARTManager(this);
+        return manager = new UARTManager(this);
     }
 
     @Override
@@ -113,23 +113,23 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
     public void onCreate() {
         super.onCreate();
 
-        registerReceiver(mDisconnectActionBroadcastReceiver, new IntentFilter(ACTION_DISCONNECT));
-        registerReceiver(mIntentBroadcastReceiver, new IntentFilter(ACTION_SEND));
+        registerReceiver(disconnectActionBroadcastReceiver, new IntentFilter(ACTION_DISCONNECT));
+        registerReceiver(intentBroadcastReceiver, new IntentFilter(ACTION_SEND));
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
+        googleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .build();
-        mGoogleApiClient.connect();
+        googleApiClient.connect();
     }
 
     @Override
     public void onDestroy() {
         // when user has disconnected from the sensor, we have to cancel the notification that we've created some milliseconds before using unbindService
         stopForegroundService();
-        unregisterReceiver(mDisconnectActionBroadcastReceiver);
-        unregisterReceiver(mIntentBroadcastReceiver);
+        unregisterReceiver(disconnectActionBroadcastReceiver);
+        unregisterReceiver(intentBroadcastReceiver);
 
-        mGoogleApiClient.disconnect();
+        googleApiClient.disconnect();
 
         super.onDestroy();
     }
@@ -174,7 +174,7 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
     }
 
     @Override
-    public void onDataReceived(final BluetoothDevice device, final String data) {
+    public void onDataReceived(@NonNull final BluetoothDevice device, final String data) {
         final Intent broadcast = new Intent(BROADCAST_UART_RX);
         broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
         broadcast.putExtra(EXTRA_DATA, data);
@@ -188,7 +188,7 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
     }
 
     @Override
-    public void onDataSent(final BluetoothDevice device, final String data) {
+    public void onDataSent(@NonNull final BluetoothDevice device, final String data) {
         final Intent broadcast = new Intent(BROADCAST_UART_TX);
         broadcast.putExtra(EXTRA_DEVICE, getBluetoothDevice());
         broadcast.putExtra(EXTRA_DATA, data);
@@ -201,13 +201,13 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
      * @param path    message path
      * @param message the message
      */
-    private void sendMessageToWearables(final @NonNull String path, final @NonNull String message) {
-        if (mGoogleApiClient.isConnected()) {
+    private void sendMessageToWearables(@NonNull final String path, @NonNull final String message) {
+        if (googleApiClient.isConnected()) {
             new Thread(() -> {
-                NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
+                NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(googleApiClient).await();
                 for (Node node : nodes.getNodes()) {
                     Logger.v(getLogSession(), "[WEAR] Sending message '" + path + "' to " + node.getDisplayName());
-                    final MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), path, message.getBytes()).await();
+                    final MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(googleApiClient, node.getId(), path, message.getBytes()).await();
                     if (result.getStatus().isSuccess()) {
                         Logger.i(getLogSession(), "[WEAR] Message sent");
                     } else {
@@ -259,6 +259,7 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
      *                     f.e. <code>&lt;string name="name"&gt;%s is connected&lt;/string&gt;</code>
      * @param defaults     signals that will be used to notify the user
      */
+    @SuppressWarnings("SameParameterValue")
     protected Notification createNotification(final int messageResId, final int defaults) {
         final Intent parentIntent = new Intent(this, FeaturesActivity.class);
         parentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -291,7 +292,7 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
     /**
      * This broadcast receiver listens for {@link #ACTION_DISCONNECT} that may be fired by pressing Disconnect action button on the notification.
      */
-    private final BroadcastReceiver mDisconnectActionBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver disconnectActionBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             final int source = intent.getIntExtra(EXTRA_SOURCE, SOURCE_NOTIFICATION);
@@ -314,7 +315,7 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
      * Broadcast receiver that listens for {@link #ACTION_SEND} from other apps. Sends the String or int content of the {@link Intent#EXTRA_TEXT} extra to the remote device.
      * The integer content will be sent as String (65 -> "65", not 65 -> "A").
      */
-    private BroadcastReceiver mIntentBroadcastReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver intentBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             final boolean hasMessage = intent.hasExtra(Intent.EXTRA_TEXT);
@@ -337,7 +338,7 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
                             Logger.i(getLogSession(), "[Broadcast] " + ACTION_SEND + " broadcast received with data: \"" + message + "\"");
                             break;
                     }
-                    mManager.send(message);
+                    manager.send(message);
                     return;
                 }
             }

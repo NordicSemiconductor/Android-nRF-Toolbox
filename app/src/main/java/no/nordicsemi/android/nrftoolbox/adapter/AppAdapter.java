@@ -37,27 +37,29 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import no.nordicsemi.android.nrftoolbox.R;
 
 public class AppAdapter extends BaseAdapter {
 	private static final String CATEGORY = "no.nordicsemi.android.nrftoolbox.LAUNCHER";
 	private static final String NRF_CONNECT_PACKAGE = "no.nordicsemi.android.mcp";
 
-	private final Context mContext;
-	private final PackageManager mPackageManager;
-	private final LayoutInflater mInflater;
-	private final List<ResolveInfo> mApplications;
+	private final Context context;
+	private final PackageManager packageManager;
+	private final LayoutInflater inflater;
+	private final List<ResolveInfo> applications;
 
-	public AppAdapter(final Context context) {
-		mContext = context;
-		mInflater = LayoutInflater.from(context);
+	public AppAdapter(@NonNull final Context context) {
+		this.context = context;
+		this.inflater = LayoutInflater.from(context);
 
 		// get nRF installed app plugins from package manager
-		final PackageManager pm = mPackageManager = context.getPackageManager();
+		final PackageManager pm = packageManager = context.getPackageManager();
 		final Intent intent = new Intent(Intent.ACTION_MAIN);
 		intent.addCategory(CATEGORY);
 
-		final List<ResolveInfo> appList = mApplications = pm.queryIntentActivities(intent, 0);
+		final List<ResolveInfo> appList = applications = pm.queryIntentActivities(intent, 0);
 		// TODO remove the following loop after some time, when there will be no more MCP 1.1 at the market.
 		for (final ResolveInfo info : appList) {
 			if (NRF_CONNECT_PACKAGE.equals(info.activityInfo.packageName)) {
@@ -70,24 +72,24 @@ public class AppAdapter extends BaseAdapter {
 
 	@Override
 	public int getCount() {
-		return mApplications.size();
+		return applications.size();
 	}
 
 	@Override
-	public Object getItem(int position) {
-		return mApplications.get(position);
+	public Object getItem(final int position) {
+		return applications.get(position);
 	}
 
 	@Override
-	public long getItemId(int position) {
+	public long getItemId(final int position) {
 		return position;
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
+	public View getView(final int position, @Nullable final View convertView, @NonNull final ViewGroup parent) {
 		View view = convertView;
 		if (view == null) {
-			view = mInflater.inflate(R.layout.feature_icon, parent, false);
+			view = inflater.inflate(R.layout.feature_icon, parent, false);
 
 			final ViewHolder holder = new ViewHolder();
 			holder.view = view;
@@ -96,8 +98,8 @@ public class AppAdapter extends BaseAdapter {
 			view.setTag(holder);
 		}
 
-		final ResolveInfo info = mApplications.get(position);
-		final PackageManager pm = mPackageManager;
+		final ResolveInfo info = applications.get(position);
+		final PackageManager pm = packageManager;
 
 		final ViewHolder holder = (ViewHolder) view.getTag();
 		holder.icon.setImageDrawable(info.loadIcon(pm));
@@ -106,7 +108,7 @@ public class AppAdapter extends BaseAdapter {
 			final Intent intent = new Intent();
 			intent.setComponent(new ComponentName(info.activityInfo.packageName, info.activityInfo.name));
 			intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-			mContext.startActivity(intent);
+			context.startActivity(intent);
 		});
 
 		return view;

@@ -28,36 +28,38 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.uart.domain.Command;
 import no.nordicsemi.android.nrftoolbox.uart.domain.UartConfiguration;
 
 public class UARTButtonAdapter extends BaseAdapter {
-	private UartConfiguration mConfiguration;
-	private boolean mEditMode;
+	private UartConfiguration configuration;
+	private boolean editMode;
 
 	public UARTButtonAdapter(final UartConfiguration configuration) {
-		mConfiguration = configuration;
+		this.configuration = configuration;
 	}
 
 	public void setEditMode(final boolean editMode) {
-		mEditMode = editMode;
+		this.editMode = editMode;
 		notifyDataSetChanged();
 	}
 
 	public void setConfiguration(final UartConfiguration configuration) {
-		mConfiguration = configuration;
+		this.configuration = configuration;
 		notifyDataSetChanged();
 	}
 
 	@Override
 	public int getCount() {
-		return mConfiguration != null ? mConfiguration.getCommands().length : 0;
+		return configuration != null ? configuration.getCommands().length : 0;
 	}
 
 	@Override
 	public Object getItem(final int position) {
-		return mConfiguration.getCommands()[position];
+		return configuration.getCommands()[position];
 	}
 
 	@Override
@@ -76,20 +78,20 @@ public class UARTButtonAdapter extends BaseAdapter {
 	}
 
 	@Override
-	public boolean isEnabled(int position) {
+	public boolean isEnabled(final int position) {
 		final Command command = (Command) getItem(position);
-		return mEditMode || (command != null && command.isActive());
+		return editMode || (command != null && command.isActive());
 	}
 
 	@Override
-	public View getView(final int position, final View convertView, final ViewGroup parent) {
+	public View getView(final int position, @Nullable final View convertView, @NonNull final ViewGroup parent) {
 		View view = convertView;
 		if (view == null) {
 			final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 			view = inflater.inflate(R.layout.feature_uart_button, parent, false);
 		}
 		view.setEnabled(isEnabled(position));
-		view.setActivated(mEditMode);
+		view.setActivated(editMode);
 
 		// Update image
 		final Command command = (Command) getItem(position);

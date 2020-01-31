@@ -23,6 +23,8 @@
 package no.nordicsemi.android.nrftoolbox.profile.multiconnect;
 
 import android.bluetooth.BluetoothDevice;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 
 public interface IDeviceLogger {
@@ -32,7 +34,7 @@ public interface IDeviceLogger {
 	 * @param level the log level
 	 * @param message the message to be logged
 	 */
-	void log(final BluetoothDevice device, final int level, final String message);
+	void log(@NonNull final BluetoothDevice device, final int level, final String message);
 
 	/**
 	 * Logs the given message with given log level into the device's log session.
@@ -41,5 +43,5 @@ public interface IDeviceLogger {
 	 * @param messageRes string resource id
 	 * @param params additional (optional) parameters used to fill the message
 	 */
-	void log(final BluetoothDevice device, final int level, @StringRes final int messageRes, final Object... params);
+	void log(@NonNull final BluetoothDevice device, final int level, @StringRes final int messageRes, final Object... params);
 }

@@ -5,6 +5,8 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
+
+import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import android.util.Log;
 
@@ -23,16 +25,15 @@ import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
  * @param <T> The profile callbacks type.
  * @see BleManager
  */
-@SuppressWarnings("WeakerAccess")
 public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends LoggableBleManager<T> {
 	/** Battery Service UUID. */
 	private final static UUID BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb");
 	/** Battery Level characteristic UUID. */
 	private final static UUID BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb");
 
-	private BluetoothGattCharacteristic mBatteryLevelCharacteristic;
+	private BluetoothGattCharacteristic batteryLevelCharacteristic;
 	/** Last received Battery Level value. */
-	private Integer mBatteryLevel;
+	private Integer batteryLevel;
 
 	/**
 	 * The manager constructor.
@@ -43,12 +44,13 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 		super(context);
 	}
 
-	private DataReceivedCallback mBatteryLevelDataCallback = new BatteryLevelDataCallback() {
+	private DataReceivedCallback batteryLevelDataCallback = new BatteryLevelDataCallback() {
 		@Override
-		public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
+		public void onBatteryLevelChanged(@NonNull final BluetoothDevice device,
+										  @IntRange(from = 0, to = 100) final int batteryLevel) {
 			log(LogContract.Log.Level.APPLICATION,"Battery Level received: " + batteryLevel + "%");
-			mBatteryLevel = batteryLevel;
-			mCallbacks.onBatteryLevelChanged(device, batteryLevel);
+			BatteryManager.this.batteryLevel = batteryLevel;
+			callbacks.onBatteryLevelChanged(device, batteryLevel);
 		}
 
 		@Override
@@ -59,8 +61,8 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 
 	public void readBatteryLevelCharacteristic() {
 		if (isConnected()) {
-			readCharacteristic(mBatteryLevelCharacteristic)
-					.with(mBatteryLevelDataCallback)
+			readCharacteristic(batteryLevelCharacteristic)
+					.with(batteryLevelDataCallback)
 					.fail((device, status) -> log(Log.WARN,"Battery Level characteristic not found"))
 					.enqueue();
 		}
@@ -69,9 +71,9 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 	public void enableBatteryLevelCharacteristicNotifications() {
 		if (isConnected()) {
 			// If the Battery Level characteristic is null, the request will be ignored
-			setNotificationCallback(mBatteryLevelCharacteristic)
-					.with(mBatteryLevelDataCallback);
-			enableNotifications(mBatteryLevelCharacteristic)
+			setNotificationCallback(batteryLevelCharacteristic)
+					.with(batteryLevelDataCallback);
+			enableNotifications(batteryLevelCharacteristic)
 					.done(device -> log(Log.INFO, "Battery Level notifications enabled"))
 					.fail((device, status) -> log(Log.WARN, "Battery Level characteristic not found"))
 					.enqueue();
@@ -83,7 +85,7 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 	 */
 	public void disableBatteryLevelCharacteristicNotifications() {
 		if (isConnected()) {
-			disableNotifications(mBatteryLevelCharacteristic)
+			disableNotifications(batteryLevelCharacteristic)
 					.done(device -> log(Log.INFO, "Battery Level notifications disabled"))
 					.enqueue();
 		}
@@ -95,7 +97,7 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 	 * @return Battery Level value, in percent.
 	 */
 	public Integer getBatteryLevel() {
-		return mBatteryLevel;
+		return batteryLevel;
 	}
 
 	protected abstract class BatteryManagerGattCallback extends BleManagerGattCallback {
@@ -110,15 +112,15 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 		protected boolean isOptionalServiceSupported(@NonNull final BluetoothGatt gatt) {
 			final BluetoothGattService service = gatt.getService(BATTERY_SERVICE_UUID);
 			if (service != null) {
-				mBatteryLevelCharacteristic = service.getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID);
+				batteryLevelCharacteristic = service.getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID);
 			}
-			return mBatteryLevelCharacteristic != null;
+			return batteryLevelCharacteristic != null;
 		}
 
 		@Override
 		protected void onDeviceDisconnected() {
-			mBatteryLevelCharacteristic = null;
-			mBatteryLevel = null;
+			batteryLevelCharacteristic = null;
+			batteryLevel = null;
 		}
 	}
 }

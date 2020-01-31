@@ -30,6 +30,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+
+import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.view.Menu;
 import android.widget.TextView;
@@ -44,15 +46,15 @@ import no.nordicsemi.android.nrftoolbox.profile.BleProfileService;
 import no.nordicsemi.android.nrftoolbox.profile.BleProfileServiceReadyActivity;
 
 public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBinder> {
-	private TextView mSpeedView;
-	private TextView mSpeedUnitView;
-	private TextView mCadenceView;
-	private TextView mDistanceView;
-	private TextView mDistanceUnitView;
-	private TextView mTotalDistanceView;
-	private TextView mTotalDistanceUnitView;
-	private TextView mGearRatioView;
-	private TextView mBatteryLevelView;
+	private TextView speedView;
+	private TextView speedUnitView;
+	private TextView cadenceView;
+	private TextView distanceView;
+	private TextView distanceUnitView;
+	private TextView totalDistanceView;
+	private TextView totalDistanceUnitView;
+	private TextView gearRatioView;
+	private TextView batteryLevelView;
 
 	@Override
 	protected void onCreateView(final Bundle savedInstanceState) {
@@ -62,25 +64,25 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 
 	@Override
 	protected void onInitialize(final Bundle savedInstanceState) {
-		LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, makeIntentFilter());
+		LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, makeIntentFilter());
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
 	}
 
 	private void setGui() {
-		mSpeedView = findViewById(R.id.speed);
-		mSpeedUnitView = findViewById(R.id.speed_unit);
-		mCadenceView = findViewById(R.id.cadence);
-		mDistanceView = findViewById(R.id.distance);
-		mDistanceUnitView = findViewById(R.id.distance_unit);
-		mTotalDistanceView = findViewById(R.id.distance_total);
-		mTotalDistanceUnitView = findViewById(R.id.distance_total_unit);
-		mGearRatioView = findViewById(R.id.ratio);
-		mBatteryLevelView = findViewById(R.id.battery);
+		speedView = findViewById(R.id.speed);
+		speedUnitView = findViewById(R.id.speed_unit);
+		cadenceView = findViewById(R.id.cadence);
+		distanceView = findViewById(R.id.distance);
+		distanceUnitView = findViewById(R.id.distance_unit);
+		totalDistanceView = findViewById(R.id.distance_total);
+		totalDistanceUnitView = findViewById(R.id.distance_total_unit);
+		gearRatioView = findViewById(R.id.ratio);
+		batteryLevelView = findViewById(R.id.battery);
 	}
 
 	@Override
@@ -91,12 +93,12 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 
 	@Override
 	protected void setDefaultUI() {
-		mSpeedView.setText(R.string.not_available_value);
-		mCadenceView.setText(R.string.not_available_value);
-		mDistanceView.setText(R.string.not_available_value);
-		mTotalDistanceView.setText(R.string.not_available_value);
-		mGearRatioView.setText(R.string.not_available_value);
-		mBatteryLevelView.setText(R.string.not_available);
+		speedView.setText(R.string.not_available_value);
+		cadenceView.setText(R.string.not_available_value);
+		distanceView.setText(R.string.not_available_value);
+		totalDistanceView.setText(R.string.not_available_value);
+		gearRatioView.setText(R.string.not_available_value);
+		batteryLevelView.setText(R.string.not_available);
 
 		setUnits();
 	}
@@ -107,19 +109,19 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 
 		switch (unit) {
 			case SettingsFragment.SETTINGS_UNIT_M_S: // [m/s]
-				mSpeedUnitView.setText(R.string.csc_speed_unit_m_s);
-				mDistanceUnitView.setText(R.string.csc_distance_unit_m);
-				mTotalDistanceUnitView.setText(R.string.csc_total_distance_unit_km);
+				speedUnitView.setText(R.string.csc_speed_unit_m_s);
+				distanceUnitView.setText(R.string.csc_distance_unit_m);
+				totalDistanceUnitView.setText(R.string.csc_total_distance_unit_km);
 				break;
 			case SettingsFragment.SETTINGS_UNIT_KM_H: // [km/h]
-				mSpeedUnitView.setText(R.string.csc_speed_unit_km_h);
-				mDistanceUnitView.setText(R.string.csc_distance_unit_m);
-				mTotalDistanceUnitView.setText(R.string.csc_total_distance_unit_km);
+				speedUnitView.setText(R.string.csc_speed_unit_km_h);
+				distanceUnitView.setText(R.string.csc_distance_unit_m);
+				totalDistanceUnitView.setText(R.string.csc_total_distance_unit_km);
 				break;
 			case SettingsFragment.SETTINGS_UNIT_MPH: // [mph]
-				mSpeedUnitView.setText(R.string.csc_speed_unit_mph);
-				mDistanceUnitView.setText(R.string.csc_distance_unit_yd);
-				mTotalDistanceUnitView.setText(R.string.csc_total_distance_unit_mile);
+				speedUnitView.setText(R.string.csc_speed_unit_mph);
+				distanceUnitView.setText(R.string.csc_distance_unit_yd);
+				totalDistanceUnitView.setText(R.string.csc_total_distance_unit_mile);
 				break;
 		}
 	}
@@ -177,14 +179,14 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 	}
 
 	@Override
-	public void onServicesDiscovered(final BluetoothDevice device, final boolean optionalServicesFound) {
+	public void onServicesDiscovered(@NonNull final BluetoothDevice device, final boolean optionalServicesFound) {
 		// not used
 	}
 
 	@Override
-	public void onDeviceDisconnected(final BluetoothDevice device) {
+	public void onDeviceDisconnected(@NonNull final BluetoothDevice device) {
 		super.onDeviceDisconnected(device);
-		mBatteryLevelView.setText(R.string.not_available);
+		batteryLevelView.setText(R.string.not_available);
 	}
 
 	private void onMeasurementReceived(final BluetoothDevice device, float speed, float distance, float totalDistance) {
@@ -197,42 +199,42 @@ public class CSCActivity extends BleProfileServiceReadyActivity<CSCService.CSCBi
 				// pass through intended
 			case SettingsFragment.SETTINGS_UNIT_M_S:
 				if (distance < 1000) { // 1 km in m
-					mDistanceView.setText(String.format(Locale.US, "%.0f", distance));
-					mDistanceUnitView.setText(R.string.csc_distance_unit_m);
+					distanceView.setText(String.format(Locale.US, "%.0f", distance));
+					distanceUnitView.setText(R.string.csc_distance_unit_m);
 				} else {
-					mDistanceView.setText(String.format(Locale.US, "%.2f", distance / 1000.0f));
-					mDistanceUnitView.setText(R.string.csc_distance_unit_km);
+					distanceView.setText(String.format(Locale.US, "%.2f", distance / 1000.0f));
+					distanceUnitView.setText(R.string.csc_distance_unit_km);
 				}
 
-				mTotalDistanceView.setText(String.format(Locale.US, "%.2f", totalDistance / 1000.0f));
+				totalDistanceView.setText(String.format(Locale.US, "%.2f", totalDistance / 1000.0f));
 				break;
 			case SettingsFragment.SETTINGS_UNIT_MPH:
 				speed = speed * 2.2369f;
 				if (distance < 1760) { // 1 mile in yrs
-					mDistanceView.setText(String.format(Locale.US, "%.0f", distance));
-					mDistanceUnitView.setText(R.string.csc_distance_unit_yd);
+					distanceView.setText(String.format(Locale.US, "%.0f", distance));
+					distanceUnitView.setText(R.string.csc_distance_unit_yd);
 				} else {
-					mDistanceView.setText(String.format(Locale.US, "%.2f", distance / 1760.0f));
-					mDistanceUnitView.setText(R.string.csc_distance_unit_mile);
+					distanceView.setText(String.format(Locale.US, "%.2f", distance / 1760.0f));
+					distanceUnitView.setText(R.string.csc_distance_unit_mile);
 				}
 
-				mTotalDistanceView.setText(String.format(Locale.US, "%.2f", totalDistance / 1609.31f));
+				totalDistanceView.setText(String.format(Locale.US, "%.2f", totalDistance / 1609.31f));
 				break;
 		}
 
-		mSpeedView.setText(String.format(Locale.US, "%.1f", speed));
+		speedView.setText(String.format(Locale.US, "%.1f", speed));
 	}
 
 	private void onGearRatioUpdate(final BluetoothDevice device, final int cadence, final float ratio) {
-		mCadenceView.setText(String.format(Locale.US, "%d", cadence));
-		mGearRatioView.setText(String.format(Locale.US, "%.1f", ratio));
+		cadenceView.setText(String.format(Locale.US, "%d", cadence));
+		gearRatioView.setText(String.format(Locale.US, "%.1f", ratio));
 	}
 
 	public void onBatteryLevelChanged(final BluetoothDevice device, final int value) {
-		mBatteryLevelView.setText(getString(R.string.battery, value));
+		batteryLevelView.setText(getString(R.string.battery, value));
 	}
 
-	private final  BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+	private final  BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			final String action = intent.getAction();

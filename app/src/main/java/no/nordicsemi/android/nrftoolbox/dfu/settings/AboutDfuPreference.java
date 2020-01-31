@@ -45,7 +45,7 @@ public class AboutDfuPreference extends Preference {
 	protected void onClick() {
 		final Context context = getContext();
 		final Intent intent = new Intent(Intent.ACTION_VIEW,
-				Uri.parse("https://www.nordicsemi.com/DocLib/Content/SDK_Doc/nRF5_SDK/v15-3-0/ble_sdk_app_dfu_bootloader"));
+				Uri.parse("https://infocenter.nordicsemi.com/topic/sdk_nrf5_v16.0.0/examples_bootloader.html?cp=7_1_4_4"));
 		intent.addCategory(Intent.CATEGORY_DEFAULT);
 		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 

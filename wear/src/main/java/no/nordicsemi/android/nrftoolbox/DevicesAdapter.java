@@ -48,127 +48,127 @@ public class DevicesAdapter extends WearableListView.Adapter {
 
 	private final static long SCAN_DURATION = 5000;
 
-	private final List<BluetoothDevice> mDevices = new ArrayList<>();
-	private final LayoutInflater mInflater;
-	private final Handler mHandler;
-	private final WearableListView mListView;
-	private final String mNotAvailable;
-	private final String mConnectingText;
-	private final String mAvailableText;
-	private final String mBondedText;
-	private final String mBondingText;
+	private final List<BluetoothDevice> devices = new ArrayList<>();
+	private final LayoutInflater inflater;
+	private final Handler handler;
+	private final WearableListView listView;
+	private final String notAvailable;
+	private final String connectingText;
+	private final String availableText;
+	private final String bondedText;
+	private final String bondingText;
 	/** A position of a device that the activity is currently connecting to. */
-	private int mConnectingPosition = -1;
+	private int connectingPosition = -1;
 	/** Flag set to true when scanner is active. */
-	private boolean mScanning;
+	private boolean scanning;
 
 	public DevicesAdapter(final WearableListView listView) {
 		final Context context = listView.getContext();
-		mInflater = LayoutInflater.from(context);
-		mNotAvailable = context.getString(R.string.not_available);
-		mConnectingText = context.getString(R.string.state_connecting);
-		mAvailableText = context.getString(R.string.devices_list_available);
-		mBondedText = context.getString(R.string.devices_list_bonded);
-		mBondingText = context.getString(R.string.devices_list_bonding);
-		mListView = listView;
-		mHandler = new Handler();
+		inflater = LayoutInflater.from(context);
+		notAvailable = context.getString(R.string.not_available);
+		connectingText = context.getString(R.string.state_connecting);
+		availableText = context.getString(R.string.devices_list_available);
+		bondedText = context.getString(R.string.devices_list_bonded);
+		bondingText = context.getString(R.string.devices_list_bonding);
+		this.listView = listView;
+		handler = new Handler();
 
 		final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (bluetoothAdapter != null)
-			mDevices.addAll(bluetoothAdapter.getBondedDevices());
+			devices.addAll(bluetoothAdapter.getBondedDevices());
 	}
 
 	@NonNull
 	@Override
 	public WearableListView.ViewHolder onCreateViewHolder(@NonNull final ViewGroup viewGroup, final int position) {
-		return new ItemViewHolder(mInflater.inflate(R.layout.device_item, viewGroup, false));
+		return new ItemViewHolder(inflater.inflate(R.layout.device_item, viewGroup, false));
 	}
 
 	@Override
 	public void onBindViewHolder(@NonNull final WearableListView.ViewHolder holder, final int position) {
 		final ItemViewHolder viewHolder = (ItemViewHolder) holder;
 
-		if (position < mDevices.size()) {
-			final BluetoothDevice device = mDevices.get(position);
+		if (position < devices.size()) {
+			final BluetoothDevice device = devices.get(position);
 
-			viewHolder.mDevice = device;
-			viewHolder.mName.setText(TextUtils.isEmpty(device.getName()) ? mNotAvailable : device.getName());
-			viewHolder.mAddress.setText(getState(device, position));
-			viewHolder.mIcon.showIndeterminateProgress(position == mConnectingPosition);
+			viewHolder.device = device;
+			viewHolder.name.setText(TextUtils.isEmpty(device.getName()) ? notAvailable : device.getName());
+			viewHolder.address.setText(getState(device, position));
+			viewHolder.icon.showIndeterminateProgress(position == connectingPosition);
 		} else {
-			viewHolder.mDevice = null;
-			viewHolder.mName.setText(mScanning ? R.string.devices_list_scanning : R.string.devices_list_start_scan);
-			viewHolder.mAddress.setText(null);
-			viewHolder.mIcon.showIndeterminateProgress(mScanning);
+			viewHolder.device = null;
+			viewHolder.name.setText(scanning ? R.string.devices_list_scanning : R.string.devices_list_start_scan);
+			viewHolder.address.setText(null);
+			viewHolder.icon.showIndeterminateProgress(scanning);
 		}
 	}
 
 	@Override
 	public int getItemCount() {
-		return mDevices.size() + (mConnectingPosition == -1 ? 1 : 0);
+		return devices.size() + (connectingPosition == -1 ? 1 : 0);
 	}
 
 	public void setConnectingPosition(final int connectingPosition) {
-		final int oldPosition = mConnectingPosition;
-		this.mConnectingPosition = connectingPosition;
+		final int oldPosition = connectingPosition;
+		this.connectingPosition = connectingPosition;
 		if (connectingPosition >= 0) {
 			// The "Scan for nearby device' item is removed
 			notifyItemChanged(connectingPosition);
-			notifyItemRemoved(mDevices.size());
+			notifyItemRemoved(devices.size());
 		} else {
 			if (oldPosition >= 0)
 				notifyItemChanged(oldPosition);
-			notifyItemInserted(mDevices.size());
+			notifyItemInserted(devices.size());
 		}
 	}
 
 	public void startLeScan() {
 		// Scanning is disabled when we are connecting or connected.
-		if (mConnectingPosition >= 0)
+		if (connectingPosition >= 0)
 			return;
 
-		if (mScanning) {
+		if (scanning) {
 			// Extend scanning for some time more
-			mHandler.removeCallbacks(mStopScanTask);
-			mHandler.postDelayed(mStopScanTask, SCAN_DURATION);
+			handler.removeCallbacks(stopScanTask);
+			handler.postDelayed(stopScanTask, SCAN_DURATION);
 			return;
 		}
 
 		final BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
 		final ScanSettings settings = new ScanSettings.Builder().setReportDelay(1000).setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build();
-		scanner.startScan(null, settings, mScanCallback);
+		scanner.startScan(null, settings, scanCallback);
 
 		// Setup timer that will stop scanning
-		mHandler.postDelayed(mStopScanTask, SCAN_DURATION);
-		mScanning = true;
-		notifyItemChanged(mDevices.size());
+		handler.postDelayed(stopScanTask, SCAN_DURATION);
+		scanning = true;
+		notifyItemChanged(devices.size());
 	}
 
 	public void stopLeScan() {
-		if (!mScanning)
+		if (!scanning)
 			return;
 
 		final BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
-		scanner.stopScan(mScanCallback);
+		scanner.stopScan(scanCallback);
 
-		mHandler.removeCallbacks(mStopScanTask);
-		mScanning = false;
-		notifyItemChanged(mDevices.size());
+		handler.removeCallbacks(stopScanTask);
+		scanning = false;
+		notifyItemChanged(devices.size());
 	}
 
 	private String getState(final BluetoothDevice device, final int position) {
-		if (mConnectingPosition == position)
-			return mConnectingText;
+		if (connectingPosition == position)
+			return connectingText;
 		else if (device.getBondState() == BluetoothDevice.BOND_BONDED)
-			return mBondedText;
+			return bondedText;
 		else if (device.getBondState() == BluetoothDevice.BOND_BONDING)
-			return mBondingText;
-		return mAvailableText;
+			return bondingText;
+		return availableText;
 	}
 
-	private Runnable mStopScanTask = this::stopLeScan;
+	private Runnable stopScanTask = this::stopLeScan;
 
-	private ScanCallback mScanCallback = new ScanCallback() {
+	private ScanCallback scanCallback = new ScanCallback() {
 		@Override
 		public void onScanResult(final int callbackType, @NonNull final ScanResult result) {
 			// empty
@@ -176,16 +176,16 @@ public class DevicesAdapter extends WearableListView.Adapter {
 
 		@Override
 		public void onBatchScanResults(final List<ScanResult> results) {
-			final int size = mDevices.size();
+			final int size = devices.size();
 			for (final ScanResult result : results) {
 				final BluetoothDevice device = result.getDevice();
-				if (!mDevices.contains(device))
-					mDevices.add(device);
+				if (!devices.contains(device))
+					devices.add(device);
 			}
-			if (size != mDevices.size()) {
-				notifyItemRangeInserted(size, mDevices.size() - size);
+			if (size != devices.size()) {
+				notifyItemRangeInserted(size, devices.size() - size);
 				if (size == 0)
-					mListView.scrollToPosition(0);
+					listView.scrollToPosition(0);
 			}
 		}
 
@@ -196,22 +196,22 @@ public class DevicesAdapter extends WearableListView.Adapter {
 	};
 
 	public static class ItemViewHolder extends WearableListView.ViewHolder {
-		private CircledImageView mIcon;
-		private TextView mName;
-		private TextView mAddress;
-		private BluetoothDevice mDevice;
+		private CircledImageView icon;
+		private TextView name;
+		private TextView address;
+		private BluetoothDevice device;
 
 		public ItemViewHolder(final View itemView) {
 			super(itemView);
 
-			mIcon = itemView.findViewById(R.id.icon);
-			mName = itemView.findViewById(R.id.name);
-			mAddress = itemView.findViewById(R.id.state);
+			icon = itemView.findViewById(R.id.icon);
+			name = itemView.findViewById(R.id.name);
+			address = itemView.findViewById(R.id.state);
 		}
 
 		/** Returns the Bluetooth device for that holder, or null for "Scanning for nearby devices" row. */
 		public BluetoothDevice getDevice() {
-			return mDevice;
+			return device;
 		}
 	}
 }

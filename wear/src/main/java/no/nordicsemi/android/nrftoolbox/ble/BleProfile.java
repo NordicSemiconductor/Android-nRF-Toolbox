@@ -32,19 +32,19 @@ import android.os.Build;
 import java.util.Deque;
 
 public abstract class BleProfile {
-	private Context mContext;
-	private BleProfileApi mApi;
+	private Context context;
+	private BleProfileApi api;
 
 	/* package */ void setApi(final BleProfileApi api) {
-		this.mContext = api.getContext();
-		this.mApi = api;
+		this.context = api.getContext();
+		this.api = api;
 	}
 
 	/**
 	 * Returns the BLE API for sending data to the remote device.
 	 */
 	public BleProfileApi getApi() {
-		return mApi;
+		return api;
 	}
 
 	/**
@@ -52,7 +52,7 @@ public abstract class BleProfile {
 	 * @return the context
 	 */
 	public Context getContext() {
-		return mContext;
+		return context;
 	}
 
 	/**

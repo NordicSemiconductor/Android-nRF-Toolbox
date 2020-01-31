@@ -73,8 +73,8 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
     private final static int OPEN_ACTIVITY_REQ = 0;
     private final static int DISCONNECT_REQ = 1;
 
-    private final LocalBinder mBinder = new CSCBinder();
-    private CSCManager mManager;
+    private final LocalBinder binder = new CSCBinder();
+    private CSCManager manager;
 
     /**
      * This local binder is an interface for the bonded activity to operate with the RSC sensor
@@ -85,12 +85,12 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 
     @Override
     protected LocalBinder getBinder() {
-        return mBinder;
+        return binder;
     }
 
     @Override
     protected LoggableBleManager<CSCManagerCallbacks> initializeManager() {
-        return mManager = new CSCManager(this);
+        return manager = new CSCManager(this);
     }
 
     @Override
@@ -99,14 +99,14 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
 
         final IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_DISCONNECT);
-        registerReceiver(mDisconnectActionBroadcastReceiver, filter);
+        registerReceiver(disconnectActionBroadcastReceiver, filter);
     }
 
     @Override
     public void onDestroy() {
         // when user has disconnected from the sensor, we have to cancel the notification that we've created some milliseconds before using unbindService
         cancelNotification();
-        unregisterReceiver(mDisconnectActionBroadcastReceiver);
+        unregisterReceiver(disconnectActionBroadcastReceiver);
 
         super.onDestroy();
     }
@@ -118,7 +118,7 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
         if (isConnected()) {
             // This method will read the Battery Level value, if possible and then try to enable battery notifications (if it has NOTIFY property).
             // If the Battery Level characteristic has only the NOTIFY property, it will only try to enable notifications.
-            mManager.readBatteryLevelCharacteristic();
+            manager.readBatteryLevelCharacteristic();
         }
     }
 
@@ -127,7 +127,7 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
         // When we are connected, but the application is not open, we are not really interested in battery level notifications.
         // But we will still be receiving other values, if enabled.
         if (isConnected())
-            mManager.disableBatteryLevelCharacteristicNotifications();
+            manager.disableBatteryLevelCharacteristicNotifications();
         startForegroundService();
     }
 
@@ -193,6 +193,7 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
      *                     f.e. <code>&lt;string name="name"&gt;%s is connected&lt;/string&gt;</code>
      * @param defaults
      */
+    @SuppressWarnings("SameParameterValue")
     private Notification createNotification(final int messageResId, final int defaults) {
         final Intent parentIntent = new Intent(this, FeaturesActivity.class);
         parentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -224,7 +225,7 @@ public class CSCService extends BleProfileService implements CSCManagerCallbacks
     /**
      * This broadcast receiver listens for {@link #ACTION_DISCONNECT} that may be fired by pressing Disconnect action button on the notification.
      */
-    private final BroadcastReceiver mDisconnectActionBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver disconnectActionBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             Logger.i(getLogSession(), "[Notification] Disconnect action pressed");

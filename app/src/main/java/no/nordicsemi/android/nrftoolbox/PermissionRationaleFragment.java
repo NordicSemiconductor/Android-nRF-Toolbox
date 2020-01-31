@@ -32,27 +32,27 @@ public class PermissionRationaleFragment extends DialogFragment {
 	private static final String ARG_PERMISSION = "ARG_PERMISSION";
 	private static final String ARG_TEXT = "ARG_TEXT";
 
-	private PermissionDialogListener mListener;
+	private PermissionDialogListener listener;
 
 	public interface PermissionDialogListener {
 		void onRequestPermission(final String permission);
 	}
 
 	@Override
-	public void onAttach(final Context context) {
+	public void onAttach(@NonNull final Context context) {
 		super.onAttach(context);
 
 		if (context instanceof PermissionDialogListener) {
-			mListener = (PermissionDialogListener) context;
+			listener = (PermissionDialogListener) context;
 		} else {
-			throw new IllegalArgumentException("The parent activity must impelemnt PermissionDialogListener");
+			throw new IllegalArgumentException("The parent activity must implement PermissionDialogListener");
 		}
 	}
 
 	@Override
 	public void onDetach() {
 		super.onDetach();
-		mListener = null;
+		listener = null;
 	}
 
 	public static PermissionRationaleFragment getInstance(final int aboutResId, final String permission) {
@@ -69,10 +69,10 @@ public class PermissionRationaleFragment extends DialogFragment {
 	@Override
     @NonNull
 	public Dialog onCreateDialog(final Bundle savedInstanceState) {
-		final Bundle args = getArguments();
+		final Bundle args = requireArguments();
 		final StringBuilder text = new StringBuilder(getString(args.getInt(ARG_TEXT)));
-		return new AlertDialog.Builder(getActivity()).setTitle(R.string.permission_title).setMessage(text)
+		return new AlertDialog.Builder(requireContext()).setTitle(R.string.permission_title).setMessage(text)
 				.setNegativeButton(R.string.cancel, null)
-				.setPositiveButton(R.string.ok, (dialog, which) -> mListener.onRequestPermission(args.getString(ARG_PERMISSION))).create();
+				.setPositiveButton(R.string.ok, (dialog, which) -> listener.onRequestPermission(args.getString(ARG_PERMISSION))).create();
 	}
 }

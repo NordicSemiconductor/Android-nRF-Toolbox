@@ -69,7 +69,7 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 	private static final UUID WRITABLE_CHARACTERISTIC_UUID = UUID.fromString("00002A00-0000-1000-8000-00805f9b34fb"); // Device Name
 
 	// TODO Add more services and characteristics references.
-	private BluetoothGattCharacteristic mRequiredCharacteristic, mDeviceNameCharacteristic, mOptionalCharacteristic;
+	private BluetoothGattCharacteristic requiredCharacteristic, deviceNameCharacteristic, optionalCharacteristic;
 
 	public TemplateManager(final Context context) {
 		super(context);
@@ -78,14 +78,14 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 	@NonNull
 	@Override
 	protected BatteryManagerGattCallback getGattCallback() {
-		return mGattCallback;
+		return gattCallback;
 	}
 
 	/**
 	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
 	 * receiving indication, etc.
 	 */
-	private final BatteryManagerGattCallback mGattCallback = new BatteryManagerGattCallback() {
+	private final BatteryManagerGattCallback gattCallback = new BatteryManagerGattCallback() {
 
 		@Override
 		protected void initialize() {
@@ -111,7 +111,7 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 					.enqueue();
 
 			// Set notification callback
-			setNotificationCallback(mRequiredCharacteristic)
+			setNotificationCallback(requiredCharacteristic)
 					// This callback will be called each time the notification is received
 					.with(new TemplateDataCallback() {
 						@Override
@@ -123,7 +123,7 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 						@Override
 						public void onSampleValueReceived(@NonNull final BluetoothDevice device, final int value) {
 							// Let's lass received data to the service
-							mCallbacks.onSampleValueReceived(device, value);
+							callbacks.onSampleValueReceived(device, value);
 						}
 
 						@Override
@@ -133,7 +133,7 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 					});
 
 			// Enable notifications
-			enableNotifications(mRequiredCharacteristic)
+			enableNotifications(requiredCharacteristic)
 					// Method called after the data were sent (data will contain 0x0100 in this case)
 					.with((device, data) -> log(Log.DEBUG, "Data sent: " + data))
 					// Method called when the request finished successfully. This will be called after .with(..) callback
@@ -149,13 +149,13 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 			// It should return true if all has been discovered (that is that device is supported).
 			final BluetoothGattService service = gatt.getService(SERVICE_UUID);
 			if (service != null) {
-				mRequiredCharacteristic = service.getCharacteristic(MEASUREMENT_CHARACTERISTIC_UUID);
+				requiredCharacteristic = service.getCharacteristic(MEASUREMENT_CHARACTERISTIC_UUID);
 			}
 			final BluetoothGattService otherService = gatt.getService(OTHER_SERVICE_UUID);
 			if (otherService != null) {
-				mDeviceNameCharacteristic = otherService.getCharacteristic(WRITABLE_CHARACTERISTIC_UUID);
+				deviceNameCharacteristic = otherService.getCharacteristic(WRITABLE_CHARACTERISTIC_UUID);
 			}
-			return mRequiredCharacteristic != null && mDeviceNameCharacteristic != null;
+			return requiredCharacteristic != null && deviceNameCharacteristic != null;
 		}
 
 		@Override
@@ -166,9 +166,9 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 			// TODO If there are some optional characteristics, initialize them there.
 			final BluetoothGattService service = gatt.getService(SERVICE_UUID);
 			if (service != null) {
-				mOptionalCharacteristic = service.getCharacteristic(READABLE_CHARACTERISTIC_UUID);
+				optionalCharacteristic = service.getCharacteristic(READABLE_CHARACTERISTIC_UUID);
 			}
-			return mOptionalCharacteristic != null;
+			return optionalCharacteristic != null;
 		}
 
 		@Override
@@ -177,9 +177,9 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 			super.onDeviceDisconnected();
 
 			// TODO Release references to your characteristics.
-			mRequiredCharacteristic = null;
-			mDeviceNameCharacteristic = null;
-			mOptionalCharacteristic = null;
+			requiredCharacteristic = null;
+			deviceNameCharacteristic = null;
+			optionalCharacteristic = null;
 		}
 
 		@Override
@@ -192,7 +192,7 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 
 			// Device is ready, let's read something here. Usually there is nothing else to be done
 			// here, as all had been done during initialization.
-			readCharacteristic(mOptionalCharacteristic)
+			readCharacteristic(optionalCharacteristic)
 					.with((device, data) -> {
 						// Characteristic value has been read
 						// Let's do some magic with it.
@@ -217,7 +217,7 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 	void performAction(final String parameter) {
 		log(Log.VERBOSE, "Changing device name to \"" + parameter + "\"");
 		// Write some data to the characteristic.
-		writeCharacteristic(mDeviceNameCharacteristic, Data.from(parameter))
+		writeCharacteristic(deviceNameCharacteristic, Data.from(parameter))
 				// If data are longer than MTU-3, they will be chunked into multiple packets.
 				// Check out other split options, with .split(...).
 				.split()

@@ -28,6 +28,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,8 +42,8 @@ import no.nordicsemi.android.nrftoolbox.profile.multiconnect.BleMulticonnectProf
 import no.nordicsemi.android.nrftoolbox.widget.DividerItemDecoration;
 
 public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivity<ProximityService.ProximityBinder> {
-	private RecyclerView mDevicesView;
-	private DeviceAdapter mAdapter;
+	private RecyclerView devicesView;
+	private DeviceAdapter adapter;
 
 	@Override
 	protected void onCreateView(final Bundle savedInstanceState) {
@@ -51,17 +53,17 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 
 	@Override
 	protected void onInitialize(final Bundle savedInstanceState) {
-		LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, makeIntentFilter());
+		LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, makeIntentFilter());
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
 	}
 
 	private void setGUI() {
-		final RecyclerView recyclerView = mDevicesView = findViewById(android.R.id.list);
+		final RecyclerView recyclerView = devicesView = findViewById(android.R.id.list);
 		recyclerView.setLayoutManager(new LinearLayoutManager(this));
 		recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
 	}
@@ -73,12 +75,12 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 
 	@Override
 	protected void onServiceBound(final ProximityService.ProximityBinder binder) {
-		mDevicesView.setAdapter(mAdapter = new DeviceAdapter(binder));
+		devicesView.setAdapter(adapter = new DeviceAdapter(binder));
 	}
 
 	@Override
 	protected void onServiceUnbound() {
-		mDevicesView.setAdapter(mAdapter = null);
+		devicesView.setAdapter(adapter = null);
 	}
 
 	@Override
@@ -97,46 +99,46 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 	}
 
 	@Override
-	public void onDeviceConnecting(final BluetoothDevice device) {
-		if (mAdapter != null)
-			mAdapter.onDeviceAdded(device);
+	public void onDeviceConnecting(@NonNull final BluetoothDevice device) {
+		if (adapter != null)
+			adapter.onDeviceAdded(device);
 	}
 
 	@Override
 	public void onDeviceConnected(final BluetoothDevice device) {
-		if (mAdapter != null)
-			mAdapter.onDeviceStateChanged(device);
+		if (adapter != null)
+			adapter.onDeviceStateChanged(device);
 	}
 
 	@Override
-	public void onDeviceReady(final BluetoothDevice device) {
-		if (mAdapter != null)
-			mAdapter.onDeviceStateChanged(device);
+	public void onDeviceReady(@NonNull final BluetoothDevice device) {
+		if (adapter != null)
+			adapter.onDeviceStateChanged(device);
 	}
 
 	@Override
-	public void onDeviceDisconnecting(final BluetoothDevice device) {
-		if (mAdapter != null)
-			mAdapter.onDeviceStateChanged(device);
+	public void onDeviceDisconnecting(@NonNull final BluetoothDevice device) {
+		if (adapter != null)
+			adapter.onDeviceStateChanged(device);
 	}
 
 	@Override
 	public void onDeviceDisconnected(final BluetoothDevice device) {
-		if (mAdapter != null)
-			mAdapter.onDeviceRemoved(device);
+		if (adapter != null)
+			adapter.onDeviceRemoved(device);
 	}
 
 	@Override
-	public void onDeviceNotSupported(final BluetoothDevice device) {
+	public void onDeviceNotSupported(@NonNull final BluetoothDevice device) {
 		super.onDeviceNotSupported(device);
-		if (mAdapter != null)
-			mAdapter.onDeviceRemoved(device);
+		if (adapter != null)
+			adapter.onDeviceRemoved(device);
 	}
 
 	@Override
-	public void onLinkLossOccurred(final BluetoothDevice device) {
-		if (mAdapter != null)
-			mAdapter.onDeviceStateChanged(device);
+	public void onLinkLossOccurred(@NonNull final BluetoothDevice device) {
+		if (adapter != null)
+			adapter.onDeviceStateChanged(device);
 
 		// The link loss may also be called when Bluetooth adapter was disabled
 		if (BluetoothAdapter.getDefaultAdapter().isEnabled())
@@ -145,14 +147,14 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 
 	@SuppressWarnings("unused")
 	private void onBatteryLevelChanged(final BluetoothDevice device, final int batteryLevel) {
-		if (mAdapter != null)
-			mAdapter.onBatteryValueReceived(device); // Value will be obtained from the service
+		if (adapter != null)
+			adapter.onBatteryValueReceived(device); // Value will be obtained from the service
 	}
 
 	@SuppressWarnings("unused")
 	private void onRemoteAlarmSwitched(final BluetoothDevice device, final boolean on) {
-		if (mAdapter != null)
-			mAdapter.onDeviceStateChanged(device); // Value will be obtained from the service
+		if (adapter != null)
+			adapter.onDeviceStateChanged(device); // Value will be obtained from the service
 	}
 
 	private void showLinkLossDialog(final String name) {
@@ -164,7 +166,7 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 		}
 	}
 
-	private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			final String action = intent.getAction();

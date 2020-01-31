@@ -43,13 +43,13 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 	@SuppressWarnings("unused")
 	private static final String TAG = "GlucoseActivity";
 
-	private BaseExpandableListAdapter mAdapter;
-	private GlucoseManager mGlucoseManager;
+	private BaseExpandableListAdapter adapter;
+	private GlucoseManager glucoseManager;
 
-	private View mControlPanelStd;
-	private View mControlPanelAbort;
-	private TextView mUnitView;
-	private TextView mBatteryLevelView;
+	private View controlPanelStd;
+	private View controlPanelAbort;
+	private TextView unitView;
+	private TextView batteryLevelView;
 
 	@Override
 	protected void onCreateView(final Bundle savedInstanceState) {
@@ -58,14 +58,14 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 	}
 
 	private void setGUI() {
-		mUnitView = findViewById(R.id.unit);
-		mControlPanelStd = findViewById(R.id.gls_control_std);
-		mControlPanelAbort = findViewById(R.id.gls_control_abort);
-		mBatteryLevelView = findViewById(R.id.battery);
+		unitView = findViewById(R.id.unit);
+		controlPanelStd = findViewById(R.id.gls_control_std);
+		controlPanelAbort = findViewById(R.id.gls_control_abort);
+		batteryLevelView = findViewById(R.id.battery);
 
-		findViewById(R.id.action_last).setOnClickListener(v -> mGlucoseManager.getLastRecord());
-		findViewById(R.id.action_all).setOnClickListener(v -> mGlucoseManager.getAllRecords());
-		findViewById(R.id.action_abort).setOnClickListener(v -> mGlucoseManager.abort());
+		findViewById(R.id.action_last).setOnClickListener(v -> glucoseManager.getLastRecord());
+		findViewById(R.id.action_all).setOnClickListener(v -> glucoseManager.getAllRecords());
+		findViewById(R.id.action_abort).setOnClickListener(v -> glucoseManager.abort());
 
 		// create popup menu attached to the button More
 		findViewById(R.id.action_more).setOnClickListener(v -> {
@@ -76,12 +76,12 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 			menu.show();
 		});
 
-		setListAdapter(mAdapter = new ExpandableRecordAdapter(this, mGlucoseManager));
+		setListAdapter(adapter = new ExpandableRecordAdapter(this, glucoseManager));
 	}
 
 	@Override
 	protected LoggableBleManager<GlucoseManagerCallbacks> initializeManager() {
-		GlucoseManager manager = mGlucoseManager = GlucoseManager.getGlucoseManager(getApplicationContext());
+		GlucoseManager manager = glucoseManager = GlucoseManager.getGlucoseManager(getApplicationContext());
 		manager.setGattCallbacks(this);
 		return manager;
 	}
@@ -90,16 +90,16 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 	public boolean onMenuItemClick(final MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_refresh:
-			mGlucoseManager.refreshRecords();
+			glucoseManager.refreshRecords();
 			break;
 		case R.id.action_first:
-			mGlucoseManager.getFirstRecord();
+			glucoseManager.getFirstRecord();
 			break;
 		case R.id.action_clear:
-			mGlucoseManager.clear();
+			glucoseManager.clear();
 			break;
 		case R.id.action_delete_all:
-			mGlucoseManager.deleteAllRecords();
+			glucoseManager.deleteAllRecords();
 			break;
 		}
 		return true;
@@ -127,14 +127,14 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 
 	@Override
 	protected void setDefaultUI() {
-		mGlucoseManager.clear();
-		mBatteryLevelView.setText(R.string.not_available);
+		glucoseManager.clear();
+		batteryLevelView.setText(R.string.not_available);
 	}
 
 	private void setOperationInProgress(final boolean progress) {
 		runOnUiThread(() -> {
-			mControlPanelStd.setVisibility(!progress ? View.VISIBLE : View.GONE);
-			mControlPanelAbort.setVisibility(progress ? View.VISIBLE : View.GONE);
+			controlPanelStd.setVisibility(!progress ? View.VISIBLE : View.GONE);
+			controlPanelAbort.setVisibility(progress ? View.VISIBLE : View.GONE);
 		});
 	}
 
@@ -142,55 +142,55 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 	public void onDeviceDisconnected(@NonNull final BluetoothDevice device) {
 		super.onDeviceDisconnected(device);
 		setOperationInProgress(false);
-		runOnUiThread(() -> mBatteryLevelView.setText(R.string.not_available));
+		runOnUiThread(() -> batteryLevelView.setText(R.string.not_available));
 	}
 
 	@Override
-	public void onOperationStarted(final BluetoothDevice device) {
+	public void onOperationStarted(@NonNull final BluetoothDevice device) {
 		setOperationInProgress(true);
 	}
 
 	@Override
-	public void onOperationCompleted(final BluetoothDevice device) {
+	public void onOperationCompleted(@NonNull final BluetoothDevice device) {
 		setOperationInProgress(false);
 
 		runOnUiThread(() -> {
-			final SparseArray<GlucoseRecord> records = mGlucoseManager.getRecords();
+			final SparseArray<GlucoseRecord> records = glucoseManager.getRecords();
 			if (records.size() > 0) {
 				final int unit = records.valueAt(0).unit;
-				mUnitView.setVisibility(View.VISIBLE);
-				mUnitView.setText(unit == GlucoseRecord.UNIT_kgpl ? R.string.gls_unit_mgpdl : R.string.gls_unit_mmolpl);
+				unitView.setVisibility(View.VISIBLE);
+				unitView.setText(unit == GlucoseRecord.UNIT_kgpl ? R.string.gls_unit_mgpdl : R.string.gls_unit_mmolpl);
 			} else {
-				mUnitView.setVisibility(View.GONE);
+				unitView.setVisibility(View.GONE);
 			}
-			mAdapter.notifyDataSetChanged();
+			adapter.notifyDataSetChanged();
 		});
 	}
 
 	@Override
-	public void onOperationAborted(final BluetoothDevice device) {
+	public void onOperationAborted(@NonNull final BluetoothDevice device) {
 		setOperationInProgress(false);
 	}
 
 	@Override
-	public void onOperationNotSupported(final BluetoothDevice device) {
+	public void onOperationNotSupported(@NonNull final BluetoothDevice device) {
 		setOperationInProgress(false);
 		showToast(R.string.gls_operation_not_supported);
 	}
 
 	@Override
-	public void onOperationFailed(final BluetoothDevice device) {
+	public void onOperationFailed(@NonNull final BluetoothDevice device) {
 		setOperationInProgress(false);
 		showToast(R.string.gls_operation_failed);
 	}
 
 	@Override
-	public void onDatasetChanged(final BluetoothDevice device) {
+	public void onDataSetChanged(@NonNull final BluetoothDevice device) {
 		// Do nothing. Refreshing the list is done in onOperationCompleted
 	}
 
 	@Override
-	public void onNumberOfRecordsRequested(final BluetoothDevice device, final int value) {
+	public void onNumberOfRecordsRequested(@NonNull final BluetoothDevice device, final int value) {
 		if (value == 0)
 			showToast(R.string.gls_progress_zero);
 		else
@@ -199,6 +199,6 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 
 	@Override
 	public void onBatteryLevelChanged(@NonNull final BluetoothDevice device, final int batteryLevel) {
-		runOnUiThread(() -> mBatteryLevelView.setText(getString(R.string.battery, batteryLevel)));
+		runOnUiThread(() -> batteryLevelView.setText(getString(R.string.battery, batteryLevel)));
 	}
 }

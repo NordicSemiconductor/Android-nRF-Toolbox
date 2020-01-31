@@ -45,10 +45,10 @@ public class ScannerActivity extends Activity {
 
 	private static final int PERMISSION_REQUEST_LOCATION = 1;
 
-	private DevicesAdapter mDeviceAdapter;
-	private View mHeader;
+	private DevicesAdapter deviceAdapter;
+	private View header;
 
-	private BroadcastReceiver mServiceBroadcastReceiver = new BroadcastReceiver() {
+	private BroadcastReceiver serviceBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			final String action = intent.getAction();
@@ -57,7 +57,7 @@ public class ScannerActivity extends Activity {
 				case BleProfileService.BROADCAST_CONNECTION_STATE: {
 					final int state = intent.getIntExtra(BleProfileService.EXTRA_CONNECTION_STATE, BleProfileService.STATE_DISCONNECTED);
 					if (state == BleProfileService.STATE_DISCONNECTED)
-						mDeviceAdapter.setConnectingPosition(-1);
+						deviceAdapter.setConnectingPosition(-1);
 					break;
 				}
 				case BleProfileService.BROADCAST_DEVICE_READY: {
@@ -68,7 +68,7 @@ public class ScannerActivity extends Activity {
 				}
 				case BleProfileService.BROADCAST_DEVICE_NOT_SUPPORTED: {
 					Toast.makeText(ScannerActivity.this, R.string.devices_list_device_not_supported, Toast.LENGTH_SHORT).show();
-					mDeviceAdapter.setConnectingPosition(-1);
+					deviceAdapter.setConnectingPosition(-1);
 					break;
 				}
 				case BleProfileService.BROADCAST_ERROR: {
@@ -79,7 +79,7 @@ public class ScannerActivity extends Activity {
 					break;
 				}
 				case BleProfileService.BROADCAST_BOND_STATE: {
-					mDeviceAdapter.notifyDataSetChanged(); // TODO check this. Bonding was never tested.
+					deviceAdapter.notifyDataSetChanged(); // TODO check this. Bonding was never tested.
 					break;
 				}
 			}
@@ -93,21 +93,21 @@ public class ScannerActivity extends Activity {
 
 		// Get the list component from the layout of the activity
 		final WearableListView listView = findViewById(R.id.devices_list);
-		listView.setAdapter(mDeviceAdapter = new DevicesAdapter(listView));
-		listView.setClickListener(mOnRowClickListener);
-		listView.addOnScrollListener(mOnScrollListener);
+		listView.setAdapter(deviceAdapter = new DevicesAdapter(listView));
+		listView.setClickListener(onRowClickListener);
+		listView.addOnScrollListener(onScrollListener);
 
 		// The header will be moved as the list is scrolled
-		mHeader = findViewById(R.id.header);
+		header = findViewById(R.id.header);
 
 		// Register a broadcast receiver that will listen for events from the service.
-		LocalBroadcastManager.getInstance(this).registerReceiver(mServiceBroadcastReceiver, BleProfileService.makeIntentFilter());
+		LocalBroadcastManager.getInstance(this).registerReceiver(serviceBroadcastReceiver, BleProfileService.makeIntentFilter());
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		LocalBroadcastManager.getInstance(this).unregisterReceiver(mServiceBroadcastReceiver);
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(serviceBroadcastReceiver);
 	}
 
 	@Override
@@ -115,7 +115,7 @@ public class ScannerActivity extends Activity {
 		switch (requestCode) {
 			case PERMISSION_REQUEST_LOCATION:
 				if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-					mDeviceAdapter.startLeScan();
+					deviceAdapter.startLeScan();
 				} else {
 					Toast.makeText(ScannerActivity.this, "Location permission required", Toast.LENGTH_SHORT).show();
 					finish();
@@ -134,32 +134,32 @@ public class ScannerActivity extends Activity {
 				return;
 			}
 		}
-		mDeviceAdapter.startLeScan();
+		deviceAdapter.startLeScan();
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		mDeviceAdapter.stopLeScan();
+		deviceAdapter.stopLeScan();
 	}
 
 	/** List click listener. */
-	private WearableListView.ClickListener mOnRowClickListener = new WearableListView.ClickListener() {
+	private WearableListView.ClickListener onRowClickListener = new WearableListView.ClickListener() {
 		@Override
 		public void onClick(final WearableListView.ViewHolder holder) {
 			final DevicesAdapter.ItemViewHolder viewHolder = (DevicesAdapter.ItemViewHolder) holder;
 			final BluetoothDevice device = viewHolder.getDevice();
 
 			if (device != null) {
-				mDeviceAdapter.stopLeScan();
-				mDeviceAdapter.setConnectingPosition(holder.getAdapterPosition());
+				deviceAdapter.stopLeScan();
+				deviceAdapter.setConnectingPosition(holder.getAdapterPosition());
 
 				// Start the service that will connect to selected device
 				final Intent service = new Intent(ScannerActivity.this, BleProfileService.class);
 				service.putExtra(BleProfileService.EXTRA_DEVICE_ADDRESS, device.getAddress());
 				startService(service);
 			} else {
-				mDeviceAdapter.startLeScan();
+				deviceAdapter.startLeScan();
 			}
 		}
 
@@ -170,13 +170,13 @@ public class ScannerActivity extends Activity {
 	};
 
 	/** The following code ensures that the title scrolls as the user scrolls up or down the list/ */
-	private WearableListView.OnScrollListener mOnScrollListener = new WearableListView.OnScrollListener() {
+	private WearableListView.OnScrollListener onScrollListener = new WearableListView.OnScrollListener() {
 		@Override
 		public void onAbsoluteScrollChange(final int i) {
 			if (i > 0)
-				mHeader.setY(-i);
+				header.setY(-i);
 			else
-				mHeader.setY(0);
+				header.setY(0);
 		}
 
 		@Override

@@ -27,9 +27,9 @@ import androidx.annotation.NonNull;
 
 import no.nordicsemi.android.nrftoolbox.battery.BatteryManagerCallbacks;
 
-public interface CGMSManagerCallbacks extends BatteryManagerCallbacks {
+interface CGMSManagerCallbacks extends BatteryManagerCallbacks {
 
-	void onCGMValueReceived(@NonNull final BluetoothDevice device, final CGMSRecord record);
+	void onCGMValueReceived(@NonNull final BluetoothDevice device, @NonNull final CGMSRecord record);
 
 	void onOperationStarted(final @NonNull BluetoothDevice device);
 
@@ -41,7 +41,7 @@ public interface CGMSManagerCallbacks extends BatteryManagerCallbacks {
 
 	void onOperationNotSupported(final @NonNull BluetoothDevice device);
 
-	void onDatasetCleared(final @NonNull BluetoothDevice device);
+	void onDataSetCleared(final @NonNull BluetoothDevice device);
 
 	void onNumberOfRecordsRequested(final @NonNull BluetoothDevice device, final int value);
 

@@ -30,21 +30,23 @@ import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import no.nordicsemi.android.nrftoolbox.R;
 
 public class UARTConfigurationsAdapter extends CursorAdapter {
-	final Context mContext;
-	final ActionListener mListener;
+	final Context context;
+	final ActionListener listener;
 
 	public interface ActionListener {
 		void onNewConfigurationClick();
 		void onImportClick();
 	}
 
-	public UARTConfigurationsAdapter(final Context context, final ActionListener listener, final Cursor c) {
+	public UARTConfigurationsAdapter(@NonNull final Context context, final ActionListener listener, final Cursor c) {
 		super(context, c, 0);
-		mContext = context;
-		mListener = listener;
+		this.context = context;
+		this.listener = listener;
 	}
 
 	@Override
@@ -83,7 +85,7 @@ public class UARTConfigurationsAdapter extends CursorAdapter {
 	}
 
 	@Override
-	public View getView(final int position, final View convertView, final ViewGroup parent) {
+	public View getView(final int position, @Nullable final View convertView, @NonNull final ViewGroup parent) {
 		if (position == 0) {
 			// This empty view should never be visible. Only positions 1+ are valid. Position 0 is reserved for action buttons.
 			// It is only created temporally when activity is created.
@@ -93,9 +95,9 @@ public class UARTConfigurationsAdapter extends CursorAdapter {
 	}
 
 	@Override
-	public View getDropDownView(final int position, final View convertView, final ViewGroup parent) {
+	public View getDropDownView(final int position, @Nullable final View convertView, @NonNull final ViewGroup parent) {
 		if (position == 0) {
-			return newToolbarView(mContext, parent);
+			return newToolbarView(context, parent);
 		}
 		if (convertView instanceof ViewGroup)
 			return super.getDropDownView(position - 1, null, parent);
@@ -104,18 +106,18 @@ public class UARTConfigurationsAdapter extends CursorAdapter {
 
 	@Override
 	public View newView(final Context context, final Cursor cursor, final ViewGroup parent) {
-		return LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_spinner_item, parent, false);
+		return LayoutInflater.from(context).inflate(android.R.layout.simple_spinner_item, parent, false);
 	}
 
 	@Override
 	public View newDropDownView(final Context context, final Cursor cursor, final ViewGroup parent) {
-		return LayoutInflater.from(mContext).inflate(R.layout.feature_uart_dropdown_item, parent, false);
+		return LayoutInflater.from(context).inflate(R.layout.feature_uart_dropdown_item, parent, false);
 	}
 
 	public View newToolbarView(final Context context, final ViewGroup parent) {
 		final View view = LayoutInflater.from(context).inflate(R.layout.feature_uart_dropdown_title, parent, false);
-		view.findViewById(R.id.action_add).setOnClickListener(v -> mListener.onNewConfigurationClick());
-		view.findViewById(R.id.action_import).setOnClickListener(v -> mListener.onImportClick());
+		view.findViewById(R.id.action_add).setOnClickListener(v -> listener.onNewConfigurationClick());
+		view.findViewById(R.id.action_import).setOnClickListener(v -> listener.onImportClick());
 		return view;
 	}
 

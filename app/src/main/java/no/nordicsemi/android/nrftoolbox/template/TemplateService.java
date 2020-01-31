@@ -55,9 +55,9 @@ public class TemplateService extends BleProfileService implements TemplateManage
     private final static int OPEN_ACTIVITY_REQ = 0;
     private final static int DISCONNECT_REQ = 1;
 
-    private TemplateManager mManager;
+    private TemplateManager manager;
 
-    private final LocalBinder mBinder = new TemplateBinder();
+    private final LocalBinder binder = new TemplateBinder();
 
     /**
      * This local binder is an interface for the bound activity to operate with the sensor.
@@ -70,19 +70,19 @@ public class TemplateService extends BleProfileService implements TemplateManage
          *
          * @param parameter some parameter.
          */
-        public void performAction(final String parameter) {
-            mManager.performAction(parameter);
+        void performAction(final String parameter) {
+            manager.performAction(parameter);
         }
     }
 
     @Override
     protected LocalBinder getBinder() {
-        return mBinder;
+        return binder;
     }
 
     @Override
     protected LoggableBleManager<TemplateManagerCallbacks> initializeManager() {
-        return mManager = new TemplateManager(this);
+        return manager = new TemplateManager(this);
     }
 
     @Override
@@ -91,14 +91,14 @@ public class TemplateService extends BleProfileService implements TemplateManage
 
         final IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_DISCONNECT);
-        registerReceiver(mDisconnectActionBroadcastReceiver, filter);
+        registerReceiver(disconnectActionBroadcastReceiver, filter);
     }
 
     @Override
     public void onDestroy() {
         // when user has disconnected from the sensor, we have to cancel the notification that we've created some milliseconds before using unbindService
         stopForegroundService();
-        unregisterReceiver(mDisconnectActionBroadcastReceiver);
+        unregisterReceiver(disconnectActionBroadcastReceiver);
 
         super.onDestroy();
     }
@@ -120,7 +120,7 @@ public class TemplateService extends BleProfileService implements TemplateManage
         broadcast.putExtra(EXTRA_DATA, value);
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
 
-        if (!mBound) {
+        if (!bound) {
             // Here we may update the notification to display the current value.
             // TODO modify the notification here
         }
@@ -166,6 +166,7 @@ public class TemplateService extends BleProfileService implements TemplateManage
      *                     f.e. <code>&lt;string name="name"&gt;%s is connected&lt;/string&gt;</code>
      * @param defaults     signals that will be used to notify the user
      */
+    @SuppressWarnings("SameParameterValue")
     private Notification createNotification(final int messageResId, final int defaults) {
         final Intent parentIntent = new Intent(this, FeaturesActivity.class);
         parentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -197,7 +198,7 @@ public class TemplateService extends BleProfileService implements TemplateManage
     /**
      * This broadcast receiver listens for {@link #ACTION_DISCONNECT} that may be fired by pressing Disconnect action button on the notification.
      */
-    private final BroadcastReceiver mDisconnectActionBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver disconnectActionBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             Logger.i(getLogSession(), "[Notification] Disconnect action pressed");

@@ -25,6 +25,8 @@ package no.nordicsemi.android.nrftoolbox.dfu;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import no.nordicsemi.android.nrftoolbox.R;
@@ -52,7 +54,7 @@ public class DfuInitiatorActivity extends AppCompatActivity implements ScannerFr
 	}
 
 	@Override
-	public void onDeviceSelected(final BluetoothDevice device, final String name) {
+	public void onDeviceSelected(@NonNull final BluetoothDevice device, final String name) {
 		final Intent intent = getIntent();
 		final String overwrittenName = intent.getStringExtra(DfuService.EXTRA_DEVICE_NAME);
 		final String path = intent.getStringExtra(DfuService.EXTRA_FILE_PATH);
