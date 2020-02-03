@@ -105,7 +105,7 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 	}
 
 	@Override
-	public void onDeviceConnected(final BluetoothDevice device) {
+	public void onDeviceConnected(@NonNull final BluetoothDevice device) {
 		if (adapter != null)
 			adapter.onDeviceStateChanged(device);
 	}
@@ -123,7 +123,7 @@ public class ProximityActivity extends BleMulticonnectProfileServiceReadyActivit
 	}
 
 	@Override
-	public void onDeviceDisconnected(final BluetoothDevice device) {
+	public void onDeviceDisconnected(@NonNull final BluetoothDevice device) {
 		if (adapter != null)
 			adapter.onDeviceRemoved(device);
 	}

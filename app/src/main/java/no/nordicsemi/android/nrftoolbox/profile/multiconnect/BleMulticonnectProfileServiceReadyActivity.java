@@ -173,10 +173,12 @@ public abstract class BleMulticonnectProfileServiceReadyActivity<E extends BleMu
 			managedDevices.addAll(bleService.getManagedDevices());
 			onServiceBound(bleService);
 
-			// and notify user if device is connected
+			// and notify user if device is connected and ready
 			for (final BluetoothDevice device : managedDevices) {
 				if (bleService.isConnected(device))
 					onDeviceConnected(device);
+				if (bleService.isReady(device))
+					onDeviceReady(device);
 			}
 		}
 
