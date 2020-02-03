@@ -34,7 +34,7 @@ import no.nordicsemi.android.nrftoolbox.ble.BleManager;
 import no.nordicsemi.android.nrftoolbox.ble.BleProfile;
 import no.nordicsemi.android.nrftoolbox.ble.BleProfileApi;
 
-class UARTProfile extends BleProfile {
+public class UARTProfile extends BleProfile {
 	/** Broadcast sent when a UART message is received. */
 	static final String BROADCAST_DATA_RECEIVED = "no.nordicsemi.android.nrftoolbox.uart.BROADCAST_DATA_RECEIVED";
 	/** The message. */
