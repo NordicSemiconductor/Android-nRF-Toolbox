@@ -69,7 +69,7 @@ The wearable application may work in 2 modes: as a remote control of the phone, 
 
     ![Scenario 1](resources/scenario_1.png)
 
-2. Open the applications menu on Android Wear watch and click nRF Toolbox. The watch will now scan for all nearby Bluetooth Smart devices and show you them on a list. Select your UART device to connect to it. A list of your configurations will be shown, like in 1. As that was a direct connection from the watch to the UART target the phone, or any other watch will not be notified about it.
+2. Open the applications menu on Android Wear watch and click nRF Toolbox. The watch will now scan for all nearby Bluetooth LE devices and show you them on a list. Select your UART device to connect to it. A list of your configurations will be shown, like in 1. As that was a direct connection from the watch to the UART target the phone, or any other watch will not be notified about it.
 
     ![Scenario 2](resources/scenario_2.png)
 
@@ -84,7 +84,6 @@ The DFU has the following features:
 - Allows to update a soft device and bootloader from ZIP in one connection.
 - Pause, resume, and cancel file uploads.
 - Works in portrait and landscape orientation.
-- Includes pre-installed examples that consist of the Bluetooth Smart heart rate service and running speed and cadence service.
 - **Secure DFU** is supported since nRF Toolbox 1.17.0.
 
 #### DFU Settings

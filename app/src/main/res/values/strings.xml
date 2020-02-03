@@ -64,7 +64,7 @@
 	<string name="scanner_action_cancel">Cancel</string>
 	<string name="scanner_subtitle_bonded">BONDED DEVICES:</string>
 	<string name="scanner_subtitle_not_bonded">AVAILABLE DEVICES:</string>
-	<string name="scanner_permission_rationale">Since Android 6.0 Marshmallow system requires granting access to device\'s location in order to scan for Bluetooth Smart devices. Bluetooth beacons may be used to determine the phone\'s and user\'s location.</string>
+	<string name="scanner_permission_rationale">Since Android 6.0 Marshmallow system requires granting access to device\'s location in order to scan for Bluetooth LE devices. Bluetooth beacons may be used to determine the phone\'s and user\'s location.</string>
 
 	<string name="log" formatted="false">%1$tR:%1$tS.%1$tL</string>
 

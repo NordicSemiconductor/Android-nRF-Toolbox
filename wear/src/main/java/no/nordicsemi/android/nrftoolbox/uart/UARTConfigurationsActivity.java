@@ -33,6 +33,8 @@ import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+
+import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.support.wearable.view.WearableListView;
 import android.widget.Toast;
@@ -170,7 +172,7 @@ public class UARTConfigurationsActivity extends Activity implements GoogleApiCli
 	}
 
 	@Override
-	public void onConnectionFailed(final ConnectionResult connectionResult) {
+	public void onConnectionFailed(@NonNull final ConnectionResult connectionResult) {
 		finish();
 	}
 

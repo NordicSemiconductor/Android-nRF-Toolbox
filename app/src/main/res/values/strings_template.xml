@@ -48,6 +48,6 @@
 	</string-array>
     
     <string name="template_about_text">This is an empty profile that may be easily adopted to match customer requirements.
-		The Bluetooth Smart connection is handled by the Manager in Template Service.
+		The Bluetooth Low Energy connection is handled by the Manager in Template Service.
 		\n\nBy default this profile displays the Heart Rate value.</string>
 </resources>

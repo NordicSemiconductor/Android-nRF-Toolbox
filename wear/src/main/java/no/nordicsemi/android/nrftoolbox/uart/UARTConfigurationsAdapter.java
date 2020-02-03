@@ -35,18 +35,18 @@ import androidx.annotation.NonNull;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.uart.domain.UartConfiguration;
 
-public class UARTConfigurationsAdapter extends WearableListView.Adapter {
+class UARTConfigurationsAdapter extends WearableListView.Adapter {
 	private final LayoutInflater inflater;
 	private List<UartConfiguration> configurations;
 
-	public UARTConfigurationsAdapter(final Context context) {
+	UARTConfigurationsAdapter(final Context context) {
 		inflater = LayoutInflater.from(context);
 	}
 
 	/**
 	 * Populates the adapter with list of configurations.
 	 */
-	public void setConfigurations(final List<UartConfiguration> configurations) {
+	void setConfigurations(final List<UartConfiguration> configurations) {
 		this.configurations = configurations;
 		notifyDataSetChanged();
 	}
@@ -68,11 +68,11 @@ public class UARTConfigurationsAdapter extends WearableListView.Adapter {
 		return configurations != null ? configurations.size() : 0;
 	}
 
-	public static class ConfigurationViewHolder extends WearableListView.ViewHolder {
+	static class ConfigurationViewHolder extends WearableListView.ViewHolder {
 		private UartConfiguration configuration;
 		private TextView name;
 
-		public ConfigurationViewHolder(final View itemView) {
+		ConfigurationViewHolder(final View itemView) {
 			super(itemView);
 
 			name = itemView.findViewById(R.id.name);
@@ -83,7 +83,7 @@ public class UARTConfigurationsAdapter extends WearableListView.Adapter {
 			name.setText(configuration.getName());
 		}
 
-		public UartConfiguration getConfiguration() {
+		UartConfiguration getConfiguration() {
 			return configuration;
 		}
 	}

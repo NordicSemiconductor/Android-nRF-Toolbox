@@ -49,7 +49,7 @@ import no.nordicsemi.android.nrftoolbox.utility.DebugLogger;
  * The BleManager should be overridden in your app and all the 'high level' callbacks should be called from there.
  * Keeping this file as is (and {@link BleManagerCallbacks} as well) will allow to quickly update it when an update is posted here.
  *
- * <p>The BleManager is responsible for managing the low level communication with a Bluetooth Smart device. Please see profiles implementation for an example of use.
+ * <p>The BleManager is responsible for managing the low level communication with a Bluetooth Low Energy device. Please see profiles implementation for an example of use.
  * This base manager has been tested against number of devices and samples from Nordic SDK.</p>
  * <p>The manager handles connection events and initializes the device after establishing the connection.
  * <ol>
@@ -754,8 +754,15 @@ public class BleManager implements BleProfileApi {
 						initQueue.addFirst(Request.newEnableBatteryLevelNotificationsRequest());
 					// 2. Read Battery Level characteristic (if such does not exist, this will be skipped)
 					initQueue.addFirst(Request.newReadBatteryLevelRequest());
-					// 1. On devices running Android 4.3-6.0 the Service Changed characteristic needs to be enabled by the app (for bonded devices)
-					if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+					// 1. On devices running Android 4.3-5.x, 8.x and 9.0 the Service Changed
+					//    characteristic needs to be enabled by the app (for bonded devices).
+					//    The request will be ignored if there is no Service Changed characteristic.
+					// This "fix" broke this in Android 8:
+					// https://android-review.googlesource.com/c/platform/system/bt/+/239970
+					if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M
+							|| Build.VERSION.SDK_INT == Build.VERSION_CODES.O
+							|| Build.VERSION.SDK_INT == Build.VERSION_CODES.O_MR1
+							|| Build.VERSION.SDK_INT == Build.VERSION_CODES.P)
 						initQueue.addFirst(Request.newEnableServiceChangedIndicationsRequest());
 
 					operationInProgress = false;

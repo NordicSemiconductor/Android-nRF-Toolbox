@@ -33,7 +33,7 @@ import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.uart.domain.Command;
 import no.nordicsemi.android.nrftoolbox.uart.domain.UartConfiguration;
 
-public class UARTCommandsAdapter extends GridPagerAdapter {
+class UARTCommandsAdapter extends GridPagerAdapter {
 	private final OnCommandSelectedListener listener;
 	private UartConfiguration configuration;
 
@@ -41,12 +41,12 @@ public class UARTCommandsAdapter extends GridPagerAdapter {
 		void onCommandSelected(final Command command);
 	}
 
-	public UARTCommandsAdapter(final UartConfiguration configuration, final OnCommandSelectedListener listener) {
+	UARTCommandsAdapter(final UartConfiguration configuration, final OnCommandSelectedListener listener) {
 		this.configuration = configuration;
 		this.listener = listener;
 	}
 
-	public void setConfiguration(final UartConfiguration configuration) {
+	void setConfiguration(final UartConfiguration configuration) {
 		// Configuration is null when it has been deleted on the handheld
 		this.configuration = configuration;
 		notifyDataSetChanged();
