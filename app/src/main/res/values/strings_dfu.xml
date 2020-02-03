@@ -24,14 +24,10 @@
 	<string name="dfu_feature_title">DFU</string>
 	<string name="dfu_service_title">nRF Toolbox DFU Proxy</string>
 	<string name="dfu_settings_title">DFU Settings</string>
-	<string name="dfu_lib_version">DFU Library version 1.9.0</string>
+	<string name="dfu_lib_version">DFU Library version 1.9.1</string>
 
 	<string name="dfu_feature_title_long">DEVICE FIRMWARE UPDATE</string>
 	<dimen name="dfu_feature_title_long_margin">-186dp</dimen>
-	
-	<string name="dfu_example_files_created">Example HEX files were copied to /sdcard/Nordic Semiconductor.</string>
-	<string name="dfu_example_new_files_created">New example HEX files were copied to /sdcard/Nordic Semiconductor.</string>
-	<string name="dfu_scripts_created">DFU script files were copied to /sdcard/Nordic Semiconductor.</string>
 	
 	<string name="dfu_section_application_header">APPLICATION</string>
 	<string name="dfu_file_name_label">File name:</string>
@@ -105,7 +101,6 @@
 		<item>Application only</item>
 	</string-array>
 	
-	<string name="dfu_unknown_name">unnamed device</string>
 	<string name="dfu_uploading_percentage_label">0%</string>
 	<string name="dfu_uploading_percentage">%d%%</string>
 	<string name="dfu_default_name">DEFAULT DFU</string>
@@ -127,8 +122,7 @@
 		\n\n<b>Backward compatibility</b>
 		\nThe nRF Toolbox also supports all old file formats: HEX and BIN files, separate DAT files and ZIP files without a manifest file but with a fixed naming convention:
 </string>
-	<string name="dfu_about_text">The Device Firmware Update (DFU) app allows you to update the firmware of your Bluetooth Smart device over-the-air (OTA).
-		It is compatible with Nordic Semiconductor nRF51822 or nRF51422 devices with S110 SoftDevice and DFU bootloader enabled. With SoftDevice s110 7.0.0+,
-		the SoftDevice itself and/or a bootloader may also be updated.
+	<string name="dfu_about_text">The Device Firmware Update (DFU) app allows you to update the firmware of your Bluetooth LE device over-the-air (OTA).
+		It is compatible with Nordic Semiconductor nRF5 devices with DFU bootloader enabled.
 		\n\nFor more information about the DFU, see the About DFU section in Settings.</string>
 </resources>

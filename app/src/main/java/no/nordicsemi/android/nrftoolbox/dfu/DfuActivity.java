@@ -21,14 +21,12 @@
  */
 package no.nordicsemi.android.nrftoolbox.dfu;
 
-import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.app.NotificationManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -42,13 +40,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.DialogFragment;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -62,12 +53,16 @@ import android.widget.Toast;
 
 import java.io.File;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import no.nordicsemi.android.dfu.DfuProgressListener;
 import no.nordicsemi.android.dfu.DfuProgressListenerAdapter;
 import no.nordicsemi.android.dfu.DfuServiceInitiator;
 import no.nordicsemi.android.dfu.DfuServiceListenerHelper;
 import no.nordicsemi.android.nrftoolbox.AppHelpFragment;
-import no.nordicsemi.android.nrftoolbox.PermissionRationaleFragment;
 import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.dfu.adapter.FileBrowserAppsAdapter;
 import no.nordicsemi.android.nrftoolbox.dfu.fragment.UploadCancelFragment;
@@ -75,15 +70,14 @@ import no.nordicsemi.android.nrftoolbox.dfu.fragment.ZipInfoFragment;
 import no.nordicsemi.android.nrftoolbox.dfu.settings.SettingsActivity;
 import no.nordicsemi.android.nrftoolbox.dfu.settings.SettingsFragment;
 import no.nordicsemi.android.nrftoolbox.scanner.ScannerFragment;
-import no.nordicsemi.android.nrftoolbox.utility.FileHelper;
 
 /**
- * DfuActivity is the main DFU activity It implements DFUManagerCallbacks to receive callbacks from DFUManager class It implements
- * DeviceScannerFragment.OnDeviceSelectedListener callback to receive callback when device is selected from scanning dialog The activity supports portrait and
+ * DfuActivity is the main DFU activity It implements DFUManagerCallbacks to receive callbacks from
+ * DfuManager class It implements DeviceScannerFragment.OnDeviceSelectedListener callback to receive callback when device is selected from scanning dialog The activity supports portrait and
  * landscape orientations
  */
 public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cursor>, ScannerFragment.OnDeviceSelectedListener,
-		UploadCancelFragment.CancelFragmentListener, PermissionRationaleFragment.PermissionDialogListener {
+		UploadCancelFragment.CancelFragmentListener {
 	private static final String TAG = "DfuActivity";
 
 	private static final String PREFS_DEVICE_NAME = "no.nordicsemi.android.nrftoolbox.dfu.PREFS_DEVICE_NAME";
@@ -106,7 +100,6 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 
 	private static final String EXTRA_URI = "uri";
 
-	private static final int PERMISSION_REQ = 25;
 	private static final int ENABLE_BT_REQ = 0;
 	private static final int SELECT_FILE_REQ = 1;
 	private static final int SELECT_INIT_FILE_REQ = 2;
@@ -248,16 +241,6 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		}
 		setGUI();
 
-		// Try to create sample files
-		if (FileHelper.newSamplesAvailable(this)) {
-			if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-				FileHelper.createSamples(this);
-			} else {
-				final DialogFragment dialog = PermissionRationaleFragment.getInstance(R.string.permission_sd_text, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-				dialog.show(getSupportFragmentManager(), null);
-			}
-		}
-
 		// restore saved state
 		fileType = DfuService.TYPE_AUTO; // Default
 		if (savedInstanceState != null) {
@@ -355,27 +338,6 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 		resumed = false;
 	}
 
-	@Override
-	public void onRequestPermission(final String permission) {
-		ActivityCompat.requestPermissions(this, new String[] { permission }, PERMISSION_REQ);
-	}
-
-	@Override
-	public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
-		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-		switch (requestCode) {
-			case PERMISSION_REQ: {
-				if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-					// We have been granted the Manifest.permission.WRITE_EXTERNAL_STORAGE permission. Now we may proceed with exporting.
-					FileHelper.createSamples(this);
-				} else {
-					Toast.makeText(this, R.string.no_required_permission, Toast.LENGTH_SHORT).show();
-				}
-				break;
-			}
-		}
-	}
-
 	private void isBLESupported() {
 		if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
 			showToast(R.string.no_ble);
@@ -384,8 +346,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 	}
 
 	private boolean isBLEEnabled() {
-		final BluetoothManager manager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-		final BluetoothAdapter adapter = manager.getAdapter();
+		final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
 		return adapter != null && adapter.isEnabled();
 	}
 
@@ -425,6 +386,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 
 	@Override
 	protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode != RESULT_OK)
 			return;
 
@@ -437,10 +399,10 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 
 				// and read new one
 				final Uri uri = data.getData();
-			/*
-			 * The URI returned from application may be in 'file' or 'content' schema. 'File' schema allows us to create a File object and read details from if
-			 * directly. Data from 'Content' schema must be read by Content Provider. To do that we are using a Loader.
-			 */
+				/*
+				 * The URI returned from application may be in 'file' or 'content' schema. 'File' schema allows us to create a File object and read details from if
+				 * directly. Data from 'Content' schema must be read by Content Provider. To do that we are using a Loader.
+				 */
 				if (uri.getScheme().equals("file")) {
 					// the direct path to the file has been returned
 					final String path = uri.getPath();
@@ -470,10 +432,10 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 
 				// and read new one
 				final Uri uri = data.getData();
-			/*
-			 * The URI returned from application may be in 'file' or 'content' schema. 'File' schema allows us to create a File object and read details from if
-			 * directly. Data from 'Content' schema must be read by Content Provider. To do that we are using a Loader.
-			 */
+				/*
+				 * The URI returned from application may be in 'file' or 'content' schema. 'File' schema allows us to create a File object and read details from if
+				 * directly. Data from 'Content' schema must be read by Content Provider. To do that we are using a Loader.
+				 */
 				if (uri.getScheme().equals("file")) {
 					// the direct path to the file has been returned
 					initFilePath = uri.getPath();

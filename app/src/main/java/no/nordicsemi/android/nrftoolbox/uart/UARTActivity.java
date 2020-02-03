@@ -82,6 +82,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.util.UUID;
@@ -113,7 +114,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	private final static String SIS_EDIT_MODE = "sis_edit_mode";
 
 	private final static int SELECT_FILE_REQ = 2678; // random
-	private final static int PERMISSION_REQ = 24; // random, 8-bit
+	private final static int REQUEST_SAVE = 2679;
 
 	UARTConfigurationSynchronizer wearableSynchronizer;
 
@@ -364,11 +365,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 				return true;
 			}
 			case R.id.action_export: {
-				if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-					exportConfiguration();
-				} else {
-					ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE }, PERMISSION_REQ);
-				}
+				exportConfiguration();
 				return true;
 			}
 			case R.id.action_rename: {
@@ -406,22 +403,6 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	}
 
 	@Override
-	public void onRequestPermissionsResult(final int requestCode, final @NonNull String[] permissions, final @NonNull int[] grantResults) {
-		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-		switch (requestCode) {
-			case PERMISSION_REQ: {
-				if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-					// We have been granted the Manifest.permission.WRITE_EXTERNAL_STORAGE permission. Now we may proceed with exporting.
-					exportConfiguration();
-				} else {
-					Toast.makeText(this, R.string.no_required_permission, Toast.LENGTH_SHORT).show();
-				}
-				break;
-			}
-		}
-	}
-
-	@Override
 	public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
 		if (position > 0) { // FIXME this is called twice after rotation.
 			try {
@@ -441,7 +422,14 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 				else
 					message = "Unknown error";
 				final String msg = message;
-				Snackbar.make(container, R.string.uart_configuration_loading_failed, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_details, v -> new AlertDialog.Builder(UARTActivity.this).setMessage(msg).setTitle(R.string.uart_action_details).setPositiveButton(R.string.ok, null).show()).show();
+				Snackbar.make(container, R.string.uart_configuration_loading_failed, Snackbar.LENGTH_INDEFINITE)
+						.setAction(R.string.uart_action_details, v ->
+								new AlertDialog.Builder(UARTActivity.this)
+										.setMessage(msg)
+										.setTitle(R.string.uart_action_details)
+										.setPositiveButton(R.string.ok, null)
+										.show())
+						.show();
 				return;
 			}
 
@@ -484,14 +472,19 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			appsList.setAdapter(new FileBrowserAppsAdapter(this));
 			appsList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 			appsList.setItemChecked(0, true);
-			new AlertDialog.Builder(this).setTitle(R.string.dfu_alert_no_filebrowser_title).setView(customView).setNegativeButton(R.string.no, (dialog, which) -> dialog.dismiss()).setPositiveButton(R.string.yes, (dialog, which) -> {
-				final int pos = appsList.getCheckedItemPosition();
-				if (pos >= 0) {
-					final String query = getResources().getStringArray(R.array.dfu_app_file_browser_action)[pos];
-					final Intent storeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(query));
-					startActivity(storeIntent);
-				}
-			}).show();
+			new AlertDialog.Builder(this)
+					.setTitle(R.string.dfu_alert_no_filebrowser_title)
+					.setView(customView)
+					.setNegativeButton(R.string.no, (dialog, which) -> dialog.dismiss())
+					.setPositiveButton(R.string.yes, (dialog, which) -> {
+						final int pos = appsList.getCheckedItemPosition();
+						if (pos >= 0) {
+							final String query = getResources().getStringArray(R.array.dfu_app_file_browser_action)[pos];
+							final Intent storeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(query));
+							startActivity(storeIntent);
+						}
+					})
+					.show();
 		}
 	}
 
@@ -499,17 +492,18 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 
-		if (resultCode == Activity.RESULT_CANCELED)
+
+		Uri uri = data != null ? data.getData() : null;
+		if (resultCode == Activity.RESULT_CANCELED || uri == null)
 			return;
 
 		switch (requestCode) {
 			case SELECT_FILE_REQ: {
-				// clear previous data
-				final Uri uri = data.getData();
 				/*
 				 * The URI returned from application may be in 'file' or 'content' schema.
 				 * 'File' schema allows us to create a File object and read details from if directly.
-				 * Data from 'Content' schema must be read with use of a Content Provider. To do that we are using a Loader.
+				 * Data from 'Content' schema must be read with use of a Content Provider.
+				 * To do that we are using a Loader.
 				 */
 				if (uri.getScheme().equals("file")) {
 					// The direct path to the file has been returned
@@ -535,6 +529,19 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 					} catch (final FileNotFoundException e) {
 						Toast.makeText(this, R.string.uart_configuration_load_error, Toast.LENGTH_LONG).show();
 					}
+				}
+				break;
+			}
+			case REQUEST_SAVE: {
+				try {
+					final OutputStream stream = getContentResolver().openOutputStream(uri);
+					final OutputStreamWriter writer = new OutputStreamWriter(stream);
+					writer.append(databaseHelper.getConfiguration(configurationSpinner.getSelectedItemId()));
+					writer.close();
+					Toast.makeText(this, R.string.uart_configuration_export_succeeded, Toast.LENGTH_SHORT).show();
+				} catch (final Exception e) {
+					Log.e(TAG, "Error while exporting server configuration", e);
+					Toast.makeText(this, R.string.uart_configuration_save_error, Toast.LENGTH_SHORT).show();
 				}
 				break;
 			}
@@ -694,7 +701,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	 * Loads the configuration from the given input stream.
 	 * @param is the input stream
 	 */
-	private void loadConfiguration(final InputStream is) {
+	private void loadConfiguration(@NonNull final InputStream is) {
 		try {
 			final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 			final StringBuilder builder = new StringBuilder();
@@ -727,40 +734,62 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			else
 				message = "Unknown error";
 			final String msg = message;
-			Snackbar.make(container, R.string.uart_configuration_loading_failed, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_details, v -> new AlertDialog.Builder(UARTActivity.this).setMessage(msg).setTitle(R.string.uart_action_details).setPositiveButton(R.string.ok, null).show()).show();
+			Snackbar.make(container, R.string.uart_configuration_loading_failed, Snackbar.LENGTH_INDEFINITE)
+					.setAction(R.string.uart_action_details, v ->
+							new AlertDialog.Builder(UARTActivity.this)
+									.setMessage(msg)
+									.setTitle(R.string.uart_action_details)
+									.setPositiveButton(R.string.ok, null)
+									.show())
+					.show();
 		}
 	}
 
 	private void exportConfiguration() {
-		// TODO this may not work if the SD card is not available. (Lenovo A806, email from 11.03.2015)
-		final File folder = new File(Environment.getExternalStorageDirectory(), FileHelper.NORDIC_FOLDER);
-		if (!folder.exists())
-			folder.mkdir();
-		final File serverFolder = new File(folder, FileHelper.UART_FOLDER);
-		if (!serverFolder.exists())
-			serverFolder.mkdir();
-
 		final String fileName = configuration.getName() + ".xml";
-		final File file = new File(serverFolder, fileName);
-		try {
-			file.createNewFile();
-			final FileOutputStream fos = new FileOutputStream(file);
-			final OutputStreamWriter writer = new OutputStreamWriter(fos);
-			writer.append(databaseHelper.getConfiguration(configurationSpinner.getSelectedItemId()));
-			writer.close();
 
-			// Notify user about the file
-			final Intent intent = new Intent(Intent.ACTION_VIEW);
-			intent.setDataAndType(FileHelper.getContentUri(this, file), "text/xml");
-			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			final PendingIntent pendingIntent = PendingIntent.getActivity(this, 420, intent, 0);
-			final Notification notification = new NotificationCompat.Builder(this, ToolboxApplication.FILE_SAVED_CHANNEL).setContentIntent(pendingIntent).setContentTitle(fileName).setContentText(getText(R.string.uart_configuration_export_succeeded))
-					.setAutoCancel(true).setShowWhen(true).setTicker(getText(R.string.uart_configuration_export_succeeded_ticker)).setSmallIcon(android.R.drawable.stat_notify_sdcard).build();
-			final NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-			nm.notify(fileName, 823, notification);
-		} catch (final Exception e) {
-			Log.e(TAG, "Error while exporting configuration", e);
-			Toast.makeText(this, R.string.uart_configuration_save_error, Toast.LENGTH_SHORT).show();
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+			final Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+			intent.addCategory(Intent.CATEGORY_OPENABLE);
+			intent.setType("text/xml");
+			intent.putExtra(Intent.EXTRA_TITLE, fileName);
+			startActivityForResult(intent, REQUEST_SAVE);
+		} else {
+			final File folder = new File(Environment.getExternalStorageDirectory(), FileHelper.NORDIC_FOLDER);
+			if (!folder.exists())
+				folder.mkdir();
+			final File serverFolder = new File(folder, FileHelper.UART_FOLDER);
+			if (!serverFolder.exists())
+				serverFolder.mkdir();
+
+			final File file = new File(serverFolder, fileName);
+			try {
+				file.createNewFile();
+				final FileOutputStream fos = new FileOutputStream(file);
+				final OutputStreamWriter writer = new OutputStreamWriter(fos);
+				writer.append(databaseHelper.getConfiguration(configurationSpinner.getSelectedItemId()));
+				writer.close();
+
+				// Notify user about the file
+				final Intent intent = new Intent(Intent.ACTION_VIEW);
+				intent.setDataAndType(FileHelper.getContentUri(this, file), "text/xml");
+				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				final PendingIntent pendingIntent = PendingIntent.getActivity(this, 420, intent, 0);
+				final Notification notification = new NotificationCompat.Builder(this, ToolboxApplication.FILE_SAVED_CHANNEL)
+						.setContentIntent(pendingIntent)
+						.setContentTitle(fileName)
+						.setContentText(getText(R.string.uart_configuration_export_succeeded))
+						.setAutoCancel(true)
+						.setShowWhen(true)
+						.setTicker(getText(R.string.uart_configuration_export_succeeded_ticker))
+						.setSmallIcon(android.R.drawable.stat_notify_sdcard)
+						.build();
+				final NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+				nm.notify(fileName, 823, notification);
+			} catch (final Exception e) {
+				Log.e(TAG, "Error while exporting configuration", e);
+				Toast.makeText(this, R.string.uart_configuration_save_error, Toast.LENGTH_SHORT).show();
+			}
 		}
 	}
 
@@ -768,7 +797,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	 * Converts the old configuration, stored in preferences, into the first XML configuration and saves it to the database.
 	 * If there is already any configuration in the database this method does nothing.
 	 */
-	private void ensureFirstConfiguration(final DatabaseHelper databaseHelper) {
+	private void ensureFirstConfiguration(@NonNull final DatabaseHelper databaseHelper) {
 		// This method ensures that the "old", single configuration has been saved to the database.
 		if (databaseHelper.getConfigurationsCount() == 0) {
 			final UartConfiguration configuration = new UartConfiguration();
@@ -807,16 +836,16 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	 */
 	private class CommentVisitor implements Visitor {
 		@Override
-		public void read(final Type type, final NodeMap<InputNode> node) throws Exception {
+		public void read(final Type type, final NodeMap<InputNode> node) {
 			// do nothing
 		}
 
 		@Override
-		public void write(final Type type, final NodeMap<OutputNode> node) throws Exception {
+		public void write(final Type type, final NodeMap<OutputNode> node) {
 			if (type.getType().equals(Command[].class)) {
-				OutputNode element = node.getNode();
+				final OutputNode element = node.getNode();
 
-				StringBuilder builder = new StringBuilder("A configuration must have 9 commands, one for each button.\n        Possible icons are:");
+				final StringBuilder builder = new StringBuilder("A configuration must have 9 commands, one for each button.\n        Possible icons are:");
 				for (Command.Icon icon : Command.Icon.values())
 					builder.append("\n          - ").append(icon.toString());
 				element.setComment(builder.toString());
