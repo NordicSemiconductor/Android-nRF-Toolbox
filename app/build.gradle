@@ -8,7 +8,7 @@ android {
         applicationId "no.nordicsemi.android.nrftoolbox"
         minSdkVersion 18
         targetSdkVersion 29
-        versionCode 70
+        versionCode 72
         versionName "2.8.0"
         resConfigs "en"
 
@@ -40,7 +40,7 @@ dependencies {
     //noinspection GradleDependency
     implementation 'com.google.android.gms:play-services-wearable:10.2.0'
 
-    implementation 'androidx.appcompat:appcompat:1.2.0-alpha01'
+    implementation 'androidx.appcompat:appcompat:1.2.0-alpha02'
     implementation 'androidx.preference:preference:1.1.0'
     implementation 'com.google.android.material:material:1.2.0-alpha04'
 
