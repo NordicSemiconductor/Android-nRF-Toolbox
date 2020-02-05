@@ -8,8 +8,8 @@ android {
         applicationId "no.nordicsemi.android.nrftoolbox"
         minSdkVersion 18
         targetSdkVersion 29
-        versionCode 72
-        versionName "2.8.0"
+        versionCode 73
+        versionName "2.8.1"
         resConfigs "en"
 
         vectorDrawables.useSupportLibrary = true
@@ -17,10 +17,12 @@ android {
     buildTypes {
         debug {
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         release {
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
