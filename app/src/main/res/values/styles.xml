@@ -98,7 +98,12 @@
 	</style>
 
 	<style name="Widget.Connect" parent="@style/Widget.MaterialComponents.Button">
-		<item name="android:theme">@style/ConnectTheme</item>
+		<!--
+		This needs to be theme, not android:theme, otherwise clicking the button causes
+		a crash on Android 6.0. The parent activity is replaced with ThemeContextWrapper and
+		causes onClick attribute in XML to fail find the target.
+		-->
+		<item name="theme">@style/ConnectTheme</item>
 		<item name="android:minWidth">200dp</item>
 		<item name="android:minHeight">52dp</item>
 	</style>
