@@ -8,8 +8,8 @@ android {
         applicationId "no.nordicsemi.android.nrftoolbox"
         minSdkVersion 18
         targetSdkVersion 29
-        versionCode 73
-        versionName "2.8.1"
+        versionCode 74
+        versionName "2.8.2"
         resConfigs "en"
 
         vectorDrawables.useSupportLibrary = true
