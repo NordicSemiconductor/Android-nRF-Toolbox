@@ -50,7 +50,7 @@ dependencies {
     implementation 'no.nordicsemi.android.support.v18:scanner:1.4.3'
 
     // The DFU Library is imported automatically from jcenter:
-    implementation 'no.nordicsemi.android:dfu:1.9.1'
+    implementation 'no.nordicsemi.android:dfu:1.10.0'
     // if you desire to build the DFU Library, clone the
     // https://github.com/NordicSemiconductor/Android-DFU-Library project into DFULibrary folder,
     // add it as a module into the project structure and uncomment the following line
@@ -60,7 +60,6 @@ dependencies {
     // Gson is needed for DFU to work. The DFU library dependency to Gson is internal and would
     // not be attached to APK.
     // See: https://github.com/NordicSemiconductor/Android-nRF-Toolbox/issues/86
-    implementation 'com.google.code.gson:gson:2.8.6'
 
     // Import the BLE Common Library.
     // The BLE Common Library depends on BLE Library. It is enough to include the first one.

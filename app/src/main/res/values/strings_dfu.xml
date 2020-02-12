@@ -24,7 +24,7 @@
 	<string name="dfu_feature_title">DFU</string>
 	<string name="dfu_service_title">nRF Toolbox DFU Proxy</string>
 	<string name="dfu_settings_title">DFU Settings</string>
-	<string name="dfu_lib_version">DFU Library version 1.9.1</string>
+	<string name="dfu_lib_version">DFU Library version 1.10.0</string>
 
 	<string name="dfu_feature_title_long">DEVICE FIRMWARE UPDATE</string>
 	<dimen name="dfu_feature_title_long_margin">-186dp</dimen>

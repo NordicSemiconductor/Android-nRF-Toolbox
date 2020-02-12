@@ -703,6 +703,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 				.setForceDfu(forceDfu)
 				.setPacketsReceiptNotificationsEnabled(enablePRNs)
 				.setPacketsReceiptNotificationsValue(numberOfPackets)
+				.setPrepareDataObjectDelay(400)
 				.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true);
 		if (fileType == DfuService.TYPE_AUTO) {
 			starter.setZip(fileStreamUri, filePath);
