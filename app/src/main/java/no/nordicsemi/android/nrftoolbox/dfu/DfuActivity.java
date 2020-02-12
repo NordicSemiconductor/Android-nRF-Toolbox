@@ -539,16 +539,20 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 			if (fileType != DfuService.TYPE_AUTO) {
 				scope = null;
 				fileScopeView.setText(getString(R.string.not_available));
-				new AlertDialog.Builder(this).setTitle(R.string.dfu_file_init_title).setMessage(R.string.dfu_file_init_message)
+				new AlertDialog.Builder(this)
+						.setTitle(R.string.dfu_file_init_title)
+						.setMessage(R.string.dfu_file_init_message)
 						.setNegativeButton(R.string.no, (dialog, which) -> {
 							initFilePath = null;
 							initFileStreamUri = null;
-						}).setPositiveButton(R.string.yes, (dialog, which) -> {
+						})
+						.setPositiveButton(R.string.yes, (dialog, which) -> {
 							final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 							intent.setType(DfuService.MIME_TYPE_OCTET_STREAM);
 							intent.addCategory(Intent.CATEGORY_OPENABLE);
 							startActivityForResult(intent, SELECT_INIT_FILE_REQ);
-						}).show();
+						})
+						.show();
 			} else {
 				new AlertDialog.Builder(this).setTitle(R.string.dfu_file_scope_title).setCancelable(false)
 						.setSingleChoiceItems(R.array.dfu_file_scope, 0, (dialog, which) -> {
@@ -584,7 +588,10 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 	 * @param view a button that was pressed
 	 */
 	public void onSelectFileHelpClicked(final View view) {
-		new AlertDialog.Builder(this).setTitle(R.string.dfu_help_title).setMessage(R.string.dfu_help_message).setPositiveButton(R.string.ok, null)
+		new AlertDialog.Builder(this)
+				.setTitle(R.string.dfu_help_title)
+				.setMessage(R.string.dfu_help_message)
+				.setPositiveButton(R.string.ok, null)
 				.show();
 	}
 
@@ -611,7 +618,8 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 				break;
 		}
 		// Show a dialog with file types
-		new AlertDialog.Builder(this).setTitle(R.string.dfu_file_type_title)
+		new AlertDialog.Builder(this)
+				.setTitle(R.string.dfu_file_type_title)
 				.setSingleChoiceItems(R.array.dfu_file_type, index, (dialog, which) -> {
 					switch (which) {
 						case 0:
@@ -627,10 +635,14 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 							fileTypeTmp = DfuService.TYPE_APPLICATION;
 							break;
 					}
-				}).setPositiveButton(R.string.ok, (dialog, which) -> openFileChooser()).setNeutralButton(R.string.dfu_file_info, (dialog, which) -> {
-			final ZipInfoFragment fragment = new ZipInfoFragment();
-			fragment.show(getSupportFragmentManager(), "help_fragment");
-		}).setNegativeButton(R.string.cancel, null).show();
+				})
+				.setPositiveButton(R.string.ok, (dialog, which) -> openFileChooser())
+				.setNeutralButton(R.string.dfu_file_info, (dialog, which) -> {
+					final ZipInfoFragment fragment = new ZipInfoFragment();
+					fragment.show(getSupportFragmentManager(), "help_fragment");
+				})
+				.setNegativeButton(R.string.cancel, null)
+				.show();
 	}
 
 	private void openFileChooser() {
@@ -647,15 +659,19 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 			appsList.setAdapter(new FileBrowserAppsAdapter(this));
 			appsList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 			appsList.setItemChecked(0, true);
-			new AlertDialog.Builder(this).setTitle(R.string.dfu_alert_no_filebrowser_title).setView(customView)
-					.setNegativeButton(R.string.no, (dialog, which) -> dialog.dismiss()).setPositiveButton(R.string.ok, (dialog, which) -> {
+			new AlertDialog.Builder(this)
+					.setTitle(R.string.dfu_alert_no_filebrowser_title)
+					.setView(customView)
+					.setNegativeButton(R.string.no, (dialog, which) -> dialog.dismiss())
+					.setPositiveButton(R.string.ok, (dialog, which) -> {
 						final int pos = appsList.getCheckedItemPosition();
 						if (pos >= 0) {
 							final String query = getResources().getStringArray(R.array.dfu_app_file_browser_action)[pos];
 							final Intent storeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(query));
 							startActivity(storeIntent);
 						}
-					}).show();
+					})
+					.show();
 		}
 	}
 
@@ -703,6 +719,7 @@ public class DfuActivity extends AppCompatActivity implements LoaderCallbacks<Cu
 				.setForceDfu(forceDfu)
 				.setPacketsReceiptNotificationsEnabled(enablePRNs)
 				.setPacketsReceiptNotificationsValue(numberOfPackets)
+				.setPrepareDataObjectDelay(400)
 				.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true);
 		if (fileType == DfuService.TYPE_AUTO) {
 			starter.setZip(fileStreamUri, filePath);
