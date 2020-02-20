@@ -118,7 +118,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 			}
 			device.setCharacteristicNotification(recordAccessControlPointCharacteristic, true);
 			*/
-			setNotificationCallback(glucoseMeasurementContextCharacteristic)
+			setNotificationCallback(glucoseMeasurementCharacteristic)
 					.with(new GlucoseMeasurementDataCallback() {
 						@Override
 						public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
@@ -255,7 +255,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 						}
 					});
 
-			enableNotifications(glucoseMeasurementContextCharacteristic).enqueue();
+			enableNotifications(glucoseMeasurementCharacteristic).enqueue();
 			enableNotifications(glucoseMeasurementContextCharacteristic).enqueue();
 			enableIndications(recordAccessControlPointCharacteristic)
 					.fail((device, status) -> log(Log.WARN, "Failed to enabled Record Access Control Point indications (error " + status + ")"))
