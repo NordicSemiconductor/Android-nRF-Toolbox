@@ -189,11 +189,12 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:orientation="horizontal"
+					tools:visibility="visible"
 					android:visibility="gone">
 
 					<Button
+						style="@style/Widget.MaterialComponents.Button.TextButton"
 						android:id="@+id/action_abort"
-						style="?android:attr/buttonBarButtonStyle"
 						android:layout_width="0dp"
 						android:layout_height="wrap_content"
 						android:layout_weight="1"
