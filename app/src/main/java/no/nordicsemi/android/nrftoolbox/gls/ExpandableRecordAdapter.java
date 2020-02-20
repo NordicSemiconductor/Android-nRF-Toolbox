@@ -39,8 +39,8 @@ public class ExpandableRecordAdapter extends BaseExpandableListAdapter {;
 	private final Context context;
 	private SparseArray<GlucoseRecord> records;
 
-	public ExpandableRecordAdapter(final Context context, final GlucoseManager manager) {
-		glucoseManager = manager;
+	ExpandableRecordAdapter(final Context context, final GlucoseManager manager) {
+		this.glucoseManager = manager;
 		this.context = context;
 		inflater = LayoutInflater.from(context);
 		records = manager.getRecords().clone();

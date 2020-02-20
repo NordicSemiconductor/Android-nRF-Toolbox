@@ -301,7 +301,10 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 	 */
 	public void clear() {
 		records.clear();
-		callbacks.onOperationCompleted(getBluetoothDevice());
+		final BluetoothDevice target = getBluetoothDevice();
+		if (target != null) {
+			callbacks.onOperationCompleted(target);
+		}
 	}
 
 	/**
@@ -312,9 +315,12 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 	void getLastRecord() {
 		if (recordAccessControlPointCharacteristic == null)
 			return;
+		final BluetoothDevice target = getBluetoothDevice();
+		if (target == null)
+			return;
 
 		clear();
-		callbacks.onOperationStarted(getBluetoothDevice());
+		callbacks.onOperationStarted(target);
 		writeCharacteristic(recordAccessControlPointCharacteristic, RecordAccessControlPointData.reportLastStoredRecord())
 				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
 				.enqueue();
@@ -328,9 +334,12 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 	void getFirstRecord() {
 		if (recordAccessControlPointCharacteristic == null)
 			return;
+		final BluetoothDevice target = getBluetoothDevice();
+		if (target == null)
+			return;
 
 		clear();
-		callbacks.onOperationStarted(getBluetoothDevice());
+		callbacks.onOperationStarted(target);
 		writeCharacteristic(recordAccessControlPointCharacteristic, RecordAccessControlPointData.reportFirstStoredRecord())
 				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
 				.enqueue();
@@ -345,9 +354,12 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 	void getAllRecords() {
 		if (recordAccessControlPointCharacteristic == null)
 			return;
+		final BluetoothDevice target = getBluetoothDevice();
+		if (target == null)
+			return;
 
 		clear();
-		callbacks.onOperationStarted(getBluetoothDevice());
+		callbacks.onOperationStarted(target);
 		writeCharacteristic(recordAccessControlPointCharacteristic, RecordAccessControlPointData.reportNumberOfAllStoredRecords())
 				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
 				.enqueue();
@@ -366,11 +378,14 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 	void refreshRecords() {
 		if (recordAccessControlPointCharacteristic == null)
 			return;
+		final BluetoothDevice target = getBluetoothDevice();
+		if (target == null)
+			return;
 
 		if (records.size() == 0) {
 			getAllRecords();
 		} else {
-			callbacks.onOperationStarted(getBluetoothDevice());
+			callbacks.onOperationStarted(target);
 
 			// obtain the last sequence number
 			final int sequenceNumber = records.keyAt(records.size() - 1) + 1;
@@ -390,6 +405,9 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 	void abort() {
 		if (recordAccessControlPointCharacteristic == null)
 			return;
+		final BluetoothDevice target = getBluetoothDevice();
+		if (target == null)
+			return;
 
 		writeCharacteristic(recordAccessControlPointCharacteristic, RecordAccessControlPointData.abortOperation())
 				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
@@ -403,9 +421,12 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 	void deleteAllRecords() {
 		if (recordAccessControlPointCharacteristic == null)
 			return;
+		final BluetoothDevice target = getBluetoothDevice();
+		if (target == null)
+			return;
 
 		clear();
-		callbacks.onOperationStarted(getBluetoothDevice());
+		callbacks.onOperationStarted(target);
 		writeCharacteristic(recordAccessControlPointCharacteristic, RecordAccessControlPointData.deleteAllStoredRecords())
 				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
 				.enqueue();
