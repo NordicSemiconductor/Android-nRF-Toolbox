@@ -227,5 +227,5 @@ contributed based on the [Apache 2.0 license](http://www.apache.org/licenses/LIC
 - Android 4.3 or newer is required.
 - Compatible with nRF5 devices running samples from the Nordic SDK and other devices implementing 
   standard profiles.
-- Development kits can be ordered from http://www.nordicsemi.com/eng/Buy-Online.
-- The nRF51 or nRF52 SDKs and SoftDevices are available online at http://developer.nordicsemi.com.
+- Development kits: https://www.nordicsemi.com/Software-and-tools/Development-Kits.
+- The nRF5 SDK and SoftDevices are available online at http://developer.nordicsemi.com.
