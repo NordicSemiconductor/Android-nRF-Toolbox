@@ -99,7 +99,7 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 																			 final float cuffPressure, final int unit,
 																			 @Nullable final Float pulseRate, @Nullable final Integer userID,
 																			 @Nullable final BPMStatus status, @Nullable final Calendar calendar) {
-								  callbacks.onIntermediateCuffPressureReceived(device, cuffPressure, unit, pulseRate, userID, status, calendar);
+								  mCallbacks.onIntermediateCuffPressureReceived(device, cuffPressure, unit, pulseRate, userID, status, calendar);
 							  }
 
 							  @Override
@@ -123,7 +123,7 @@ public class BPMManager extends BatteryManager<BPMManagerCallbacks> {
 																	   final int unit, @Nullable final Float pulseRate,
 																	   @Nullable final Integer userID, @Nullable final BPMStatus status,
 																	   @Nullable final Calendar calendar) {
-							callbacks.onBloodPressureMeasurementReceived(device, systolic, diastolic,
+							mCallbacks.onBloodPressureMeasurementReceived(device, systolic, diastolic,
                                     meanArterialPressure, unit, pulseRate, userID, status, calendar);
 						}
 

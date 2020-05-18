@@ -47,7 +47,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import no.nordicsemi.android.ble.BleServerManagerCallbacks;
+import no.nordicsemi.android.ble.observer.ServerObserver;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.nrftoolbox.FeaturesActivity;
 import no.nordicsemi.android.nrftoolbox.R;
@@ -55,7 +55,7 @@ import no.nordicsemi.android.nrftoolbox.ToolboxApplication;
 import no.nordicsemi.android.nrftoolbox.profile.LoggableBleManager;
 import no.nordicsemi.android.nrftoolbox.profile.multiconnect.BleMulticonnectProfileService;
 
-public class ProximityService extends BleMulticonnectProfileService implements ProximityManagerCallbacks, BleServerManagerCallbacks {
+public class ProximityService extends BleMulticonnectProfileService implements ProximityManagerCallbacks, ServerObserver {
     @SuppressWarnings("unused")
     private static final String TAG = "ProximityService";
 
@@ -179,7 +179,7 @@ public class ProximityService extends BleMulticonnectProfileService implements P
     @Override
     protected void onServiceCreated() {
         serverManager = new ProximityServerManager(this);
-        serverManager.setManagerCallbacks(this);
+        serverManager.setServerObserver(this);
 
         initializeAlarm();
 

@@ -78,7 +78,7 @@ public class RSCManager extends BatteryManager<RSCManagerCallbacks> {
 															 final float instantaneousSpeed, final int instantaneousCadence,
 															 @Nullable final Integer strideLength,
 															 @Nullable final Long totalDistance) {
-							callbacks.onRSCMeasurementReceived(device, running, instantaneousSpeed,
+							mCallbacks.onRSCMeasurementReceived(device, running, instantaneousSpeed,
 									instantaneousCadence, strideLength, totalDistance);
 						}
 					});

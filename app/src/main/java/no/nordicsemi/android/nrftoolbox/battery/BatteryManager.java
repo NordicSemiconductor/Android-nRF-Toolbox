@@ -50,7 +50,7 @@ public abstract class BatteryManager<T extends BatteryManagerCallbacks> extends 
 										  @IntRange(from = 0, to = 100) final int batteryLevel) {
 			log(LogContract.Log.Level.APPLICATION,"Battery Level received: " + batteryLevel + "%");
 			BatteryManager.this.batteryLevel = batteryLevel;
-			callbacks.onBatteryLevelChanged(device, batteryLevel);
+			mCallbacks.onBatteryLevelChanged(device, batteryLevel);
 		}
 
 		@Override

@@ -81,7 +81,7 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 					.with(new AlertLevelDataCallback() {
 						@Override
 						public void onAlertLevelChanged(@NonNull final BluetoothDevice device, final int level) {
-							callbacks.onLocalAlarmSwitched(device, level != ALERT_NONE);
+							mCallbacks.onLocalAlarmSwitched(device, level != ALERT_NONE);
 						}
 					});
 			// After connection, set the Link Loss behaviour on the tag.
@@ -152,7 +152,7 @@ class ProximityManager extends BatteryManager<ProximityManagerCallbacks> {
 						"\"" + AlertLevelParser.parse(data) + "\" sent"))
 				.done(device -> {
 					alertOn = on;
-					callbacks.onRemoteAlarmSwitched(device, on);
+					mCallbacks.onRemoteAlarmSwitched(device, on);
 				})
 				.fail((device, status) -> log(Log.WARN,
 						status == FailCallback.REASON_NULL_ATTRIBUTE ?

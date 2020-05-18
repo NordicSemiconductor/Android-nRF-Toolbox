@@ -92,7 +92,7 @@ public class BPMActivity extends BleProfileActivity implements BPMManagerCallbac
 	@Override
 	protected LoggableBleManager<BPMManagerCallbacks> initializeManager() {
 		final BPMManager manager = BPMManager.getBPMManager(getApplicationContext());
-		manager.setManagerCallbacks(this);
+		manager.setGattCallbacks(this);
 		return manager;
 	}
 

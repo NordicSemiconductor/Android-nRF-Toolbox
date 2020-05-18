@@ -82,7 +82,7 @@ public class GlucoseActivity extends BleProfileExpandableListActivity implements
 	@Override
 	protected LoggableBleManager<GlucoseManagerCallbacks> initializeManager() {
 		final GlucoseManager manager = glucoseManager = GlucoseManager.getGlucoseManager(getApplicationContext());
-		manager.setManagerCallbacks(this);
+		manager.setGattCallbacks(this);
 		return manager;
 	}
 

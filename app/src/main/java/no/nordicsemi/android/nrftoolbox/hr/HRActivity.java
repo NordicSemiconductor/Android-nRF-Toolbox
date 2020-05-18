@@ -183,7 +183,7 @@ public class HRActivity extends BleProfileActivity implements HRManagerCallbacks
 	@Override
 	protected LoggableBleManager<HRManagerCallbacks> initializeManager() {
 		final HRManager manager = HRManager.getInstance(getApplicationContext());
-		manager.setManagerCallbacks(this);
+		manager.setGattCallbacks(this);
 		return manager;
 	}
 
