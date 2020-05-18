@@ -42,9 +42,9 @@ dependencies {
     //noinspection GradleDependency
     implementation 'com.google.android.gms:play-services-wearable:10.2.0'
 
-    implementation 'androidx.appcompat:appcompat:1.2.0-alpha02'
-    implementation 'androidx.preference:preference:1.1.0'
-    implementation 'com.google.android.material:material:1.2.0-alpha04'
+    implementation 'androidx.appcompat:appcompat:1.2.0-beta01'
+    implementation 'androidx.preference:preference:1.1.1'
+    implementation 'com.google.android.material:material:1.2.0-alpha06'
 
     implementation 'no.nordicsemi.android:log:2.2.0'
     implementation 'no.nordicsemi.android.support.v18:scanner:1.4.3'
