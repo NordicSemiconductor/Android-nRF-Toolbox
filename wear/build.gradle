@@ -9,7 +9,7 @@ android {
         applicationId "no.nordicsemi.android.nrftoolbox"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 292847601 // target: 29, version: 2.8.4, build: 74, multi-APK: 01
+        versionCode 292907701 // target: 29, version: 2.9.0, build: 77, multi-APK: 01
         versionName "2.8.4"
         resConfigs "en"
     }

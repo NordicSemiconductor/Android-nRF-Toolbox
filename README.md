@@ -22,11 +22,11 @@ for bidirectional text communication between devices.
 ### How to import to Android Studio
 
 The production version of nRF Toolbox depends on 
-[Android BLE Common Library](https://github.com/NordicSemiconductor/Android-BLE-Common-Library/)
-(which depends on [Android BLE Library](https://github.com/NordicSemiconductor/Android-BLE-Library/)).
-Both libraries are available on jcenter.
+[Android BLE Library](https://github.com/NordicSemiconductor/Android-BLE-Library/) and demonstrates 
+use of the Android BLE Common Library (ble-common module), which provides parsers for common profiles 
+adopted by Bluetooth SIG. Both libraries are available on jcenter.
 
-You may also include the BLE Library or BLE Common Library as modules. Clone the library project 
+You may also include the BLE Library and BLE Common Library as modules. Clone the library project 
 to the same root folder.
 
 If you are having issue like [#40](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/issues/40) 
@@ -66,7 +66,7 @@ different service implementation but still the `BleManager` is used to manage ea
 If the [useAutoConnect(boolean)](https://github.com/NordicSemiconductor/Android-BLE-Library/blob/e95a814f4c0ecd08a75e5f0e53c68e2b8dbdf70c/ble/src/main/java/no/nordicsemi/android/ble/ConnectRequest.java#L198) 
 method returns `true` for a connection, the manager will try to reconnect automatically to the device 
 if a link was lost. You will also be notified about a device that got away using 
-`onLinklossOccurred(BluetoothDevice)`.
+`onDeviceDisconnected(ConnectionObserver.REASON_LINK_LOSS)`.
 
 The `BleMulticonnectProfileService` implementation, used by Proximity profile, does not save addresses 
 of connected devices. When the service is killed it will not be able to reconnect to them after it's
@@ -83,7 +83,8 @@ Such approach is not demonstrated in nRF Toolbox.
 
 At last, the `BleManager` can be accessed from a `ViewModel` 
 (see [Architecture Components](https://developer.android.com/topic/libraries/architecture/index.html)). 
-Check out the [Android nRF Blinky](https://github.com/NordicSemiconductor/Android-nRF-Blinky) app for sample code. 
+Check out the [Android nRF Blinky](https://github.com/NordicSemiconductor/Android-nRF-Blinky) app 
+for sample code. 
 
 ### Nordic UART Service
 
