@@ -91,7 +91,7 @@ class CGMManager extends BatteryManager<CGMManagerCallbacks> {
 	}
 
 	/**
-	 * BluetoothGatt callbacks for connection/disconnection, service discovery,
+	 * BluetoothGatt mCallbacks for connection/disconnection, service discovery,
 	 * receiving notification, etc.
 	 */
 	private class CGMManagerGattCallback extends BatteryManagerGattCallback {
@@ -129,7 +129,7 @@ class CGMManager extends BatteryManager<CGMManagerCallbacks> {
 					.fail((device, status) -> log(Log.WARN, "Could not read CGM Status characteristic"))
 					.enqueue();
 
-			// Set notification and indication callbacks
+			// Set notification and indication mCallbacks
 			setNotificationCallback(cgmMeasurementCharacteristic)
 					.with(new ContinuousGlucoseMeasurementDataCallback() {
 						@Override
@@ -157,7 +157,7 @@ class CGMManager extends BatteryManager<CGMManagerCallbacks> {
 
 							final CGMRecord record = new CGMRecord(timeOffset, glucoseConcentration, timestamp);
 							records.put(record.sequenceNumber, record);
-							callbacks.onCGMValueReceived(device, record);
+							mCallbacks.onCGMValueReceived(device, record);
 						}
 
 						@Override
@@ -234,11 +234,11 @@ class CGMManager extends BatteryManager<CGMManagerCallbacks> {
 							//noinspection SwitchStatementWithTooFewBranches
 							switch (requestCode) {
 								case RACP_OP_CODE_ABORT_OPERATION:
-									callbacks.onOperationAborted(device);
+									mCallbacks.onOperationAborted(device);
 									break;
 								default:
 									recordAccessRequestInProgress = false;
-									callbacks.onOperationCompleted(device);
+									mCallbacks.onOperationCompleted(device);
 									break;
 							}
 						}
@@ -247,12 +247,12 @@ class CGMManager extends BatteryManager<CGMManagerCallbacks> {
 						public void onRecordAccessOperationCompletedWithNoRecordsFound(@NonNull final BluetoothDevice device,
 																					   @RACPOpCode final int requestCode) {
 							recordAccessRequestInProgress = false;
-							callbacks.onOperationCompleted(device);
+							mCallbacks.onOperationCompleted(device);
 						}
 
 						@Override
 						public void onNumberOfRecordsReceived(@NonNull final BluetoothDevice device, final int numberOfRecords) {
-							callbacks.onNumberOfRecordsRequested(device, numberOfRecords);
+							mCallbacks.onNumberOfRecordsRequested(device, numberOfRecords);
 							if (numberOfRecords > 0) {
 								if (records.size() > 0) {
 									final int sequenceNumber = records.keyAt(records.size() - 1) + 1;
@@ -266,7 +266,7 @@ class CGMManager extends BatteryManager<CGMManagerCallbacks> {
 								}
 							} else {
 								recordAccessRequestInProgress = false;
-								callbacks.onOperationCompleted(device);
+								mCallbacks.onOperationCompleted(device);
 							}
 						}
 
@@ -276,9 +276,9 @@ class CGMManager extends BatteryManager<CGMManagerCallbacks> {
 																 @RACPErrorCode final int errorCode) {
 							log(Log.WARN, "Record Access operation failed (error " + errorCode + ")");
 							if (errorCode == RACP_ERROR_OP_CODE_NOT_SUPPORTED) {
-								callbacks.onOperationNotSupported(device);
+								mCallbacks.onOperationNotSupported(device);
 							} else {
-								callbacks.onOperationFailed(device);
+								mCallbacks.onOperationFailed(device);
 							}
 						}
 					});
@@ -341,7 +341,7 @@ class CGMManager extends BatteryManager<CGMManagerCallbacks> {
 	 */
 	void clear() {
 		records.clear();
-		callbacks.onDataSetCleared(getBluetoothDevice());
+		mCallbacks.onDataSetCleared(getBluetoothDevice());
 	}
 
 	/**
@@ -354,7 +354,7 @@ class CGMManager extends BatteryManager<CGMManagerCallbacks> {
 			return;
 
 		clear();
-		callbacks.onOperationStarted(getBluetoothDevice());
+		mCallbacks.onOperationStarted(getBluetoothDevice());
 		recordAccessRequestInProgress = true;
 		writeCharacteristic(recordAccessControlPointCharacteristic, RecordAccessControlPointData.reportLastStoredRecord())
 				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
@@ -371,7 +371,7 @@ class CGMManager extends BatteryManager<CGMManagerCallbacks> {
 			return;
 
 		clear();
-		callbacks.onOperationStarted(getBluetoothDevice());
+		mCallbacks.onOperationStarted(getBluetoothDevice());
 		recordAccessRequestInProgress = true;
 		writeCharacteristic(recordAccessControlPointCharacteristic, RecordAccessControlPointData.reportFirstStoredRecord())
 				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
@@ -401,7 +401,7 @@ class CGMManager extends BatteryManager<CGMManagerCallbacks> {
 			return;
 
 		clear();
-		callbacks.onOperationStarted(getBluetoothDevice());
+		mCallbacks.onOperationStarted(getBluetoothDevice());
 		recordAccessRequestInProgress = true;
 		writeCharacteristic(recordAccessControlPointCharacteristic, RecordAccessControlPointData.reportNumberOfAllStoredRecords())
 				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
@@ -421,7 +421,7 @@ class CGMManager extends BatteryManager<CGMManagerCallbacks> {
 		if (records.size() == 0) {
 			getAllRecords();
 		} else {
-			callbacks.onOperationStarted(getBluetoothDevice());
+			mCallbacks.onOperationStarted(getBluetoothDevice());
 
 			// Obtain the last sequence number
 			final int sequenceNumber = records.keyAt(records.size() - 1) + 1;
@@ -445,7 +445,7 @@ class CGMManager extends BatteryManager<CGMManagerCallbacks> {
 			return;
 
 		clear();
-		callbacks.onOperationStarted(getBluetoothDevice());
+		mCallbacks.onOperationStarted(getBluetoothDevice());
 		writeCharacteristic(recordAccessControlPointCharacteristic, RecordAccessControlPointData.deleteAllStoredRecords())
 				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
 				.enqueue();

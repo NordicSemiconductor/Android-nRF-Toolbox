@@ -141,7 +141,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 			LoggableBleManager<BleManagerCallbacks> manager = bleManagers.get(device);
 			if (manager == null) {
 				bleManagers.put(device, manager = initializeManager());
-				manager.setManagerCallbacks(BleMulticonnectProfileService.this);
+				manager.setGattCallbacks(BleMulticonnectProfileService.this);
 			}
 			manager.setLogger(session);
 			manager.connect(device)
@@ -162,7 +162,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 		 * @param device target device to disconnect and forget
 		 */
 		public void disconnect(final BluetoothDevice device) {
-			final BleManager<BleManagerCallbacks> manager = bleManagers.get(device);
+			final BleManager manager = bleManagers.get(device);
 			if (manager != null && manager.isConnected()) {
 				manager.disconnect().enqueue();
 			}
@@ -175,7 +175,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 		 * @return <code>true</code> if device is connected to the sensor, <code>false</code> otherwise
 		 */
 		public final boolean isConnected(final BluetoothDevice device) {
-			final BleManager<BleManagerCallbacks> manager = bleManagers.get(device);
+			final BleManager manager = bleManagers.get(device);
 			return manager != null && manager.isConnected();
 		}
 
@@ -186,7 +186,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 		 * initializing. False otherwise.
 		 */
 		public final boolean isReady(final BluetoothDevice device) {
-			final BleManager<BleManagerCallbacks> manager = bleManagers.get(device);
+			final BleManager manager = bleManagers.get(device);
 			return manager != null && manager.isReady();
 		}
 
@@ -197,7 +197,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 		 */
 		@SuppressWarnings("unused")
 		public final int getConnectionState(final BluetoothDevice device) {
-			final BleManager<BleManagerCallbacks> manager = bleManagers.get(device);
+			final BleManager manager = bleManagers.get(device);
 			return manager != null ? manager.getConnectionState() : BluetoothGatt.STATE_DISCONNECTED;
 		}
 
@@ -210,7 +210,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 		@SuppressWarnings("deprecation")
 		@Deprecated
 		public int getBatteryValue(final BluetoothDevice device) {
-			final BleManager<BleManagerCallbacks> manager = bleManagers.get(device);
+			final BleManager manager = bleManagers.get(device);
 			if (manager != null)
 				return manager.getBatteryValue();
 			return 0;
@@ -228,27 +228,27 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 
 		@Override
 		public void log(@NonNull final BluetoothDevice device, final int level, final String message) {
-			final BleManager<BleManagerCallbacks> manager = bleManagers.get(device);
+			final BleManager manager = bleManagers.get(device);
 			if (manager != null)
 				manager.log(level, message);
 		}
 
 		@Override
 		public void log(@NonNull final BluetoothDevice device, final int level, @StringRes final int messageRes, final Object... params) {
-			final BleManager<BleManagerCallbacks> manager = bleManagers.get(device);
+			final BleManager manager = bleManagers.get(device);
 			if (manager != null)
 				manager.log(level, messageRes, params);
 		}
 
 		@Override
 		public void log(final int level, @NonNull final String message) {
-			for (final BleManager<BleManagerCallbacks> manager : bleManagers.values())
+			for (final BleManager manager : bleManagers.values())
 				manager.log(level, message);
 		}
 
 		@Override
 		public void log(final int level, @StringRes final int messageRes, final Object... params) {
-			for (final BleManager<BleManagerCallbacks> manager : bleManagers.values())
+			for (final BleManager manager : bleManagers.values())
 				manager.log(level, messageRes, params);
 		}
 	}
@@ -405,7 +405,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 		unregisterReceiver(bluetoothStateBroadcastReceiver);
 
 		// The managers map may not be empty if the service was killed by the system
-		for (final BleManager<BleManagerCallbacks> manager : bleManagers.values()) {
+		for (final BleManager manager : bleManagers.values()) {
 			// Service is being destroyed, no need to disconnect manually.
 			manager.close();
 			manager.log(Log.INFO, "Service destroyed");
@@ -432,7 +432,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 	 */
 	protected void onBluetoothEnabled() {
 		for (final BluetoothDevice device : managedDevices) {
-			final BleManager<BleManagerCallbacks> manager = bleManagers.get(device);
+			final BleManager manager = bleManagers.get(device);
 			if (manager != null && !manager.isConnected())
 				manager.connect(device).enqueue();
 		}
@@ -598,7 +598,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 	 * @param device the target device
 	 * @return the BleManager or null
 	 */
-	protected BleManager<? extends BleManagerCallbacks> getBleManager(final BluetoothDevice device) {
+	protected BleManager getBleManager(final BluetoothDevice device) {
 		return bleManagers.get(device);
 	}
 
@@ -617,7 +617,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 	protected List<BluetoothDevice> getConnectedDevices() {
 		final List<BluetoothDevice> list = new ArrayList<>();
 		for (BluetoothDevice device : managedDevices) {
-			final BleManager<BleManagerCallbacks> manager = bleManagers.get(device);
+			final BleManager manager = bleManagers.get(device);
 			if (manager != null && manager.isConnected())
 				list.add(device);
 		}
@@ -630,7 +630,7 @@ public abstract class BleMulticonnectProfileService extends Service implements B
 	 * @return <code>true</code> if device is connected to the sensor, <code>false</code> otherwise
 	 */
 	protected boolean isConnected(final BluetoothDevice device) {
-		final BleManager<BleManagerCallbacks> manager = bleManagers.get(device);
+		final BleManager manager = bleManagers.get(device);
 		return manager != null && manager.isConnected();
 	}
 }

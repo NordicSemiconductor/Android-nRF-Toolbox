@@ -147,7 +147,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 								// if there is no context information following the measurement data,
 								// notify callback about the new record
 								if (!contextInformationFollows)
-									callbacks.onDataSetChanged(device);
+									mCallbacks.onDataSetChanged(device);
 							});
 						}
 					});
@@ -189,7 +189,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 
 							handler.post(() -> {
 								// notify callback about the new record
-								callbacks.onDataSetChanged(device);
+								mCallbacks.onDataSetChanged(device);
 							});
 						}
 					});
@@ -209,10 +209,10 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 							//noinspection SwitchStatementWithTooFewBranches
 							switch (requestCode) {
 								case RACP_OP_CODE_ABORT_OPERATION:
-									callbacks.onOperationAborted(device);
+									mCallbacks.onOperationAborted(device);
 									break;
 								default:
-									callbacks.onOperationCompleted(device);
+									mCallbacks.onOperationCompleted(device);
 									break;
 							}
 						}
@@ -220,12 +220,12 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 						@Override
 						public void onRecordAccessOperationCompletedWithNoRecordsFound(@NonNull final BluetoothDevice device,
 																					   @RACPOpCode final int requestCode) {
-							callbacks.onOperationCompleted(device);
+							mCallbacks.onOperationCompleted(device);
 						}
 
 						@Override
 						public void onNumberOfRecordsReceived(@NonNull final BluetoothDevice device, final int numberOfRecords) {
-							callbacks.onNumberOfRecordsRequested(device, numberOfRecords);
+							mCallbacks.onNumberOfRecordsRequested(device, numberOfRecords);
 							if (numberOfRecords > 0) {
 								if (records.size() > 0) {
 									final int sequenceNumber = records.keyAt(records.size() - 1) + 1;
@@ -238,7 +238,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 											.enqueue();
 								}
 							} else {
-								callbacks.onOperationCompleted(device);
+								mCallbacks.onOperationCompleted(device);
 							}
 						}
 
@@ -248,9 +248,9 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 																 @RACPErrorCode final int errorCode) {
 							log(Log.WARN, "Record Access operation failed (error " + errorCode + ")");
 							if (errorCode == RACP_ERROR_OP_CODE_NOT_SUPPORTED) {
-								callbacks.onOperationNotSupported(device);
+								mCallbacks.onOperationNotSupported(device);
 							} else {
-								callbacks.onOperationFailed(device);
+								mCallbacks.onOperationFailed(device);
 							}
 						}
 					});
@@ -303,7 +303,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 		records.clear();
 		final BluetoothDevice target = getBluetoothDevice();
 		if (target != null) {
-			callbacks.onOperationCompleted(target);
+			mCallbacks.onOperationCompleted(target);
 		}
 	}
 
@@ -320,7 +320,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 			return;
 
 		clear();
-		callbacks.onOperationStarted(target);
+		mCallbacks.onOperationStarted(target);
 		writeCharacteristic(recordAccessControlPointCharacteristic, RecordAccessControlPointData.reportLastStoredRecord())
 				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
 				.enqueue();
@@ -339,7 +339,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 			return;
 
 		clear();
-		callbacks.onOperationStarted(target);
+		mCallbacks.onOperationStarted(target);
 		writeCharacteristic(recordAccessControlPointCharacteristic, RecordAccessControlPointData.reportFirstStoredRecord())
 				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
 				.enqueue();
@@ -359,7 +359,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 			return;
 
 		clear();
-		callbacks.onOperationStarted(target);
+		mCallbacks.onOperationStarted(target);
 		writeCharacteristic(recordAccessControlPointCharacteristic, RecordAccessControlPointData.reportNumberOfAllStoredRecords())
 				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
 				.enqueue();
@@ -385,7 +385,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 		if (records.size() == 0) {
 			getAllRecords();
 		} else {
-			callbacks.onOperationStarted(target);
+			mCallbacks.onOperationStarted(target);
 
 			// obtain the last sequence number
 			final int sequenceNumber = records.keyAt(records.size() - 1) + 1;
@@ -426,7 +426,7 @@ public class GlucoseManager extends BatteryManager<GlucoseManagerCallbacks> {
 			return;
 
 		clear();
-		callbacks.onOperationStarted(target);
+		mCallbacks.onOperationStarted(target);
 		writeCharacteristic(recordAccessControlPointCharacteristic, RecordAccessControlPointData.deleteAllStoredRecords())
 				.with((device, data) -> log(LogContract.Log.Level.APPLICATION, "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"))
 				.enqueue();

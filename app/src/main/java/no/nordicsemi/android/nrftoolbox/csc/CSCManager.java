@@ -95,14 +95,14 @@ public class CSCManager extends BatteryManager<CSCManagerCallbacks> {
 													  @FloatRange(from = 0) final float totalDistance,
 													  @FloatRange(from = 0) final float distance,
 													  @FloatRange(from = 0) final float speed) {
-							callbacks.onDistanceChanged(device, totalDistance, distance, speed);
+							mCallbacks.onDistanceChanged(device, totalDistance, distance, speed);
 						}
 
 						@Override
 						public void onCrankDataChanged(@NonNull final BluetoothDevice device,
 													   @FloatRange(from = 0) final float crankCadence,
 													   final float gearRatio) {
-							callbacks.onCrankDataChanged(device, crankCadence, gearRatio);
+							mCallbacks.onCrankDataChanged(device, crankCadence, gearRatio);
 						}
 
 						@Override

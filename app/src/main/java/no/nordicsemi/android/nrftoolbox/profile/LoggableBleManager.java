@@ -1,12 +1,13 @@
 package no.nordicsemi.android.nrftoolbox.profile;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.util.Log;
 
-import no.nordicsemi.android.ble.BleManager;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import no.nordicsemi.android.ble.BleManagerCallbacks;
+import no.nordicsemi.android.ble.LegacyBleManager;
 import no.nordicsemi.android.log.ILogSession;
 import no.nordicsemi.android.log.LogContract;
 import no.nordicsemi.android.log.Logger;
@@ -16,14 +17,14 @@ import no.nordicsemi.android.log.Logger;
  *
  * @param <T> the callbacks class.
  */
-public abstract class LoggableBleManager<T extends BleManagerCallbacks> extends BleManager<T> {
+public abstract class LoggableBleManager<T extends BleManagerCallbacks> extends LegacyBleManager<T> {
 	private ILogSession logSession;
 
 	/**
 	 * The manager constructor.
 	 * <p>
 	 * After constructing the manager, the callbacks object must be set with
-	 * {@link #setManagerCallbacks(BleManagerCallbacks)}.
+	 * {@link #setGattCallbacks(BleManagerCallbacks)}.
 	 *
 	 * @param context the context.
 	 */

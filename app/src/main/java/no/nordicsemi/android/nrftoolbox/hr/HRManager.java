@@ -99,7 +99,7 @@ public class HRManager extends BatteryManager<HRManagerCallbacks> {
 						@Override
 						public void onBodySensorLocationReceived(@NonNull final BluetoothDevice device,
 																 @BodySensorLocation final int sensorLocation) {
-							callbacks.onBodySensorLocationReceived(device, sensorLocation);
+							mCallbacks.onBodySensorLocationReceived(device, sensorLocation);
 						}
 					})
 					.fail((device, status) -> log(Log.WARN, "Body Sensor Location characteristic not found"))
@@ -118,7 +118,7 @@ public class HRManager extends BatteryManager<HRManagerCallbacks> {
 																   @Nullable final Boolean contactDetected,
 																   @Nullable @IntRange(from = 0) final Integer energyExpanded,
 																   @Nullable final List<Integer> rrIntervals) {
-							callbacks.onHeartRateMeasurementReceived(device, heartRate, contactDetected, energyExpanded, rrIntervals);
+							mCallbacks.onHeartRateMeasurementReceived(device, heartRate, contactDetected, energyExpanded, rrIntervals);
 						}
 					});
 			enableNotifications(heartRateCharacteristic).enqueue();

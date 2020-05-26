@@ -87,7 +87,7 @@ public class HTManager extends BatteryManager<HTManagerCallbacks> {
 																	 @TemperatureUnit final int unit,
 																	 @Nullable final Calendar calendar,
 																	 @Nullable @TemperatureType final Integer type) {
-							callbacks.onTemperatureMeasurementReceived(device, temperature, unit, calendar, type);
+							mCallbacks.onTemperatureMeasurementReceived(device, temperature, unit, calendar, type);
 						}
 					});
 			enableIndications(htCharacteristic).enqueue();

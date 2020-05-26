@@ -123,7 +123,7 @@ public class TemplateManager extends BatteryManager<TemplateManagerCallbacks> {
 						@Override
 						public void onSampleValueReceived(@NonNull final BluetoothDevice device, final int value) {
 							// Let's lass received data to the service
-							callbacks.onSampleValueReceived(device, value);
+							mCallbacks.onSampleValueReceived(device, value);
 						}
 
 						@Override

@@ -9,7 +9,7 @@ android {
         applicationId "no.nordicsemi.android.nrftoolbox"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 292847601 // target: 29, version: 2.8.4, build: 74, multi-APK: 01
+        versionCode 292907701 // target: 29, version: 2.9.0, build: 77, multi-APK: 01
         versionName "2.8.4"
         resConfigs "en"
     }
@@ -37,10 +37,10 @@ configurations.all() { configuration -> exclude group: "org.apache.httpcomponent
 
 dependencies {
     implementation project(':common')
-    implementation 'androidx.recyclerview:recyclerview:1.2.0-alpha01'
+    implementation 'androidx.recyclerview:recyclerview:1.2.0-alpha03'
     implementation 'androidx.percentlayout:percentlayout:1.0.0'
-    implementation 'com.google.android.support:wearable:2.5.0'
-    compileOnly 'com.google.android.wearable:wearable:2.5.0'
+    implementation 'com.google.android.support:wearable:2.7.0'
+    compileOnly 'com.google.android.wearable:wearable:2.7.0'
 
     implementation 'no.nordicsemi.android.support.v18:scanner:1.4.3'
 
