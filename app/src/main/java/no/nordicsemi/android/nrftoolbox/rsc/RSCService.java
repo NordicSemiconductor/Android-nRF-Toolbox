@@ -210,7 +210,7 @@ public class RSCService extends BleProfileService implements RSCManagerCallbacks
     private void startForegroundService(){
         // when the activity closes we need to show the notification that user is connected to the peripheral sensor
         // We start the service as a foreground service as Android 8.0 (Oreo) onwards kills any running background services
-        final Notification notification = createNotification(R.string.uart_notification_connected_message, 0);
+        final Notification notification = createNotification(R.string.rsc_notification_connected_message, 0);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForeground(NOTIFICATION_ID, notification);
         } else {
