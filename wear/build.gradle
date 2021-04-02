@@ -3,7 +3,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
 
     defaultConfig {
         applicationId "no.nordicsemi.android.nrftoolbox"
