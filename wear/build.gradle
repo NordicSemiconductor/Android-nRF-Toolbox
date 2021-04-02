@@ -18,8 +18,7 @@ android {
     }
     buildTypes {
         debug {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled false
         }
         release {
             minifyEnabled true
@@ -37,10 +36,10 @@ configurations.all() { configuration -> exclude group: "org.apache.httpcomponent
 
 dependencies {
     implementation project(':common')
-    implementation 'androidx.recyclerview:recyclerview:1.2.0-alpha03'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.percentlayout:percentlayout:1.0.0'
-    implementation 'com.google.android.support:wearable:2.7.0'
-    compileOnly 'com.google.android.wearable:wearable:2.7.0'
+    implementation 'com.google.android.support:wearable:2.8.1'
+    compileOnly 'com.google.android.wearable:wearable:2.8.1'
 
     implementation 'no.nordicsemi.android.support.v18:scanner:1.4.3'
 
