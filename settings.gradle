@@ -1,13 +1,14 @@
-include ':app', ':wear', ':common'
+//dependencyResolutionManagement {
+//    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+//    repositories {
+//        google()
+//        mavenCentral()
+//        jcenter() // Warning: this repository is going to shut down soon
+//    }
+//}
+rootProject.name = "Test"
+include ':app'
 
-// Uncomment these lines if you want to import the BLE Library and BLE Common Library as a project,
-// not from jcenter:
-
-// include ':ble', ':ble-common'
-// project(':ble').projectDir = file('../Android-BLE-Library/ble')
-// project(':ble-common').projectDir = file('../Android-BLE-Library/ble-common')
-
-// Uncomment these lines if you want to import the DFULibrary as a project, not from jcenter:
-
-// include ':dfu'
-// project(':dfu').projectDir = file('../Android-DFU-Library/dfu')
+if (file('../Android-BLE-Library').exists()) {
+    includeBuild('../Android-BLE-Library')
+}

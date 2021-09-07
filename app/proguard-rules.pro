@@ -1,81 +1,21 @@
--optimizationpasses 5
--dontusemixedcaseclassnames
--dontskipnonpubliclibraryclasses
--dontskipnonpubliclibraryclassmembers
--dontpreverify
--dontshrink
--verbose
+# Add project specific ProGuard rules here.
+# You can control the set of applied configuration files using the
+# proguardFiles setting in build.gradle.
+#
+# For more details, see
+#   http://developer.android.com/guide/developing/tools/proguard.html
 
--optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
+# If your project uses WebView with JS, uncomment the following
+# and specify the fully qualified class name to the JavaScript interface
+# class:
+#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
+#   public *;
+#}
 
--keepattributes *Annotation*
--keepattributes Signature
+# Uncomment this to preserve the line number information for
+# debugging stack traces.
+#-keepattributes SourceFile,LineNumberTable
 
--keepclasseswithmembernames class * {
-    native <methods>;
-}
-
--keepclasseswithmembers class * {
-    public <init>(android.content.Context, android.util.AttributeSet);
-}
-
--keep public class * extends android.app.Activity
--keep public class * extends android.app.Application
--keep public class * extends android.app.Service
--keep public class * extends android.content.BroadcastReceiver
--keep public class * extends android.content.ContentProvider
--keep public class * extends android.app.backup.BackupAgentHelper
--keep public class * extends android.preference.Preference
--keep public class com.android.vending.licensing.ILicensingService
-
-# The AndroidX library contains references to newer platform versions.
-# Don't warn about those in case this app is linking against an older platform version.
--dontwarn androidx.**
-
--keep class com.google.android.gms.**
--dontwarn com.google.android.gms.**
-
-# Java
--keep class java.** { *; }
--dontnote java.**
--dontwarn java.**
-
--keep class javax.** { *; }
--dontnote javax.**
--dontwarn javax.**
-
--keep class sun.misc.Unsafe { *; }
--dontnote sun.misc.Unsafe
-
--keep class javax.xml.stream.XMLOutputFactory { *; }
-
-# (the rt.jar has them)
--dontwarn com.bea.xml.stream.XMLWriterBase
--dontwarn javax.xml.stream.events.**
--dontwarn javax.xml.stream.**
-
-# Simple XML
--keep public class org.simpleframework.** { *; }
--keep class org.simpleframework.xml.** { *; }
--keep class org.simpleframework.xml.core.** { *; }
--keep class org.simpleframework.xml.util.** { *; }
-
--keepattributes ElementList, Root, InnerClasses, LineNumberTable
-
--keepclasseswithmembers class * {
-    @org.simpleframework.xml.* <fields>;
-}
-
-# Chart Engine
--keep class org.achartengine.** { *; }
--dontnote org.achartengine.**
-
-# HTTP (might require legacyLibraries) ?
--dontnote org.apache.http.params.**
--dontnote org.apache.http.conn.scheme.**
--dontnote org.apache.http.conn.**
--dontnote android.net.http.**
-
-# DFU Library
--keep class no.nordicsemi.android.dfu.** { *; }
-
+# If you keep the line number information, uncomment this to
+# hide the original source file name.
+#-renamesourcefileattribute SourceFile
