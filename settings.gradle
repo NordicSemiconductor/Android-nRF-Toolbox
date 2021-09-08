@@ -1,11 +1,38 @@
-//dependencyResolutionManagement {
-//    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-//    repositories {
-//        google()
-//        mavenCentral()
-//        jcenter() // Warning: this repository is going to shut down soon
-//    }
-//}
+enableFeaturePreview("VERSION_CATALOGS")
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        jcenter() // Warning: this repository is going to shut down soon
+    }
+
+    versionCatalogs {
+        libs {
+            version('compose', '1.0.2')
+
+            alias('androidx-core').to('androidx.core:core-ktx:1.6.0')
+            alias('material').to('com.google.android.material:material:1.4.0')
+            alias('lifecycle').to('androidx.lifecycle:lifecycle-runtime-ktx:2.3.1')
+            alias('compose-activity').to('androidx.activity:activity-compose:1.3.1')
+
+            alias('compose-ui').to('androidx.compose.ui', 'ui').versionRef('compose')
+            alias('compose-material').to('androidx.compose.material', 'material').versionRef('compose')
+            alias('compose-tooling-preview').to('androidx.compose.ui', 'ui-tooling-preview').versionRef('compose')
+
+            bundle('compose', ['compose-ui', 'compose-material', 'compose-tooling-preview'])
+
+            //-- Test ------------------------------------------------------------------------------
+            alias('test-junit').to('junit:junit:4.13.2')
+            alias('android-test-junit').to('androidx.test.ext:junit:1.1.3')
+            alias('android-test-espresso').to('androidx.test.espresso:espresso-core:3.4.0')
+            alias('android-test-compose-ui').to('androidx.compose.ui', 'ui-test-junit4').versionRef('compose')
+            alias('android-test-compose-tooling').to('androidx.compose.ui', 'ui-tooling').versionRef('compose')
+        }
+    }
+}
+
 rootProject.name = "Test"
 include ':app'
 

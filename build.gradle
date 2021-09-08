@@ -17,13 +17,6 @@ buildscript {
     }
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-
 apply plugin: "io.spring.dependency-management"
 
 task clean(type: Delete) {
