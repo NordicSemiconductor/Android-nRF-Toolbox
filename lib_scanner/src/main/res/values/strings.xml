@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scanner__devices_list">BLE devices</string>
+
+    <string name="scanner__permission_rationale">The location permission is required when using Bluetooth LE, because surrounding devices can expose user\'s location. Please grant the permission.</string>
+    <string name="scanner__permission_denied">Location permission denied. Please, grant us access on the Settings screen.</string>
+    <string name="scanner__button_ok">OK</string>
+    <string name="scanner__button_nope">Nope</string>
+    <string name="scanner__open_settings">Open settings</string>
+    <string name="scanner__feature_not_available">Feature not available</string>
+
+    <string name="scanner__list_of_devices">List of devices</string>
+    <string name="scanner__error">Scanning failed due to technical reason.</string>
+    <string name="scanner__no_name">Name: NONE</string>
+</resources>

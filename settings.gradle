@@ -10,18 +10,39 @@ dependencyResolutionManagement {
 
     versionCatalogs {
         libs {
-            version('compose', '1.0.2')
+            alias('nordic-ble-common').to('no.nordicsemi.android:ble-common:2.2.0')
+            alias('nordic-log').to('no.nordicsemi.android:log:2.3.0')
+            alias('nordic-scanner').to('no.nordicsemi.android.support.v18:scanner:1.5.0')
+
+            alias('material').to('com.google.android.material:material:1.4.0')
+
+            version('lifecycle', '2.3.1')
+            alias('lifecycle-activity').to('androidx.lifecycle', 'lifecycle-runtime-ktx').versionRef('lifecycle')
+            alias('lifecycle-service').to('androidx.lifecycle', 'lifecycle-service').versionRef('lifecycle')
 
             alias('androidx-core').to('androidx.core:core-ktx:1.6.0')
-            alias('material').to('com.google.android.material:material:1.4.0')
-            alias('lifecycle').to('androidx.lifecycle:lifecycle-runtime-ktx:2.3.1')
             alias('compose-activity').to('androidx.activity:activity-compose:1.3.1')
+            alias('compose-lifecycle').to('androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07')
 
+            version('compose', '1.0.2')
+            alias('compose-livedata').to('androidx.compose.runtime', 'runtime-livedata').versionRef('compose')
             alias('compose-ui').to('androidx.compose.ui', 'ui').versionRef('compose')
             alias('compose-material').to('androidx.compose.material', 'material').versionRef('compose')
             alias('compose-tooling-preview').to('androidx.compose.ui', 'ui-tooling-preview').versionRef('compose')
+            alias('compose-navigation').to('androidx.navigation:navigation-compose:2.4.0-alpha09')
+            bundle('compose', ['compose-livedata', 'compose-ui', 'compose-material', 'compose-tooling-preview', 'compose-navigation'])
 
-            bundle('compose', ['compose-ui', 'compose-material', 'compose-tooling-preview'])
+            version('hilt', '2.38.1')
+            alias('hilt-android').to('com.google.dagger', 'hilt-android').versionRef('hilt')
+            alias('hilt-compiler').to('com.google.dagger', 'hilt-compiler').versionRef('hilt')
+            alias('hilt-compose').to('androidx.hilt:hilt-navigation-compose:1.0.0-alpha03')
+            alias('hilt-lifecycle').to('androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha02')
+            alias('hilt-lifecyclecompiler').to('androidx.hilt:hilt-compiler:1.0.0-alpha02')
+            bundle('hilt', ['hilt-android', 'hilt-compose', 'hilt-lifecycle'])
+            bundle('hiltkapt', ['hilt-compiler', 'hilt-lifecyclecompiler'])
+
+            alias('kotlin-coroutines').to('org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2')
+            alias('google-permissions').to('com.google.accompanist:accompanist-permissions:0.18.0')
 
             //-- Test ------------------------------------------------------------------------------
             alias('test-junit').to('junit:junit:4.13.2')
@@ -33,9 +54,15 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Test"
+rootProject.name = "Android-nRF-Toolbox"
+
 include ':app'
+include ':feature_csc'
+include ':lib_broadcast'
+include ':lib_events'
 
 if (file('../Android-BLE-Library').exists()) {
     includeBuild('../Android-BLE-Library')
 }
+include ':lib_theme'
+include ':lib_scanner'

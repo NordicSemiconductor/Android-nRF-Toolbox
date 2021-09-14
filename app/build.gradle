@@ -1,15 +1,17 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'dagger.hilt.android.plugin'
 }
 
 android {
-    compileSdk 31
+    compileSdk android_api_version
 
     defaultConfig {
         applicationId "no.nordicsemi.android.nrftoolbox"
-        minSdk 21
-        targetSdk 31
+        minSdk android_min_api_version
+        targetSdk android_api_version
         versionCode 1
         versionName "1.0"
 
@@ -38,21 +40,32 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion compose_version
-        kotlinCompilerVersion '1.5.21'
+        kotlinCompilerVersion kotlin_version
     }
-    packagingOptions {
-        resources {
-            excludes += '/META-INF/{AL2.0,LGPL2.1}'
-        }
+    hilt {
+        enableExperimentalClasspathAggregation = true
     }
 }
 
 dependencies {
+    //Hilt requires to implement every module in the main app module
+    //https://github.com/google/dagger/issues/2123
+    implementation project(":feature_csc")
+    implementation project(":lib_broadcast")
+    implementation project(":lib_events")
+    implementation project(":lib_theme")
+    implementation project(":lib_scanner")
+
+    implementation libs.nordic.ble.common
+
+    implementation libs.bundles.hilt
+    kapt libs.bundles.hiltkapt
 
     implementation libs.bundles.compose
     implementation libs.androidx.core
     implementation libs.material
-    implementation libs.lifecycle
+    implementation libs.lifecycle.activity
+    implementation libs.compose.lifecycle
     implementation libs.compose.activity
 
     testImplementation libs.test.junit
