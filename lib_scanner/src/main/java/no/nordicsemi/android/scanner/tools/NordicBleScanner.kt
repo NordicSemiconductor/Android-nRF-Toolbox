@@ -1,4 +1,4 @@
-package no.nordicsemi.android.scanner
+package no.nordicsemi.android.scanner.tools
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter

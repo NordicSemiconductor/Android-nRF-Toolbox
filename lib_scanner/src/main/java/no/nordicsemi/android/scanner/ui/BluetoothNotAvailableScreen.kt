@@ -1,4 +1,4 @@
-package no.nordicsemi.android.scanner.bluetooth
+package no.nordicsemi.android.scanner.ui
 
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter

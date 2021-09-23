@@ -1,9 +1,11 @@
-package no.nordicsemi.android.scanner
+package no.nordicsemi.android.scanner.ui
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import no.nordicsemi.android.events.exhaustive
+import no.nordicsemi.android.scanner.tools.NordicBleScanner
+import no.nordicsemi.android.scanner.tools.ScannerStatus
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,8 +22,6 @@ internal class NordicBleScannerViewModel @Inject constructor(
         when (event) {
             ScannerViewEvent.PERMISSION_CHECKED -> onPermissionChecked()
             ScannerViewEvent.BLUETOOTH_ENABLED -> onBluetoothEnabled()
-            ScannerViewEvent.ENABLE_SCANNING -> bleScanner.startScanning()
-            ScannerViewEvent.DISABLE_SCANNING -> bleScanner.stopScanning()
         }.exhaustive
     }
 
@@ -36,7 +36,7 @@ internal class NordicBleScannerViewModel @Inject constructor(
 }
 
 enum class ScannerViewEvent {
-    PERMISSION_CHECKED, BLUETOOTH_ENABLED, ENABLE_SCANNING, DISABLE_SCANNING
+    PERMISSION_CHECKED, BLUETOOTH_ENABLED
 }
 
 internal data class NordicBleScannerState(

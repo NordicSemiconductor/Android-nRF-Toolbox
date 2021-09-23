@@ -1,4 +1,4 @@
-package no.nordicsemi.android.scanner.permissions
+package no.nordicsemi.android.scanner.ui
 
 import android.content.Context
 import android.content.Intent

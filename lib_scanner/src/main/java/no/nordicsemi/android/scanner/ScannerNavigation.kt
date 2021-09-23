@@ -9,9 +9,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import no.nordicsemi.android.events.exhaustive
-import no.nordicsemi.android.scanner.bluetooth.BluetoothNotAvailableScreen
-import no.nordicsemi.android.scanner.bluetooth.BluetoothNotEnabledScreen
-import no.nordicsemi.android.scanner.permissions.RequestPermissionScreen
+import no.nordicsemi.android.scanner.tools.ScannerStatus
+import no.nordicsemi.android.scanner.ui.BluetoothNotAvailableScreen
+import no.nordicsemi.android.scanner.ui.BluetoothNotEnabledScreen
+import no.nordicsemi.android.scanner.ui.NordicBleScannerViewModel
+import no.nordicsemi.android.scanner.ui.RequestPermissionScreen
+import no.nordicsemi.android.scanner.ui.ScanDeviceScreen
+import no.nordicsemi.android.scanner.ui.ScannerViewEvent
 
 @Composable
 fun ScannerRoute(navController: NavController) {
@@ -35,15 +39,6 @@ private fun ScannerScreen(
         ScannerStatus.PERMISSION_REQUIRED -> RequestPermissionScreen { onEvent(ScannerViewEvent.PERMISSION_CHECKED) }
         ScannerStatus.NOT_AVAILABLE -> BluetoothNotAvailableScreen()
         ScannerStatus.DISABLED -> BluetoothNotEnabledScreen { onEvent(ScannerViewEvent.BLUETOOTH_ENABLED) }
-        ScannerStatus.ENABLED -> {
-            onEvent(ScannerViewEvent.ENABLE_SCANNING)
-            ListOfDevicesScreen {
-                navController.previousBackStackEntry
-                    ?.savedStateHandle
-                    ?.set("result", it)
-                navController.popBackStack()
-                onEvent(ScannerViewEvent.DISABLE_SCANNING)
-            }
-        }
+        ScannerStatus.ENABLED -> ScanDeviceScreen(navController)
     }.exhaustive
 }
