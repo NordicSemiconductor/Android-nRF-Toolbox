@@ -1,7 +1,5 @@
 package no.nordicsemi.android.csc.view
 
-import no.nordicsemi.android.events.EMPTY
-
 internal sealed class CSCViewState {
 
     fun ensureConnectedState(): CSCViewConnectedState {
@@ -30,7 +28,7 @@ internal data class CSCViewConnectedState(
     val totalDistance: Float = 0f,
     val gearRatio: Float = 0f,
     val batteryLevel: Int = 0,
-    val wheelSize: String = String.EMPTY
+    val wheelSize: String = CSCSettings.DefaultWheelSize.NAME
 ) : CSCViewState() {
 
     fun displaySpeed(): String {

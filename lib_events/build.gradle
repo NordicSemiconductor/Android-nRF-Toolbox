@@ -1,3 +1,0 @@
-apply from: rootProject.file("library.gradle")
-apply plugin: 'kotlin-kapt'
-apply plugin: 'kotlin-parcelize'

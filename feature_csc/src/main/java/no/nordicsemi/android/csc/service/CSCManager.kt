@@ -29,17 +29,16 @@ import android.util.Log
 import androidx.annotation.FloatRange
 import no.nordicsemi.android.ble.common.callback.csc.CyclingSpeedAndCadenceMeasurementDataCallback
 import no.nordicsemi.android.ble.data.Data
-import no.nordicsemi.android.csc.batery.BatteryManager
-import no.nordicsemi.android.csc.batery.CSCMeasurementParser.parse
+import no.nordicsemi.android.csc.service.CSCMeasurementParser.parse
+import no.nordicsemi.android.csc.view.CSCSettings
 import no.nordicsemi.android.log.LogContract
+import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 
-private const val SETTINGS_WHEEL_SIZE_DEFAULT = 2340
-
-internal class CSCManager(context: Context) : BatteryManager<CSCManagerCallbacks?>(context) {
+internal class CSCManager(context: Context) : BatteryManager<CSCManagerCallbacks>(context) {
 
     private var cscMeasurementCharacteristic: BluetoothGattCharacteristic? = null
-    private var wheelSize = SETTINGS_WHEEL_SIZE_DEFAULT
+    private var wheelSize = CSCSettings.DefaultWheelSize.VALUE
 
     override fun getGattCallback(): BatteryManagerGattCallback {
         return CSCManagerGattCallback()
@@ -77,7 +76,7 @@ internal class CSCManager(context: Context) : BatteryManager<CSCManagerCallbacks
                         @FloatRange(from = 0.0) distance: Float,
                         @FloatRange(from = 0.0) speed: Float
                     ) {
-                        mCallbacks!!.onDistanceChanged(device, totalDistance, distance, speed)
+                        mCallbacks?.onDistanceChanged(device, totalDistance, distance, speed)
                     }
 
                     override fun onCrankDataChanged(
@@ -85,7 +84,7 @@ internal class CSCManager(context: Context) : BatteryManager<CSCManagerCallbacks
                         @FloatRange(from = 0.0) crankCadence: Float,
                         gearRatio: Float
                     ) {
-                        mCallbacks!!.onCrankDataChanged(device, crankCadence, gearRatio)
+                        mCallbacks?.onCrankDataChanged(device, crankCadence, gearRatio)
                     }
 
                     override fun onInvalidDataReceived(

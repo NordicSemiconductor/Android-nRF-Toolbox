@@ -1,0 +1,14 @@
+apply from: rootProject.file("library.gradle")
+apply plugin: 'kotlin-parcelize'
+
+dependencies {
+    implementation project(":lib_utils")
+    implementation project(":lib_theme")
+
+    implementation libs.material
+    implementation libs.google.permissions
+
+    implementation libs.bundles.compose
+    implementation libs.compose.lifecycle
+    implementation libs.compose.activity
+}

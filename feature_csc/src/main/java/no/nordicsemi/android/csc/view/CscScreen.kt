@@ -25,7 +25,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import no.nordicsemi.android.csc.R
 import no.nordicsemi.android.csc.service.CSCService
-import no.nordicsemi.android.events.exhaustive
+import no.nordicsemi.android.csc.viewmodel.CscViewModel
+import no.nordicsemi.android.utils.exhaustive
+import no.nordicsemi.android.utils.isServiceRunning
 
 @Composable
 internal fun CscScreen(navController: NavController, viewModel: CscViewModel = hiltViewModel()) {
@@ -36,11 +38,6 @@ internal fun CscScreen(navController: NavController, viewModel: CscViewModel = h
 
     secondScreenResult?.value?.let {
         viewModel.onEvent(OnBluetoothDeviceSelected(it))
-
-        val intent = Intent(LocalContext.current, CSCService::class.java).apply {
-            putExtra("no.nordicsemi.android.nrftoolbox.EXTRA_DEVICE_ADDRESS", it.address)
-        }
-        LocalContext.current.startService(intent)
 
         navController.currentBackStackEntry
             ?.savedStateHandle
@@ -77,7 +74,14 @@ private fun NotConnectedScreen(
         onEvent(OnMovedToScannerScreen)
     }
 
+    if (LocalContext.current.isServiceRunning(CSCService::class.java.name)) {
+        val intent = Intent(LocalContext.current, CSCService::class.java)
+        LocalContext.current.stopService(intent)
+    }
+
     NotConnectedView(onEvent)
+
+    LocalContext.current.stopService(Intent(LocalContext.current, CSCService::class.java))
 }
 
 @Composable
@@ -105,6 +109,11 @@ private fun ConnectedView(state: CSCViewConnectedState, onEvent: (CSCViewEvent) 
         SelectWheelSizeDialog { onEvent(it) }
     }
 
+    if (!LocalContext.current.isServiceRunning(CSCService::class.java.name)) {
+        val intent = Intent(LocalContext.current, CSCService::class.java)
+        LocalContext.current.startService(intent)
+    }
+
     Column(
         modifier = Modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -118,7 +127,6 @@ private fun ConnectedView(state: CSCViewConnectedState, onEvent: (CSCViewEvent) 
         Button(onClick = { onEvent(OnDisconnectButtonClick) }) {
             Text(text = stringResource(id = R.string.csc_disconnect))
         }
-
     }
 }
 

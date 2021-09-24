@@ -1,7 +1,0 @@
-apply from: rootProject.file("library.gradle")
-
-dependencies {
-    implementation project(":lib_events")
-
-    implementation libs.kotlin.coroutines
-}

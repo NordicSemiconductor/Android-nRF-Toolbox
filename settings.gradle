@@ -14,6 +14,7 @@ dependencyResolutionManagement {
             alias('nordic-log').to('no.nordicsemi.android:log:2.3.0')
             alias('nordic-scanner').to('no.nordicsemi.android.support.v18:scanner:1.5.0')
 
+            alias('localbroadcastmanager').to('androidx.localbroadcastmanager:localbroadcastmanager:1.0.0')
             alias('material').to('com.google.android.material:material:1.4.0')
 
             version('lifecycle', '2.3.1')
@@ -57,12 +58,14 @@ dependencyResolutionManagement {
 rootProject.name = "Android-nRF-Toolbox"
 
 include ':app'
+
 include ':feature_csc'
-include ':lib_broadcast'
-include ':lib_events'
+include ':feature_scanner'
+
+include ':lib_service'
+include ':lib_theme'
+include ':lib_utils'
 
 if (file('../Android-BLE-Library').exists()) {
     includeBuild('../Android-BLE-Library')
 }
-include ':lib_theme'
-include ':lib_scanner'

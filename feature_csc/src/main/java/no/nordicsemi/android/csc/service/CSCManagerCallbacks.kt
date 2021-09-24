@@ -22,5 +22,6 @@
 package no.nordicsemi.android.csc.service
 
 import no.nordicsemi.android.ble.common.profile.csc.CyclingSpeedAndCadenceCallback
+import no.nordicsemi.android.service.BatteryManagerCallbacks
 
 internal interface CSCManagerCallbacks : BatteryManagerCallbacks, CyclingSpeedAndCadenceCallback
