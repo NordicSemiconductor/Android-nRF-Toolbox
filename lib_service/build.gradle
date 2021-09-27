@@ -2,7 +2,7 @@ apply from: rootProject.file("library.gradle")
 apply plugin: 'kotlin-parcelize'
 
 dependencies {
-    implementation project(":feature_scanner")
+    implementation project(":lib_theme")
 
     implementation libs.nordic.ble.common
     implementation libs.nordic.log

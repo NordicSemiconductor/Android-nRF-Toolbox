@@ -2,8 +2,10 @@ package no.nordicsemi.android.csc.view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -16,7 +18,7 @@ internal fun SpeedUnitRadioGroup(
     onEvent: (OnSelectedSpeedUnitSelected) -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         SpeedUnitRadioButton(currentUnit, SpeedUnit.KM_H, onEvent)
@@ -36,6 +38,7 @@ internal fun SpeedUnitRadioButton(
             selected = (selectedUnit == displayedUnit),
             onClick = { onEvent(OnSelectedSpeedUnitSelected(displayedUnit)) }
         )
+        Spacer(modifier = Modifier.width(4.dp))
         Text(text = createSpeedUnitLabel(displayedUnit))
     }
 }

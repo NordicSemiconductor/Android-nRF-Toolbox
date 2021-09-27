@@ -42,7 +42,6 @@ import no.nordicsemi.android.ble.BleManagerCallbacks
 import no.nordicsemi.android.ble.utils.ILogger
 import no.nordicsemi.android.log.ILogSession
 import no.nordicsemi.android.log.Logger
-import no.nordicsemi.android.scanner.tools.SelectedBluetoothDeviceHolder
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -68,7 +67,7 @@ abstract class BleProfileService : LifecycleService(), BleManagerCallbacks {
      * @return bluetooth device
      */
     protected val bluetoothDevice: BluetoothDevice by lazy {
-        bluetoothDeviceHolder.device ?: throw UnsupportedOperationException(
+        bluetoothDeviceHolder.device ?: throw IllegalArgumentException(
             "No device address at EXTRA_DEVICE_ADDRESS key"
         )
     }

@@ -6,4 +6,6 @@
     <color name="colorSecondary">#FF0077c8</color>
     <color name="colorSecondaryDark">#FF004c97</color>
     <color name="colorOnSecondary">#FFFFFFFF</color>
+    <color name="background">#FFDADADA</color>
+    <color name="actionBarColor">#FF0090B0</color>
 </resources>

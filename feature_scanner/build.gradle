@@ -4,6 +4,7 @@ apply plugin: 'kotlin-parcelize'
 dependencies {
     implementation project(":lib_utils")
     implementation project(":lib_theme")
+    implementation project(":lib_service")
 
     implementation libs.material
     implementation libs.google.permissions

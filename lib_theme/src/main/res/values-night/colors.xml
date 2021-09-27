@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#FF212121</color>
+    <color name="colorPrimaryDark">@android:color/black</color>
+    <color name="colorSecondary">#FF008CD2</color>
+    <color name="colorSecondaryDark">#FF008CD2</color>
+    <color name="colorOnSecondary">#FFFFFFFF</color>
+    <color name="colorOnPrimary">#FFFFFFFF</color>
+    <color name="background">@android:color/black</color>
+    <color name="actionBarColor">#FF0090B0</color>
+</resources>

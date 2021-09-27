@@ -22,16 +22,29 @@
 package no.nordicsemi.android.service
 
 import android.app.Notification
+import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Intent
 import android.os.Build
+import androidx.core.app.NotificationCompat
+
+private const val CHANNEL_ID = "FOREGROUND_BLE_SERVICE"
 
 abstract class ForegroundBleService<T : BatteryManager<out BatteryManagerCallbacks>> : BleProfileService() {
 
     protected abstract val manager: T
 
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val result = super.onStartCommand(intent, flags, startId)
+        startForegroundService()
+        return result
+    }
+
     override fun onDestroy() {
         // when user has disconnected from the sensor, we have to cancel the notification that we've created some milliseconds before using unbindService
         cancelNotification()
+        stopForegroundService()
         super.onDestroy()
     }
 
@@ -87,24 +100,30 @@ abstract class ForegroundBleService<T : BatteryManager<out BatteryManagerCallbac
      * @param defaults
      */
     private fun createNotification(messageResId: Int, defaults: Int): Notification {
-        TODO()
-//        final Intent parentIntent = new Intent(this, FeaturesActivity.class);
-//        parentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        final Intent targetIntent = new Intent(this, CSCActivity.class);
-//
-//        final Intent disconnect = new Intent(ACTION_DISCONNECT);
-//        final PendingIntent disconnectAction = PendingIntent.getBroadcast(this, DISCONNECT_REQ, disconnect, PendingIntent.FLAG_UPDATE_CURRENT);
-//
-//        // both activities above have launchMode="singleTask" in the AndroidManifest.xml file, so if the task is already running, it will be resumed
-//        final PendingIntent pendingIntent = PendingIntent.getActivities(this, OPEN_ACTIVITY_REQ, new Intent[]{parentIntent, targetIntent}, PendingIntent.FLAG_UPDATE_CURRENT);
-//        final NotificationCompat.Builder builder = new NotificationCompat.Builder(this, ToolboxApplication.CONNECTED_DEVICE_CHANNEL);
-//        builder.setContentIntent(pendingIntent);
-//        builder.setContentTitle(getString(R.string.app_name)).setContentText(getString(messageResId, getDeviceName()));
-//        builder.setSmallIcon(R.drawable.ic_stat_notify_csc);
-//        builder.setShowWhen(defaults != 0).setDefaults(defaults).setAutoCancel(true).setOngoing(true);
-//        builder.addAction(new NotificationCompat.Action(R.drawable.ic_action_bluetooth, getString(R.string.csc_notification_action_disconnect), disconnectAction));
-//
-//        return builder.build();
+        createNotificationChannel(CHANNEL_ID)
+
+        val intent: Intent? = packageManager.getLaunchIntentForPackage(packageName)
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText(getString(messageResId, manager.bluetoothDevice?.name ?: "Device"))
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentIntent(pendingIntent)
+            .build()
+    }
+
+    private fun createNotificationChannel(channelName: String) {
+        val channel = NotificationChannel(
+            channelName,
+            getString(R.string.channel_connected_devices_title),
+            NotificationManager.IMPORTANCE_LOW
+        )
+        channel.description = getString(R.string.channel_connected_devices_description)
+        channel.setShowBadge(false)
+        channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 
     /**

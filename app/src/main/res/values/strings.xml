@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">nRF Toolbox</string>
-
     <string name="csc_module">CSC</string>
+    <string name="hrs_module">HRS</string>
 </resources>

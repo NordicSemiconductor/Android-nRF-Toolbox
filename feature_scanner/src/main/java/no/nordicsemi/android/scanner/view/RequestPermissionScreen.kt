@@ -4,9 +4,18 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -14,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
@@ -24,18 +34,21 @@ import no.nordicsemi.android.scanner.R
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-internal fun RequestPermissionScreen(finish: () -> Unit) {
+fun RequestPermissionScreen(finish: () -> Unit) {
     val permissionsState = rememberMultiplePermissionsState(listOf(
-        android.Manifest.permission.ACCESS_FINE_LOCATION,
-//        android.Manifest.permission.BLUETOOTH_SCAN,
-//        android.Manifest.permission.BLUETOOTH_CONNECT
+        android.Manifest.permission.BLUETOOTH_CONNECT
     ))
-    PermissionsRequired(
-        multiplePermissionsState = permissionsState,
-        permissionsNotGrantedContent = { PermissionNotGranted { permissionsState.launchMultiplePermissionRequest() } },
-        permissionsNotAvailableContent = { PermissionNotAvailable() }
-    ) {
-        finish()
+
+    Column {
+        TopAppBar(title = { Text(text = stringResource(id = R.string.scanner__request_permission)) })
+
+        PermissionsRequired(
+            multiplePermissionsState = permissionsState,
+            permissionsNotGrantedContent = { PermissionNotGranted { permissionsState.launchMultiplePermissionRequest() } },
+            permissionsNotAvailableContent = { PermissionNotAvailable() }
+        ) {
+            finish()
+        }
     }
 }
 
@@ -45,7 +58,9 @@ private fun PermissionNotGranted(onClick: () -> Unit) {
 
     if (doNotShowRationale.value) {
         Column(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -53,18 +68,21 @@ private fun PermissionNotGranted(onClick: () -> Unit) {
         }
     } else {
         Column(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .padding(16.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(stringResource(id = R.string.scanner__permission_rationale))
-            Spacer(modifier = Modifier.height(8.dp))
+            Text(textAlign = TextAlign.Center, text = stringResource(id = R.string.scanner__permission_rationale))
+            Spacer(modifier = Modifier.height(16.dp))
             Row {
-                Button(onClick = { onClick() }) {
+                Button(modifier = Modifier.width(100.dp), onClick = { onClick() }) {
                     Text(stringResource(id = R.string.scanner__button_ok))
                 }
-                Spacer(Modifier.width(8.dp))
-                Button(onClick = { doNotShowRationale.value = true }) {
+                Spacer(Modifier.width(16.dp))
+                Button(modifier = Modifier.width(100.dp), onClick = { doNotShowRationale.value = true }) {
                     Text(stringResource(id = R.string.scanner__button_nope))
                 }
             }
@@ -76,7 +94,9 @@ private fun PermissionNotGranted(onClick: () -> Unit) {
 private fun PermissionNotAvailable() {
     val context = LocalContext.current
     Column(
-        modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

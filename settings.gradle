@@ -4,6 +4,7 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
+        maven { url 'https://jitpack.io' }
         mavenCentral()
         jcenter() // Warning: this repository is going to shut down soon
     }
@@ -44,6 +45,7 @@ dependencyResolutionManagement {
 
             alias('kotlin-coroutines').to('org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2')
             alias('google-permissions').to('com.google.accompanist:accompanist-permissions:0.18.0')
+            alias('chart').to('com.github.PhilJay:MPAndroidChart:v3.1.0')
 
             //-- Test ------------------------------------------------------------------------------
             alias('test-junit').to('junit:junit:4.13.2')
@@ -60,6 +62,7 @@ rootProject.name = "Android-nRF-Toolbox"
 include ':app'
 
 include ':feature_csc'
+include ':feature_hrs'
 include ':feature_scanner'
 
 include ':lib_service'

@@ -5,41 +5,40 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-
-//TODO
-private val DarkColorPalette = darkColors(
-    primary = NordicColors.Primary,
-    primaryVariant = NordicColors.PrimaryDark,
-    secondary = NordicColors.Secondary,
-    secondaryVariant = NordicColors.SecondaryDark,
-    onSecondary = Color.White,
-    onPrimary = Color.White,
-    onBackground = Color.Black,
-    onSurface = Color.Black,
-    background = Color.White,
-    surface = Color.White,
-)
-
-private val LightColorPalette = lightColors(
-    primary = NordicColors.Primary,
-    primaryVariant = NordicColors.PrimaryDark,
-    secondary = NordicColors.Secondary,
-    secondaryVariant = NordicColors.SecondaryDark,
-    onSecondary = Color.White,
-    onPrimary = Color.White,
-    onBackground = Color.Black,
-    onSurface = Color.Black,
-    background = Color.White,
-    surface = Color.White,
-)
 
 @Composable
 fun TestTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable() () -> Unit) {
+
+    val darkColorPalette = darkColors(
+        primary = NordicColors.Primary.value(),
+        primaryVariant = NordicColors.PrimaryVariant.value(),
+        secondary = NordicColors.Secondary.value(),
+        secondaryVariant = NordicColors.SecondaryVariant.value(),
+        onSecondary = NordicColors.OnSecondary.value(),
+        onPrimary = NordicColors.OnPrimary.value(),
+        onBackground = NordicColors.OnBackground.value(),
+        onSurface = NordicColors.OnSurface.value(),
+        background = NordicColors.Background.value(),
+        surface = NordicColors.Surface.value(),
+    )
+
+    val lightColorPalette = lightColors(
+        primary = NordicColors.Primary.value(),
+        primaryVariant = NordicColors.PrimaryVariant.value(),
+        secondary = NordicColors.Secondary.value(),
+        secondaryVariant = NordicColors.SecondaryVariant.value(),
+        onSecondary = NordicColors.OnSecondary.value(),
+        onPrimary = NordicColors.OnPrimary.value(),
+        onBackground = NordicColors.OnBackground.value(),
+        onSurface = NordicColors.OnSurface.value(),
+        background = NordicColors.Background.value(),
+        surface = NordicColors.Surface.value(),
+    )
+
     val colors = if (darkTheme) {
-        DarkColorPalette
+        darkColorPalette
     } else {
-        LightColorPalette
+        lightColorPalette
     }
 
     MaterialTheme(

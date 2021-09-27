@@ -4,10 +4,10 @@ import android.bluetooth.BluetoothDevice
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
-sealed class CSCServiceEvent : Parcelable
+internal sealed class CSCServiceEvent : Parcelable
 
 @Parcelize
-data class OnDistanceChangedEvent(
+internal data class OnDistanceChangedEvent(
     val bluetoothDevice: BluetoothDevice,
     val speed: Float,
     val distance: Float,
@@ -15,14 +15,14 @@ data class OnDistanceChangedEvent(
 ) : CSCServiceEvent()
 
 @Parcelize
-data class CrankDataChanged(
+internal data class CrankDataChanged(
     val bluetoothDevice: BluetoothDevice,
     val crankCadence: Int,
     val gearRatio: Float
 ) : CSCServiceEvent()
 
 @Parcelize
-data class OnBatteryLevelChanged(
+internal data class OnBatteryLevelChanged(
     val device: BluetoothDevice,
     val batteryLevel: Int
 ) : CSCServiceEvent()

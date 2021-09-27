@@ -1,26 +1,67 @@
 package no.nordicsemi.android.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 object NordicColors {
-    val Primary = Color(0xFF00A9CE)
-    val PrimaryLight = Color(0xFF5fdbff)
-    val PrimaryDark = Color(0xFF007a9d)
-    val Secondary = Color(0xFF0077c8)
-    val SecondaryLight = Color(0xFF57c0e2)
-    val SecondaryDark = Color(0xFF004c97)
-    val Text = Color(0xFF00A9CE)
-
+    val AlmostWhite = Color(0xFFDADADA)
     val NordicBlue = Color(0xFF00A9CE)
-    val NordicBlueDark = Color(0xFF0090B0)
-    val NordicSky = Color(0xFF6AD1E3)
-    val NordicBlueLate = Color(0xFF0033A0)
-    val NordicLake = Color(0xFF0077C8)
-    val NordicLightGray = Color(0xFFD9E1E2)
-    val NordicMediumGray = Color(0xFF768692)
-    val NordicDarkGray = Color(0xFF333F48)
-    val NordicGrass = Color(0xFFD0DF00)
-    val NordicSun = Color(0xFFFFCD00)
-    val NordicRed = Color(0xFFEE2F4E)
-    val NordicFall = Color(0xFFF58220)
+    val NordicLake = Color(0xFF008CD2)
+
+    val NordicDarkGray = ThemedColor(Color(0xFF333F48), Color(0xFFCCCBC8))
+
+//    val NordicGray4 = ThemedColor(Color(0xFFD1D1D6), Color(0xFF3A3A3C))
+    val NordicGray4 = ThemedColor(Color.White, Color(0xFF3A3A3C))
+
+    val NordicGray5 = ThemedColor(Color(0xFFE5E5EA), Color(0xFF2C2C2E))
+    val NordicLightGray = NeutralColor(Color(0xFF929CA2))
+    val NordicMediumGray = NeutralColor(Color(0xFF929CA2))
+
+    val NordicFall = ThemedColor(Color(0xFFF99535), Color(0xFFFF9F0A))
+    val NordicGreen = ThemedColor(Color(0xFF3ED052), Color(0xFF32D74B))
+
+    val NordicOrange = ThemedColor(Color(0xFFDF9B16), Color(0xFFFF9F0A))
+    val NordicRed = ThemedColor(Color(0xFFD03E51), Color(0xFFFF453A))
+    val NordicSky = NeutralColor(Color(0xFF6AD1E3))
+    val NordicYellow = ThemedColor(Color(0xFFF9EE35), Color(0xFFFFD60A))
+    val TableViewBackground = NeutralColor(Color(0xFFF2F2F6))
+    val TableViewSeparator = NeutralColor(Color(0xFFD2D2D6))
+
+    val Primary = ThemedColor(Color(0xFF00A9CE), Color(0xFF212121))
+    val PrimaryVariant = ThemedColor(Color(0xFF008CD2), Color.Black)
+    val Secondary = ThemedColor(Color(0xFF00A9CE), Color(0xFF008CD2))
+    val SecondaryVariant = ThemedColor(Color(0xFF008CD2), Color(0xFF008CD2))
+    val OnPrimary = ThemedColor(Color.White, Color.White)
+    val OnSecondary = ThemedColor(Color.White, Color.White)
+    val OnBackground = ThemedColor(Color.Black, Color.White)
+    val OnSurface = ThemedColor(Color.Black, Color.White)
+    val Background = ThemedColor(Color(0xFFDADADA), Color.Black)
+    val Surface = ThemedColor(Color(0xFFDADADA), Color.Black)
+}
+
+sealed class NordicColor {
+
+    @Composable
+    abstract fun value(): Color
+}
+
+data class ThemedColor(val light: Color, val dark: Color): NordicColor() {
+
+    @Composable
+    override fun value(): Color {
+        return if (isSystemInDarkTheme()) {
+            dark
+        } else {
+            light
+        }
+    }
+}
+
+data class NeutralColor(val color: Color): NordicColor() {
+
+    @Composable
+    override fun value(): Color {
+        return color
+    }
 }

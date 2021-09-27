@@ -9,7 +9,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class CSCDataReadBroadcast @Inject constructor() : BluetoothDataReadBroadcast<CSCServiceEvent>() {
+internal class CSCDataReadBroadcast @Inject constructor() : BluetoothDataReadBroadcast<CSCServiceEvent>() {
 
     private val _wheelSize = MutableSharedFlow<Int>(
         replay = 1,
