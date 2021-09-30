@@ -14,7 +14,7 @@ import javax.inject.Inject
 class NavigationViewModel @Inject constructor(
     private val bleScanner: NordicBleScanner,
     private val permissionHelper: PermissionHelper,
-    private val selectedDevice: no.nordicsemi.android.service.SelectedBluetoothDeviceHolder
+    private val selectedDevice: SelectedBluetoothDeviceHolder
 ): ViewModel() {
 
     val state= MutableStateFlow(NavDestination.HOME)

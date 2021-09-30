@@ -52,6 +52,7 @@ dependencies {
     //https://github.com/google/dagger/issues/2123
     implementation project(":feature_csc")
     implementation project(":feature_hrs")
+    implementation project(":feature_gls")
     implementation project(':feature_scanner')
     implementation project(":lib_theme")
     implementation project(":lib_utils")

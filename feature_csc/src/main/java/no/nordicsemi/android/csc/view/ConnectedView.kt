@@ -17,11 +17,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.csc.R
-import no.nordicsemi.android.csc.viewmodel.CSCViewState
+import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.theme.NordicColors
 
 @Composable
-internal fun ContentView(state: CSCViewState, onEvent: (CSCViewEvent) -> Unit) {
+internal fun ContentView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
     if (state.showDialog) {
         SelectWheelSizeDialog { onEvent(it) }
     }
@@ -48,7 +48,7 @@ internal fun ContentView(state: CSCViewState, onEvent: (CSCViewEvent) -> Unit) {
 }
 
 @Composable
-private fun SettingsSection(state: CSCViewState, onEvent: (CSCViewEvent) -> Unit) {
+private fun SettingsSection(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
     Card(
         backgroundColor = NordicColors.NordicGray4.value(),
         shape = RoundedCornerShape(10.dp),
@@ -70,5 +70,5 @@ private fun SettingsSection(state: CSCViewState, onEvent: (CSCViewEvent) -> Unit
 @Preview
 @Composable
 private fun ConnectedPreview() {
-    ContentView(CSCViewState()) { }
+    ContentView(CSCData()) { }
 }

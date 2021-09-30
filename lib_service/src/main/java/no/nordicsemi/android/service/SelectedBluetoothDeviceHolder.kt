@@ -16,6 +16,15 @@ class SelectedBluetoothDeviceHolder constructor(
             return deviceManager.associations.firstOrNull()?.let { bluetoothAdapter?.getRemoteDevice(it) }
         }
 
+    //TODO: Check if starts automatically
+    fun bondDevice() {
+        device?.let {
+            if (it.bondState == BluetoothDevice.BOND_NONE) {
+                it.createBond()
+            }
+        }
+    }
+
     fun forgetDevice() {
         device?.let {
             val deviceManager = context.getSystemService(Context.COMPANION_DEVICE_SERVICE) as CompanionDeviceManager

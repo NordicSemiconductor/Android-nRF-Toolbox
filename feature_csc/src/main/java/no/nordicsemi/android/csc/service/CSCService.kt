@@ -5,15 +5,15 @@ import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import no.nordicsemi.android.csc.events.CrankDataChanged
-import no.nordicsemi.android.csc.events.OnBatteryLevelChanged
-import no.nordicsemi.android.csc.events.OnDistanceChangedEvent
+import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.service.ForegroundBleService
 import no.nordicsemi.android.service.LoggableBleManager
 import javax.inject.Inject
 
 @AndroidEntryPoint
 internal class CSCService : ForegroundBleService<CSCManager>(), CSCManagerCallbacks {
+
+    private var data = CSCData()
 
     @Inject
     lateinit var localBroadcast: CSCDataReadBroadcast
@@ -42,7 +42,7 @@ internal class CSCService : ForegroundBleService<CSCManager>(), CSCManagerCallba
         distance: Float,
         speed: Float
     ) {
-        localBroadcast.offer(OnDistanceChangedEvent(bluetoothDevice, speed, distance, totalDistance))
+        localBroadcast.offer(data.copy(speed = speed, distance = distance, totalDistance = totalDistance))
     }
 
     override fun onCrankDataChanged(
@@ -50,10 +50,10 @@ internal class CSCService : ForegroundBleService<CSCManager>(), CSCManagerCallba
         crankCadence: Float,
         gearRatio: Float
     ) {
-        localBroadcast.offer(CrankDataChanged(bluetoothDevice, crankCadence.toInt(), gearRatio))
+        localBroadcast.offer(data.copy(cadence = crankCadence.toInt(), gearRatio = gearRatio))
     }
 
     override fun onBatteryLevelChanged(device: BluetoothDevice, batteryLevel: Int) {
-        localBroadcast.offer(OnBatteryLevelChanged(bluetoothDevice, batteryLevel))
+        localBroadcast.offer(data.copy(batteryLevel = batteryLevel))
     }
 }

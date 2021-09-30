@@ -12,10 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import no.nordicsemi.android.csc.R
-import no.nordicsemi.android.csc.viewmodel.CSCViewState
+import no.nordicsemi.android.csc.data.CSCData
 
 @Composable
-internal fun WheelSizeView(state: CSCViewState, onEvent: (CSCViewEvent) -> Unit) {
+internal fun WheelSizeView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth(),
         value = state.wheelSize,
@@ -36,5 +36,5 @@ private fun EditIcon(onEvent: (CSCViewEvent) -> Unit) {
 @Preview
 @Composable
 private fun WheelSizeViewPreview() {
-    WheelSizeView(CSCViewState()) { }
+    WheelSizeView(CSCData()) { }
 }

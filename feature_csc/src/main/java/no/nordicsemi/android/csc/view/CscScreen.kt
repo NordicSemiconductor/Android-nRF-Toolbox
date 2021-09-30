@@ -12,7 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.csc.R
 import no.nordicsemi.android.csc.service.CSCService
-import no.nordicsemi.android.csc.viewmodel.CSCViewState
+import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.csc.viewmodel.CscViewModel
 import no.nordicsemi.android.utils.isServiceRunning
 
@@ -43,7 +43,7 @@ fun CscScreen(finishAction: () -> Unit) {
 }
 
 @Composable
-private fun CSCView(state: CSCViewState, onEvent: (CSCViewEvent) -> Unit) {
+private fun CSCView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
     Column {
         TopAppBar(title = { Text(text = stringResource(id = R.string.csc_title)) })
 

@@ -1,10 +1,10 @@
-package no.nordicsemi.android.csc.viewmodel
+package no.nordicsemi.android.csc.data
 
 import no.nordicsemi.android.csc.view.CSCSettings
 import no.nordicsemi.android.csc.view.SpeedUnit
 import java.util.*
 
-internal data class CSCViewState(
+internal data class CSCData(
     val showDialog: Boolean = false,
     val scanDevices: Boolean = false,
     val selectedSpeedUnit: SpeedUnit = SpeedUnit.M_S,

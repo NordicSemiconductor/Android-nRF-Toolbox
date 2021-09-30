@@ -62,6 +62,7 @@ rootProject.name = "Android-nRF-Toolbox"
 include ':app'
 
 include ':feature_csc'
+include ':feature_gls'
 include ':feature_hrs'
 include ':feature_scanner'
 

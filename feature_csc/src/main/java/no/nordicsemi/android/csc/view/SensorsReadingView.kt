@@ -12,13 +12,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.csc.R
-import no.nordicsemi.android.csc.viewmodel.CSCViewState
+import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.theme.NordicColors
 import no.nordicsemi.android.theme.view.BatteryLevelView
 import no.nordicsemi.android.theme.view.KeyValueField
 
 @Composable
-internal fun SensorsReadingView(state: CSCViewState) {
+internal fun SensorsReadingView(state: CSCData) {
     Card(
         backgroundColor = NordicColors.NordicGray4.value(),
         shape = RoundedCornerShape(10.dp),
@@ -48,5 +48,5 @@ internal fun SensorsReadingView(state: CSCViewState) {
 @Preview
 @Composable
 private fun Preview() {
-    SensorsReadingView(CSCViewState())
+    SensorsReadingView(CSCData())
 }

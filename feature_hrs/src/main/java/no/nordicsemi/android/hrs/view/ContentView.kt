@@ -71,7 +71,7 @@ internal fun ContentView(state: HRSViewState, onEvent: (HRSScreenViewEvent) -> U
 }
 
 @Composable
-fun LineChartView(state: HRSViewState) {
+internal fun LineChartView(state: HRSViewState) {
     AndroidView(
         modifier = Modifier
             .fillMaxWidth()
@@ -81,7 +81,7 @@ fun LineChartView(state: HRSViewState) {
     )
 }
 
-fun createLineChartView(context: Context, state: HRSViewState): LineChart {
+internal fun createLineChartView(context: Context, state: HRSViewState): LineChart {
     return LineChart(context).apply {
         setBackgroundColor(Color.WHITE)
 

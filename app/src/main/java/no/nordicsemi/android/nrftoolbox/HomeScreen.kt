@@ -20,6 +20,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import no.nordicsemi.android.csc.view.CscScreen
+import no.nordicsemi.android.gls.view.GLSScreen
 import no.nordicsemi.android.hrs.view.HRSScreen
 import no.nordicsemi.android.scanner.view.BluetoothNotAvailableScreen
 import no.nordicsemi.android.scanner.view.BluetoothNotEnabledScreen
@@ -29,7 +30,7 @@ import no.nordicsemi.android.scanner.view.ScanDeviceScreenResult
 import no.nordicsemi.android.utils.exhaustive
 
 @Composable
-fun HomeScreen() {
+internal fun HomeScreen() {
     val navController = rememberNavController()
 
     val viewModel = hiltViewModel<NavigationViewModel>()
@@ -42,6 +43,7 @@ fun HomeScreen() {
         composable(NavDestination.HOME.id) { HomeView { viewModel.navigate(it) } }
         composable(NavDestination.CSC.id) { CscScreen { viewModel.navigateUp() } }
         composable(NavDestination.HRS.id) { HRSScreen { viewModel.navigateUp() } }
+        composable(NavDestination.GLS.id) { GLSScreen { viewModel.navigateUp() } }
         composable(NavDestination.REQUEST_PERMISSION.id) { RequestPermissionScreen(continueAction) }
         composable(NavDestination.BLUETOOTH_NOT_AVAILABLE.id) { BluetoothNotAvailableScreen() }
         composable(NavDestination.BLUETOOTH_NOT_ENABLED.id) {
@@ -69,6 +71,7 @@ fun HomeView(callback: (NavDestination) -> Unit) {
 
         FeatureButton(R.drawable.ic_csc, R.string.csc_module) { callback(NavDestination.CSC) }
         FeatureButton(R.drawable.ic_hrs, R.string.hrs_module) { callback(NavDestination.HRS) }
+        FeatureButton(R.drawable.ic_gls, R.string.gls_module) { callback(NavDestination.GLS) }
     }
 }
 

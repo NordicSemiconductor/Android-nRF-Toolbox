@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
-import no.nordicsemi.android.hrs.events.HRSAggregatedData
+import no.nordicsemi.android.hrs.data.HRSData
 import no.nordicsemi.android.hrs.service.HRSDataBroadcast
 import no.nordicsemi.android.hrs.view.DisconnectEvent
 import no.nordicsemi.android.hrs.view.HRSScreenViewEvent
@@ -27,7 +27,7 @@ internal class HRSViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    private fun consumeEvent(event: HRSAggregatedData) {
+    private fun consumeEvent(event: HRSData) {
         state.value = state.value.copy(
             points = event.heartRates,
             batteryLevel = event.batteryLevel,

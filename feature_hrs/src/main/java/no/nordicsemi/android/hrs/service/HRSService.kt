@@ -3,7 +3,7 @@ package no.nordicsemi.android.hrs.service
 import android.bluetooth.BluetoothDevice
 import dagger.hilt.android.AndroidEntryPoint
 import no.nordicsemi.android.ble.BleManagerCallbacks
-import no.nordicsemi.android.hrs.events.HRSAggregatedData
+import no.nordicsemi.android.hrs.data.HRSData
 import no.nordicsemi.android.service.ForegroundBleService
 import no.nordicsemi.android.service.LoggableBleManager
 import javax.inject.Inject
@@ -11,7 +11,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 internal class HRSService : ForegroundBleService<HRSManager>(), HRSManagerCallbacks {
 
-    private var data = HRSAggregatedData()
+    private var data = HRSData()
     private val points = mutableListOf<Int>()
 
     @Inject
@@ -46,7 +46,7 @@ internal class HRSService : ForegroundBleService<HRSManager>(), HRSManagerCallba
         sendNewData(data.copy(heartRates = points))
     }
 
-    private fun sendNewData(newData: HRSAggregatedData) {
+    private fun sendNewData(newData: HRSData) {
         data = newData
         localBroadcast.offer(newData)
     }

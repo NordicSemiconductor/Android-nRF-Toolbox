@@ -3,13 +3,13 @@ package no.nordicsemi.android.csc.service
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import no.nordicsemi.android.csc.events.CSCServiceEvent
+import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.service.BluetoothDataReadBroadcast
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class CSCDataReadBroadcast @Inject constructor() : BluetoothDataReadBroadcast<CSCServiceEvent>() {
+internal class CSCDataReadBroadcast @Inject constructor() : BluetoothDataReadBroadcast<CSCData>() {
 
     private val _wheelSize = MutableSharedFlow<Int>(
         replay = 1,
