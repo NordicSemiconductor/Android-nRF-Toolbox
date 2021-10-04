@@ -24,7 +24,7 @@ package no.nordicsemi.android.hrs.service
 import no.nordicsemi.android.ble.data.Data
 import java.util.*
 
-object HeartRateMeasurementParser {
+internal object HeartRateMeasurementParser {
 
     private const val HEART_RATE_VALUE_FORMAT: Byte = 0x01 // 1 bit
     private const val SENSOR_CONTACT_STATUS: Byte = 0x06 // 2 bits

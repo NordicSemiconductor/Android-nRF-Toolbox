@@ -22,6 +22,7 @@ import androidx.navigation.compose.rememberNavController
 import no.nordicsemi.android.csc.view.CscScreen
 import no.nordicsemi.android.gls.view.GLSScreen
 import no.nordicsemi.android.hrs.view.HRSScreen
+import no.nordicsemi.android.hts.view.HTSScreen
 import no.nordicsemi.android.scanner.view.BluetoothNotAvailableScreen
 import no.nordicsemi.android.scanner.view.BluetoothNotEnabledScreen
 import no.nordicsemi.android.scanner.view.RequestPermissionScreen
@@ -43,6 +44,7 @@ internal fun HomeScreen() {
         composable(NavDestination.HOME.id) { HomeView { viewModel.navigate(it) } }
         composable(NavDestination.CSC.id) { CscScreen { viewModel.navigateUp() } }
         composable(NavDestination.HRS.id) { HRSScreen { viewModel.navigateUp() } }
+        composable(NavDestination.HTS.id) { HTSScreen { viewModel.navigateUp() } }
         composable(NavDestination.GLS.id) { GLSScreen { viewModel.navigateUp() } }
         composable(NavDestination.REQUEST_PERMISSION.id) { RequestPermissionScreen(continueAction) }
         composable(NavDestination.BLUETOOTH_NOT_AVAILABLE.id) { BluetoothNotAvailableScreen() }

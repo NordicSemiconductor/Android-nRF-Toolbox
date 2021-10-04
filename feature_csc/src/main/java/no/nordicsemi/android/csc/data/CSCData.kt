@@ -55,4 +55,8 @@ internal data class CSCData(
     fun displayGearRatio(): String {
         return String.format(Locale.US, "%.1f", gearRatio)
     }
+
+    fun items(): List<> {
+
+    }
 }

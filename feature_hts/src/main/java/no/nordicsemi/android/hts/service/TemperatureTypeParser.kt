@@ -19,22 +19,30 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package no.nordicsemi.android.hrs.service
+package no.nordicsemi.android.hts.service
 
 import no.nordicsemi.android.ble.data.Data
 
-internal object BodySensorLocationParser {
+object TemperatureTypeParser {
     fun parse(data: Data): String {
-        val value = data.getIntValue(Data.FORMAT_UINT8, 0)!!
-        return when (value) {
-            6 -> "Foot"
-            5 -> "Ear Lobe"
-            4 -> "Hand"
-            3 -> "Finger"
-            2 -> "Wrist"
-            1 -> "Chest"
-            0 -> "Other"
-            else -> "Other"
+        return parse(data, 0)
+    }
+
+    /* package */
+	@JvmStatic
+	fun parse(data: Data, offset: Int): String {
+        val type = data.value!![offset].toInt()
+        return when (type) {
+            1 -> "Armpit"
+            2 -> "Body (general)"
+            3 -> "Ear (usually ear lobe)"
+            4 -> "Finger"
+            5 -> "Gastro-intestinal Tract"
+            6 -> "Mouth"
+            7 -> "Rectum"
+            8 -> "Toe"
+            9 -> "Tympanum (ear drum)"
+            else -> "Unknown"
         }
     }
 }

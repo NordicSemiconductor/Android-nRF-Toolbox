@@ -19,22 +19,35 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package no.nordicsemi.android.hrs.service
+package no.nordicsemi.android.hts.service
 
+import no.nordicsemi.android.ble.common.callback.DateTimeDataCallback
 import no.nordicsemi.android.ble.data.Data
+import java.util.*
 
-internal object BodySensorLocationParser {
+object DateTimeParser {
+    /**
+     * Parses the date and time info.
+     *
+     * @param data
+     * @return time in human readable format
+     */
     fun parse(data: Data): String {
-        val value = data.getIntValue(Data.FORMAT_UINT8, 0)!!
-        return when (value) {
-            6 -> "Foot"
-            5 -> "Ear Lobe"
-            4 -> "Hand"
-            3 -> "Finger"
-            2 -> "Wrist"
-            1 -> "Chest"
-            0 -> "Other"
-            else -> "Other"
-        }
+        return parse(data, 0)
+    }
+
+    /**
+     * Parses the date and time info. This data has 7 bytes
+     *
+     * @param data
+     * @param offset
+     * offset to start reading the time
+     * @return time in human readable format
+     */
+    /* package */
+	@JvmStatic
+	fun parse(data: Data, offset: Int): String {
+        val calendar = DateTimeDataCallback.readDateTime(data, offset)
+        return String.format(Locale.US, "%1\$te %1\$tb %1\$tY, %1\$tH:%1\$tM:%1\$tS", calendar)
     }
 }

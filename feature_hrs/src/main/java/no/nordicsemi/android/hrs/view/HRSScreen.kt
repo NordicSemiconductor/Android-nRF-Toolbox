@@ -47,6 +47,6 @@ private fun HRSView(state: HRSViewState, onEvent: (HRSScreenViewEvent) -> Unit) 
     Column {
         TopAppBar(title = { Text(text = stringResource(id = R.string.hrs_title)) })
 
-        ContentView(state) { onEvent(it) }
+        HRSContentView(state) { onEvent(it) }
     }
 }

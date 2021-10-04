@@ -4,10 +4,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -18,10 +16,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.csc.R
 import no.nordicsemi.android.csc.data.CSCData
-import no.nordicsemi.android.theme.NordicColors
+import no.nordicsemi.android.theme.view.SensorRecordCard
 
 @Composable
-internal fun ContentView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
+internal fun CSCContentView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
     if (state.showDialog) {
         SelectWheelSizeDialog { onEvent(it) }
     }
@@ -49,11 +47,7 @@ internal fun ContentView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
 
 @Composable
 private fun SettingsSection(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
-    Card(
-        backgroundColor = NordicColors.NordicGray4.value(),
-        shape = RoundedCornerShape(10.dp),
-        elevation = 0.dp
-    ) {
+    SensorRecordCard {
         Column(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -70,5 +64,5 @@ private fun SettingsSection(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
 @Preview
 @Composable
 private fun ConnectedPreview() {
-    ContentView(CSCData()) { }
+    CSCContentView(CSCData()) { }
 }

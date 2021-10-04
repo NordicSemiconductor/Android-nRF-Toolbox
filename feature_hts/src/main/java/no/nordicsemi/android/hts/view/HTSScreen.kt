@@ -1,4 +1,4 @@
-package no.nordicsemi.android.csc.view
+package no.nordicsemi.android.hts.view
 
 import android.content.Intent
 import androidx.compose.foundation.layout.Column
@@ -10,15 +10,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import no.nordicsemi.android.csc.R
-import no.nordicsemi.android.csc.service.CSCService
-import no.nordicsemi.android.csc.data.CSCData
-import no.nordicsemi.android.csc.viewmodel.CscViewModel
+import no.nordicsemi.android.hts.R
+import no.nordicsemi.android.hts.data.HTSData
+import no.nordicsemi.android.hts.service.HTSService
+import no.nordicsemi.android.hts.viewmodel.HTSViewModel
 import no.nordicsemi.android.utils.isServiceRunning
 
 @Composable
-fun CscScreen(finishAction: () -> Unit) {
-    val viewModel: CscViewModel = hiltViewModel()
+fun HTSScreen(finishAction: () -> Unit) {
+    val viewModel: HTSViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
 
     val context = LocalContext.current
@@ -26,27 +26,27 @@ fun CscScreen(finishAction: () -> Unit) {
         if (!state.isScreenActive) {
             finishAction()
         }
-        if (context.isServiceRunning(CSCService::class.java.name)) {
-            val intent = Intent(context, CSCService::class.java)
+        if (context.isServiceRunning(HTSService::class.java.name)) {
+            val intent = Intent(context, HTSService::class.java)
             context.stopService(intent)
         }
     }
 
     LaunchedEffect("start-service") {
-        if (!context.isServiceRunning(CSCService::class.java.name)) {
-            val intent = Intent(context, CSCService::class.java)
+        if (!context.isServiceRunning(HTSService::class.java.name)) {
+            val intent = Intent(context, HTSService::class.java)
             context.startService(intent)
         }
     }
 
-    CSCView(state) { viewModel.onEvent(it) }
+    HRSView(state) { viewModel.onEvent(it) }
 }
 
 @Composable
-private fun CSCView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
+private fun HRSView(state: HTSData, onEvent: (HTSScreenViewEvent) -> Unit) {
     Column {
-        TopAppBar(title = { Text(text = stringResource(id = R.string.csc_title)) })
+        TopAppBar(title = { Text(text = stringResource(id = R.string.hts_title)) })
 
-        CSCContentView(state) { onEvent(it) }
+        HTSContentView(state) { onEvent(it) }
     }
 }

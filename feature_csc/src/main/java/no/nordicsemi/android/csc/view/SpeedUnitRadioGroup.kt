@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
@@ -14,32 +13,33 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 internal fun SpeedUnitRadioGroup(
-    currentUnit: SpeedUnit,
-    onEvent: (OnSelectedSpeedUnitSelected) -> Unit
+    currentItem: RadioGroupItem,
+    items: List<RadioGroupItem>,
+    onEvent: (RadioGroupItem) -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        SpeedUnitRadioButton(currentUnit, SpeedUnit.KM_H, onEvent)
-        SpeedUnitRadioButton(currentUnit, SpeedUnit.MPH, onEvent)
-        SpeedUnitRadioButton(currentUnit, SpeedUnit.M_S, onEvent)
+        items.forEach {
+            SpeedUnitRadioButton(currentItem, it, onEvent)
+        }
     }
 }
 
 @Composable
 internal fun SpeedUnitRadioButton(
-    selectedUnit: SpeedUnit,
-    displayedUnit: SpeedUnit,
-    onEvent: (OnSelectedSpeedUnitSelected) -> Unit
+    selectedItem: RadioGroupItem,
+    displayedItem: RadioGroupItem,
+    onEvent: (RadioGroupItem) -> Unit
 ) {
     Row {
         RadioButton(
-            selected = (selectedUnit == displayedUnit),
-            onClick = { onEvent(OnSelectedSpeedUnitSelected(displayedUnit)) }
+            selected = (selectedItem == displayedItem),
+            onClick = { onEvent(displayedItem) }
         )
         Spacer(modifier = Modifier.width(4.dp))
-        Text(text = createSpeedUnitLabel(displayedUnit))
+        Text(text = displayedItem.label)
     }
 }
 
@@ -50,3 +50,5 @@ internal fun createSpeedUnitLabel(unit: SpeedUnit): String {
         SpeedUnit.MPH -> "mph"
     }
 }
+
+data class RadioGroupItem(val label: String)

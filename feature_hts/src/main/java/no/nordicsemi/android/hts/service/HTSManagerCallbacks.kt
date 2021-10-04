@@ -19,22 +19,13 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package no.nordicsemi.android.hrs.service
+package no.nordicsemi.android.hts.service
 
-import no.nordicsemi.android.ble.data.Data
+import no.nordicsemi.android.ble.common.profile.ht.TemperatureMeasurementCallback
+import no.nordicsemi.android.service.BatteryManagerCallbacks
 
-internal object BodySensorLocationParser {
-    fun parse(data: Data): String {
-        val value = data.getIntValue(Data.FORMAT_UINT8, 0)!!
-        return when (value) {
-            6 -> "Foot"
-            5 -> "Ear Lobe"
-            4 -> "Hand"
-            3 -> "Finger"
-            2 -> "Wrist"
-            1 -> "Chest"
-            0 -> "Other"
-            else -> "Other"
-        }
-    }
-}
+/**
+ * Interface [HTSManagerCallbacks] must be implemented by [HTActivity] in order
+ * to receive callbacks from [HTSManager].
+ */
+interface HTSManagerCallbacks : BatteryManagerCallbacks, TemperatureMeasurementCallback

@@ -64,6 +64,7 @@ include ':app'
 include ':feature_csc'
 include ':feature_gls'
 include ':feature_hrs'
+include ':feature_hts'
 include ':feature_scanner'
 
 include ':lib_service'

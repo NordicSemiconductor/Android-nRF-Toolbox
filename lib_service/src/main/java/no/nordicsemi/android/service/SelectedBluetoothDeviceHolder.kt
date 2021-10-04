@@ -16,13 +16,11 @@ class SelectedBluetoothDeviceHolder constructor(
             return deviceManager.associations.firstOrNull()?.let { bluetoothAdapter?.getRemoteDevice(it) }
         }
 
-    //TODO: Check if starts automatically
+    fun isDeviceBonded(): Boolean {
+        return device?.bondState == BluetoothDevice.BOND_NONE
+    }
     fun bondDevice() {
-        device?.let {
-            if (it.bondState == BluetoothDevice.BOND_NONE) {
-                it.createBond()
-            }
-        }
+        device?.createBond()
     }
 
     fun forgetDevice() {

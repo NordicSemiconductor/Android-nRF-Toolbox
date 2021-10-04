@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -16,6 +17,10 @@ import no.nordicsemi.android.gls.viewmodel.GLSViewModel
 fun GLSScreen(finishAction: () -> Unit) {
     val viewModel: GLSViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
+
+    LaunchedEffect(state.isDeviceBonded) {
+//        viewModel.bondDevice()
+    }
 }
 
 @Composable

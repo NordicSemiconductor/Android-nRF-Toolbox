@@ -15,6 +15,10 @@ internal class GLSViewModel @Inject constructor(
     val state = glsManager.data
 
     fun bondDevice() {
-
+        if (deviceHolder.isDeviceBonded()) {
+            deviceHolder.bondDevice()
+        } else {
+            //start work
+        }
     }
 }

@@ -38,7 +38,7 @@ import no.nordicsemi.android.theme.view.BatteryLevelView
 import java.util.*
 
 @Composable
-internal fun ContentView(state: HRSViewState, onEvent: (HRSScreenViewEvent) -> Unit) {
+internal fun HRSContentView(state: HRSViewState, onEvent: (HRSScreenViewEvent) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -220,5 +220,5 @@ private fun updateData(points: List<Int>, chart: LineChart) {
 @Preview
 @Composable
 private fun Preview() {
-    ContentView(state = HRSViewState()) { }
+    HRSContentView(state = HRSViewState()) { }
 }
