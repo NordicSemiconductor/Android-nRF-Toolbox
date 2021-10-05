@@ -28,16 +28,17 @@ object NordicColors {
     val TableViewBackground = NeutralColor(Color(0xFFF2F2F6))
     val TableViewSeparator = NeutralColor(Color(0xFFD2D2D6))
 
-    val Primary = ThemedColor(Color(0xFF00A9CE), Color(0xFF212121))
-    val PrimaryVariant = ThemedColor(Color(0xFF008CD2), Color.Black)
-    val Secondary = ThemedColor(Color(0xFF00A9CE), Color(0xFF008CD2))
-    val SecondaryVariant = ThemedColor(Color(0xFF008CD2), Color(0xFF008CD2))
+    val Primary = ThemedColor(Color(0xFF00A9CE), Color(0xFF00A9CE))
+    val PrimaryVariant = ThemedColor(Color(0xFF008CD2), Color(0xFF00A9CE))
+    val Secondary = ThemedColor(Color(0xFF00A9CE), Color(0xFF00A9CE))
+    val SecondaryVariant = ThemedColor(Color(0xFF008CD2), Color(0xFF00A9CE))
     val OnPrimary = ThemedColor(Color.White, Color.White)
     val OnSecondary = ThemedColor(Color.White, Color.White)
     val OnBackground = ThemedColor(Color.Black, Color.White)
     val OnSurface = ThemedColor(Color.Black, Color.White)
-    val Background = ThemedColor(Color(0xFFDADADA), Color.Black)
-    val Surface = ThemedColor(Color(0xFFDADADA), Color.Black)
+    val ItemHighlight = ThemedColor(Color.White, Color(0xFF1E1E1E))
+    val Background = ThemedColor(Color(0xFFF5F5F5), Color(0xFF121212))
+    val Surface = ThemedColor(Color(0xFFF5F5F5), Color(0xFF121212))
 }
 
 sealed class NordicColor {

@@ -50,11 +50,11 @@ android {
 dependencies {
     //Hilt requires to implement every module in the main app module
     //https://github.com/google/dagger/issues/2123
-    implementation project(":feature_csc")
-    implementation project(":feature_hrs")
-    implementation project(":feature_hts")
-    implementation project(":feature_gls")
-    implementation project(':feature_scanner')
+    implementation project(':profile_csc')
+    implementation project(':profile_hrs')
+    implementation project(':profile_hts')
+    implementation project(':profile_gls')
+    implementation project(':profile_scanner')
     implementation project(":lib_theme")
     implementation project(":lib_utils")
 

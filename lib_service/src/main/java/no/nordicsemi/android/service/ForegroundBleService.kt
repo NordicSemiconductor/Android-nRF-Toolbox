@@ -31,9 +31,7 @@ import androidx.core.app.NotificationCompat
 
 private const val CHANNEL_ID = "FOREGROUND_BLE_SERVICE"
 
-abstract class ForegroundBleService<T : BatteryManager<out BatteryManagerCallbacks>> : BleProfileService() {
-
-    protected abstract val manager: T
+abstract class ForegroundBleService : BleProfileService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val result = super.onStartCommand(intent, flags, startId)
@@ -46,22 +44,6 @@ abstract class ForegroundBleService<T : BatteryManager<out BatteryManagerCallbac
         cancelNotification()
         stopForegroundService()
         super.onDestroy()
-    }
-
-    override fun onRebind() {
-        stopForegroundService()
-        if (isConnected) {
-            // This method will read the Battery Level value, if possible and then try to enable battery notifications (if it has NOTIFY property).
-            // If the Battery Level characteristic has only the NOTIFY property, it will only try to enable notifications.
-            manager.readBatteryLevelCharacteristic()
-        }
-    }
-
-    override fun onUnbind() {
-        // When we are connected, but the application is not open, we are not really interested in battery level notifications.
-        // But we will still be receiving other values, if enabled.
-        if (isConnected) manager.disableBatteryLevelCharacteristicNotifications()
-        startForegroundService()
     }
 
     /**

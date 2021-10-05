@@ -2,4 +2,5 @@
     <string name="csc_module">CSC</string>
     <string name="hrs_module">HRS</string>
     <string name="gls_module">GLS</string>
+    <string name="hts_module">HTS</string>
 </resources>

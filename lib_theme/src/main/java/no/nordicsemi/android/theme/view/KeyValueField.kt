@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import no.nordicsemi.android.theme.NordicColors
 
 @Composable
- fun KeyValueField(key: String, value: String) {
+fun KeyValueField(key: String, value: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
