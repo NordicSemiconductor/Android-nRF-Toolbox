@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.csc.R
 import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.theme.view.ScreenSection
-import no.nordicsemi.android.theme.view.SpeedUnitRadioGroup
+import no.nordicsemi.android.theme.view.SelectItemRadioGroup
 
 @Composable
 internal fun CSCContentView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
@@ -56,7 +56,7 @@ private fun SettingsSection(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SpeedUnitRadioGroup(state.selectedSpeedUnit, state.items()) {
+            SelectItemRadioGroup(state.selectedSpeedUnit, state.items()) {
                 onEvent(OnSelectedSpeedUnitSelected(it.unit))
             }
         }

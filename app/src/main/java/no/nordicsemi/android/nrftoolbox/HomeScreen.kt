@@ -20,16 +20,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import no.nordicsemi.android.csc.view.CSCScreen
 import no.nordicsemi.android.gls.view.GLSScreen
 import no.nordicsemi.android.hrs.view.HRSScreen
 import no.nordicsemi.android.hts.view.HTSScreen
-import no.nordicsemi.android.scanner.view.BluetoothNotAvailableScreen
-import no.nordicsemi.android.scanner.view.BluetoothNotEnabledScreen
-import no.nordicsemi.android.scanner.view.RequestPermissionScreen
+import no.nordicsemi.android.permission.view.BluetoothNotAvailableScreen
+import no.nordicsemi.android.permission.view.BluetoothNotEnabledScreen
+import no.nordicsemi.android.permission.view.RequestPermissionScreen
 import no.nordicsemi.android.scanner.view.ScanDeviceScreen
 import no.nordicsemi.android.scanner.view.ScanDeviceScreenResult
 import no.nordicsemi.android.theme.view.CloseIconAppBar
@@ -56,10 +58,13 @@ internal fun HomeScreen() {
         composable(NavDestination.BLUETOOTH_NOT_ENABLED.id) {
             BluetoothNotEnabledScreen(continueAction)
         }
-        composable(NavDestination.DEVICE_NOT_CONNECTED.id) {
-            ScanDeviceScreen {
+        composable(
+            NavDestination.DEVICE_NOT_CONNECTED.id,
+            arguments = listOf(navArgument("args") { type = NavType.StringType })
+        ) {
+            ScanDeviceScreen(it.arguments?.getString(ARGS_KEY)!!) {
                 when (it) {
-                    ScanDeviceScreenResult.SUCCESS -> viewModel.finish()
+                    ScanDeviceScreenResult.OK -> viewModel.finish()
                     ScanDeviceScreenResult.CANCEL -> viewModel.navigateUp()
                 }.exhaustive
             }
@@ -67,7 +72,7 @@ internal fun HomeScreen() {
     }
 
     LaunchedEffect(state) {
-        navController.navigate(state.id)
+        navController.navigate(state.url)
     }
 }
 

@@ -21,7 +21,7 @@ import no.nordicsemi.android.hts.data.HTSData
 import no.nordicsemi.android.theme.view.BatteryLevelView
 import no.nordicsemi.android.theme.view.KeyValueField
 import no.nordicsemi.android.theme.view.ScreenSection
-import no.nordicsemi.android.theme.view.SpeedUnitRadioGroup
+import no.nordicsemi.android.theme.view.SelectItemRadioGroup
 
 @Composable
 internal fun HTSContentView(state: HTSData, onEvent: (HTSScreenViewEvent) -> Unit) {
@@ -33,7 +33,7 @@ internal fun HTSContentView(state: HTSData, onEvent: (HTSScreenViewEvent) -> Uni
 
         ScreenSection {
             Box(modifier = Modifier.padding(16.dp)) {
-                SpeedUnitRadioGroup(state.temperatureUnit, state.temperatureSettingsItems()) {
+                SelectItemRadioGroup(state.temperatureUnit, state.temperatureSettingsItems()) {
                     onEvent(OnTemperatureUnitSelected(it.unit))
                 }
             }

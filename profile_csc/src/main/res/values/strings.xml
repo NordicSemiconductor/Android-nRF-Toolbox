@@ -2,13 +2,15 @@
 <resources>
     <string name="csc_title">Cyclic and speed cadence</string>
 
-    <string name="scs_field_speed">Speed</string>
-    <string name="scs_field_cadence">Cadence</string>
-    <string name="scs_field_distance">Distance</string>
-    <string name="scs_field_total_distance">Total Distance</string>
-    <string name="scs_field_gear_ratio">Gear Ratio</string>
+    <string name="csc_dialog_title">Select wheel size</string>
 
-    <string name="scs_field_wheel_size">Wheel size</string>
+    <string name="csc_field_speed">Speed</string>
+    <string name="csc_field_cadence">Cadence</string>
+    <string name="csc_field_distance">Distance</string>
+    <string name="csc_field_total_distance">Total Distance</string>
+    <string name="csc_field_gear_ratio">Gear Ratio</string>
+
+    <string name="csc_field_wheel_size">Wheel size</string>
 
     <string-array name="wheel_entries">
         <item>60&#8211;622</item>

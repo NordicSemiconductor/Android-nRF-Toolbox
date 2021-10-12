@@ -6,6 +6,7 @@ dependencies {
     implementation project(":lib_theme")
     implementation project(":lib_service")
 
+    implementation libs.scanner
     implementation libs.material
     implementation libs.google.permissions
 

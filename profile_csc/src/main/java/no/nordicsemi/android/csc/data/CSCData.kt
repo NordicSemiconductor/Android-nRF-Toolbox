@@ -1,6 +1,5 @@
 package no.nordicsemi.android.csc.data
 
-import androidx.compose.runtime.Composable
 import no.nordicsemi.android.csc.view.CSCSettings
 import no.nordicsemi.android.csc.view.SpeedUnit
 import no.nordicsemi.android.theme.view.RadioGroupItem
@@ -19,12 +18,6 @@ internal data class CSCData(
     val wheelSize: Int = CSCSettings.DefaultWheelSize.VALUE,
     val wheelSizeDisplay: String = CSCSettings.DefaultWheelSize.NAME
 ) {
-
-    @Composable
-    fun drawItself() {
-
-    }
-
 
     private val speedWithUnit = when (selectedSpeedUnit) {
         SpeedUnit.M_S -> speed

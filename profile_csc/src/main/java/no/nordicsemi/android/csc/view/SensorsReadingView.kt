@@ -18,18 +18,18 @@ import no.nordicsemi.android.theme.view.ScreenSection
 internal fun SensorsReadingView(state: CSCData) {
     ScreenSection {
         Column {
-            KeyValueField(stringResource(id = R.string.scs_field_speed), state.displaySpeed())
+            KeyValueField(stringResource(id = R.string.csc_field_speed), state.displaySpeed())
             Spacer(modifier = Modifier.height(4.dp))
-            KeyValueField(stringResource(id = R.string.scs_field_cadence), state.displayCadence())
+            KeyValueField(stringResource(id = R.string.csc_field_cadence), state.displayCadence())
             Spacer(modifier = Modifier.height(4.dp))
-            KeyValueField(stringResource(id = R.string.scs_field_distance), state.displayDistance())
+            KeyValueField(stringResource(id = R.string.csc_field_distance), state.displayDistance())
             Spacer(modifier = Modifier.height(4.dp))
             KeyValueField(
-                stringResource(id = R.string.scs_field_total_distance),
+                stringResource(id = R.string.csc_field_total_distance),
                 state.displayTotalDistance()
             )
             Spacer(modifier = Modifier.height(4.dp))
-            KeyValueField(stringResource(id = R.string.scs_field_gear_ratio), state.displayGearRatio())
+            KeyValueField(stringResource(id = R.string.csc_field_gear_ratio), state.displayGearRatio())
         }
     }
 

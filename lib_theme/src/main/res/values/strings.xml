@@ -2,6 +2,9 @@
 <resources>
     <string name="app_name">nRF Toolbox</string>
 
+    <string name="dialog">Dialog</string>
+    <string name="cancel">CANCEL</string>
+
     <string name="close_app">Close the application.</string>
     <string name="back_screen">Close the current screen.</string>
 

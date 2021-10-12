@@ -1,4 +1,4 @@
-package no.nordicsemi.android.scanner.view
+package no.nordicsemi.android.permission.view
 
 import android.content.Context
 import android.content.Intent
@@ -29,7 +29,7 @@ import androidx.core.content.ContextCompat.startActivity
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import no.nordicsemi.android.scanner.R
+import no.nordicsemi.android.permission.R
 import no.nordicsemi.android.theme.view.BackIconAppBar
 
 @OptIn(ExperimentalPermissionsApi::class)

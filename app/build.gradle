@@ -54,6 +54,7 @@ dependencies {
     implementation project(':profile_hrs')
     implementation project(':profile_hts')
     implementation project(':profile_gls')
+    implementation project(':profile_permission')
     implementation project(':profile_scanner')
     implementation project(":lib_theme")
     implementation project(":lib_utils")

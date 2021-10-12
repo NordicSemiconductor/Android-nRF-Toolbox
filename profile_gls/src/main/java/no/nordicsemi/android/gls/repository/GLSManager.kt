@@ -59,7 +59,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /** Glucose service UUID  */
-private val GLS_SERVICE_UUID = UUID.fromString("00001808-0000-1000-8000-00805f9b34fb")
+val GLS_SERVICE_UUID: UUID = UUID.fromString("00001808-0000-1000-8000-00805f9b34fb")
 
 /** Glucose Measurement characteristic UUID  */
 private val GM_CHARACTERISTIC = UUID.fromString("00002A18-0000-1000-8000-00805f9b34fb")

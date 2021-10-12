@@ -1,4 +1,4 @@
-package no.nordicsemi.android.scanner.view
+package no.nordicsemi.android.permission.view
 
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.scanner.R
+import no.nordicsemi.android.permission.R
 import no.nordicsemi.android.theme.view.BackIconAppBar
 import no.nordicsemi.android.theme.view.CloseIconAppBar
 

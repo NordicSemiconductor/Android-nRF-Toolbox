@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun <T> SpeedUnitRadioGroup(
+fun <T> SelectItemRadioGroup(
     currentItem: T,
     items: List<RadioGroupItem<T>>,
     onEvent: (RadioGroupItem<T>) -> Unit
@@ -22,13 +22,13 @@ fun <T> SpeedUnitRadioGroup(
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         items.forEach {
-            SpeedUnitRadioButton(currentItem, it, onEvent)
+            SelectItemRadioButton(currentItem, it, onEvent)
         }
     }
 }
 
 @Composable
-internal fun <T> SpeedUnitRadioButton(
+internal fun <T> SelectItemRadioButton(
     selectedItem: T,
     displayedItem: RadioGroupItem<T>,
     onEvent: (RadioGroupItem<T>) -> Unit

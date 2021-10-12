@@ -1,5 +1,7 @@
 package no.nordicsemi.android.nrftoolbox
 
+const val ARGS_KEY = "args"
+
 enum class NavDestination(val id: String) {
     HOME("home-screen"),
     CSC("csc-screen"),
@@ -9,5 +11,5 @@ enum class NavDestination(val id: String) {
     REQUEST_PERMISSION("request-permission"),
     BLUETOOTH_NOT_AVAILABLE("bluetooth-not-available"),
     BLUETOOTH_NOT_ENABLED("bluetooth-not-enabled"),
-    DEVICE_NOT_CONNECTED("device-not-connected"),
+    DEVICE_NOT_CONNECTED("device-not-connected/{$ARGS_KEY}");
 }

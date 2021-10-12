@@ -34,7 +34,7 @@ import no.nordicsemi.android.log.LogContract
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 
-private val HT_SERVICE_UUID = UUID.fromString("00001809-0000-1000-8000-00805f9b34fb")
+val HT_SERVICE_UUID: UUID = UUID.fromString("00001809-0000-1000-8000-00805f9b34fb")
 private val HT_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A1C-0000-1000-8000-00805f9b34fb")
 
 /**

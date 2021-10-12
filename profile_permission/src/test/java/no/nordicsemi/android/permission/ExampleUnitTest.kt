@@ -1,4 +1,4 @@
-package no.nordicsemi.android.scanner
+package no.nordicsemi.android.permission
 
 import org.junit.Test
 

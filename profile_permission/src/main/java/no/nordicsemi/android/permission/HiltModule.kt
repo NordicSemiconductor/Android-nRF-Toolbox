@@ -1,4 +1,4 @@
-package no.nordicsemi.android.scanner
+package no.nordicsemi.android.permission
 
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
@@ -7,7 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import no.nordicsemi.android.scanner.tools.PermissionHelper
+import no.nordicsemi.android.permission.tools.PermissionHelper
 import no.nordicsemi.android.service.SelectedBluetoothDeviceHolder
 import javax.inject.Singleton
 
@@ -22,14 +22,8 @@ internal object HiltModule {
 
     @Singleton
     @Provides
-    fun createSelectedBluetoothDeviceHolder(
-        @ApplicationContext context: Context,
-        bluetoothAdapter: BluetoothAdapter?
-    ): SelectedBluetoothDeviceHolder {
-        return SelectedBluetoothDeviceHolder(
-            context,
-            bluetoothAdapter
-        )
+    fun createSelectedBluetoothDeviceHolder(): SelectedBluetoothDeviceHolder {
+        return SelectedBluetoothDeviceHolder()
     }
 
     @Singleton

@@ -1,4 +1,4 @@
-package no.nordicsemi.android.scanner.viewmodel
+package no.nordicsemi.android.permission.viewmodel
 
 enum class BluetoothPermissionState {
     PERMISSION_REQUIRED,

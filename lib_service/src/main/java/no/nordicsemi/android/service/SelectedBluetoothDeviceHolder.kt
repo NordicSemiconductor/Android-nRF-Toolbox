@@ -1,20 +1,11 @@
 package no.nordicsemi.android.service
 
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.companion.CompanionDeviceManager
-import android.content.Context
 
-class SelectedBluetoothDeviceHolder constructor(
-    private val context: Context,
-    private val bluetoothAdapter: BluetoothAdapter?
-) {
+class SelectedBluetoothDeviceHolder {
 
-    val device: BluetoothDevice?
-        get() {
-            val deviceManager = context.getSystemService(Context.COMPANION_DEVICE_SERVICE) as CompanionDeviceManager
-            return deviceManager.associations.firstOrNull()?.let { bluetoothAdapter?.getRemoteDevice(it) }
-        }
+    var device: BluetoothDevice? = null
+        private set
 
     fun isBondingRequired(): Boolean {
         return device?.bondState == BluetoothDevice.BOND_NONE
@@ -23,10 +14,11 @@ class SelectedBluetoothDeviceHolder constructor(
         device?.createBond()
     }
 
+    fun attachDevice(newDevice: BluetoothDevice) {
+        device = newDevice
+    }
+
     fun forgetDevice() {
-        device?.let {
-            val deviceManager = context.getSystemService(Context.COMPANION_DEVICE_SERVICE) as CompanionDeviceManager
-            deviceManager.disassociate(it.address)
-        }
+        device = null
     }
 }

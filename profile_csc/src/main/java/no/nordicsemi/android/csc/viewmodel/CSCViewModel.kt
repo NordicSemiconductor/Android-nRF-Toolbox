@@ -3,6 +3,7 @@ package no.nordicsemi.android.csc.viewmodel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import no.nordicsemi.android.csc.data.CSCDataHolder
 import no.nordicsemi.android.csc.view.CSCViewEvent
+import no.nordicsemi.android.csc.view.OnCloseSelectWheelSizeDialog
 import no.nordicsemi.android.csc.view.OnDisconnectButtonClick
 import no.nordicsemi.android.csc.view.OnSelectedSpeedUnitSelected
 import no.nordicsemi.android.csc.view.OnShowEditWheelSizeDialogButtonClick
@@ -24,6 +25,7 @@ internal class CSCViewModel @Inject constructor(
             OnShowEditWheelSizeDialogButtonClick -> onShowDialogEvent()
             is OnWheelSizeSelected -> onWheelSizeChanged(event)
             OnDisconnectButtonClick -> onDisconnectButtonClick()
+            OnCloseSelectWheelSizeDialog -> onHideDialogEvent()
         }.exhaustive
     }
 
@@ -42,5 +44,9 @@ internal class CSCViewModel @Inject constructor(
     private fun onDisconnectButtonClick() {
         finish()
         dataHolder.clear()
+    }
+
+    private fun onHideDialogEvent() {
+        dataHolder.setHideWheelSizeDialog()
     }
 }

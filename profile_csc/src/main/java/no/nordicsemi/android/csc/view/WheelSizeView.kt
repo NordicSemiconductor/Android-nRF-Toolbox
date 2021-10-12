@@ -21,7 +21,7 @@ internal fun WheelSizeView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
         value = state.wheelSizeDisplay,
         onValueChange = { },
         enabled = false,
-        label = { Text(text = stringResource(id = R.string.scs_field_wheel_size)) },
+        label = { Text(text = stringResource(id = R.string.csc_field_wheel_size)) },
         trailingIcon = { EditIcon(onEvent = onEvent) }
     )
 }

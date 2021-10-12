@@ -24,6 +24,10 @@ internal class CSCDataHolder @Inject constructor() {
         _data.tryEmit(_data.value.copy(selectedSpeedUnit = selectedSpeedUnit))
     }
 
+    fun setHideWheelSizeDialog() {
+        _data.tryEmit(_data.value.copy(showDialog = false))
+    }
+
     fun setDisplayWheelSizeDialog() {
         _data.tryEmit(_data.value.copy(showDialog = true))
     }

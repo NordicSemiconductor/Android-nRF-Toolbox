@@ -21,7 +21,7 @@ import no.nordicsemi.android.gls.viewmodel.GLSScreenViewEvent
 import no.nordicsemi.android.gls.viewmodel.OnWorkingModeSelected
 import no.nordicsemi.android.theme.view.BatteryLevelView
 import no.nordicsemi.android.theme.view.ScreenSection
-import no.nordicsemi.android.theme.view.SpeedUnitRadioGroup
+import no.nordicsemi.android.theme.view.SelectItemRadioGroup
 
 @Composable
 internal fun GLSContentView(state: GLSData, onEvent: (GLSScreenViewEvent) -> Unit) {
@@ -55,7 +55,7 @@ internal fun GLSContentView(state: GLSData, onEvent: (GLSScreenViewEvent) -> Uni
 @Composable
 private fun SettingsView(state: GLSData, onEvent: (GLSScreenViewEvent) -> Unit) {
     ScreenSection {
-        SpeedUnitRadioGroup(state.selectedMode, state.modeItems()) {
+        SelectItemRadioGroup(state.selectedMode, state.modeItems()) {
             onEvent(OnWorkingModeSelected(it.unit))
         }
     }

@@ -46,6 +46,7 @@ dependencyResolutionManagement {
             alias('kotlin-coroutines').to('org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2')
             alias('google-permissions').to('com.google.accompanist:accompanist-permissions:0.18.0')
             alias('chart').to('com.github.PhilJay:MPAndroidChart:v3.1.0')
+            alias('scanner').to('no.nordicsemi.android.support.v18:scanner:1.6.0')
 
             //-- Test ------------------------------------------------------------------------------
             alias('test-junit').to('junit:junit:4.13.2')
@@ -65,7 +66,7 @@ include ':profile_csc'
 include ':profile_gls'
 include ':profile_hrs'
 include ':profile_hts'
-include ':profile_scanner'
+include ':profile_permission'
 
 include ':lib_service'
 include ':lib_theme'
@@ -78,3 +79,4 @@ if (file('../Android-BLE-Library').exists()) {
 if (file('../Android-Scanner-Compat-Library').exists()) {
     includeBuild('../Android-Scanner-Compat-Library')
 }
+include ':profile_scanner'
