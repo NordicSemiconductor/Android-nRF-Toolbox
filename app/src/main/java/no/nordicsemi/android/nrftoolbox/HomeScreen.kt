@@ -25,6 +25,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import no.nordicsemi.android.bps.view.BPSScreen
 import no.nordicsemi.android.csc.view.CSCScreen
 import no.nordicsemi.android.gls.view.GLSScreen
 import no.nordicsemi.android.hrs.view.HRSScreen
@@ -32,6 +33,7 @@ import no.nordicsemi.android.hts.view.HTSScreen
 import no.nordicsemi.android.permission.view.BluetoothNotAvailableScreen
 import no.nordicsemi.android.permission.view.BluetoothNotEnabledScreen
 import no.nordicsemi.android.permission.view.RequestPermissionScreen
+import no.nordicsemi.android.rscs.view.RSCSScreen
 import no.nordicsemi.android.scanner.view.ScanDeviceScreen
 import no.nordicsemi.android.scanner.view.ScanDeviceScreenResult
 import no.nordicsemi.android.theme.view.CloseIconAppBar
@@ -53,6 +55,8 @@ internal fun HomeScreen() {
         composable(NavDestination.HRS.id) { HRSScreen { viewModel.navigateUp() } }
         composable(NavDestination.HTS.id) { HTSScreen { viewModel.navigateUp() } }
         composable(NavDestination.GLS.id) { GLSScreen { viewModel.navigateUp() } }
+        composable(NavDestination.BPS.id) { BPSScreen { viewModel.navigateUp() } }
+        composable(NavDestination.RSCS.id) { RSCSScreen { viewModel.navigateUp() } }
         composable(NavDestination.REQUEST_PERMISSION.id) { RequestPermissionScreen(continueAction) }
         composable(NavDestination.BLUETOOTH_NOT_AVAILABLE.id) { BluetoothNotAvailableScreen{ viewModel.finish() } }
         composable(NavDestination.BLUETOOTH_NOT_ENABLED.id) {
@@ -91,6 +95,10 @@ fun HomeView(callback: (NavDestination) -> Unit) {
         FeatureButton(R.drawable.ic_gls, R.string.gls_module) { callback(NavDestination.GLS) }
         Spacer(modifier = Modifier.height(1.dp))
         FeatureButton(R.drawable.ic_hts, R.string.hts_module) { callback(NavDestination.HTS) }
+        Spacer(modifier = Modifier.height(1.dp))
+        FeatureButton(R.drawable.ic_bps, R.string.bps_module) { callback(NavDestination.BPS) }
+        Spacer(modifier = Modifier.height(1.dp))
+        FeatureButton(R.drawable.ic_rscs, R.string.rscs_module) { callback(NavDestination.RSCS) }
     }
 }
 

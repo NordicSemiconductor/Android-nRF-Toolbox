@@ -62,10 +62,12 @@ rootProject.name = "Android-nRF-Toolbox"
 
 include ':app'
 
+include ':profile_bps'
 include ':profile_csc'
 include ':profile_gls'
 include ':profile_hrs'
 include ':profile_hts'
+include ':profile_rscs'
 include ':profile_permission'
 
 include ':lib_service'

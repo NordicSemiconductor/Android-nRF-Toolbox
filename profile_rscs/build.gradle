@@ -1,0 +1,26 @@
+apply from: rootProject.file("library.gradle")
+apply plugin: 'kotlin-parcelize'
+
+dependencies {
+    implementation project(":lib_service")
+    implementation project(":lib_theme")
+    implementation project(":lib_utils")
+
+    implementation libs.nordic.ble.common
+
+    implementation libs.nordic.log
+
+    implementation libs.bundles.compose
+    implementation libs.androidx.core
+    implementation libs.material
+    implementation libs.lifecycle.activity
+    implementation libs.lifecycle.service
+    implementation libs.compose.lifecycle
+    implementation libs.compose.activity
+
+    testImplementation libs.test.junit
+    androidTestImplementation libs.android.test.junit
+    androidTestImplementation libs.android.test.espresso
+    androidTestImplementation libs.android.test.compose.ui
+    debugImplementation libs.android.test.compose.tooling
+}

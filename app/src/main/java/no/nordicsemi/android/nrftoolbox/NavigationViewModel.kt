@@ -3,6 +3,7 @@ package no.nordicsemi.android.nrftoolbox
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import no.nordicsemi.android.bps.repository.BPS_SERVICE_UUID
 import no.nordicsemi.android.csc.service.CYCLING_SPEED_AND_CADENCE_SERVICE_UUID
 import no.nordicsemi.android.gls.repository.GLS_SERVICE_UUID
 import no.nordicsemi.android.hrs.service.HR_SERVICE_UUID
@@ -11,6 +12,7 @@ import no.nordicsemi.android.permission.tools.NordicBleScanner
 import no.nordicsemi.android.permission.tools.PermissionHelper
 import no.nordicsemi.android.permission.tools.ScannerStatus
 import no.nordicsemi.android.permission.viewmodel.BluetoothPermissionState
+import no.nordicsemi.android.rscs.service.RSCS_SERVICE_UUID
 import no.nordicsemi.android.service.SelectedBluetoothDeviceHolder
 import javax.inject.Inject
 
@@ -73,6 +75,8 @@ class NavigationViewModel @Inject constructor(
             NavDestination.HRS -> HR_SERVICE_UUID.toString()
             NavDestination.HTS -> HT_SERVICE_UUID.toString()
             NavDestination.GLS -> GLS_SERVICE_UUID.toString()
+            NavDestination.BPS -> BPS_SERVICE_UUID.toString()
+            NavDestination.RSCS -> RSCS_SERVICE_UUID.toString()
             NavDestination.HOME,
             NavDestination.REQUEST_PERMISSION,
             NavDestination.BLUETOOTH_NOT_AVAILABLE,

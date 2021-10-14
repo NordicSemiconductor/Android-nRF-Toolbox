@@ -3,4 +3,6 @@
     <string name="hrs_module">HRS</string>
     <string name="gls_module">GLS</string>
     <string name="hts_module">HTS</string>
+    <string name="bps_module">BPS</string>
+    <string name="rscs_module">RSCS</string>
 </resources>

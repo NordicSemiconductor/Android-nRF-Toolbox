@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rscs_title">Running speed &amp; cadence</string>
+
+    <string name="rscs_activity">Activity</string>
+    <string name="rscs_pace">Pace</string>
+    <string name="rscs_cadence">Cadence</string>
+    <string name="rscs_number_of_steps">Number of steps</string>
+</resources>
