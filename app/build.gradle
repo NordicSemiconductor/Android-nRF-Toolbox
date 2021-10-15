@@ -52,12 +52,14 @@ dependencies {
     //https://github.com/google/dagger/issues/2123
     implementation project(':profile_bps')
     implementation project(':profile_csc')
+    implementation project(':profile_gls')
     implementation project(':profile_hrs')
     implementation project(':profile_hts')
-    implementation project(':profile_gls')
+    implementation project(':profile_prx')
     implementation project(':profile_rscs')
-    implementation project(':profile_permission')
     implementation project(':profile_scanner')
+
+    implementation project(':lib_permission')
     implementation project(":lib_theme")
     implementation project(":lib_utils")
 

@@ -5,4 +5,5 @@
     <string name="hts_module">HTS</string>
     <string name="bps_module">BPS</string>
     <string name="rscs_module">RSCS</string>
+    <string name="prx_module">PRX</string>
 </resources>

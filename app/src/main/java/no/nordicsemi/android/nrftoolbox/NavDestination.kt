@@ -9,6 +9,7 @@ enum class NavDestination(val id: String) {
     HTS("hts-screen"),
     GLS("gls-screen"),
     BPS("bps-screen"),
+    PRX("prx-screen"),
     RSCS("rscs-screen"),
     REQUEST_PERMISSION("request-permission"),
     BLUETOOTH_NOT_AVAILABLE("bluetooth-not-available"),

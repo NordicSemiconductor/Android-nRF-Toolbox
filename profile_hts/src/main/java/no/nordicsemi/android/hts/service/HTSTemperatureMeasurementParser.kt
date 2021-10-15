@@ -19,67 +19,55 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package no.nordicsemi.android.hts.service;
+package no.nordicsemi.android.hts.service
 
-import java.util.Locale;
+import no.nordicsemi.android.ble.data.Data
+import java.util.*
 
-import no.nordicsemi.android.ble.data.Data;
+private const val TEMPERATURE_UNIT_FLAG: Byte = 0x01 // 1 bit
+private const val TIMESTAMP_FLAG: Byte = 0x02 // 1 bits
+private const val TEMPERATURE_TYPE_FLAG: Byte = 0x04 // 1 bit
 
-@SuppressWarnings("ConstantConditions")
-public class TemperatureMeasurementParser {
-	private static final byte TEMPERATURE_UNIT_FLAG = 0x01; // 1 bit
-	private static final byte TIMESTAMP_FLAG = 0x02; // 1 bits
-	private static final byte TEMPERATURE_TYPE_FLAG = 0x04; // 1 bit
+internal object HTSTemperatureMeasurementParser {
 
-	public static String parse(final Data data) {
-		int offset = 0;
-		final int flags = data.getIntValue(Data.FORMAT_UINT8, offset++);
+    fun parse(data: Data): String {
+        var offset = 0
+        val flags = data.getIntValue(Data.FORMAT_UINT8, offset++)!!
 
-		/*
+        /*
 		 * false 	Temperature is in Celsius degrees 
 		 * true 	Temperature is in Fahrenheit degrees 
 		 */
-		final boolean fahrenheit = (flags & TEMPERATURE_UNIT_FLAG) > 0;
+        val fahrenheit = flags and TEMPERATURE_UNIT_FLAG.toInt() > 0
 
-		/*
+        /*
 		 * false 	No Timestamp in the packet
 		 * true 	There is a timestamp information
 		 */
-		final boolean timestampIncluded = (flags & TIMESTAMP_FLAG) > 0;
+        val timestampIncluded = flags and TIMESTAMP_FLAG.toInt() > 0
 
-		/*
+        /*
 		 * false 	Temperature type is not included
 		 * true 	Temperature type included in the packet
 		 */
-		final boolean temperatureTypeIncluded = (flags & TEMPERATURE_TYPE_FLAG) > 0;
-
-		final float tempValue = data.getFloatValue(Data.FORMAT_FLOAT, offset);
-		offset += 4;
-
-		String dateTime = null;
-		if (timestampIncluded) {
-			dateTime = DateTimeParser.parse(data, offset);
-			offset += 7;
-		}
-
-		String type = null;
-		if (temperatureTypeIncluded) {
-			type = TemperatureTypeParser.parse(data, offset);
-			// offset++;
-		}
-
-		final StringBuilder builder = new StringBuilder();
-		builder.append(String.format(Locale.US, "%.02f", tempValue));
-
-		if (fahrenheit)
-			builder.append("°F");
-		else
-			builder.append("°C");
-
-		if (timestampIncluded)
-			builder.append("\nTime: ").append(dateTime);
-		if (temperatureTypeIncluded)
-			builder.append("\nType: ").append(type);
-		return builder.toString();
-	}
+        val temperatureTypeIncluded = flags and TEMPERATURE_TYPE_FLAG.toInt() > 0
+        val tempValue = data.getFloatValue(Data.FORMAT_FLOAT, offset)!!
+        offset += 4
+        var dateTime: String? = null
+        if (timestampIncluded) {
+            dateTime = HTSDateTimeParser.parse(data, offset)
+            offset += 7
+        }
+        var type: String? = null
+        if (temperatureTypeIncluded) {
+            type = HTSTemperatureTypeParser.parse(data, offset)
+            // offset++;
+        }
+        val builder = StringBuilder()
+        builder.append(String.format(Locale.US, "%.02f", tempValue))
+        if (fahrenheit) builder.append("°F") else builder.append("°C")
+        if (timestampIncluded) builder.append("\nTime: ").append(dateTime)
+        if (temperatureTypeIncluded) builder.append("\nType: ").append(type)
+        return builder.toString()
+    }
 }

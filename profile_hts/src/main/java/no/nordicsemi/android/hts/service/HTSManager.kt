@@ -42,7 +42,10 @@ private val HT_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A1C-0000-
  * enabling indication and reading characteristics. All operations required to connect to device
  * with BLE HT Service and reading health thermometer values are performed here.
  */
-class HTSManager internal constructor(context: Context, private val dataHolder: HTSDataHolder) : BatteryManager(context) {
+internal class HTSManager internal constructor(
+    context: Context,
+    private val dataHolder: HTSDataHolder
+) : BatteryManager(context) {
 
     private var htCharacteristic: BluetoothGattCharacteristic? = null
 
@@ -50,7 +53,7 @@ class HTSManager internal constructor(context: Context, private val dataHolder: 
         override fun onDataReceived(device: BluetoothDevice, data: Data) {
             log(
                 LogContract.Log.Level.APPLICATION,
-                "\"" + TemperatureMeasurementParser.parse(data) + "\" received"
+                "\"" + HTSTemperatureMeasurementParser.parse(data) + "\" received"
             )
             super.onDataReceived(device, data)
         }

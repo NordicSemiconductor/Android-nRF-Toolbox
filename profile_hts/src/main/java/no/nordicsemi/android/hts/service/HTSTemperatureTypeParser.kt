@@ -21,33 +21,27 @@
  */
 package no.nordicsemi.android.hts.service
 
-import no.nordicsemi.android.ble.common.callback.DateTimeDataCallback
 import no.nordicsemi.android.ble.data.Data
-import java.util.*
 
-object DateTimeParser {
-    /**
-     * Parses the date and time info.
-     *
-     * @param data
-     * @return time in human readable format
-     */
+internal object HTSTemperatureTypeParser {
     fun parse(data: Data): String {
         return parse(data, 0)
     }
 
-    /**
-     * Parses the date and time info. This data has 7 bytes
-     *
-     * @param data
-     * @param offset
-     * offset to start reading the time
-     * @return time in human readable format
-     */
     /* package */
 	@JvmStatic
 	fun parse(data: Data, offset: Int): String {
-        val calendar = DateTimeDataCallback.readDateTime(data, offset)
-        return String.format(Locale.US, "%1\$te %1\$tb %1\$tY, %1\$tH:%1\$tM:%1\$tS", calendar)
+        return when (data.value!![offset].toInt()) {
+            1 -> "Armpit"
+            2 -> "Body (general)"
+            3 -> "Ear (usually ear lobe)"
+            4 -> "Finger"
+            5 -> "Gastro-intestinal Tract"
+            6 -> "Mouth"
+            7 -> "Rectum"
+            8 -> "Toe"
+            9 -> "Tympanum (ear drum)"
+            else -> "Unknown"
+        }
     }
 }

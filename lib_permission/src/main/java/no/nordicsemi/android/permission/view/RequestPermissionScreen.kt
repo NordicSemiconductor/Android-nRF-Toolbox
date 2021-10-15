@@ -77,7 +77,10 @@ private fun PermissionNotGranted(onClick: () -> Unit) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(textAlign = TextAlign.Center, text = stringResource(id = R.string.scanner__permission_rationale))
+            Text(
+                textAlign = TextAlign.Center,
+                text = stringResource(id = R.string.scanner__permission_rationale)
+            )
             Spacer(modifier = Modifier.height(16.dp))
             Row {
                 Button(modifier = Modifier.width(100.dp), onClick = { onClick() }) {
@@ -102,7 +105,10 @@ private fun PermissionNotAvailable() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(stringResource(id = R.string.scanner__permission_denied))
+        Text(
+            textAlign = TextAlign.Center,
+            text = stringResource(id = R.string.scanner__permission_denied)
+        )
         Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = { openPermissionSettings(context) }) {
             Text(stringResource(id = R.string.scanner__open_settings))

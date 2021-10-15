@@ -19,29 +19,30 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package no.nordicsemi.android.hts.service
+package no.nordicsemi.android.prx.service
 
+import android.bluetooth.BluetoothGattCharacteristic
 import no.nordicsemi.android.ble.data.Data
 
-object TemperatureTypeParser {
-    fun parse(data: Data): String {
-        return parse(data, 0)
+internal object PRXAlertLevelParser {
+
+    fun parse(characteristic: BluetoothGattCharacteristic?): String {
+        return parse(Data.from(characteristic!!))
     }
 
-    /* package */
-	@JvmStatic
-	fun parse(data: Data, offset: Int): String {
-        return when (data.value!![offset].toInt()) {
-            1 -> "Armpit"
-            2 -> "Body (general)"
-            3 -> "Ear (usually ear lobe)"
-            4 -> "Finger"
-            5 -> "Gastro-intestinal Tract"
-            6 -> "Mouth"
-            7 -> "Rectum"
-            8 -> "Toe"
-            9 -> "Tympanum (ear drum)"
-            else -> "Unknown"
+    /**
+     * Parses the alert level.
+     *
+     * @param data
+     * @return alert level in human readable format
+     */
+    fun parse(data: Data): String {
+        val value = data.getIntValue(Data.FORMAT_UINT8, 0)!!
+        return when (value) {
+            0 -> "No Alert"
+            1 -> "Mild Alert"
+            2 -> "High Alert"
+            else -> "Reserved value ($value)"
         }
     }
 }
