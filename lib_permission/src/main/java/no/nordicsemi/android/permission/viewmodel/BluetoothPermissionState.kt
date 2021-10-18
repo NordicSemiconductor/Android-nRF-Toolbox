@@ -5,5 +5,6 @@ enum class BluetoothPermissionState {
     BLUETOOTH_NOT_AVAILABLE,
     BLUETOOTH_NOT_ENABLED,
     DEVICE_NOT_CONNECTED,
+    BONDING_REQUIRED,
     READY
 }

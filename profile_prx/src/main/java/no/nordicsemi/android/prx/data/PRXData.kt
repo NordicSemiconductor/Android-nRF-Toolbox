@@ -1,10 +1,19 @@
 package no.nordicsemi.android.prx.data
 
 internal data class PRXData(
-    private val batteryLevel: Int = 0,
-    private val localAlarmLevel: AlarmLevel = AlarmLevel.NONE,
-    private val remoteAlarmLevel: Boolean = false
-)
+    val batteryLevel: Int = 0,
+    val localAlarmLevel: AlarmLevel = AlarmLevel.NONE,
+    val isRemoteAlarm: Boolean = false
+) {
+
+    fun displayLocalAlarm(): String {
+        return when (localAlarmLevel) {
+            AlarmLevel.NONE -> "none"
+            AlarmLevel.MEDIUM -> "medium"
+            AlarmLevel.HIGH -> "height"
+        }
+    }
+}
 
 internal enum class AlarmLevel(val value: Int) {
     NONE(0x00),

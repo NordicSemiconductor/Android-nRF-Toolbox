@@ -2,4 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="no.nordicsemi.android.prx">
 
+    <application>
+        <service android:name=".service.Hilt_PRXService"/>
+    </application>
 </manifest>

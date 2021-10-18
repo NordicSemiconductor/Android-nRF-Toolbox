@@ -21,7 +21,7 @@ internal class PRXDataHolder @Inject constructor() {
     }
 
     fun setRemoteAlarmLevel(isOn: Boolean) {
-        _data.tryEmit(_data.value.copy(remoteAlarmLevel = isOn))
+        _data.tryEmit(_data.value.copy(isRemoteAlarm = isOn))
     }
 
     fun clear(){

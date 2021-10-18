@@ -6,6 +6,8 @@ import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -26,10 +28,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import no.nordicsemi.android.bps.view.BPSScreen
+import no.nordicsemi.android.cgms.view.CGMScreen
 import no.nordicsemi.android.csc.view.CSCScreen
 import no.nordicsemi.android.gls.view.GLSScreen
 import no.nordicsemi.android.hrs.view.HRSScreen
 import no.nordicsemi.android.hts.view.HTSScreen
+import no.nordicsemi.android.permission.bonding.view.BondingScreen
 import no.nordicsemi.android.permission.view.BluetoothNotAvailableScreen
 import no.nordicsemi.android.permission.view.BluetoothNotEnabledScreen
 import no.nordicsemi.android.permission.view.RequestPermissionScreen
@@ -59,6 +63,7 @@ internal fun HomeScreen() {
         composable(NavDestination.BPS.id) { BPSScreen { viewModel.navigateUp() } }
         composable(NavDestination.PRX.id) { PRXScreen { viewModel.navigateUp() } }
         composable(NavDestination.RSCS.id) { RSCSScreen { viewModel.navigateUp() } }
+        composable(NavDestination.CGMS.id) { CGMScreen { viewModel.navigateUp() } }
         composable(NavDestination.REQUEST_PERMISSION.id) { RequestPermissionScreen(continueAction) }
         composable(NavDestination.BLUETOOTH_NOT_AVAILABLE.id) { BluetoothNotAvailableScreen{ viewModel.finish() } }
         composable(NavDestination.BLUETOOTH_NOT_ENABLED.id) {
@@ -75,6 +80,7 @@ internal fun HomeScreen() {
                 }.exhaustive
             }
         }
+        composable(NavDestination.BONDING.id) { BondingScreen(continueAction) }
     }
 
     LaunchedEffect(state) {
@@ -90,19 +96,23 @@ fun HomeView(callback: (NavDestination) -> Unit) {
             (context as? Activity)?.finish()
         }
 
-        FeatureButton(R.drawable.ic_csc, R.string.csc_module) { callback(NavDestination.CSC) }
-        Spacer(modifier = Modifier.height(1.dp))
-        FeatureButton(R.drawable.ic_hrs, R.string.hrs_module) { callback(NavDestination.HRS) }
-        Spacer(modifier = Modifier.height(1.dp))
-        FeatureButton(R.drawable.ic_gls, R.string.gls_module) { callback(NavDestination.GLS) }
-        Spacer(modifier = Modifier.height(1.dp))
-        FeatureButton(R.drawable.ic_hts, R.string.hts_module) { callback(NavDestination.HTS) }
-        Spacer(modifier = Modifier.height(1.dp))
-        FeatureButton(R.drawable.ic_bps, R.string.bps_module) { callback(NavDestination.BPS) }
-        Spacer(modifier = Modifier.height(1.dp))
-        FeatureButton(R.drawable.ic_rscs, R.string.rscs_module) { callback(NavDestination.RSCS) }
-        Spacer(modifier = Modifier.height(1.dp))
-        FeatureButton(R.drawable.ic_proximity, R.string.prx_module) { callback(NavDestination.PRX) }
+        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            FeatureButton(R.drawable.ic_csc, R.string.csc_module) { callback(NavDestination.CSC) }
+            Spacer(modifier = Modifier.height(1.dp))
+            FeatureButton(R.drawable.ic_hrs, R.string.hrs_module) { callback(NavDestination.HRS) }
+            Spacer(modifier = Modifier.height(1.dp))
+            FeatureButton(R.drawable.ic_gls, R.string.gls_module) { callback(NavDestination.GLS) }
+            Spacer(modifier = Modifier.height(1.dp))
+            FeatureButton(R.drawable.ic_hts, R.string.hts_module) { callback(NavDestination.HTS) }
+            Spacer(modifier = Modifier.height(1.dp))
+            FeatureButton(R.drawable.ic_bps, R.string.bps_module) { callback(NavDestination.BPS) }
+            Spacer(modifier = Modifier.height(1.dp))
+            FeatureButton(R.drawable.ic_rscs, R.string.rscs_module) { callback(NavDestination.RSCS) }
+            Spacer(modifier = Modifier.height(1.dp))
+            FeatureButton(R.drawable.ic_prx, R.string.prx_module) { callback(NavDestination.PRX) }
+            Spacer(modifier = Modifier.height(1.dp))
+            FeatureButton(R.drawable.ic_cgm, R.string.cgm_module) { callback(NavDestination.CGMS) }
+        }
     }
 }
 

@@ -6,7 +6,6 @@ internal data class GLSData(
     val records: List<GLSRecord> = emptyList(),
     val batteryLevel: Int = 0,
     val requestStatus: RequestStatus = RequestStatus.IDLE,
-    val isDeviceBonded: Boolean = false,
     val selectedMode: WorkingMode = WorkingMode.ALL
 ) {
     fun modeItems(): List<RadioGroupItem<WorkingMode>> {

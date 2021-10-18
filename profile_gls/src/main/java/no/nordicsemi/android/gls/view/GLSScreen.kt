@@ -19,8 +19,8 @@ fun GLSScreen(finishAction: () -> Unit) {
     val state = viewModel.state.collectAsState().value
     val isScreenActive = viewModel.isActive.collectAsState().value
 
-    LaunchedEffect(state.isDeviceBonded) {
-        viewModel.bondDevice()
+    LaunchedEffect("connect") {
+        viewModel.connectDevice()
     }
 
     LaunchedEffect(isScreenActive) {

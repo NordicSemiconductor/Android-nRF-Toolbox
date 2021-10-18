@@ -7,6 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import no.nordicsemi.android.permission.bonding.repository.BondingStateObserver
 import no.nordicsemi.android.permission.tools.PermissionHelper
 import no.nordicsemi.android.service.SelectedBluetoothDeviceHolder
 import javax.inject.Singleton
@@ -30,5 +31,11 @@ internal object HiltModule {
     @Provides
     fun createPermissionHelper(@ApplicationContext context: Context): PermissionHelper {
         return PermissionHelper(context)
+    }
+
+    @Singleton
+    @Provides
+    fun createBondingStateObserver(@ApplicationContext context: Context): BondingStateObserver {
+        return BondingStateObserver(context)
     }
 }

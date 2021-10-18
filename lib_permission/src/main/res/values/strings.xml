@@ -23,4 +23,8 @@
     <string name="scanner__bluetooth_not_enabled">Bluetooth not enabled.</string>
     <string name="scanner__bluetooth_open_settings_info">To enable Bluetooth please open settings.</string>
     <string name="scanner__bluetooth_open_settings">Open settings</string>
+
+    <string name="bonding_in_progress">Bonding in progress. Please follow instruction on the screen.</string>
+    <string name="bonding_success">Bonding success. Please wait for the redirect to chosen profile screen.</string>
+    <string name="bonding_error">We cannot get data from the peripheral without bonding. Please bond the device.</string>
 </resources>

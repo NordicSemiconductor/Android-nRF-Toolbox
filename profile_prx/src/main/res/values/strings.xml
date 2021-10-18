@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="prx_title">Proximity</string>
+
+    <string name="prx_is_remote_alarm">Remote alarm</string>
+    <string name="prx_local_alarm_level">Local alarm level</string>
 </resources>

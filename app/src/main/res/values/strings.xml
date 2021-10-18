@@ -6,4 +6,5 @@
     <string name="bps_module">BPS</string>
     <string name="rscs_module">RSCS</string>
     <string name="prx_module">PRX</string>
+    <string name="cgm_module">CGMS</string>
 </resources>

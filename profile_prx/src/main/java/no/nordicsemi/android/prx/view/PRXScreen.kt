@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,7 +46,7 @@ fun PRXScreen(finishAction: () -> Unit) {
 
 @Composable
 private fun PRXView(state: PRXData, onEvent: (PRXScreenViewEvent) -> Unit) {
-    Column {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         BackIconAppBar(stringResource(id = R.string.prx_title)) {
             onEvent(DisconnectEvent)
         }
@@ -56,6 +57,6 @@ private fun PRXView(state: PRXData, onEvent: (PRXScreenViewEvent) -> Unit) {
 
 @Preview
 @Composable
-private fun PRXViewPreview(state: PRXData, onEvent: (PRXScreenViewEvent) -> Unit) {
-    PRXView(state) { }
+private fun PRXViewPreview() {
+    PRXView(PRXData()) { }
 }

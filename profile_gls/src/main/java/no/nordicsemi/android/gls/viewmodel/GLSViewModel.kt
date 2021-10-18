@@ -43,15 +43,7 @@ internal class GLSViewModel @Inject constructor(
         }.exhaustive
     }
 
-    fun bondDevice() {
-        if (deviceHolder.isBondingRequired()) {
-            deviceHolder.bondDevice()
-        } else {
-            connectDevice()
-        }
-    }
-
-    private fun connectDevice() {
+    fun connectDevice() {
         deviceHolder.device?.let {
             glsManager.connect(it)
                 .useAutoConnect(false)

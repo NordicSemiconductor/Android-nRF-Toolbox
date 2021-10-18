@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import no.nordicsemi.android.bps.repository.BPS_SERVICE_UUID
+import no.nordicsemi.android.cgms.repository.CGMS_UUID
 import no.nordicsemi.android.csc.service.CYCLING_SPEED_AND_CADENCE_SERVICE_UUID
 import no.nordicsemi.android.gls.repository.GLS_SERVICE_UUID
 import no.nordicsemi.android.hrs.service.HR_SERVICE_UUID
@@ -49,7 +50,13 @@ class NavigationViewModel @Inject constructor(
         } else when (bleScanner.getBluetoothStatus()) {
             ScannerStatus.NOT_AVAILABLE -> BluetoothPermissionState.BLUETOOTH_NOT_AVAILABLE
             ScannerStatus.DISABLED -> BluetoothPermissionState.BLUETOOTH_NOT_ENABLED
-            ScannerStatus.ENABLED -> selectedDevice.device?.let { BluetoothPermissionState.READY } ?: BluetoothPermissionState.DEVICE_NOT_CONNECTED
+            ScannerStatus.ENABLED -> selectedDevice.device?.let {
+                if (targetDestination.pairingRequired && selectedDevice.isBondingRequired()) {
+                    BluetoothPermissionState.BONDING_REQUIRED
+                } else {
+                    BluetoothPermissionState.READY
+                }
+            } ?: BluetoothPermissionState.DEVICE_NOT_CONNECTED
         }
     }
 
@@ -59,6 +66,7 @@ class NavigationViewModel @Inject constructor(
             BluetoothPermissionState.BLUETOOTH_NOT_AVAILABLE -> NavDestination.BLUETOOTH_NOT_AVAILABLE
             BluetoothPermissionState.BLUETOOTH_NOT_ENABLED -> NavDestination.BLUETOOTH_NOT_ENABLED
             BluetoothPermissionState.DEVICE_NOT_CONNECTED -> NavDestination.DEVICE_NOT_CONNECTED
+            BluetoothPermissionState.BONDING_REQUIRED -> NavDestination.BONDING
             BluetoothPermissionState.READY -> targetDestination
         }
 
@@ -79,10 +87,12 @@ class NavigationViewModel @Inject constructor(
             NavDestination.BPS -> BPS_SERVICE_UUID.toString()
             NavDestination.RSCS -> RSCS_SERVICE_UUID.toString()
             NavDestination.PRX -> IMMEDIATE_ALERT_SERVICE_UUID.toString()
+            NavDestination.CGMS -> CGMS_UUID.toString()
             NavDestination.HOME,
             NavDestination.REQUEST_PERMISSION,
             NavDestination.BLUETOOTH_NOT_AVAILABLE,
             NavDestination.BLUETOOTH_NOT_ENABLED,
+            NavDestination.BONDING,
             NavDestination.DEVICE_NOT_CONNECTED -> throw IllegalArgumentException("There is no serivce related to the destination: $destination")
         }
     }
