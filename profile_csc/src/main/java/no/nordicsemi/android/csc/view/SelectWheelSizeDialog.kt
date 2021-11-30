@@ -5,7 +5,7 @@ import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import no.nordicsemi.android.csc.R
-import no.nordicsemi.android.theme.TestTheme
+import no.nordicsemi.android.material.you.NordicTheme
 import no.nordicsemi.android.theme.view.dialog.FlowCanceled
 import no.nordicsemi.android.theme.view.dialog.ItemSelectedResult
 import no.nordicsemi.android.theme.view.dialog.StringListDialog
@@ -40,7 +40,7 @@ private fun createConfig(entries: Array<String>, onResult: (StringListDialogResu
 @Preview
 @Composable
 internal fun DefaultPreview() {
-    TestTheme {
+    NordicTheme {
         val wheelEntries = stringArrayResource(R.array.wheel_entries)
         StringListDialog(createConfig(wheelEntries) {})
     }

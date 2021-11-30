@@ -13,9 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,7 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import no.nordicsemi.android.theme.NordicColors
+import no.nordicsemi.android.material.you.Card
 import no.nordicsemi.android.theme.R
 
 @Composable
@@ -39,7 +38,6 @@ fun StringListDialog(config: StringListDialogConfig) {
 fun StringListView(config: StringListDialogConfig) {
     Card(
         modifier = Modifier.height(300.dp),
-        backgroundColor = NordicColors.NordicGray4.value(),
         shape = RoundedCornerShape(10.dp),
         elevation = 0.dp
     ) {
@@ -72,9 +70,9 @@ fun StringListView(config: StringListDialogConfig) {
                                     modifier = Modifier.padding(horizontal = 4.dp),
                                     painter = painterResource(it),
                                     contentDescription = "Content image",
-                                    colorFilter = ColorFilter.tint(
-                                        NordicColors.NordicDarkGray.value()
-                                    )
+//                                    colorFilter = ColorFilter.tint(
+//                                        NordicColors.NordicDarkGray.value()
+//                                    )
                                 )
                             }
                             Text(

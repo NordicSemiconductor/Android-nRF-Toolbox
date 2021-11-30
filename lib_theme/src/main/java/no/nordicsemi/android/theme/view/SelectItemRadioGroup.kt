@@ -2,14 +2,11 @@ package no.nordicsemi.android.theme.view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.RadioButton
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.material.you.RadioButton
+import no.nordicsemi.android.material.you.RadioButtonItem
 
 @Composable
 fun <T> SelectItemRadioGroup(
@@ -35,11 +32,10 @@ internal fun <T> SelectItemRadioButton(
 ) {
     Row {
         RadioButton(
-            selected = (selectedItem == displayedItem.unit),
-            onClick = { onEvent(displayedItem) }
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(text = displayedItem.label)
+            RadioButtonItem(displayedItem.label, selectedItem == displayedItem.unit),
+        ) {
+            onEvent(displayedItem)
+        }
     }
 }
 

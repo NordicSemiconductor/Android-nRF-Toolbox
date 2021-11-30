@@ -1,12 +1,11 @@
 package no.nordicsemi.android.csc.view
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -16,14 +15,15 @@ import no.nordicsemi.android.csc.data.CSCData
 
 @Composable
 internal fun WheelSizeView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
-    OutlinedTextField(
-        modifier = Modifier.fillMaxWidth(),
-        value = state.wheelSizeDisplay,
-        onValueChange = { },
-        enabled = false,
-        label = { Text(text = stringResource(id = R.string.csc_field_wheel_size)) },
-        trailingIcon = { EditIcon(onEvent = onEvent) }
-    )
+    //TODO
+//    OutlinedTextField(
+//        modifier = Modifier.fillMaxWidth(),
+//        value = state.wheelSizeDisplay,
+//        onValueChange = { },
+//        enabled = false,
+//        label = { Text(text = stringResource(id = R.string.csc_field_wheel_size)) },
+//        trailingIcon = { EditIcon(onEvent = onEvent) }
+//    )
 }
 
 @Composable

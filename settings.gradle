@@ -11,12 +11,13 @@ dependencyResolutionManagement {
 
     versionCatalogs {
         libs {
+            alias('nordic-theme').to('no.nordicsemi.android.common:theme:1.0.0')
             alias('nordic-ble-common').to('no.nordicsemi.android:ble-common:2.2.0')
             alias('nordic-log').to('no.nordicsemi.android:log:2.3.0')
             alias('nordic-scanner').to('no.nordicsemi.android.support.v18:scanner:1.5.0')
 
             alias('localbroadcastmanager').to('androidx.localbroadcastmanager:localbroadcastmanager:1.0.0')
-            alias('material').to('com.google.android.material:material:1.4.0')
+            alias('material').to('com.google.android.material:material:1.5.0-beta01')
 
             version('lifecycle', '2.3.1')
             alias('lifecycle-activity').to('androidx.lifecycle', 'lifecycle-runtime-ktx').versionRef('lifecycle')
@@ -29,7 +30,7 @@ dependencyResolutionManagement {
             version('compose', '1.0.2')
             alias('compose-livedata').to('androidx.compose.runtime', 'runtime-livedata').versionRef('compose')
             alias('compose-ui').to('androidx.compose.ui', 'ui').versionRef('compose')
-            alias('compose-material').to('androidx.compose.material', 'material').versionRef('compose')
+            alias('compose-material').to('androidx.compose.material3:material3:1.0.0-alpha01')
             alias('compose-tooling-preview').to('androidx.compose.ui', 'ui-tooling-preview').versionRef('compose')
             alias('compose-navigation').to('androidx.navigation:navigation-compose:2.4.0-alpha09')
             bundle('compose', ['compose-livedata', 'compose-ui', 'compose-material', 'compose-tooling-preview', 'compose-navigation'])
