@@ -1,6 +1,8 @@
 package no.nordicsemi.android.gls.view
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,7 +23,6 @@ import no.nordicsemi.android.gls.viewmodel.GLSScreenViewEvent
 import no.nordicsemi.android.gls.viewmodel.OnWorkingModeSelected
 import no.nordicsemi.android.theme.view.BatteryLevelView
 import no.nordicsemi.android.theme.view.ScreenSection
-import no.nordicsemi.android.theme.view.SelectItemRadioGroup
 
 @Composable
 internal fun GLSContentView(state: GLSData, onEvent: (GLSScreenViewEvent) -> Unit) {
@@ -55,8 +56,15 @@ internal fun GLSContentView(state: GLSData, onEvent: (GLSScreenViewEvent) -> Uni
 @Composable
 private fun SettingsView(state: GLSData, onEvent: (GLSScreenViewEvent) -> Unit) {
     ScreenSection {
-        SelectItemRadioGroup(state.selectedMode, state.modeItems()) {
-            onEvent(OnWorkingModeSelected(it.unit))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            state.modeItems().forEach {
+                Button(onClick = { onEvent(OnWorkingModeSelected(it.unit)) }) {
+                    Text(it.label)
+                }
+            }
         }
     }
 }
@@ -66,7 +74,7 @@ private fun RecordsView(state: GLSData) {
     ScreenSection {
         Column(modifier = Modifier.fillMaxWidth()) {
             state.records.forEach {
-                Text(text = String.format("Glocose concentration: ", it.glucoseConcentration))
+                Text(text = String.format("Glucose concentration: ", it.glucoseConcentration))
             }
         }
     }
