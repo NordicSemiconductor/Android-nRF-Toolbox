@@ -1,10 +1,8 @@
 package no.nordicsemi.android.hrs.view
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,6 +15,7 @@ import no.nordicsemi.android.hrs.R
 import no.nordicsemi.android.hrs.data.HRSData
 import no.nordicsemi.android.theme.view.BatteryLevelView
 import no.nordicsemi.android.theme.view.ScreenSection
+import no.nordicsemi.android.theme.view.SectionTitle
 
 @Composable
 internal fun HRSContentView(state: HRSData, onEvent: (HRSScreenViewEvent) -> Unit) {
@@ -26,9 +25,11 @@ internal fun HRSContentView(state: HRSData, onEvent: (HRSScreenViewEvent) -> Uni
         Spacer(modifier = Modifier.height(16.dp))
 
         ScreenSection {
-            Box(modifier = Modifier.padding(16.dp)) {
-                LineChartView(state)
-            }
+            SectionTitle(resId = R.drawable.ic_chart_line, title = "Data")
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LineChartView(state)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
