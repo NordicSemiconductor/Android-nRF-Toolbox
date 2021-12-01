@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.rscs.R
 import no.nordicsemi.android.rscs.data.RSCSData
+import no.nordicsemi.android.theme.view.BatteryLevelView
 
 @Composable
 internal fun RSCSContentView(state: RSCSData, onEvent: (RSCScreenViewEvent) -> Unit) {
@@ -22,6 +23,10 @@ internal fun RSCSContentView(state: RSCSData, onEvent: (RSCScreenViewEvent) -> U
         Spacer(modifier = Modifier.height(16.dp))
 
         SensorsReadingView(state = state)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        BatteryLevelView(state.batteryLevel)
 
         Spacer(modifier = Modifier.height(16.dp))
 
