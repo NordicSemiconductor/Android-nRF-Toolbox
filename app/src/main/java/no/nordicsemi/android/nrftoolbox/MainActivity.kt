@@ -16,7 +16,7 @@ class MainActivity : NordicActivity() {
 
         setContent {
             NordicTheme {
-                Surface(color = MaterialTheme.colorScheme.background) {
+                Surface(color = MaterialTheme.colorScheme.surface) {
                     HomeScreen()
                 }
             }

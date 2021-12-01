@@ -3,13 +3,11 @@ package no.nordicsemi.android.nrftoolbox
 import android.app.Activity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -60,7 +58,7 @@ internal fun HomeScreen() {
         composable(NavDestination.RSCS.id) { RSCSScreen { viewModel.navigateUp() } }
         composable(NavDestination.CGMS.id) { CGMScreen { viewModel.navigateUp() } }
         composable(NavDestination.REQUEST_PERMISSION.id) { RequestPermissionScreen(continueAction) }
-        composable(NavDestination.BLUETOOTH_NOT_AVAILABLE.id) { BluetoothNotAvailableScreen{ viewModel.finish() } }
+        composable(NavDestination.BLUETOOTH_NOT_AVAILABLE.id) { BluetoothNotAvailableScreen { viewModel.finish() } }
         composable(NavDestination.BLUETOOTH_NOT_ENABLED.id) {
             BluetoothNotEnabledScreen(continueAction)
         }
@@ -91,22 +89,127 @@ fun HomeView(callback: (NavDestination) -> Unit) {
             (context as? Activity)?.finish()
         }
 
-        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-            FeatureButton(R.drawable.ic_csc, R.string.csc_module) { callback(NavDestination.CSC) }
-            Spacer(modifier = Modifier.height(1.dp))
-            FeatureButton(R.drawable.ic_hrs, R.string.hrs_module) { callback(NavDestination.HRS) }
-            Spacer(modifier = Modifier.height(1.dp))
-            FeatureButton(R.drawable.ic_gls, R.string.gls_module) { callback(NavDestination.GLS) }
-            Spacer(modifier = Modifier.height(1.dp))
-            FeatureButton(R.drawable.ic_hts, R.string.hts_module) { callback(NavDestination.HTS) }
-            Spacer(modifier = Modifier.height(1.dp))
-            FeatureButton(R.drawable.ic_bps, R.string.bps_module) { callback(NavDestination.BPS) }
-            Spacer(modifier = Modifier.height(1.dp))
-            FeatureButton(R.drawable.ic_rscs, R.string.rscs_module) { callback(NavDestination.RSCS) }
-            Spacer(modifier = Modifier.height(1.dp))
-            FeatureButton(R.drawable.ic_prx, R.string.prx_module) { callback(NavDestination.PRX) }
-            Spacer(modifier = Modifier.height(1.dp))
-            FeatureButton(R.drawable.ic_cgm, R.string.cgm_module) { callback(NavDestination.CGMS) }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(horizontalArrangement = Arrangement.SpaceEvenly) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    FeatureButton(
+                        R.drawable.ic_csc,
+                        R.string.csc_module,
+                        R.string.csc_module_full
+                    ) { callback(NavDestination.CSC) }
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    FeatureButton(
+                        R.drawable.ic_hrs, R.string.hrs_module,
+                        R.string.hrs_module_full
+                    ) { callback(NavDestination.HRS) }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(horizontalArrangement = Arrangement.SpaceEvenly) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    FeatureButton(
+                        R.drawable.ic_gls, R.string.gls_module,
+                        R.string.gls_module_full
+                    ) { callback(NavDestination.GLS) }
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    FeatureButton(
+                        R.drawable.ic_hts, R.string.hts_module,
+                        R.string.hts_module_full
+                    ) { callback(NavDestination.HTS) }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(horizontalArrangement = Arrangement.SpaceEvenly) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    FeatureButton(
+                        R.drawable.ic_bps, R.string.bps_module,
+                        R.string.bps_module_full
+                    ) { callback(NavDestination.BPS) }
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    FeatureButton(
+                        R.drawable.ic_rscs,
+                        R.string.rscs_module,
+                        R.string.rscs_module_full
+                    ) { callback(NavDestination.RSCS) }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(horizontalArrangement = Arrangement.SpaceEvenly) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    FeatureButton(
+                        R.drawable.ic_prx, R.string.prx_module,
+                        R.string.prx_module_full
+                    ) { callback(NavDestination.PRX) }
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    FeatureButton(
+                        R.drawable.ic_cgm, R.string.cgm_module,
+                        R.string.cgm_module_full
+                    ) { callback(NavDestination.CGMS) }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
