@@ -1,6 +1,6 @@
 package no.nordicsemi.android.theme.view
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -16,7 +16,7 @@ fun ScreenSection(content: @Composable () -> Unit) {
         shape = RoundedCornerShape(4.dp),
         elevation = 0.dp
     ) {
-        Box(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             content()
         }
     }

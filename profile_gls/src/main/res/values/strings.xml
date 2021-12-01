@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="gls_title">GLS</string>
+    <string name="gls_no_records_info">There is no data available. This peripheral downloads data only when requested. Please select what kind of data you want to download by clicking one from the above buttons.</string>
 </resources>

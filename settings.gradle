@@ -12,7 +12,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         libs {
             alias('nordic-theme').to('no.nordicsemi.android.common:theme:1.0.0')
-            alias('nordic-ble-common').to('no.nordicsemi.android:ble-common:2.2.0')
+            alias('nordic-ble-common').to('no.nordicsemi.android:ble-common:2.3.1')
             alias('nordic-log').to('no.nordicsemi.android:log:2.3.0')
             alias('nordic-scanner').to('no.nordicsemi.android.support.v18:scanner:1.5.0')
 
@@ -78,10 +78,10 @@ include ':lib_service'
 include ':lib_theme'
 include ':lib_utils'
 
-if (file('../Android-BLE-Library').exists()) {
-    includeBuild('../Android-BLE-Library')
-}
-
-if (file('../Android-Scanner-Compat-Library').exists()) {
-    includeBuild('../Android-Scanner-Compat-Library')
-}
+//if (file('../Android-BLE-Library').exists()) {
+//    includeBuild('../Android-BLE-Library')
+//}
+//
+//if (file('../Android-Scanner-Compat-Library').exists()) {
+//    includeBuild('../Android-Scanner-Compat-Library')
+//}
