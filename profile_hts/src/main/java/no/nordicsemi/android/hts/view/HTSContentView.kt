@@ -1,6 +1,9 @@
 package no.nordicsemi.android.hts.view
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -11,10 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.hts.R
 import no.nordicsemi.android.hts.data.HTSData
-import no.nordicsemi.android.theme.view.BatteryLevelView
-import no.nordicsemi.android.theme.view.KeyValueField
-import no.nordicsemi.android.theme.view.ScreenSection
-import no.nordicsemi.android.theme.view.SelectItemRadioGroup
+import no.nordicsemi.android.theme.view.*
 
 @Composable
 internal fun HTSContentView(state: HTSData, onEvent: (HTSScreenViewEvent) -> Unit) {
@@ -25,16 +25,22 @@ internal fun HTSContentView(state: HTSData, onEvent: (HTSScreenViewEvent) -> Uni
         Spacer(modifier = Modifier.height(16.dp))
 
         ScreenSection {
-            Box(modifier = Modifier.padding(16.dp)) {
-                SelectItemRadioGroup(state.temperatureUnit, state.temperatureSettingsItems()) {
-                    onEvent(OnTemperatureUnitSelected(it.unit))
-                }
+            SectionTitle(resId = R.drawable.ic_thermometer, title = "Settings")
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            SelectItemRadioGroup(state.temperatureUnit, state.temperatureSettingsItems()) {
+                onEvent(OnTemperatureUnitSelected(it.unit))
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         ScreenSection {
+            SectionTitle(resId = R.drawable.ic_records, title = "Records")
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             KeyValueField(
                 stringResource(id = R.string.hts_temperature),
                 state.displayTemperature()
