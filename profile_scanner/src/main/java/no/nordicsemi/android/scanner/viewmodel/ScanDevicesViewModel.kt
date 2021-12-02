@@ -8,11 +8,7 @@ import no.nordicsemi.android.scanner.view.OnCancelButtonClick
 import no.nordicsemi.android.scanner.view.OnDeviceSelected
 import no.nordicsemi.android.scanner.view.ScanDevicesViewEvent
 import no.nordicsemi.android.service.SelectedBluetoothDeviceHolder
-import no.nordicsemi.android.support.v18.scanner.BluetoothLeScannerCompat
-import no.nordicsemi.android.support.v18.scanner.ScanCallback
-import no.nordicsemi.android.support.v18.scanner.ScanFilter
-import no.nordicsemi.android.support.v18.scanner.ScanResult
-import no.nordicsemi.android.support.v18.scanner.ScanSettings
+import no.nordicsemi.android.support.v18.scanner.*
 import no.nordicsemi.android.theme.viewmodel.CloseableViewModel
 import no.nordicsemi.android.utils.exhaustive
 import javax.inject.Inject
@@ -58,7 +54,7 @@ class ScanDevicesViewModel @Inject constructor(
         val settings: ScanSettings = ScanSettings.Builder()
             .setLegacy(false)
             .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-            .setReportDelay(5000)
+            .setReportDelay(500)
             .setUseHardwareBatchingIfSupported(true)
             .build()
 

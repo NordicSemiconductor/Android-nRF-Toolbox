@@ -3,6 +3,9 @@ package no.nordicsemi.android.csc.view
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.csc.R
 import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.theme.view.ScreenSection
+import no.nordicsemi.android.theme.view.SectionTitle
 import no.nordicsemi.android.theme.view.SelectItemRadioGroup
 
 @Composable
@@ -23,7 +27,8 @@ internal fun CSCContentView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
     }
 
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(horizontal = 16.dp)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -49,6 +54,10 @@ private fun SettingsSection(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            SectionTitle(icon = Icons.Default.Settings, title = stringResource(R.string.csc_settings))
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             WheelSizeView(state, onEvent)
 
             Spacer(modifier = Modifier.height(16.dp))

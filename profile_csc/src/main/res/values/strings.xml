@@ -12,6 +12,8 @@
 
     <string name="csc_field_wheel_size">Wheel size</string>
 
+    <string name="csc_settings">Settings</string>
+
     <string-array name="wheel_entries">
         <item>60&#8211;622</item>
         <item>50&#8211;622</item>

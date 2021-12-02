@@ -13,10 +13,15 @@ import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.theme.view.BatteryLevelView
 import no.nordicsemi.android.theme.view.KeyValueField
 import no.nordicsemi.android.theme.view.ScreenSection
+import no.nordicsemi.android.theme.view.SectionTitle
 
 @Composable
 internal fun SensorsReadingView(state: CSCData) {
     ScreenSection {
+        SectionTitle(resId = R.drawable.ic_records, title = "Records")
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Column {
             KeyValueField(stringResource(id = R.string.csc_field_speed), state.displaySpeed())
             Spacer(modifier = Modifier.height(4.dp))

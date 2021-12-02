@@ -2,6 +2,7 @@ package no.nordicsemi.android.bps.view
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -15,6 +16,16 @@ fun BPSScreen(finishAction: () -> Unit) {
     val viewModel: BPSViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
     val isScreenActive = viewModel.isActive.collectAsState().value
+
+    LaunchedEffect("connect") {
+        viewModel.connectDevice()
+    }
+
+    LaunchedEffect(isScreenActive) {
+        if (!isScreenActive) {
+            finishAction()
+        }
+    }
 
     BPSView(state) { viewModel.onEvent(it) }
 }

@@ -13,11 +13,14 @@ import no.nordicsemi.android.bps.data.BPSData
 import no.nordicsemi.android.theme.view.BatteryLevelView
 import no.nordicsemi.android.theme.view.KeyValueField
 import no.nordicsemi.android.theme.view.ScreenSection
+import no.nordicsemi.android.theme.view.SectionTitle
 
 @Composable
 internal fun BPSSensorsReadingView(state: BPSData) {
     ScreenSection {
         Column {
+            SectionTitle(resId = R.drawable.ic_records, title = "Records")
+            Spacer(modifier = Modifier.height(16.dp))
             KeyValueField(stringResource(id = R.string.bps_systolic), state.displaySystolic())
             Spacer(modifier = Modifier.height(4.dp))
             KeyValueField(stringResource(id = R.string.bps_diastolic), state.displayDiastolic())

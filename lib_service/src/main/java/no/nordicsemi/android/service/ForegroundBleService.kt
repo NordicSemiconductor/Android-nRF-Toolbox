@@ -28,6 +28,7 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 
 private const val CHANNEL_ID = "FOREGROUND_BLE_SERVICE"
 
@@ -91,6 +92,7 @@ abstract class ForegroundBleService : BleProfileService() {
             .setContentTitle(getString(R.string.app_name))
             .setContentText(getString(messageResId, manager.bluetoothDevice?.name ?: "Device"))
             .setSmallIcon(R.mipmap.ic_launcher)
+            .setColor(ContextCompat.getColor(this, R.color.md_theme_primary))
             .setContentIntent(pendingIntent)
             .build()
     }
