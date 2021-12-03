@@ -27,6 +27,7 @@ import no.nordicsemi.android.hts.view.HTSScreen
 import no.nordicsemi.android.prx.view.PRXScreen
 import no.nordicsemi.android.rscs.view.RSCSScreen
 import no.nordicsemi.android.theme.view.CloseIconAppBar
+import no.nordicsemi.ui.scanner.navigation.view.FindDeviceScreen
 
 @Composable
 internal fun HomeScreen() {
@@ -44,7 +45,10 @@ internal fun HomeScreen() {
     val goHome = { navController.navigate(NavDestination.HOME.id) }
 
     NavHost(navController = navController, startDestination = NavDestination.HOME.id) {
-        composable(NavDestination.HOME.id) { HomeView { goHome() } }
+        composable(NavDestination.HOME.id) {
+            FindDeviceScreen()
+            HomeView { goHome() }
+        }
         composable(NavDestination.CSC.id) { CSCScreen { goHome() } }
         composable(NavDestination.HRS.id) { HRSScreen { goHome() } }
         composable(NavDestination.HTS.id) { HTSScreen { goHome() } }
