@@ -62,7 +62,6 @@ dependencies {
     implementation project(':profile_rscs')
     implementation project(':profile_scanner')
 
-    implementation project(':lib_permission')
     implementation project(":lib_theme")
     implementation project(":lib_utils")
     implementation project(":lib_service")

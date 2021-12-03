@@ -73,10 +73,11 @@ include ':profile_prx'
 include ':profile_rscs'
 include ':profile_scanner'
 
-include ':lib_permission'
 include ':lib_service'
 include ':lib_theme'
 include ':lib_utils'
+
+include ':scanner'
 
 if (file('../Android-Common-Libraries').exists()) {
     includeBuild('../Android-Common-Libraries')
