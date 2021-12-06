@@ -54,7 +54,7 @@ import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 
 /** Cycling Speed and Cadence service UUID.  */
-val CGMS_UUID = UUID.fromString("0000181F-0000-1000-8000-00805f9b34fb")
+val CGMS_SERVICE_UUID = UUID.fromString("0000181F-0000-1000-8000-00805f9b34fb")
 private val CGM_STATUS_UUID = UUID.fromString("00002AA9-0000-1000-8000-00805f9b34fb")
 private val CGM_FEATURE_UUID = UUID.fromString("00002AA8-0000-1000-8000-00805f9b34fb")
 private val CGM_MEASUREMENT_UUID = UUID.fromString("00002AA7-0000-1000-8000-00805f9b34fb")
@@ -378,7 +378,7 @@ internal class CGMManager(
         }
 
         override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
-            val service = gatt.getService(CGMS_UUID)
+            val service = gatt.getService(CGMS_SERVICE_UUID)
             if (service != null) {
                 cgmStatusCharacteristic = service.getCharacteristic(CGM_STATUS_UUID)
                 cgmFeatureCharacteristic = service.getCharacteristic(CGM_FEATURE_UUID)

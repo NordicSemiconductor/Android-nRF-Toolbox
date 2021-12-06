@@ -60,14 +60,15 @@ dependencies {
     implementation project(':profile_hts')
     implementation project(':profile_prx')
     implementation project(':profile_rscs')
-    implementation project(':scanner')
 
     implementation project(":lib_theme")
     implementation project(":lib_utils")
     implementation project(":lib_service")
 
     implementation libs.nordic.ble.common
+    implementation libs.nordic.ui.scanner
 
+    implementation libs.bundles.koin
     implementation libs.bundles.hilt
     kapt libs.bundles.hiltkapt
 

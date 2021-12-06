@@ -41,7 +41,7 @@ import java.util.*
 val LINK_LOSS_SERVICE_UUID = UUID.fromString("00001803-0000-1000-8000-00805f9b34fb")
 
 /** Immediate Alert service UUID.  */
-val IMMEDIATE_ALERT_SERVICE_UUID = UUID.fromString("00001802-0000-1000-8000-00805f9b34fb")
+val PRX_SERVICE_UUID = UUID.fromString("00001802-0000-1000-8000-00805f9b34fb")
 
 /** Alert Level characteristic UUID.  */
 val ALERT_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A06-0000-1000-8000-00805f9b34fb")
@@ -97,7 +97,7 @@ internal class PRXManager(
         }
 
         override fun onServerReady(server: BluetoothGattServer) {
-            val immediateAlertService = server.getService(IMMEDIATE_ALERT_SERVICE_UUID)
+            val immediateAlertService = server.getService(PRX_SERVICE_UUID)
             if (immediateAlertService != null) {
                 localAlertLevelCharacteristic = immediateAlertService.getCharacteristic(
                     ALERT_LEVEL_CHARACTERISTIC_UUID
@@ -118,7 +118,7 @@ internal class PRXManager(
 
         override fun isOptionalServiceSupported(gatt: BluetoothGatt): Boolean {
             super.isOptionalServiceSupported(gatt)
-            val iaService = gatt.getService(IMMEDIATE_ALERT_SERVICE_UUID)
+            val iaService = gatt.getService(PRX_SERVICE_UUID)
             if (iaService != null) {
                 alertLevelCharacteristic = iaService.getCharacteristic(
                     ALERT_LEVEL_CHARACTERISTIC_UUID

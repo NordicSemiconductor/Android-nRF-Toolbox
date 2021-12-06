@@ -1,6 +1,7 @@
 package no.nordicsemi.android.nrftoolbox
 
 import android.app.Activity
+import android.os.ParcelUuid
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
@@ -15,6 +16,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -32,6 +34,7 @@ import no.nordicsemi.ui.scanner.navigation.view.FindDeviceScreen
 @Composable
 internal fun HomeScreen() {
     val navController = rememberNavController()
+    val deviceHolder: HomeViewModel = hiltViewModel()
 
     val activity = LocalContext.current as Activity
     BackHandler {
@@ -46,17 +49,56 @@ internal fun HomeScreen() {
 
     NavHost(navController = navController, startDestination = NavDestination.HOME.id) {
         composable(NavDestination.HOME.id) {
-            FindDeviceScreen()
-            HomeView { goHome() }
+            HomeView { navController.navigate(it.id) }
         }
-        composable(NavDestination.CSC.id) { CSCScreen { goHome() } }
-        composable(NavDestination.HRS.id) { HRSScreen { goHome() } }
-        composable(NavDestination.HTS.id) { HTSScreen { goHome() } }
-        composable(NavDestination.GLS.id) { GLSScreen { goHome() } }
-        composable(NavDestination.BPS.id) { BPSScreen { goHome() } }
-        composable(NavDestination.PRX.id) { PRXScreen { goHome() } }
-        composable(NavDestination.RSCS.id) { RSCSScreen { goHome() } }
-        composable(NavDestination.CGMS.id) { CGMScreen { goHome() } }
+        composable(NavDestination.CSC.id) {
+            FindDeviceScreen(ParcelUuid(NavDestination.CSC.uuid)) {
+                deviceHolder.onDeviceSelected(it)
+                CSCScreen { goHome() }
+            }
+        }
+        composable(NavDestination.HRS.id) {
+            FindDeviceScreen(ParcelUuid(NavDestination.HRS.uuid)) {
+                deviceHolder.onDeviceSelected(it)
+                HRSScreen { goHome() }
+            }
+        }
+        composable(NavDestination.HTS.id) {
+            FindDeviceScreen(ParcelUuid(NavDestination.HTS.uuid)) {
+                deviceHolder.onDeviceSelected(it)
+                HTSScreen { goHome() }
+            }
+        }
+        composable(NavDestination.GLS.id) {
+            FindDeviceScreen(ParcelUuid(NavDestination.GLS.uuid)) {
+                deviceHolder.onDeviceSelected(it)
+                GLSScreen { goHome() }
+            }
+        }
+        composable(NavDestination.BPS.id) {
+            FindDeviceScreen(ParcelUuid(NavDestination.BPS.uuid)) {
+                deviceHolder.onDeviceSelected(it)
+                BPSScreen { goHome() }
+            }
+        }
+        composable(NavDestination.PRX.id) {
+            FindDeviceScreen(ParcelUuid(NavDestination.PRX.uuid)) {
+                deviceHolder.onDeviceSelected(it)
+                PRXScreen { goHome() }
+            }
+        }
+        composable(NavDestination.RSCS.id) {
+            FindDeviceScreen(ParcelUuid(NavDestination.RSCS.uuid)) {
+                deviceHolder.onDeviceSelected(it)
+                RSCSScreen { goHome() }
+            }
+        }
+        composable(NavDestination.CGMS.id) {
+            FindDeviceScreen(ParcelUuid(NavDestination.CGMS.uuid)) {
+                deviceHolder.onDeviceSelected(it)
+                CGMScreen { goHome() }
+            }
+        }
     }
 }
 

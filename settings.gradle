@@ -6,6 +6,7 @@ dependencyResolutionManagement {
         google()
         maven { url 'https://jitpack.io' }
         mavenCentral()
+        mavenLocal()
         jcenter() // Warning: this repository is going to shut down soon
     }
 
@@ -15,6 +16,7 @@ dependencyResolutionManagement {
             alias('nordic-ble-common').to('no.nordicsemi.android:ble-common:2.3.1')
             alias('nordic-log').to('no.nordicsemi.android:log:2.3.0')
             alias('nordic-scanner').to('no.nordicsemi.android.support.v18:scanner:1.5.0')
+            alias('nordic-ui-scanner').to('no.nordicsemi.android.common:ui-scanner:1.0.0')
 
             alias('localbroadcastmanager').to('androidx.localbroadcastmanager:localbroadcastmanager:1.0.0')
             alias('material').to('com.google.android.material:material:1.5.0-beta01')
@@ -43,6 +45,11 @@ dependencyResolutionManagement {
             alias('hilt-lifecyclecompiler').to('androidx.hilt:hilt-compiler:1.0.0-alpha02')
             bundle('hilt', ['hilt-android', 'hilt-compose', 'hilt-lifecycle'])
             bundle('hiltkapt', ['hilt-compiler', 'hilt-lifecyclecompiler'])
+
+            version('koin', '3.1.2')
+            alias('koin-android').to('io.insert-koin', 'koin-android').versionRef('koin')
+            alias('koin-compose').to('io.insert-koin', 'koin-androidx-compose').versionRef('koin')
+            bundle('koin', ['koin-android', 'koin-compose'])
 
             alias('kotlin-coroutines').to('org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2')
             alias('google-permissions').to('com.google.accompanist:accompanist-permissions:0.18.0')
