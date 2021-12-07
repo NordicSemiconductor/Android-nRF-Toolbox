@@ -91,7 +91,7 @@ abstract class ForegroundBleService : BleProfileService() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name))
             .setContentText(getString(messageResId, manager.bluetoothDevice?.name ?: "Device"))
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_notification_icon)
             .setColor(ContextCompat.getColor(this, R.color.md_theme_primary))
             .setContentIntent(pendingIntent)
             .build()
