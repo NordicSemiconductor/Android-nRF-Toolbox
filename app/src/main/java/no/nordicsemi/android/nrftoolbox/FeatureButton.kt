@@ -35,7 +35,6 @@ fun FeatureButton(
                 .fillMaxWidth()
                 .height(150.dp)
                 .clickable { onClick() }
-                .background(MaterialTheme.colorScheme.background)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

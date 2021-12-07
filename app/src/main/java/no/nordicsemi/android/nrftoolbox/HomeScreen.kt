@@ -5,9 +5,11 @@ import android.os.ParcelUuid
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,7 +49,10 @@ internal fun HomeScreen() {
 
     val goHome = { navController.navigate(NavDestination.HOME.id) }
 
-    NavHost(navController = navController, startDestination = NavDestination.HOME.id) {
+    NavHost(
+        navController = navController,
+        startDestination = NavDestination.HOME.id
+    ) {
         composable(NavDestination.HOME.id) {
             HomeView { navController.navigate(it.id) }
         }

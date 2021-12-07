@@ -2,8 +2,10 @@ package no.nordicsemi.android.nrftoolbox
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
 import no.nordicsemi.android.material.you.NordicActivity
 import no.nordicsemi.android.material.you.NordicTheme
@@ -16,7 +18,10 @@ class MainActivity : NordicActivity() {
 
         setContent {
             NordicTheme {
-                Surface(color = MaterialTheme.colorScheme.surface) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     HomeScreen()
                 }
             }
