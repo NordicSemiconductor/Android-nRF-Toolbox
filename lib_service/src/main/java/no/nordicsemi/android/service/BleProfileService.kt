@@ -104,7 +104,7 @@ abstract class BleProfileService : LifecycleService() {
         super.onDestroy()
 
         // shutdown the manager
-        manager.close()
+        manager.disconnect().enqueue()
         Logger.i(logSession, "Service destroyed")
         bluetoothDeviceHolder.forgetDevice()
         logSession = null

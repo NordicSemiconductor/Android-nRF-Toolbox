@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.gls.R
 import no.nordicsemi.android.gls.data.GLSData
 import no.nordicsemi.android.gls.data.GLSRecord
+import no.nordicsemi.android.gls.data.WorkingMode
 import no.nordicsemi.android.gls.viewmodel.DisconnectEvent
 import no.nordicsemi.android.gls.viewmodel.GLSScreenViewEvent
 import no.nordicsemi.android.gls.viewmodel.OnWorkingModeSelected
@@ -61,9 +62,9 @@ private fun SettingsView(state: GLSData, onEvent: (GLSScreenViewEvent) -> Unit) 
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            state.modeItems().forEach {
-                Button(onClick = { onEvent(OnWorkingModeSelected(it.unit)) }) {
-                    Text(it.label)
+            WorkingMode.values().forEach {
+                Button(onClick = { onEvent(OnWorkingModeSelected(it)) }) {
+                    Text(it.displayName)
                 }
             }
         }

@@ -16,9 +16,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.csc.R
 import no.nordicsemi.android.csc.data.CSCData
+import no.nordicsemi.android.material.you.RadioButtonGroup
 import no.nordicsemi.android.theme.view.ScreenSection
 import no.nordicsemi.android.theme.view.SectionTitle
-import no.nordicsemi.android.theme.view.SelectItemRadioGroup
 
 @Composable
 internal fun CSCContentView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
@@ -62,8 +62,8 @@ private fun SettingsSection(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SelectItemRadioGroup(state.selectedSpeedUnit, state.items()) {
-                onEvent(OnSelectedSpeedUnitSelected(it.unit))
+            RadioButtonGroup(viewEntity = state.temperatureSettingsItems()) {
+                onEvent(OnSelectedSpeedUnitSelected(state.getSpeedUnit(it.label)))
             }
         }
     }

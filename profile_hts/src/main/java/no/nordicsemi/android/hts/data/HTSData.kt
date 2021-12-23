@@ -1,6 +1,11 @@
 package no.nordicsemi.android.hts.data
 
-import no.nordicsemi.android.theme.view.RadioGroupItem
+import no.nordicsemi.android.material.you.RadioButtonItem
+import no.nordicsemi.android.material.you.RadioGroupViewEntity
+
+private const val DISPLAY_FAHRENHEIT = "°F"
+private const val DISPLAY_CELSIUS = "°C"
+private const val DISPLAY_KELVIN = "°K"
 
 internal data class HTSData(
     val temperatureValue: Float = 0f,
@@ -16,15 +21,36 @@ internal data class HTSData(
         }
     }
 
-    fun temperatureSettingsItems(): List<RadioGroupItem<TemperatureUnit>> {
-        return listOf(
-            RadioGroupItem(TemperatureUnit.CELSIUS,"°C"),
-            RadioGroupItem(TemperatureUnit.FAHRENHEIT, "°F"),
-            RadioGroupItem(TemperatureUnit.KELVIN, "°K")
+    fun getTemperatureUnit(label: String): TemperatureUnit {
+        return when (label) {
+            DISPLAY_CELSIUS -> TemperatureUnit.CELSIUS
+            DISPLAY_FAHRENHEIT -> TemperatureUnit.FAHRENHEIT
+            DISPLAY_KELVIN -> TemperatureUnit.KELVIN
+            else -> throw IllegalArgumentException("Can't create TemperatureUnit from this label: $label")
+        }
+    }
+
+    fun temperatureSettingsItems(): RadioGroupViewEntity {
+        return RadioGroupViewEntity(
+            TemperatureUnit.values().map { createRadioButtonItem(it) }
         )
+    }
+
+    private fun createRadioButtonItem(unit: TemperatureUnit): RadioButtonItem {
+        return RadioButtonItem(displayTemperature(unit), unit == temperatureUnit)
+    }
+
+    private fun displayTemperature(unit: TemperatureUnit): String {
+        return when (unit) {
+            TemperatureUnit.CELSIUS -> DISPLAY_CELSIUS
+            TemperatureUnit.FAHRENHEIT -> DISPLAY_FAHRENHEIT
+            TemperatureUnit.KELVIN -> DISPLAY_KELVIN
+        }
     }
 }
 
 internal enum class TemperatureUnit {
-    CELSIUS, FAHRENHEIT, KELVIN
+    CELSIUS,
+    FAHRENHEIT,
+    KELVIN
 }

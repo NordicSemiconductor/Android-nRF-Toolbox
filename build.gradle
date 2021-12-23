@@ -1,8 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     ext {
-        compose_version = '1.1.0-alpha03'
-        kotlin_version = '1.5.30'
+        compose_version = '1.1.0-rc01'
+        kotlin_version = '1.6.0'
         android_api_version = 31
         android_min_api_version = 26
     }
@@ -14,7 +14,7 @@ buildscript {
         classpath "com.android.tools.build:gradle:7.0.4"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "io.spring.gradle:dependency-management-plugin:1.0.11.RELEASE"
-        classpath "com.google.dagger:hilt-android-gradle-plugin:2.40"
+        classpath "com.google.dagger:hilt-android-gradle-plugin:2.40.4"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files

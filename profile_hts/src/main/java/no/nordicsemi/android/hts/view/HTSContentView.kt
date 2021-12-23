@@ -11,12 +11,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.hts.R
 import no.nordicsemi.android.hts.data.HTSData
-import no.nordicsemi.android.theme.view.*
+import no.nordicsemi.android.material.you.RadioButtonGroup
+import no.nordicsemi.android.theme.view.BatteryLevelView
+import no.nordicsemi.android.theme.view.KeyValueField
+import no.nordicsemi.android.theme.view.ScreenSection
+import no.nordicsemi.android.theme.view.SectionTitle
 
 @Composable
 internal fun HTSContentView(state: HTSData, onEvent: (HTSScreenViewEvent) -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(16.dp))
@@ -26,8 +32,8 @@ internal fun HTSContentView(state: HTSData, onEvent: (HTSScreenViewEvent) -> Uni
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SelectItemRadioGroup(state.temperatureUnit, state.temperatureSettingsItems()) {
-                onEvent(OnTemperatureUnitSelected(it.unit))
+            RadioButtonGroup(viewEntity = state.temperatureSettingsItems()) {
+                onEvent(OnTemperatureUnitSelected(state.getTemperatureUnit(it.label)))
             }
         }
 
