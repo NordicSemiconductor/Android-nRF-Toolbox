@@ -36,8 +36,7 @@ internal data class GLSRecord(
     /** Concentration unit. One of the following: [ConcentrationUnit.UNIT_KGPL], [ConcentrationUnit.UNIT_MOLPL]  */
     val unit: ConcentrationUnit = ConcentrationUnit.UNIT_KGPL,
 
-    /** The type of the record. 0 if not present  */
-    val type: Int = 0,
+    val type: RecordType?,
 
     /** The sample location. 0 if unknown  */
     val sampleLocation: Int = 0,
@@ -47,6 +46,30 @@ internal data class GLSRecord(
 
     var context: MeasurementContext? = null
 )
+
+internal enum class RecordType(val id: Int) {
+    CAPILLARY_WHOLE_BLOOD(1),
+    CAPILLARY_PLASMA(2),
+    VENOUS_WHOLE_BLOOD(3),
+    VENOUS_PLASMA(4),
+    ARTERIAL_WHOLE_BLOOD(5),
+    ARTERIAL_PLASMA(6),
+    UNDETERMINED_WHOLE_BLOOD(7),
+    UNDETERMINED_PLASMA(8),
+    INTERSTITIAL_FLUID(9),
+    CONTROL_SOLUTION(10);
+
+    companion object {
+        fun create(value: Int): RecordType {
+            return values().firstOrNull { it.id == value.toInt() }
+                ?: throw IllegalArgumentException("Cannot find element for provided value.")
+        }
+
+        fun createOrNull(value: Int?): RecordType? {
+            return values().firstOrNull { it.id == value }
+        }
+    }
+}
 
 internal data class MeasurementContext(
     /** Record sequence number  */

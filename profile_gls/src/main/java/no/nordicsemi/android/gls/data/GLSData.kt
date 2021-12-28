@@ -3,14 +3,13 @@ package no.nordicsemi.android.gls.data
 internal data class GLSData(
     val records: List<GLSRecord> = emptyList(),
     val batteryLevel: Int = 0,
-    val requestStatus: RequestStatus = RequestStatus.IDLE,
-    val selectedMode: WorkingMode = WorkingMode.ALL
+    val requestStatus: RequestStatus = RequestStatus.IDLE
 )
 
-internal enum class WorkingMode(val displayName: String) {
-    ALL("All"),
-    LAST("First"),
-    FIRST("Last")
+internal enum class WorkingMode {
+    ALL,
+    LAST,
+    FIRST
 }
 
 internal enum class RequestStatus {

@@ -1,9 +1,6 @@
 package no.nordicsemi.android.gls.viewmodel
 
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.gls.data.GLSDataHolder
 import no.nordicsemi.android.gls.data.WorkingMode
 import no.nordicsemi.android.gls.repository.GLSManager
@@ -20,26 +17,11 @@ internal class GLSViewModel @Inject constructor(
 ) : CloseableViewModel() {
 
     val state = dataHolder.data
-    private var lastSelectedMode = state.value.selectedMode
-
-    init {
-        dataHolder.data.onEach {
-            if (lastSelectedMode == it.selectedMode) {
-                return@onEach
-            }
-            lastSelectedMode = it.selectedMode
-            when (it.selectedMode) {
-                WorkingMode.ALL -> glsManager.requestAllRecords()
-                WorkingMode.LAST -> glsManager.requestLastRecord()
-                WorkingMode.FIRST -> glsManager.requestFirstRecord()
-            }.exhaustive
-        }.launchIn(GlobalScope)
-    }
 
     fun onEvent(event: GLSScreenViewEvent) {
         when (event) {
             DisconnectEvent -> disconnect()
-            is OnWorkingModeSelected -> dataHolder.setNewWorkingMode(event.workingMode)
+            is OnWorkingModeSelected -> requestData(event.workingMode)
         }.exhaustive
     }
 
@@ -50,6 +32,14 @@ internal class GLSViewModel @Inject constructor(
                 .retry(3, 100)
                 .enqueue()
         }
+    }
+
+    private fun requestData(mode: WorkingMode) {
+        when (mode) {
+            WorkingMode.ALL -> glsManager.requestAllRecords()
+            WorkingMode.LAST -> glsManager.requestLastRecord()
+            WorkingMode.FIRST -> glsManager.requestFirstRecord()
+        }.exhaustive
     }
 
     private fun disconnect() {

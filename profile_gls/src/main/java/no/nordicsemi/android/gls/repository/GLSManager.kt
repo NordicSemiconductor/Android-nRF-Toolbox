@@ -35,21 +35,14 @@ import no.nordicsemi.android.ble.common.data.RecordAccessControlPointData
 import no.nordicsemi.android.ble.common.profile.RecordAccessControlPointCallback.RACPErrorCode
 import no.nordicsemi.android.ble.common.profile.RecordAccessControlPointCallback.RACPOpCode
 import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementCallback.GlucoseStatus
-import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Carbohydrate
-import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Health
-import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Meal
-import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Medication
-import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Tester
+import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.*
 import no.nordicsemi.android.ble.data.Data
+import no.nordicsemi.android.gls.data.*
 import no.nordicsemi.android.gls.data.CarbohydrateId
 import no.nordicsemi.android.gls.data.ConcentrationUnit
-import no.nordicsemi.android.gls.data.GLSDataHolder
-import no.nordicsemi.android.gls.data.GLSRecord
 import no.nordicsemi.android.gls.data.HealthStatus
-import no.nordicsemi.android.gls.data.MeasurementContext
 import no.nordicsemi.android.gls.data.MedicationId
 import no.nordicsemi.android.gls.data.MedicationUnit
-import no.nordicsemi.android.gls.data.RequestStatus
 import no.nordicsemi.android.gls.data.TestType
 import no.nordicsemi.android.gls.data.TypeOfMeal
 import no.nordicsemi.android.log.LogContract
@@ -137,7 +130,7 @@ internal class GLSManager @Inject constructor(
                             glucoseConcentration = glucoseConcentration ?: 0f,
                             unit = unit?.let { ConcentrationUnit.create(it) }
                                 ?: ConcentrationUnit.UNIT_KGPL,
-                            type = type ?: 0,
+                            type = RecordType.createOrNull(type),
                             sampleLocation = sampleLocation ?: 0,
                             status = status?.value ?: 0
                         )
@@ -213,8 +206,6 @@ internal class GLSManager @Inject constructor(
                         device: BluetoothDevice,
                         numberOfRecords: Int
                     ) {
-                        //TODO("Probably not needed")
-//                        mCallbacks!!.onNumberOfRecordsRequested(device, numberOfRecords)
                         if (numberOfRecords > 0) {
                             if (dataHolder.records().isNotEmpty()) {
                                 val sequenceNumber = dataHolder.records().last().sequenceNumber + 1 //TODO check if correct
@@ -232,9 +223,8 @@ internal class GLSManager @Inject constructor(
                                 )
                                     .enqueue()
                             }
-                        } else {
-                            dataHolder.setRequestStatus(RequestStatus.SUCCESS)
                         }
+                        dataHolder.setRequestStatus(RequestStatus.SUCCESS)
                     }
 
                     override fun onRecordAccessOperationError(

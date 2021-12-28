@@ -2,4 +2,25 @@
 <resources>
     <string name="gls_title">GLS</string>
     <string name="gls_no_records_info">There is no data available. This peripheral downloads data only when requested. Please select what kind of data you want to download by clicking one from the above buttons.</string>
+
+    <string name="gls_timestamp">%1$te %1$tb %1$tY at %1$tT</string>
+
+    <string name="gls_type_reserved">Reserved for future use</string>
+    <string name="gls_type_capillary_whole_blood">Capillary Whole blood</string>
+    <string name="gls_type_capillary_plasma">Capillary Plasma</string>
+    <string name="gls_type_venous_whole_blood">Venous Whole blood</string>
+    <string name="gls_type_venous_plasma">Venous Plasma</string>
+    <string name="gls_type_arterial_whole_blood">Arterial Whole blood</string>
+    <string name="gls_type_arterial_plasma">Arterial Plasma</string>
+    <string name="gls_type_undetermined_whole_blood">Undetermined Whole blood</string>
+    <string name="gls_type_undetermined_plasma">Undetermined Plasma</string>
+    <string name="gls_type_interstitial_fluid">Interstitial Fluid (ISF)</string>
+    <string name="gls_type_control_solution">Control Solution</string>
+
+    <string name="gls_unit_mgpdl">mg/dl</string>
+    <string name="gls_unit_mmolpl">mmol/l</string>
+
+    <string name="gls__working_mode__all">All</string>
+    <string name="gls__working_mode__last">Last</string>
+    <string name="gls__working_mode__first">First</string>
 </resources>
