@@ -19,17 +19,18 @@ import no.nordicsemi.android.theme.view.SectionTitle
 internal fun BPSSensorsReadingView(state: BPSData) {
     ScreenSection {
         Column {
-            SectionTitle(resId = R.drawable.ic_records, title = "Records")
+            SectionTitle(resId = R.drawable.ic_records, title = stringResource(id = R.string.bps_records))
             Spacer(modifier = Modifier.height(16.dp))
             KeyValueField(stringResource(id = R.string.bps_systolic), state.displaySystolic())
             Spacer(modifier = Modifier.height(4.dp))
             KeyValueField(stringResource(id = R.string.bps_diastolic), state.displayDiastolic())
             Spacer(modifier = Modifier.height(4.dp))
             KeyValueField(stringResource(id = R.string.bps_mean), state.displayMeanArterialPressure())
-            Spacer(modifier = Modifier.height(4.dp))
-            KeyValueField(stringResource(id = R.string.bps_pulse), state.displayPulse())
-            Spacer(modifier = Modifier.height(4.dp))
-            KeyValueField(stringResource(id = R.string.bps_time_data), state.displayTimeData())
+
+            state.displayHeartRate()?.let {
+                Spacer(modifier = Modifier.height(4.dp))
+                KeyValueField(stringResource(id = R.string.bps_pulse), it)
+            }
         }
     }
 

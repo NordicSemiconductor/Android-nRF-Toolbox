@@ -14,25 +14,4 @@ data class BPSData(
     val systolic: Float = 0f,
     val diastolic: Float = 0f,
     val meanArterialPressure: Float = 0f,
-) {
-
-    fun displaySystolic(): String {
-        return "$systolic"
-    }
-
-    fun displayDiastolic(): String {
-        return "$diastolic"
-    }
-
-    fun displayMeanArterialPressure(): String {
-        return "$meanArterialPressure"
-    }
-
-    fun displayPulse(): String {
-        return "$pulseRate"
-    }
-
-    fun displayTimeData(): String {
-        return ""
-    }
-}
+)

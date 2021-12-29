@@ -33,10 +33,10 @@ import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 
 /** Running Speed and Cadence Measurement service UUID  */
-val RSCS_SERVICE_UUID: UUID = UUID.fromString("00001814-0000-1000-8000-00805f9b34fb")
+val RSCS_SERVICE_UUID: UUID = UUID.fromString("00001814-0000-1000-8000-00805F9B34FB")
 
 /** Running Speed and Cadence Measurement characteristic UUID  */
-private val RSC_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A53-0000-1000-8000-00805f9b34fb")
+private val RSC_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A53-0000-1000-8000-00805F9B34FB")
 
 internal class RSCSManager internal constructor(
     context: Context,

@@ -4,16 +4,7 @@ internal data class PRXData(
     val batteryLevel: Int = 0,
     val localAlarmLevel: AlarmLevel = AlarmLevel.NONE,
     val isRemoteAlarm: Boolean = false
-) {
-
-    fun displayLocalAlarm(): String {
-        return when (localAlarmLevel) {
-            AlarmLevel.NONE -> "none"
-            AlarmLevel.MEDIUM -> "medium"
-            AlarmLevel.HIGH -> "height"
-        }
-    }
-}
+)
 
 internal enum class AlarmLevel(val value: Int) {
     NONE(0x00),

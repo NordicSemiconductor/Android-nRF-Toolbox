@@ -1,6 +1,5 @@
 package no.nordicsemi.android.bps.view
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -21,8 +20,6 @@ internal fun BPSContentView(state: BPSData, onEvent: (BPSScreenViewEvent) -> Uni
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(16.dp)
     ) {
-        Log.d("AAATESTAAA", "state: $state")
-
         BPSSensorsReadingView(state = state)
 
         Spacer(modifier = Modifier.height(16.dp))

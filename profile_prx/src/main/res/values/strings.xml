@@ -2,6 +2,16 @@
 <resources>
     <string name="prx_title">Proximity</string>
 
+    <string name="prx_silent_me">SILENT ME</string>
+    <string name="prx_find_me">FIND ME</string>
+
+    <string name="prx_records">Records</string>
+    <string name="prx_settings">Settings</string>
+
+    <string name="prx_alarm_level_none">none</string>
+    <string name="prx_alarm_level_medium">medium</string>
+    <string name="prx_alarm_level_height">height</string>
+
     <string name="prx_is_remote_alarm">Remote alarm</string>
     <string name="prx_local_alarm_level">Local alarm level</string>
 </resources>

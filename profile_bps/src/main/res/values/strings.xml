@@ -2,9 +2,13 @@
 <resources>
     <string name="bps_title">Blood pressure</string>
 
+    <string name="bps_records">Records</string>
+
     <string name="bps_systolic">Systolic</string>
     <string name="bps_diastolic">Diastolic</string>
-    <string name="bps_mean">Mean ap</string>
-    <string name="bps_pulse">Pulse</string>
+    <string name="bps_mean">Mean AP</string>
+    <string name="bps_pulse">Heart rate</string>
     <string name="bps_time_data">Time and Date</string>
+
+    <string name="bps_blood_pressure">%.0f kPa</string>
 </resources>
