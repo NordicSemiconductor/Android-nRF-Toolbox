@@ -1,21 +1,36 @@
 package no.nordicsemi.android.cgms.data
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 internal class CGMDataHolder @Inject constructor() {
 
-    private val _data = MutableStateFlow<CGMEvent>(Idle)
-    val data: StateFlow<CGMEvent> = _data
+    private val _data = MutableStateFlow(CGMData())
+    val data: StateFlow<CGMData> = _data.asStateFlow()
 
-    fun emitNewEvent(event: CGMEvent) {
-        _data.tryEmit(event)
+    private val _command = MutableSharedFlow<WorkingMode>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_LATEST)
+    val command = _command.asSharedFlow()
+
+    fun emitNewBatteryLevel(batterLevel: Int) {
+        _data.tryEmit(_data.value.copy(batteryLevel = batterLevel))
+    }
+
+    fun emitNewRecords(records: List<CGMRecord>) {
+        _data.tryEmit(_data.value.copy(records = records))
+    }
+
+    fun setRequestStatus(requestStatus: RequestStatus) {
+        _data.tryEmit(_data.value.copy(requestStatus = requestStatus))
+    }
+
+    fun requestNewWorkingMode(workingMode: WorkingMode) {
+        _command.tryEmit(workingMode)
     }
 
     fun clear() {
-        _data.tryEmit(Idle)
+        _data.tryEmit(CGMData())
     }
 }

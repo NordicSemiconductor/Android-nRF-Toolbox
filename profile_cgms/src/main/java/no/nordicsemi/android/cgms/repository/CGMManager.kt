@@ -39,16 +39,7 @@ import no.nordicsemi.android.ble.common.profile.RecordAccessControlPointCallback
 import no.nordicsemi.android.ble.common.profile.cgm.CGMSpecificOpsControlPointCallback
 import no.nordicsemi.android.ble.common.profile.cgm.CGMTypes
 import no.nordicsemi.android.ble.data.Data
-import no.nordicsemi.android.cgms.data.CGMDataHolder
-import no.nordicsemi.android.cgms.data.CGMRecord
-import no.nordicsemi.android.cgms.data.OnCGMValueReceived
-import no.nordicsemi.android.cgms.data.OnDataSetCleared
-import no.nordicsemi.android.cgms.data.OnNumberOfRecordsRequested
-import no.nordicsemi.android.cgms.data.OnOperationAborted
-import no.nordicsemi.android.cgms.data.OnOperationCompleted
-import no.nordicsemi.android.cgms.data.OnOperationFailed
-import no.nordicsemi.android.cgms.data.OnOperationNotSupported
-import no.nordicsemi.android.cgms.data.OnOperationStarted
+import no.nordicsemi.android.cgms.data.*
 import no.nordicsemi.android.log.LogContract
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
@@ -90,8 +81,9 @@ internal class CGMManager(
      * times of samples.
      */
     private var sessionStartTime: Long = 0
+
     override fun onBatteryLevelChanged(batteryLevel: Int) {
-        TODO("Not yet implemented")
+        dataHolder.emitNewBatteryLevel(batteryLevel)
     }
 
     override fun getGattCallback(): BatteryManagerGattCallback {
@@ -156,14 +148,6 @@ internal class CGMManager(
             // Set notification and indication mCallbacks
             setNotificationCallback(cgmMeasurementCharacteristic)
                 .with(object : ContinuousGlucoseMeasurementDataCallback() {
-                    override fun onDataReceived(device: BluetoothDevice, data: Data) {
-                        log(
-                            LogContract.Log.Level.APPLICATION,
-                            "\"" + CGMMeasurementParser.parse(data).toString() + "\" received"
-                        )
-                        super.onDataReceived(device, data)
-                    }
-
                     override fun onContinuousGlucoseMeasurementReceived(
                         device: BluetoothDevice,
                         glucoseConcentration: Float,
@@ -184,7 +168,7 @@ internal class CGMManager(
                             sessionStartTime + timeOffset * 60000L // Sequence number is in minutes since Start Session
                         val record = CGMRecord(timeOffset, glucoseConcentration, timestamp)
                         records.put(record.sequenceNumber, record)
-                        dataHolder.emitNewEvent(OnCGMValueReceived(record))
+                        dataHolder.emitNewRecords(records.toList())
                     }
 
                     override fun onContinuousGlucoseMeasurementReceivedWithCrcError(
@@ -199,15 +183,6 @@ internal class CGMManager(
                 })
             setIndicationCallback(cgmSpecificOpsControlPointCharacteristic)
                 .with(object : CGMSpecificOpsControlPointDataCallback() {
-                    override fun onDataReceived(device: BluetoothDevice, data: Data) {
-                        log(
-                            LogContract.Log.Level.APPLICATION,
-                            "\"" + CGMSpecificOpsControlPointParser.parse(data)
-                                .toString() + "\" received"
-                        )
-                        super.onDataReceived(device, data)
-                    }
-
                     @SuppressLint("SwitchIntDef")
                     override fun onCGMSpecificOpsOperationCompleted(
                         device: BluetoothDevice,
@@ -254,27 +229,16 @@ internal class CGMManager(
                 })
             setIndicationCallback(recordAccessControlPointCharacteristic)
                 .with(object : RecordAccessControlPointDataCallback() {
-                    override fun onDataReceived(device: BluetoothDevice, data: Data) {
-                        log(
-                            LogContract.Log.Level.APPLICATION,
-                            "\"" + RecordAccessControlPointParser.parse(data)
-                                .toString() + "\" received"
-                        )
-                        super.onDataReceived(device, data)
-                    }
-
                     @SuppressLint("SwitchIntDef")
                     override fun onRecordAccessOperationCompleted(
                         device: BluetoothDevice,
                         @RecordAccessControlPointCallback.RACPOpCode requestCode: Int
                     ) {
                         when (requestCode) {
-                            RecordAccessControlPointCallback.RACP_OP_CODE_ABORT_OPERATION -> dataHolder.emitNewEvent(
-                                OnOperationAborted
-                            )
+                            RecordAccessControlPointCallback.RACP_OP_CODE_ABORT_OPERATION -> dataHolder.setRequestStatus(RequestStatus.ABORTED)
                             else -> {
                                 recordAccessRequestInProgress = false
-                                dataHolder.emitNewEvent(OnOperationCompleted)
+                                dataHolder.setRequestStatus(RequestStatus.SUCCESS)
                             }
                         }
                     }
@@ -284,14 +248,13 @@ internal class CGMManager(
                         @RecordAccessControlPointCallback.RACPOpCode requestCode: Int
                     ) {
                         recordAccessRequestInProgress = false
-                        dataHolder.emitNewEvent(OnOperationCompleted)
+                        dataHolder.setRequestStatus(RequestStatus.SUCCESS)
                     }
 
                     override fun onNumberOfRecordsReceived(
                         device: BluetoothDevice,
                         numberOfRecords: Int
                     ) {
-                        dataHolder.emitNewEvent(OnNumberOfRecordsRequested(numberOfRecords))
                         if (numberOfRecords > 0) {
                             if (records.size() > 0) {
                                 val sequenceNumber = records.keyAt(records.size() - 1) + 1
@@ -311,7 +274,7 @@ internal class CGMManager(
                             }
                         } else {
                             recordAccessRequestInProgress = false
-                            dataHolder.emitNewEvent(OnOperationCompleted)
+                            dataHolder.setRequestStatus(RequestStatus.SUCCESS)
                         }
                     }
 
@@ -322,9 +285,9 @@ internal class CGMManager(
                     ) {
                         log(Log.WARN, "Record Access operation failed (error $errorCode)")
                         if (errorCode == RecordAccessControlPointCallback.RACP_ERROR_OP_CODE_NOT_SUPPORTED) {
-                            dataHolder.emitNewEvent(OnOperationNotSupported)
+                            dataHolder.setRequestStatus(RequestStatus.NOT_SUPPORTED)
                         } else {
-                            dataHolder.emitNewEvent(OnOperationFailed)
+                            dataHolder.setRequestStatus(RequestStatus.FAILED)
                         }
                     }
                 })
@@ -361,12 +324,6 @@ internal class CGMManager(
                     cgmSpecificOpsControlPointCharacteristic,
                     CGMSpecificOpsControlPointData.startSession(secured)
                 )
-                    .with { _: BluetoothDevice, data: Data ->
-                        log(
-                            LogContract.Log.Level.APPLICATION,
-                            "\"" + CGMSpecificOpsControlPointParser.parse(data) + "\" sent"
-                        )
-                    }
                     .fail { _: BluetoothDevice?, status: Int ->
                         log(
                             LogContract.Log.Level.ERROR,
@@ -391,7 +348,7 @@ internal class CGMManager(
             return cgmMeasurementCharacteristic != null && cgmSpecificOpsControlPointCharacteristic != null && recordAccessControlPointCharacteristic != null
         }
 
-        override fun onServicesInvalidated() { }
+        override fun onServicesInvalidated() {}
 
         override fun onDeviceDisconnected() {
             super.onDeviceDisconnected()
@@ -415,7 +372,6 @@ internal class CGMManager(
      */
     fun clear() {
         records.clear()
-        dataHolder.emitNewEvent(OnDataSetCleared)
     }
 
     /**
@@ -423,48 +379,32 @@ internal class CGMManager(
      * The data will be returned to Glucose Measurement characteristic as a notification followed by
      * Record Access Control Point indication with status code Success or other in case of error.
      */
-    val lastRecord: Unit
-        get() {
-            if (recordAccessControlPointCharacteristic == null) return
-            clear()
-            dataHolder.emitNewEvent(OnOperationStarted)
-            recordAccessRequestInProgress = true
-            writeCharacteristic(
-                recordAccessControlPointCharacteristic,
-                RecordAccessControlPointData.reportLastStoredRecord()
-            )
-                .with { device: BluetoothDevice, data: Data ->
-                    log(
-                        LogContract.Log.Level.APPLICATION,
-                        "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"
-                    )
-                }
-                .enqueue()
-        }
+    fun requestLastRecord() {
+        if (recordAccessControlPointCharacteristic == null) return
+        clear()
+        dataHolder.setRequestStatus(RequestStatus.PENDING)
+        recordAccessRequestInProgress = true
+        writeCharacteristic(
+            recordAccessControlPointCharacteristic,
+            RecordAccessControlPointData.reportLastStoredRecord()
+        ).enqueue()
+    }
 
     /**
      * Sends the request to obtain the first (oldest) record from glucose device.
      * The data will be returned to Glucose Measurement characteristic as a notification followed by
      * Record Access Control Point indication with status code Success or other in case of error.
      */
-    val firstRecord: Unit
-        get() {
-            if (recordAccessControlPointCharacteristic == null) return
-            clear()
-            dataHolder.emitNewEvent(OnOperationStarted)
-            recordAccessRequestInProgress = true
-            writeCharacteristic(
-                recordAccessControlPointCharacteristic,
-                RecordAccessControlPointData.reportFirstStoredRecord()
-            )
-                .with { _: BluetoothDevice, data: Data ->
-                    log(
-                        LogContract.Log.Level.APPLICATION,
-                        "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"
-                    )
-                }
-                .enqueue()
-        }
+    fun requestFirstRecord() {
+        if (recordAccessControlPointCharacteristic == null) return
+        clear()
+        dataHolder.setRequestStatus(RequestStatus.PENDING)
+        recordAccessRequestInProgress = true
+        writeCharacteristic(
+            recordAccessControlPointCharacteristic,
+            RecordAccessControlPointData.reportFirstStoredRecord()
+        ).enqueue()
+    }
 
     /**
      * Sends abort operation signal to the device.
@@ -474,14 +414,7 @@ internal class CGMManager(
         writeCharacteristic(
             recordAccessControlPointCharacteristic,
             RecordAccessControlPointData.abortOperation()
-        )
-            .with { _: BluetoothDevice, data: Data ->
-                log(
-                    LogContract.Log.Level.APPLICATION,
-                    "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"
-                )
-            }
-            .enqueue()
+        ).enqueue()
     }
 
     /**
@@ -490,24 +423,16 @@ internal class CGMManager(
      * The data will be returned to Glucose Measurement characteristic as a notification followed by
      * Record Access Control Point indication with status code Success or other in case of error.
      */
-    val allRecords: Unit
-        get() {
-            if (recordAccessControlPointCharacteristic == null) return
-            clear()
-            dataHolder.emitNewEvent(OnOperationStarted)
-            recordAccessRequestInProgress = true
-            writeCharacteristic(
-                recordAccessControlPointCharacteristic,
-                RecordAccessControlPointData.reportNumberOfAllStoredRecords()
-            )
-                .with { _: BluetoothDevice, data: Data ->
-                    log(
-                        LogContract.Log.Level.APPLICATION,
-                        "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"
-                    )
-                }
-                .enqueue()
-        }
+    fun requestAllRecords() {
+        if (recordAccessControlPointCharacteristic == null) return
+        clear()
+        dataHolder.setRequestStatus(RequestStatus.PENDING)
+        recordAccessRequestInProgress = true
+        writeCharacteristic(
+            recordAccessControlPointCharacteristic,
+            RecordAccessControlPointData.reportNumberOfAllStoredRecords()
+        ).enqueue()
+    }
 
     /**
      * Sends the request to obtain all records from glucose device. Initially we want to notify the
@@ -518,9 +443,9 @@ internal class CGMManager(
     fun refreshRecords() {
         if (recordAccessControlPointCharacteristic == null) return
         if (records.size() == 0) {
-            allRecords
+            requestAllRecords()
         } else {
-            dataHolder.emitNewEvent(OnOperationStarted)
+            dataHolder.setRequestStatus(RequestStatus.PENDING)
 
             // Obtain the last sequence number
             val sequenceNumber = records.keyAt(records.size() - 1) + 1
@@ -528,14 +453,7 @@ internal class CGMManager(
             writeCharacteristic(
                 recordAccessControlPointCharacteristic,
                 RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber)
-            )
-                .with { _: BluetoothDevice, data: Data ->
-                    log(
-                        LogContract.Log.Level.APPLICATION,
-                        "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"
-                    )
-                }
-                .enqueue()
+            ).enqueue()
             // Info:
             // Operators OPERATOR_GREATER_THEN_OR_EQUAL, OPERATOR_LESS_THEN_OR_EQUAL and OPERATOR_RANGE are not supported by the CGMS sample from SDK
             // The "Operation not supported" response will be received
@@ -550,17 +468,10 @@ internal class CGMManager(
     fun deleteAllRecords() {
         if (recordAccessControlPointCharacteristic == null) return
         clear()
-        dataHolder.emitNewEvent(OnOperationStarted)
+        dataHolder.setRequestStatus(RequestStatus.PENDING)
         writeCharacteristic(
             recordAccessControlPointCharacteristic,
             RecordAccessControlPointData.deleteAllStoredRecords()
-        )
-            .with { _: BluetoothDevice, data: Data ->
-                log(
-                    LogContract.Log.Level.APPLICATION,
-                    "\"" + RecordAccessControlPointParser.parse(data) + "\" sent"
-                )
-            }
-            .enqueue()
+        ).enqueue()
     }
 }

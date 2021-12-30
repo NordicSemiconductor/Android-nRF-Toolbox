@@ -9,6 +9,7 @@ dependencies {
     implementation libs.nordic.ble.common
 
     implementation libs.nordic.log
+    implementation libs.nordic.theme
 
     implementation libs.bundles.compose
     implementation libs.androidx.core

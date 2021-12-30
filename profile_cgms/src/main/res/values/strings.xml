@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cgms_title">CGMS</string>
+    <string name="cgms_no_records_info">There is no data available. Every record is created once a minute. Please wait.</string>
+
+    <string name="cgms__working_mode__all">All</string>
+    <string name="cgms__working_mode__last">Last</string>
+    <string name="cgms__working_mode__first">First</string>
+
+    <string name="cgms_sequence_number">Sequence number: %d</string>
+    <string name="cgms_value_unit">%.2f mg/dL</string>
+</resources>

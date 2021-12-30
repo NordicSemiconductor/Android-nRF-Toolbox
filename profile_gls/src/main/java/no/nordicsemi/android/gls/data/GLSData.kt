@@ -5,13 +5,3 @@ internal data class GLSData(
     val batteryLevel: Int = 0,
     val requestStatus: RequestStatus = RequestStatus.IDLE
 )
-
-internal enum class WorkingMode {
-    ALL,
-    LAST,
-    FIRST
-}
-
-internal enum class RequestStatus {
-    IDLE, PENDING, SUCCESS, ABORTED, FAILED, NOT_SUPPORTED
-}
