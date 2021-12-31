@@ -60,6 +60,7 @@ dependencies {
     implementation project(':profile_hts')
     implementation project(':profile_prx')
     implementation project(':profile_rscs')
+    implementation project(':profile_uart')
 
     implementation project(":lib_theme")
     implementation project(":lib_utils")

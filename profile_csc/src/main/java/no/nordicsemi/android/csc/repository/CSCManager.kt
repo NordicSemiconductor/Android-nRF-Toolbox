@@ -19,7 +19,7 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package no.nordicsemi.android.csc.service
+package no.nordicsemi.android.csc.repository
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
@@ -30,7 +30,7 @@ import androidx.annotation.FloatRange
 import no.nordicsemi.android.ble.common.callback.csc.CyclingSpeedAndCadenceMeasurementDataCallback
 import no.nordicsemi.android.ble.data.Data
 import no.nordicsemi.android.csc.data.CSCDataHolder
-import no.nordicsemi.android.csc.service.CSCMeasurementParser.parse
+import no.nordicsemi.android.csc.repository.CSCMeasurementParser.parse
 import no.nordicsemi.android.csc.view.CSCSettings
 import no.nordicsemi.android.log.LogContract
 import no.nordicsemi.android.service.BatteryManager

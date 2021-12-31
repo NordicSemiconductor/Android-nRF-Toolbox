@@ -1,4 +1,4 @@
-package no.nordicsemi.android.csc.service
+package no.nordicsemi.android.csc.repository
 
 import dagger.hilt.android.AndroidEntryPoint
 import no.nordicsemi.android.csc.data.CSCDataHolder

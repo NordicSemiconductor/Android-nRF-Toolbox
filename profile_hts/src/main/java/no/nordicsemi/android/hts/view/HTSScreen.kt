@@ -10,7 +10,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.hts.R
 import no.nordicsemi.android.hts.data.HTSData
-import no.nordicsemi.android.hts.service.HTSService
+import no.nordicsemi.android.hts.repository.HTSService
 import no.nordicsemi.android.hts.viewmodel.HTSViewModel
 import no.nordicsemi.android.theme.view.BackIconAppBar
 import no.nordicsemi.android.utils.isServiceRunning

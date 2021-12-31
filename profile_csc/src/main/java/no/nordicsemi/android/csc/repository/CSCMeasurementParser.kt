@@ -19,55 +19,51 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package no.nordicsemi.android.hts.service
+package no.nordicsemi.android.csc.repository
 
 import no.nordicsemi.android.ble.data.Data
-import java.util.*
 
-private const val TEMPERATURE_UNIT_FLAG: Byte = 0x01 // 1 bit
-private const val TIMESTAMP_FLAG: Byte = 0x02 // 1 bits
-private const val TEMPERATURE_TYPE_FLAG: Byte = 0x04 // 1 bit
+object CSCMeasurementParser {
 
-internal object HTSTemperatureMeasurementParser {
+    private const val WHEEL_REV_DATA_PRESENT: Byte = 0x01 // 1 bit
+    private const val CRANK_REV_DATA_PRESENT: Byte = 0x02 // 1 bit
 
-    fun parse(data: Data): String {
+    @JvmStatic
+	fun parse(data: Data): String {
         var offset = 0
-        val flags = data.getIntValue(Data.FORMAT_UINT8, offset++)!!
-
-        /*
-		 * false 	Temperature is in Celsius degrees 
-		 * true 	Temperature is in Fahrenheit degrees 
-		 */
-        val fahrenheit = flags and TEMPERATURE_UNIT_FLAG.toInt() > 0
-
-        /*
-		 * false 	No Timestamp in the packet
-		 * true 	There is a timestamp information
-		 */
-        val timestampIncluded = flags and TIMESTAMP_FLAG.toInt() > 0
-
-        /*
-		 * false 	Temperature type is not included
-		 * true 	Temperature type included in the packet
-		 */
-        val temperatureTypeIncluded = flags and TEMPERATURE_TYPE_FLAG.toInt() > 0
-        val tempValue = data.getFloatValue(Data.FORMAT_FLOAT, offset)!!
-        offset += 4
-        var dateTime: String? = null
-        if (timestampIncluded) {
-            dateTime = HTSDateTimeParser.parse(data, offset)
-            offset += 7
+        val flags = data.getByte(offset)!!.toInt() // 1 byte
+        offset += 1
+        val wheelRevPresent = flags and WHEEL_REV_DATA_PRESENT.toInt() > 0
+        val crankRevPreset = flags and CRANK_REV_DATA_PRESENT.toInt() > 0
+        var wheelRevolutions = 0
+        var lastWheelEventTime = 0
+        if (wheelRevPresent) {
+            wheelRevolutions = data.getIntValue(Data.FORMAT_UINT32, offset)!!
+            offset += 4
+            lastWheelEventTime = data.getIntValue(Data.FORMAT_UINT16, offset)!! // 1/1024 s
+            offset += 2
         }
-        var type: String? = null
-        if (temperatureTypeIncluded) {
-            type = HTSTemperatureTypeParser.parse(data, offset)
-            // offset++;
+        var crankRevolutions = 0
+        var lastCrankEventTime = 0
+        if (crankRevPreset) {
+            crankRevolutions = data.getIntValue(Data.FORMAT_UINT16, offset)!!
+            offset += 2
+            lastCrankEventTime = data.getIntValue(Data.FORMAT_UINT16, offset)!!
+            //offset += 2;
         }
         val builder = StringBuilder()
-        builder.append(String.format(Locale.US, "%.02f", tempValue))
-        if (fahrenheit) builder.append("°F") else builder.append("°C")
-        if (timestampIncluded) builder.append("\nTime: ").append(dateTime)
-        if (temperatureTypeIncluded) builder.append("\nType: ").append(type)
+        if (wheelRevPresent) {
+            builder.append("Wheel rev: ").append(wheelRevolutions).append(",\n")
+            builder.append("Last wheel event time: ").append(lastWheelEventTime).append(",\n")
+        }
+        if (crankRevPreset) {
+            builder.append("Crank rev: ").append(crankRevolutions).append(",\n")
+            builder.append("Last crank event time: ").append(lastCrankEventTime).append(",\n")
+        }
+        if (!wheelRevPresent && !crankRevPreset) {
+            builder.append("No wheel or crank data")
+        }
+        builder.setLength(builder.length - 2)
         return builder.toString()
     }
 }

@@ -1,4 +1,4 @@
-package no.nordicsemi.android.hts.service
+package no.nordicsemi.android.hts.repository
 
 import dagger.hilt.android.AndroidEntryPoint
 import no.nordicsemi.android.hts.data.HTSDataHolder

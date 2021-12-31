@@ -10,7 +10,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.csc.R
 import no.nordicsemi.android.csc.data.CSCData
-import no.nordicsemi.android.csc.service.CSCService
+import no.nordicsemi.android.csc.repository.CSCService
 import no.nordicsemi.android.csc.viewmodel.CSCViewModel
 import no.nordicsemi.android.theme.view.BackIconAppBar
 import no.nordicsemi.android.utils.isServiceRunning

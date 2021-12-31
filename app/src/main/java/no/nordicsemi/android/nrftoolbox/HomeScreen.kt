@@ -5,11 +5,9 @@ import android.os.ParcelUuid
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +29,7 @@ import no.nordicsemi.android.hts.view.HTSScreen
 import no.nordicsemi.android.prx.view.PRXScreen
 import no.nordicsemi.android.rscs.view.RSCSScreen
 import no.nordicsemi.android.theme.view.CloseIconAppBar
+import no.nordicsemi.android.uart.view.UARTScreen
 import no.nordicsemi.ui.scanner.navigation.view.FindDeviceScreen
 
 @Composable
@@ -102,6 +101,18 @@ internal fun HomeScreen() {
             FindDeviceScreen(ParcelUuid(NavDestination.CGMS.uuid)) {
                 deviceHolder.onDeviceSelected(it)
                 CGMScreen { goHome() }
+            }
+        }
+        composable(NavDestination.CGMS.id) {
+            FindDeviceScreen(ParcelUuid(NavDestination.CGMS.uuid)) {
+                deviceHolder.onDeviceSelected(it)
+                CGMScreen { goHome() }
+            }
+        }
+        composable(NavDestination.UART.id) {
+            FindDeviceScreen(ParcelUuid(NavDestination.UART.uuid)) {
+                deviceHolder.onDeviceSelected(it)
+                UARTScreen { goHome() }
             }
         }
     }
@@ -236,6 +247,21 @@ fun HomeView(callback: (NavDestination) -> Unit) {
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            Row(horizontalArrangement = Arrangement.SpaceEvenly) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    FeatureButton(
+                        R.drawable.ic_uart, R.string.uart_module,
+                        R.string.uart_module_full
+                    ) { callback(NavDestination.UART) }
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+            }
         }
     }
 }

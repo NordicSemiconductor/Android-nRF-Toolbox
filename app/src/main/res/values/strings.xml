@@ -15,4 +15,6 @@
     <string name="prx_module_full">Proximity</string>
     <string name="cgm_module">CGMS</string>
     <string name="cgm_module_full">Continuous Glucose</string>
+    <string name="uart_module">UART</string>
+    <string name="uart_module_full">Serial port over BLE</string>
 </resources>

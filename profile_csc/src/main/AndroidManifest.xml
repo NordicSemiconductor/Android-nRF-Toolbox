@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
     <application>
-        <service android:name=".service.CSCService" />
+        <service android:name=".repository.CSCService" />
     </application>
 
 </manifest>
