@@ -260,7 +260,6 @@ fun HomeView(callback: (NavDestination) -> Unit) {
                         R.string.uart_module_full
                     ) { callback(NavDestination.UART) }
                 }
-                Spacer(modifier = Modifier.width(16.dp))
             }
         }
     }

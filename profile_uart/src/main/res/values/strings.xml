@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="uart_title">UART</string>
+
+    <string name="uart_no_macros_info">Please define a macro to send command to the device.</string>
+
+    <string name="uart_input">Macros</string>
+    <string name="uart_output">Output</string>
+
+    <string name="uart_command_field">Command: %s</string>
+
+    <string name="uart_run_macro_description">Run macro</string>
+    <string name="uart_delete_macro_description">Delete macro</string>
+
+    <string name="uart_add_macro">Add macro</string>
+    <string name="uart_output_info">Here will be displayed read value from GATT characteristic.</string>
+
+    <string name="uart_macro_dialog_title">Add macro</string>
+    <string name="uart_macro_dialog_alias">Alias</string>
+    <string name="uart_macro_dialog_command">Command</string>
+    <string name="uart_macro_dialog_confirm">Confirm</string>
+    <string name="uart_macro_dialog_dismiss">Dismiss</string>
+</resources>
