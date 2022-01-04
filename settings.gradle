@@ -7,7 +7,6 @@ dependencyResolutionManagement {
         maven { url 'https://jitpack.io' }
         mavenCentral()
         mavenLocal()
-        jcenter() // Warning: this repository is going to shut down soon
     }
 
     versionCatalogs {
@@ -17,6 +16,7 @@ dependencyResolutionManagement {
             alias('nordic-log').to('no.nordicsemi.android:log:2.3.0')
             alias('nordic-scanner').to('no.nordicsemi.android.support.v18:scanner:1.5.0')
             alias('nordic-ui-scanner').to('no.nordicsemi.android.common:scanner:1.0.0')
+            alias('nordic-dfu').to('no.nordicsemi.android:dfu:1.12.1-beta01')
 
             alias('localbroadcastmanager').to('androidx.localbroadcastmanager:localbroadcastmanager:1.0.0')
             alias('material').to('com.google.android.material:material:1.5.0-beta01')
@@ -95,3 +95,4 @@ if (file('../Android-Common-Libraries').exists()) {
 //    includeBuild('../Android-Scanner-Compat-Library')
 //}
 include ':profile_uart'
+include ':profile_dfu'
