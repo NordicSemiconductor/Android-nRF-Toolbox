@@ -9,7 +9,7 @@ import no.nordicsemi.android.material.you.CircularProgressIndicator
 import no.nordicsemi.dfu.R
 
 @Composable
-internal fun DFUInstallingView(onEvent: (DFUViewEvent) -> Unit) {
+internal fun DFUSummaryView(onEvent: (DFUViewEvent) -> Unit) {
 
     Column {
         CircularProgressIndicator()
@@ -17,11 +17,7 @@ internal fun DFUInstallingView(onEvent: (DFUViewEvent) -> Unit) {
         //todo add percentage indicator
 
         Button(onClick = { onEvent(OnPauseButtonClick) }) {
-            Text(text = stringResource(id = R.string.dfu_pause))
-        }
-
-        Button(onClick = { onEvent(OnPauseButtonClick) }) {
-            Text(text = stringResource(id = R.string.dfu_stop))
+            Text(text = stringResource(id = R.string.dfu_install))
         }
     }
 }

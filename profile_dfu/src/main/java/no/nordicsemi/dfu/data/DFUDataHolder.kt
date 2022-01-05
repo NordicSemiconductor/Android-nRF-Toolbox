@@ -8,7 +8,7 @@ import javax.inject.Singleton
 @Singleton
 internal class DFUDataHolder @Inject constructor() {
 
-    private val _data = MutableStateFlow(DFUData())
+    private val _data = MutableStateFlow(NoFileSelectedState)
     val data: StateFlow<DFUData> = _data
 
 

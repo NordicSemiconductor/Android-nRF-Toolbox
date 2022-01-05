@@ -1,4 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="dfu_title">DFU</string>
+
+    <string name="dfu_done">Done</string>
+    <string name="dfu_pause">Pause</string>
+    <string name="dfu_stop">Stop</string>
+    <string name="dfu_install">Install</string>
+
+    <string name="dfu_select_zip">Select .zip</string>
+    <string name="dfu_select_hex">Select .hex</string>
+
+    <string name="dfu_macro_dialog_title">File managers</string>
+    <string name="dfu_macro_dialog_info">Please select </string>
+    <string name="dfu_macro_dialog_confirm">Confirm</string>
+    <string name="dfu_macro_dialog_dismiss">Dismiss</string>
 </resources>

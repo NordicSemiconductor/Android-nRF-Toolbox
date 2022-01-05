@@ -23,5 +23,6 @@ enum class NavDestination(val id: String, val uuid: UUID?, val pairingRequired: 
     PRX("prx-screen", PRX_SERVICE_UUID, true),
     RSCS("rscs-screen", RSCS_SERVICE_UUID, false),
     CGMS("cgms-screen", CGMS_SERVICE_UUID, false),
-    UART("uart-screen", UART_SERVICE_UUID, false);
+    UART("uart-screen", UART_SERVICE_UUID, false),
+    DFU("dfu-screen", null, false); //todo check characteristic
 }
