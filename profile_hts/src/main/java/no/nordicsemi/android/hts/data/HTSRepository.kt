@@ -6,7 +6,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class HTSDataHolder @Inject constructor() {
+internal class HTSRepository @Inject constructor() {
 
     private val _data = MutableStateFlow(HTSData())
     val data: StateFlow<HTSData> = _data

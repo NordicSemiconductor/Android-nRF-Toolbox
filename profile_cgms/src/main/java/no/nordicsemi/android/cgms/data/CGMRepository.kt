@@ -6,7 +6,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class CGMDataHolder @Inject constructor() {
+internal class CGMRepository @Inject constructor() {
 
     private val _data = MutableStateFlow(CGMData())
     val data: StateFlow<CGMData> = _data.asStateFlow()

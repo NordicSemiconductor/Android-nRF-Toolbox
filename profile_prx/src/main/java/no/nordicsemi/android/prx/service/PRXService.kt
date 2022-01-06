@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.prx.data.AlarmLevel
 import no.nordicsemi.android.prx.data.DisableAlarm
 import no.nordicsemi.android.prx.data.EnableAlarm
-import no.nordicsemi.android.prx.data.PRXDataHolder
+import no.nordicsemi.android.prx.data.PRXRepository
 import no.nordicsemi.android.service.ForegroundBleService
 import no.nordicsemi.android.utils.exhaustive
 import javax.inject.Inject
@@ -16,7 +16,7 @@ import javax.inject.Inject
 internal class PRXService : ForegroundBleService() {
 
     @Inject
-    lateinit var dataHolder: PRXDataHolder
+    lateinit var dataHolder: PRXRepository
 
     @Inject
     lateinit var alarmHandler: AlarmHandler

@@ -54,7 +54,7 @@ abstract class BleProfileService : LifecycleService() {
      * @return bluetooth device
      */
     private val bluetoothDevice: BluetoothDevice by lazy {
-        bluetoothDeviceHolder.device ?: throw IllegalArgumentException(
+        bluetoothDeviceHolder.device?.device ?: throw IllegalArgumentException(
             "No device associated with the application."
         )
     }

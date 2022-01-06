@@ -8,7 +8,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class BPSDataHolder @Inject constructor() {
+internal class BPSRepository @Inject constructor() {
 
     private val _data = MutableStateFlow(BPSData())
     val data: StateFlow<BPSData> = _data

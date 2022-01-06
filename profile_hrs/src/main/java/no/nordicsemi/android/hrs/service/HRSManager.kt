@@ -31,7 +31,7 @@ import no.nordicsemi.android.ble.common.callback.hr.BodySensorLocationDataCallba
 import no.nordicsemi.android.ble.common.callback.hr.HeartRateMeasurementDataCallback
 import no.nordicsemi.android.ble.common.profile.hr.BodySensorLocation
 import no.nordicsemi.android.ble.data.Data
-import no.nordicsemi.android.hrs.data.HRSDataHolder
+import no.nordicsemi.android.hrs.data.HRSRepository
 import no.nordicsemi.android.log.LogContract
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
@@ -46,7 +46,7 @@ private val HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A
  * All operations required to connect to device with BLE Heart Rate Service and reading
  * heart rate values are performed here.
  */
-internal class HRSManager(context: Context, private val dataHolder: HRSDataHolder) : BatteryManager(context) {
+internal class HRSManager(context: Context, private val dataHolder: HRSRepository) : BatteryManager(context) {
 
     private var heartRateCharacteristic: BluetoothGattCharacteristic? = null
     private var bodySensorLocationCharacteristic: BluetoothGattCharacteristic? = null

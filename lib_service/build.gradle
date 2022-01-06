@@ -6,6 +6,7 @@ dependencies {
 
     implementation libs.nordic.ble.common
     implementation libs.nordic.log
+    implementation libs.nordic.ui.scanner
 
     implementation libs.lifecycle.service
     implementation libs.localbroadcastmanager

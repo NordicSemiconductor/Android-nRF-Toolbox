@@ -7,7 +7,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class CSCDataHolder @Inject constructor() {
+internal class CSCRepository @Inject constructor() {
 
     private val _data = MutableStateFlow(CSCData())
     val data: StateFlow<CSCData> = _data

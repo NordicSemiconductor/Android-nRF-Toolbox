@@ -9,7 +9,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class UARTDataHolder @Inject constructor() {
+internal class UARTRepository @Inject constructor() {
 
     private val _data = MutableStateFlow(UARTData())
     val data = _data.asStateFlow()

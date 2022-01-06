@@ -33,7 +33,7 @@ import no.nordicsemi.android.ble.common.data.alert.AlertLevelData
 import no.nordicsemi.android.ble.data.Data
 import no.nordicsemi.android.ble.error.GattError
 import no.nordicsemi.android.log.LogContract
-import no.nordicsemi.android.prx.data.PRXDataHolder
+import no.nordicsemi.android.prx.data.PRXRepository
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 
@@ -48,7 +48,7 @@ val ALERT_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A06-0000-1000-8000-0
 
 internal class PRXManager(
     context: Context,
-    private val dataHolder: PRXDataHolder
+    private val dataHolder: PRXRepository
 ) : BatteryManager(context) {
 
     // Client characteristics.

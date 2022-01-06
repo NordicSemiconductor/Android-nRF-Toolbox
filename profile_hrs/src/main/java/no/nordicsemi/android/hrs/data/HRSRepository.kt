@@ -6,7 +6,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class HRSDataHolder @Inject constructor() {
+internal class HRSRepository @Inject constructor() {
 
     private val _data = MutableStateFlow(HRSData())
     val data: StateFlow<HRSData> = _data

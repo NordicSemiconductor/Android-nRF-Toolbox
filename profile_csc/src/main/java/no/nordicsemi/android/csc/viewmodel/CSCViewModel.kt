@@ -1,7 +1,7 @@
 package no.nordicsemi.android.csc.viewmodel
 
 import dagger.hilt.android.lifecycle.HiltViewModel
-import no.nordicsemi.android.csc.data.CSCDataHolder
+import no.nordicsemi.android.csc.data.CSCRepository
 import no.nordicsemi.android.csc.view.CSCViewEvent
 import no.nordicsemi.android.csc.view.OnCloseSelectWheelSizeDialog
 import no.nordicsemi.android.csc.view.OnDisconnectButtonClick
@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class CSCViewModel @Inject constructor(
-    private val dataHolder: CSCDataHolder
+    private val dataHolder: CSCRepository
 ) : CloseableViewModel() {
 
     val state = dataHolder.data

@@ -9,7 +9,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class PRXDataHolder @Inject constructor() {
+internal class PRXRepository @Inject constructor() {
 
     private val _data = MutableStateFlow(PRXData())
     val data: StateFlow<PRXData> = _data

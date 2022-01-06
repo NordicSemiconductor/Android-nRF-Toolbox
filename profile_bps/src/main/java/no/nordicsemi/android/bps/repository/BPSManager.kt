@@ -31,7 +31,7 @@ import no.nordicsemi.android.ble.common.callback.bps.BloodPressureMeasurementDat
 import no.nordicsemi.android.ble.common.callback.bps.IntermediateCuffPressureDataCallback
 import no.nordicsemi.android.ble.common.profile.bp.BloodPressureTypes
 import no.nordicsemi.android.ble.data.Data
-import no.nordicsemi.android.bps.data.BPSDataHolder
+import no.nordicsemi.android.bps.data.BPSRepository
 import no.nordicsemi.android.log.LogContract
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
@@ -50,7 +50,7 @@ private val ICP_CHARACTERISTIC_UUID = UUID.fromString("00002A36-0000-1000-8000-0
 @Singleton
 internal class BPSManager @Inject constructor(
     @ApplicationContext context: Context,
-    private val dataHolder: BPSDataHolder
+    private val dataHolder: BPSRepository
 ) : BatteryManager(context) {
 
     private var bpmCharacteristic: BluetoothGattCharacteristic? = null

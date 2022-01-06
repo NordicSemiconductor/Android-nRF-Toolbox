@@ -279,11 +279,13 @@ fun HomeView(callback: (NavDestination) -> Unit) {
                     contentAlignment = Alignment.Center
                 ) {
                     FeatureButton(
-                        R.drawable.ic_uart, R.string.uart_module,
+                        R.drawable.ic_dfu, R.string.dfu_module,
                         R.string.uart_module_full
                     ) { callback(NavDestination.DFU) }
                 }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

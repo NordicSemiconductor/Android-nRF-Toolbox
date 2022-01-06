@@ -57,7 +57,7 @@ private val RACP_UUID = UUID.fromString("00002A52-0000-1000-8000-00805f9b34fb")
 
 internal class CGMManager(
     context: Context,
-    private val dataHolder: CGMDataHolder
+    private val repository: CGMRepository
 ) : BatteryManager(context) {
 
     private var cgmStatusCharacteristic: BluetoothGattCharacteristic? = null
@@ -83,7 +83,7 @@ internal class CGMManager(
     private var sessionStartTime: Long = 0
 
     override fun onBatteryLevelChanged(batteryLevel: Int) {
-        dataHolder.emitNewBatteryLevel(batteryLevel)
+        repository.emitNewBatteryLevel(batteryLevel)
     }
 
     override fun getGattCallback(): BatteryManagerGattCallback {
@@ -168,7 +168,7 @@ internal class CGMManager(
                             sessionStartTime + timeOffset * 60000L // Sequence number is in minutes since Start Session
                         val record = CGMRecord(timeOffset, glucoseConcentration, timestamp)
                         records.put(record.sequenceNumber, record)
-                        dataHolder.emitNewRecords(records.toList())
+                        repository.emitNewRecords(records.toList())
                     }
 
                     override fun onContinuousGlucoseMeasurementReceivedWithCrcError(
@@ -235,10 +235,10 @@ internal class CGMManager(
                         @RecordAccessControlPointCallback.RACPOpCode requestCode: Int
                     ) {
                         when (requestCode) {
-                            RecordAccessControlPointCallback.RACP_OP_CODE_ABORT_OPERATION -> dataHolder.setRequestStatus(RequestStatus.ABORTED)
+                            RecordAccessControlPointCallback.RACP_OP_CODE_ABORT_OPERATION -> repository.setRequestStatus(RequestStatus.ABORTED)
                             else -> {
                                 recordAccessRequestInProgress = false
-                                dataHolder.setRequestStatus(RequestStatus.SUCCESS)
+                                repository.setRequestStatus(RequestStatus.SUCCESS)
                             }
                         }
                     }
@@ -248,7 +248,7 @@ internal class CGMManager(
                         @RecordAccessControlPointCallback.RACPOpCode requestCode: Int
                     ) {
                         recordAccessRequestInProgress = false
-                        dataHolder.setRequestStatus(RequestStatus.SUCCESS)
+                        repository.setRequestStatus(RequestStatus.SUCCESS)
                     }
 
                     override fun onNumberOfRecordsReceived(
@@ -274,7 +274,7 @@ internal class CGMManager(
                             }
                         } else {
                             recordAccessRequestInProgress = false
-                            dataHolder.setRequestStatus(RequestStatus.SUCCESS)
+                            repository.setRequestStatus(RequestStatus.SUCCESS)
                         }
                     }
 
@@ -285,9 +285,9 @@ internal class CGMManager(
                     ) {
                         log(Log.WARN, "Record Access operation failed (error $errorCode)")
                         if (errorCode == RecordAccessControlPointCallback.RACP_ERROR_OP_CODE_NOT_SUPPORTED) {
-                            dataHolder.setRequestStatus(RequestStatus.NOT_SUPPORTED)
+                            repository.setRequestStatus(RequestStatus.NOT_SUPPORTED)
                         } else {
-                            dataHolder.setRequestStatus(RequestStatus.FAILED)
+                            repository.setRequestStatus(RequestStatus.FAILED)
                         }
                     }
                 })
@@ -382,7 +382,7 @@ internal class CGMManager(
     fun requestLastRecord() {
         if (recordAccessControlPointCharacteristic == null) return
         clear()
-        dataHolder.setRequestStatus(RequestStatus.PENDING)
+        repository.setRequestStatus(RequestStatus.PENDING)
         recordAccessRequestInProgress = true
         writeCharacteristic(
             recordAccessControlPointCharacteristic,
@@ -398,7 +398,7 @@ internal class CGMManager(
     fun requestFirstRecord() {
         if (recordAccessControlPointCharacteristic == null) return
         clear()
-        dataHolder.setRequestStatus(RequestStatus.PENDING)
+        repository.setRequestStatus(RequestStatus.PENDING)
         recordAccessRequestInProgress = true
         writeCharacteristic(
             recordAccessControlPointCharacteristic,
@@ -426,7 +426,7 @@ internal class CGMManager(
     fun requestAllRecords() {
         if (recordAccessControlPointCharacteristic == null) return
         clear()
-        dataHolder.setRequestStatus(RequestStatus.PENDING)
+        repository.setRequestStatus(RequestStatus.PENDING)
         recordAccessRequestInProgress = true
         writeCharacteristic(
             recordAccessControlPointCharacteristic,
@@ -445,7 +445,7 @@ internal class CGMManager(
         if (records.size() == 0) {
             requestAllRecords()
         } else {
-            dataHolder.setRequestStatus(RequestStatus.PENDING)
+            repository.setRequestStatus(RequestStatus.PENDING)
 
             // Obtain the last sequence number
             val sequenceNumber = records.keyAt(records.size() - 1) + 1
@@ -468,7 +468,7 @@ internal class CGMManager(
     fun deleteAllRecords() {
         if (recordAccessControlPointCharacteristic == null) return
         clear()
-        dataHolder.setRequestStatus(RequestStatus.PENDING)
+        repository.setRequestStatus(RequestStatus.PENDING)
         writeCharacteristic(
             recordAccessControlPointCharacteristic,
             RecordAccessControlPointData.deleteAllStoredRecords()

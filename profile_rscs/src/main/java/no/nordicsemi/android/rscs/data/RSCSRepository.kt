@@ -6,7 +6,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class RSCSDataHolder @Inject constructor() {
+internal class RSCSRepository @Inject constructor() {
 
     private val _data = MutableStateFlow(RSCSData())
     val data: StateFlow<RSCSData> = _data

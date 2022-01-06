@@ -1,7 +1,7 @@
 package no.nordicsemi.android.bps.viewmodel
 
 import dagger.hilt.android.lifecycle.HiltViewModel
-import no.nordicsemi.android.bps.data.BPSDataHolder
+import no.nordicsemi.android.bps.data.BPSRepository
 import no.nordicsemi.android.bps.repository.BPSManager
 import no.nordicsemi.android.bps.view.BPSScreenViewEvent
 import no.nordicsemi.android.bps.view.DisconnectEvent
@@ -14,7 +14,7 @@ import javax.inject.Inject
 internal class BPSViewModel @Inject constructor(
     private val bpsManager: BPSManager,
     private val deviceHolder: SelectedBluetoothDeviceHolder,
-    private val dataHolder: BPSDataHolder
+    private val dataHolder: BPSRepository
 ) : CloseableViewModel() {
 
     val state = dataHolder.data
@@ -27,7 +27,7 @@ internal class BPSViewModel @Inject constructor(
 
     fun connectDevice() {
         deviceHolder.device?.let {
-            bpsManager.connect(it)
+            bpsManager.connect(it.device)
                 .useAutoConnect(false)
                 .retry(3, 100)
                 .enqueue()

@@ -13,6 +13,7 @@ dependencies {
 
     implementation libs.nordic.log
     implementation libs.nordic.dfu
+    implementation libs.nordic.ui.scanner
 
     implementation libs.bundles.compose
     implementation libs.androidx.core

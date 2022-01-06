@@ -29,7 +29,7 @@ import no.nordicsemi.android.ble.common.callback.ht.TemperatureMeasurementDataCa
 import no.nordicsemi.android.ble.common.profile.ht.TemperatureType
 import no.nordicsemi.android.ble.common.profile.ht.TemperatureUnit
 import no.nordicsemi.android.ble.data.Data
-import no.nordicsemi.android.hts.data.HTSDataHolder
+import no.nordicsemi.android.hts.data.HTSRepository
 import no.nordicsemi.android.log.LogContract
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
@@ -44,7 +44,7 @@ private val HT_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A1C-0000-
  */
 internal class HTSManager internal constructor(
     context: Context,
-    private val dataHolder: HTSDataHolder
+    private val dataHolder: HTSRepository
 ) : BatteryManager(context) {
 
     private var htCharacteristic: BluetoothGattCharacteristic? = null

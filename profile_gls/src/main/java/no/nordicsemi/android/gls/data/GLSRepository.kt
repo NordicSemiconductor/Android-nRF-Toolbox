@@ -7,7 +7,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class GLSDataHolder @Inject constructor() {
+internal class GLSRepository @Inject constructor() {
 
     private val _data = MutableStateFlow(GLSData())
     val data: StateFlow<GLSData> = _data.asStateFlow()

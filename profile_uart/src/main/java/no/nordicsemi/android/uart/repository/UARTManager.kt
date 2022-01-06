@@ -29,7 +29,7 @@ import android.text.TextUtils
 import no.nordicsemi.android.ble.WriteRequest
 import no.nordicsemi.android.log.LogContract
 import no.nordicsemi.android.service.BatteryManager
-import no.nordicsemi.android.uart.data.UARTDataHolder
+import no.nordicsemi.android.uart.data.UARTRepository
 import no.nordicsemi.android.utils.EMPTY
 import java.util.*
 
@@ -42,7 +42,7 @@ private val UART_RX_CHARACTERISTIC_UUID = UUID.fromString("6E400002-B5A3-F393-E0
 /** TX characteristic UUID  */
 private val UART_TX_CHARACTERISTIC_UUID = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
 
-internal class UARTManager(context: Context, private val dataHolder: UARTDataHolder) : BatteryManager(context) {
+internal class UARTManager(context: Context, private val dataHolder: UARTRepository) : BatteryManager(context) {
 
     private var rxCharacteristic: BluetoothGattCharacteristic? = null
     private var txCharacteristic: BluetoothGattCharacteristic? = null

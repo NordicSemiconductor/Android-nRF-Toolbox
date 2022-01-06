@@ -28,7 +28,7 @@ import android.content.Context
 import no.nordicsemi.android.ble.common.callback.rsc.RunningSpeedAndCadenceMeasurementDataCallback
 import no.nordicsemi.android.ble.data.Data
 import no.nordicsemi.android.log.LogContract
-import no.nordicsemi.android.rscs.data.RSCSDataHolder
+import no.nordicsemi.android.rscs.data.RSCSRepository
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 
@@ -40,7 +40,7 @@ private val RSC_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A53-0000
 
 internal class RSCSManager internal constructor(
     context: Context,
-    private val dataHolder: RSCSDataHolder
+    private val dataHolder: RSCSRepository
 ) : BatteryManager(context) {
 
     private var rscMeasurementCharacteristic: BluetoothGattCharacteristic? = null

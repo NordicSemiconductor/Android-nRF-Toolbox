@@ -4,7 +4,7 @@ import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import no.nordicsemi.android.cgms.data.CGMDataHolder
+import no.nordicsemi.android.cgms.data.CGMRepository
 import no.nordicsemi.android.cgms.data.WorkingMode
 import no.nordicsemi.android.service.ForegroundBleService
 import no.nordicsemi.android.utils.exhaustive
@@ -14,7 +14,7 @@ import javax.inject.Inject
 internal class CGMService : ForegroundBleService() {
 
     @Inject
-    lateinit var dataHolder: CGMDataHolder
+    lateinit var dataHolder: CGMRepository
 
     override val manager: CGMManager by lazy { CGMManager(this, dataHolder) }
 

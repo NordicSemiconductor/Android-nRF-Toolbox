@@ -1,7 +1,7 @@
 package no.nordicsemi.android.hts.viewmodel
 
 import dagger.hilt.android.lifecycle.HiltViewModel
-import no.nordicsemi.android.hts.data.HTSDataHolder
+import no.nordicsemi.android.hts.data.HTSRepository
 import no.nordicsemi.android.hts.view.DisconnectEvent
 import no.nordicsemi.android.hts.view.HTSScreenViewEvent
 import no.nordicsemi.android.hts.view.OnTemperatureUnitSelected
@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class HTSViewModel @Inject constructor(
-    private val dataHolder: HTSDataHolder
+    private val dataHolder: HTSRepository
 ) : CloseableViewModel() {
 
     val state = dataHolder.data

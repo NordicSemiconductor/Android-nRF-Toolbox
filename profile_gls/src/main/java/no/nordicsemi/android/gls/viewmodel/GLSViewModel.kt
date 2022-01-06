@@ -1,7 +1,7 @@
 package no.nordicsemi.android.gls.viewmodel
 
 import dagger.hilt.android.lifecycle.HiltViewModel
-import no.nordicsemi.android.gls.data.GLSDataHolder
+import no.nordicsemi.android.gls.data.GLSRepository
 import no.nordicsemi.android.gls.data.WorkingMode
 import no.nordicsemi.android.gls.repository.GLSManager
 import no.nordicsemi.android.service.SelectedBluetoothDeviceHolder
@@ -13,7 +13,7 @@ import javax.inject.Inject
 internal class GLSViewModel @Inject constructor(
     private val glsManager: GLSManager,
     private val deviceHolder: SelectedBluetoothDeviceHolder,
-    private val dataHolder: GLSDataHolder
+    private val dataHolder: GLSRepository
 ) : CloseableViewModel() {
 
     val state = dataHolder.data
@@ -27,7 +27,7 @@ internal class GLSViewModel @Inject constructor(
 
     fun connectDevice() {
         deviceHolder.device?.let {
-            glsManager.connect(it)
+            glsManager.connect(it.device)
                 .useAutoConnect(false)
                 .retry(3, 100)
                 .enqueue()

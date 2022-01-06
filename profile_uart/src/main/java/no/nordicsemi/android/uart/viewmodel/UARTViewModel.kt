@@ -2,7 +2,7 @@ package no.nordicsemi.android.uart.viewmodel
 
 import dagger.hilt.android.lifecycle.HiltViewModel
 import no.nordicsemi.android.theme.viewmodel.CloseableViewModel
-import no.nordicsemi.android.uart.data.UARTDataHolder
+import no.nordicsemi.android.uart.data.UARTRepository
 import no.nordicsemi.android.uart.data.UARTServiceCommand
 import no.nordicsemi.android.uart.view.*
 import no.nordicsemi.android.utils.exhaustive
@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class UARTViewModel @Inject constructor(
-    private val dataHolder: UARTDataHolder
+    private val dataHolder: UARTRepository
 ) : CloseableViewModel() {
 
     val state = dataHolder.data

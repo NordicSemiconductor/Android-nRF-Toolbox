@@ -1,24 +1,16 @@
 package no.nordicsemi.android.service
 
-import android.bluetooth.BluetoothDevice
+import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class SelectedBluetoothDeviceHolder @Inject constructor() {
 
-    var device: BluetoothDevice? = null
+    var device: DiscoveredBluetoothDevice? = null
         private set
 
-    fun isBondingRequired(): Boolean {
-        return device?.bondState == BluetoothDevice.BOND_NONE
-    }
-
-    fun bondDevice() {
-        device?.createBond()
-    }
-
-    fun attachDevice(newDevice: BluetoothDevice) {
+    fun attachDevice(newDevice: DiscoveredBluetoothDevice) {
         device = newDevice
     }
 

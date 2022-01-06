@@ -1,7 +1,7 @@
 package no.nordicsemi.android.cgms.viewmodel
 
 import dagger.hilt.android.lifecycle.HiltViewModel
-import no.nordicsemi.android.cgms.data.CGMDataHolder
+import no.nordicsemi.android.cgms.data.CGMRepository
 import no.nordicsemi.android.cgms.view.CGMViewEvent
 import no.nordicsemi.android.cgms.view.DisconnectEvent
 import no.nordicsemi.android.cgms.view.OnWorkingModeSelected
@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class CGMScreenViewModel @Inject constructor(
-    private val dataHolder: CGMDataHolder
+    private val dataHolder: CGMRepository
 ) : CloseableViewModel() {
 
     val state = dataHolder.data

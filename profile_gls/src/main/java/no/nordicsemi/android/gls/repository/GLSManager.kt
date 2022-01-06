@@ -70,7 +70,7 @@ private val RACP_CHARACTERISTIC = UUID.fromString("00002A52-0000-1000-8000-00805
 @Singleton
 internal class GLSManager @Inject constructor(
     @ApplicationContext context: Context,
-    private val dataHolder: GLSDataHolder
+    private val repository: GLSRepository
 ) : BatteryManager(context) {
 
     private var glucoseMeasurementCharacteristic: BluetoothGattCharacteristic? = null
@@ -78,7 +78,7 @@ internal class GLSManager @Inject constructor(
     private var recordAccessControlPointCharacteristic: BluetoothGattCharacteristic? = null
 
     override fun onBatteryLevelChanged(batteryLevel: Int) {
-        dataHolder.setNewBatteryLevel(batteryLevel)
+        repository.setNewBatteryLevel(batteryLevel)
     }
 
     override fun getGattCallback(): BatteryManagerGattCallback {
@@ -135,7 +135,7 @@ internal class GLSManager @Inject constructor(
                             status = status?.value ?: 0
                         )
 
-                        dataHolder.addNewRecord(record)
+                        repository.addNewRecord(record)
                     }
                 })
             setNotificationCallback(glucoseMeasurementContextCharacteristic)
@@ -177,7 +177,7 @@ internal class GLSManager @Inject constructor(
                             HbA1c = HbA1c ?: 0f
                         )
 
-                        dataHolder.addNewContext(context)
+                        repository.addNewContext(context)
                     }
                 })
             setIndicationCallback(recordAccessControlPointCharacteristic)
@@ -192,14 +192,14 @@ internal class GLSManager @Inject constructor(
                             RACP_OP_CODE_ABORT_OPERATION -> RequestStatus.ABORTED
                             else -> RequestStatus.SUCCESS
                         }
-                        dataHolder.setRequestStatus(status)
+                        repository.setRequestStatus(status)
                     }
 
                     override fun onRecordAccessOperationCompletedWithNoRecordsFound(
                         device: BluetoothDevice,
                         @RACPOpCode requestCode: Int
                     ) {
-                        dataHolder.setRequestStatus(RequestStatus.SUCCESS)
+                        repository.setRequestStatus(RequestStatus.SUCCESS)
                     }
 
                     override fun onNumberOfRecordsReceived(
@@ -207,8 +207,8 @@ internal class GLSManager @Inject constructor(
                         numberOfRecords: Int
                     ) {
                         if (numberOfRecords > 0) {
-                            if (dataHolder.records().isNotEmpty()) {
-                                val sequenceNumber = dataHolder.records().last().sequenceNumber + 1 //TODO check if correct
+                            if (repository.records().isNotEmpty()) {
+                                val sequenceNumber = repository.records().last().sequenceNumber + 1 //TODO check if correct
                                 writeCharacteristic(
                                     recordAccessControlPointCharacteristic,
                                     RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(
@@ -224,7 +224,7 @@ internal class GLSManager @Inject constructor(
                                     .enqueue()
                             }
                         }
-                        dataHolder.setRequestStatus(RequestStatus.SUCCESS)
+                        repository.setRequestStatus(RequestStatus.SUCCESS)
                     }
 
                     override fun onRecordAccessOperationError(
@@ -234,9 +234,9 @@ internal class GLSManager @Inject constructor(
                     ) {
                         log(Log.WARN, "Record Access operation failed (error $errorCode)")
                         if (errorCode == RACP_ERROR_OP_CODE_NOT_SUPPORTED) {
-                            dataHolder.setRequestStatus(RequestStatus.NOT_SUPPORTED)
+                            repository.setRequestStatus(RequestStatus.NOT_SUPPORTED)
                         } else {
-                            dataHolder.setRequestStatus(RequestStatus.FAILED)
+                            repository.setRequestStatus(RequestStatus.FAILED)
                         }
                     }
                 })
@@ -284,10 +284,10 @@ internal class GLSManager @Inject constructor(
      * Clears the records list locally.
      */
     private fun clear() {
-        dataHolder.clearRecords()
+        repository.clearRecords()
         val target = bluetoothDevice
         if (target != null) {
-            dataHolder.setRequestStatus(RequestStatus.SUCCESS)
+            repository.setRequestStatus(RequestStatus.SUCCESS)
         }
     }
 
@@ -300,7 +300,7 @@ internal class GLSManager @Inject constructor(
         if (recordAccessControlPointCharacteristic == null) return
         val target = bluetoothDevice ?: return
         clear()
-        dataHolder.setRequestStatus(RequestStatus.PENDING)
+        repository.setRequestStatus(RequestStatus.PENDING)
         writeCharacteristic(
             recordAccessControlPointCharacteristic,
             RecordAccessControlPointData.reportLastStoredRecord()
@@ -323,7 +323,7 @@ internal class GLSManager @Inject constructor(
         if (recordAccessControlPointCharacteristic == null) return
         val target = bluetoothDevice ?: return
         clear()
-        dataHolder.setRequestStatus(RequestStatus.PENDING)
+        repository.setRequestStatus(RequestStatus.PENDING)
         writeCharacteristic(
             recordAccessControlPointCharacteristic,
             RecordAccessControlPointData.reportFirstStoredRecord()
@@ -347,7 +347,7 @@ internal class GLSManager @Inject constructor(
         if (recordAccessControlPointCharacteristic == null) return
         val target = bluetoothDevice ?: return
         clear()
-        dataHolder.setRequestStatus(RequestStatus.PENDING)
+        repository.setRequestStatus(RequestStatus.PENDING)
         writeCharacteristic(
             recordAccessControlPointCharacteristic,
             RecordAccessControlPointData.reportNumberOfAllStoredRecords()
@@ -375,13 +375,13 @@ internal class GLSManager @Inject constructor(
     fun refreshRecords() {
         if (recordAccessControlPointCharacteristic == null) return
         val target = bluetoothDevice ?: return
-        if (dataHolder.records().isEmpty()) {
+        if (repository.records().isEmpty()) {
             requestAllRecords()
         } else {
-            dataHolder.setRequestStatus(RequestStatus.PENDING)
+            repository.setRequestStatus(RequestStatus.PENDING)
 
             // obtain the last sequence number
-            val sequenceNumber = dataHolder.records().last().sequenceNumber + 1 //TODO check if correct
+            val sequenceNumber = repository.records().last().sequenceNumber + 1 //TODO check if correct
             writeCharacteristic(
                 recordAccessControlPointCharacteristic,
                 RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber)
@@ -425,7 +425,7 @@ internal class GLSManager @Inject constructor(
         if (recordAccessControlPointCharacteristic == null) return
         val target = bluetoothDevice ?: return
         clear()
-        dataHolder.setRequestStatus(RequestStatus.PENDING)
+        repository.setRequestStatus(RequestStatus.PENDING)
         writeCharacteristic(
             recordAccessControlPointCharacteristic,
             RecordAccessControlPointData.deleteAllStoredRecords()

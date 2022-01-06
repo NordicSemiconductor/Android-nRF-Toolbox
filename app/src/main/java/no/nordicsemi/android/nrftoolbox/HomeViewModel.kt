@@ -12,6 +12,6 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     fun onDeviceSelected(device: DiscoveredBluetoothDevice) {
-        deviceHolder.attachDevice(device.device)
+        deviceHolder.attachDevice(device)
     }
 }
