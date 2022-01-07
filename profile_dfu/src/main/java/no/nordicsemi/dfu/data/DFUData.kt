@@ -1,16 +1,24 @@
 package no.nordicsemi.dfu.data
 
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
-import java.io.File
 
 internal sealed class DFUData
 
-internal object NoFileSelectedState : DFUData()
+internal data class NoFileSelectedState(
+    val isError: Boolean = false
+) : DFUData()
 
 internal data class FileReadyState(
-    val file: File,
-    val device: DiscoveredBluetoothDevice,
-    val isUploading: Boolean = false
+    val file: DFUFile,
+    val device: DiscoveredBluetoothDevice
+) : DFUData()
+
+internal data class HexFileReadyState(
+    val file: DFUFile
+) : DFUData()
+
+internal data class FileInstallingState(
+    val status: DFUServiceStatus = Idle
 ) : DFUData()
 
 internal object UploadSuccessState : DFUData()

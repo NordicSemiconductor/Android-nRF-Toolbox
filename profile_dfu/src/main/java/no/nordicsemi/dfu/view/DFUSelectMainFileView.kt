@@ -1,0 +1,81 @@
+package no.nordicsemi.dfu.view
+
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.dfu.DfuBaseService
+import no.nordicsemi.android.theme.view.ScreenSection
+import no.nordicsemi.android.theme.view.SectionTitle
+import no.nordicsemi.dfu.R
+import no.nordicsemi.dfu.data.DFUData
+
+@Composable
+internal fun DFUSelectMainFileView(state: DFUData, onEvent: (DFUViewEvent) -> Unit) {
+    ScreenSection {
+        SectionTitle(
+            icon = Icons.Default.Settings,
+            title = stringResource(id = R.string.dfu_choose_file)
+        )
+
+        Spacer(modifier = Modifier.padding(8.dp))
+
+        Text(
+            text = stringResource(id = R.string.dfu_choose_info),
+            style = MaterialTheme.typography.bodyMedium
+        )
+
+        Spacer(modifier = Modifier.padding(8.dp))
+
+        ButtonsRow(onEvent)
+    }
+}
+
+@Composable
+private fun ButtonsRow(onEvent: (DFUViewEvent) -> Unit) {
+
+    val fileType = rememberSaveable { mutableStateOf(DfuBaseService.MIME_TYPE_ZIP) }
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            if (fileType.value == DfuBaseService.MIME_TYPE_ZIP) {
+                onEvent(OnZipFileSelected(it))
+            } else {
+                onEvent(OnHexFileSelected(it))
+            }
+        }
+    }
+
+    Row(
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Button(onClick = {
+            fileType.value = DfuBaseService.MIME_TYPE_ZIP
+            launcher.launch(fileType.value)
+        }) {
+            Text(text = stringResource(id = R.string.dfu_select_zip))
+        }
+
+        Button(onClick = {
+            fileType.value = DfuBaseService.MIME_TYPE_OCTET_STREAM
+            launcher.launch(fileType.value)
+        }) {
+            Text(text = stringResource(id = R.string.dfu_select_hex))
+        }
+    }
+}

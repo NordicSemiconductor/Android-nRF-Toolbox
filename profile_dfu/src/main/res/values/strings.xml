@@ -8,6 +8,7 @@
     <string name="dfu_stop">Stop</string>
     <string name="dfu_install">Install</string>
 
+    <string name="dfu_select_dat">Select .dat</string>
     <string name="dfu_select_zip">Select .zip</string>
     <string name="dfu_select_hex">Select .hex</string>
 
@@ -21,6 +22,7 @@
 
     <string name="dfu_choose_file">Choose file</string>
     <string name="dfu_choose_info">Please select .zip or .hex file with bootloader, application or soft device.</string>
+    <string name="dfu_choose_dat_info">Please select .dat file.</string>
 
     <string name="dfu_macro_dialog_title">File managers</string>
     <string name="dfu_macro_dialog_info">Please select </string>
@@ -29,4 +31,19 @@
 
     <string name="dfu_success_icon_description">Operation success</string>
     <string name="dfu_failure_icon_description">Operation failed</string>
+
+    <string name="dfu_display_status_aborted">Aborted</string>
+    <string name="dfu_display_status_completed">Completed</string>
+    <string name="dfu_display_status_connected">Connected</string>
+    <string name="dfu_display_status_connecting">Connecting</string>
+    <string name="dfu_display_status_disconnected">Disconnected</string>
+    <string name="dfu_display_status_disconnecting">Disconnecting</string>
+    <string name="dfu_display_status_enabling">Enabling DFU</string>
+    <string name="dfu_display_status_error">Error</string>
+    <string name="dfu_display_status_idle">Idle</string>
+    <string name="dfu_display_status_progress_update">%d%</string>
+    <string name="dfu_display_status_started">Started</string>
+    <string name="dfu_display_status_starting">Starting</string>
+    <string name="dfu_display_status_validating">Validating</string>
+    <string name="dfu_display_status">Status: %s</string>
 </resources>

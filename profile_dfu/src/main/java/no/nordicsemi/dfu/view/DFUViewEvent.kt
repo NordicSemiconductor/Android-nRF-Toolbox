@@ -4,7 +4,9 @@ import android.net.Uri
 
 internal sealed class DFUViewEvent
 
-internal data class OnFileSelected(val uri: Uri) : DFUViewEvent()
+internal data class OnZipFileSelected(val file: Uri) : DFUViewEvent()
+internal data class OnHexFileSelected(val file: Uri) : DFUViewEvent()
+internal data class OnDatFileSelected(val file: Uri) : DFUViewEvent()
 
 internal object OnInstallButtonClick : DFUViewEvent()
 
