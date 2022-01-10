@@ -12,7 +12,10 @@
     <string name="dfu_select_zip">Select .zip</string>
     <string name="dfu_select_hex">Select .hex</string>
 
-    <string name="dfu_file_details">File details</string>
+    <string name="dfu_load_file_error">An error occurred during loading the file. Please try with another file.</string>
+
+    <string name="dfu_zip_file_details">Zip file details</string>
+    <string name="dfu_hex_file_details">Hex file details</string>
 
     <string name="dfu_file_size">%d bytes</string>
     <string name="dfu_file_type_zip">Distribution packet (ZIP)</string>
@@ -41,9 +44,12 @@
     <string name="dfu_display_status_enabling">Enabling DFU</string>
     <string name="dfu_display_status_error">Error</string>
     <string name="dfu_display_status_idle">Idle</string>
-    <string name="dfu_display_status_progress_update">%d%</string>
+    <string name="dfu_display_status_progress_update">%d\%%</string>
     <string name="dfu_display_status_started">Started</string>
     <string name="dfu_display_status_starting">Starting</string>
     <string name="dfu_display_status_validating">Validating</string>
     <string name="dfu_display_status">Status: %s</string>
+
+    <string name="dfu_success">Success!</string>
+    <string name="dfu_unknown_error">Unknown error.</string>
 </resources>

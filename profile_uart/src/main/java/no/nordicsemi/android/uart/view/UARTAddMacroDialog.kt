@@ -3,6 +3,7 @@ package no.nordicsemi.android.uart.view
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -33,7 +34,7 @@ internal fun UARTAddMacroDialog(onDismiss: () -> Unit, onEvent: (UARTViewEvent) 
                     alias.value = it
                 }
 
-                Spacer(modifier = Modifier.padding(16.dp))
+                Spacer(modifier = Modifier.size(16.dp))
 
                 TextField(text = command.value, hint = stringResource(id = R.string.uart_macro_dialog_command)) {
                     command.value = it

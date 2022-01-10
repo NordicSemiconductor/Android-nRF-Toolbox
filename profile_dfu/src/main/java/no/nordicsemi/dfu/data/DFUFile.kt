@@ -10,7 +10,12 @@ data class ZipFile(val data: FileData) : DFUFile() {
     override val fileType: DFUFileType = DFUFileType.TYPE_AUTO
 }
 
-data class HexFile(
+data class PartialHexFile(
+    val data: FileData,
+    val fileType: DFUFileType
+)
+
+data class FullHexFile(
     val data: FileData,
     val datFileData: FileData,
     override val fileType: DFUFileType
@@ -19,6 +24,6 @@ data class HexFile(
 data class FileData(
     val uri: Uri,
     val name: String,
-    val path: String,
+    val path: String?,
     val size: Long
 )

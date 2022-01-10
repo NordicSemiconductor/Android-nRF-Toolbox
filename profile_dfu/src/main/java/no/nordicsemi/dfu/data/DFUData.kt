@@ -13,8 +13,9 @@ internal data class FileReadyState(
     val device: DiscoveredBluetoothDevice
 ) : DFUData()
 
-internal data class HexFileReadyState(
-    val file: DFUFile
+internal data class HexFileLoadedState(
+    val file: PartialHexFile,
+    val isDatFileError: Boolean = false
 ) : DFUData()
 
 internal data class FileInstallingState(
@@ -23,4 +24,4 @@ internal data class FileInstallingState(
 
 internal object UploadSuccessState : DFUData()
 
-internal object UploadFailureState : DFUData()
+internal data class UploadFailureState(val message: String?) : DFUData()

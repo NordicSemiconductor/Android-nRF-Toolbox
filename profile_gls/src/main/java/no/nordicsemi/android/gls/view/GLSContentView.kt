@@ -107,7 +107,7 @@ private fun RecordsViewWithData(state: GLSData) {
             RecordItem(it)
 
             if (i < state.records.size-1) {
-                Spacer(modifier = Modifier.padding(8.dp))
+                Spacer(modifier = Modifier.size(8.dp))
             }
         }
     }
@@ -134,7 +134,7 @@ private fun RecordItem(record: GLSRecord) {
             )
         }
 
-        Spacer(modifier = Modifier.padding(16.dp))
+        Spacer(modifier = Modifier.size(16.dp))
 
         Text(
             text = glucoseConcentrationDisplayValue(record.glucoseConcentration, record.unit),

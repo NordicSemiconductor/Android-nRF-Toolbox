@@ -1,5 +1,6 @@
 package no.nordicsemi.android.theme.view
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,14 +13,26 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.material.you.Card
 
 @Composable
-fun ScreenSection(content: @Composable () -> Unit) {
+fun ScreenSection(onClick: (() -> Unit)? = null, content: @Composable () -> Unit) {
     Card(
         backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
         shape = RoundedCornerShape(16.dp),
         elevation = 0.dp,
     ) {
+
+        val modifier = if (onClick != null) {
+            Modifier
+                .clickable { onClick.invoke() }
+                .fillMaxWidth()
+                .padding(16.dp)
+        } else {
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        }
+
         Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             content()

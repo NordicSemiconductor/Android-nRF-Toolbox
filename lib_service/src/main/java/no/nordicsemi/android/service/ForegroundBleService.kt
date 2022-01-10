@@ -27,6 +27,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 
@@ -83,7 +84,9 @@ abstract class ForegroundBleService : BleProfileService() {
      * @param defaults
      */
     private fun createNotification(messageResId: Int, defaults: Int): Notification {
-        createNotificationChannel(CHANNEL_ID)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel(CHANNEL_ID)
+        }
 
         val intent: Intent? = packageManager.getLaunchIntentForPackage(packageName)
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
@@ -97,6 +100,7 @@ abstract class ForegroundBleService : BleProfileService() {
             .build()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(channelName: String) {
         val channel = NotificationChannel(
             channelName,

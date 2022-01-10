@@ -2,7 +2,14 @@ package no.nordicsemi.dfu.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
@@ -20,8 +27,10 @@ import no.nordicsemi.android.theme.view.ScreenSection
 import no.nordicsemi.android.theme.view.SectionTitle
 import no.nordicsemi.dfu.R
 import no.nordicsemi.dfu.data.FileReadyState
+import no.nordicsemi.dfu.data.FullHexFile
+import no.nordicsemi.dfu.data.ZipFile
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
-import java.io.File
+import no.nordicsemi.ui.scanner.ui.exhaustive
 
 @Composable
 internal fun DFUSummaryView(state: FileReadyState, onEvent: (DFUViewEvent) -> Unit) {
@@ -30,7 +39,10 @@ internal fun DFUSummaryView(state: FileReadyState, onEvent: (DFUViewEvent) -> Un
         
         Spacer(modifier = Modifier.height(16.dp))
 
-        FileDetailsView(state.file)
+        when (state.file) {
+            is FullHexFile -> FileDetailsView(state.file)
+            is ZipFile -> FileDetailsView(state.file)
+        }.exhaustive
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -59,7 +71,7 @@ internal fun DeviceDetailsView(device: DiscoveredBluetoothDevice) {
                     .padding(8.dp)
             )
 
-            Spacer(modifier = Modifier.padding(8.dp))
+            Spacer(modifier = Modifier.size(8.dp))
 
             Column(modifier = Modifier
                 .fillMaxWidth()
@@ -75,19 +87,37 @@ internal fun DeviceDetailsView(device: DiscoveredBluetoothDevice) {
 }
 
 @Composable
-private fun FileDetailsView(file: File) {
-    val fileName = file.name
-    val fileLength = file.length()
+private fun FileDetailsView(file: ZipFile) {
+    val fileName = file.data.name
+    val fileLength = file.data.size
 
     ScreenSection {
-        SectionTitle(icon = Icons.Default.Notifications, title = stringResource(id = R.string.dfu_file_details))
+        SectionTitle(icon = Icons.Default.Notifications, title = stringResource(id = R.string.dfu_zip_file_details))
 
-        Spacer(modifier = Modifier.padding(16.dp))
+        Spacer(modifier = Modifier.size(16.dp))
 
         Text(text = fileName)
 
-        Spacer(modifier = Modifier.padding(4.dp))
+        Spacer(modifier = Modifier.size(4.dp))
         
+        Text(text = stringResource(id = R.string.dfu_file_size, fileLength))
+    }
+}
+
+@Composable
+private fun FileDetailsView(file: FullHexFile) {
+    val fileName = file.data.name
+    val fileLength = file.data.size
+
+    ScreenSection {
+        SectionTitle(icon = Icons.Default.Notifications, title = stringResource(id = R.string.dfu_hex_file_details))
+
+        Spacer(modifier = Modifier.size(16.dp))
+
+        Text(text = fileName)
+
+        Spacer(modifier = Modifier.size(4.dp))
+
         Text(text = stringResource(id = R.string.dfu_file_size, fileLength))
     }
 }

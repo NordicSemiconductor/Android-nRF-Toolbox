@@ -14,12 +14,11 @@ import no.nordicsemi.dfu.R
 import no.nordicsemi.dfu.data.DFUData
 import no.nordicsemi.dfu.repository.DFUService
 import no.nordicsemi.dfu.viewmodel.DFUViewModel
-import no.nordicsemi.dfu.data.NoFileSelectedState
 
 @Composable
 fun DFUScreen(finishAction: () -> Unit) {
     val viewModel: DFUViewModel = hiltViewModel()
-    val state = viewModel.state.collectAsState(NoFileSelectedState).value
+    val state = viewModel.state.collectAsState().value
     val isScreenActive = viewModel.isActive.collectAsState().value
 
     val context = LocalContext.current

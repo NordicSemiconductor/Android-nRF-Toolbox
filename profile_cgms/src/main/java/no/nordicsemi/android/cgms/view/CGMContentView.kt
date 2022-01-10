@@ -104,7 +104,7 @@ private fun RecordsViewWithData(state: CGMData) {
             RecordItem(it)
 
             if (i < state.records.size - 1) {
-                Spacer(modifier = Modifier.padding(8.dp))
+                Spacer(modifier = Modifier.size(8.dp))
             }
         }
     }
@@ -129,7 +129,7 @@ private fun RecordItem(record: CGMRecord) {
             )
         }
 
-        Spacer(modifier = Modifier.padding(16.dp))
+        Spacer(modifier = Modifier.size(16.dp))
 
         Text(
             text = record.glucoseConcentration(),

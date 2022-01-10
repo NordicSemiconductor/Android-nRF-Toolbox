@@ -17,7 +17,7 @@ class DFUManager @Inject constructor(
     fun install(file: DFUFile) {
         val device = deviceHolder.device!!
 
-        val starter = DfuServiceInitiator(device.address)
+        val starter = DfuServiceInitiator(device.address())
             .setDeviceName(device.displayName())
 //        .setKeepBond(keepBond)
 //        .setForceDfu(forceDfu)
@@ -27,9 +27,9 @@ class DFUManager @Inject constructor(
             .setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
 
         when (file) {
-            is ZipFile -> starter.setZip(file.uri, file.path)
-            is HexFile -> starter.setBinOrHex(file.fileType.id, file.uri, file.path)
-                .setInitFile(file.datFile.uri, file.datFile.path)
+            is ZipFile -> starter.setZip(file.data.uri, file.data.path)
+            is FullHexFile -> starter.setBinOrHex(file.fileType.id, file.data.uri, file.data.path)
+                .setInitFile(file.datFileData.uri, file.datFileData.path)
         }.exhaustive
 
         starter.start(context, DFUService::class.java)

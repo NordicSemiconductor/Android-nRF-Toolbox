@@ -4,6 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -17,23 +18,34 @@ import no.nordicsemi.android.dfu.DfuBaseService
 import no.nordicsemi.android.theme.view.ScreenSection
 import no.nordicsemi.android.theme.view.SectionTitle
 import no.nordicsemi.dfu.R
+import no.nordicsemi.dfu.data.HexFileLoadedState
 
 @Composable
-internal fun DFUSelectDatFileView(onEvent: (DFUViewEvent) -> Unit) {
+internal fun DFUSelectDatFileView(state: HexFileLoadedState, onEvent: (DFUViewEvent) -> Unit) {
     ScreenSection {
         SectionTitle(
             icon = Icons.Default.Settings,
             title = stringResource(id = R.string.dfu_choose_file)
         )
 
-        Spacer(modifier = Modifier.padding(8.dp))
+        Spacer(modifier = Modifier.size(8.dp))
 
         Text(
             text = stringResource(id = R.string.dfu_choose_dat_info),
             style = MaterialTheme.typography.bodyMedium
         )
 
-        Spacer(modifier = Modifier.padding(8.dp))
+        if (state.isDatFileError) {
+            Spacer(modifier = Modifier.size(8.dp))
+
+            Text(
+                text = stringResource(id = R.string.dfu_load_file_error),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+
+        Spacer(modifier = Modifier.size(8.dp))
 
         val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             uri?.let { onEvent(OnDatFileSelected(it)) }

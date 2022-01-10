@@ -32,7 +32,7 @@ internal fun MacroItem(macro: UARTMacro, onEvent: (UARTViewEvent) -> Unit) {
                     .clickable { onEvent(OnRunMacro(macro)) }
             )
 
-            Spacer(modifier = Modifier.padding(16.dp))
+            Spacer(modifier = Modifier.size(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -46,7 +46,7 @@ internal fun MacroItem(macro: UARTMacro, onEvent: (UARTViewEvent) -> Unit) {
                 )
             }
 
-            Spacer(modifier = Modifier.padding(16.dp))
+            Spacer(modifier = Modifier.size(16.dp))
 
             Icon(
                 imageVector = Icons.Default.Delete,

@@ -41,7 +41,7 @@ fun SectionTitle(
                 )
                 .padding(8.dp)
         )
-        Spacer(modifier = Modifier.padding(8.dp))
+        Spacer(modifier = Modifier.size(8.dp))
         Text(
             text = title,
             textAlign = TextAlign.Center,
@@ -73,7 +73,7 @@ fun SectionTitle(
                 )
                 .padding(8.dp)
         )
-        Spacer(modifier = Modifier.padding(8.dp))
+        Spacer(modifier = Modifier.size(8.dp))
         Text(
             text = title,
             textAlign = TextAlign.Center,

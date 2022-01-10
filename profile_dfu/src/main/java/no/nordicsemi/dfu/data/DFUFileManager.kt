@@ -3,6 +3,7 @@ package no.nordicsemi.dfu.data
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import androidx.core.net.toFile
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -12,13 +13,17 @@ class DFUFileManager @Inject constructor(
     private val context: Context
 ) {
 
+    private val TAG = "DFU_FILE_MANAGER"
+
     fun createFile(uri: Uri): FileData? {
         return try {
             createFromFile(uri)
         } catch (e: Exception) {
+            Log.e(TAG, "Error during creation file from uri.", e)
             try {
                 createFromContentResolver(uri)
             } catch (e: Exception) {
+                Log.e(TAG, "Error during loading file from content resolver.", e)
                 null
             }
         }
@@ -30,26 +35,27 @@ class DFUFileManager @Inject constructor(
     }
 
     private fun createFromContentResolver(uri: Uri): FileData? {
-        return try {
-            val data = context.contentResolver.query(uri, null, null, null, null)
+        val data = context.contentResolver.query(uri, null, null, null, null)
 
-            if (data != null && data.moveToNext()) {
+        return if (data != null && data.moveToNext()) {
 
-                val displayNameIndex = data.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME)
-                val fileSizeIndex = data.getColumnIndex(MediaStore.MediaColumns.SIZE)
-                val dataIndex = data.getColumnIndex(MediaStore.MediaColumns.DATA)
+            val displayNameIndex = data.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME)
+            val fileSizeIndex = data.getColumnIndex(MediaStore.MediaColumns.SIZE)
+            val dataIndex = data.getColumnIndex(MediaStore.MediaColumns.DATA)
 
-                val fileName = data.getString(displayNameIndex)
-                val fileSize = data.getInt(fileSizeIndex)
-                val filePath = data.getString(dataIndex)
-
-                data.close()
-
-                FileData(uri, fileName, filePath, fileSize.toLong())
+            val fileName = data.getString(displayNameIndex)
+            val fileSize = data.getInt(fileSizeIndex)
+            val filePath = if (dataIndex != -1) {
+                data.getString(dataIndex)
             } else {
                 null
             }
-        } catch (e: Exception) {
+
+            data.close()
+
+            FileData(uri, fileName, filePath, fileSize.toLong())
+        } else {
+            Log.d(TAG, "Data loaded from ContentResolver is empty.")
             null
         }
     }

@@ -22,10 +22,24 @@
 package no.nordicsemi.dfu.repository
 
 import android.app.Activity
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import no.nordicsemi.android.dfu.DfuBaseService
-import no.nordicsemi.dfu.view.NotificationActivity
+import no.nordicsemi.dfu.R
 
 class DFUService : DfuBaseService() {
+
+    override fun onCreate() {
+        super.onCreate()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createDfuNotificationChannel(this)
+        }
+    }
 
     override fun getNotificationTarget(): Class<out Activity?>? {
         /*
@@ -41,11 +55,26 @@ class DFUService : DfuBaseService() {
 		 * This method may be used to restore the target activity in case the application was closed or is open. It may also be used to recreate an activity
 		 * history (see NotificationActivity).
 		 */
-        return NotificationActivity::class.java
+        return Class.forName("no.nordicsemi.android.nrftoolbox.MainActivity") as Class<out Activity>
     }
 
     override fun isDebug(): Boolean {
         // return BuildConfig.DEBUG;
         return true
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private fun createDfuNotificationChannel(context: Context) {
+        val channel = NotificationChannel(
+            NOTIFICATION_CHANNEL_DFU,
+            context.getString(R.string.dfu_channel_name),
+            NotificationManager.IMPORTANCE_LOW
+        )
+        channel.description = context.getString(R.string.dfu_channel_description)
+        channel.setShowBadge(false)
+        channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+        val notificationManager =
+            context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager?.createNotificationChannel(channel)
     }
 }
