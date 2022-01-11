@@ -15,7 +15,7 @@ class DFUFileManager @Inject constructor(
 
     private val TAG = "DFU_FILE_MANAGER"
 
-    fun createFile(uri: Uri): FileData? {
+    fun createFile(uri: Uri): ZipFile? {
         return try {
             createFromFile(uri)
         } catch (e: Exception) {
@@ -29,12 +29,12 @@ class DFUFileManager @Inject constructor(
         }
     }
 
-    private fun createFromFile(uri: Uri): FileData {
+    private fun createFromFile(uri: Uri): ZipFile {
         val file = uri.toFile()
-        return FileData(uri, file.name, file.path, file.length())
+        return ZipFile(uri, file.name, file.path, file.length())
     }
 
-    private fun createFromContentResolver(uri: Uri): FileData? {
+    private fun createFromContentResolver(uri: Uri): ZipFile? {
         val data = context.contentResolver.query(uri, null, null, null, null)
 
         return if (data != null && data.moveToNext()) {
@@ -53,7 +53,7 @@ class DFUFileManager @Inject constructor(
 
             data.close()
 
-            FileData(uri, fileName, filePath, fileSize.toLong())
+            ZipFile(uri, fileName, filePath, fileSize.toLong())
         } else {
             Log.d(TAG, "Data loaded from ContentResolver is empty.")
             null

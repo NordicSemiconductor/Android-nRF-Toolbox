@@ -27,22 +27,17 @@ import no.nordicsemi.android.theme.view.ScreenSection
 import no.nordicsemi.android.theme.view.SectionTitle
 import no.nordicsemi.dfu.R
 import no.nordicsemi.dfu.data.FileReadyState
-import no.nordicsemi.dfu.data.FullHexFile
 import no.nordicsemi.dfu.data.ZipFile
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
-import no.nordicsemi.ui.scanner.ui.exhaustive
 
 @Composable
 internal fun DFUSummaryView(state: FileReadyState, onEvent: (DFUViewEvent) -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         DeviceDetailsView(state.device)
-        
+
         Spacer(modifier = Modifier.height(16.dp))
 
-        when (state.file) {
-            is FullHexFile -> FileDetailsView(state.file)
-            is ZipFile -> FileDetailsView(state.file)
-        }.exhaustive
+        FileDetailsView(state.file)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -73,9 +68,11 @@ internal fun DeviceDetailsView(device: DiscoveredBluetoothDevice) {
 
             Spacer(modifier = Modifier.size(8.dp))
 
-            Column(modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
                 Text(
                     text = device.displayName(),
                     style = MaterialTheme.typography.titleMedium
@@ -88,36 +85,26 @@ internal fun DeviceDetailsView(device: DiscoveredBluetoothDevice) {
 
 @Composable
 private fun FileDetailsView(file: ZipFile) {
-    val fileName = file.data.name
-    val fileLength = file.data.size
+    val fileName = file.name
+    val fileLength = file.size
 
     ScreenSection {
-        SectionTitle(icon = Icons.Default.Notifications, title = stringResource(id = R.string.dfu_zip_file_details))
+        SectionTitle(
+            icon = Icons.Default.Notifications,
+            title = stringResource(id = R.string.dfu_zip_file_details)
+        )
 
         Spacer(modifier = Modifier.size(16.dp))
 
-        Text(text = fileName)
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(text = stringResource(id = R.string.dfu_file_name, fileName))
 
-        Spacer(modifier = Modifier.size(4.dp))
-        
-        Text(text = stringResource(id = R.string.dfu_file_size, fileLength))
-    }
-}
+            Spacer(modifier = Modifier.size(4.dp))
 
-@Composable
-private fun FileDetailsView(file: FullHexFile) {
-    val fileName = file.data.name
-    val fileLength = file.data.size
-
-    ScreenSection {
-        SectionTitle(icon = Icons.Default.Notifications, title = stringResource(id = R.string.dfu_hex_file_details))
-
-        Spacer(modifier = Modifier.size(16.dp))
-
-        Text(text = fileName)
-
-        Spacer(modifier = Modifier.size(4.dp))
-
-        Text(text = stringResource(id = R.string.dfu_file_size, fileLength))
+            Text(text = stringResource(id = R.string.dfu_file_size, fileLength))
+        }
     }
 }

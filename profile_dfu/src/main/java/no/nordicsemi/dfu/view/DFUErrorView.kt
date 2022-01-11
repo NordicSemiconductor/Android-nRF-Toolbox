@@ -21,18 +21,22 @@ import no.nordicsemi.dfu.data.UploadFailureState
 internal fun DFUErrorView(state: UploadFailureState, onEvent: (DFUViewEvent) -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         ScreenSection {
+            val errorColor = MaterialTheme.colorScheme.error
+
             Icon(
                 painter = painterResource(id = R.drawable.ic_fail_circle),
                 contentDescription = stringResource(id = R.string.dfu_failure_icon_description),
-                tint = MaterialTheme.colorScheme.error
+                tint = errorColor
             )
 
-            Spacer(modifier = Modifier.size(16.dp))
+
+            Spacer(modifier = Modifier.size(8.dp))
 
             val error = state.message ?: stringResource(id = R.string.dfu_unknown_error)
             Text(
                 text = error,
-                color = MaterialTheme.colorScheme.error
+                color = errorColor,
+                style = MaterialTheme.typography.titleLarge
             )
 
             Spacer(modifier = Modifier.size(16.dp))

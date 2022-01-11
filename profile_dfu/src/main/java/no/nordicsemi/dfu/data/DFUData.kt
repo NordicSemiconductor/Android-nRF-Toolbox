@@ -9,13 +9,8 @@ internal data class NoFileSelectedState(
 ) : DFUData()
 
 internal data class FileReadyState(
-    val file: DFUFile,
+    val file: ZipFile,
     val device: DiscoveredBluetoothDevice
-) : DFUData()
-
-internal data class HexFileLoadedState(
-    val file: PartialHexFile,
-    val isDatFileError: Boolean = false
 ) : DFUData()
 
 internal data class FileInstallingState(

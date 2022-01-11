@@ -2,11 +2,7 @@ package no.nordicsemi.dfu.view
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
@@ -62,31 +58,13 @@ private fun ButtonsRow(onEvent: (DFUViewEvent) -> Unit) {
     val fileType = rememberSaveable { mutableStateOf(DfuBaseService.MIME_TYPE_ZIP) }
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let {
-            if (fileType.value == DfuBaseService.MIME_TYPE_ZIP) {
-                onEvent(OnZipFileSelected(it))
-            } else {
-                onEvent(OnHexFileSelected(it))
-            }
-        }
+        uri?.let { onEvent(OnZipFileSelected(it)) }
     }
 
-    Row(
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Button(onClick = {
-            fileType.value = DfuBaseService.MIME_TYPE_ZIP
-            launcher.launch(fileType.value)
-        }) {
-            Text(text = stringResource(id = R.string.dfu_select_zip))
-        }
-
-        Button(onClick = {
-            fileType.value = DfuBaseService.MIME_TYPE_OCTET_STREAM
-            launcher.launch(fileType.value)
-        }) {
-            Text(text = stringResource(id = R.string.dfu_select_hex))
-        }
+    Button(onClick = {
+        fileType.value = DfuBaseService.MIME_TYPE_ZIP
+        launcher.launch(fileType.value)
+    }) {
+        Text(text = stringResource(id = R.string.dfu_select_zip))
     }
 }

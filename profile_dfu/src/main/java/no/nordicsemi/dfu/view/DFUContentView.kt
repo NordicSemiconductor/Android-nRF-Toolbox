@@ -14,7 +14,6 @@ internal fun DFUContentView(state: DFUData, onEvent: (DFUViewEvent) -> Unit) {
         when (state) {
             is NoFileSelectedState -> DFUSelectMainFileView(state, onEvent)
             is FileReadyState -> DFUSummaryView(state, onEvent)
-            is HexFileLoadedState -> DFUSelectDatFileView(state, onEvent)
             UploadSuccessState -> DFUSuccessView(onEvent)
             is UploadFailureState -> DFUErrorView(state, onEvent)
             is FileInstallingState -> DFUInstallingView(state, onEvent)

@@ -9,7 +9,6 @@ import no.nordicsemi.android.service.SelectedBluetoothDeviceHolder
 import no.nordicsemi.android.theme.viewmodel.CloseableViewModel
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.dfu.data.Completed
-import no.nordicsemi.dfu.data.DFUFile
 import no.nordicsemi.dfu.data.DFUManager
 import no.nordicsemi.dfu.data.DFUProgressManager
 import no.nordicsemi.dfu.data.DFURepository
@@ -18,10 +17,9 @@ import no.nordicsemi.dfu.data.Error
 import no.nordicsemi.dfu.data.FileInstallingState
 import no.nordicsemi.dfu.data.FileReadyState
 import no.nordicsemi.dfu.data.NoFileSelectedState
+import no.nordicsemi.dfu.data.ZipFile
 import no.nordicsemi.dfu.view.DFUViewEvent
-import no.nordicsemi.dfu.view.OnDatFileSelected
 import no.nordicsemi.dfu.view.OnDisconnectButtonClick
-import no.nordicsemi.dfu.view.OnHexFileSelected
 import no.nordicsemi.dfu.view.OnInstallButtonClick
 import no.nordicsemi.dfu.view.OnPauseButtonClick
 import no.nordicsemi.dfu.view.OnStopButtonClick
@@ -55,9 +53,7 @@ internal class DFUViewModel @Inject constructor(
             }
             OnPauseButtonClick -> closeScreen()
             OnStopButtonClick -> closeScreen()
-            is OnHexFileSelected -> repository.setHexFile(event.file)
             is OnZipFileSelected -> repository.setZipFile(event.file)
-            is OnDatFileSelected -> repository.setDatFile(event.file)
         }.exhaustive
     }
 
@@ -67,7 +63,7 @@ internal class DFUViewModel @Inject constructor(
         finish()
     }
 
-    private fun requireFile(): DFUFile {
+    private fun requireFile(): ZipFile {
         return (repository.data.value as FileReadyState).file
     }
 

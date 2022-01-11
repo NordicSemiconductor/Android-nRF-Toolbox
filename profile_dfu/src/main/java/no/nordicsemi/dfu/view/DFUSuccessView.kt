@@ -21,19 +21,22 @@ import no.nordicsemi.dfu.R
 internal fun DFUSuccessView(onEvent: (DFUViewEvent) -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         ScreenSection {
+            val successColor = colorResource(id = no.nordicsemi.android.material.you.R.color.nordicGrass)
+
             Icon(
                 painter = painterResource(id = R.drawable.ic_success_circle),
                 contentDescription = stringResource(id = R.string.dfu_success_icon_description),
-                tint = colorResource(id = no.nordicsemi.android.material.you.R.color.nordicGrass)
+                tint = successColor
+            )
+
+            Spacer(modifier = Modifier.size(8.dp))
+
+            Text(
+                text = stringResource(id = R.string.dfu_success),
+                color = successColor,
+                style = MaterialTheme.typography.titleLarge
             )
         }
-
-        Spacer(modifier = Modifier.size(16.dp))
-
-        Text(
-            text = stringResource(id = R.string.dfu_success),
-            color = MaterialTheme.colorScheme.error
-        )
 
         Spacer(modifier = Modifier.size(16.dp))
 

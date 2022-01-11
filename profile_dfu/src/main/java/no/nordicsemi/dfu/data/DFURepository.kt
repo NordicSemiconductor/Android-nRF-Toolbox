@@ -20,22 +20,8 @@ internal class DFURepository @Inject constructor(
     fun setZipFile(file: Uri) {
         val currentState = _data.value as NoFileSelectedState
         _data.value = fileManger.createFile(file)?.let {
-            FileReadyState(ZipFile(it), requireNotNull(deviceHolder.device))
+            FileReadyState(it, requireNotNull(deviceHolder.device))
         } ?: currentState.copy(isError = true)
-    }
-
-    fun setHexFile(file: Uri) {
-        val currentState = _data.value as NoFileSelectedState
-        _data.value = fileManger.createFile(file)?.let {
-            HexFileLoadedState(PartialHexFile(it, DFUFileType.TYPE_APPLICATION))
-        } ?: currentState.copy(isError = true)
-    }
-
-    fun setDatFile(file: Uri) {
-        val currentState = _data.value as HexFileLoadedState
-        _data.value = fileManger.createFile(file)?.let {
-            FileReadyState(FullHexFile(it, currentState.file.data, DFUFileType.TYPE_APPLICATION), requireNotNull(deviceHolder.device))
-        } ?: currentState.copy(isDatFileError = true)
     }
 
     fun setSuccess() {

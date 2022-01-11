@@ -17,7 +17,6 @@
     <string name="dfu_zip_file_details">Zip file details</string>
     <string name="dfu_hex_file_details">Hex file details</string>
 
-    <string name="dfu_file_size">%d bytes</string>
     <string name="dfu_file_type_zip">Distribution packet (ZIP)</string>
     <string name="dfu_file_type_soft_device">Soft Device</string>
     <string name="dfu_file_type_bootloader">Bootloader</string>
@@ -52,4 +51,7 @@
 
     <string name="dfu_success">Success!</string>
     <string name="dfu_unknown_error">Unknown error.</string>
+
+    <string name="dfu_file_name">File name: <b>%s</b></string>
+    <string name="dfu_file_size">File size: <b>%d</b> bytes</string>
 </resources>
