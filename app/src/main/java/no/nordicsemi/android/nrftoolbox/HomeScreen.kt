@@ -30,7 +30,6 @@ import no.nordicsemi.android.prx.view.PRXScreen
 import no.nordicsemi.android.rscs.view.RSCSScreen
 import no.nordicsemi.android.theme.view.CloseIconAppBar
 import no.nordicsemi.android.uart.view.UARTScreen
-import no.nordicsemi.dfu.view.DFUScreen
 import no.nordicsemi.ui.scanner.navigation.view.FindDeviceScreen
 
 @Composable
@@ -119,7 +118,6 @@ internal fun HomeScreen() {
         composable(NavDestination.DFU.id) {
             FindDeviceScreen(ParcelUuid(NavDestination.DFU.uuid)) {
                 deviceHolder.onDeviceSelected(it)
-                DFUScreen { goHome() }
             }
         }
     }
@@ -284,8 +282,8 @@ fun HomeView(callback: (NavDestination) -> Unit) {
                     ) {
                         FeatureButton(
                             R.drawable.ic_dfu, R.string.dfu_module,
-                            R.string.uart_module_full
-                        ) { callback(NavDestination.DFU) }
+                            R.string.dfu_module_full
+                        ) {  }
                     }
                 }
 
