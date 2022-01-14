@@ -46,8 +46,8 @@ internal fun HomeScreen() {
         startDestination = NavigationId.HOME.id
     ) {
         composable(NavigationId.SCANNER.id) {
-//            val profile = viewModel.profile!!
-            FindDeviceScreen(ParcelUuid(Profile.CSC.uuid)) {
+            val profile = viewModel.profile!!
+            FindDeviceScreen(ParcelUuid(profile.uuid)) {
                 viewModel.onScannerFlowResult(it)
             }
         }
