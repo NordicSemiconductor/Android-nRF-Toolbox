@@ -35,12 +35,12 @@ class HomeViewModel @Inject constructor(
 
     fun navigateUp() {
         val currentDestination = _destination.value
-        when (currentDestination) {
+        _destination.value = when (currentDestination) {
             FinishDestination -> FinishDestination
             HomeDestination -> FinishDestination
             is ProfileDestination -> HomeDestination
             is ScannerDestination -> HomeDestination
-        }.exhaustive
+        }
     }
 
     private fun onDeviceSelected(result: FindDeviceSuccessResult) {

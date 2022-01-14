@@ -2,6 +2,7 @@ package no.nordicsemi.android.nrftoolbox
 
 import android.app.Activity
 import android.os.ParcelUuid
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -88,7 +89,10 @@ internal fun HomeScreen() {
         when (val destination = destination.value) {
             FinishDestination -> context.finish()
             HomeDestination -> navController.navigateUp()
-            is ProfileDestination -> navController.navigate(destination.id.id)
+            is ProfileDestination -> {
+                navController.navigateUp()
+                navController.navigate(destination.id.id)
+            }
             is ScannerDestination -> navController.navigate(destination.id.id)
         }.exhaustive
     }
