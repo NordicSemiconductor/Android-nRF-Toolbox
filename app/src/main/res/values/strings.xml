@@ -8,7 +8,7 @@
     <string name="hts_module">HTS</string>
     <string name="hts_module_full">Health Thermometer</string>
     <string name="bps_module">BPS</string>
-    <string name="bps_module_full">Blood presure</string>
+    <string name="bps_module_full">Blood pressure</string>
     <string name="rscs_module">RSCS</string>
     <string name="rscs_module_full">Running Speed and Cadence</string>
     <string name="prx_module">PRX</string>
