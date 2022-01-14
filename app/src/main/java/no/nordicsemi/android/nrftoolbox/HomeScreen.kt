@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -30,12 +31,16 @@ import no.nordicsemi.android.prx.view.PRXScreen
 import no.nordicsemi.android.rscs.view.RSCSScreen
 import no.nordicsemi.android.theme.view.CloseIconAppBar
 import no.nordicsemi.android.uart.view.UARTScreen
+import no.nordicsemi.ui.scanner.navigation.view.FindDeviceCloseResult
 import no.nordicsemi.ui.scanner.navigation.view.FindDeviceScreen
+import no.nordicsemi.ui.scanner.navigation.view.FindDeviceFlowStatus
+import no.nordicsemi.ui.scanner.navigation.view.FindDeviceProcessingResult
+import no.nordicsemi.ui.scanner.navigation.view.FindDeviceSuccessResult
+import no.nordicsemi.ui.scanner.ui.exhaustive
 
 @Composable
 internal fun HomeScreen() {
     val navController = rememberNavController()
-    val deviceHolder: HomeViewModel = hiltViewModel()
 
     val activity = LocalContext.current as Activity
     BackHandler {
@@ -56,71 +61,51 @@ internal fun HomeScreen() {
             HomeView { navController.navigate(it.id) }
         }
         composable(NavDestination.CSC.id) {
-            FindDeviceScreen(ParcelUuid(NavDestination.CSC.uuid)) {
-                deviceHolder.onDeviceSelected(it)
-                CSCScreen { goHome() }
-            }
+            handleScannerFlow(navController) { CSCScreen { goHome() }}
         }
         composable(NavDestination.HRS.id) {
-            FindDeviceScreen(ParcelUuid(NavDestination.HRS.uuid)) {
-                deviceHolder.onDeviceSelected(it)
-                HRSScreen { goHome() }
-            }
+            handleScannerFlow(navController) { HRSScreen { goHome() }}
         }
         composable(NavDestination.HTS.id) {
-            FindDeviceScreen(ParcelUuid(NavDestination.HTS.uuid)) {
-                deviceHolder.onDeviceSelected(it)
-                HTSScreen { goHome() }
-            }
+            handleScannerFlow(navController) { HTSScreen { goHome() }}
         }
         composable(NavDestination.GLS.id) {
-            FindDeviceScreen(ParcelUuid(NavDestination.GLS.uuid)) {
-                deviceHolder.onDeviceSelected(it)
-                GLSScreen { goHome() }
-            }
+            handleScannerFlow(navController) { GLSScreen { goHome() }}
         }
         composable(NavDestination.BPS.id) {
-            FindDeviceScreen(ParcelUuid(NavDestination.BPS.uuid)) {
-                deviceHolder.onDeviceSelected(it)
-                BPSScreen { goHome() }
-            }
+            handleScannerFlow(navController) { BPSScreen { goHome() }}
         }
         composable(NavDestination.PRX.id) {
-            FindDeviceScreen(ParcelUuid(NavDestination.PRX.uuid)) {
-                deviceHolder.onDeviceSelected(it)
-                PRXScreen { goHome() }
-            }
+            handleScannerFlow(navController) { PRXScreen { goHome() }}
         }
         composable(NavDestination.RSCS.id) {
-            FindDeviceScreen(ParcelUuid(NavDestination.RSCS.uuid)) {
-                deviceHolder.onDeviceSelected(it)
-                RSCSScreen { goHome() }
-            }
+            handleScannerFlow(navController) { RSCSScreen { goHome() }}
         }
         composable(NavDestination.CGMS.id) {
-            FindDeviceScreen(ParcelUuid(NavDestination.CGMS.uuid)) {
-                deviceHolder.onDeviceSelected(it)
-                CGMScreen { goHome() }
-            }
-        }
-        composable(NavDestination.CGMS.id) {
-            FindDeviceScreen(ParcelUuid(NavDestination.CGMS.uuid)) {
-                deviceHolder.onDeviceSelected(it)
-                CGMScreen { goHome() }
-            }
+            handleScannerFlow(navController) { CGMScreen { goHome() }}
         }
         composable(NavDestination.UART.id) {
-            FindDeviceScreen(ParcelUuid(NavDestination.UART.uuid)) {
-                deviceHolder.onDeviceSelected(it)
-                UARTScreen { goHome() }
-            }
-        }
-        composable(NavDestination.DFU.id) {
-            FindDeviceScreen(ParcelUuid(NavDestination.DFU.uuid)) {
-                deviceHolder.onDeviceSelected(it)
-            }
+            handleScannerFlow(navController) { UARTScreen { goHome() }}
         }
     }
+}
+
+@Composable
+private fun handleScannerFlow(navController: NavHostController, screen: @Composable () -> Unit) {
+    val deviceHolder: HomeViewModel = hiltViewModel()
+
+    val findDeviceResult = remember {
+        mutableStateOf<FindDeviceFlowStatus>(FindDeviceProcessingResult)
+    }
+
+    when (val result = findDeviceResult.value) {
+        FindDeviceProcessingResult -> FindDeviceScreen(ParcelUuid(NavDestination.CSC.uuid), findDeviceResult)
+        FindDeviceCloseResult -> navController.navigateUp()
+        is FindDeviceSuccessResult -> {
+            deviceHolder.onDeviceSelected(result.device)
+            screen()
+        }
+    }.exhaustive
 }
 
 @Composable
@@ -289,31 +274,6 @@ fun HomeView(callback: (NavDestination) -> Unit) {
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
-        }
-    }
-}
-
-@Composable
-private fun BackHandler(enabled: Boolean = true, onBack: () -> Unit) {
-    val currentOnBack = rememberUpdatedState(onBack)
-    val backCallback = remember {
-        object : OnBackPressedCallback(enabled) {
-            override fun handleOnBackPressed() {
-                currentOnBack.value()
-            }
-        }
-    }
-    SideEffect {
-        backCallback.isEnabled = enabled
-    }
-    val backDispatcher = checkNotNull(LocalOnBackPressedDispatcherOwner.current) {
-        "No OnBackPressedDispatcherOwner was provided via LocalOnBackPressedDispatcherOwner"
-    }.onBackPressedDispatcher
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner, backDispatcher) {
-        backDispatcher.addCallback(lifecycleOwner, backCallback)
-        onDispose {
-            backCallback.remove()
         }
     }
 }
