@@ -1,7 +1,10 @@
 package no.nordicsemi.android.csc.data
 
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import no.nordicsemi.android.csc.view.SpeedUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -11,6 +14,9 @@ internal class CSCRepository @Inject constructor() {
 
     private val _data = MutableStateFlow(CSCData())
     val data: StateFlow<CSCData> = _data
+
+    private val _command = MutableSharedFlow<CSCServiceCommand>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_LATEST)
+    val command = _command.asSharedFlow()
 
     fun setWheelSize(wheelSize: Int, wheelSizeDisplay: String) {
         _data.tryEmit(_data.value.copy(
@@ -42,6 +48,10 @@ internal class CSCRepository @Inject constructor() {
 
     fun setBatteryLevel(batteryLevel: Int) {
         _data.tryEmit(_data.value.copy(batteryLevel = batteryLevel))
+    }
+
+    fun sendNewServiceCommand(workingMode: CSCServiceCommand) {
+        _command.tryEmit(workingMode)
     }
 
     fun clear() {

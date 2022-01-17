@@ -7,36 +7,37 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.bps.R
-import no.nordicsemi.android.bps.data.BPSData
 import no.nordicsemi.android.bps.viewmodel.BPSViewModel
 import no.nordicsemi.android.theme.view.BackIconAppBar
+import no.nordicsemi.android.theme.view.DeviceConnectingView
+import no.nordicsemi.android.utils.exhaustive
 
 @Composable
 fun BPSScreen(finishAction: () -> Unit) {
     val viewModel: BPSViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
-    val isScreenActive = viewModel.isActive.collectAsState().value
 
-    LaunchedEffect("connect") {
-        viewModel.connectDevice()
-    }
-
-    LaunchedEffect(isScreenActive) {
-        if (!isScreenActive) {
+    LaunchedEffect(state.isActive) {
+        if (state.isActive) {
+            viewModel.connectDevice()
+        } else {
             finishAction()
         }
     }
 
-    BPSView(state) { viewModel.onEvent(it) }
+    BPSView(state.viewState) { viewModel.onEvent(it) }
 }
 
 @Composable
-private fun BPSView(state: BPSData, onEvent: (BPSScreenViewEvent) -> Unit) {
+private fun BPSView(state: BPSViewState, onEvent: (BPSScreenViewEvent) -> Unit) {
     Column {
         BackIconAppBar(stringResource(id = R.string.bps_title)) {
             onEvent(DisconnectEvent)
         }
 
-        BPSContentView(state) { onEvent(it) }
+        when (state) {
+            is DisplayDataState -> BPSContentView(state.data) { onEvent(it) }
+            LoadingState -> DeviceConnectingView()
+        }.exhaustive
     }
 }

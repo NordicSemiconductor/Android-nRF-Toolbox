@@ -1,5 +1,6 @@
 package no.nordicsemi.android.csc.viewmodel
 
+import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import no.nordicsemi.android.csc.data.CSCRepository
 import no.nordicsemi.android.csc.view.CSCViewEvent
@@ -8,14 +9,13 @@ import no.nordicsemi.android.csc.view.OnDisconnectButtonClick
 import no.nordicsemi.android.csc.view.OnSelectedSpeedUnitSelected
 import no.nordicsemi.android.csc.view.OnShowEditWheelSizeDialogButtonClick
 import no.nordicsemi.android.csc.view.OnWheelSizeSelected
-import no.nordicsemi.android.theme.viewmodel.CloseableViewModel
 import no.nordicsemi.android.utils.exhaustive
 import javax.inject.Inject
 
 @HiltViewModel
 internal class CSCViewModel @Inject constructor(
     private val dataHolder: CSCRepository
-) : CloseableViewModel() {
+) : ViewModel() {
 
     val state = dataHolder.data
 

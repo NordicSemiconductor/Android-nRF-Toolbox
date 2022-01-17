@@ -70,12 +70,6 @@ internal class CSCManager(context: Context, private val dataHolder: CSCRepositor
             // CSC characteristic is required
             setNotificationCallback(cscMeasurementCharacteristic)
                 .with(object : CyclingSpeedAndCadenceMeasurementDataCallback() {
-                    override fun onDataReceived(device: BluetoothDevice, data: Data) {
-                        log(LogContract.Log.Level.APPLICATION, "\"" + parse(data) + "\" received")
-
-                        // Pass through received data
-                        super.onDataReceived(device, data)
-                    }
 
                     override fun getWheelCircumference(): Float {
                         return wheelSize.toFloat()

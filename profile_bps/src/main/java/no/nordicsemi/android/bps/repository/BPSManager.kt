@@ -58,17 +58,6 @@ internal class BPSManager @Inject constructor(
 
     private val intermediateCuffPressureCallback = object : IntermediateCuffPressureDataCallback() {
 
-        override fun onDataReceived(device: BluetoothDevice, data: Data) {
-            log(
-                LogContract.Log.Level.APPLICATION,
-                "\"" + IntermediateCuffPressureParser.parse(data)
-                    .toString() + "\" received"
-            )
-
-            // Pass through received data
-            super.onDataReceived(device, data)
-        }
-
         override fun onIntermediateCuffPressureReceived(
             device: BluetoothDevice,
             cuffPressure: Float,
@@ -94,17 +83,6 @@ internal class BPSManager @Inject constructor(
     }
 
     private val bloodPressureMeasurementDataCallback = object : BloodPressureMeasurementDataCallback() {
-
-        override fun onDataReceived(device: BluetoothDevice, data: Data) {
-            log(
-                LogContract.Log.Level.APPLICATION,
-                "\"" + BloodPressureMeasurementParser.parse(data)
-                    .toString() + "\" received"
-            )
-
-            // Pass through received data
-            super.onDataReceived(device, data)
-        }
 
         override fun onBloodPressureMeasurementReceived(
             device: BluetoothDevice,
@@ -138,10 +116,6 @@ internal class BPSManager @Inject constructor(
         dataHolder.setBatteryLevel(batteryLevel)
     }
 
-    /**
-     * BluetoothGatt callbacks for connection/disconnection, service discovery,
-     * receiving notification, etc.
-     */
     private inner class BloodPressureManagerGattCallback : BatteryManagerGattCallback() {
 
         override fun initialize() {

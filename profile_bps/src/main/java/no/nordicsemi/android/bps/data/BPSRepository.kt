@@ -2,7 +2,9 @@ package no.nordicsemi.android.bps.data
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import no.nordicsemi.android.ble.common.profile.bp.BloodPressureTypes
+import no.nordicsemi.android.service.BleManagerStatus
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -12,6 +14,9 @@ internal class BPSRepository @Inject constructor() {
 
     private val _data = MutableStateFlow(BPSData())
     val data: StateFlow<BPSData> = _data
+
+    private val _status = MutableStateFlow(BleManagerStatus.CONNECTING)
+    val status = _status.asStateFlow()
 
     fun setIntermediateCuffPressure(
         cuffPressure: Float,
@@ -59,5 +64,9 @@ internal class BPSRepository @Inject constructor() {
 
     fun clear() {
         _data.tryEmit(BPSData())
+    }
+
+    fun setNewStatus(status: BleManagerStatus) {
+        _status.value = status
     }
 }

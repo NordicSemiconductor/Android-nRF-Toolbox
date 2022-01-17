@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import no.nordicsemi.android.service.BleManagerStatus
-import no.nordicsemi.android.theme.viewmodel.CloseableViewModel
 import no.nordicsemi.android.uart.data.DisconnectCommand
 import no.nordicsemi.android.uart.data.SendTextCommand
 import no.nordicsemi.android.uart.data.UARTRepository
