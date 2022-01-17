@@ -1,3 +1,7 @@
 package no.nordicsemi.android.uart.data
 
-data class UARTServiceCommand(val command: String)
+internal sealed class UARTServiceCommand
+
+internal data class SendTextCommand(val command: String) : UARTServiceCommand()
+
+internal object DisconnectCommand : UARTServiceCommand()

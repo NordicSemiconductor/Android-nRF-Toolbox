@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -26,24 +28,24 @@ internal fun CSCContentView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
         SelectWheelSizeDialog { onEvent(it) }
     }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(horizontal = 16.dp)
-    ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
-        SettingsSection(state, onEvent)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        SensorsReadingView(state = state)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = { onEvent(OnDisconnectButtonClick) }
+    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(16.dp)
         ) {
-            Text(text = stringResource(id = R.string.disconnect))
+            SettingsSection(state, onEvent)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            SensorsReadingView(state = state)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = { onEvent(OnDisconnectButtonClick) }
+            ) {
+                Text(text = stringResource(id = R.string.disconnect))
+            }
         }
     }
 }

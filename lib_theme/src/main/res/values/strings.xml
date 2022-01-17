@@ -10,4 +10,8 @@
 
     <string name="disconnect">DISCONNECT</string>
     <string name="field_battery">Battery</string>
+
+    <string name="device_connecting">Connecting</string>
+    <string name="device_explanation">The mobile is trying to connect to peripheral device.</string>
+    <string name="device_please_wait">Please wait.</string>
 </resources>

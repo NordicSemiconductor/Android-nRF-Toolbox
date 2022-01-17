@@ -1,9 +1,9 @@
 package no.nordicsemi.android.cgms.view
 
-import no.nordicsemi.android.cgms.data.WorkingMode
+import no.nordicsemi.android.cgms.data.CGMServiceCommand
 
 internal sealed class CGMViewEvent
 
-internal data class OnWorkingModeSelected(val workingMode: WorkingMode) : CGMViewEvent()
+internal data class OnWorkingModeSelected(val workingMode: CGMServiceCommand) : CGMViewEvent()
 
 internal object DisconnectEvent : CGMViewEvent()

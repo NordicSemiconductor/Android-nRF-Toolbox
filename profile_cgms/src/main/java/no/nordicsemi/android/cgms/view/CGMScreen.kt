@@ -9,49 +9,43 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.cgms.R
-import no.nordicsemi.android.cgms.data.CGMData
 import no.nordicsemi.android.cgms.repository.CGMService
 import no.nordicsemi.android.cgms.viewmodel.CGMScreenViewModel
 import no.nordicsemi.android.theme.view.BackIconAppBar
-import no.nordicsemi.android.utils.isServiceRunning
+import no.nordicsemi.android.theme.view.DeviceConnectingView
+import no.nordicsemi.android.utils.exhaustive
 
 @Composable
 fun CGMScreen(finishAction: () -> Unit) {
     val viewModel: CGMScreenViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
-    val isScreenActive = viewModel.isActive.collectAsState().value
 
     val context = LocalContext.current
-    LaunchedEffect(isScreenActive) {
-        if (!isScreenActive) {
-            finishAction()
-        }
-        if (context.isServiceRunning(CGMService::class.java.name)) {
-            val intent = Intent(context, CGMService::class.java)
-            context.stopService(intent)
-        }
-    }
-
-    LaunchedEffect("start-service") {
-        if (!context.isServiceRunning(CGMService::class.java.name)) {
+    LaunchedEffect(state.isActive) {
+        if (state.isActive) {
             val intent = Intent(context, CGMService::class.java)
             context.startService(intent)
+        } else if (!state.isActive) {
+            finishAction()
         }
     }
 
-    CGMView(state) {
+    CGMView(state.viewState) {
         viewModel.onEvent(it)
     }
 }
 
 @Composable
-private fun CGMView(state: CGMData, onEvent: (CGMViewEvent) -> Unit) {
+private fun CGMView(state: CGMViewState, onEvent: (CGMViewEvent) -> Unit) {
     Column {
         BackIconAppBar(stringResource(id = R.string.cgms_title)) {
             onEvent(DisconnectEvent)
         }
 
-        CGMContentView(state, onEvent)
+        when (state) {
+            is DisplayDataState -> CGMContentView(state.data, onEvent)
+            LoadingState -> DeviceConnectingView()
+        }.exhaustive
     }
 }
 

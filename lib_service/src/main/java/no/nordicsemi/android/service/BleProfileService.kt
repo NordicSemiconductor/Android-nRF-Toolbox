@@ -21,21 +21,33 @@
  */
 package no.nordicsemi.android.service
 
+import android.app.Service
 import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import android.os.Handler
+import android.os.IBinder
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LifecycleService
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.log.ILogSession
 import no.nordicsemi.android.log.Logger
 import javax.inject.Inject
 
 @AndroidEntryPoint
-abstract class BleProfileService : LifecycleService() {
+abstract class BleProfileService : Service() {
+
+    protected val scope = CloseableCoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     protected abstract val manager: BleManager
+
+    private val _status = MutableStateFlow(BleManagerStatus.CONNECTING)
+    val status = _status.asStateFlow()
 
     @Inject
     lateinit var bluetoothDeviceHolder: SelectedBluetoothDeviceHolder
@@ -71,6 +83,23 @@ abstract class BleProfileService : LifecycleService() {
     override fun onCreate() {
         super.onCreate()
         handler = Handler()
+
+        manager.setConnectionObserver(object : ConnectionObserverAdapter() {
+            override fun onDeviceConnected(device: BluetoothDevice) {
+                super.onDeviceConnected(device)
+                _status.value = BleManagerStatus.OK
+            }
+
+            override fun onDeviceDisconnected(device: BluetoothDevice, reason: Int) {
+                super.onDeviceDisconnected(device, reason)
+                _status.value = BleManagerStatus.DISCONNECTED
+                scope.close()
+            }
+        })
+    }
+
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
     }
 
     /**
@@ -89,6 +118,7 @@ abstract class BleProfileService : LifecycleService() {
             .useAutoConnect(shouldAutoConnect())
             .retry(3, 100)
             .enqueue()
+
         return START_REDELIVER_INTENT
     }
 

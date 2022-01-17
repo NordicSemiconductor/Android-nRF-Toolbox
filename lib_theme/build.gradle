@@ -6,6 +6,7 @@ dependencies {
     implementation libs.nordic.theme
 
     implementation libs.bundles.compose
+    implementation libs.bundles.icons
     implementation libs.compose.lifecycle
     implementation libs.compose.activity
 }

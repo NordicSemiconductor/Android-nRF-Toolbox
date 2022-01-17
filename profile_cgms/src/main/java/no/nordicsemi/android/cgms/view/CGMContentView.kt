@@ -18,7 +18,7 @@ import no.nordicsemi.android.cgms.R
 import no.nordicsemi.android.cgms.data.CGMData
 import no.nordicsemi.android.cgms.data.CGMRecord
 import no.nordicsemi.android.cgms.data.RequestStatus
-import no.nordicsemi.android.cgms.data.WorkingMode
+import no.nordicsemi.android.cgms.data.CGMServiceCommand
 import no.nordicsemi.android.material.you.CircularProgressIndicator
 import no.nordicsemi.android.theme.view.BatteryLevelView
 import no.nordicsemi.android.theme.view.ScreenSection
@@ -29,12 +29,10 @@ internal fun CGMContentView(state: CGMData, onEvent: (CGMViewEvent) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp)
+            .padding(16.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
         SettingsView(state, onEvent)
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -71,10 +69,14 @@ private fun SettingsView(state: CGMData, onEvent: (CGMViewEvent) -> Unit) {
             if (state.requestStatus == RequestStatus.PENDING) {
                 CircularProgressIndicator()
             } else {
-                WorkingMode.values().forEach {
-                    Button(onClick = { onEvent(OnWorkingModeSelected(it)) }) {
-                        Text(it.toDisplayString())
-                    }
+                Button(onClick = { onEvent(OnWorkingModeSelected(CGMServiceCommand.REQUEST_ALL_RECORDS)) }) {
+                    Text(stringResource(id = R.string.cgms__working_mode__all))
+                }
+                Button(onClick = { onEvent(OnWorkingModeSelected(CGMServiceCommand.REQUEST_LAST_RECORD)) }) {
+                    Text(stringResource(id = R.string.cgms__working_mode__last))
+                }
+                Button(onClick = { onEvent(OnWorkingModeSelected(CGMServiceCommand.REQUEST_FIRST_RECORD)) }) {
+                    Text(stringResource(id = R.string.cgms__working_mode__first))
                 }
             }
         }

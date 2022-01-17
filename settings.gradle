@@ -37,6 +37,10 @@ dependencyResolutionManagement {
             alias('compose-navigation').to('androidx.navigation:navigation-compose:2.4.0-alpha09')
             bundle('compose', ['compose-livedata', 'compose-ui', 'compose-material', 'compose-tooling-preview', 'compose-navigation'])
 
+            alias('material-icons').to('androidx.compose.material', 'material-icons-core').versionRef('compose')
+            alias('material-icons-extended').to('androidx.compose.material', 'material-icons-extended').versionRef('compose')
+            bundle('icons', ['material-icons', 'material-icons-extended'])
+
             version('hilt', '2.38.1')
             alias('hilt-android').to('com.google.dagger', 'hilt-android').versionRef('hilt')
             alias('hilt-compiler').to('com.google.dagger', 'hilt-compiler').versionRef('hilt')

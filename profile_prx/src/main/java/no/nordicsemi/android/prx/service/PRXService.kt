@@ -39,7 +39,7 @@ internal class PRXService : ForegroundBleService() {
                 DisableAlarm -> manager.writeImmediateAlert(false)
                 EnableAlarm -> manager.writeImmediateAlert(true)
             }.exhaustive
-        }.launchIn(lifecycleScope)
+        }.launchIn(scope)
 
         dataHolder.data.onEach {
             if (it.localAlarmLevel != AlarmLevel.NONE) {
@@ -47,7 +47,7 @@ internal class PRXService : ForegroundBleService() {
             } else {
                 alarmHandler.pauseAlarm()
             }
-        }.launchIn(lifecycleScope)
+        }.launchIn(scope)
     }
 
     override fun onDestroy() {

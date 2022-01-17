@@ -26,8 +26,6 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
 import no.nordicsemi.android.ble.common.callback.rsc.RunningSpeedAndCadenceMeasurementDataCallback
-import no.nordicsemi.android.ble.data.Data
-import no.nordicsemi.android.log.LogContract
 import no.nordicsemi.android.rscs.data.RSCSRepository
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
@@ -46,13 +44,6 @@ internal class RSCSManager internal constructor(
     private var rscMeasurementCharacteristic: BluetoothGattCharacteristic? = null
 
     private val callback = object : RunningSpeedAndCadenceMeasurementDataCallback() {
-        override fun onDataReceived(device: BluetoothDevice, data: Data) {
-            log(
-                LogContract.Log.Level.APPLICATION,
-                "\"" + RSCMeasurementParser.parse(data).toString() + "\" received"
-            )
-            super.onDataReceived(device, data)
-        }
 
         override fun onRSCMeasurementReceived(
             device: BluetoothDevice,

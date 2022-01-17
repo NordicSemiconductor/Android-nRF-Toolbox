@@ -2,6 +2,7 @@ package no.nordicsemi.android.cgms.data
 
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
+import no.nordicsemi.android.service.BleManagerStatus
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -11,8 +12,11 @@ internal class CGMRepository @Inject constructor() {
     private val _data = MutableStateFlow(CGMData())
     val data: StateFlow<CGMData> = _data.asStateFlow()
 
-    private val _command = MutableSharedFlow<WorkingMode>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_LATEST)
+    private val _command = MutableSharedFlow<CGMServiceCommand>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_LATEST)
     val command = _command.asSharedFlow()
+
+    private val _status = MutableStateFlow(BleManagerStatus.CONNECTING)
+    val status = _status.asStateFlow()
 
     fun emitNewBatteryLevel(batterLevel: Int) {
         _data.tryEmit(_data.value.copy(batteryLevel = batterLevel))
@@ -26,8 +30,12 @@ internal class CGMRepository @Inject constructor() {
         _data.tryEmit(_data.value.copy(requestStatus = requestStatus))
     }
 
-    fun requestNewWorkingMode(workingMode: WorkingMode) {
+    fun sendNewServiceCommand(workingMode: CGMServiceCommand) {
         _command.tryEmit(workingMode)
+    }
+
+    fun setNewStatus(status: BleManagerStatus) {
+        _status.value = status
     }
 
     fun clear() {
