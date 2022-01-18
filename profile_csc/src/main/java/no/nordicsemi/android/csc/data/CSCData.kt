@@ -1,6 +1,5 @@
 package no.nordicsemi.android.csc.data
 
-import no.nordicsemi.android.csc.view.CSCSettings
 import no.nordicsemi.android.csc.view.SpeedUnit
 import no.nordicsemi.android.material.you.RadioButtonItem
 import no.nordicsemi.android.material.you.RadioGroupViewEntity
@@ -11,7 +10,6 @@ private const val DISPLAY_KM_H = "km/h"
 private const val DISPLAY_MPH = "mph"
 
 internal data class CSCData(
-    val showDialog: Boolean = false,
     val scanDevices: Boolean = false,
     val selectedSpeedUnit: SpeedUnit = SpeedUnit.M_S,
     val speed: Float = 0f,
@@ -20,8 +18,7 @@ internal data class CSCData(
     val totalDistance: Float = 0f,
     val gearRatio: Float = 0f,
     val batteryLevel: Int = 0,
-    val wheelSize: Int = CSCSettings.DefaultWheelSize.VALUE,
-    val wheelSizeDisplay: String = CSCSettings.DefaultWheelSize.NAME
+    val wheelSize: WheelSize = WheelSize()
 ) {
 
     private val speedWithUnit = when (selectedSpeedUnit) {

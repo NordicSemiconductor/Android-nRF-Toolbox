@@ -1,5 +1,6 @@
 package no.nordicsemi.android.csc.repository
 
+import android.util.Log
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -21,10 +22,14 @@ internal class CSCService : ForegroundBleService() {
     override fun onCreate() {
         super.onCreate()
 
+        status.onEach {
+            repository.setNewStatus(it)
+        }.launchIn(scope)
+
         repository.command.onEach {
             when (it) {
                 DisconnectCommand -> stopSelf()
-                is SetWheelSizeCommand -> manager.setWheelSize(it.size)
+                is SetWheelSizeCommand -> manager.setWheelSize(it.wheelSize)
             }.exhaustive
         }.launchIn(scope)
     }

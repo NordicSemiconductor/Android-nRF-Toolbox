@@ -11,21 +11,41 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.csc.R
 import no.nordicsemi.android.csc.data.CSCData
+import no.nordicsemi.android.csc.data.WheelSize
 import no.nordicsemi.android.material.you.RadioButtonGroup
 import no.nordicsemi.android.theme.view.ScreenSection
 import no.nordicsemi.android.theme.view.SectionTitle
+import no.nordicsemi.android.theme.view.dialog.FlowCanceled
+import no.nordicsemi.android.theme.view.dialog.ItemSelectedResult
+import no.nordicsemi.android.utils.exhaustive
 
 @Composable
 internal fun CSCContentView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
-    if (state.showDialog) {
-        SelectWheelSizeDialog { onEvent(it) }
+    val showDialog = rememberSaveable { mutableStateOf(false) }
+
+    if (showDialog.value) {
+        val wheelEntries = stringArrayResource(R.array.wheel_entries)
+        val wheelValues = stringArrayResource(R.array.wheel_values)
+
+        SelectWheelSizeDialog {
+            when (it) {
+                FlowCanceled -> showDialog.value = false
+                is ItemSelectedResult -> {
+                    onEvent(OnWheelSizeSelected(WheelSize(wheelValues[it.index].toInt(), wheelEntries[it.index])))
+                    showDialog.value = false
+                }
+            }.exhaustive
+        }
     }
 
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -33,7 +53,7 @@ internal fun CSCContentView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(16.dp)
         ) {
-            SettingsSection(state, onEvent)
+            SettingsSection(state, onEvent) { showDialog.value = true }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -51,7 +71,7 @@ internal fun CSCContentView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
 }
 
 @Composable
-private fun SettingsSection(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
+private fun SettingsSection(state: CSCData, onEvent: (CSCViewEvent) -> Unit, onWheelButtonClick: () -> Unit) {
     ScreenSection {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
@@ -60,7 +80,7 @@ private fun SettingsSection(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            WheelSizeView(state, onEvent)
+            WheelSizeView(state, onWheelButtonClick)
 
             Spacer(modifier = Modifier.height(16.dp))
 

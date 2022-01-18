@@ -30,9 +30,7 @@ import androidx.annotation.IntRange
 import no.nordicsemi.android.ble.common.callback.hr.BodySensorLocationDataCallback
 import no.nordicsemi.android.ble.common.callback.hr.HeartRateMeasurementDataCallback
 import no.nordicsemi.android.ble.common.profile.hr.BodySensorLocation
-import no.nordicsemi.android.ble.data.Data
 import no.nordicsemi.android.hrs.data.HRSRepository
-import no.nordicsemi.android.log.LogContract
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 
@@ -53,11 +51,6 @@ internal class HRSManager(context: Context, private val dataHolder: HRSRepositor
 
     private val bodySensorLocationDataCallback = object : BodySensorLocationDataCallback() {
 
-        override fun onDataReceived(device: BluetoothDevice, data: Data) {
-            log(LogContract.Log.Level.APPLICATION, "\"" + BodySensorLocationParser.parse(data) + "\" received")
-            super.onDataReceived(device, data)
-        }
-
         override fun onBodySensorLocationReceived(
             device: BluetoothDevice,
             @BodySensorLocation sensorLocation: Int
@@ -67,11 +60,6 @@ internal class HRSManager(context: Context, private val dataHolder: HRSRepositor
     }
 
     private val heartRateMeasurementDataCallback = object : HeartRateMeasurementDataCallback() {
-
-        override fun onDataReceived(device: BluetoothDevice, data: Data) {
-            log(LogContract.Log.Level.APPLICATION, "\"" + HeartRateMeasurementParser.parse(data) + "\" received")
-            super.onDataReceived(device, data)
-        }
 
         override fun onHeartRateMeasurementReceived(
             device: BluetoothDevice,

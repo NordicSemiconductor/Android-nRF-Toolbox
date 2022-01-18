@@ -32,7 +32,6 @@ import no.nordicsemi.android.ble.common.callback.bps.IntermediateCuffPressureDat
 import no.nordicsemi.android.ble.common.profile.bp.BloodPressureTypes
 import no.nordicsemi.android.ble.data.Data
 import no.nordicsemi.android.bps.data.BPSRepository
-import no.nordicsemi.android.log.LogContract
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 import javax.inject.Inject

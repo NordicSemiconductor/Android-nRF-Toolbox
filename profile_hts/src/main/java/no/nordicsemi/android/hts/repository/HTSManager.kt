@@ -28,9 +28,7 @@ import android.content.Context
 import no.nordicsemi.android.ble.common.callback.ht.TemperatureMeasurementDataCallback
 import no.nordicsemi.android.ble.common.profile.ht.TemperatureType
 import no.nordicsemi.android.ble.common.profile.ht.TemperatureUnit
-import no.nordicsemi.android.ble.data.Data
 import no.nordicsemi.android.hts.data.HTSRepository
-import no.nordicsemi.android.log.LogContract
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 
@@ -50,13 +48,6 @@ internal class HTSManager internal constructor(
     private var htCharacteristic: BluetoothGattCharacteristic? = null
 
     private val temperatureMeasurementDataCallback = object : TemperatureMeasurementDataCallback() {
-        override fun onDataReceived(device: BluetoothDevice, data: Data) {
-            log(
-                LogContract.Log.Level.APPLICATION,
-                "\"" + HTSTemperatureMeasurementParser.parse(data) + "\" received"
-            )
-            super.onDataReceived(device, data)
-        }
 
         override fun onTemperatureMeasurementReceived(
             device: BluetoothDevice,

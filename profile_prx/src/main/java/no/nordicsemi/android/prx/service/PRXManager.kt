@@ -30,9 +30,7 @@ import android.util.Log
 import no.nordicsemi.android.ble.callback.FailCallback
 import no.nordicsemi.android.ble.common.callback.alert.AlertLevelDataCallback
 import no.nordicsemi.android.ble.common.data.alert.AlertLevelData
-import no.nordicsemi.android.ble.data.Data
 import no.nordicsemi.android.ble.error.GattError
-import no.nordicsemi.android.log.LogContract
 import no.nordicsemi.android.prx.data.PRXRepository
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
@@ -159,12 +157,6 @@ internal class PRXManager(
                 log(
                     Log.VERBOSE,
                     if (on) "Setting alarm to HIGH..." else "Disabling alarm..."
-                )
-            }
-            .with { _: BluetoothDevice, data: Data ->
-                log(
-                    LogContract.Log.Level.APPLICATION,
-                    "\"" + PRXAlertLevelParser.parse(data) + "\" sent"
                 )
             }
             .done { device: BluetoothDevice? ->

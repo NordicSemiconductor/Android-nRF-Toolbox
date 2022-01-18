@@ -21,6 +21,8 @@ import java.util.*
 </T> */
 abstract class BatteryManager(context: Context) : BleManager(context) {
 
+    private val TAG = "BLE-MANAGER"
+
     private var batteryLevelCharacteristic: BluetoothGattCharacteristic? = null
 
     private val batteryLevelDataCallback: DataReceivedCallback =
@@ -65,6 +67,11 @@ abstract class BatteryManager(context: Context) : BleManager(context) {
                 }
                 .enqueue()
         }
+    }
+
+    override fun log(priority: Int, message: String) {
+        super.log(priority, message)
+        Log.println(priority, TAG, message)
     }
 
     protected abstract inner class BatteryManagerGattCallback : BleManagerGattCallback() {

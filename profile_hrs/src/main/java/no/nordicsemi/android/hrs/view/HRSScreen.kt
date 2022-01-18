@@ -9,46 +9,40 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.hrs.R
-import no.nordicsemi.android.hrs.data.HRSData
 import no.nordicsemi.android.hrs.service.HRSService
 import no.nordicsemi.android.hrs.viewmodel.HRSViewModel
 import no.nordicsemi.android.theme.view.BackIconAppBar
-import no.nordicsemi.android.utils.isServiceRunning
+import no.nordicsemi.android.theme.view.DeviceConnectingView
+import no.nordicsemi.android.utils.exhaustive
 
 @Composable
 fun HRSScreen(finishAction: () -> Unit) {
     val viewModel: HRSViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
-    val isActive = viewModel.isActive.collectAsState().value
 
     val context = LocalContext.current
-    LaunchedEffect(isActive) {
-        if (!isActive) {
-            finishAction()
-        }
-        if (context.isServiceRunning(HRSService::class.java.name)) {
-            val intent = Intent(context, HRSService::class.java)
-            context.stopService(intent)
-        }
-    }
-
-    LaunchedEffect("start-service") {
-        if (!context.isServiceRunning(HRSService::class.java.name)) {
+    LaunchedEffect(state.isActive) {
+        if (state.isActive) {
             val intent = Intent(context, HRSService::class.java)
             context.startService(intent)
+        } else {
+            finishAction()
         }
     }
 
-    HRSView(state) { viewModel.onEvent(it) }
+    HRSView(state.viewState) { viewModel.onEvent(it) }
 }
 
 @Composable
-private fun HRSView(state: HRSData, onEvent: (HRSScreenViewEvent) -> Unit) {
+private fun HRSView(state: HRSViewState, onEvent: (HRSScreenViewEvent) -> Unit) {
     Column {
         BackIconAppBar(stringResource(id = R.string.hrs_title)) {
             onEvent(DisconnectEvent)
         }
 
-        HRSContentView(state) { onEvent(it) }
+        when (state) {
+            is DisplayDataState -> HRSContentView(state.data) { onEvent(it) }
+            LoadingState -> DeviceConnectingView()
+        }.exhaustive
     }
 }

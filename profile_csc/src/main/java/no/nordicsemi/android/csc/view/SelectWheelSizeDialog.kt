@@ -5,6 +5,7 @@ import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import no.nordicsemi.android.csc.R
+import no.nordicsemi.android.csc.data.WheelSize
 import no.nordicsemi.android.material.you.NordicTheme
 import no.nordicsemi.android.theme.view.dialog.FlowCanceled
 import no.nordicsemi.android.theme.view.dialog.ItemSelectedResult
@@ -15,16 +16,12 @@ import no.nordicsemi.android.theme.view.dialog.toAnnotatedString
 import no.nordicsemi.android.utils.exhaustive
 
 @Composable
-internal fun SelectWheelSizeDialog(onEvent: (CSCViewEvent) -> Unit) {
+internal fun SelectWheelSizeDialog(onEvent: (StringListDialogResult) -> Unit) {
     val wheelEntries = stringArrayResource(R.array.wheel_entries)
     val wheelValues = stringArrayResource(R.array.wheel_values)
 
     StringListDialog(createConfig(wheelEntries) {
-        when (it) {
-            FlowCanceled -> onEvent(OnCloseSelectWheelSizeDialog)
-            is ItemSelectedResult ->
-                onEvent(OnWheelSizeSelected(wheelValues[it.index].toInt(), wheelEntries[it.index]))
-        }.exhaustive
+        onEvent(it)
     })
 }
 

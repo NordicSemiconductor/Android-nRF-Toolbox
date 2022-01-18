@@ -19,8 +19,8 @@ import no.nordicsemi.android.csc.R
 import no.nordicsemi.android.csc.data.CSCData
 
 @Composable
-internal fun WheelSizeView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
-    OutlinedButton(onClick = { onEvent(OnShowEditWheelSizeDialogButtonClick) }) {
+internal fun WheelSizeView(state: CSCData, onClick: () -> Unit) {
+    OutlinedButton(onClick = { onClick() }) {
         Row(
             modifier = Modifier.fillMaxWidth(0.5f),
             verticalAlignment = Alignment.CenterVertically,
@@ -31,7 +31,7 @@ internal fun WheelSizeView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
                     text = stringResource(id = R.string.csc_field_wheel_size),
                     style = MaterialTheme.typography.labelSmall
                 )
-                Text(text = state.wheelSizeDisplay, style = MaterialTheme.typography.bodyMedium)
+                Text(text = state.wheelSize.name, style = MaterialTheme.typography.bodyMedium)
             }
 
             Icon(Icons.Default.ArrowDropDown, contentDescription = "")

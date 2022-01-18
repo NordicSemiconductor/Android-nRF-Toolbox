@@ -63,6 +63,7 @@ internal class BPSRepository @Inject constructor() {
     }
 
     fun clear() {
+        _status.value = BleManagerStatus.CONNECTING
         _data.tryEmit(BPSData())
     }
 

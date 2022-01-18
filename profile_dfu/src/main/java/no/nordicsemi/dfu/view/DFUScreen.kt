@@ -9,9 +9,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.theme.view.BackIconAppBar
-import no.nordicsemi.android.utils.isServiceRunning
+import no.nordicsemi.android.theme.view.DeviceConnectingView
+import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.dfu.R
-import no.nordicsemi.dfu.data.DFUData
 import no.nordicsemi.dfu.repository.DFUService
 import no.nordicsemi.dfu.viewmodel.DFUViewModel
 
@@ -19,36 +19,30 @@ import no.nordicsemi.dfu.viewmodel.DFUViewModel
 fun DFUScreen(finishAction: () -> Unit) {
     val viewModel: DFUViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
-    val isScreenActive = viewModel.isActive.collectAsState().value
 
     val context = LocalContext.current
-    LaunchedEffect(isScreenActive) {
-        if (!isScreenActive) {
-            finishAction()
-        }
-        if (context.isServiceRunning(DFUService::class.java.name)) {
-            val intent = Intent(context, DFUService::class.java)
-            context.stopService(intent)
-        }
-    }
-
-    LaunchedEffect("start-service") {
-        if (!context.isServiceRunning(DFUService::class.java.name)) {
+    LaunchedEffect(state.isActive) {
+        if (state.isActive) {
             val intent = Intent(context, DFUService::class.java)
             context.startService(intent)
+        } else {
+            finishAction()
         }
     }
 
-    DFUView(state) { viewModel.onEvent(it) }
+    DFUView(state.viewState) { viewModel.onEvent(it) }
 }
 
 @Composable
-private fun DFUView(state: DFUData, onEvent: (DFUViewEvent) -> Unit) {
+private fun DFUView(state: DFUViewState, onEvent: (DFUViewEvent) -> Unit) {
     Column {
         BackIconAppBar(stringResource(id = R.string.dfu_title)) {
             onEvent(OnDisconnectButtonClick)
         }
 
-        DFUContentView(state) { onEvent(it) }
+        when (state) {
+            is DisplayDataState -> DFUContentView(state.data) { onEvent(it) }
+            LoadingState -> DeviceConnectingView()
+        }.exhaustive
     }
 }

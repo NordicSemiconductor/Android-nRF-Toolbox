@@ -42,4 +42,9 @@ internal class UARTViewModel @Inject constructor(
             is OnRunMacro -> repository.sendNewCommand(SendTextCommand(event.macro.command))
         }.exhaustive
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        repository.clear()
+    }
 }

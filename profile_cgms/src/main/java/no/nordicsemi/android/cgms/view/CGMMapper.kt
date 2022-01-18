@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import no.nordicsemi.android.cgms.R
 import no.nordicsemi.android.cgms.data.CGMRecord
-import no.nordicsemi.android.cgms.data.CGMServiceCommand
 import java.text.SimpleDateFormat
 import java.util.*
 

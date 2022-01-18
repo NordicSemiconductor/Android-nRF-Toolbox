@@ -8,55 +8,42 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.prx.R
-import no.nordicsemi.android.prx.data.PRXData
 import no.nordicsemi.android.prx.service.PRXService
 import no.nordicsemi.android.prx.viewmodel.PRXViewModel
 import no.nordicsemi.android.theme.view.BackIconAppBar
-import no.nordicsemi.android.utils.isServiceRunning
+import no.nordicsemi.android.theme.view.DeviceConnectingView
+import no.nordicsemi.android.utils.exhaustive
 
 @Composable
 fun PRXScreen(finishAction: () -> Unit) {
     val viewModel: PRXViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
-    val isActive = viewModel.isActive.collectAsState().value
 
     val context = LocalContext.current
-    LaunchedEffect(isActive) {
-        if (!isActive) {
-            finishAction()
-        }
-        if (context.isServiceRunning(PRXService::class.java.name)) {
-            val intent = Intent(context, PRXService::class.java)
-            context.stopService(intent)
-        }
-    }
-
-    LaunchedEffect("start-service") {
-        if (!context.isServiceRunning(PRXService::class.java.name)) {
+    LaunchedEffect(state.isActive) {
+        if (state.isActive) {
             val intent = Intent(context, PRXService::class.java)
             context.startService(intent)
+        } else {
+            finishAction()
         }
     }
 
-    PRXView(state) { viewModel.onEvent(it) }
+    PRXView(state.viewState) { viewModel.onEvent(it) }
 }
 
 @Composable
-private fun PRXView(state: PRXData, onEvent: (PRXScreenViewEvent) -> Unit) {
+private fun PRXView(state: PRXViewState, onEvent: (PRXScreenViewEvent) -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         BackIconAppBar(stringResource(id = R.string.prx_title)) {
             onEvent(DisconnectEvent)
         }
 
-        ContentView(state) { onEvent(it) }
+        when (state) {
+            is DisplayDataState -> ContentView(state.data) { onEvent(it) }
+            LoadingState -> DeviceConnectingView()
+        }.exhaustive
     }
-}
-
-@Preview
-@Composable
-private fun PRXViewPreview() {
-    PRXView(PRXData()) { }
 }

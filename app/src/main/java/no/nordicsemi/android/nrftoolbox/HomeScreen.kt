@@ -2,7 +2,6 @@ package no.nordicsemi.android.nrftoolbox
 
 import android.app.Activity
 import android.os.ParcelUuid
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,14 +45,14 @@ internal fun HomeScreen() {
         navController = navController,
         startDestination = NavigationId.HOME.id
     ) {
+        composable(NavigationId.HOME.id) {
+            HomeView(viewModel)
+        }
         composable(NavigationId.SCANNER.id) {
             val profile = viewModel.profile!!
             FindDeviceScreen(ParcelUuid(profile.uuid)) {
                 viewModel.onScannerFlowResult(it)
             }
-        }
-        composable(NavigationId.HOME.id) {
-            HomeView(viewModel)
         }
         composable(NavigationId.CSC.id) {
             CSCScreen(navigateUp)

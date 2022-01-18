@@ -42,6 +42,11 @@ internal class BPSViewModel @Inject constructor(
                 repository.setNewStatus(BleManagerStatus.OK)
             }
 
+            override fun onDeviceFailedToConnect(device: BluetoothDevice, reason: Int) {
+                super.onDeviceFailedToConnect(device, reason)
+                repository.setNewStatus(BleManagerStatus.DISCONNECTED)
+            }
+
             override fun onDeviceDisconnected(device: BluetoothDevice, reason: Int) {
                 super.onDeviceDisconnected(device, reason)
                 repository.setNewStatus(BleManagerStatus.DISCONNECTED)
@@ -63,7 +68,13 @@ internal class BPSViewModel @Inject constructor(
     }
 
     private fun onDisconnectButtonClick() {
-        deviceHolder.forgetDevice()
         bpsManager.disconnect().enqueue()
+        deviceHolder.forgetDevice()
+        repository.clear()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        repository.clear()
     }
 }

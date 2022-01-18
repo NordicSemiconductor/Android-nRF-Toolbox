@@ -1,19 +1,34 @@
 package no.nordicsemi.android.service
 
 import android.bluetooth.BluetoothDevice
+import android.util.Log
 import no.nordicsemi.android.ble.observer.ConnectionObserver
 
 abstract class ConnectionObserverAdapter : ConnectionObserver {
 
-    override fun onDeviceConnecting(device: BluetoothDevice) { }
+    private val TAG = "BLE-CONNECTION"
 
-    override fun onDeviceConnected(device: BluetoothDevice) { }
+    override fun onDeviceConnecting(device: BluetoothDevice) {
+        Log.d(TAG, "onDeviceConnecting()")
+    }
 
-    override fun onDeviceFailedToConnect(device: BluetoothDevice, reason: Int) { }
+    override fun onDeviceConnected(device: BluetoothDevice) {
+        Log.d(TAG, "onDeviceConnected()")
+    }
 
-    override fun onDeviceReady(device: BluetoothDevice) { }
+    override fun onDeviceFailedToConnect(device: BluetoothDevice, reason: Int) {
+        Log.d(TAG, "onDeviceFailedToConnect()")
+    }
 
-    override fun onDeviceDisconnecting(device: BluetoothDevice) { }
+    override fun onDeviceReady(device: BluetoothDevice) {
+        Log.d(TAG, "onDeviceReady()")
+    }
 
-    override fun onDeviceDisconnected(device: BluetoothDevice, reason: Int) { }
+    override fun onDeviceDisconnecting(device: BluetoothDevice) {
+        Log.d(TAG, "onDeviceDisconnecting()")
+    }
+
+    override fun onDeviceDisconnected(device: BluetoothDevice, reason: Int) {
+        Log.d(TAG, "onDeviceDisconnected()")
+    }
 }

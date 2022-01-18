@@ -1,7 +1,7 @@
 package no.nordicsemi.android.service
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
 import java.io.Closeable
 import kotlin.coroutines.CoroutineContext
 
@@ -9,6 +9,6 @@ class CloseableCoroutineScope(context: CoroutineContext) : Closeable, CoroutineS
     override val coroutineContext: CoroutineContext = context
 
     override fun close() {
-        coroutineContext.cancel()
+        coroutineContext.cancelChildren()
     }
 }

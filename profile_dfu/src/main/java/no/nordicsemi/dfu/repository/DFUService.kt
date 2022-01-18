@@ -28,10 +28,25 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.dfu.DfuBaseService
+import no.nordicsemi.android.service.BleManagerStatus
+import no.nordicsemi.android.service.CloseableCoroutineScope
 import no.nordicsemi.dfu.R
+import no.nordicsemi.dfu.data.DFURepository
+import javax.inject.Inject
 
-class DFUService : DfuBaseService() {
+@AndroidEntryPoint
+internal class DFUService : DfuBaseService() {
+
+    private val scope = CloseableCoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    @Inject
+    lateinit var repository: DFURepository
 
     override fun onCreate() {
         super.onCreate()
@@ -39,6 +54,12 @@ class DFUService : DfuBaseService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createDfuNotificationChannel(this)
         }
+
+        repository.command.onEach {
+            stopSelf()
+        }.launchIn(scope)
+
+        repository.setNewStatus(BleManagerStatus.OK)
     }
 
     override fun getNotificationTarget(): Class<out Activity?>? {
@@ -76,5 +97,11 @@ class DFUService : DfuBaseService() {
         val notificationManager =
             context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager?.createNotificationChannel(channel)
+    }
+
+    override fun onDestroy() {
+        repository.setNewStatus(BleManagerStatus.DISCONNECTED)
+        super.onDestroy()
+        scope.close()
     }
 }

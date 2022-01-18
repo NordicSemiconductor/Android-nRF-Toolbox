@@ -39,7 +39,12 @@ internal class CGMScreenViewModel @Inject constructor(
     }
 
     private fun disconnect() {
-        repository.clear()
         repository.sendNewServiceCommand(CGMServiceCommand.DISCONNECT)
+        repository.clear()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        repository.clear()
     }
 }

@@ -30,9 +30,7 @@ import androidx.annotation.FloatRange
 import no.nordicsemi.android.ble.common.callback.csc.CyclingSpeedAndCadenceMeasurementDataCallback
 import no.nordicsemi.android.ble.data.Data
 import no.nordicsemi.android.csc.data.CSCRepository
-import no.nordicsemi.android.csc.repository.CSCMeasurementParser.parse
-import no.nordicsemi.android.csc.view.CSCSettings
-import no.nordicsemi.android.log.LogContract
+import no.nordicsemi.android.csc.data.WheelSize
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 
@@ -42,20 +40,20 @@ val CYCLING_SPEED_AND_CADENCE_SERVICE_UUID: UUID = UUID.fromString("00001816-000
 /** Cycling Speed and Cadence Measurement characteristic UUID.  */
 private val CSC_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A5B-0000-1000-8000-00805f9b34fb")
 
-internal class CSCManager(context: Context, private val dataHolder: CSCRepository) : BatteryManager(context) {
+internal class CSCManager(context: Context, private val repository: CSCRepository) : BatteryManager(context) {
 
     private var cscMeasurementCharacteristic: BluetoothGattCharacteristic? = null
-    private var wheelSize = CSCSettings.DefaultWheelSize.VALUE
+    private var wheelSize: WheelSize = WheelSize()
 
     override fun onBatteryLevelChanged(batteryLevel: Int) {
-        dataHolder.setBatteryLevel(batteryLevel)
+        repository.setBatteryLevel(batteryLevel)
     }
 
     override fun getGattCallback(): BatteryManagerGattCallback {
         return CSCManagerGattCallback()
     }
 
-    fun setWheelSize(value: Int) {
+    fun setWheelSize(value: WheelSize) {
         wheelSize = value
     }
 
@@ -72,7 +70,7 @@ internal class CSCManager(context: Context, private val dataHolder: CSCRepositor
                 .with(object : CyclingSpeedAndCadenceMeasurementDataCallback() {
 
                     override fun getWheelCircumference(): Float {
-                        return wheelSize.toFloat()
+                        return wheelSize.value.toFloat()
                     }
 
                     override fun onDistanceChanged(
@@ -81,7 +79,7 @@ internal class CSCManager(context: Context, private val dataHolder: CSCRepositor
                         @FloatRange(from = 0.0) distance: Float,
                         @FloatRange(from = 0.0) speed: Float
                     ) {
-                        dataHolder.setNewDistance(totalDistance, distance, speed)
+                        repository.setNewDistance(totalDistance, distance, speed, wheelSize)
                     }
 
                     override fun onCrankDataChanged(
@@ -89,7 +87,7 @@ internal class CSCManager(context: Context, private val dataHolder: CSCRepositor
                         @FloatRange(from = 0.0) crankCadence: Float,
                         gearRatio: Float
                     ) {
-                        dataHolder.setNewCrankCadence(crankCadence, gearRatio)
+                        repository.setNewCrankCadence(crankCadence, gearRatio, wheelSize)
                     }
 
                     override fun onInvalidDataReceived(

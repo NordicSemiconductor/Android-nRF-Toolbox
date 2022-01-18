@@ -5,3 +5,5 @@ internal sealed class PRXCommand
 internal object EnableAlarm : PRXCommand()
 
 internal object DisableAlarm : PRXCommand()
+
+internal object Disconnect : PRXCommand()

@@ -1,24 +1,28 @@
 package no.nordicsemi.dfu.viewmodel
 
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import no.nordicsemi.android.service.BleManagerStatus
 import no.nordicsemi.android.service.SelectedBluetoothDeviceHolder
-import no.nordicsemi.android.theme.viewmodel.CloseableViewModel
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.dfu.data.Completed
 import no.nordicsemi.dfu.data.DFUManager
 import no.nordicsemi.dfu.data.DFUProgressManager
 import no.nordicsemi.dfu.data.DFURepository
 import no.nordicsemi.dfu.data.DFUServiceStatus
+import no.nordicsemi.dfu.data.DisconnectCommand
 import no.nordicsemi.dfu.data.Error
 import no.nordicsemi.dfu.data.FileInstallingState
 import no.nordicsemi.dfu.data.FileReadyState
-import no.nordicsemi.dfu.data.NoFileSelectedState
 import no.nordicsemi.dfu.data.ZipFile
+import no.nordicsemi.dfu.view.DFUState
 import no.nordicsemi.dfu.view.DFUViewEvent
+import no.nordicsemi.dfu.view.DisplayDataState
+import no.nordicsemi.dfu.view.LoadingState
 import no.nordicsemi.dfu.view.OnDisconnectButtonClick
 import no.nordicsemi.dfu.view.OnInstallButtonClick
 import no.nordicsemi.dfu.view.OnPauseButtonClick
@@ -32,13 +36,19 @@ internal class DFUViewModel @Inject constructor(
     private val progressManager: DFUProgressManager,
     private val deviceHolder: SelectedBluetoothDeviceHolder,
     private val dfuManager: DFUManager
-) : CloseableViewModel() {
+) : ViewModel() {
 
     val state = repository.data.combine(progressManager.status) { state, status ->
         (state as? FileInstallingState)
             ?.run { createInstallingStateWithNewStatus(state, status) }
             ?: state
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, NoFileSelectedState())
+    }.combine(repository.status) { data, status ->
+        when (status) {
+            BleManagerStatus.CONNECTING -> DFUState(LoadingState)
+            BleManagerStatus.OK -> DFUState(DisplayDataState(data))
+            BleManagerStatus.DISCONNECTED -> DFUState(DisplayDataState(data), false)
+        }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, DFUState(LoadingState))
 
     init {
         progressManager.registerListener()
@@ -58,9 +68,9 @@ internal class DFUViewModel @Inject constructor(
     }
 
     private fun closeScreen() {
+        repository.sendNewCommand(DisconnectCommand)
         repository.clear()
         deviceHolder.forgetDevice()
-        finish()
     }
 
     private fun requireFile(): ZipFile {
@@ -82,6 +92,7 @@ internal class DFUViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
+        repository.clear()
         progressManager.unregisterListener()
     }
 }

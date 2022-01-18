@@ -1,6 +1,14 @@
 package no.nordicsemi.android.cgms.view
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -17,8 +25,8 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.cgms.R
 import no.nordicsemi.android.cgms.data.CGMData
 import no.nordicsemi.android.cgms.data.CGMRecord
-import no.nordicsemi.android.cgms.data.RequestStatus
 import no.nordicsemi.android.cgms.data.CGMServiceCommand
+import no.nordicsemi.android.cgms.data.RequestStatus
 import no.nordicsemi.android.material.you.CircularProgressIndicator
 import no.nordicsemi.android.theme.view.BatteryLevelView
 import no.nordicsemi.android.theme.view.ScreenSection

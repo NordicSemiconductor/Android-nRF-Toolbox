@@ -47,4 +47,8 @@ internal class UARTRepository @Inject constructor() {
     fun setNewStatus(status: BleManagerStatus) {
         _status.value = status
     }
+
+    fun clear() {
+        _status.value = BleManagerStatus.CONNECTING
+    }
 }

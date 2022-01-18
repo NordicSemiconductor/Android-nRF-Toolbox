@@ -35,17 +35,23 @@ import no.nordicsemi.android.ble.common.data.RecordAccessControlPointData
 import no.nordicsemi.android.ble.common.profile.RecordAccessControlPointCallback.RACPErrorCode
 import no.nordicsemi.android.ble.common.profile.RecordAccessControlPointCallback.RACPOpCode
 import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementCallback.GlucoseStatus
-import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.*
-import no.nordicsemi.android.ble.data.Data
-import no.nordicsemi.android.gls.data.*
+import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Carbohydrate
+import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Health
+import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Meal
+import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Medication
+import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Tester
 import no.nordicsemi.android.gls.data.CarbohydrateId
 import no.nordicsemi.android.gls.data.ConcentrationUnit
+import no.nordicsemi.android.gls.data.GLSRecord
+import no.nordicsemi.android.gls.data.GLSRepository
 import no.nordicsemi.android.gls.data.HealthStatus
+import no.nordicsemi.android.gls.data.MeasurementContext
 import no.nordicsemi.android.gls.data.MedicationId
 import no.nordicsemi.android.gls.data.MedicationUnit
+import no.nordicsemi.android.gls.data.RecordType
+import no.nordicsemi.android.gls.data.RequestStatus
 import no.nordicsemi.android.gls.data.TestType
 import no.nordicsemi.android.gls.data.TypeOfMeal
-import no.nordicsemi.android.log.LogContract
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 import javax.inject.Inject
@@ -304,14 +310,7 @@ internal class GLSManager @Inject constructor(
         writeCharacteristic(
             recordAccessControlPointCharacteristic,
             RecordAccessControlPointData.reportLastStoredRecord()
-        )
-            .with { device: BluetoothDevice, data: Data ->
-                log(
-                    LogContract.Log.Level.APPLICATION,
-                    "\"" + GLSRecordAccessControlPointParser.parse(data) + "\" sent"
-                )
-            }
-            .enqueue()
+        ).enqueue()
     }
 
     /**
@@ -327,14 +326,7 @@ internal class GLSManager @Inject constructor(
         writeCharacteristic(
             recordAccessControlPointCharacteristic,
             RecordAccessControlPointData.reportFirstStoredRecord()
-        )
-            .with { device: BluetoothDevice, data: Data ->
-                log(
-                    LogContract.Log.Level.APPLICATION,
-                    "\"" + GLSRecordAccessControlPointParser.parse(data) + "\" sent"
-                )
-            }
-            .enqueue()
+        ).enqueue()
     }
 
     /**
@@ -351,14 +343,7 @@ internal class GLSManager @Inject constructor(
         writeCharacteristic(
             recordAccessControlPointCharacteristic,
             RecordAccessControlPointData.reportNumberOfAllStoredRecords()
-        )
-            .with { device: BluetoothDevice, data: Data ->
-                log(
-                    LogContract.Log.Level.APPLICATION,
-                    "\"" + GLSRecordAccessControlPointParser.parse(data) + "\" sent"
-                )
-            }
-            .enqueue()
+        ).enqueue()
     }
 
     /**
@@ -385,14 +370,7 @@ internal class GLSManager @Inject constructor(
             writeCharacteristic(
                 recordAccessControlPointCharacteristic,
                 RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber)
-            )
-                .with { device: BluetoothDevice, data: Data ->
-                    log(
-                        LogContract.Log.Level.APPLICATION,
-                        "\"" + GLSRecordAccessControlPointParser.parse(data) + "\" sent"
-                    )
-                }
-                .enqueue()
+            ).enqueue()
             // Info:
             // Operators OPERATOR_LESS_THEN_OR_EQUAL and OPERATOR_RANGE are not supported by Nordic Semiconductor Glucose Service in SDK 4.4.2.
         }
@@ -407,14 +385,7 @@ internal class GLSManager @Inject constructor(
         writeCharacteristic(
             recordAccessControlPointCharacteristic,
             RecordAccessControlPointData.abortOperation()
-        )
-            .with { device: BluetoothDevice, data: Data ->
-                log(
-                    LogContract.Log.Level.APPLICATION,
-                    "\"" + GLSRecordAccessControlPointParser.parse(data) + "\" sent"
-                )
-            }
-            .enqueue()
+        ).enqueue()
     }
 
     /**
@@ -429,14 +400,7 @@ internal class GLSManager @Inject constructor(
         writeCharacteristic(
             recordAccessControlPointCharacteristic,
             RecordAccessControlPointData.deleteAllStoredRecords()
-        )
-            .with { device: BluetoothDevice, data: Data ->
-                log(
-                    LogContract.Log.Level.APPLICATION,
-                    "\"" + GLSRecordAccessControlPointParser.parse(data) + "\" sent"
-                )
-            }
-            .enqueue()
+        ).enqueue()
 
         val elements = listOf(1, 2, 3)
         val result = elements.all { it > 3 }
