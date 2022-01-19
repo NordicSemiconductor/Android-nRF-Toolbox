@@ -11,6 +11,7 @@ dependencyResolutionManagement {
 
     versionCatalogs {
         libs {
+            alias('nordic-navigation').to('no.nordicsemi.android.common:navigation:1.0.0')
             alias('nordic-theme').to('no.nordicsemi.android.common:theme:1.0.0')
             alias('nordic-ble-common').to('no.nordicsemi.android:ble-common:2.3.1')
             alias('nordic-log').to('no.nordicsemi.android:log:2.3.0')
@@ -76,11 +77,13 @@ include ':app'
 include ':profile_bps'
 include ':profile_cgms'
 include ':profile_csc'
+include ':profile_dfu'
 include ':profile_gls'
 include ':profile_hrs'
 include ':profile_hts'
 include ':profile_prx'
 include ':profile_rscs'
+include ':profile_uart'
 
 include ':lib_service'
 include ':lib_theme'
@@ -89,13 +92,3 @@ include ':lib_utils'
 if (file('../Android-Common-Libraries').exists()) {
     includeBuild('../Android-Common-Libraries')
 }
-
-//if (file('../Android-BLE-Library').exists()) {
-//    includeBuild('../Android-BLE-Library')
-//}
-//
-//if (file('../Android-Scanner-Compat-Library').exists()) {
-//    includeBuild('../Android-Scanner-Compat-Library')
-//}
-include ':profile_uart'
-include ':profile_dfu'

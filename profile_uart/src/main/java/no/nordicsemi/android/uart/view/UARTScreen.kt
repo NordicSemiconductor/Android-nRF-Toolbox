@@ -16,21 +16,17 @@ import no.nordicsemi.android.uart.viewmodel.UARTViewModel
 import no.nordicsemi.android.utils.exhaustive
 
 @Composable
-fun UARTScreen(finishAction: () -> Unit) {
+fun UARTScreen() {
     val viewModel: UARTViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
 
     val context = LocalContext.current
-    LaunchedEffect(state.isActive) {
-        if (state.isActive) {
-            val intent = Intent(context, UARTService::class.java)
-            context.startService(intent)
-        } else if (!state.isActive) {
-            finishAction()
-        }
+    LaunchedEffect(Unit) {
+        val intent = Intent(context, UARTService::class.java)
+        context.startService(intent)
     }
 
-    UARTView(state.viewState) { viewModel.onEvent(it) }
+    UARTView(state) { viewModel.onEvent(it) }
 }
 
 @Composable

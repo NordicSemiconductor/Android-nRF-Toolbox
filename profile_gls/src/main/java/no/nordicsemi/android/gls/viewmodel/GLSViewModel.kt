@@ -6,13 +6,15 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import no.nordicsemi.android.gls.data.GLSRepository
 import no.nordicsemi.android.gls.data.WorkingMode
 import no.nordicsemi.android.gls.repository.GLSManager
 import no.nordicsemi.android.gls.view.DisplayDataState
-import no.nordicsemi.android.gls.view.GLSState
 import no.nordicsemi.android.gls.view.LoadingState
+import no.nordicsemi.android.navigation.NavigationManager
 import no.nordicsemi.android.service.BleManagerStatus
 import no.nordicsemi.android.service.ConnectionObserverAdapter
 import no.nordicsemi.android.service.SelectedBluetoothDeviceHolder
@@ -23,16 +25,17 @@ import javax.inject.Inject
 internal class GLSViewModel @Inject constructor(
     private val glsManager: GLSManager,
     private val deviceHolder: SelectedBluetoothDeviceHolder,
-    private val repository: GLSRepository
+    private val repository: GLSRepository,
+    private val navigationManager: NavigationManager
 ) : ViewModel() {
 
     val state = repository.data.combine(repository.status) { data, status ->
         when (status) {
-            BleManagerStatus.CONNECTING -> GLSState(LoadingState)
-            BleManagerStatus.OK -> GLSState(DisplayDataState(data))
-            BleManagerStatus.DISCONNECTED -> GLSState(DisplayDataState(data), false)
+            BleManagerStatus.CONNECTING -> LoadingState
+            BleManagerStatus.OK,
+            BleManagerStatus.DISCONNECTED -> DisplayDataState(data)
         }
-    }.stateIn(viewModelScope, SharingStarted.Lazily, GLSState(LoadingState))
+    }.stateIn(viewModelScope, SharingStarted.Lazily, LoadingState)
 
     init {
         glsManager.setConnectionObserver(object : ConnectionObserverAdapter() {
@@ -51,6 +54,12 @@ internal class GLSViewModel @Inject constructor(
                 repository.setNewStatus(BleManagerStatus.DISCONNECTED)
             }
         })
+
+        repository.status.onEach {
+            if (it == BleManagerStatus.DISCONNECTED) {
+                navigationManager.navigateUp()
+            }
+        }.launchIn(viewModelScope)
     }
 
     fun onEvent(event: GLSScreenViewEvent) {

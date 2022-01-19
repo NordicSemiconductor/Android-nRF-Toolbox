@@ -5,7 +5,10 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import no.nordicsemi.android.navigation.NavigationManager
 import no.nordicsemi.android.service.BleManagerStatus
 import no.nordicsemi.android.uart.data.DisconnectCommand
 import no.nordicsemi.android.uart.data.SendTextCommand
@@ -16,23 +19,31 @@ import no.nordicsemi.android.uart.view.OnCreateMacro
 import no.nordicsemi.android.uart.view.OnDeleteMacro
 import no.nordicsemi.android.uart.view.OnDisconnectButtonClick
 import no.nordicsemi.android.uart.view.OnRunMacro
-import no.nordicsemi.android.uart.view.UARTState
 import no.nordicsemi.android.uart.view.UARTViewEvent
 import no.nordicsemi.android.utils.exhaustive
 import javax.inject.Inject
 
 @HiltViewModel
 internal class UARTViewModel @Inject constructor(
-    private val repository: UARTRepository
+    private val repository: UARTRepository,
+    private val navigationManager: NavigationManager
 ) : ViewModel() {
 
     val state = repository.data.combine(repository.status) { data, status ->
         when (status) {
-            BleManagerStatus.CONNECTING -> UARTState(LoadingState)
-            BleManagerStatus.OK -> UARTState(DisplayDataState(data))
-            BleManagerStatus.DISCONNECTED -> UARTState(DisplayDataState(data), false)
+            BleManagerStatus.CONNECTING -> LoadingState
+            BleManagerStatus.OK,
+            BleManagerStatus.DISCONNECTED -> DisplayDataState(data)
         }
-    }.stateIn(viewModelScope, SharingStarted.Lazily, UARTState(LoadingState))
+    }.stateIn(viewModelScope, SharingStarted.Lazily, LoadingState)
+
+    init {
+        repository.status.onEach {
+            if (it == BleManagerStatus.DISCONNECTED) {
+                navigationManager.navigateUp()
+            }
+        }.launchIn(viewModelScope)
+    }
 
     fun onEvent(event: UARTViewEvent) {
         when (event) {

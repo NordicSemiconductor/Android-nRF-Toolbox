@@ -16,21 +16,17 @@ import no.nordicsemi.android.theme.view.DeviceConnectingView
 import no.nordicsemi.android.utils.exhaustive
 
 @Composable
-fun CGMScreen(finishAction: () -> Unit) {
+fun CGMScreen() {
     val viewModel: CGMScreenViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
 
     val context = LocalContext.current
-    LaunchedEffect(state.isActive) {
-        if (state.isActive) {
-            val intent = Intent(context, CGMService::class.java)
-            context.startService(intent)
-        } else if (!state.isActive) {
-            finishAction()
-        }
+    LaunchedEffect(Unit) {
+        val intent = Intent(context, CGMService::class.java)
+        context.startService(intent)
     }
 
-    CGMView(state.viewState) {
+    CGMView(state) {
         viewModel.onEvent(it)
     }
 }

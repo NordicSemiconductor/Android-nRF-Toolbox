@@ -34,7 +34,7 @@ import no.nordicsemi.android.hrs.data.HRSRepository
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 
-val HR_SERVICE_UUID: UUID = UUID.fromString("0000180D-0000-1000-8000-00805f9b34fb")
+val HRS_SERVICE_UUID: UUID = UUID.fromString("0000180D-0000-1000-8000-00805f9b34fb")
 private val BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID = UUID.fromString("00002A38-0000-1000-8000-00805f9b34fb")
 private val HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb")
 
@@ -100,7 +100,7 @@ internal class HRSManager(context: Context, private val dataHolder: HRSRepositor
         }
 
         override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
-            val service = gatt.getService(HR_SERVICE_UUID)
+            val service = gatt.getService(HRS_SERVICE_UUID)
             if (service != null) {
                 heartRateCharacteristic = service.getCharacteristic(
                     HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID
@@ -111,7 +111,7 @@ internal class HRSManager(context: Context, private val dataHolder: HRSRepositor
 
         override fun isOptionalServiceSupported(gatt: BluetoothGatt): Boolean {
             super.isOptionalServiceSupported(gatt)
-            val service = gatt.getService(HR_SERVICE_UUID)
+            val service = gatt.getService(HRS_SERVICE_UUID)
             if (service != null) {
                 bodySensorLocationCharacteristic = service.getCharacteristic(
                     BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID

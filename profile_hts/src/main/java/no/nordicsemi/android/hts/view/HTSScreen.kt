@@ -16,21 +16,17 @@ import no.nordicsemi.android.theme.view.DeviceConnectingView
 import no.nordicsemi.android.utils.exhaustive
 
 @Composable
-fun HTSScreen(finishAction: () -> Unit) {
+fun HTSScreen() {
     val viewModel: HTSViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
 
     val context = LocalContext.current
-    LaunchedEffect(state.isActive) {
-        if (state.isActive) {
-            val intent = Intent(context, HTSService::class.java)
-            context.startService(intent)
-        } else {
-            finishAction()
-        }
+    LaunchedEffect(Unit) {
+        val intent = Intent(context, HTSService::class.java)
+        context.startService(intent)
     }
 
-    HTSView(state.viewState) { viewModel.onEvent(it) }
+    HTSView(state) { viewModel.onEvent(it) }
 }
 
 @Composable

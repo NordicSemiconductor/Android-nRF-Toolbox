@@ -32,7 +32,7 @@ import no.nordicsemi.android.hts.data.HTSRepository
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 
-val HT_SERVICE_UUID: UUID = UUID.fromString("00001809-0000-1000-8000-00805f9b34fb")
+val HTS_SERVICE_UUID: UUID = UUID.fromString("00001809-0000-1000-8000-00805f9b34fb")
 private val HT_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A1C-0000-1000-8000-00805f9b34fb")
 
 /**
@@ -81,7 +81,7 @@ internal class HTSManager internal constructor(
         }
 
         override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
-            val service = gatt.getService(HT_SERVICE_UUID)
+            val service = gatt.getService(HTS_SERVICE_UUID)
             if (service != null) {
                 htCharacteristic = service.getCharacteristic(HT_MEASUREMENT_CHARACTERISTIC_UUID)
             }

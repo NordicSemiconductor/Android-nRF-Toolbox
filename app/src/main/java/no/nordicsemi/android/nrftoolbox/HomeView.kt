@@ -18,10 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.theme.view.CloseIconAppBar
 
 @Composable
-fun HomeView(viewModel: HomeViewModel) {
+fun HomeScreen() {
+    val viewModel: HomeViewModel = hiltViewModel()
+
     Column {
         val context = LocalContext.current
         CloseIconAppBar(stringResource(id = R.string.app_name)) {
@@ -43,12 +46,12 @@ fun HomeView(viewModel: HomeViewModel) {
                 DoubleSection(
                     leftView = {
                         FeatureButton(R.drawable.ic_csc, R.string.csc_module, R.string.csc_module_full) {
-                            viewModel.openProfile(Profile.CSC)
+                            viewModel.openProfile(ProfileDestination.CSC)
                         }
                     },
                     rightView = {
                         FeatureButton(R.drawable.ic_hrs, R.string.hrs_module, R.string.hrs_module_full) {
-                            viewModel.openProfile(Profile.HRS)
+                            viewModel.openProfile(ProfileDestination.HRS)
                         }
                     }
                 )
@@ -58,12 +61,12 @@ fun HomeView(viewModel: HomeViewModel) {
                 DoubleSection(
                     leftView = {
                         FeatureButton(R.drawable.ic_gls, R.string.gls_module, R.string.gls_module_full) {
-                            viewModel.openProfile(Profile.GLS)
+                            viewModel.openProfile(ProfileDestination.GLS)
                         }
                     },
                     rightView = {
                         FeatureButton(R.drawable.ic_hts, R.string.hts_module, R.string.hts_module_full) {
-                            viewModel.openProfile(Profile.HTS)
+                            viewModel.openProfile(ProfileDestination.HTS)
                         }
                     }
                 )
@@ -73,12 +76,12 @@ fun HomeView(viewModel: HomeViewModel) {
                 DoubleSection(
                     leftView = {
                         FeatureButton(R.drawable.ic_bps, R.string.bps_module, R.string.bps_module_full) {
-                            viewModel.openProfile(Profile.BPS)
+                            viewModel.openProfile(ProfileDestination.BPS)
                         }
                     },
                     rightView = {
                         FeatureButton(R.drawable.ic_rscs, R.string.rscs_module, R.string.rscs_module_full) {
-                            viewModel.openProfile(Profile.RSCS)
+                            viewModel.openProfile(ProfileDestination.RSCS)
                         }
                     }
                 )
@@ -88,12 +91,12 @@ fun HomeView(viewModel: HomeViewModel) {
                 DoubleSection(
                     leftView = {
                         FeatureButton(R.drawable.ic_prx, R.string.prx_module, R.string.prx_module_full) {
-                            viewModel.openProfile(Profile.PRX)
+                            viewModel.openProfile(ProfileDestination.PRX)
                         }
                     },
                     rightView = {
                         FeatureButton(R.drawable.ic_cgm, R.string.cgm_module, R.string.cgm_module_full) {
-                            viewModel.openProfile(Profile.CGMS)
+                            viewModel.openProfile(ProfileDestination.CGMS)
                         }
                     }
                 )
@@ -101,7 +104,7 @@ fun HomeView(viewModel: HomeViewModel) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_uart, R.string.uart_module, R.string.uart_module_full) {
-                    viewModel.openProfile(Profile.UART)
+                    viewModel.openProfile(ProfileDestination.UART)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))

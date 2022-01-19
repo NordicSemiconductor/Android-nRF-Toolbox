@@ -16,21 +16,17 @@ import no.nordicsemi.android.theme.view.DeviceConnectingView
 import no.nordicsemi.android.utils.exhaustive
 
 @Composable
-fun CSCScreen(finishAction: () -> Unit) {
+fun CSCScreen() {
     val viewModel: CSCViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
 
     val context = LocalContext.current
-    LaunchedEffect(state.isActive) {
-        if (state.isActive) {
-            val intent = Intent(context, CSCService::class.java)
-            context.startService(intent)
-        } else {
-            finishAction()
-        }
+    LaunchedEffect(Unit) {
+        val intent = Intent(context, CSCService::class.java)
+        context.startService(intent)
     }
 
-    CSCView(state.viewState) { viewModel.onEvent(it) }
+    CSCView(state) { viewModel.onEvent(it) }
 }
 
 @Composable

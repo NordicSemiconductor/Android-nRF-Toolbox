@@ -16,21 +16,17 @@ import no.nordicsemi.android.theme.view.DeviceConnectingView
 import no.nordicsemi.android.utils.exhaustive
 
 @Composable
-fun HRSScreen(finishAction: () -> Unit) {
+fun HRSScreen() {
     val viewModel: HRSViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
 
     val context = LocalContext.current
-    LaunchedEffect(state.isActive) {
-        if (state.isActive) {
-            val intent = Intent(context, HRSService::class.java)
-            context.startService(intent)
-        } else {
-            finishAction()
-        }
+    LaunchedEffect(Unit) {
+        val intent = Intent(context, HRSService::class.java)
+        context.startService(intent)
     }
 
-    HRSView(state.viewState) { viewModel.onEvent(it) }
+    HRSView(state) { viewModel.onEvent(it) }
 }
 
 @Composable

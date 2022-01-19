@@ -17,21 +17,17 @@ import no.nordicsemi.android.theme.view.DeviceConnectingView
 import no.nordicsemi.android.utils.exhaustive
 
 @Composable
-fun PRXScreen(finishAction: () -> Unit) {
+fun PRXScreen() {
     val viewModel: PRXViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
 
     val context = LocalContext.current
-    LaunchedEffect(state.isActive) {
-        if (state.isActive) {
-            val intent = Intent(context, PRXService::class.java)
-            context.startService(intent)
-        } else {
-            finishAction()
-        }
+    LaunchedEffect(Unit) {
+        val intent = Intent(context, PRXService::class.java)
+        context.startService(intent)
     }
 
-    PRXView(state.viewState) { viewModel.onEvent(it) }
+    PRXView(state) { viewModel.onEvent(it) }
 }
 
 @Composable

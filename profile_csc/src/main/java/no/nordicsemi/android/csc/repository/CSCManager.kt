@@ -35,7 +35,7 @@ import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 
 /** Cycling Speed and Cadence service UUID.  */
-val CYCLING_SPEED_AND_CADENCE_SERVICE_UUID: UUID = UUID.fromString("00001816-0000-1000-8000-00805f9b34fb")
+val CSC_SERVICE_UUID: UUID = UUID.fromString("00001816-0000-1000-8000-00805f9b34fb")
 
 /** Cycling Speed and Cadence Measurement characteristic UUID.  */
 private val CSC_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A5B-0000-1000-8000-00805f9b34fb")
@@ -101,7 +101,7 @@ internal class CSCManager(context: Context, private val repository: CSCRepositor
         }
 
         public override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
-            val service = gatt.getService(CYCLING_SPEED_AND_CADENCE_SERVICE_UUID)
+            val service = gatt.getService(CSC_SERVICE_UUID)
             if (service != null) {
                 cscMeasurementCharacteristic = service.getCharacteristic(
                     CSC_MEASUREMENT_CHARACTERISTIC_UUID

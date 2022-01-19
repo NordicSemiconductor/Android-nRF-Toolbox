@@ -71,6 +71,7 @@ dependencies {
 
     implementation libs.nordic.ble.common
     implementation libs.nordic.ui.scanner
+    implementation libs.nordic.navigation
 
     implementation libs.bundles.koin
     implementation libs.bundles.hilt

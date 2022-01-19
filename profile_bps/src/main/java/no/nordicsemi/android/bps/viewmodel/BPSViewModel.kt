@@ -6,14 +6,16 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import no.nordicsemi.android.bps.data.BPSRepository
 import no.nordicsemi.android.bps.repository.BPSManager
 import no.nordicsemi.android.bps.view.BPSScreenViewEvent
-import no.nordicsemi.android.bps.view.BPSState
 import no.nordicsemi.android.bps.view.DisconnectEvent
 import no.nordicsemi.android.bps.view.DisplayDataState
 import no.nordicsemi.android.bps.view.LoadingState
+import no.nordicsemi.android.navigation.NavigationManager
 import no.nordicsemi.android.service.BleManagerStatus
 import no.nordicsemi.android.service.ConnectionObserverAdapter
 import no.nordicsemi.android.service.SelectedBluetoothDeviceHolder
@@ -24,16 +26,17 @@ import javax.inject.Inject
 internal class BPSViewModel @Inject constructor(
     private val bpsManager: BPSManager,
     private val deviceHolder: SelectedBluetoothDeviceHolder,
-    private val repository: BPSRepository
+    private val repository: BPSRepository,
+    private val navigationManager: NavigationManager
 ) : ViewModel() {
 
     val state = repository.data.combine(repository.status) { data, status ->
         when (status) {
-            BleManagerStatus.CONNECTING -> BPSState(LoadingState)
-            BleManagerStatus.OK -> BPSState(DisplayDataState(data))
-            BleManagerStatus.DISCONNECTED -> BPSState(DisplayDataState(data), false)
+            BleManagerStatus.CONNECTING -> LoadingState
+            BleManagerStatus.OK,
+            BleManagerStatus.DISCONNECTED -> DisplayDataState(data)
         }
-    }.stateIn(viewModelScope, SharingStarted.Lazily, BPSState(LoadingState))
+    }.stateIn(viewModelScope, SharingStarted.Lazily, LoadingState)
 
     init {
         bpsManager.setConnectionObserver(object : ConnectionObserverAdapter() {
@@ -52,6 +55,12 @@ internal class BPSViewModel @Inject constructor(
                 repository.setNewStatus(BleManagerStatus.DISCONNECTED)
             }
         })
+
+        repository.status.onEach {
+            if (it == BleManagerStatus.DISCONNECTED) {
+                navigationManager.navigateUp()
+            }
+        }.launchIn(viewModelScope)
     }
 
     fun onEvent(event: BPSScreenViewEvent) {

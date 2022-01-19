@@ -16,21 +16,17 @@ import no.nordicsemi.android.theme.view.DeviceConnectingView
 import no.nordicsemi.android.utils.exhaustive
 
 @Composable
-fun GLSScreen(finishAction: () -> Unit) {
+fun GLSScreen() {
     val viewModel: GLSViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
 
     Log.d("AAATESTAAA", "$viewModel") //TODO fix screen rotation
 
-    LaunchedEffect(state.isActive) {
-        if (state.isActive) {
-            viewModel.connectDevice()
-        } else {
-            finishAction()
-        }
+    LaunchedEffect(Unit) {
+        viewModel.connectDevice()
     }
 
-    GLSView(state.viewState) {
+    GLSView(state) {
         viewModel.onEvent(it)
     }
 }

@@ -13,19 +13,15 @@ import no.nordicsemi.android.theme.view.DeviceConnectingView
 import no.nordicsemi.android.utils.exhaustive
 
 @Composable
-fun BPSScreen(finishAction: () -> Unit) {
+fun BPSScreen() {
     val viewModel: BPSViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
 
-    LaunchedEffect(state.isActive) {
-        if (state.isActive) {
-            viewModel.connectDevice()
-        } else {
-            finishAction()
-        }
+    LaunchedEffect(Unit) {
+        viewModel.connectDevice()
     }
 
-    BPSView(state.viewState) { viewModel.onEvent(it) }
+    BPSView(state) { viewModel.onEvent(it) }
 }
 
 @Composable
