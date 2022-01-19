@@ -5,12 +5,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import no.nordicsemi.android.navigation.ForwardDestination
 import no.nordicsemi.android.navigation.NavigationManager
 import no.nordicsemi.android.navigation.UUIDArgument
-import no.nordicsemi.android.service.SelectedBluetoothDeviceHolder
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val deviceHolder: SelectedBluetoothDeviceHolder,
     private val navigationManager: NavigationManager
 ) : ViewModel() {
 

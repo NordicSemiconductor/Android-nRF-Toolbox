@@ -24,9 +24,7 @@ class MainActivity : NordicActivity() {
                     color = MaterialTheme.colorScheme.surface,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    NavigationView(
-                        HomeDestinations + ProfileDestinations + ScannerDestinations
-                    )
+                    NavigationView(HomeDestinations + ProfileDestinations + ScannerDestinations)
                 }
             }
         }

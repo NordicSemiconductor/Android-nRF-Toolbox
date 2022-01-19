@@ -6,8 +6,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import no.nordicsemi.android.navigation.NavigationManager
+import no.nordicsemi.android.navigation.ParcelableArgument
+import no.nordicsemi.android.navigation.SuccessDestinationResult
 import no.nordicsemi.android.service.BleManagerStatus
-import no.nordicsemi.android.service.SelectedBluetoothDeviceHolder
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.dfu.data.Completed
 import no.nordicsemi.dfu.data.DFUManager
@@ -28,15 +30,23 @@ import no.nordicsemi.dfu.view.OnInstallButtonClick
 import no.nordicsemi.dfu.view.OnPauseButtonClick
 import no.nordicsemi.dfu.view.OnStopButtonClick
 import no.nordicsemi.dfu.view.OnZipFileSelected
+import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
+import no.nordicsemi.ui.scanner.ScannerDestinationId
 import javax.inject.Inject
 
 @HiltViewModel
 internal class DFUViewModel @Inject constructor(
     private val repository: DFURepository,
     private val progressManager: DFUProgressManager,
-    private val deviceHolder: SelectedBluetoothDeviceHolder,
-    private val dfuManager: DFUManager
+    private val dfuManager: DFUManager,
+    private val navigationManager: NavigationManager
 ) : ViewModel() {
+
+    private val args
+        get() = navigationManager.getResult(ScannerDestinationId)
+    private val device
+        get() = ((args as SuccessDestinationResult).argument as ParcelableArgument).value as DiscoveredBluetoothDevice
+
 
     val state = repository.data.combine(progressManager.status) { state, status ->
         (state as? FileInstallingState)
@@ -58,19 +68,18 @@ internal class DFUViewModel @Inject constructor(
         when (event) {
             OnDisconnectButtonClick -> closeScreen()
             OnInstallButtonClick -> {
-                dfuManager.install(requireFile())
+                dfuManager.install(requireFile(), device)
                 repository.install()
             }
             OnPauseButtonClick -> closeScreen()
             OnStopButtonClick -> closeScreen()
-            is OnZipFileSelected -> repository.setZipFile(event.file)
+            is OnZipFileSelected -> repository.setZipFile(event.file, device)
         }.exhaustive
     }
 
     private fun closeScreen() {
         repository.sendNewCommand(DisconnectCommand)
         repository.clear()
-        deviceHolder.forgetDevice()
     }
 
     private fun requireFile(): ZipFile {

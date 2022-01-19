@@ -16,19 +16,26 @@ import no.nordicsemi.android.bps.view.DisconnectEvent
 import no.nordicsemi.android.bps.view.DisplayDataState
 import no.nordicsemi.android.bps.view.LoadingState
 import no.nordicsemi.android.navigation.NavigationManager
+import no.nordicsemi.android.navigation.ParcelableArgument
+import no.nordicsemi.android.navigation.SuccessDestinationResult
 import no.nordicsemi.android.service.BleManagerStatus
 import no.nordicsemi.android.service.ConnectionObserverAdapter
-import no.nordicsemi.android.service.SelectedBluetoothDeviceHolder
 import no.nordicsemi.android.utils.exhaustive
+import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
+import no.nordicsemi.ui.scanner.ScannerDestinationId
 import javax.inject.Inject
 
 @HiltViewModel
 internal class BPSViewModel @Inject constructor(
     private val bpsManager: BPSManager,
-    private val deviceHolder: SelectedBluetoothDeviceHolder,
     private val repository: BPSRepository,
     private val navigationManager: NavigationManager
 ) : ViewModel() {
+
+    private val args
+        get() = navigationManager.getResult(ScannerDestinationId)
+    private val device
+        get() = ((args as SuccessDestinationResult).argument as ParcelableArgument).value as DiscoveredBluetoothDevice
 
     val state = repository.data.combine(repository.status) { data, status ->
         when (status) {
@@ -70,7 +77,7 @@ internal class BPSViewModel @Inject constructor(
     }
 
     fun connectDevice() {
-        bpsManager.connect(deviceHolder.device!!.device)
+        bpsManager.connect(device.device)
             .useAutoConnect(false)
             .retry(3, 100)
             .enqueue()
@@ -78,7 +85,6 @@ internal class BPSViewModel @Inject constructor(
 
     private fun onDisconnectButtonClick() {
         bpsManager.disconnect().enqueue()
-        deviceHolder.forgetDevice()
         repository.clear()
     }
 

@@ -35,7 +35,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.log.ILogSession
 import no.nordicsemi.android.log.Logger
-import javax.inject.Inject
 
 @AndroidEntryPoint
 abstract class BleProfileService : Service() {
@@ -47,9 +46,6 @@ abstract class BleProfileService : Service() {
     private val _status = MutableStateFlow(BleManagerStatus.CONNECTING)
     val status = _status.asStateFlow()
 
-    @Inject
-    lateinit var bluetoothDeviceHolder: SelectedBluetoothDeviceHolder
-
     /**
      * Returns a handler that is created in onCreate().
      * The handler may be used to postpone execution of some operations or to run them in UI thread.
@@ -57,17 +53,6 @@ abstract class BleProfileService : Service() {
     private var handler: Handler? = null
 
     private var activityIsChangingConfiguration = false
-
-    /**
-     * Returns the Bluetooth device object
-     *
-     * @return bluetooth device
-     */
-    private val bluetoothDevice: BluetoothDevice by lazy {
-        bluetoothDeviceHolder.device?.device ?: throw IllegalArgumentException(
-            "No device associated with the application."
-        )
-    }
 
     /**
      * Returns the log session that can be used to append log entries. The method returns `null` if the nRF Logger app was not installed. It is safe to use logger when
@@ -119,7 +104,7 @@ abstract class BleProfileService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
-        manager.connect(bluetoothDevice)
+        manager.connect(intent!!.getParcelableExtra(DEVICE_DATA)!!)
             .useAutoConnect(shouldAutoConnect())
             .retry(3, 100)
             .enqueue()
@@ -141,7 +126,6 @@ abstract class BleProfileService : Service() {
         // shutdown the manager
         manager.disconnect().enqueue()
         Logger.i(logSession, "Service destroyed")
-        bluetoothDeviceHolder.forgetDevice()
         logSession = null
         handler = null
     }
@@ -183,14 +167,6 @@ abstract class BleProfileService : Service() {
             Toast.makeText(this@BleProfileService, message, Toast.LENGTH_SHORT).show()
         }
     }
-
-    /**
-     * Returns the device address
-     *
-     * @return device address
-     */
-    protected val deviceAddress: String
-        get() = bluetoothDevice.address
 
     /**
      * Returns `true` if the device is connected to the sensor.

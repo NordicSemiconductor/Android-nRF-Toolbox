@@ -15,19 +15,26 @@ import no.nordicsemi.android.gls.repository.GLSManager
 import no.nordicsemi.android.gls.view.DisplayDataState
 import no.nordicsemi.android.gls.view.LoadingState
 import no.nordicsemi.android.navigation.NavigationManager
+import no.nordicsemi.android.navigation.ParcelableArgument
+import no.nordicsemi.android.navigation.SuccessDestinationResult
 import no.nordicsemi.android.service.BleManagerStatus
 import no.nordicsemi.android.service.ConnectionObserverAdapter
-import no.nordicsemi.android.service.SelectedBluetoothDeviceHolder
 import no.nordicsemi.android.utils.exhaustive
+import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
+import no.nordicsemi.ui.scanner.ScannerDestinationId
 import javax.inject.Inject
 
 @HiltViewModel
 internal class GLSViewModel @Inject constructor(
     private val glsManager: GLSManager,
-    private val deviceHolder: SelectedBluetoothDeviceHolder,
     private val repository: GLSRepository,
     private val navigationManager: NavigationManager
 ) : ViewModel() {
+
+    private val args
+        get() = navigationManager.getResult(ScannerDestinationId)
+    private val device
+        get() = ((args as SuccessDestinationResult).argument as ParcelableArgument).value as DiscoveredBluetoothDevice
 
     val state = repository.data.combine(repository.status) { data, status ->
         when (status) {
@@ -70,12 +77,10 @@ internal class GLSViewModel @Inject constructor(
     }
 
     fun connectDevice() {
-        deviceHolder.device?.let {
-            glsManager.connect(it.device)
-                .useAutoConnect(false)
-                .retry(3, 100)
-                .enqueue()
-        }
+        glsManager.connect(device.device)
+            .useAutoConnect(false)
+            .retry(3, 100)
+            .enqueue()
     }
 
     private fun requestData(mode: WorkingMode) {
@@ -87,7 +92,6 @@ internal class GLSViewModel @Inject constructor(
     }
 
     private fun disconnect() {
-        deviceHolder.forgetDevice()
         glsManager.disconnect().enqueue()
     }
 

@@ -8,13 +8,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import no.nordicsemi.android.service.BleManagerStatus
-import no.nordicsemi.android.service.SelectedBluetoothDeviceHolder
+import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 internal class DFURepository @Inject constructor(
-    private val deviceHolder: SelectedBluetoothDeviceHolder,
     private val fileManger: DFUFileManager
 ) {
 
@@ -27,10 +26,10 @@ internal class DFURepository @Inject constructor(
     private val _status = MutableStateFlow(BleManagerStatus.CONNECTING)
     val status = _status.asStateFlow()
 
-    fun setZipFile(file: Uri) {
+    fun setZipFile(file: Uri, device: DiscoveredBluetoothDevice) {
         val currentState = _data.value as NoFileSelectedState
         _data.value = fileManger.createFile(file)?.let {
-            FileReadyState(it, requireNotNull(deviceHolder.device))
+            FileReadyState(it, device)
         } ?: currentState.copy(isError = true)
     }
 

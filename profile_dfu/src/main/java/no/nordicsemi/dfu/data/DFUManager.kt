@@ -3,19 +3,16 @@ package no.nordicsemi.dfu.data
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import no.nordicsemi.android.dfu.DfuServiceInitiator
-import no.nordicsemi.android.service.SelectedBluetoothDeviceHolder
 import no.nordicsemi.dfu.repository.DFUService
+import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
 
 class DFUManager @Inject constructor(
     @ApplicationContext
-    private val context: Context,
-    private val deviceHolder: SelectedBluetoothDeviceHolder
+    private val context: Context
 ) {
 
-    fun install(file: ZipFile) {
-        val device = deviceHolder.device!!
-
+    fun install(file: ZipFile, device: DiscoveredBluetoothDevice) {
         val starter = DfuServiceInitiator(device.address())
             .setDeviceName(device.displayName())
 //        .setKeepBond(keepBond)
