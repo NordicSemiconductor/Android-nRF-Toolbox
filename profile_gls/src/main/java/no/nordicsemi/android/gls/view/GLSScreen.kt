@@ -3,7 +3,6 @@ package no.nordicsemi.android.gls.view
 import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -21,10 +20,6 @@ fun GLSScreen() {
     val state = viewModel.state.collectAsState().value
 
     Log.d("AAATESTAAA", "$viewModel") //TODO fix screen rotation
-
-    LaunchedEffect(Unit) {
-        viewModel.connectDevice()
-    }
 
     GLSView(state) {
         viewModel.onEvent(it)

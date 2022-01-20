@@ -15,12 +15,11 @@ import no.nordicsemi.android.bps.view.BPSScreenViewEvent
 import no.nordicsemi.android.bps.view.DisconnectEvent
 import no.nordicsemi.android.bps.view.DisplayDataState
 import no.nordicsemi.android.bps.view.LoadingState
-import no.nordicsemi.android.navigation.NavigationManager
-import no.nordicsemi.android.navigation.ParcelableArgument
-import no.nordicsemi.android.navigation.SuccessDestinationResult
+import no.nordicsemi.android.navigation.*
 import no.nordicsemi.android.service.BleManagerStatus
 import no.nordicsemi.android.service.ConnectionObserverAdapter
 import no.nordicsemi.android.utils.exhaustive
+import no.nordicsemi.android.utils.getDevice
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import no.nordicsemi.ui.scanner.ScannerDestinationId
 import javax.inject.Inject
@@ -32,11 +31,6 @@ internal class BPSViewModel @Inject constructor(
     private val navigationManager: NavigationManager
 ) : ViewModel() {
 
-    private val args
-        get() = navigationManager.getResult(ScannerDestinationId)
-    private val device
-        get() = ((args as SuccessDestinationResult).argument as ParcelableArgument).value as DiscoveredBluetoothDevice
-
     val state = repository.data.combine(repository.status) { data, status ->
         when (status) {
             BleManagerStatus.CONNECTING -> LoadingState
@@ -46,6 +40,12 @@ internal class BPSViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.Lazily, LoadingState)
 
     init {
+        navigationManager.recentResult.onEach {
+            if (it.destinationId == ScannerDestinationId) {
+                handleArgs(it)
+            }
+        }.launchIn(viewModelScope)
+
         bpsManager.setConnectionObserver(object : ConnectionObserverAdapter() {
             override fun onDeviceConnected(device: BluetoothDevice) {
                 super.onDeviceConnected(device)
@@ -70,13 +70,21 @@ internal class BPSViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
+    private fun handleArgs(args: DestinationResult?) {
+        when (args) {
+            is CancelDestinationResult -> navigationManager.navigateUp()
+            is SuccessDestinationResult -> connectDevice(args.getDevice())
+            null -> navigationManager.navigateTo(ForwardDestination(ScannerDestinationId), UUIDArgument(ScannerDestinationId, GLS_SERVICE_UUID))
+        }.exhaustive
+    }
+
     fun onEvent(event: BPSScreenViewEvent) {
         when (event) {
             DisconnectEvent -> onDisconnectButtonClick()
         }.exhaustive
     }
 
-    fun connectDevice() {
+    private fun connectDevice(device: DiscoveredBluetoothDevice) {
         bpsManager.connect(device.device)
             .useAutoConnect(false)
             .retry(3, 100)

@@ -1,11 +1,7 @@
 package no.nordicsemi.android.csc.data
 
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import no.nordicsemi.android.csc.view.SpeedUnit
 import no.nordicsemi.android.service.BleManagerStatus
 import javax.inject.Inject

@@ -15,7 +15,7 @@ class HomeViewModel @Inject constructor(
     fun openProfile(destination: ProfileDestination) {
         navigationManager.navigateTo(
             ForwardDestination(destination.destination.id),
-            UUIDArgument(destination.uuid)
+            UUIDArgument(destination.destination.id, destination.uuid)
         )
     }
 }

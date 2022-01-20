@@ -5,6 +5,9 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.navigation.NavController
+import no.nordicsemi.android.navigation.ParcelableArgument
+import no.nordicsemi.android.navigation.SuccessDestinationResult
+import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 
 val <T> T.exhaustive
     get() = this
@@ -16,6 +19,10 @@ fun Context.isServiceRunning(serviceClassName: String): Boolean {
     val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     val services = activityManager.getRunningServices(Integer.MAX_VALUE)
     return services.find { it.service.className == serviceClassName } != null
+}
+
+fun SuccessDestinationResult.getDevice(): DiscoveredBluetoothDevice {
+    return (argument as ParcelableArgument).value as DiscoveredBluetoothDevice
 }
 
 @Composable

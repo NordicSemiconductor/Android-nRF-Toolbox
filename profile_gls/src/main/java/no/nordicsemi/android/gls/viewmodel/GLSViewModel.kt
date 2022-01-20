@@ -4,22 +4,18 @@ import android.bluetooth.BluetoothDevice
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import no.nordicsemi.android.gls.data.GLSRepository
 import no.nordicsemi.android.gls.data.WorkingMode
 import no.nordicsemi.android.gls.repository.GLSManager
+import no.nordicsemi.android.gls.repository.GLS_SERVICE_UUID
 import no.nordicsemi.android.gls.view.DisplayDataState
 import no.nordicsemi.android.gls.view.LoadingState
-import no.nordicsemi.android.navigation.NavigationManager
-import no.nordicsemi.android.navigation.ParcelableArgument
-import no.nordicsemi.android.navigation.SuccessDestinationResult
+import no.nordicsemi.android.navigation.*
 import no.nordicsemi.android.service.BleManagerStatus
 import no.nordicsemi.android.service.ConnectionObserverAdapter
 import no.nordicsemi.android.utils.exhaustive
+import no.nordicsemi.android.utils.getDevice
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import no.nordicsemi.ui.scanner.ScannerDestinationId
 import javax.inject.Inject
@@ -31,11 +27,6 @@ internal class GLSViewModel @Inject constructor(
     private val navigationManager: NavigationManager
 ) : ViewModel() {
 
-    private val args
-        get() = navigationManager.getResult(ScannerDestinationId)
-    private val device
-        get() = ((args as SuccessDestinationResult).argument as ParcelableArgument).value as DiscoveredBluetoothDevice
-
     val state = repository.data.combine(repository.status) { data, status ->
         when (status) {
             BleManagerStatus.CONNECTING -> LoadingState
@@ -45,6 +36,12 @@ internal class GLSViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.Lazily, LoadingState)
 
     init {
+        navigationManager.recentResult.onEach {
+            if (it.destinationId == ScannerDestinationId) {
+                handleArgs(it)
+            }
+        }.launchIn(viewModelScope)
+
         glsManager.setConnectionObserver(object : ConnectionObserverAdapter() {
             override fun onDeviceConnected(device: BluetoothDevice) {
                 super.onDeviceConnected(device)
@@ -69,6 +66,14 @@ internal class GLSViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
+    private fun handleArgs(args: DestinationResult?) {
+        when (args) {
+            is CancelDestinationResult -> navigationManager.navigateUp()
+            is SuccessDestinationResult -> connectDevice(args.getDevice())
+            null -> navigationManager.navigateTo(ForwardDestination(ScannerDestinationId), UUIDArgument(ScannerDestinationId, GLS_SERVICE_UUID))
+        }.exhaustive
+    }
+
     fun onEvent(event: GLSScreenViewEvent) {
         when (event) {
             DisconnectEvent -> disconnect()
@@ -76,7 +81,7 @@ internal class GLSViewModel @Inject constructor(
         }.exhaustive
     }
 
-    fun connectDevice() {
+    private fun connectDevice(device: DiscoveredBluetoothDevice) {
         glsManager.connect(device.device)
             .useAutoConnect(false)
             .retry(3, 100)
