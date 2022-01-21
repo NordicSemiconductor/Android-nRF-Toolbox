@@ -3,29 +3,26 @@ package no.nordicsemi.android.prx.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
-import no.nordicsemi.android.navigation.NavigationManager
+import kotlinx.coroutines.flow.*
+import no.nordicsemi.android.navigation.*
 import no.nordicsemi.android.prx.data.DisableAlarm
 import no.nordicsemi.android.prx.data.Disconnect
 import no.nordicsemi.android.prx.data.EnableAlarm
 import no.nordicsemi.android.prx.data.PRXRepository
-import no.nordicsemi.android.prx.view.DisconnectEvent
-import no.nordicsemi.android.prx.view.DisplayDataState
-import no.nordicsemi.android.prx.view.LoadingState
-import no.nordicsemi.android.prx.view.PRXScreenViewEvent
-import no.nordicsemi.android.prx.view.TurnOffAlert
-import no.nordicsemi.android.prx.view.TurnOnAlert
+import no.nordicsemi.android.prx.service.PRXService
+import no.nordicsemi.android.prx.service.PRX_SERVICE_UUID
+import no.nordicsemi.android.prx.view.*
 import no.nordicsemi.android.service.BleManagerStatus
+import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.utils.exhaustive
+import no.nordicsemi.android.utils.getDevice
+import no.nordicsemi.ui.scanner.ScannerDestinationId
 import javax.inject.Inject
 
 @HiltViewModel
 internal class PRXViewModel @Inject constructor(
     private val repository: PRXRepository,
+    private val serviceManager: ServiceManager,
     private val navigationManager: NavigationManager
 ) : ViewModel() {
 
@@ -38,11 +35,26 @@ internal class PRXViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.Lazily, LoadingState)
 
     init {
+        navigationManager.navigateTo(ForwardDestination(ScannerDestinationId), UUIDArgument(ScannerDestinationId, PRX_SERVICE_UUID))
+
+        navigationManager.recentResult.onEach {
+            if (it.destinationId == ScannerDestinationId) {
+                handleArgs(it)
+            }
+        }.launchIn(viewModelScope)
+
         repository.status.onEach {
             if (it == BleManagerStatus.DISCONNECTED) {
                 navigationManager.navigateUp()
             }
         }.launchIn(viewModelScope)
+    }
+
+    private fun handleArgs(args: DestinationResult) {
+        when (args) {
+            is CancelDestinationResult -> navigationManager.navigateUp()
+            is SuccessDestinationResult -> serviceManager.startService(PRXService::class.java, args.getDevice())
+        }.exhaustive
     }
 
     fun onEvent(event: PRXScreenViewEvent) {

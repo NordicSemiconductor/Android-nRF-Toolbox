@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.log.ILogSession
 import no.nordicsemi.android.log.Logger
+import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 
 @AndroidEntryPoint
 abstract class BleProfileService : Service() {
@@ -104,7 +105,9 @@ abstract class BleProfileService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
-        manager.connect(intent!!.getParcelableExtra(DEVICE_DATA)!!)
+        val device = intent!!.getParcelableExtra<DiscoveredBluetoothDevice>(DEVICE_DATA)!!.device
+
+        manager.connect(device)
             .useAutoConnect(shouldAutoConnect())
             .retry(3, 100)
             .enqueue()

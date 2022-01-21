@@ -34,6 +34,8 @@ internal class CSCViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.Lazily, LoadingState)
 
     init {
+        navigationManager.navigateTo(ForwardDestination(ScannerDestinationId), UUIDArgument(ScannerDestinationId, CSC_SERVICE_UUID))
+
         navigationManager.recentResult.onEach {
             if (it.destinationId == ScannerDestinationId) {
                 handleArgs(it)
@@ -47,11 +49,10 @@ internal class CSCViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    private fun handleArgs(args: DestinationResult?) {
+    private fun handleArgs(args: DestinationResult) {
         when (args) {
             is CancelDestinationResult -> navigationManager.navigateUp()
             is SuccessDestinationResult -> serviceManager.startService(CSCService::class.java, args.getDevice())
-            null -> navigationManager.navigateTo(ForwardDestination(ScannerDestinationId), UUIDArgument(ScannerDestinationId, CSC_SERVICE_UUID))
         }.exhaustive
     }
 

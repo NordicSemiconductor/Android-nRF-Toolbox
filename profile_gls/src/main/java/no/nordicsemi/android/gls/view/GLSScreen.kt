@@ -8,7 +8,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.gls.R
 import no.nordicsemi.android.gls.viewmodel.DisconnectEvent
-import no.nordicsemi.android.gls.viewmodel.GLSScreenViewEvent
 import no.nordicsemi.android.gls.viewmodel.GLSViewModel
 import no.nordicsemi.android.theme.view.BackIconAppBar
 import no.nordicsemi.android.theme.view.DeviceConnectingView
@@ -21,20 +20,13 @@ fun GLSScreen() {
 
     Log.d("AAATESTAAA", "$viewModel") //TODO fix screen rotation
 
-    GLSView(state) {
-        viewModel.onEvent(it)
-    }
-}
-
-@Composable
-private fun GLSView(state: GLSViewState, onEvent: (GLSScreenViewEvent) -> Unit) {
     Column {
         BackIconAppBar(stringResource(id = R.string.gls_title)) {
-            onEvent(DisconnectEvent)
+            viewModel.onEvent(DisconnectEvent)
         }
 
         when (state) {
-            is DisplayDataState -> GLSContentView(state.data, onEvent)
+            is DisplayDataState -> GLSContentView(state.data) { viewModel.onEvent(it) }
             LoadingState -> DeviceConnectingView()
         }.exhaustive
     }

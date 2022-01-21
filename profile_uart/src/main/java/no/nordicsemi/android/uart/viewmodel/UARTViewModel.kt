@@ -3,29 +3,25 @@ package no.nordicsemi.android.uart.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
-import no.nordicsemi.android.navigation.NavigationManager
+import kotlinx.coroutines.flow.*
+import no.nordicsemi.android.navigation.*
 import no.nordicsemi.android.service.BleManagerStatus
+import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.uart.data.DisconnectCommand
 import no.nordicsemi.android.uart.data.SendTextCommand
 import no.nordicsemi.android.uart.data.UARTRepository
-import no.nordicsemi.android.uart.view.DisplayDataState
-import no.nordicsemi.android.uart.view.LoadingState
-import no.nordicsemi.android.uart.view.OnCreateMacro
-import no.nordicsemi.android.uart.view.OnDeleteMacro
-import no.nordicsemi.android.uart.view.OnDisconnectButtonClick
-import no.nordicsemi.android.uart.view.OnRunMacro
-import no.nordicsemi.android.uart.view.UARTViewEvent
+import no.nordicsemi.android.uart.repository.UARTService
+import no.nordicsemi.android.uart.repository.UART_SERVICE_UUID
+import no.nordicsemi.android.uart.view.*
 import no.nordicsemi.android.utils.exhaustive
+import no.nordicsemi.android.utils.getDevice
+import no.nordicsemi.ui.scanner.ScannerDestinationId
 import javax.inject.Inject
 
 @HiltViewModel
 internal class UARTViewModel @Inject constructor(
     private val repository: UARTRepository,
+    private val serviceManager: ServiceManager,
     private val navigationManager: NavigationManager
 ) : ViewModel() {
 
@@ -38,11 +34,26 @@ internal class UARTViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.Lazily, LoadingState)
 
     init {
+        navigationManager.navigateTo(ForwardDestination(ScannerDestinationId), UUIDArgument(ScannerDestinationId, UART_SERVICE_UUID))
+
+        navigationManager.recentResult.onEach {
+            if (it.destinationId == ScannerDestinationId) {
+                handleArgs(it)
+            }
+        }.launchIn(viewModelScope)
+
         repository.status.onEach {
             if (it == BleManagerStatus.DISCONNECTED) {
                 navigationManager.navigateUp()
             }
         }.launchIn(viewModelScope)
+    }
+
+    private fun handleArgs(args: DestinationResult) {
+        when (args) {
+            is CancelDestinationResult -> navigationManager.navigateUp()
+            is SuccessDestinationResult -> serviceManager.startService(UARTService::class.java, args.getDevice())
+        }.exhaustive
     }
 
     fun onEvent(event: UARTViewEvent) {

@@ -4,13 +4,10 @@ import android.bluetooth.BluetoothDevice
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import no.nordicsemi.android.bps.data.BPSRepository
 import no.nordicsemi.android.bps.repository.BPSManager
+import no.nordicsemi.android.bps.repository.BPS_SERVICE_UUID
 import no.nordicsemi.android.bps.view.BPSScreenViewEvent
 import no.nordicsemi.android.bps.view.DisconnectEvent
 import no.nordicsemi.android.bps.view.DisplayDataState
@@ -40,6 +37,8 @@ internal class BPSViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.Lazily, LoadingState)
 
     init {
+        navigationManager.navigateTo(ForwardDestination(ScannerDestinationId), UUIDArgument(ScannerDestinationId, BPS_SERVICE_UUID))
+
         navigationManager.recentResult.onEach {
             if (it.destinationId == ScannerDestinationId) {
                 handleArgs(it)
@@ -70,11 +69,10 @@ internal class BPSViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    private fun handleArgs(args: DestinationResult?) {
+    private fun handleArgs(args: DestinationResult) {
         when (args) {
             is CancelDestinationResult -> navigationManager.navigateUp()
             is SuccessDestinationResult -> connectDevice(args.getDevice())
-            null -> navigationManager.navigateTo(ForwardDestination(ScannerDestinationId), UUIDArgument(ScannerDestinationId, GLS_SERVICE_UUID))
         }.exhaustive
     }
 
