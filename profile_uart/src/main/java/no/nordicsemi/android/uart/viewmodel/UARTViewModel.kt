@@ -34,7 +34,7 @@ internal class UARTViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.Lazily, LoadingState)
 
     init {
-        navigationManager.navigateTo(ForwardDestination(ScannerDestinationId), UUIDArgument(ScannerDestinationId, UART_SERVICE_UUID))
+        navigationManager.navigateTo(ScannerDestinationId, UUIDArgument(UART_SERVICE_UUID))
 
         navigationManager.recentResult.onEach {
             if (it.destinationId == ScannerDestinationId) {

@@ -33,7 +33,7 @@ internal class CGMScreenViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.Lazily, LoadingState)
 
     init {
-        navigationManager.navigateTo(ForwardDestination(ScannerDestinationId), UUIDArgument(ScannerDestinationId, CGMS_SERVICE_UUID))
+        navigationManager.navigateTo(ScannerDestinationId, UUIDArgument(CGMS_SERVICE_UUID))
 
         navigationManager.recentResult.onEach {
             if (it.destinationId == ScannerDestinationId) {

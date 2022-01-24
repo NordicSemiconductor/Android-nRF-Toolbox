@@ -1,4 +1,4 @@
-package no.nordicsemi.android.gls.view
+package no.nordicsemi.android.gls.main.view
 
 import no.nordicsemi.android.gls.data.GLSData
 

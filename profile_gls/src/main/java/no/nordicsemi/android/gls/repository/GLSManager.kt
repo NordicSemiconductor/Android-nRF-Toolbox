@@ -35,23 +35,8 @@ import no.nordicsemi.android.ble.common.data.RecordAccessControlPointData
 import no.nordicsemi.android.ble.common.profile.RecordAccessControlPointCallback.RACPErrorCode
 import no.nordicsemi.android.ble.common.profile.RecordAccessControlPointCallback.RACPOpCode
 import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementCallback.GlucoseStatus
-import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Carbohydrate
-import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Health
-import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Meal
-import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Medication
-import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Tester
-import no.nordicsemi.android.gls.data.CarbohydrateId
-import no.nordicsemi.android.gls.data.ConcentrationUnit
-import no.nordicsemi.android.gls.data.GLSRecord
-import no.nordicsemi.android.gls.data.GLSRepository
-import no.nordicsemi.android.gls.data.HealthStatus
-import no.nordicsemi.android.gls.data.MeasurementContext
-import no.nordicsemi.android.gls.data.MedicationId
-import no.nordicsemi.android.gls.data.MedicationUnit
-import no.nordicsemi.android.gls.data.RecordType
-import no.nordicsemi.android.gls.data.RequestStatus
-import no.nordicsemi.android.gls.data.TestType
-import no.nordicsemi.android.gls.data.TypeOfMeal
+import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.*
+import no.nordicsemi.android.gls.data.*
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 import javax.inject.Inject
@@ -137,8 +122,8 @@ internal class GLSManager @Inject constructor(
                             unit = unit?.let { ConcentrationUnit.create(it) }
                                 ?: ConcentrationUnit.UNIT_KGPL,
                             type = RecordType.createOrNull(type),
-                            sampleLocation = sampleLocation ?: 0,
-                            status = status?.value ?: 0
+                            sampleLocation = SampleLocation.createOrNull(sampleLocation),
+                            status = status
                         )
 
                         repository.addNewRecord(record)
@@ -164,19 +149,14 @@ internal class GLSManager @Inject constructor(
                     ) {
                         val context = MeasurementContext(
                             sequenceNumber = sequenceNumber,
-                            carbohydrateId = carbohydrate?.value?.let { CarbohydrateId.create(it) }
-                                ?: CarbohydrateId.NOT_PRESENT,
-                            carbohydrateUnits = carbohydrateAmount ?: 0f,
-                            meal = meal?.value?.let { TypeOfMeal.create(it) }
-                                ?: TypeOfMeal.NOT_PRESENT,
-                            tester = tester?.value?.let { TestType.create(it) }
-                                ?: TestType.NOT_PRESENT,
-                            health = health?.value?.let { HealthStatus.create(it) }
-                                ?: HealthStatus.NOT_PRESENT,
+                            carbohydrate = carbohydrate,
+                            carbohydrateAmount = carbohydrateAmount ?: 0f,
+                            meal = meal,
+                            tester = tester,
+                            health = health,
                             exerciseDuration = exerciseDuration ?: 0,
                             exerciseIntensity = exerciseIntensity ?: 0,
-                            medicationId = medication?.value?.let { MedicationId.create(it) }
-                                ?: MedicationId.NOT_PRESENT,
+                            medication = medication,
                             medicationQuantity = medicationAmount ?: 0f,
                             medicationUnit = medicationUnit?.let { MedicationUnit.create(it) }
                                 ?: MedicationUnit.UNIT_KG,

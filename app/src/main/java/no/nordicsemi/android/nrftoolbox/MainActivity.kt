@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
+import no.nordicsemi.android.gls.GLSDestinations
 import no.nordicsemi.android.material.you.NordicActivity
 import no.nordicsemi.android.material.you.NordicTheme
 import no.nordicsemi.android.navigation.NavigationView
@@ -24,7 +25,7 @@ class MainActivity : NordicActivity() {
                     color = MaterialTheme.colorScheme.surface,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    NavigationView(HomeDestinations + ProfileDestinations + ScannerDestinations)
+                    NavigationView(HomeDestinations + ProfileDestinations + ScannerDestinations + GLSDestinations)
                 }
             }
         }

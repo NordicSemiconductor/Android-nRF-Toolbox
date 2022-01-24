@@ -1,14 +1,7 @@
-package no.nordicsemi.android.gls.view
+package no.nordicsemi.android.gls.main.view
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -22,14 +15,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.gls.R
 import no.nordicsemi.android.gls.data.GLSData
 import no.nordicsemi.android.gls.data.GLSRecord
 import no.nordicsemi.android.gls.data.RequestStatus
 import no.nordicsemi.android.gls.data.WorkingMode
-import no.nordicsemi.android.gls.viewmodel.DisconnectEvent
-import no.nordicsemi.android.gls.viewmodel.GLSScreenViewEvent
-import no.nordicsemi.android.gls.viewmodel.OnWorkingModeSelected
+import no.nordicsemi.android.gls.main.viewmodel.GLSViewModel
 import no.nordicsemi.android.material.you.CircularProgressIndicator
 import no.nordicsemi.android.theme.view.BatteryLevelView
 import no.nordicsemi.android.theme.view.ScreenSection
@@ -123,11 +115,14 @@ private fun RecordsViewWithData(state: GLSData) {
 
 @Composable
 private fun RecordItem(record: GLSRecord) {
+    val viewModel: GLSViewModel = hiltViewModel()
+
     Row(verticalAlignment = Alignment.CenterVertically) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
+                .clickable { viewModel.onEvent(OnGLSRecordClick(record)) }
         ) {
             record.time?.let {
                 Text(

@@ -21,29 +21,18 @@
  */
 package no.nordicsemi.android.gls.data
 
+import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementCallback.GlucoseStatus
+import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.*
 import java.util.*
 
 internal data class GLSRecord(
-    /** Record sequence number  */
     val sequenceNumber: Int = 0,
-
-    /** The base time of the measurement  */
     val time: Calendar? = null,
-
-    /** The glucose concentration. 0 if not present  */
     val glucoseConcentration: Float = 0f,
-
-    /** Concentration unit. One of the following: [ConcentrationUnit.UNIT_KGPL], [ConcentrationUnit.UNIT_MOLPL]  */
     val unit: ConcentrationUnit = ConcentrationUnit.UNIT_KGPL,
-
     val type: RecordType?,
-
-    /** The sample location. 0 if unknown  */
-    val sampleLocation: Int = 0,
-
-    /** Sensor status annunciation flags. 0 if not present  */
-    val status: Int = 0,
-
+    val status: GlucoseStatus?,
+    val sampleLocation: SampleLocation? = null,
     var context: MeasurementContext? = null
 )
 
@@ -72,35 +61,17 @@ internal enum class RecordType(val id: Int) {
 }
 
 internal data class MeasurementContext(
-    /** Record sequence number  */
     val sequenceNumber: Int = 0,
-
-    val carbohydrateId: CarbohydrateId = CarbohydrateId.NOT_PRESENT,
-
-    /** Number of kilograms of carbohydrate  */
-    val carbohydrateUnits: Float = 0f,
-
-    val meal: TypeOfMeal = TypeOfMeal.NOT_PRESENT,
-
-    val tester: TestType = TestType.NOT_PRESENT,
-
-    val health: HealthStatus = HealthStatus.NOT_PRESENT,
-
-    /** Exercise duration in seconds. 0 if not present  */
+    val carbohydrate: Carbohydrate? = null,
+    val carbohydrateAmount: Float = 0f,
+    val meal: Meal? = null,
+    val tester: Tester? = null,
+    val health: Health? = null,
     val exerciseDuration: Int = 0,
-
-    /** Exercise intensity in percent. 0 if not present  */
     val exerciseIntensity: Int = 0,
-
-    val medicationId: MedicationId = MedicationId.NOT_PRESENT,
-
-    /** Quantity of medication. See [.medicationUnit] for the unit.  */
+    val medication: Medication?,
     val medicationQuantity: Float = 0f,
-
-    /** One of the following: [MeasurementContext.UNIT_kg], [MeasurementContext.UNIT_l].  */
     val medicationUnit: MedicationUnit = MedicationUnit.UNIT_KG,
-
-    /** HbA1c value. 0 if not present  */
     val HbA1c: Float = 0f
 )
 
@@ -116,88 +87,6 @@ internal enum class ConcentrationUnit(val id: Int) {
     }
 }
 
-internal enum class CarbohydrateId(val id: Int) {
-    NOT_PRESENT(0),
-    BREAKFAST(1),
-    LUNCH(2),
-    DINNER(3),
-    SNACK(4),
-    DRINK(5),
-    SUPPER(6),
-    BRUNCH(7);
-
-    companion object {
-        fun create(value: Byte): CarbohydrateId {
-            return values().firstOrNull { it.id == value.toInt() }
-                ?: throw IllegalArgumentException("Cannot find element for provided value.")
-        }
-    }
-}
-
-internal enum class TypeOfMeal(val id: Int) {
-    NOT_PRESENT(0),
-    PREPRANDIAL(1),
-    POSTPRANDIAL(2),
-    FASTING(3),
-    CASUAL(4),
-    BEDTIME(5);
-
-    companion object {
-        fun create(value: Byte): TypeOfMeal {
-            return values().firstOrNull { it.id == value.toInt() }
-                ?: throw IllegalArgumentException("Cannot find element for provided value.")
-        }
-    }
-}
-
-internal enum class TestType(val id: Int) {
-    NOT_PRESENT(0),
-    SELF(1),
-    HEALTH_CARE_PROFESSIONAL(2),
-    LAB_TEST(3),
-    VALUE_NOT_AVAILABLE(15);
-
-    companion object {
-        fun create(value: Byte): TestType {
-            return values().firstOrNull { it.id == value.toInt() }
-                ?: throw IllegalArgumentException("Cannot find element for provided value.")
-        }
-    }
-}
-
-internal enum class HealthStatus(val id: Int) {
-    NOT_PRESENT(0),
-    MINOR_HEALTH_ISSUES(1),
-    MAJOR_HEALTH_ISSUES(2),
-    DURING_MENSES(3),
-    UNDER_STRESS(4),
-    NO_HEALTH_ISSUES(5),
-    VALUE_NOT_AVAILABLE(15);
-
-    companion object {
-        fun create(value: Byte): HealthStatus {
-            return values().firstOrNull { it.id == value.toInt() }
-                ?: throw IllegalArgumentException("Cannot find element for provided value.")
-        }
-    }
-}
-
-internal enum class MedicationId(val id: Int) {
-    NOT_PRESENT(0),
-    RAPID_ACTING_INSULIN(1),
-    SHORT_ACTING_INSULIN(2),
-    INTERMEDIATE_ACTING_INSULIN(3),
-    LONG_ACTING_INSULIN(4),
-    PRE_MIXED_INSULIN(5);
-
-    companion object {
-        fun create(value: Byte): MedicationId {
-            return values().firstOrNull { it.id == value.toInt() }
-                ?: throw IllegalArgumentException("Cannot find element for provided value.")
-        }
-    }
-}
-
 internal enum class MedicationUnit(val id: Int) {
     UNIT_KG(0),
     UNIT_L(1);
@@ -206,6 +95,20 @@ internal enum class MedicationUnit(val id: Int) {
         fun create(value: Int): MedicationUnit {
             return values().firstOrNull { it.id == value }
                 ?: throw IllegalArgumentException("Cannot find element for provided value.")
+        }
+    }
+}
+
+internal enum class SampleLocation(val id: Int) {
+    FINGER(1),
+    AST(2),
+    EARLOBE(3),
+    CONTROL_SOLUTION(4),
+    NOT_AVAILABLE(15);
+
+    companion object {
+        fun createOrNull(value: Int?): SampleLocation? {
+            return values().firstOrNull { it.id == value }
         }
     }
 }

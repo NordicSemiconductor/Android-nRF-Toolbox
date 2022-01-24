@@ -1,4 +1,4 @@
-package no.nordicsemi.android.gls.view
+package no.nordicsemi.android.gls.main.view
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource

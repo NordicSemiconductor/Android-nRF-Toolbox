@@ -1,16 +1,16 @@
-package no.nordicsemi.android.gls.viewmodel
+package no.nordicsemi.android.gls.main.viewmodel
 
 import android.bluetooth.BluetoothDevice
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
+import no.nordicsemi.android.gls.GlsDetailsDestinationId
 import no.nordicsemi.android.gls.data.GLSRepository
 import no.nordicsemi.android.gls.data.WorkingMode
+import no.nordicsemi.android.gls.main.view.*
 import no.nordicsemi.android.gls.repository.GLSManager
 import no.nordicsemi.android.gls.repository.GLS_SERVICE_UUID
-import no.nordicsemi.android.gls.view.DisplayDataState
-import no.nordicsemi.android.gls.view.LoadingState
 import no.nordicsemi.android.navigation.*
 import no.nordicsemi.android.service.BleManagerStatus
 import no.nordicsemi.android.service.ConnectionObserverAdapter
@@ -36,7 +36,7 @@ internal class GLSViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.Lazily, LoadingState)
 
     init {
-        navigationManager.navigateTo(ForwardDestination(ScannerDestinationId), UUIDArgument(ScannerDestinationId, GLS_SERVICE_UUID))
+        navigationManager.navigateTo(ScannerDestinationId, UUIDArgument(GLS_SERVICE_UUID))
 
         navigationManager.recentResult.onEach {
             if (it.destinationId == ScannerDestinationId) {
@@ -79,6 +79,7 @@ internal class GLSViewModel @Inject constructor(
         when (event) {
             DisconnectEvent -> disconnect()
             is OnWorkingModeSelected -> requestData(event.workingMode)
+            is OnGLSRecordClick -> navigationManager.navigateTo(GlsDetailsDestinationId, AnyArgument(event.record))
         }.exhaustive
     }
 

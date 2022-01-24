@@ -35,7 +35,7 @@ internal class PRXViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.Lazily, LoadingState)
 
     init {
-        navigationManager.navigateTo(ForwardDestination(ScannerDestinationId), UUIDArgument(ScannerDestinationId, PRX_SERVICE_UUID))
+        navigationManager.navigateTo(ScannerDestinationId, UUIDArgument(PRX_SERVICE_UUID))
 
         navigationManager.recentResult.onEach {
             if (it.destinationId == ScannerDestinationId) {

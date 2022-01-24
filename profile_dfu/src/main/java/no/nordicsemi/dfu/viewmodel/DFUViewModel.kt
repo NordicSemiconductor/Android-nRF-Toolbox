@@ -6,7 +6,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import no.nordicsemi.android.navigation.*
+import no.nordicsemi.android.navigation.CancelDestinationResult
+import no.nordicsemi.android.navigation.DestinationResult
+import no.nordicsemi.android.navigation.NavigationManager
+import no.nordicsemi.android.navigation.SuccessDestinationResult
 import no.nordicsemi.android.service.BleManagerStatus
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.utils.exhaustive
@@ -52,7 +55,7 @@ internal class DFUViewModel @Inject constructor(
                 device = args.getDevice()
                 serviceManager.startService(DFUService::class.java, args.getDevice())
             }
-            null -> navigationManager.navigateTo(ForwardDestination(ScannerDestinationId))
+            null -> navigationManager.navigateTo(ScannerDestinationId)
         }.exhaustive
     }
 

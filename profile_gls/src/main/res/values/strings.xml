@@ -23,4 +23,87 @@
     <string name="gls__working_mode__all">All</string>
     <string name="gls__working_mode__last">Last</string>
     <string name="gls__working_mode__first">First</string>
+
+    <string name="gls_yes">YES</string>
+    <string name="gls_no">NO</string>
+
+    <string name="gls_sample_location_finger">Finger</string>
+    <string name="gls_sample_location_ast">Alternate Site Test (AST)</string>
+    <string name="gls_sample_location_earlobe">Earlobe</string>
+    <string name="gls_sample_location_control_solution">Control solution</string>
+    <string name="gls_sample_location_value_not_available">Value not available</string>
+
+    <string name="gls_sample_location_kg_l">kg/l</string>
+    <string name="gls_sample_location_mol_l">mol/l</string>
+
+    <string name="gls_sample_location_kg">kg</string>
+    <string name="gls_sample_location_l">l</string>
+
+    <string name="gls_reserved">Reserved</string>
+    <string name="gls_sample_location_rapid_acting_insulin">Rapid acting insulin</string>
+    <string name="gls_sample_location_short_acting_insulin">Short acting insulin</string>
+    <string name="gls_sample_location_intermediate_acting_insulin">intermediate acting insulin</string>
+    <string name="gls_sample_location_long_acting_insulin">Long acting insulin</string>
+    <string name="gls_sample_location_pre_mixed_insulin">Pre mixed insulin</string>
+
+    <string name="gls_health_minor_issues">Minor health issues</string>
+    <string name="gls_health_major_issues">Major health issues"</string>
+    <string name="gls_health_during_menses">During menses</string>
+    <string name="gls_health_under_stress">Under stress</string>
+    <string name="gls_health_no_issues">No health issues</string>
+    <string name="gls_health_not_available">Not available</string>
+
+    <string name="gls_tester_self">Self</string>
+    <string name="gls_tester_health_care_professional">Health care professional</string>
+    <string name="gls_tester_lab_test">Lab test</string>
+    <string name="gls_tester_not_available">Not available</string>
+
+    <string name="gls_carbohydrate_breakfast">Breakfast</string>
+    <string name="gls_carbohydrate_lunch">Lunch</string>
+    <string name="gls_carbohydrate_dinner">Dinner</string>
+    <string name="gls_carbohydrate_snack">Snack</string>
+    <string name="gls_carbohydrate_drink">Drink</string>
+    <string name="gls_carbohydrate_supper">Supper</string>
+    <string name="gls_carbohydrate_brunch">Brunch</string>
+
+    <string name="gls_meal_preprandial">Preprandial</string>
+    <string name="gls_meal_posprandial">Postprandial</string>
+    <string name="gls_meal_fasting">Fasting</string>
+    <string name="gls_meal_casual">Casual</string>
+    <string name="gls_meal_bedtime">Bedtime</string>
+
+    <string name="gls_available">Available</string>
+    <string name="gls_unavailable">Unavailable</string>
+
+    <string name="gls_details_sequence_number">Sequence number: </string>
+    <string name="gls_details_date_and_time">Date &amp; Time: </string>
+    <string name="gls_details_type">Type: </string>
+    <string name="gls_details_location">Location: </string>
+    <string name="gls_details_glucose_condensation_title">Glucose condensation: </string>
+    <string name="gls_details_glucose_condensation_field">%.2f %s</string>
+
+    <string name="gls_details_battery_low">Battery low:</string>
+    <string name="gls_details_sensor_malfunction">Sensor malfunction:</string>
+    <string name="gls_details_insufficient_sample">Insufficient sample:</string>
+    <string name="gls_details_strip_insertion_error">Strip insertion error:</string>
+    <string name="gls_details_strip_type_incorrect">Strip type incorrect:</string>
+    <string name="gls_details_sensor_result_too_high">Sensor result too high:</string>
+    <string name="gls_details_sensor_result_too_low">Sensor result too low:</string>
+    <string name="gls_details_temperature_too_high">Temperature too high:</string>
+    <string name="gls_details_temperature_too_low">Temperature too low:</string>
+    <string name="gls_details_strip_pulled_too_soon">Strip pulled too soon:</string>
+    <string name="gls_details_general_device_fault">General device fault:</string>
+    <string name="gls_details_time_fault">Time fault:</string>
+
+    <string name="gls_context_title">Measurement context:</string>
+    <string name="gls_context_carbohydrate">Carbohydrate:</string>
+    <string name="gls_context_meal">Meal:</string>
+    <string name="gls_context_tester">Tester:</string>
+    <string name="gls_context_health">Health:</string>
+    <string name="gls_context_exercise_title">Exercise:</string>
+    <string name="gls_context_exercise_field">%d min %d%%</string>
+    <string name="gls_context_medication_title">Medication:</string>
+    <string name="gls_context_medication_field">%d %s \n %s</string>
+    <string name="gls_context_hba1c_title">HbA1c:</string>
+    <string name="gls_context_hba1c_field">%.2f%%</string>
 </resources>

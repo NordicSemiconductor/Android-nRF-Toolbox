@@ -34,7 +34,7 @@ internal class CSCViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.Lazily, LoadingState)
 
     init {
-        navigationManager.navigateTo(ForwardDestination(ScannerDestinationId), UUIDArgument(ScannerDestinationId, CSC_SERVICE_UUID))
+        navigationManager.navigateTo(ScannerDestinationId, UUIDArgument(CSC_SERVICE_UUID))
 
         navigationManager.recentResult.onEach {
             if (it.destinationId == ScannerDestinationId) {
