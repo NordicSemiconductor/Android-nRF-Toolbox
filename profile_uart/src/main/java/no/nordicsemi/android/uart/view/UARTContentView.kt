@@ -23,10 +23,8 @@ import no.nordicsemi.android.uart.data.UARTData
 internal fun UARTContentView(state: UARTData, onEvent: (UARTViewEvent) -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(horizontal = 16.dp)
+        modifier = Modifier.padding(16.dp)
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
         InputSection(state, onEvent)
 
         Spacer(modifier = Modifier.height(16.dp))

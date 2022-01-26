@@ -22,10 +22,8 @@ import no.nordicsemi.android.theme.view.SectionTitle
 internal fun HRSContentView(state: HRSData, onEvent: (HRSScreenViewEvent) -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(horizontal = 16.dp)
+        modifier = Modifier.padding(16.dp)
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
         ScreenSection {
             SectionTitle(resId = R.drawable.ic_chart_line, title = "Data")
 

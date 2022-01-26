@@ -1,9 +1,12 @@
 package no.nordicsemi.android.prx.view
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.prx.R
@@ -22,9 +25,11 @@ fun PRXScreen() {
             viewModel.onEvent(DisconnectEvent)
         }
 
-        when (state) {
-            is DisplayDataState -> ContentView(state.data) { viewModel.onEvent(it) }
-            LoadingState -> DeviceConnectingView()
-        }.exhaustive
+        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            when (state) {
+                is DisplayDataState -> ContentView(state.data) { viewModel.onEvent(it) }
+                LoadingState -> DeviceConnectingView()
+            }.exhaustive
+        }
     }
 }

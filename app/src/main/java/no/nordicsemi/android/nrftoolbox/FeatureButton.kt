@@ -4,12 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,14 +32,18 @@ fun FeatureButton(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(150.dp)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .height(160.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = stringResource(id = nameCode),
-                style = MaterialTheme.typography.labelMedium
-            )
+            Box( modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(id = nameCode),
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter),
+                    textAlign = TextAlign.Center
+                )
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -62,11 +61,14 @@ fun FeatureButton(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = stringResource(id = name),
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center
-            )
+            Box( modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(id = name),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.fillMaxWidth().align(Alignment.TopCenter),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }

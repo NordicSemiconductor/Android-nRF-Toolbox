@@ -20,10 +20,8 @@ import no.nordicsemi.android.theme.view.BatteryLevelView
 internal fun RSCSContentView(state: RSCSData, onEvent: (RSCScreenViewEvent) -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(horizontal = 16.dp)
+        modifier = Modifier.padding(16.dp)
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
         SensorsReadingView(state = state)
 
         Spacer(modifier = Modifier.height(16.dp))

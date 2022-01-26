@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -41,42 +39,46 @@ internal fun CSCContentView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
             when (it) {
                 FlowCanceled -> showDialog.value = false
                 is ItemSelectedResult -> {
-                    onEvent(OnWheelSizeSelected(WheelSize(wheelValues[it.index].toInt(), wheelEntries[it.index])))
+                    onEvent(OnWheelSizeSelected(WheelSize(wheelValues[it.index].toInt(),
+                        wheelEntries[it.index])))
                     showDialog.value = false
                 }
             }.exhaustive
         }
     }
 
-    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(16.dp)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(16.dp)
+    ) {
+        SettingsSection(state, onEvent) { showDialog.value = true }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        SensorsReadingView(state = state)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = { onEvent(OnDisconnectButtonClick) }
         ) {
-            SettingsSection(state, onEvent) { showDialog.value = true }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            SensorsReadingView(state = state)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = { onEvent(OnDisconnectButtonClick) }
-            ) {
-                Text(text = stringResource(id = R.string.disconnect))
-            }
+            Text(text = stringResource(id = R.string.disconnect))
         }
     }
 }
 
 @Composable
-private fun SettingsSection(state: CSCData, onEvent: (CSCViewEvent) -> Unit, onWheelButtonClick: () -> Unit) {
+private fun SettingsSection(
+    state: CSCData,
+    onEvent: (CSCViewEvent) -> Unit,
+    onWheelButtonClick: () -> Unit,
+) {
     ScreenSection {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            SectionTitle(icon = Icons.Default.Settings, title = stringResource(R.string.csc_settings))
+            SectionTitle(icon = Icons.Default.Settings,
+                title = stringResource(R.string.csc_settings))
 
             Spacer(modifier = Modifier.height(16.dp))
 
