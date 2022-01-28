@@ -1,11 +1,7 @@
 package no.nordicsemi.android.hts.data
 
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import no.nordicsemi.android.service.BleManagerStatus
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -35,7 +31,11 @@ internal class HTSRepository @Inject constructor() {
     }
 
     fun sendDisconnectCommand() {
-        _command.tryEmit(DisconnectCommand)
+        if (_command.subscriptionCount.value > 0) {
+            _command.tryEmit(DisconnectCommand)
+        } else {
+            _status.tryEmit(BleManagerStatus.DISCONNECTED)
+        }
     }
 
     fun setNewStatus(status: BleManagerStatus) {

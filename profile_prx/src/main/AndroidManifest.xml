@@ -3,6 +3,6 @@
     package="no.nordicsemi.android.prx">
 
     <application>
-        <service android:name=".service.PRXService"/>
+        <service android:name=".repository.PRXService"/>
     </application>
 </manifest>

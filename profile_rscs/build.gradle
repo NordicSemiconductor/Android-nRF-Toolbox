@@ -20,9 +20,5 @@ dependencies {
     implementation libs.compose.lifecycle
     implementation libs.compose.activity
 
-    testImplementation libs.test.junit
-    androidTestImplementation libs.android.test.junit
-    androidTestImplementation libs.android.test.espresso
-    androidTestImplementation libs.android.test.compose.ui
-    debugImplementation libs.android.test.compose.tooling
+    testImplementation libs.bundles.test
 }

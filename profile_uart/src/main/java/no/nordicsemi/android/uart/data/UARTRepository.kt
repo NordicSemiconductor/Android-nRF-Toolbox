@@ -41,7 +41,11 @@ internal class UARTRepository @Inject constructor() {
     }
 
     fun sendNewCommand(command: UARTServiceCommand) {
-        _command.tryEmit(command)
+        if (_command.subscriptionCount.value > 0) {
+            _command.tryEmit(command)
+        } else {
+            _status.tryEmit(BleManagerStatus.DISCONNECTED)
+        }
     }
 
     fun setNewStatus(status: BleManagerStatus) {

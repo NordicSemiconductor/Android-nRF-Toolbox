@@ -99,7 +99,11 @@ internal class GLSViewModel @Inject constructor(
     }
 
     private fun disconnect() {
-        glsManager.disconnect().enqueue()
+        if (glsManager.isConnected) {
+            glsManager.disconnect().enqueue()
+        } else {
+            repository.setNewStatus(BleManagerStatus.DISCONNECTED)
+        }
     }
 
     override fun onCleared() {

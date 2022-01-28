@@ -50,7 +50,11 @@ internal class CSCRepository @Inject constructor() {
     }
 
     fun sendNewServiceCommand(workingMode: CSCServiceCommand) {
-        _command.tryEmit(workingMode)
+        if (_command.subscriptionCount.value > 0) {
+            _command.tryEmit(workingMode)
+        } else {
+            _status.tryEmit(BleManagerStatus.DISCONNECTED)
+        }
     }
 
     fun setNewStatus(status: BleManagerStatus) {

@@ -90,8 +90,11 @@ internal class BPSViewModel @Inject constructor(
     }
 
     private fun onDisconnectButtonClick() {
-        bpsManager.disconnect().enqueue()
-        repository.clear()
+        if (bpsManager.isConnected) {
+            bpsManager.disconnect().enqueue()
+        } else {
+            repository.setNewStatus(BleManagerStatus.DISCONNECTED)
+        }
     }
 
     override fun onCleared() {

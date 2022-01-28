@@ -60,6 +60,11 @@ dependencyResolutionManagement {
             alias('android-test-espresso').to('androidx.test.espresso:espresso-core:3.4.0')
             alias('android-test-compose-ui').to('androidx.compose.ui', 'ui-test-junit4').versionRef('compose')
             alias('android-test-compose-tooling').to('androidx.compose.ui', 'ui-tooling').versionRef('compose')
+
+            alias('mockk-main').to('io.mockk:mockk:1.12.2')
+            alias('mockk-jvm').to('io.mockk:mockk-agent-jvm:1.12.2')
+            alias('test-coroutines').to('org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0')
+            bundle('test', ['test-junit', 'android-test-junit', 'mockk-main', 'mockk-jvm', 'test-coroutines'])
         }
     }
 }

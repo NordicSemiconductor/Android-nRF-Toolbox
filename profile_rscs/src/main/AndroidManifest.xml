@@ -3,6 +3,6 @@
     package="no.nordicsemi.android.rscs">
 
     <application>
-        <service android:name=".service.RSCSService"/>
+        <service android:name=".repository.RSCSService"/>
     </application>
 </manifest>

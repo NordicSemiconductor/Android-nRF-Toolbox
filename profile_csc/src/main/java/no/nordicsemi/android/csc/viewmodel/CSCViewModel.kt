@@ -74,7 +74,6 @@ internal class CSCViewModel @Inject constructor(
 
     private fun onDisconnectButtonClick() {
         repository.sendNewServiceCommand(DisconnectCommand)
-        repository.setNewStatus(BleManagerStatus.DISCONNECTED)
         repository.clear()
     }
 

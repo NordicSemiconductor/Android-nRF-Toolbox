@@ -6,8 +6,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import no.nordicsemi.android.navigation.*
 import no.nordicsemi.android.rscs.data.RSCSRepository
-import no.nordicsemi.android.rscs.service.RSCSService
-import no.nordicsemi.android.rscs.service.RSCS_SERVICE_UUID
+import no.nordicsemi.android.rscs.repository.RSCSService
+import no.nordicsemi.android.rscs.repository.RSCS_SERVICE_UUID
 import no.nordicsemi.android.rscs.view.DisconnectEvent
 import no.nordicsemi.android.rscs.view.DisplayDataState
 import no.nordicsemi.android.rscs.view.LoadingState

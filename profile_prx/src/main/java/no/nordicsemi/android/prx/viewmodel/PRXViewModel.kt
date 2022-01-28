@@ -9,8 +9,8 @@ import no.nordicsemi.android.prx.data.DisableAlarm
 import no.nordicsemi.android.prx.data.Disconnect
 import no.nordicsemi.android.prx.data.EnableAlarm
 import no.nordicsemi.android.prx.data.PRXRepository
-import no.nordicsemi.android.prx.service.PRXService
-import no.nordicsemi.android.prx.service.PRX_SERVICE_UUID
+import no.nordicsemi.android.prx.repository.PRXService
+import no.nordicsemi.android.prx.repository.PRX_SERVICE_UUID
 import no.nordicsemi.android.prx.view.*
 import no.nordicsemi.android.service.BleManagerStatus
 import no.nordicsemi.android.service.ServiceManager

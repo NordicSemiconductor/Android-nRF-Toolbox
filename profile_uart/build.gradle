@@ -20,4 +20,6 @@ dependencies {
     implementation libs.lifecycle.service
     implementation libs.compose.lifecycle
     implementation libs.compose.activity
+
+    testImplementation libs.bundles.test
 }
