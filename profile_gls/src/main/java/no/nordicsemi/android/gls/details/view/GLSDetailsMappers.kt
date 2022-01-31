@@ -100,12 +100,3 @@ internal fun Meal.toDisplayString(): String {
         Meal.BEDTIME -> stringResource(id = R.string.gls_meal_bedtime)
     }
 }
-
-@Composable
-internal fun Boolean.toGLSStatus(): String {
-    return if (this) {
-        stringResource(id = R.string.gls_yes)
-    } else {
-        stringResource(id = R.string.gls_no)
-    }
-}

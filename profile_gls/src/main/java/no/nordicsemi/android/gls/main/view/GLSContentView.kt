@@ -2,6 +2,7 @@ package no.nordicsemi.android.gls.main.view
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -11,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -103,7 +105,7 @@ private fun RecordsViewWithData(state: GLSData) {
         state.records.forEachIndexed { i, it ->
             RecordItem(it)
 
-            if (i < state.records.size-1) {
+            if (i < state.records.size - 1) {
                 Spacer(modifier = Modifier.size(8.dp))
             }
         }
@@ -114,32 +116,46 @@ private fun RecordsViewWithData(state: GLSData) {
 private fun RecordItem(record: GLSRecord) {
     val viewModel: GLSViewModel = hiltViewModel()
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clip(RoundedCornerShape(10.dp))
+            .clickable { viewModel.onEvent(OnGLSRecordClick(record)) }
+            .padding(8.dp)
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .clickable { viewModel.onEvent(OnGLSRecordClick(record)) }
         ) {
             record.time?.let {
                 Text(
                     text = stringResource(R.string.gls_timestamp, it),
-                    style = MaterialTheme.typography.labelLarge
+                    style = MaterialTheme.typography.titleMedium
                 )
             }
 
-            Text(
-                text = record.type.toDisplayString(),
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Spacer(modifier = Modifier.size(4.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = record.type.toDisplayString(),
+                    style = MaterialTheme.typography.bodySmall
+                )
+
+                Text(
+                    text = glucoseConcentrationDisplayValue(
+                        record.glucoseConcentration,
+                        record.unit
+                    ),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
         }
-
-        Spacer(modifier = Modifier.size(16.dp))
-
-        Text(
-            text = glucoseConcentrationDisplayValue(record.glucoseConcentration, record.unit),
-            style = MaterialTheme.typography.titleMedium,
-        )
     }
 }
 

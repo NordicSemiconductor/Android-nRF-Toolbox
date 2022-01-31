@@ -33,7 +33,7 @@ dependencyResolutionManagement {
             version('compose', '1.0.5')
             alias('compose-livedata').to('androidx.compose.runtime', 'runtime-livedata').versionRef('compose')
             alias('compose-ui').to('androidx.compose.ui', 'ui').versionRef('compose')
-            alias('compose-material').to('androidx.compose.material3:material3:1.0.0-alpha01')
+            alias('compose-material').to('androidx.compose.material3:material3:1.0.0-alpha04')
             alias('compose-tooling-preview').to('androidx.compose.ui', 'ui-tooling-preview').versionRef('compose')
             alias('compose-navigation').to('androidx.navigation:navigation-compose:2.4.0-alpha09')
             bundle('compose', ['compose-livedata', 'compose-ui', 'compose-material', 'compose-tooling-preview', 'compose-navigation'])
