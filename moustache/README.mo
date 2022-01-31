@@ -1,138 +1,92 @@
-# nRF Connect Device Manager
+# nRF Toolbox
 
-This repository is a fork of the [McuManager Android Library](https://github.com/JuulLabs-OSS/mcumgr-android), 
-which has been DEPRECATED. All new features and bug fixes will be added here. Please, migrate to the
-new version to get future updates.
+The nRF Toolbox is a container app that stores your Nordic Semiconductor apps for Bluetooth Low Energy
+in one location.
 
-The sample application has been named nRF Connect Device Manager and is available on 
-[Google Play](https://play.google.com/store/apps/details?id=no.nordicsemi.android.nrfconnectdevicemanager).
+It contains applications demonstrating standard Bluetooth LE profiles:
+* **Cycling Speed and Cadence**,
+* **Running Speed and Cadence**,
+* **Heart Rate Monitor**,
+* **Blood Pressure Monitor**,
+* **Health Thermometer Monitor**,
+* **Glucose Monitor**,
+* **Continuous Glucose Monitor**,
+* **Proximity Monitor**
 
-nRF Connect Device Manager library is compatible with Mcu Manager, a management subsystem supported 
-by nRF Connect SDK, Zephyr and Apache Mynewt.
+Since version 1.10.0 the *nRF Toolbox* also supports the **Nordic UART Service** which may be used
+for bidirectional text communication between devices.
 
----
+### How to import to Android Studio
 
-# McuManager Android
+The production version of nRF Toolbox depends on
+[Android BLE Library](https://github.com/NordicSemiconductor/Android-BLE-Library/) and demonstrates
+use of the Android BLE Common Library (ble-common module), which provides parsers for common profiles
+adopted by Bluetooth SIG.
 
-A transport agnostic implementation of the McuManager protocol. Contains a default implementation for BLE transport.
-Minimum required Android version is 5.0 (Android Lollipop) due to a requirement for high MTU.
+You may also include the BLE Library and BLE Common Library as modules. Clone the library project
+to the same root folder.
 
-## Gradle Install
+If you are having issue like [#40](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/issues/40)
+or [#41](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/issues/41), the correct folders
+structure should look like this:
 
-[ ![Download](https://maven-badges.herokuapp.com/maven-central/no.nordicsemi.android/mcumgr-ble/badge.svg?style=plastic) ](https://search.maven.org/search?q=g:no.nordicsemi.android)
+![Folders structure](resources/structure.png)
 
-#### McuManager BLE (Recommended)
-Contains the core and a BLE transport implementation using Nordic's [Android-BLE-Library v2](https://github.com/NordicSemiconductor/Android-BLE-Library). 
+If you prefer a different name for BLE library, update the
+[*settings.gradle*](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/blob/master/settings.gradle)
+file.
 
-```groovy
-implementation 'no.nordicsemi.android:mcumgr-ble:{{VERSION}}'
-```
+If you get ["Missing Feature Watch" error](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/issues/41#issuecomment-355291101),
+switch the configuration to 'app'.
 
-The core module will be included automatically.
+### BleManager and how to use it
 
-#### McuManager Core
-Core dependency only. Use if you want to provide your own transport implementation.
+There are 4 different solutions how to use the manager shown in different profiles.
+The very basic approach is used by the BPS nd GLS profiles. Each of those activities holds a
+static reference to the manager. Keeping the manager as a view model object protects from disposing it
+when device orientation changes and the activities are being destroyed and recreated. However, this
+approach does not allow to keep the connections in background mode and therefore is not a solution
+that should be used in any production-ready application.
 
-```groovy
-implementation 'no.nordicsemi.android:mcumgr-core:{{VERSION}}'
-```
+A better implementation may be found in CGMS, CSC, HRS, HTS, PRX, RSCS, UART. The `BleManager` instance is maintained
+by the running service. The service is started in order to connect to a device and stopped when user
+decides to disconnect from it. When an activity is destroyed it unbinds from the service, but the
+service is still running, so the incoming data may continue to be handled. All device-related data
+are kept by the service and may be obtained by a activity when it binds to it in order to be
+shown to the user.
 
-### Migration from the original repo
+### Nordic UART Service
 
-When migrating from the version 0.12 and older, change 
-```groovy
-implementation 'io.runtime.mcumgr:mcumgr-ble:0.XX.X'
-```
-to the above.
+The UART profile allows for fast prototyping of devices. The service itself is very simple, having
+just 2 characteristics, one for sending data and one for receiving. The data may be any byte array
+but it is very often used with just text. Each UART configuration can be created as a separate profile.
+Each of them, when pressed, will send the stored command to the device.
+You may export your configuration to XML and share between other devices. Swipe the screen to
+right to show the log with all events.
 
-# Introduction
+### Device Firmware Update
 
-McuManager is an application layer protocol used to manage and monitor microcontrollers running 
-Apache Mynewt and Zephyr. More specifically, McuManager implements over-the-air (OTA) firmware upgrades,
-log and stat collection, and file-system and configuration management. 
+**DFU is now available as a separate application**
+https://github.com/NordicSemiconductor/Android-DFU-Library
 
-## Command Groups
+### Dependencies
 
-McuManager are organized by functionality into command groups. In _mcumgr-android_, command groups 
-are called managers and extend the `McuManager` class. The managers (groups) implemented in 
-_mcumgr-android_ are:
+nRF Toolbox depends on [Android BLE Library](https://github.com/NordicSemiconductor/Android-BLE-Library/)
+which has to be cloned into the same root folder as this app. If you prefer a different name,
+update the [*settings.gradle*](https://github.com/NordicSemiconductor/Android-BLE-Library/blob/master/settings.gradle) file.
 
-* **`DefaultManager`**: Contains commands relevant to the OS. This includes task and memory pool 
-  statistics, device time read & write, and device reset.
-* **`ImageManager`**: Manage image state on the device and perform image uploads.
-* **`StatsManager`**: Read stats from the device.
-* **`ConfigManager`**: Read/Write config values on the device.
-* **`LogManager`**: Collect logs from the device.
-* **`FsManager`**: Download/upload files from the device file system.
+The nRF Toolbox also uses the nRF Logger API library which may be found here:
+https://github.com/NordicSemiconductor/nRF-Logger-API. The library is included in dependencies
+in *build.gradle* file. This library allows the app to create log entries in the
+[nRF Logger](https://play.google.com/store/apps/details?id=no.nordicsemi.android.log) application.
+Please, read the library documentation on GitHub for more information about the usage and permissions.
 
-# Firmware Upgrade
+The graph in HRM profile is created using the [MPAndroidChart v3.1.0](https://github.com/PhilJay/MPAndroidChart)
+contributed based on the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0).
 
-Firmware upgrade is generally a four step process performed using commands from the `image` and 
-`default` commands groups: `upload`, `test`, `reset`, and `confirm`.
-
-This library provides a `FirmwareUpgradeManager` as a convenience for upgrading the image running on a device. 
-
-### Example
-```java
-// Initialize the BLE transporter with context and a BluetoothDevice
-McuMgrTransport transport = new McuMgrBleTransport(context, bluetoothDevice);
-
-// Initialize the FirmwareUpgradeManager
-FirmwareUpgradeManager dfuManager = new FirmwareUpgradeManager(transport, dfuCallback)
-
-// Start the firmware upgrade with the image data
-dfuManager.start(imageData);
-```
-
-To update multi-core device, use:
-```java
-List<Pair<Integer, byte[]>> images = new ArrayList<>();
-images.add(new Pair<Integer, byte[]>(0, appCoreImage));
-images.add(new Pair<Integer, byte[]>(1, netCoreImage));
-dfuManager.start(images);
-```
-You may also use `ZipPackage` class from `utils` package in Sample app, which can unpack the ZIP file
-generated by `west` in Zephyr or nRF Connect SDK.
-
-## FirmwareUpgradeManager
-
-A `FirmwareUpgradeManager` provides an easy way to perform firmware upgrades on a device. 
-A `FirmwareUpgradeManager` must be initialized with an `McuMgrTransport` which defines the transport 
-scheme and device. Once initialized, a `FirmwareUpgradeManager` can perform one firmware upgrade at a time. 
-Firmware upgrades are started using the `start(byte[] imageData)` of `start(List<Pair<Integer, byte[]>> images)`
-methods and can be paused, resumed, and canceled using `pause()`, `resume()`, and `cancel()` respectively.
-
-### Firmware Upgrade Mode
-
-McuManager firmware upgrades can actually be performed in few different ways. These different upgrade 
-modes determine the commands sent after the upload step. The `FirmwareUpgradeManager` can be 
-configured to perform these different methods using `setMode(FirmwareUpgradeManager.Mode mode)`. 
-The different firmware upgrade modes are as follows:
-
-* **`TEST_AND_CONFIRM`**: This mode is the **default and recommended mode** for performing upgrades 
-  due to it's ability to recover from a bad firmware upgrade. 
-  The process for this mode is `UPLOAD`, `TEST`, `RESET`, `CONFIRM`. 
-* **`CONFIRM_ONLY`**: This mode may be used for devices with revert disabled. If the device fails
-  to boot into the new image, it will not be able to recover and will need to be re-flashed.
-  The process for this mode is `UPLOAD`, `CONFIRM`, `RESET`.
-* **`TEST_ONLY`**: This mode is useful if you want to run tests on the new image running before 
-  confirming it manually as the primary boot image. 
-  The process for this mode is `UPLOAD`, `TEST`, `RESET`.
-
-### Firmware Upgrade State
-
-`FirmwareUpgradeManager` acts as a simple, mostly linear state machine which is determined by the `Mode`. 
-As the manager moves through the firmware upgrade process, state changes are provided through the 
-`FirmwareUpgradeCallback`'s `onStateChanged` method.
-
-The `FirmwareUpgradeManager` contains an additional state, `VALIDATE`, which precedes the upload. 
-The `VALIDATE` state checks the current image state of the device in an attempt to bypass certain 
-states of the firmware upgrade. For example, if the image to upload is already in slot 1 on the 
-device, the `State` will skip `UPLOAD` and move directly to `TEST` (or `CONFIRM` if `Mode.CONFIRM_ONLY` 
-has been set). If the uploaded image is already active, and confirmed in slot 0, the upgrade will 
-succeed immediately. The `VALIDATE` state makes it easy to reattempt an upgrade without needing to 
-re-upload the image or manually determine where to start.
-
-## License
-
-This library is licensed under the Apache 2.0 license. For more info, see the `LICENSE` file.
+### Note
+- Android 5.0 or newer is required.
+- Compatible with nRF5 devices running samples from the Nordic SDK and other devices implementing
+  standard profiles.
+- Development kits: https://www.nordicsemi.com/Software-and-tools/Development-Kits.
+- The nRF5 SDK and SoftDevices are available online at http://developer.nordicsemi.com.
