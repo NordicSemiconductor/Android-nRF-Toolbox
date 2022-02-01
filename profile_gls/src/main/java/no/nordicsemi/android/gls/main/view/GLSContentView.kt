@@ -22,7 +22,7 @@ import no.nordicsemi.android.gls.data.GLSRecord
 import no.nordicsemi.android.gls.data.RequestStatus
 import no.nordicsemi.android.gls.data.WorkingMode
 import no.nordicsemi.android.gls.main.viewmodel.GLSViewModel
-import no.nordicsemi.android.material.you.CircularProgressIndicator
+import androidx.compose.material3.CircularProgressIndicator
 import no.nordicsemi.android.theme.view.BatteryLevelView
 import no.nordicsemi.android.theme.view.ScreenSection
 import no.nordicsemi.android.theme.view.SectionTitle

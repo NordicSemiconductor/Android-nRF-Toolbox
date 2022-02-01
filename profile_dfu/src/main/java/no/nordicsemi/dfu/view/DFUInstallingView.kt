@@ -6,7 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.material.you.CircularProgressIndicator
+import androidx.compose.material3.CircularProgressIndicator
 import no.nordicsemi.android.theme.view.ScreenSection
 import no.nordicsemi.dfu.data.FileInstallingState
 
