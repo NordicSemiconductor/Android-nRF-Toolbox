@@ -24,9 +24,7 @@ internal class CGMService : ForegroundBleService() {
         status.onEach {
             val status = it.mapToSimpleManagerStatus()
             repository.setNewStatus(status)
-            if (status == BleManagerStatus.DISCONNECTED) {
-                scope.close()
-            }
+            stopIfDisconnected(status)
         }.launchIn(scope)
 
         repository.command.onEach {

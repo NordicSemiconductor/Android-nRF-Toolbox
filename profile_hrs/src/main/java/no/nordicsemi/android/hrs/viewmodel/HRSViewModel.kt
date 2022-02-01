@@ -1,5 +1,6 @@
 package no.nordicsemi.android.hrs.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,6 +25,7 @@ internal class HRSViewModel @Inject constructor(
 ) : ViewModel() {
 
     val state = repository.data.combine(repository.status) { data, status ->
+        Log.d("AAATESTAAA", "data: $data, status: $status")
         when (status) {
             BleManagerStatus.CONNECTING -> LoadingState
             BleManagerStatus.OK,

@@ -92,6 +92,13 @@ abstract class BleProfileService : Service() {
         })
     }
 
+    protected fun stopIfDisconnected(status: BleManagerStatus) {
+        if (status == BleManagerStatus.DISCONNECTED) {
+            scope.close()
+            stopSelf()
+        }
+    }
+
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }

@@ -1,14 +1,9 @@
 package no.nordicsemi.android.prx.repository
 
-import android.util.Log
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import no.nordicsemi.android.prx.data.AlarmLevel
-import no.nordicsemi.android.prx.data.DisableAlarm
-import no.nordicsemi.android.prx.data.Disconnect
-import no.nordicsemi.android.prx.data.EnableAlarm
-import no.nordicsemi.android.prx.data.PRXRepository
+import no.nordicsemi.android.prx.data.*
 import no.nordicsemi.android.service.BleManagerStatus
 import no.nordicsemi.android.service.BleServiceStatus
 import no.nordicsemi.android.service.ForegroundBleService
@@ -43,6 +38,7 @@ internal class PRXService : ForegroundBleService() {
                 BleServiceStatus.OK -> BleManagerStatus.OK
                 BleServiceStatus.DISCONNECTED -> {
                     scope.close()
+                    stopSelf()
                     BleManagerStatus.DISCONNECTED
                 }
                 BleServiceStatus.LINK_LOSS -> null
