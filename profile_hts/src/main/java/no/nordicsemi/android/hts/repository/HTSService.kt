@@ -4,7 +4,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.hts.data.HTSRepository
+import no.nordicsemi.android.service.BleManagerStatus
+import no.nordicsemi.android.service.BleServiceStatus
 import no.nordicsemi.android.service.ForegroundBleService
+import no.nordicsemi.android.utils.exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -19,7 +22,11 @@ internal class HTSService : ForegroundBleService() {
         super.onCreate()
 
         status.onEach {
-            repository.setNewStatus(it)
+            val status = it.mapToSimpleManagerStatus()
+            repository.setNewStatus(status)
+            if (status == BleManagerStatus.DISCONNECTED) {
+                scope.close()
+            }
         }.launchIn(scope)
 
         repository.command.onEach {

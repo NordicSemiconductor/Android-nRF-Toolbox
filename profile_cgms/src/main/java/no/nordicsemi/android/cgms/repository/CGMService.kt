@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.cgms.data.CGMRepository
 import no.nordicsemi.android.cgms.data.CGMServiceCommand
+import no.nordicsemi.android.service.BleManagerStatus
 import no.nordicsemi.android.service.ForegroundBleService
 import no.nordicsemi.android.utils.exhaustive
 import javax.inject.Inject
@@ -21,7 +22,11 @@ internal class CGMService : ForegroundBleService() {
         super.onCreate()
 
         status.onEach {
-            repository.setNewStatus(it)
+            val status = it.mapToSimpleManagerStatus()
+            repository.setNewStatus(status)
+            if (status == BleManagerStatus.DISCONNECTED) {
+                scope.close()
+            }
         }.launchIn(scope)
 
         repository.command.onEach {

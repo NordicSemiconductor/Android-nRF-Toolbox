@@ -1,5 +1,6 @@
 package no.nordicsemi.android.prx.repository
 
+import android.util.Log
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -8,6 +9,8 @@ import no.nordicsemi.android.prx.data.DisableAlarm
 import no.nordicsemi.android.prx.data.Disconnect
 import no.nordicsemi.android.prx.data.EnableAlarm
 import no.nordicsemi.android.prx.data.PRXRepository
+import no.nordicsemi.android.service.BleManagerStatus
+import no.nordicsemi.android.service.BleServiceStatus
 import no.nordicsemi.android.service.ForegroundBleService
 import no.nordicsemi.android.utils.exhaustive
 import javax.inject.Inject
@@ -35,7 +38,20 @@ internal class PRXService : ForegroundBleService() {
         serverManager.open()
 
         status.onEach {
-            repository.setNewStatus(it)
+            val bleStatus = when (it) {
+                BleServiceStatus.CONNECTING -> BleManagerStatus.CONNECTING
+                BleServiceStatus.OK -> BleManagerStatus.OK
+                BleServiceStatus.DISCONNECTED -> {
+                    scope.close()
+                    BleManagerStatus.DISCONNECTED
+                }
+                BleServiceStatus.LINK_LOSS -> null
+            }.exhaustive
+            bleStatus?.let { repository.setNewStatus(it) }
+
+            if (BleServiceStatus.LINK_LOSS == it) {
+                repository.setLocalAlarmLevel(repository.data.value.linkLossAlarmLevel)
+            }
         }.launchIn(scope)
 
         repository.command.onEach {
@@ -48,11 +64,15 @@ internal class PRXService : ForegroundBleService() {
 
         repository.data.onEach {
             if (it.localAlarmLevel != AlarmLevel.NONE) {
-                alarmHandler.playAlarm()
+                alarmHandler.playAlarm(it.localAlarmLevel)
             } else {
                 alarmHandler.pauseAlarm()
             }
         }.launchIn(scope)
+    }
+
+    override fun shouldAutoConnect(): Boolean {
+        return true
     }
 
     override fun onDestroy() {

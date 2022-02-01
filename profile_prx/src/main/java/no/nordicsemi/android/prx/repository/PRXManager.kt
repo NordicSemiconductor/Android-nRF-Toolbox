@@ -55,6 +55,7 @@ internal class PRXManager(
 
     // Server characteristics.
     private var localAlertLevelCharacteristic: BluetoothGattCharacteristic? = null
+    private var linkLossServerCharacteristic: BluetoothGattCharacteristic? = null
     /**
      * Returns true if the alert has been enabled on the proximity tag, false otherwise.
      */
@@ -77,8 +78,16 @@ internal class PRXManager(
                         dataHolder.setLocalAlarmLevel(level)
                     }
                 })
+
+            setWriteCallback(linkLossServerCharacteristic)
+                .with(object : AlertLevelDataCallback() {
+                    override fun onAlertLevelChanged(device: BluetoothDevice, level: Int) {
+                        dataHolder.setLinkLossLevel(level)
+                    }
+                })
+
             // After connection, set the Link Loss behaviour on the tag.
-            writeCharacteristic(linkLossCharacteristic, AlertLevelData.highAlert())
+            writeCharacteristic(linkLossCharacteristic, AlertLevelData.highAlert(), BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
                 .done { device: BluetoothDevice? ->
                     log(
                         Log.INFO,
@@ -97,9 +106,11 @@ internal class PRXManager(
         override fun onServerReady(server: BluetoothGattServer) {
             val immediateAlertService = server.getService(PRX_SERVICE_UUID)
             if (immediateAlertService != null) {
-                localAlertLevelCharacteristic = immediateAlertService.getCharacteristic(
-                    ALERT_LEVEL_CHARACTERISTIC_UUID
-                )
+                localAlertLevelCharacteristic = immediateAlertService.getCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID)
+            }
+            val linkLossService = server.getService(LINK_LOSS_SERVICE_UUID)
+            if (linkLossService != null) {
+                linkLossServerCharacteristic = linkLossService.getCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID)
             }
         }
 
@@ -108,8 +119,7 @@ internal class PRXManager(
         override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
             val llService = gatt.getService(LINK_LOSS_SERVICE_UUID)
             if (llService != null) {
-                linkLossCharacteristic =
-                    llService.getCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID)
+                linkLossCharacteristic = llService.getCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID)
             }
             return linkLossCharacteristic != null
         }
@@ -130,6 +140,7 @@ internal class PRXManager(
             alertLevelCharacteristic = null
             linkLossCharacteristic = null
             localAlertLevelCharacteristic = null
+            linkLossServerCharacteristic = null
             // Reset the alert flag
             isAlertEnabled = false
         }

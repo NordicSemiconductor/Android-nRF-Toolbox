@@ -27,16 +27,22 @@ internal class PRXRepository @Inject constructor() {
         _data.tryEmit(_data.value.copy(localAlarmLevel = alarmLevel))
     }
 
+    fun setLocalAlarmLevel(alarmLevel: AlarmLevel) {
+        _data.tryEmit(_data.value.copy(localAlarmLevel = alarmLevel))
+    }
+
+    fun setLinkLossLevel(value: Int) {
+        val alarmLevel = AlarmLevel.create(value)
+        _data.tryEmit(_data.value.copy(linkLossAlarmLevel = alarmLevel))
+    }
+
     fun setRemoteAlarmLevel(isOn: Boolean) {
         _data.tryEmit(_data.value.copy(isRemoteAlarm = isOn))
     }
 
     fun invokeCommand(command: PRXCommand) {
-        if (_command.subscriptionCount.value > 0) {
-            _command.tryEmit(command)
-        } else {
-            _status.tryEmit(BleManagerStatus.DISCONNECTED)
-        }
+        _command.tryEmit(command)
+        _status.tryEmit(BleManagerStatus.DISCONNECTED)
     }
 
     fun setNewStatus(status: BleManagerStatus) {

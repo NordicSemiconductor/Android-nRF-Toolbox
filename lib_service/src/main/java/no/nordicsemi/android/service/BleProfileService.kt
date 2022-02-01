@@ -33,6 +33,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import no.nordicsemi.android.ble.BleManager
+import no.nordicsemi.android.ble.observer.ConnectionObserver
 import no.nordicsemi.android.log.ILogSession
 import no.nordicsemi.android.log.Logger
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
@@ -44,7 +45,7 @@ abstract class BleProfileService : Service() {
 
     protected abstract val manager: BleManager
 
-    private val _status = MutableStateFlow(BleManagerStatus.CONNECTING)
+    private val _status = MutableStateFlow(BleServiceStatus.CONNECTING)
     val status = _status.asStateFlow()
 
     /**
@@ -71,20 +72,22 @@ abstract class BleProfileService : Service() {
         manager.setConnectionObserver(object : ConnectionObserverAdapter() {
             override fun onDeviceConnected(device: BluetoothDevice) {
                 super.onDeviceConnected(device)
-                _status.value = BleManagerStatus.OK
+                _status.value = BleServiceStatus.OK
             }
 
             override fun onDeviceFailedToConnect(device: BluetoothDevice, reason: Int) {
                 super.onDeviceFailedToConnect(device, reason)
-                _status.value = BleManagerStatus.DISCONNECTED
+                _status.value = BleServiceStatus.DISCONNECTED
                 stopSelf()
-                scope.close()
             }
 
             override fun onDeviceDisconnected(device: BluetoothDevice, reason: Int) {
                 super.onDeviceDisconnected(device, reason)
-                _status.value = BleManagerStatus.DISCONNECTED
-                scope.close()
+                if (reason == ConnectionObserver.REASON_LINK_LOSS) {
+                    _status.value = BleServiceStatus.LINK_LOSS
+                } else {
+                    _status.value = BleServiceStatus.DISCONNECTED
+                }
             }
         })
     }
@@ -98,7 +101,7 @@ abstract class BleProfileService : Service() {
      *
      * @return true to use autoConnect feature, false (default) otherwise.
      */
-    private fun shouldAutoConnect(): Boolean {
+    protected open fun shouldAutoConnect(): Boolean {
         return false
     }
 

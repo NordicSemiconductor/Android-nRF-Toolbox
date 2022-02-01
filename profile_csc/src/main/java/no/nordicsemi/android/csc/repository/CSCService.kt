@@ -1,12 +1,12 @@
 package no.nordicsemi.android.csc.repository
 
-import android.util.Log
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.csc.data.CSCRepository
 import no.nordicsemi.android.csc.data.DisconnectCommand
 import no.nordicsemi.android.csc.data.SetWheelSizeCommand
+import no.nordicsemi.android.service.BleManagerStatus
 import no.nordicsemi.android.service.ForegroundBleService
 import no.nordicsemi.android.utils.exhaustive
 import javax.inject.Inject
@@ -23,7 +23,11 @@ internal class CSCService : ForegroundBleService() {
         super.onCreate()
 
         status.onEach {
-            repository.setNewStatus(it)
+            val status = it.mapToSimpleManagerStatus()
+            repository.setNewStatus(status)
+            if (status == BleManagerStatus.DISCONNECTED) {
+                scope.close()
+            }
         }.launchIn(scope)
 
         repository.command.onEach {

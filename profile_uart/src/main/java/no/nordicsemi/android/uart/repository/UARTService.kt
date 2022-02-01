@@ -3,6 +3,7 @@ package no.nordicsemi.android.uart.repository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import no.nordicsemi.android.service.BleManagerStatus
 import no.nordicsemi.android.service.ForegroundBleService
 import no.nordicsemi.android.uart.data.DisconnectCommand
 import no.nordicsemi.android.uart.data.SendTextCommand
@@ -22,7 +23,11 @@ internal class UARTService : ForegroundBleService() {
         super.onCreate()
 
         status.onEach {
-            repository.setNewStatus(it)
+            val status = it.mapToSimpleManagerStatus()
+            repository.setNewStatus(status)
+            if (status == BleManagerStatus.DISCONNECTED) {
+                scope.close()
+            }
         }.launchIn(scope)
 
         repository.command.onEach {
