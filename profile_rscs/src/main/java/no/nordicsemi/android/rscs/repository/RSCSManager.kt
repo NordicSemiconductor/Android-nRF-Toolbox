@@ -21,40 +21,35 @@
  */
 package no.nordicsemi.android.rscs.repository
 
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
-import no.nordicsemi.android.ble.common.callback.rsc.RunningSpeedAndCadenceMeasurementDataCallback
+import android.util.Log
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import no.nordicsemi.android.ble.common.callback.rsc.RunningSpeedAndCadenceMeasurementResponse
+import no.nordicsemi.android.ble.ktx.asValidResponseFlow
+import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.rscs.data.RSCSRepository
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 
-/** Running Speed and Cadence Measurement service UUID  */
 val RSCS_SERVICE_UUID: UUID = UUID.fromString("00001814-0000-1000-8000-00805F9B34FB")
-
-/** Running Speed and Cadence Measurement characteristic UUID  */
 private val RSC_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A53-0000-1000-8000-00805F9B34FB")
 
 internal class RSCSManager internal constructor(
     context: Context,
+    private val scope: CoroutineScope,
     private val dataHolder: RSCSRepository
 ) : BatteryManager(context) {
 
     private var rscMeasurementCharacteristic: BluetoothGattCharacteristic? = null
 
-    private val callback = object : RunningSpeedAndCadenceMeasurementDataCallback() {
-
-        override fun onRSCMeasurementReceived(
-            device: BluetoothDevice,
-            running: Boolean,
-            instantaneousSpeed: Float,
-            instantaneousCadence: Int,
-            strideLength: Int?,
-            totalDistance: Long?
-        ) {
-            dataHolder.setNewData(running, instantaneousSpeed, instantaneousCadence, strideLength, totalDistance)
-        }
+    private val exceptionHandler = CoroutineExceptionHandler { _, t->
+        Log.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
     }
 
     override fun onBatteryLevelChanged(batteryLevel: Int) {
@@ -65,17 +60,18 @@ internal class RSCSManager internal constructor(
         return RSCManagerGattCallback()
     }
 
-    /**
-     * BluetoothGatt callbacks for connection/disconnection, service discovery,
-     * receiving indication, etc.
-     */
     private inner class RSCManagerGattCallback : BatteryManagerGattCallback() {
 
         override fun initialize() {
             super.initialize()
-            setNotificationCallback(rscMeasurementCharacteristic)
-                .with(callback)
-            enableNotifications(rscMeasurementCharacteristic).enqueue()
+            setNotificationCallback(rscMeasurementCharacteristic).asValidResponseFlow<RunningSpeedAndCadenceMeasurementResponse>()
+                .onEach {
+                    dataHolder.setNewData(it.isRunning, it.instantaneousSpeed, it.instantaneousCadence, it.strideLength, it.totalDistance)
+                }.launchIn(scope)
+
+            scope.launch(exceptionHandler) {
+                enableNotifications(rscMeasurementCharacteristic).suspend()
+            }
         }
 
         public override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {

@@ -1,5 +1,6 @@
 package no.nordicsemi.android.prx.repository
 
+import android.util.Log
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -22,7 +23,7 @@ internal class PRXService : ForegroundBleService() {
     private var serverManager: ProximityServerManager = ProximityServerManager(this)
 
     override val manager: PRXManager by lazy {
-        PRXManager(this, repository).apply {
+        PRXManager(this, scope, repository).apply {
             useServer(serverManager)
         }
     }

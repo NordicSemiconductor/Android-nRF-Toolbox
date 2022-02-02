@@ -21,42 +21,45 @@
  */
 package no.nordicsemi.android.cgms.repository
 
-import android.annotation.SuppressLint
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
 import android.util.Log
 import android.util.SparseArray
-import no.nordicsemi.android.ble.common.callback.RecordAccessControlPointDataCallback
-import no.nordicsemi.android.ble.common.callback.cgm.CGMFeatureDataCallback
-import no.nordicsemi.android.ble.common.callback.cgm.CGMSpecificOpsControlPointDataCallback
-import no.nordicsemi.android.ble.common.callback.cgm.CGMStatusDataCallback
-import no.nordicsemi.android.ble.common.callback.cgm.ContinuousGlucoseMeasurementDataCallback
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import no.nordicsemi.android.ble.common.callback.RecordAccessControlPointResponse
+import no.nordicsemi.android.ble.common.callback.cgm.CGMFeatureResponse
+import no.nordicsemi.android.ble.common.callback.cgm.CGMSpecificOpsControlPointResponse
+import no.nordicsemi.android.ble.common.callback.cgm.CGMStatusResponse
+import no.nordicsemi.android.ble.common.callback.cgm.ContinuousGlucoseMeasurementResponse
 import no.nordicsemi.android.ble.common.data.RecordAccessControlPointData
 import no.nordicsemi.android.ble.common.data.cgm.CGMSpecificOpsControlPointData
 import no.nordicsemi.android.ble.common.profile.RecordAccessControlPointCallback
 import no.nordicsemi.android.ble.common.profile.cgm.CGMSpecificOpsControlPointCallback
-import no.nordicsemi.android.ble.common.profile.cgm.CGMTypes
-import no.nordicsemi.android.ble.data.Data
-import no.nordicsemi.android.cgms.data.*
-import no.nordicsemi.android.log.LogContract
+import no.nordicsemi.android.ble.ktx.asValidResponseFlow
+import no.nordicsemi.android.ble.ktx.suspend
+import no.nordicsemi.android.ble.ktx.suspendForValidResponse
+import no.nordicsemi.android.cgms.data.CGMRecord
+import no.nordicsemi.android.cgms.data.CGMRepository
+import no.nordicsemi.android.cgms.data.RequestStatus
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 
-/** Cycling Speed and Cadence service UUID.  */
 val CGMS_SERVICE_UUID = UUID.fromString("0000181F-0000-1000-8000-00805f9b34fb")
 private val CGM_STATUS_UUID = UUID.fromString("00002AA9-0000-1000-8000-00805f9b34fb")
 private val CGM_FEATURE_UUID = UUID.fromString("00002AA8-0000-1000-8000-00805f9b34fb")
 private val CGM_MEASUREMENT_UUID = UUID.fromString("00002AA7-0000-1000-8000-00805f9b34fb")
-private val CGM_OPS_CONTROL_POINT_UUID =
-    UUID.fromString("00002AAC-0000-1000-8000-00805f9b34fb")
+private val CGM_OPS_CONTROL_POINT_UUID = UUID.fromString("00002AAC-0000-1000-8000-00805f9b34fb")
 
-/** Record Access Control Point characteristic UUID.  */
 private val RACP_UUID = UUID.fromString("00002A52-0000-1000-8000-00805f9b34fb")
 
 internal class CGMManager(
     context: Context,
+    private val scope: CoroutineScope,
     private val repository: CGMRepository
 ) : BatteryManager(context) {
 
@@ -67,20 +70,15 @@ internal class CGMManager(
     private var recordAccessControlPointCharacteristic: BluetoothGattCharacteristic? = null
     private val records: SparseArray<CGMRecord> = SparseArray<CGMRecord>()
 
-    /** A flag set to true if the remote device supports E2E CRC.  */
     private var secured = false
 
-    /**
-     * A flag set when records has been requested using RACP. This is to distinguish CGM packets
-     * received as continuous measurements or requested.
-     */
     private var recordAccessRequestInProgress = false
 
-    /**
-     * The timestamp when the session has started. This is needed to display the user facing
-     * times of samples.
-     */
     private var sessionStartTime: Long = 0
+
+    private val exceptionHandler = CoroutineExceptionHandler { _, t->
+        Log.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
+    }
 
     override fun onBatteryLevelChanged(batteryLevel: Int) {
         repository.emitNewBatteryLevel(batteryLevel)
@@ -90,247 +88,135 @@ internal class CGMManager(
         return CGMManagerGattCallback()
     }
 
-    /**
-     * BluetoothGatt mCallbacks for connection/disconnection, service discovery,
-     * receiving notification, etc.
-     */
     private inner class CGMManagerGattCallback : BatteryManagerGattCallback() {
         override fun initialize() {
-            // Enable Battery service
             super.initialize()
 
-            // Read CGM Feature characteristic, mainly to see if the device supports E2E CRC.
-            // This is not supported in the experimental CGMS from the SDK.
-            readCharacteristic(cgmFeatureCharacteristic)
-                .with(object : CGMFeatureDataCallback() {
-                    override fun onContinuousGlucoseMonitorFeaturesReceived(
-                        device: BluetoothDevice, features: CGMTypes.CGMFeatures,
-                        type: Int, sampleLocation: Int, secured: Boolean
-                    ) {
-                        this@CGMManager.secured = features.e2eCrcSupported
-                        log(
-                            LogContract.Log.Level.APPLICATION,
-                            "E2E CRC feature " + if (this@CGMManager.secured) "supported" else "not supported"
-                        )
-                    }
-                })
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(
-                        Log.WARN,
-                        "Could not read CGM Feature characteristic"
-                    )
+            scope.launch(exceptionHandler) {
+                val response =
+                    readCharacteristic(cgmFeatureCharacteristic).suspendForValidResponse<CGMFeatureResponse>()
+                this@CGMManager.secured = response.features.e2eCrcSupported
+            }
+
+            scope.launch(exceptionHandler) {
+                val response =
+                    readCharacteristic(cgmStatusCharacteristic).suspendForValidResponse<CGMStatusResponse>()
+                if (response.status?.sessionStopped == false) {
+                    sessionStartTime = System.currentTimeMillis() - response.timeOffset * 60000L
                 }
-                .enqueue()
+            }
 
-            // Check if the session is already started. This is not supported in the experimental CGMS from the SDK.
-            readCharacteristic(cgmStatusCharacteristic)
-                .with(object : CGMStatusDataCallback() {
-                    override fun onContinuousGlucoseMonitorStatusChanged(
-                        device: BluetoothDevice,
-                        status: CGMTypes.CGMStatus,
-                        timeOffset: Int,
-                        secured: Boolean
-                    ) {
-                        if (!status.sessionStopped) {
-                            sessionStartTime = System.currentTimeMillis() - timeOffset * 60000L
-                            log(LogContract.Log.Level.APPLICATION, "Session already started")
-                        }
-                    }
-                })
-                .fail { _: BluetoothDevice?, _: Int ->
-                    log(
-                        Log.WARN,
-                        "Could not read CGM Status characteristic"
-                    )
-                }
-                .enqueue()
-
-            // Set notification and indication mCallbacks
-            setNotificationCallback(cgmMeasurementCharacteristic)
-                .with(object : ContinuousGlucoseMeasurementDataCallback() {
-                    override fun onContinuousGlucoseMeasurementReceived(
-                        device: BluetoothDevice,
-                        glucoseConcentration: Float,
-                        cgmTrend: Float?,
-                        cgmQuality: Float?,
-                        status: CGMTypes.CGMStatus?,
-                        timeOffset: Int,
-                        secured: Boolean
-                    ) {
-                        // If the CGM Status characteristic has not been read and the session was already started before,
-                        // estimate the Session Start Time by subtracting timeOffset minutes from the current timestamp.
-                        if (sessionStartTime == 0L && !recordAccessRequestInProgress) {
-                            sessionStartTime = System.currentTimeMillis() - timeOffset * 60000L
-                        }
-
-                        // Calculate the sample timestamp based on the Session Start Time
-                        val timestamp =
-                            sessionStartTime + timeOffset * 60000L // Sequence number is in minutes since Start Session
-                        val record = CGMRecord(timeOffset, glucoseConcentration, timestamp)
-                        records.put(record.sequenceNumber, record)
-                        repository.emitNewRecords(records.toList())
+            setNotificationCallback(cgmMeasurementCharacteristic).asValidResponseFlow<ContinuousGlucoseMeasurementResponse>()
+                .onEach {
+                    if (sessionStartTime == 0L && !recordAccessRequestInProgress) {
+                        sessionStartTime = System.currentTimeMillis() - it.timeOffset * 60000L
                     }
 
-                    override fun onContinuousGlucoseMeasurementReceivedWithCrcError(
-                        device: BluetoothDevice,
-                        data: Data
-                    ) {
-                        log(
-                            Log.WARN,
-                            "Continuous Glucose Measurement record received with CRC error"
-                        )
-                    }
-                })
-            setIndicationCallback(cgmSpecificOpsControlPointCharacteristic)
-                .with(object : CGMSpecificOpsControlPointDataCallback() {
-                    @SuppressLint("SwitchIntDef")
-                    override fun onCGMSpecificOpsOperationCompleted(
-                        device: BluetoothDevice,
-                        @CGMSpecificOpsControlPointCallback.CGMOpCode requestCode: Int,
-                        secured: Boolean
-                    ) {
-                        when (requestCode) {
+                    val timestamp = sessionStartTime + it.timeOffset * 60000L
+                    val record = CGMRecord(it.timeOffset, it.glucoseConcentration, timestamp)
+                    records.put(record.sequenceNumber, record)
+                    repository.emitNewRecords(records.toList())
+                }.launchIn(scope)
+
+            setIndicationCallback(cgmSpecificOpsControlPointCharacteristic).asValidResponseFlow<CGMSpecificOpsControlPointResponse>()
+                .onEach {
+                    if (it.isOperationCompleted) {
+                        when (it.requestCode) {
                             CGMSpecificOpsControlPointCallback.CGM_OP_CODE_START_SESSION -> sessionStartTime =
                                 System.currentTimeMillis()
-                            CGMSpecificOpsControlPointCallback.CGM_OP_CODE_STOP_SESSION -> sessionStartTime =
-                                0
+                            CGMSpecificOpsControlPointCallback.CGM_OP_CODE_STOP_SESSION -> sessionStartTime = 0
                         }
-                    }
-
-                    @SuppressLint("SwitchIntDef")
-                    override fun onCGMSpecificOpsOperationError(
-                        device: BluetoothDevice,
-                        @CGMSpecificOpsControlPointCallback.CGMOpCode requestCode: Int,
-                        @CGMSpecificOpsControlPointCallback.CGMErrorCode errorCode: Int,
-                        secured: Boolean
-                    ) {
-                        when (requestCode) {
-                            CGMSpecificOpsControlPointCallback.CGM_OP_CODE_START_SESSION -> {
-                                if (errorCode == CGMSpecificOpsControlPointCallback.CGM_ERROR_PROCEDURE_NOT_COMPLETED) {
-                                    // Session was already started before.
-                                    // Looks like the CGM Status characteristic has not been read,
-                                    // otherwise we would have got the Session Start Time before.
-                                    // The Session Start Time will be calculated when a next CGM
-                                    // packet is received based on it's Time Offset.
+                    } else {
+                        when (it.requestCode) {
+                            CGMSpecificOpsControlPointCallback.CGM_OP_CODE_START_SESSION ->
+                                if (it.errorCode == CGMSpecificOpsControlPointCallback.CGM_ERROR_PROCEDURE_NOT_COMPLETED) {
+                                    sessionStartTime = 0
                                 }
-                                sessionStartTime = 0
-                            }
-                            CGMSpecificOpsControlPointCallback.CGM_OP_CODE_STOP_SESSION -> sessionStartTime =
-                                0
+                            CGMSpecificOpsControlPointCallback.CGM_OP_CODE_STOP_SESSION -> sessionStartTime = 0
                         }
                     }
+                }.launchIn(scope)
 
-                    override fun onCGMSpecificOpsResponseReceivedWithCrcError(
-                        device: BluetoothDevice,
-                        data: Data
-                    ) {
-                        log(Log.ERROR, "Request failed: CRC error")
+            setIndicationCallback(recordAccessControlPointCharacteristic).asValidResponseFlow<RecordAccessControlPointResponse>()
+                .onEach {
+                    if (it.isOperationCompleted && !it.wereRecordsFound() && it.numberOfRecords > 0) {
+                        onRecordsReceived(it)
+                    } else if (it.isOperationCompleted && !it.wereRecordsFound()) {
+                        onNoRecordsFound()
+                    } else if (it.isOperationCompleted && it.wereRecordsFound()) {
+                        onOperationCompleted(it)
+                    } else if (it.errorCode > 0) {
+                        onError(it)
                     }
-                })
-            setIndicationCallback(recordAccessControlPointCharacteristic)
-                .with(object : RecordAccessControlPointDataCallback() {
-                    @SuppressLint("SwitchIntDef")
-                    override fun onRecordAccessOperationCompleted(
-                        device: BluetoothDevice,
-                        @RecordAccessControlPointCallback.RACPOpCode requestCode: Int
-                    ) {
-                        when (requestCode) {
-                            RecordAccessControlPointCallback.RACP_OP_CODE_ABORT_OPERATION -> repository.setRequestStatus(RequestStatus.ABORTED)
-                            else -> {
-                                recordAccessRequestInProgress = false
-                                repository.setRequestStatus(RequestStatus.SUCCESS)
-                            }
-                        }
-                    }
+                }.launchIn(scope)
 
-                    override fun onRecordAccessOperationCompletedWithNoRecordsFound(
-                        device: BluetoothDevice,
-                        @RecordAccessControlPointCallback.RACPOpCode requestCode: Int
-                    ) {
-                        recordAccessRequestInProgress = false
-                        repository.setRequestStatus(RequestStatus.SUCCESS)
-                    }
+            scope.launch(exceptionHandler) {
+                enableNotifications(cgmMeasurementCharacteristic).suspend()
+            }
+            scope.launch(exceptionHandler) {
+                enableIndications(cgmSpecificOpsControlPointCharacteristic).suspend()
+            }
+            scope.launch(exceptionHandler) {
+                enableIndications(recordAccessControlPointCharacteristic).suspend()
+            }
 
-                    override fun onNumberOfRecordsReceived(
-                        device: BluetoothDevice,
-                        numberOfRecords: Int
-                    ) {
-                        if (numberOfRecords > 0) {
-                            if (records.size() > 0) {
-                                val sequenceNumber = records.keyAt(records.size() - 1) + 1
-                                writeCharacteristic(
-                                    recordAccessControlPointCharacteristic,
-                                    RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(
-                                        sequenceNumber
-                                    )
-                                )
-                                    .enqueue()
-                            } else {
-                                writeCharacteristic(
-                                    recordAccessControlPointCharacteristic,
-                                    RecordAccessControlPointData.reportAllStoredRecords()
-                                )
-                                    .enqueue()
-                            }
-                        } else {
-                            recordAccessRequestInProgress = false
-                            repository.setRequestStatus(RequestStatus.SUCCESS)
-                        }
-                    }
-
-                    override fun onRecordAccessOperationError(
-                        device: BluetoothDevice,
-                        @RecordAccessControlPointCallback.RACPOpCode requestCode: Int,
-                        @RecordAccessControlPointCallback.RACPErrorCode errorCode: Int
-                    ) {
-                        log(Log.WARN, "Record Access operation failed (error $errorCode)")
-                        if (errorCode == RecordAccessControlPointCallback.RACP_ERROR_OP_CODE_NOT_SUPPORTED) {
-                            repository.setRequestStatus(RequestStatus.NOT_SUPPORTED)
-                        } else {
-                            repository.setRequestStatus(RequestStatus.FAILED)
-                        }
-                    }
-                })
-
-            // Enable notifications and indications
-            enableNotifications(cgmMeasurementCharacteristic)
-                .fail { _: BluetoothDevice?, status: Int ->
-                    log(
-                        Log.WARN,
-                        "Failed to enable Continuous Glucose Measurement notifications ($status)"
-                    )
-                }
-                .enqueue()
-            enableIndications(cgmSpecificOpsControlPointCharacteristic)
-                .fail { _: BluetoothDevice?, status: Int ->
-                    log(
-                        Log.WARN,
-                        "Failed to enable CGM Specific Ops Control Point indications notifications ($status)"
-                    )
-                }
-                .enqueue()
-            enableIndications(recordAccessControlPointCharacteristic)
-                .fail { _: BluetoothDevice?, status: Int ->
-                    log(
-                        Log.WARN,
-                        "Failed to enabled Record Access Control Point indications (error $status)"
-                    )
-                }
-                .enqueue()
-
-            // Start Continuous Glucose session if hasn't been started before
             if (sessionStartTime == 0L) {
-                writeCharacteristic(
-                    cgmSpecificOpsControlPointCharacteristic,
-                    CGMSpecificOpsControlPointData.startSession(secured)
+                scope.launch(exceptionHandler) {
+                    writeCharacteristic(
+                        cgmSpecificOpsControlPointCharacteristic,
+                        CGMSpecificOpsControlPointData.startSession(secured),
+                        BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+                    ).suspend()
+                }
+            }
+        }
+
+        private suspend fun onRecordsReceived(response: RecordAccessControlPointResponse) {
+            if (response.numberOfRecords > 0) {
+                if (records.size() > 0) {
+                    val sequenceNumber = records.keyAt(records.size() - 1) + 1
+                    writeCharacteristic(
+                        recordAccessControlPointCharacteristic,
+                        RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(
+                            sequenceNumber
+                        ),
+                        BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+                    ).suspend()
+                } else {
+                    writeCharacteristic(
+                        recordAccessControlPointCharacteristic,
+                        RecordAccessControlPointData.reportAllStoredRecords(),
+                        BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+                    ).suspend()
+                }
+            } else {
+                recordAccessRequestInProgress = false
+                repository.setRequestStatus(RequestStatus.SUCCESS)
+            }
+        }
+
+        private fun onNoRecordsFound() {
+            recordAccessRequestInProgress = false
+            repository.setRequestStatus(RequestStatus.SUCCESS)
+        }
+
+        private fun onOperationCompleted(response: RecordAccessControlPointResponse) {
+            when (response.requestCode) {
+                RecordAccessControlPointCallback.RACP_OP_CODE_ABORT_OPERATION -> repository.setRequestStatus(
+                    RequestStatus.ABORTED
                 )
-                    .fail { _: BluetoothDevice?, status: Int ->
-                        log(
-                            LogContract.Log.Level.ERROR,
-                            "Failed to start session (error $status)"
-                        )
-                    }
-                    .enqueue()
+                else -> {
+                    recordAccessRequestInProgress = false
+                    repository.setRequestStatus(RequestStatus.SUCCESS)
+                }
+            }
+        }
+
+        private fun onError(response: RecordAccessControlPointResponse) {
+            if (response.errorCode == RecordAccessControlPointCallback.RACP_ERROR_OP_CODE_NOT_SUPPORTED) {
+                repository.setRequestStatus(RequestStatus.NOT_SUPPORTED)
+            } else {
+                repository.setRequestStatus(RequestStatus.FAILED)
             }
         }
 
@@ -360,118 +246,49 @@ internal class CGMManager(
         }
     }
 
-    /**
-     * Returns a list of CGM records obtained from this device. The key in the array is the
-     */
-    fun getRecords(): SparseArray<CGMRecord> {
-        return records
-    }
-
-    /**
-     * Clears the records list locally
-     */
     fun clear() {
         records.clear()
     }
 
-    /**
-     * Sends the request to obtain the last (most recent) record from glucose device.
-     * The data will be returned to Glucose Measurement characteristic as a notification followed by
-     * Record Access Control Point indication with status code Success or other in case of error.
-     */
     fun requestLastRecord() {
         if (recordAccessControlPointCharacteristic == null) return
         clear()
         repository.setRequestStatus(RequestStatus.PENDING)
         recordAccessRequestInProgress = true
-        writeCharacteristic(
-            recordAccessControlPointCharacteristic,
-            RecordAccessControlPointData.reportLastStoredRecord()
-        ).enqueue()
+        scope.launch(exceptionHandler) {
+            writeCharacteristic(
+                recordAccessControlPointCharacteristic,
+                RecordAccessControlPointData.reportLastStoredRecord(),
+                BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+            ).suspend()
+        }
     }
 
-    /**
-     * Sends the request to obtain the first (oldest) record from glucose device.
-     * The data will be returned to Glucose Measurement characteristic as a notification followed by
-     * Record Access Control Point indication with status code Success or other in case of error.
-     */
     fun requestFirstRecord() {
         if (recordAccessControlPointCharacteristic == null) return
         clear()
         repository.setRequestStatus(RequestStatus.PENDING)
         recordAccessRequestInProgress = true
-        writeCharacteristic(
-            recordAccessControlPointCharacteristic,
-            RecordAccessControlPointData.reportFirstStoredRecord()
-        ).enqueue()
+        scope.launch(exceptionHandler) {
+            writeCharacteristic(
+                recordAccessControlPointCharacteristic,
+                RecordAccessControlPointData.reportFirstStoredRecord(),
+                BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+            ).suspend()
+        }
     }
 
-    /**
-     * Sends abort operation signal to the device.
-     */
-    fun abort() {
-        if (recordAccessControlPointCharacteristic == null) return
-        writeCharacteristic(
-            recordAccessControlPointCharacteristic,
-            RecordAccessControlPointData.abortOperation()
-        ).enqueue()
-    }
-
-    /**
-     * Sends the request to obtain all records from glucose device. Initially we want to notify the
-     * user about the number of the records so the Report Number of Stored Records request is send.
-     * The data will be returned to Glucose Measurement characteristic as a notification followed by
-     * Record Access Control Point indication with status code Success or other in case of error.
-     */
     fun requestAllRecords() {
         if (recordAccessControlPointCharacteristic == null) return
         clear()
         repository.setRequestStatus(RequestStatus.PENDING)
         recordAccessRequestInProgress = true
-        writeCharacteristic(
-            recordAccessControlPointCharacteristic,
-            RecordAccessControlPointData.reportNumberOfAllStoredRecords()
-        ).enqueue()
-    }
-
-    /**
-     * Sends the request to obtain all records from glucose device. Initially we want to notify the
-     * user about the number of the records so the Report Number of Stored Records request is send.
-     * The data will be returned to Glucose Measurement characteristic as a notification followed by
-     * Record Access Control Point indication with status code Success or other in case of error.
-     */
-    fun refreshRecords() {
-        if (recordAccessControlPointCharacteristic == null) return
-        if (records.size() == 0) {
-            requestAllRecords()
-        } else {
-            repository.setRequestStatus(RequestStatus.PENDING)
-
-            // Obtain the last sequence number
-            val sequenceNumber = records.keyAt(records.size() - 1) + 1
-            recordAccessRequestInProgress = true
+        scope.launch(exceptionHandler) {
             writeCharacteristic(
                 recordAccessControlPointCharacteristic,
-                RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber)
-            ).enqueue()
-            // Info:
-            // Operators OPERATOR_GREATER_THEN_OR_EQUAL, OPERATOR_LESS_THEN_OR_EQUAL and OPERATOR_RANGE are not supported by the CGMS sample from SDK
-            // The "Operation not supported" response will be received
+                RecordAccessControlPointData.reportNumberOfAllStoredRecords(),
+                BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+            ).suspend()
         }
-    }
-
-    /**
-     * Sends the request to remove all stored records from the Continuous Glucose Monitor device.
-     * This feature is not supported by the CGMS sample from the SDK, so monitor will answer with
-     * the Op Code Not Supported error.
-     */
-    fun deleteAllRecords() {
-        if (recordAccessControlPointCharacteristic == null) return
-        clear()
-        repository.setRequestStatus(RequestStatus.PENDING)
-        writeCharacteristic(
-            recordAccessControlPointCharacteristic,
-            RecordAccessControlPointData.deleteAllStoredRecords()
-        ).enqueue()
     }
 }

@@ -14,6 +14,7 @@ dependencyResolutionManagement {
             alias('nordic-navigation').to('no.nordicsemi.android.common:navigation:1.0.0')
             alias('nordic-theme').to('no.nordicsemi.android.common:theme:1.0.0')
             alias('nordic-ble-common').to('no.nordicsemi.android:ble-common:2.3.1')
+            alias('nordic-ble-ktx').to('no.nordicsemi.android:ble-ktx:2.3.1')
             alias('nordic-log').to('no.nordicsemi.android:log:2.3.0')
             alias('nordic-scanner').to('no.nordicsemi.android.support.v18:scanner:1.6.0')
             alias('nordic-ui-scanner').to('no.nordicsemi.android.common:scanner:1.0.0')
@@ -90,4 +91,8 @@ include ':lib_utils'
 
 if (file('../Android-Common-Libraries').exists()) {
     includeBuild('../Android-Common-Libraries')
+}
+
+if (file('../Android-BLE-Library').exists()) {
+    includeBuild('../Android-BLE-Library')
 }

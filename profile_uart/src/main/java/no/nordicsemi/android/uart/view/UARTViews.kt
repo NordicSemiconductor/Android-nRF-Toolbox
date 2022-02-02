@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
@@ -15,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.material.you.Card
@@ -26,13 +29,14 @@ internal fun MacroItem(macro: UARTMacro, onEvent: (UARTViewEvent) -> Unit) {
     Card(backgroundColor = MaterialTheme.colorScheme.primaryContainer) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(16.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.PlayArrow,
                 contentDescription = stringResource(id = R.string.uart_run_macro_description),
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(70.dp)
+                    .padding(8.dp)
+                    .clip(RoundedCornerShape(8.dp))
                     .clickable { onEvent(OnRunMacro(macro)) }
             )
 
@@ -56,7 +60,10 @@ internal fun MacroItem(macro: UARTMacro, onEvent: (UARTViewEvent) -> Unit) {
                 imageVector = Icons.Default.Delete,
                 contentDescription = stringResource(id = R.string.uart_delete_macro_description),
                 modifier = Modifier
-                    .size(32.dp)
+                    .padding(8.dp)
+                    .padding(end = 8.dp)
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(8.dp))
                     .clickable { onEvent(OnDeleteMacro(macro)) }
             )
         }

@@ -16,7 +16,7 @@ internal class CGMService : ForegroundBleService() {
     @Inject
     lateinit var repository: CGMRepository
 
-    override val manager: CGMManager by lazy { CGMManager(this, repository) }
+    override val manager: CGMManager by lazy { CGMManager(this, scope, repository) }
 
     override fun onCreate() {
         super.onCreate()

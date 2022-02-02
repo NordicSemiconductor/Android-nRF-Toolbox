@@ -7,6 +7,7 @@ dependencies {
     implementation project(":lib_utils")
 
     implementation libs.nordic.ble.common
+    implementation libs.nordic.ble.ktx
 
     implementation libs.nordic.log
     implementation libs.nordic.ui.scanner

@@ -21,13 +21,18 @@
  */
 package no.nordicsemi.android.hts.repository
 
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
-import no.nordicsemi.android.ble.common.callback.ht.TemperatureMeasurementDataCallback
-import no.nordicsemi.android.ble.common.profile.ht.TemperatureType
-import no.nordicsemi.android.ble.common.profile.ht.TemperatureUnit
+import android.util.Log
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import no.nordicsemi.android.ble.common.callback.ht.TemperatureMeasurementResponse
+import no.nordicsemi.android.ble.ktx.asValidResponseFlow
+import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.hts.data.HTSRepository
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
@@ -42,22 +47,14 @@ private val HT_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A1C-0000-
  */
 internal class HTSManager internal constructor(
     context: Context,
+    private val scope: CoroutineScope,
     private val dataHolder: HTSRepository
 ) : BatteryManager(context) {
 
     private var htCharacteristic: BluetoothGattCharacteristic? = null
 
-    private val temperatureMeasurementDataCallback = object : TemperatureMeasurementDataCallback() {
-
-        override fun onTemperatureMeasurementReceived(
-            device: BluetoothDevice,
-            temperature: Float,
-            @TemperatureUnit unit: Int,
-            calendar: Calendar?,
-            @TemperatureType type: Int?
-        ) {
-            dataHolder.setNewTemperature(temperature)
-        }
+    private val exceptionHandler = CoroutineExceptionHandler { _, t->
+        Log.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
     }
 
     override fun onBatteryLevelChanged(batteryLevel: Int) {
@@ -75,9 +72,16 @@ internal class HTSManager internal constructor(
     private inner class HTManagerGattCallback : BatteryManagerGattCallback() {
         override fun initialize() {
             super.initialize()
+
             setIndicationCallback(htCharacteristic)
-                .with(temperatureMeasurementDataCallback)
-            enableIndications(htCharacteristic).enqueue()
+                .asValidResponseFlow<TemperatureMeasurementResponse>()
+                .onEach {
+                    dataHolder.setNewTemperature(it.temperature)
+                }.launchIn(scope)
+
+            scope.launch(exceptionHandler) {
+                enableIndications(htCharacteristic).suspend()
+            }
         }
 
         override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {

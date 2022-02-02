@@ -21,29 +21,40 @@
  */
 package no.nordicsemi.android.csc.repository
 
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
 import android.util.Log
-import androidx.annotation.FloatRange
-import no.nordicsemi.android.ble.common.callback.csc.CyclingSpeedAndCadenceMeasurementDataCallback
-import no.nordicsemi.android.ble.data.Data
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import no.nordicsemi.android.ble.common.callback.csc.CyclingSpeedAndCadenceMeasurementResponse
+import no.nordicsemi.android.ble.ktx.asValidResponseFlow
+import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.csc.data.CSCRepository
 import no.nordicsemi.android.csc.data.WheelSize
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 
-/** Cycling Speed and Cadence service UUID.  */
 val CSC_SERVICE_UUID: UUID = UUID.fromString("00001816-0000-1000-8000-00805f9b34fb")
-
-/** Cycling Speed and Cadence Measurement characteristic UUID.  */
 private val CSC_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A5B-0000-1000-8000-00805f9b34fb")
 
-internal class CSCManager(context: Context, private val repository: CSCRepository) : BatteryManager(context) {
+internal class CSCManager(
+    context: Context,
+    private val scope: CoroutineScope,
+    private val repository: CSCRepository
+) : BatteryManager(context) {
 
     private var cscMeasurementCharacteristic: BluetoothGattCharacteristic? = null
     private var wheelSize: WheelSize = WheelSize()
+
+    private var previousResponse: CyclingSpeedAndCadenceMeasurementResponse? = null
+
+    private val exceptionHandler = CoroutineExceptionHandler { context, t->
+        Log.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
+    }
 
     override fun onBatteryLevelChanged(batteryLevel: Int) {
         repository.setBatteryLevel(batteryLevel)
@@ -57,47 +68,30 @@ internal class CSCManager(context: Context, private val repository: CSCRepositor
         wheelSize = value
     }
 
-    /**
-     * BluetoothGatt callbacks for connection/disconnection, service discovery,
-     * receiving indication, etc.
-     */
     private inner class CSCManagerGattCallback : BatteryManagerGattCallback() {
         override fun initialize() {
             super.initialize()
 
-            // CSC characteristic is required
-            setNotificationCallback(cscMeasurementCharacteristic)
-                .with(object : CyclingSpeedAndCadenceMeasurementDataCallback() {
-
-                    override fun getWheelCircumference(): Float {
-                        return wheelSize.value.toFloat()
-                    }
-
-                    override fun onDistanceChanged(
-                        device: BluetoothDevice,
-                        @FloatRange(from = 0.0) totalDistance: Float,
-                        @FloatRange(from = 0.0) distance: Float,
-                        @FloatRange(from = 0.0) speed: Float
-                    ) {
+            setNotificationCallback(cscMeasurementCharacteristic).asValidResponseFlow<CyclingSpeedAndCadenceMeasurementResponse>()
+                .onEach {
+                    previousResponse?.let { previousResponse ->
+                        val wheelCircumference = wheelSize.value.toFloat()
+                        val totalDistance = it.getTotalDistance(wheelSize.value.toFloat())
+                        val distance = it.getDistance(wheelCircumference, previousResponse)
+                        val speed = it.getSpeed(wheelCircumference, previousResponse)
                         repository.setNewDistance(totalDistance, distance, speed, wheelSize)
-                    }
 
-                    override fun onCrankDataChanged(
-                        device: BluetoothDevice,
-                        @FloatRange(from = 0.0) crankCadence: Float,
-                        gearRatio: Float
-                    ) {
+                        val crankCadence = it.getCrankCadence(previousResponse)
+                        val gearRatio = it.getGearRatio(previousResponse)
                         repository.setNewCrankCadence(crankCadence, gearRatio, wheelSize)
                     }
 
-                    override fun onInvalidDataReceived(
-                        device: BluetoothDevice,
-                        data: Data
-                    ) {
-                        log(Log.WARN, "Invalid CSC Measurement data received: $data")
-                    }
-                })
-            enableNotifications(cscMeasurementCharacteristic).enqueue()
+                    previousResponse = it
+                }.launchIn(scope)
+
+            scope.launch(exceptionHandler) {
+                enableNotifications(cscMeasurementCharacteristic).suspend()
+            }
         }
 
         public override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {

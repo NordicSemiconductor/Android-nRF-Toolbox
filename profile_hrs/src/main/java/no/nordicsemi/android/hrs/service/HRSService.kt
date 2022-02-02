@@ -4,7 +4,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.hrs.data.HRSRepository
-import no.nordicsemi.android.service.BleManagerStatus
 import no.nordicsemi.android.service.ForegroundBleService
 import javax.inject.Inject
 

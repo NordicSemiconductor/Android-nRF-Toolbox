@@ -49,9 +49,9 @@ internal data class CSCData(
 
     fun displayTotalDistance(): String {
         return when (selectedSpeedUnit) {
-            SpeedUnit.M_S -> String.format("%.2f km", distance)
-            SpeedUnit.KM_H -> String.format("%.2f km", distance)
-            SpeedUnit.MPH -> String.format("%.2f mile", distance)
+            SpeedUnit.M_S -> String.format("%.2f km", totalDistance)
+            SpeedUnit.KM_H -> String.format("%.2f km", totalDistance)
+            SpeedUnit.MPH -> String.format("%.2f mile", totalDistance)
         }
     }
 

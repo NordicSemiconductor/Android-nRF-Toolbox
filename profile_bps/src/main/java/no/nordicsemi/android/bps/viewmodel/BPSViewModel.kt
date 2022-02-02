@@ -100,5 +100,6 @@ internal class BPSViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         repository.clear()
+        bpsManager.release()
     }
 }

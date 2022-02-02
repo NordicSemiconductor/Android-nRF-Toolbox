@@ -26,10 +26,9 @@ internal data class RSCSData(
         return "$instantaneousCadence RPM"
     }
 
-
-    fun displayNumberOfSteps(): String {
+    fun displayNumberOfSteps(): String? {
         if (totalDistance == null || strideLength == null) {
-            return "NONE"
+            return null
         }
         val numberOfSteps = totalDistance/strideLength
         return "Number of Steps $numberOfSteps"

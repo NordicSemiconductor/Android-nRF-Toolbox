@@ -21,94 +21,48 @@
  */
 package no.nordicsemi.android.bps.repository
 
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
-import no.nordicsemi.android.ble.common.callback.bps.BloodPressureMeasurementDataCallback
-import no.nordicsemi.android.ble.common.callback.bps.IntermediateCuffPressureDataCallback
-import no.nordicsemi.android.ble.common.profile.bp.BloodPressureTypes
-import no.nordicsemi.android.ble.data.Data
+import dagger.hilt.android.scopes.ViewModelScoped
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import no.nordicsemi.android.ble.common.callback.bps.BloodPressureMeasurementResponse
+import no.nordicsemi.android.ble.common.callback.bps.IntermediateCuffPressureResponse
+import no.nordicsemi.android.ble.ktx.asValidResponseFlow
+import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.bps.data.BPSRepository
+import no.nordicsemi.android.log.Logger
 import no.nordicsemi.android.service.BatteryManager
+import no.nordicsemi.android.service.CloseableCoroutineScope
 import java.util.*
 import javax.inject.Inject
-import javax.inject.Singleton
 
-/** Blood Pressure service UUID.  */
 val BPS_SERVICE_UUID = UUID.fromString("00001810-0000-1000-8000-00805f9b34fb")
 
-/** Blood Pressure Measurement characteristic UUID.  */
 private val BPM_CHARACTERISTIC_UUID = UUID.fromString("00002A35-0000-1000-8000-00805f9b34fb")
 
-/** Intermediate Cuff Pressure characteristic UUID.  */
 private val ICP_CHARACTERISTIC_UUID = UUID.fromString("00002A36-0000-1000-8000-00805f9b34fb")
 
-@Singleton
+@ViewModelScoped
 internal class BPSManager @Inject constructor(
     @ApplicationContext context: Context,
     private val dataHolder: BPSRepository
 ) : BatteryManager(context) {
 
+    private val scope = CloseableCoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
     private var bpmCharacteristic: BluetoothGattCharacteristic? = null
     private var icpCharacteristic: BluetoothGattCharacteristic? = null
 
-    private val intermediateCuffPressureCallback = object : IntermediateCuffPressureDataCallback() {
-
-        override fun onIntermediateCuffPressureReceived(
-            device: BluetoothDevice,
-            cuffPressure: Float,
-            unit: Int,
-            pulseRate: Float?,
-            userID: Int?,
-            status: BloodPressureTypes.BPMStatus?,
-            calendar: Calendar?
-        ) {
-            dataHolder.setIntermediateCuffPressure(
-                cuffPressure,
-                unit,
-                pulseRate,
-                userID,
-                status,
-                calendar
-            )
-        }
-
-        override fun onInvalidDataReceived(device: BluetoothDevice, data: Data) {
-            log(Log.WARN, "Invalid ICP data received: $data")
-        }
-    }
-
-    private val bloodPressureMeasurementDataCallback = object : BloodPressureMeasurementDataCallback() {
-
-        override fun onBloodPressureMeasurementReceived(
-            device: BluetoothDevice,
-            systolic: Float,
-            diastolic: Float,
-            meanArterialPressure: Float,
-            unit: Int,
-            pulseRate: Float?,
-            userID: Int?,
-            status: BloodPressureTypes.BPMStatus?,
-            calendar: Calendar?
-        ) {
-            dataHolder.setBloodPressureMeasurement(
-                systolic,
-                diastolic,
-                meanArterialPressure,
-                unit,
-                pulseRate,
-                userID,
-                status,
-                calendar
-            )
-        }
-
-        override fun onInvalidDataReceived(device: BluetoothDevice, data: Data) {
-            log(Log.WARN, "Invalid BPM data received: $data")
-        }
+    private val exceptionHandler = CoroutineExceptionHandler { _, t->
+        Log.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
     }
 
     override fun onBatteryLevelChanged(batteryLevel: Int) {
@@ -119,19 +73,40 @@ internal class BPSManager @Inject constructor(
 
         override fun initialize() {
             super.initialize()
-            setNotificationCallback(icpCharacteristic)
-                .with(intermediateCuffPressureCallback)
-            setIndicationCallback(bpmCharacteristic)
-                .with(bloodPressureMeasurementDataCallback)
-            enableNotifications(icpCharacteristic)
-                .fail { device, status ->
-                    log(
-                        Log.WARN,
-                        "Intermediate Cuff Pressure characteristic not found"
+
+            setNotificationCallback(icpCharacteristic).asValidResponseFlow<IntermediateCuffPressureResponse>()
+                .onEach {
+                    dataHolder.setIntermediateCuffPressure(
+                        it.cuffPressure,
+                        it.unit,
+                        it.pulseRate,
+                        it.userID,
+                        it.status,
+                        it.timestamp
                     )
-                }
-                .enqueue()
-            enableIndications(bpmCharacteristic).enqueue()
+                }.launchIn(scope)
+
+            setIndicationCallback(bpmCharacteristic).asValidResponseFlow<BloodPressureMeasurementResponse>()
+                .onEach {
+                    dataHolder.setBloodPressureMeasurement(
+                        it.systolic,
+                        it.diastolic,
+                        it.meanArterialPressure,
+                        it.unit,
+                        it.pulseRate,
+                        it.userID,
+                        it.status,
+                        it.timestamp
+                    )
+                }.launchIn(scope)
+
+            scope.launch(exceptionHandler) {
+                enableNotifications(icpCharacteristic).suspend()
+            }
+
+            scope.launch(exceptionHandler) {
+                enableIndications(bpmCharacteristic).suspend()
+            }
         }
 
         override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
@@ -143,7 +118,7 @@ internal class BPSManager @Inject constructor(
             return bpmCharacteristic != null
         }
 
-        override fun onServicesInvalidated() { }
+        override fun onServicesInvalidated() {}
 
         override fun isOptionalServiceSupported(gatt: BluetoothGatt): Boolean {
             super.isOptionalServiceSupported(gatt) // ignore the result of this
@@ -158,5 +133,9 @@ internal class BPSManager @Inject constructor(
 
     override fun getGattCallback(): BleManagerGattCallback {
         return BloodPressureManagerGattCallback()
+    }
+
+    fun release() {
+        scope.close()
     }
 }

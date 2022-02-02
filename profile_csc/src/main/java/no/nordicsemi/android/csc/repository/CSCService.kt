@@ -17,7 +17,7 @@ internal class CSCService : ForegroundBleService() {
     @Inject
     lateinit var repository: CSCRepository
 
-    override val manager: CSCManager by lazy { CSCManager(this, repository) }
+    override val manager: CSCManager by lazy { CSCManager(this, scope, repository) }
 
     override fun onCreate() {
         super.onCreate()

@@ -41,8 +41,14 @@ internal class PRXRepository @Inject constructor() {
     }
 
     fun invokeCommand(command: PRXCommand) {
-        _command.tryEmit(command)
-        _status.tryEmit(BleManagerStatus.DISCONNECTED)
+        if (command == Disconnect) {
+            _command.tryEmit(command)
+            _status.tryEmit(BleManagerStatus.DISCONNECTED)
+        } else if (_command.subscriptionCount.value > 0) {
+            _command.tryEmit(command)
+        } else {
+            _status.tryEmit(BleManagerStatus.DISCONNECTED)
+        }
     }
 
     fun setNewStatus(status: BleManagerStatus) {

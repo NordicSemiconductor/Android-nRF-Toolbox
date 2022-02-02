@@ -27,51 +27,43 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattServer
 import android.content.Context
 import android.util.Log
-import no.nordicsemi.android.ble.callback.FailCallback
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.common.callback.alert.AlertLevelDataCallback
 import no.nordicsemi.android.ble.common.data.alert.AlertLevelData
-import no.nordicsemi.android.ble.error.GattError
+import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.prx.data.PRXRepository
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 
-/** Link Loss service UUID.  */
 val LINK_LOSS_SERVICE_UUID = UUID.fromString("00001803-0000-1000-8000-00805f9b34fb")
-
-/** Immediate Alert service UUID.  */
 val PRX_SERVICE_UUID = UUID.fromString("00001802-0000-1000-8000-00805f9b34fb")
-
-/** Alert Level characteristic UUID.  */
 val ALERT_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A06-0000-1000-8000-00805f9b34fb")
 
 internal class PRXManager(
     context: Context,
+    private val scope: CoroutineScope,
     private val dataHolder: PRXRepository
 ) : BatteryManager(context) {
 
-    // Client characteristics.
     private var alertLevelCharacteristic: BluetoothGattCharacteristic? = null
     private var linkLossCharacteristic: BluetoothGattCharacteristic? = null
 
-    // Server characteristics.
     private var localAlertLevelCharacteristic: BluetoothGattCharacteristic? = null
     private var linkLossServerCharacteristic: BluetoothGattCharacteristic? = null
-    /**
-     * Returns true if the alert has been enabled on the proximity tag, false otherwise.
-     */
-    /** A flag indicating whether the alarm on the connected proximity tag has been activated.  */
+
+    private val exceptionHandler = CoroutineExceptionHandler { _, t->
+        Log.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
+    }
+
     var isAlertEnabled = false
         private set
 
-    /**
-     * BluetoothGatt callbacks for connection/disconnection, service discovery,
-     * receiving indication, etc.
-     */
     private inner class ProximityManagerGattCallback : BatteryManagerGattCallback() {
         override fun initialize() {
             super.initialize()
-            // This callback will be called whenever local Alert Level char is written
-            // by a connected proximity tag.
+
             setWriteCallback(localAlertLevelCharacteristic)
                 .with(object : AlertLevelDataCallback() {
                     override fun onAlertLevelChanged(device: BluetoothDevice, level: Int) {
@@ -86,21 +78,13 @@ internal class PRXManager(
                     }
                 })
 
-            // After connection, set the Link Loss behaviour on the tag.
-            writeCharacteristic(linkLossCharacteristic, AlertLevelData.highAlert(), BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
-                .done { device: BluetoothDevice? ->
-                    log(
-                        Log.INFO,
-                        "Link loss alert level set"
-                    )
-                }
-                .fail { device: BluetoothDevice?, status: Int ->
-                    log(
-                        Log.WARN,
-                        "Failed to set link loss level: $status"
-                    )
-                }
-                .enqueue()
+            scope.launch(exceptionHandler) {
+                writeCharacteristic(
+                    linkLossCharacteristic,
+                    AlertLevelData.highAlert(),
+                    BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+                ).suspend()
+            }
         }
 
         override fun onServerReady(server: BluetoothGattServer) {
@@ -141,48 +125,22 @@ internal class PRXManager(
             linkLossCharacteristic = null
             localAlertLevelCharacteristic = null
             linkLossServerCharacteristic = null
-            // Reset the alert flag
             isAlertEnabled = false
         }
     }
 
-    /**
-     * Toggles the immediate alert on the target device.
-     */
-    fun toggleImmediateAlert() {
-        writeImmediateAlert(!isAlertEnabled)
-    }
-
-    /**
-     * Writes the HIGH ALERT or NO ALERT command to the target device.
-     *
-     * @param on true to enable the alarm on proximity tag, false to disable it.
-     */
     fun writeImmediateAlert(on: Boolean) {
-        if (!isConnected()) return
-        writeCharacteristic(
-            alertLevelCharacteristic,
-            if (on) AlertLevelData.highAlert() else AlertLevelData.noAlert()
-        )
-            .before { device: BluetoothDevice? ->
-                log(
-                    Log.VERBOSE,
-                    if (on) "Setting alarm to HIGH..." else "Disabling alarm..."
-                )
-            }
-            .done { device: BluetoothDevice? ->
-                isAlertEnabled = on
-                dataHolder.setRemoteAlarmLevel(on)
-            }
-            .fail { device: BluetoothDevice?, status: Int ->
-                log(
-                    Log.WARN,
-                    if (status == FailCallback.REASON_NULL_ATTRIBUTE) "Alert Level characteristic not found" else GattError.parse(
-                        status
-                    )
-                )
-            }
-            .enqueue()
+        if (!isConnected) return
+        scope.launch(exceptionHandler) {
+            writeCharacteristic(
+                alertLevelCharacteristic,
+                if (on) AlertLevelData.highAlert() else AlertLevelData.noAlert(),
+                BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
+            ).suspend()
+
+            isAlertEnabled = on
+            dataHolder.setRemoteAlarmLevel(on)
+        }
     }
 
     override fun onBatteryLevelChanged(batteryLevel: Int) {

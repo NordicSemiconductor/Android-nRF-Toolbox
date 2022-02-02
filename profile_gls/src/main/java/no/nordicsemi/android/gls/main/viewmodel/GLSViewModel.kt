@@ -109,5 +109,6 @@ internal class GLSViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         repository.clear()
+        glsManager.release()
     }
 }

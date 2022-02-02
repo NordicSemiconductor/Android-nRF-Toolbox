@@ -4,10 +4,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.rscs.data.RSCSRepository
-import no.nordicsemi.android.service.BleManagerStatus
-import no.nordicsemi.android.service.BleServiceStatus
 import no.nordicsemi.android.service.ForegroundBleService
-import no.nordicsemi.android.utils.exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -16,7 +13,7 @@ internal class RSCSService : ForegroundBleService() {
     @Inject
     lateinit var repository: RSCSRepository
 
-    override val manager: RSCSManager by lazy { RSCSManager(this, repository) }
+    override val manager: RSCSManager by lazy { RSCSManager(this, scope, repository) }
 
     override fun onCreate() {
         super.onCreate()

@@ -26,51 +26,53 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import android.content.Context
 import android.text.TextUtils
+import android.util.Log
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.WriteRequest
-import no.nordicsemi.android.log.LogContract
+import no.nordicsemi.android.ble.ktx.asFlow
+import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.service.BatteryManager
 import no.nordicsemi.android.uart.data.UARTRepository
 import no.nordicsemi.android.utils.EMPTY
 import java.util.*
 
-/** Nordic UART Service UUID  */
 val UART_SERVICE_UUID = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")
-
-/** RX characteristic UUID  */
 private val UART_RX_CHARACTERISTIC_UUID = UUID.fromString("6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
-
-/** TX characteristic UUID  */
 private val UART_TX_CHARACTERISTIC_UUID = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
 
-internal class UARTManager(context: Context, private val dataHolder: UARTRepository) : BatteryManager(context) {
+internal class UARTManager(
+    context: Context,
+    private val scope: CoroutineScope,
+    private val dataHolder: UARTRepository
+) : BatteryManager(context) {
 
     private var rxCharacteristic: BluetoothGattCharacteristic? = null
     private var txCharacteristic: BluetoothGattCharacteristic? = null
 
-    /**
-     * A flag indicating whether Long Write can be used. It's set to false if the UART RX
-     * characteristic has only PROPERTY_WRITE_NO_RESPONSE property and no PROPERTY_WRITE.
-     * If you set it to false here, it will never use Long Write.
-     *
-     * TODO change this flag if you don't want to use Long Write even with Write Request.
-     */
+    private val exceptionHandler = CoroutineExceptionHandler { _, t->
+        Log.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
+    }
+
     private var useLongWrite = true
 
-    /**
-     * BluetoothGatt callbacks for connection/disconnection, service discovery,
-     * receiving indication, etc.
-     */
     private inner class UARTManagerGattCallback : BatteryManagerGattCallback() {
 
         override fun initialize() {
-            setNotificationCallback(txCharacteristic)
-                .with { device, data ->
-                    val text: String = data.getStringValue(0) ?: String.EMPTY
-                    log(LogContract.Log.Level.APPLICATION, "\"$text\" received")
-                    dataHolder.emitNewMessage(text)
-                }
-            requestMtu(260).enqueue()
-            enableNotifications(txCharacteristic).enqueue()
+            setNotificationCallback(txCharacteristic).asFlow().onEach {
+                val text: String = it.getStringValue(0) ?: String.EMPTY
+                dataHolder.emitNewMessage(text)
+            }
+
+            scope.launch(exceptionHandler) {
+                requestMtu(260).suspend()
+            }
+
+            scope.launch(exceptionHandler) {
+                enableNotifications(txCharacteristic).suspend()
+            }
         }
 
         override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
@@ -113,21 +115,15 @@ internal class UARTManager(context: Context, private val dataHolder: UARTReposit
     }
 
     fun send(text: String) {
-        // Are we connected?
         if (rxCharacteristic == null) return
         if (!TextUtils.isEmpty(text)) {
-            val request: WriteRequest = writeCharacteristic(rxCharacteristic, text.toByteArray())
-                .with { device, data ->
-                    log(
-                        LogContract.Log.Level.APPLICATION,
-                        "\"" + data.getStringValue(0).toString() + "\" sent"
-                    )
+            scope.launch(exceptionHandler) {
+                val request: WriteRequest = writeCharacteristic(rxCharacteristic, text.toByteArray(), BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
+                if (!useLongWrite) {
+                    request.split()
                 }
-            if (!useLongWrite) {
-                // This will automatically split the long data into MTU-3-byte long packets.
-                request.split()
+                request.enqueue()
             }
-            request.enqueue()
         }
     }
 

@@ -26,10 +26,9 @@ internal fun SensorsReadingView(state: RSCSData) {
         Spacer(modifier = Modifier.height(4.dp))
         KeyValueField(stringResource(id = R.string.rscs_cadence), state.displayCadence())
         Spacer(modifier = Modifier.height(4.dp))
-        KeyValueField(
-            stringResource(id = R.string.rscs_number_of_steps),
-            state.displayNumberOfSteps()
-        )
+        state.displayNumberOfSteps()?.let {
+            KeyValueField(stringResource(id = R.string.rscs_number_of_steps), it)
+        }
     }
 }
 
