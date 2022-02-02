@@ -1,4 +1,4 @@
-name: Deploy to Play Store Alpha
+name: Deploy to Play Store Internal
 on:
   workflow_dispatch:
 jobs:
