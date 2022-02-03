@@ -1,28 +1,23 @@
 package no.nordicsemi.android.nrftoolbox
 
-import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import no.nordicsemi.android.theme.view.CloseIconAppBar
+import no.nordicsemi.android.theme.view.TitleAppBar
 
 @Composable
 fun HomeScreen() {
     val viewModel: HomeViewModel = hiltViewModel()
 
     Column {
-        val context = LocalContext.current
-        CloseIconAppBar(stringResource(id = R.string.app_name)) {
-            (context as? Activity)?.finish()
-        }
+        TitleAppBar(stringResource(id = R.string.app_name))
 
         Column(
             modifier = Modifier
@@ -104,7 +99,7 @@ fun HomeScreen() {
 
                 val uriHandler = LocalUriHandler.current
                 FeatureButton(R.drawable.ic_dfu, R.string.dfu_module, R.string.dfu_module_full) {
-                    uriHandler.openUri("https://github.com/NordicSemiconductor/Android-nRF-Toolbox")
+                    uriHandler.openUri("https://github.com/NordicSemiconductor/Android-DFU-Library")
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))

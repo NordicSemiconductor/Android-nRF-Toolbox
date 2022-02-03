@@ -18,7 +18,7 @@ dependencyResolutionManagement {
             alias('nordic-dfu').to('no.nordicsemi.android:dfu:1.12.1-beta01')
 
             version('commonlibraries', '1.0.1')
-            alias('nordic-ui-scanner').to('no.nordicsemi.android.common', 'ui-scanner').versionRef('commonlibraries')
+            alias('nordic-ui-scanner').to('no.nordicsemi.android.common', 'uiscanner').versionRef('commonlibraries')
             alias('nordic-navigation').to('no.nordicsemi.android.common', 'navigation').versionRef('commonlibraries')
             alias('nordic-theme').to('no.nordicsemi.android.common', 'theme').versionRef('commonlibraries')
 
@@ -91,10 +91,10 @@ include ':lib_service'
 include ':lib_theme'
 include ':lib_utils'
 
-//if (file('../Android-Common-Libraries').exists()) {
-//    includeBuild('../Android-Common-Libraries')
-//}
-//
-//if (file('../Android-BLE-Library').exists()) {
-//    includeBuild('../Android-BLE-Library')
-//}
+if (file('../Android-Common-Libraries').exists()) {
+    includeBuild('../Android-Common-Libraries')
+}
+
+if (file('../Android-BLE-Library').exists()) {
+    includeBuild('../Android-BLE-Library')
+}

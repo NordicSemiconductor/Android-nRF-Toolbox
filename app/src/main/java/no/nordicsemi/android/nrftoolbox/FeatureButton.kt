@@ -30,23 +30,10 @@ fun FeatureButton(
 ) {
     ScreenSection(onClick = onClick) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(160.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Box( modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(id = nameCode),
-                    style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter),
-                    textAlign = TextAlign.Center
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
             Image(
                 painter = painterResource(iconId),
                 contentDescription = stringResource(id = name),
@@ -61,14 +48,12 @@ fun FeatureButton(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Box( modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(id = name),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.fillMaxWidth().align(Alignment.TopCenter),
-                    textAlign = TextAlign.Center
-                )
-            }
+            Text(
+                text = stringResource(id = name),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.fillMaxWidth().height(42.dp),
+                textAlign = TextAlign.Center
+            )
         }
     }
 }

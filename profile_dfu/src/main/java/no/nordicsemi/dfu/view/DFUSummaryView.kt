@@ -74,7 +74,7 @@ internal fun DeviceDetailsView(device: DiscoveredBluetoothDevice) {
                     .weight(1f)
             ) {
                 Text(
-                    text = device.displayName(),
+                    text = device.displayName() ?: "No name",
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(text = device.displayAddress(), style = MaterialTheme.typography.bodyMedium)
