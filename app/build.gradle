@@ -5,6 +5,7 @@ plugins {
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
 }
+apply from: rootProject.file("gradle/git-tag-version.gradle")
 
 android {
     compileSdk android_api_version
@@ -13,8 +14,8 @@ android {
         applicationId "no.nordicsemi.android.nrftoolbox"
         minSdk android_min_api_version
         targetSdk android_api_version
-        versionCode 1
-        versionName "1.0"
+        versionCode getVersionCodeFromTags()
+        versionName getVersionNameFromTags()
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
