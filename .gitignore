@@ -10,6 +10,11 @@
 *.ap_
 *.aab
 
+keystore
+keystore.encrypted
+sec.gpg
+fastlane-api.json
+
 # Files for the ART/Dalvik VM
 *.dex
 

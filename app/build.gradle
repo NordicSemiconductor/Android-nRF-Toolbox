@@ -22,12 +22,23 @@ android {
         }
     }
 
+    signingConfigs {
+        release {
+            storeFile file('../keystore')
+            storePassword System.env.KEYSTORE_PSWD
+            keyAlias System.env.KEYSTORE_ALIAS
+            keyPassword System.env.KEYSTORE_KEY_PSWD
+        }
+    }
+
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
