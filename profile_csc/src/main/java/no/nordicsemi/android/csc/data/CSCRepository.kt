@@ -1,5 +1,6 @@
 package no.nordicsemi.android.csc.data
 
+import dagger.hilt.android.scopes.ServiceScoped
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 import no.nordicsemi.android.csc.view.SpeedUnit
@@ -7,7 +8,7 @@ import no.nordicsemi.android.service.BleManagerStatus
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
+@ServiceScoped
 internal class CSCRepository @Inject constructor() {
 
     private val _data = MutableStateFlow(CSCData())

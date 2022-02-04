@@ -38,13 +38,12 @@ import no.nordicsemi.android.ble.common.callback.bps.IntermediateCuffPressureRes
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
 import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.bps.data.BPSRepository
-import no.nordicsemi.android.log.Logger
 import no.nordicsemi.android.service.BatteryManager
 import no.nordicsemi.android.service.CloseableCoroutineScope
 import java.util.*
 import javax.inject.Inject
 
-val BPS_SERVICE_UUID = UUID.fromString("00001810-0000-1000-8000-00805f9b34fb")
+val BPS_SERVICE_UUID: UUID = UUID.fromString("00001810-0000-1000-8000-00805f9b34fb")
 
 private val BPM_CHARACTERISTIC_UUID = UUID.fromString("00002A35-0000-1000-8000-00805f9b34fb")
 
@@ -54,9 +53,7 @@ private val ICP_CHARACTERISTIC_UUID = UUID.fromString("00002A36-0000-1000-8000-0
 internal class BPSManager @Inject constructor(
     @ApplicationContext context: Context,
     private val dataHolder: BPSRepository
-) : BatteryManager(context) {
-
-    private val scope = CloseableCoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+) : BatteryManager(context, CloseableCoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)) {
 
     private var bpmCharacteristic: BluetoothGattCharacteristic? = null
     private var icpCharacteristic: BluetoothGattCharacteristic? = null
@@ -133,9 +130,5 @@ internal class BPSManager @Inject constructor(
 
     override fun getGattCallback(): BleManagerGattCallback {
         return BloodPressureManagerGattCallback()
-    }
-
-    fun release() {
-        scope.close()
     }
 }

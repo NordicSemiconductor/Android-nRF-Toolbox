@@ -22,19 +22,14 @@
 package no.nordicsemi.android.service
 
 import android.app.Service
-import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
-import android.util.Log
 import android.widget.Toast
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import no.nordicsemi.android.ble.BleManager
-import no.nordicsemi.android.ble.observer.ConnectionObserver
 import no.nordicsemi.android.log.ILogSession
 import no.nordicsemi.android.log.Logger
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
@@ -45,9 +40,6 @@ abstract class BleProfileService : Service() {
     protected val scope = CloseableCoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     protected abstract val manager: BleManager
-
-    private val _status = MutableStateFlow(BleServiceStatus.CONNECTING)
-    val status = _status.asStateFlow()
 
     /**
      * Returns a handler that is created in onCreate().
@@ -69,27 +61,6 @@ abstract class BleProfileService : Service() {
     override fun onCreate() {
         super.onCreate()
         handler = Handler()
-
-        manager.setConnectionObserver(object : ConnectionObserverAdapter() {
-            override fun onDeviceConnected(device: BluetoothDevice) {
-                super.onDeviceConnected(device)
-                _status.value = BleServiceStatus.OK
-            }
-
-            override fun onDeviceFailedToConnect(device: BluetoothDevice, reason: Int) {
-                super.onDeviceFailedToConnect(device, reason)
-                _status.value = BleServiceStatus.DISCONNECTED
-            }
-
-            override fun onDeviceDisconnected(device: BluetoothDevice, reason: Int) {
-                super.onDeviceDisconnected(device, reason)
-                if (reason == ConnectionObserver.REASON_LINK_LOSS) {
-                    _status.value = BleServiceStatus.LINK_LOSS
-                } else {
-                    _status.value = BleServiceStatus.DISCONNECTED
-                }
-            }
-        })
     }
 
     protected fun stopIfDisconnected(status: BleManagerStatus) {

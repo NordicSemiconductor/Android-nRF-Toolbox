@@ -49,7 +49,7 @@ import no.nordicsemi.android.cgms.data.RequestStatus
 import no.nordicsemi.android.service.BatteryManager
 import java.util.*
 
-val CGMS_SERVICE_UUID = UUID.fromString("0000181F-0000-1000-8000-00805f9b34fb")
+val CGMS_SERVICE_UUID: UUID = UUID.fromString("0000181F-0000-1000-8000-00805f9b34fb")
 private val CGM_STATUS_UUID = UUID.fromString("00002AA9-0000-1000-8000-00805f9b34fb")
 private val CGM_FEATURE_UUID = UUID.fromString("00002AA8-0000-1000-8000-00805f9b34fb")
 private val CGM_MEASUREMENT_UUID = UUID.fromString("00002AA7-0000-1000-8000-00805f9b34fb")
@@ -59,9 +59,9 @@ private val RACP_UUID = UUID.fromString("00002A52-0000-1000-8000-00805f9b34fb")
 
 internal class CGMManager(
     context: Context,
-    private val scope: CoroutineScope,
+    scope: CoroutineScope,
     private val repository: CGMRepository
-) : BatteryManager(context) {
+) : BatteryManager(context, scope) {
 
     private var cgmStatusCharacteristic: BluetoothGattCharacteristic? = null
     private var cgmFeatureCharacteristic: BluetoothGattCharacteristic? = null
@@ -248,7 +248,7 @@ internal class CGMManager(
         }
     }
 
-    fun clear() {
+    private fun clear() {
         records.clear()
     }
 
