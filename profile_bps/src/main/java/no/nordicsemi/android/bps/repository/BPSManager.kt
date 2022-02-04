@@ -115,7 +115,7 @@ internal class BPSManager @Inject constructor(
                 bpmCharacteristic = service.getCharacteristic(BPM_CHARACTERISTIC_UUID)
                 icpCharacteristic = service.getCharacteristic(ICP_CHARACTERISTIC_UUID)
             }
-            return bpmCharacteristic != null
+            return bpmCharacteristic != null && icpCharacteristic != null
         }
 
         override fun onServicesInvalidated() {}

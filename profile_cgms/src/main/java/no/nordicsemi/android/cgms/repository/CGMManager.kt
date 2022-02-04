@@ -76,7 +76,7 @@ internal class CGMManager(
 
     private var sessionStartTime: Long = 0
 
-    private val exceptionHandler = CoroutineExceptionHandler { _, t->
+    private val exceptionHandler = CoroutineExceptionHandler { _, t ->
         Log.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
     }
 
@@ -124,7 +124,8 @@ internal class CGMManager(
                         when (it.requestCode) {
                             CGMSpecificOpsControlPointCallback.CGM_OP_CODE_START_SESSION -> sessionStartTime =
                                 System.currentTimeMillis()
-                            CGMSpecificOpsControlPointCallback.CGM_OP_CODE_STOP_SESSION -> sessionStartTime = 0
+                            CGMSpecificOpsControlPointCallback.CGM_OP_CODE_STOP_SESSION -> sessionStartTime =
+                                0
                         }
                     } else {
                         when (it.requestCode) {
@@ -132,7 +133,8 @@ internal class CGMManager(
                                 if (it.errorCode == CGMSpecificOpsControlPointCallback.CGM_ERROR_PROCEDURE_NOT_COMPLETED) {
                                     sessionStartTime = 0
                                 }
-                            CGMSpecificOpsControlPointCallback.CGM_OP_CODE_STOP_SESSION -> sessionStartTime = 0
+                            CGMSpecificOpsControlPointCallback.CGM_OP_CODE_STOP_SESSION -> sessionStartTime =
+                                0
                         }
                     }
                 }.launchIn(scope)
@@ -231,7 +233,7 @@ internal class CGMManager(
                 )
                 recordAccessControlPointCharacteristic = service.getCharacteristic(RACP_UUID)
             }
-            return cgmMeasurementCharacteristic != null && cgmSpecificOpsControlPointCharacteristic != null && recordAccessControlPointCharacteristic != null
+            return cgmMeasurementCharacteristic != null && cgmSpecificOpsControlPointCharacteristic != null && recordAccessControlPointCharacteristic != null && cgmStatusCharacteristic != null && cgmFeatureCharacteristic != null
         }
 
         override fun onServicesInvalidated() {}

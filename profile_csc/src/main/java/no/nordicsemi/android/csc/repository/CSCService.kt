@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.csc.data.CSCRepository
 import no.nordicsemi.android.csc.data.DisconnectCommand
 import no.nordicsemi.android.csc.data.SetWheelSizeCommand
-import no.nordicsemi.android.service.BleManagerStatus
 import no.nordicsemi.android.service.ForegroundBleService
 import no.nordicsemi.android.utils.exhaustive
 import javax.inject.Inject

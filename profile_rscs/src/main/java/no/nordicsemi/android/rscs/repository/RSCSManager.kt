@@ -77,9 +77,7 @@ internal class RSCSManager internal constructor(
         public override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
             val service = gatt.getService(RSCS_SERVICE_UUID)
             if (service != null) {
-                rscMeasurementCharacteristic = service.getCharacteristic(
-                    RSC_MEASUREMENT_CHARACTERISTIC_UUID
-                )
+                rscMeasurementCharacteristic = service.getCharacteristic(RSC_MEASUREMENT_CHARACTERISTIC_UUID)
             }
             return rscMeasurementCharacteristic != null
         }

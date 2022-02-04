@@ -26,6 +26,7 @@ import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
+import android.util.Log
 import android.widget.Toast
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -78,7 +79,6 @@ abstract class BleProfileService : Service() {
             override fun onDeviceFailedToConnect(device: BluetoothDevice, reason: Int) {
                 super.onDeviceFailedToConnect(device, reason)
                 _status.value = BleServiceStatus.DISCONNECTED
-                stopSelf()
             }
 
             override fun onDeviceDisconnected(device: BluetoothDevice, reason: Int) {

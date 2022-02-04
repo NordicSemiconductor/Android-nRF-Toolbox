@@ -102,9 +102,7 @@ internal class HRSManager(context: Context, private val dataHolder: HRSRepositor
         override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
             val service = gatt.getService(HRS_SERVICE_UUID)
             if (service != null) {
-                heartRateCharacteristic = service.getCharacteristic(
-                    HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID
-                )
+                heartRateCharacteristic = service.getCharacteristic(HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID)
             }
             return heartRateCharacteristic != null
         }

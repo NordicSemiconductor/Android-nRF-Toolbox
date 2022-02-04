@@ -97,11 +97,9 @@ internal class CSCManager(
         public override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
             val service = gatt.getService(CSC_SERVICE_UUID)
             if (service != null) {
-                cscMeasurementCharacteristic = service.getCharacteristic(
-                    CSC_MEASUREMENT_CHARACTERISTIC_UUID
-                )
+                cscMeasurementCharacteristic = service.getCharacteristic(CSC_MEASUREMENT_CHARACTERISTIC_UUID)
             }
-            return true
+            return cscMeasurementCharacteristic != null
         }
 
         override fun onDeviceDisconnected() {

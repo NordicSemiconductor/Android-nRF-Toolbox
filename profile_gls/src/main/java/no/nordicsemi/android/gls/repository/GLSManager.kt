@@ -189,7 +189,7 @@ internal class GLSManager @Inject constructor(
                 glucoseMeasurementContextCharacteristic = service.getCharacteristic(GM_CONTEXT_CHARACTERISTIC)
                 recordAccessControlPointCharacteristic = service.getCharacteristic(RACP_CHARACTERISTIC)
             }
-            return glucoseMeasurementCharacteristic != null && recordAccessControlPointCharacteristic != null
+            return glucoseMeasurementCharacteristic != null && recordAccessControlPointCharacteristic != null && glucoseMeasurementContextCharacteristic != null
         }
 
         override fun onServicesInvalidated() {}
