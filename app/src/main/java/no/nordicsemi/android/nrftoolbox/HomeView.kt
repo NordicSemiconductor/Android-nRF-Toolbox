@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.theme.view.TitleAppBar
@@ -33,7 +34,7 @@ fun HomeScreen() {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Bluetooth services",
+                    text = stringResource(id = R.string.bluetooth_services),
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -89,7 +90,7 @@ fun HomeScreen() {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Utils services",
+                    text = stringResource(id = R.string.utils_services),
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -106,6 +107,15 @@ fun HomeScreen() {
                 FeatureButton(R.drawable.ic_dfu, R.string.dfu_module, R.string.dfu_module_full) {
                     uriHandler.openUri("https://github.com/NordicSemiconductor/Android-DFU-Library")
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = BuildConfig.VERSION_NAME,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
             }

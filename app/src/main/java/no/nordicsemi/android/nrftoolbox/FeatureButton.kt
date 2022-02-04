@@ -32,7 +32,7 @@ fun FeatureButton(
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Image(
                 painter = painterResource(iconId),
@@ -50,8 +50,16 @@ fun FeatureButton(
 
             Text(
                 text = stringResource(id = name),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.size(16.dp))
+
+            Text(
+                text = stringResource(id = nameCode),
+                style = MaterialTheme.typography.headlineSmall,
                 textAlign = TextAlign.Center
             )
         }
