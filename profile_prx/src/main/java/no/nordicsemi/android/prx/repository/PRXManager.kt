@@ -43,9 +43,9 @@ val ALERT_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A06-0000-1000-8000-0
 
 internal class PRXManager(
     context: Context,
-    private val scope: CoroutineScope,
+    scope: CoroutineScope,
     private val dataHolder: PRXRepository
-) : BatteryManager(context) {
+) : BatteryManager(context, scope) {
 
     private var alertLevelCharacteristic: BluetoothGattCharacteristic? = null
     private var linkLossCharacteristic: BluetoothGattCharacteristic? = null

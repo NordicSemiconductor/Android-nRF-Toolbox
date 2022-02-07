@@ -30,13 +30,10 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
 import no.nordicsemi.android.ble.common.callback.csc.CyclingSpeedAndCadenceMeasurementResponse
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
@@ -58,7 +55,7 @@ internal class CSCRepo @Inject constructor(
     private val context: Context,
 ) {
 
-    suspend fun downloadData(device: BluetoothDevice) = callbackFlow<BleManagerResult<CSCData>> {
+    suspend fun downloadData(device: BluetoothDevice): Flow<BleManagerResult<CSCData>> = callbackFlow {
         val scope = CoroutineScope(coroutineContext)
         val manager = CSCManager(context, scope)
 
@@ -84,9 +81,8 @@ internal class CSCRepo @Inject constructor(
 
 internal class CSCManager(
     context: Context,
-    scope: CoroutineScope,
-//    private val channel: SendChannel<BleManagerResult<CSCData>>
-) : BatteryManager(context, scope) {
+    private val scope: CoroutineScope,
+) : BleManager(context) {
 
     private var batteryLevelCharacteristic: BluetoothGattCharacteristic? = null
     private var cscMeasurementCharacteristic: BluetoothGattCharacteristic? = null
@@ -97,7 +93,7 @@ internal class CSCManager(
     private val data = MutableStateFlow(CSCData())
     val dataHolder = ConnectionObserverAdapter<CSCData>()
 
-    private val exceptionHandler = CoroutineExceptionHandler { context, t ->
+    private val exceptionHandler = CoroutineExceptionHandler { _, t ->
         Log.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
     }
 
@@ -109,7 +105,7 @@ internal class CSCManager(
         }.launchIn(scope)
     }
 
-    override fun getGattCallback(): BatteryManagerGattCallback {
+    override fun getGattCallback(): BleManagerGattCallback {
         return CSCManagerGattCallback()
     }
 
@@ -117,7 +113,7 @@ internal class CSCManager(
         wheelSize = value
     }
 
-    private inner class CSCManagerGattCallback : BatteryManagerGattCallback() {
+    private inner class CSCManagerGattCallback : BleManagerGattCallback() {
         override fun initialize() {
             super.initialize()
 
@@ -128,14 +124,17 @@ internal class CSCManager(
                         val totalDistance = it.getTotalDistance(wheelSize.value.toFloat())
                         val distance = it.getDistance(wheelCircumference, previousResponse)
                         val speed = it.getSpeed(wheelCircumference, previousResponse)
-
-                        //todo
-                        data.value.copy(totalDistance, )
-                        repository.setNewDistance(totalDistance, distance, speed, wheelSize)
-
                         val crankCadence = it.getCrankCadence(previousResponse)
                         val gearRatio = it.getGearRatio(previousResponse)
-                        repository.setNewCrankCadence(crankCadence, gearRatio, wheelSize)
+
+                        data.tryEmit(data.value.copy(
+                            totalDistance = totalDistance,
+                            distance = distance,
+                            speed = speed,
+                            wheelSize = wheelSize,
+                            cadence = crankCadence,
+                            gearRatio = gearRatio,
+                        ))
                     }
 
                     previousResponse = it
@@ -155,16 +154,16 @@ internal class CSCManager(
         }
 
         public override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
-            val service = gatt.getService(CSC_SERVICE_UUID)
-            if (service != null) {
-                cscMeasurementCharacteristic = service.getCharacteristic(CSC_MEASUREMENT_CHARACTERISTIC_UUID)
-                batteryLevelCharacteristic = service.getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
+            gatt.getService(CSC_SERVICE_UUID)?.run {
+                cscMeasurementCharacteristic = getCharacteristic(CSC_MEASUREMENT_CHARACTERISTIC_UUID)
             }
-            return cscMeasurementCharacteristic != null
+            gatt.getService(BATTERY_SERVICE_UUID)?.run {
+                batteryLevelCharacteristic = getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
+            }
+            return cscMeasurementCharacteristic != null && batteryLevelCharacteristic != null
         }
 
         override fun onServicesInvalidated() {
-            super.onServicesInvalidated()
             cscMeasurementCharacteristic = null
             batteryLevelCharacteristic = null
         }

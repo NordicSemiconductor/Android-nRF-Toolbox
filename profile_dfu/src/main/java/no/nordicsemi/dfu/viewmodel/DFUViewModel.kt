@@ -37,11 +37,11 @@ internal class DFUViewModel @Inject constructor(
             ?.run { createInstallingStateWithNewStatus(state, status) }
             ?: state
     }.combine(repository.status) { data, status ->
-        when (status) {
-            BleManagerStatus.CONNECTING -> LoadingState
-            BleManagerStatus.OK,
-            BleManagerStatus.DISCONNECTED -> DisplayDataState(data)
-        }
+//        when (status) {
+//            BleManagerStatus.CONNECTING -> LoadingState
+//            BleManagerStatus.OK,
+//            BleManagerStatus.DISCONNECTED -> DisplayDataState(data)
+//        }
     }.stateIn(viewModelScope, SharingStarted.Lazily, LoadingState)
 
     init {

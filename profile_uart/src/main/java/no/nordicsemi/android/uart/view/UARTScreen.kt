@@ -9,10 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.theme.view.BackIconAppBar
-import no.nordicsemi.android.theme.view.DeviceConnectingView
 import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.uart.viewmodel.UARTViewModel
-import no.nordicsemi.android.utils.exhaustive
 
 @Composable
 fun UARTScreen() {
@@ -25,10 +23,10 @@ fun UARTScreen() {
         }
 
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-            when (state) {
-                is DisplayDataState -> UARTContentView(state.data) { viewModel.onEvent(it) }
-                LoadingState -> DeviceConnectingView()
-            }.exhaustive
+//            when (state) {
+//                is DisplayDataState -> UARTContentView(state.data) { viewModel.onEvent(it) }
+//                LoadingState -> DeviceConnectingView()
+//            }.exhaustive
         }
     }
 }

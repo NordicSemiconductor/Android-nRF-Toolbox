@@ -45,9 +45,9 @@ private val UART_TX_CHARACTERISTIC_UUID = UUID.fromString("6E400003-B5A3-F393-E0
 
 internal class UARTManager(
     context: Context,
-    private val scope: CoroutineScope,
+    scope: CoroutineScope,
     private val dataHolder: UARTRepository
-) : BatteryManager(context) {
+) : BatteryManager(context, scope) {
 
     private var rxCharacteristic: BluetoothGattCharacteristic? = null
     private var txCharacteristic: BluetoothGattCharacteristic? = null

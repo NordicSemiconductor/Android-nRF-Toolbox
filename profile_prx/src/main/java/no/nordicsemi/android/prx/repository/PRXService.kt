@@ -1,12 +1,9 @@
 package no.nordicsemi.android.prx.repository
 
-import android.util.Log
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.prx.data.*
-import no.nordicsemi.android.service.BleManagerStatus
-import no.nordicsemi.android.service.BleServiceStatus
 import no.nordicsemi.android.service.ForegroundBleService
 import no.nordicsemi.android.utils.exhaustive
 import javax.inject.Inject
@@ -33,23 +30,23 @@ internal class PRXService : ForegroundBleService() {
 
         serverManager.open()
 
-        status.onEach {
-            val bleStatus = when (it) {
-                BleServiceStatus.CONNECTING -> BleManagerStatus.CONNECTING
-                BleServiceStatus.OK -> BleManagerStatus.OK
-                BleServiceStatus.DISCONNECTED -> {
-                    scope.close()
-                    stopSelf()
-                    BleManagerStatus.DISCONNECTED
-                }
-                BleServiceStatus.LINK_LOSS -> null
-            }.exhaustive
-            bleStatus?.let { repository.setNewStatus(it) }
-
-            if (BleServiceStatus.LINK_LOSS == it) {
-                repository.setLocalAlarmLevel(repository.data.value.linkLossAlarmLevel)
-            }
-        }.launchIn(scope)
+//        status.onEach {
+//            val bleStatus = when (it) {
+//                BleServiceStatus.CONNECTING -> BleManagerStatus.CONNECTING
+//                BleServiceStatus.OK -> BleManagerStatus.OK
+//                BleServiceStatus.DISCONNECTED -> {
+//                    scope.close()
+//                    stopSelf()
+//                    BleManagerStatus.DISCONNECTED
+//                }
+//                BleServiceStatus.LINK_LOSS -> null
+//            }.exhaustive
+//            bleStatus?.let { repository.setNewStatus(it) }
+//
+//            if (BleServiceStatus.LINK_LOSS == it) {
+//                repository.setLocalAlarmLevel(repository.data.value.linkLossAlarmLevel)
+//            }
+//        }.launchIn(scope)
 
         repository.command.onEach {
             when (it) {

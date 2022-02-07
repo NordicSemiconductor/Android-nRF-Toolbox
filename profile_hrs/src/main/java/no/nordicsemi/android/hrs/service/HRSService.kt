@@ -13,16 +13,10 @@ internal class HRSService : ForegroundBleService() {
     @Inject
     lateinit var repository: HRSRepository
 
-    override val manager: HRSManager by lazy { HRSManager(this, repository) }
+    override val manager: HRSManager by lazy { HRSManager(this, scope, repository) }
 
     override fun onCreate() {
         super.onCreate()
-
-        status.onEach {
-            val status = it.mapToSimpleManagerStatus()
-            repository.setNewStatus(status)
-            stopIfDisconnected(status)
-        }.launchIn(scope)
 
         repository.command.onEach {
             stopSelf()

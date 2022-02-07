@@ -19,29 +19,28 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package no.nordicsemi.android.gls.repository
+package no.nordicsemi.android.gls.data
 
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.common.callback.RecordAccessControlPointDataCallback
 import no.nordicsemi.android.ble.common.callback.RecordAccessControlPointResponse
+import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
 import no.nordicsemi.android.ble.common.callback.glucose.GlucoseMeasurementContextResponse
 import no.nordicsemi.android.ble.common.callback.glucose.GlucoseMeasurementResponse
 import no.nordicsemi.android.ble.common.data.RecordAccessControlPointData
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
 import no.nordicsemi.android.ble.ktx.suspend
-import no.nordicsemi.android.gls.data.*
-import no.nordicsemi.android.service.BatteryManager
-import no.nordicsemi.android.service.CloseableCoroutineScope
+import no.nordicsemi.android.service.ConnectionObserverAdapter
+import no.nordicsemi.android.utils.launchWithCatch
 import java.util.*
 import javax.inject.Inject
 
@@ -52,75 +51,58 @@ private val GM_CONTEXT_CHARACTERISTIC = UUID.fromString("00002A34-0000-1000-8000
 private val GF_CHARACTERISTIC = UUID.fromString("00002A51-0000-1000-8000-00805f9b34fb")
 private val RACP_CHARACTERISTIC = UUID.fromString("00002A52-0000-1000-8000-00805f9b34fb")
 
+private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
+private val BATTERY_LEVEL_CHARACTERISTIC_UUID =
+    UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
+
 internal class GLSManager @Inject constructor(
-    @ApplicationContext context: Context,
-    private val repository: GLSRepository
-) : BatteryManager(context) {
+    @ApplicationContext
+    context: Context,
+    private val scope: CoroutineScope
+) : BleManager(context) {
 
-    private val scope = CloseableCoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-
+    private var batteryLevelCharacteristic: BluetoothGattCharacteristic? = null
     private var glucoseMeasurementCharacteristic: BluetoothGattCharacteristic? = null
     private var glucoseMeasurementContextCharacteristic: BluetoothGattCharacteristic? = null
     private var recordAccessControlPointCharacteristic: BluetoothGattCharacteristic? = null
 
-    private val exceptionHandler = CoroutineExceptionHandler { _, t->
-        Log.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
+    private val data = MutableStateFlow(GLSData())
+    val dataHolder = ConnectionObserverAdapter<GLSData>()
+
+    init {
+        setConnectionObserver(dataHolder)
+
+        data.onEach {
+            dataHolder.setValue(it)
+        }.launchIn(scope)
     }
 
-    override fun onBatteryLevelChanged(batteryLevel: Int) {
-        repository.setNewBatteryLevel(batteryLevel)
-    }
-
-    override fun getGattCallback(): BatteryManagerGattCallback {
+    override fun getGattCallback(): BleManagerGattCallback {
         return GlucoseManagerGattCallback()
     }
 
-    private inner class GlucoseManagerGattCallback : BatteryManagerGattCallback() {
+    private inner class GlucoseManagerGattCallback : BleManagerGattCallback() {
         override fun initialize() {
             super.initialize()
 
             setNotificationCallback(glucoseMeasurementCharacteristic).asValidResponseFlow<GlucoseMeasurementResponse>()
-                .onEach {
-                    val record = GLSRecord(
-                        sequenceNumber = it.sequenceNumber,
-                        time = it.time,
-                        glucoseConcentration = it.glucoseConcentration ?: 0f,
-                        unit = it.unit?.let { ConcentrationUnit.create(it) }
-                            ?: ConcentrationUnit.UNIT_KGPL,
-                        type = RecordType.createOrNull(it.type),
-                        sampleLocation = SampleLocation.createOrNull(it.sampleLocation),
-                        status = it.status
-                    )
-
-                    repository.addNewRecord(record)
-                }.launchIn(scope)
+                .onEach { data.tryEmit(data.value.copy(records = data.value.records + it.toRecord())) }
+                .launchIn(scope)
 
             setNotificationCallback(glucoseMeasurementContextCharacteristic).asValidResponseFlow<GlucoseMeasurementContextResponse>()
                 .onEach {
-                    val context = MeasurementContext(
-                        sequenceNumber = it.sequenceNumber,
-                        carbohydrate = it.carbohydrate,
-                        carbohydrateAmount = it.carbohydrateAmount ?: 0f,
-                        meal = it.meal,
-                        tester = it.tester,
-                        health = it.health,
-                        exerciseDuration = it.exerciseDuration ?: 0,
-                        exerciseIntensity = it.exerciseIntensity ?: 0,
-                        medication = it.medication,
-                        medicationQuantity = it.medicationAmount ?: 0f,
-                        medicationUnit = it.medicationUnit?.let { MedicationUnit.create(it) }
-                            ?: MedicationUnit.UNIT_KG,
-                        HbA1c = it.hbA1c ?: 0f
-                    )
-
-                    repository.addNewContext(context)
+                    val context = it.toMeasurementContext()
+                    data.value.records.find { context.sequenceNumber == it.sequenceNumber }?.let {
+                        it.context = context
+                    }
+                    data.tryEmit(data.value)
                 }.launchIn(scope)
 
             setIndicationCallback(recordAccessControlPointCharacteristic).asValidResponseFlow<RecordAccessControlPointResponse>()
                 .onEach {
                     if (it.isOperationCompleted && it.wereRecordsFound() && it.numberOfRecords > 0) {
                         onNumberOfRecordsReceived(it)
-                    } else if(it.isOperationCompleted && it.wereRecordsFound() && it.numberOfRecords == 0) {
+                    } else if (it.isOperationCompleted && it.wereRecordsFound() && it.numberOfRecords == 0) {
                         onRecordAccessOperationCompletedWithNoRecordsFound(it)
                     } else if (it.isOperationCompleted && it.wereRecordsFound()) {
                         onRecordAccessOperationCompleted(it)
@@ -129,15 +111,15 @@ internal class GLSManager @Inject constructor(
                     }
                 }.launchIn(scope)
 
-            scope.launch(exceptionHandler) {
-                enableNotifications(glucoseMeasurementCharacteristic).suspend()
-            }
-            scope.launch(exceptionHandler) {
-                enableNotifications(glucoseMeasurementContextCharacteristic).suspend()
-            }
-            scope.launch(exceptionHandler) {
-                enableIndications(recordAccessControlPointCharacteristic).suspend()
-            }
+            setNotificationCallback(batteryLevelCharacteristic).asValidResponseFlow<BatteryLevelResponse>()
+                .onEach {
+                    data.value = data.value.copy(batteryLevel = it.batteryLevel)
+                }.launchIn(scope)
+
+            enableNotifications(glucoseMeasurementCharacteristic).enqueue()
+            enableNotifications(glucoseMeasurementContextCharacteristic).enqueue()
+            enableIndications(recordAccessControlPointCharacteristic).enqueue()
+            enableNotifications(batteryLevelCharacteristic).enqueue()
         }
 
         private fun onRecordAccessOperationCompleted(response: RecordAccessControlPointResponse) {
@@ -145,21 +127,23 @@ internal class GLSManager @Inject constructor(
                 RecordAccessControlPointDataCallback.RACP_OP_CODE_ABORT_OPERATION -> RequestStatus.ABORTED
                 else -> RequestStatus.SUCCESS
             }
-            repository.setRequestStatus(status)
+            data.tryEmit(data.value.copy(requestStatus = status))
         }
 
         private fun onRecordAccessOperationCompletedWithNoRecordsFound(response: RecordAccessControlPointResponse) {
-            repository.setRequestStatus(RequestStatus.SUCCESS)
+            data.tryEmit(data.value.copy(requestStatus = RequestStatus.SUCCESS))
         }
 
         private suspend fun onNumberOfRecordsReceived(response: RecordAccessControlPointResponse) {
             if (response.numberOfRecords > 0) {
-                if (repository.records().isNotEmpty()) {
-                    val sequenceNumber = repository.records()
-                        .last().sequenceNumber + 1 //TODO check if correct
+                if (data.value.records.isNotEmpty()) {
+                    val sequenceNumber = data.value.records
+                        .last().sequenceNumber + 1
                     writeCharacteristic(
                         recordAccessControlPointCharacteristic,
-                        RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber),
+                        RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(
+                            sequenceNumber
+                        ),
                         BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
                     ).suspend()
                 } else {
@@ -170,26 +154,28 @@ internal class GLSManager @Inject constructor(
                     ).suspend()
                 }
             }
-            repository.setRequestStatus(RequestStatus.SUCCESS)
+            data.tryEmit(data.value.copy(requestStatus = RequestStatus.SUCCESS))
         }
 
         private fun onRecordAccessOperationError(response: RecordAccessControlPointResponse) {
             log(Log.WARN, "Record Access operation failed (error ${response.errorCode})")
             if (response.errorCode == RecordAccessControlPointDataCallback.RACP_ERROR_OP_CODE_NOT_SUPPORTED) {
-                repository.setRequestStatus(RequestStatus.NOT_SUPPORTED)
+                data.tryEmit(data.value.copy(requestStatus = RequestStatus.NOT_SUPPORTED))
             } else {
-                repository.setRequestStatus(RequestStatus.FAILED)
+                data.tryEmit(data.value.copy(requestStatus = RequestStatus.FAILED))
             }
         }
 
         public override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
-            val service = gatt.getService(GLS_SERVICE_UUID)
-            if (service != null) {
-                glucoseMeasurementCharacteristic = service.getCharacteristic(GM_CHARACTERISTIC)
-                glucoseMeasurementContextCharacteristic = service.getCharacteristic(GM_CONTEXT_CHARACTERISTIC)
-                recordAccessControlPointCharacteristic = service.getCharacteristic(RACP_CHARACTERISTIC)
+            gatt.getService(GLS_SERVICE_UUID)?.run {
+                glucoseMeasurementCharacteristic = getCharacteristic(GM_CHARACTERISTIC)
+                glucoseMeasurementContextCharacteristic = getCharacteristic(GM_CONTEXT_CHARACTERISTIC)
+                recordAccessControlPointCharacteristic = getCharacteristic(RACP_CHARACTERISTIC)
             }
-            return glucoseMeasurementCharacteristic != null && recordAccessControlPointCharacteristic != null && glucoseMeasurementContextCharacteristic != null
+            gatt.getService(BATTERY_SERVICE_UUID)?.run {
+                batteryLevelCharacteristic = getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
+            }
+            return glucoseMeasurementCharacteristic != null && recordAccessControlPointCharacteristic != null && glucoseMeasurementContextCharacteristic != null && batteryLevelCharacteristic != null
         }
 
         override fun onServicesInvalidated() {}
@@ -207,10 +193,10 @@ internal class GLSManager @Inject constructor(
     }
 
     private fun clear() {
-        repository.clearRecords()
+        data.tryEmit(data.value.copy(records = emptyList()))
         val target = bluetoothDevice
         if (target != null) {
-            repository.setRequestStatus(RequestStatus.SUCCESS)
+            data.tryEmit(data.value.copy(requestStatus = RequestStatus.SUCCESS))
         }
     }
 
@@ -218,8 +204,8 @@ internal class GLSManager @Inject constructor(
         if (recordAccessControlPointCharacteristic == null) return
         val target = bluetoothDevice ?: return
         clear()
-        repository.setRequestStatus(RequestStatus.PENDING)
-        scope.launch(exceptionHandler) {
+        data.tryEmit(data.value.copy(requestStatus = RequestStatus.PENDING))
+        scope.launchWithCatch {
             writeCharacteristic(
                 recordAccessControlPointCharacteristic,
                 RecordAccessControlPointData.reportLastStoredRecord(),
@@ -231,8 +217,8 @@ internal class GLSManager @Inject constructor(
     fun requestFirstRecord() {
         if (recordAccessControlPointCharacteristic == null) return
         clear()
-        repository.setRequestStatus(RequestStatus.PENDING)
-        scope.launch(exceptionHandler) {
+        data.tryEmit(data.value.copy(requestStatus = RequestStatus.PENDING))
+        scope.launchWithCatch {
             writeCharacteristic(
                 recordAccessControlPointCharacteristic,
                 RecordAccessControlPointData.reportFirstStoredRecord(),
@@ -244,17 +230,13 @@ internal class GLSManager @Inject constructor(
     fun requestAllRecords() {
         if (recordAccessControlPointCharacteristic == null) return
         clear()
-        repository.setRequestStatus(RequestStatus.PENDING)
-        scope.launch(exceptionHandler) {
+        data.tryEmit(data.value.copy(requestStatus = RequestStatus.PENDING))
+        scope.launchWithCatch {
             writeCharacteristic(
                 recordAccessControlPointCharacteristic,
                 RecordAccessControlPointData.reportNumberOfAllStoredRecords(),
                 BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
             ).suspend()
         }
-    }
-
-    fun release() {
-        scope.close()
     }
 }

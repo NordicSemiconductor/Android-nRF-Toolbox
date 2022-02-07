@@ -12,8 +12,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.prx.R
 import no.nordicsemi.android.prx.viewmodel.PRXViewModel
 import no.nordicsemi.android.theme.view.BackIconAppBar
-import no.nordicsemi.android.theme.view.DeviceConnectingView
-import no.nordicsemi.android.utils.exhaustive
 
 @Composable
 fun PRXScreen() {
@@ -26,10 +24,10 @@ fun PRXScreen() {
         }
 
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-            when (state) {
-                is DisplayDataState -> ContentView(state.data) { viewModel.onEvent(it) }
-                LoadingState -> DeviceConnectingView()
-            }.exhaustive
+//            when (state) {
+//                is DisplayDataState -> ContentView(state.data) { viewModel.onEvent(it) }
+//                LoadingState -> DeviceConnectingView()
+//            }.exhaustive
         }
     }
 }

@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
-import no.nordicsemi.android.bps.data.BPSRepository
 import no.nordicsemi.android.bps.repository.BPSManager
 import no.nordicsemi.android.bps.view.DisconnectEvent
 import no.nordicsemi.android.bps.viewmodel.BPSViewModel

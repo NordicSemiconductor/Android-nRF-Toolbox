@@ -9,6 +9,7 @@ dependencies {
     implementation libs.chart
 
     implementation libs.nordic.ble.common
+    implementation libs.nordic.ble.ktx
     implementation libs.nordic.navigation
     implementation libs.nordic.ui.scanner
 

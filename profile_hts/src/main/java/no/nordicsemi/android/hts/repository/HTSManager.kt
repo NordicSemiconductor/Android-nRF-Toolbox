@@ -40,16 +40,11 @@ import java.util.*
 val HTS_SERVICE_UUID: UUID = UUID.fromString("00001809-0000-1000-8000-00805f9b34fb")
 private val HT_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A1C-0000-1000-8000-00805f9b34fb")
 
-/**
- * [HTSManager] class performs [BluetoothGatt] operations for connection, service discovery,
- * enabling indication and reading characteristics. All operations required to connect to device
- * with BLE HT Service and reading health thermometer values are performed here.
- */
 internal class HTSManager internal constructor(
     context: Context,
-    private val scope: CoroutineScope,
+    scope: CoroutineScope,
     private val dataHolder: HTSRepository
-) : BatteryManager(context) {
+) : BatteryManager(context, scope) {
 
     private var htCharacteristic: BluetoothGattCharacteristic? = null
 
@@ -65,10 +60,6 @@ internal class HTSManager internal constructor(
         return HTManagerGattCallback()
     }
 
-    /**
-     * BluetoothGatt callbacks for connection/disconnection, service discovery,
-     * receiving indication, etc..
-     */
     private inner class HTManagerGattCallback : BatteryManagerGattCallback() {
         override fun initialize() {
             super.initialize()

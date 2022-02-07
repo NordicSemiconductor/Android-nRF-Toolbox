@@ -21,11 +21,11 @@ internal class UARTService : ForegroundBleService() {
     override fun onCreate() {
         super.onCreate()
 
-        status.onEach {
-            val status = it.mapToSimpleManagerStatus()
-            repository.setNewStatus(status)
-            stopIfDisconnected(status)
-        }.launchIn(scope)
+//        status.onEach {
+//            val status = it.mapToSimpleManagerStatus()
+//            repository.setNewStatus(status)
+//            stopIfDisconnected(status)
+//        }.launchIn(scope)
 
         repository.command.onEach {
             when (it) {

@@ -13,9 +13,13 @@ dependencyResolutionManagement {
         libs {
             alias('nordic-ble-common').to('no.nordicsemi.android:ble-common:2.4.0-beta01')
             alias('nordic-ble-ktx').to('no.nordicsemi.android:ble-ktx:2.4.0-beta01')
-            alias('nordic-log').to('no.nordicsemi.android:log:2.3.0')
             alias('nordic-scanner').to('no.nordicsemi.android.support.v18:scanner:1.6.0')
             alias('nordic-dfu').to('no.nordicsemi.android:dfu:1.12.1-beta01')
+
+            alias('nordic-log').to('no.nordicsemi.android:log-timber:2.3.0')
+            alias('timber-main').to('com.jakewharton.timber:timber:5.0.1')
+            alias('timber-arcao').to('com.arcao:slf4j-timber:3.1')
+            bundle('icons', ['nordic-log', 'timber-main', 'timber-arcao'])
 
             version('commonlibraries', '1.0.1')
             alias('nordic-ui-scanner').to('no.nordicsemi.android.common', 'uiscanner').versionRef('commonlibraries')

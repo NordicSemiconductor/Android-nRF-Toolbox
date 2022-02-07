@@ -26,109 +26,104 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.android.scopes.ViewModelScoped
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import no.nordicsemi.android.ble.BleManager
+import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
 import no.nordicsemi.android.ble.common.callback.bps.BloodPressureMeasurementResponse
 import no.nordicsemi.android.ble.common.callback.bps.IntermediateCuffPressureResponse
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
-import no.nordicsemi.android.ble.ktx.suspend
-import no.nordicsemi.android.bps.data.BPSRepository
-import no.nordicsemi.android.service.BatteryManager
-import no.nordicsemi.android.service.CloseableCoroutineScope
+import no.nordicsemi.android.bps.data.BPSData
+import no.nordicsemi.android.bps.data.copyWithNewResponse
+import no.nordicsemi.android.service.ConnectionObserverAdapter
 import java.util.*
-import javax.inject.Inject
 
 val BPS_SERVICE_UUID: UUID = UUID.fromString("00001810-0000-1000-8000-00805f9b34fb")
-
 private val BPM_CHARACTERISTIC_UUID = UUID.fromString("00002A35-0000-1000-8000-00805f9b34fb")
-
 private val ICP_CHARACTERISTIC_UUID = UUID.fromString("00002A36-0000-1000-8000-00805f9b34fb")
 
-@ViewModelScoped
-internal class BPSManager @Inject constructor(
-    @ApplicationContext context: Context,
-    private val dataHolder: BPSRepository
-) : BatteryManager(context, CloseableCoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)) {
+private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
+private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
 
+internal class BPSManager(
+    @ApplicationContext context: Context,
+    private val scope: CoroutineScope
+) : BleManager(context) {
+
+    private var batteryLevelCharacteristic: BluetoothGattCharacteristic? = null
     private var bpmCharacteristic: BluetoothGattCharacteristic? = null
     private var icpCharacteristic: BluetoothGattCharacteristic? = null
 
-    private val exceptionHandler = CoroutineExceptionHandler { _, t->
-        Log.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
+    private val data = MutableStateFlow(BPSData())
+    val dataHolder = ConnectionObserverAdapter<BPSData>()
+
+    init {
+        setConnectionObserver(dataHolder)
+
+        data.onEach {
+            dataHolder.setValue(it)
+        }.launchIn(scope)
     }
 
-    override fun onBatteryLevelChanged(batteryLevel: Int) {
-        dataHolder.setBatteryLevel(batteryLevel)
+    override fun getMinLogPriority(): Int {
+        return Log.VERBOSE
     }
 
-    private inner class BloodPressureManagerGattCallback : BatteryManagerGattCallback() {
+    override fun log(priority: Int, message: String) {
+        Log.println(priority, "AAA", message)
+    }
 
+    override fun getGattCallback(): BleManagerGattCallback {
+        return BloodPressureManagerGattCallback()
+    }
+
+    private inner class BloodPressureManagerGattCallback : BleManagerGattCallback() {
+
+        @OptIn(ExperimentalCoroutinesApi::class)
         override fun initialize() {
             super.initialize()
 
             setNotificationCallback(icpCharacteristic).asValidResponseFlow<IntermediateCuffPressureResponse>()
-                .onEach {
-                    dataHolder.setIntermediateCuffPressure(
-                        it.cuffPressure,
-                        it.unit,
-                        it.pulseRate,
-                        it.userID,
-                        it.status,
-                        it.timestamp
-                    )
-                }.launchIn(scope)
+                .onEach { data.tryEmit(data.value.copyWithNewResponse(it)) }
+                .launchIn(scope)
 
             setIndicationCallback(bpmCharacteristic).asValidResponseFlow<BloodPressureMeasurementResponse>()
+                .onEach { data.tryEmit(data.value.copyWithNewResponse(it)) }
+                .launchIn(scope)
+
+            setNotificationCallback(batteryLevelCharacteristic).asValidResponseFlow<BatteryLevelResponse>()
                 .onEach {
-                    dataHolder.setBloodPressureMeasurement(
-                        it.systolic,
-                        it.diastolic,
-                        it.meanArterialPressure,
-                        it.unit,
-                        it.pulseRate,
-                        it.userID,
-                        it.status,
-                        it.timestamp
-                    )
+                    data.value = data.value.copy(batteryLevel = it.batteryLevel)
                 }.launchIn(scope)
 
-            scope.launch(exceptionHandler) {
-                enableNotifications(icpCharacteristic).suspend()
-            }
-
-            scope.launch(exceptionHandler) {
-                enableIndications(bpmCharacteristic).suspend()
-            }
+            enableNotifications(icpCharacteristic).enqueue()
+            enableIndications(bpmCharacteristic).enqueue()
+            enableNotifications(batteryLevelCharacteristic).enqueue()
         }
 
         override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
-            val service = gatt.getService(BPS_SERVICE_UUID)
-            if (service != null) {
-                bpmCharacteristic = service.getCharacteristic(BPM_CHARACTERISTIC_UUID)
-                icpCharacteristic = service.getCharacteristic(ICP_CHARACTERISTIC_UUID)
+            gatt.getService(BPS_SERVICE_UUID)?.run {
+                bpmCharacteristic = getCharacteristic(BPM_CHARACTERISTIC_UUID)
+                icpCharacteristic = getCharacteristic(ICP_CHARACTERISTIC_UUID)
             }
-            return bpmCharacteristic != null && icpCharacteristic != null
+            gatt.getService(BATTERY_SERVICE_UUID)?.run {
+                batteryLevelCharacteristic = getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
+            }
+            return bpmCharacteristic != null && batteryLevelCharacteristic != null
         }
-
-        override fun onServicesInvalidated() {}
 
         override fun isOptionalServiceSupported(gatt: BluetoothGatt): Boolean {
             super.isOptionalServiceSupported(gatt) // ignore the result of this
             return icpCharacteristic != null
         }
 
-        override fun onDeviceDisconnected() {
+        override fun onServicesInvalidated() {
             icpCharacteristic = null
             bpmCharacteristic = null
+            batteryLevelCharacteristic = null
         }
-    }
-
-    override fun getGattCallback(): BleManagerGattCallback {
-        return BloodPressureManagerGattCallback()
     }
 }

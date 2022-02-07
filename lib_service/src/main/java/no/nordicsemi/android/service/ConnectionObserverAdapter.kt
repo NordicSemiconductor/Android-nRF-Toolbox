@@ -45,6 +45,7 @@ class ConnectionObserverAdapter<T> : ConnectionObserver {
     }
 
     fun setValue(value: T) {
-        _status.tryEmit(SuccessResult(value))
+        Log.d("AAATESTAAA", "setValue()")
+        _status.value = SuccessResult(value)
     }
 }

@@ -2,9 +2,14 @@ package no.nordicsemi.android.utils
 
 import android.app.ActivityManager
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.navigation.NavController
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import no.nordicsemi.android.navigation.ParcelableArgument
 import no.nordicsemi.android.navigation.SuccessDestinationResult
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
@@ -38,3 +43,12 @@ fun <T> NavController.consumeResult(value: String): T? {
             ?.set(value, null)
     }
 }
+
+private val exceptionHandler = CoroutineExceptionHandler { _, t ->
+    Log.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
+}
+
+fun CoroutineScope.launchWithCatch(block: suspend CoroutineScope.() -> Unit) =
+    launch(Job() + exceptionHandler) {
+        block()
+    }

@@ -1,19 +1,14 @@
 package no.nordicsemi.android.gls.main.viewmodel
 
-import android.bluetooth.BluetoothDevice
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import no.nordicsemi.android.gls.GlsDetailsDestinationId
 import no.nordicsemi.android.gls.data.GLSRepository
-import no.nordicsemi.android.gls.data.WorkingMode
+import no.nordicsemi.android.gls.data.GLS_SERVICE_UUID
 import no.nordicsemi.android.gls.main.view.*
-import no.nordicsemi.android.gls.repository.GLSManager
-import no.nordicsemi.android.gls.repository.GLS_SERVICE_UUID
 import no.nordicsemi.android.navigation.*
-import no.nordicsemi.android.service.BleManagerStatus
-import no.nordicsemi.android.service.ConnectionObserverAdapter
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.android.utils.getDevice
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
@@ -22,18 +17,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class GLSViewModel @Inject constructor(
-    private val glsManager: GLSManager,
     private val repository: GLSRepository,
     private val navigationManager: NavigationManager
 ) : ViewModel() {
 
-    val state = repository.data.combine(repository.status) { data, status ->
-        when (status) {
-            BleManagerStatus.CONNECTING -> LoadingState
-            BleManagerStatus.OK,
-            BleManagerStatus.DISCONNECTED -> DisplayDataState(data)
-        }
-    }.stateIn(viewModelScope, SharingStarted.Lazily, LoadingState)
+    private val _state = MutableStateFlow<BPSViewState>(NoDeviceState)
+    val state = _state.asStateFlow()
 
     init {
         navigationManager.navigateTo(ScannerDestinationId, UUIDArgument(GLS_SERVICE_UUID))
@@ -41,29 +30,6 @@ internal class GLSViewModel @Inject constructor(
         navigationManager.recentResult.onEach {
             if (it.destinationId == ScannerDestinationId) {
                 handleArgs(it)
-            }
-        }.launchIn(viewModelScope)
-
-        glsManager.setConnectionObserver(object : ConnectionObserverAdapter() {
-            override fun onDeviceConnected(device: BluetoothDevice) {
-                super.onDeviceConnected(device)
-                repository.setNewStatus(BleManagerStatus.OK)
-            }
-
-            override fun onDeviceFailedToConnect(device: BluetoothDevice, reason: Int) {
-                super.onDeviceFailedToConnect(device, reason)
-                repository.setNewStatus(BleManagerStatus.DISCONNECTED)
-            }
-
-            override fun onDeviceDisconnected(device: BluetoothDevice, reason: Int) {
-                super.onDeviceDisconnected(device, reason)
-                repository.setNewStatus(BleManagerStatus.DISCONNECTED)
-            }
-        })
-
-        repository.status.onEach {
-            if (it == BleManagerStatus.DISCONNECTED) {
-                navigationManager.navigateUp()
             }
         }.launchIn(viewModelScope)
     }
@@ -77,38 +43,16 @@ internal class GLSViewModel @Inject constructor(
 
     fun onEvent(event: GLSScreenViewEvent) {
         when (event) {
-            DisconnectEvent -> disconnect()
-            is OnWorkingModeSelected -> requestData(event.workingMode)
+            DisconnectEvent -> navigationManager.navigateUp()
+            is OnWorkingModeSelected -> repository.requestMode(event.workingMode)
             is OnGLSRecordClick -> navigationManager.navigateTo(GlsDetailsDestinationId, AnyArgument(event.record))
+            DisconnectEvent -> navigationManager.navigateUp()
         }.exhaustive
     }
 
     private fun connectDevice(device: DiscoveredBluetoothDevice) {
-        glsManager.connect(device.device)
-            .useAutoConnect(false)
-            .retry(3, 100)
-            .enqueue()
-    }
-
-    private fun requestData(mode: WorkingMode) {
-        when (mode) {
-            WorkingMode.ALL -> glsManager.requestAllRecords()
-            WorkingMode.LAST -> glsManager.requestLastRecord()
-            WorkingMode.FIRST -> glsManager.requestFirstRecord()
-        }.exhaustive
-    }
-
-    private fun disconnect() {
-        if (glsManager.isConnected) {
-            glsManager.disconnect().enqueue()
-        } else {
-            repository.setNewStatus(BleManagerStatus.DISCONNECTED)
-        }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        repository.clear()
-        glsManager.release()
+        repository.downloadData(device.device).onEach {
+            _state.value = WorkingState(it)
+        }.launchIn(viewModelScope)
     }
 }

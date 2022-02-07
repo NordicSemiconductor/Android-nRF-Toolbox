@@ -1,73 +1,50 @@
 package no.nordicsemi.android.bps.data
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import no.nordicsemi.android.ble.common.profile.bp.BloodPressureTypes
-import no.nordicsemi.android.service.BleManagerStatus
-import java.util.*
+import android.bluetooth.BluetoothDevice
+import android.content.Context
+import android.util.Log
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.android.scopes.ViewModelScoped
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import no.nordicsemi.android.ble.ktx.suspend
+import no.nordicsemi.android.bps.repository.BPSManager
+import no.nordicsemi.android.service.BleManagerResult
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-internal class BPSRepository @Inject constructor() {
+@ViewModelScoped
+internal class BPSRepository @Inject constructor(
+    @ApplicationContext
+    private val context: Context,
+) {
 
-    private val _data = MutableStateFlow(BPSData())
-    val data: StateFlow<BPSData> = _data
+    fun downloadData(device: BluetoothDevice): Flow<BleManagerResult<BPSData>> = callbackFlow {
+        val scope = this
+        val manager = BPSManager(context, scope)
 
-    private val _status = MutableStateFlow(BleManagerStatus.CONNECTING)
-    val status = _status.asStateFlow()
+        manager.dataHolder.status.onEach {
+            trySend(it)
+        }.launchIn(scope)
 
-    fun setIntermediateCuffPressure(
-        cuffPressure: Float,
-        unit: Int,
-        pulseRate: Float?,
-        userID: Int?,
-        status: BloodPressureTypes.BPMStatus?,
-        calendar: Calendar?
-    ) {
-        _data.tryEmit(_data.value.copy(
-            cuffPressure = cuffPressure,
-            unit = unit,
-            pulseRate = pulseRate,
-            userID = userID,
-            status = status,
-            calendar = calendar
-        ))
-    }
+        try {
+            manager.connect(device)
+                .useAutoConnect(false)
+                .retry(3, 100)
+                .suspend()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
-    fun setBloodPressureMeasurement(
-        systolic: Float,
-        diastolic: Float,
-        meanArterialPressure: Float,
-        unit: Int,
-        pulseRate: Float?,
-        userID: Int?,
-        status: BloodPressureTypes.BPMStatus?,
-        calendar: Calendar?
-    ) {
-        _data.tryEmit(_data.value.copy(
-            systolic = systolic,
-            diastolic = diastolic,
-            meanArterialPressure = meanArterialPressure,
-            unit = unit,
-            pulseRate = pulseRate,
-            userID = userID,
-            status = status,
-            calendar = calendar
-        ))
-    }
-
-    fun setBatteryLevel(batteryLevel: Int) {
-        _data.tryEmit(_data.value.copy(batteryLevel = batteryLevel))
-    }
-
-    fun clear() {
-        _status.value = BleManagerStatus.CONNECTING
-        _data.tryEmit(BPSData())
-    }
-
-    fun setNewStatus(status: BleManagerStatus) {
-        _status.value = status
+        awaitClose {
+            launch {
+                manager.disconnect().suspend()
+            }
+        }
     }
 }

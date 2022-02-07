@@ -16,16 +16,10 @@ internal class CSCService : ForegroundBleService() {
     @Inject
     lateinit var repository: CSCRepository
 
-    override val manager: CSCManager by lazy { CSCManager(this, scope, repository) }
+    override val manager: CSCManager by lazy { CSCManager(this, scope) }
 
     override fun onCreate() {
         super.onCreate()
-
-        status.onEach {
-            val status = it.mapToSimpleManagerStatus()
-            repository.setNewStatus(status)
-            stopIfDisconnected(status)
-        }.launchIn(scope)
 
         repository.command.onEach {
             when (it) {

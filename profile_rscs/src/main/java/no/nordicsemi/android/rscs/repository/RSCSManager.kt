@@ -42,9 +42,9 @@ private val RSC_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A53-0000
 
 internal class RSCSManager internal constructor(
     context: Context,
-    private val scope: CoroutineScope,
+    scope: CoroutineScope,
     private val dataHolder: RSCSRepository
-) : BatteryManager(context) {
+) : BatteryManager(context, scope) {
 
     private var rscMeasurementCharacteristic: BluetoothGattCharacteristic? = null
 
@@ -83,11 +83,6 @@ internal class RSCSManager internal constructor(
         }
 
         override fun onServicesInvalidated() {
-
-        }
-
-        override fun onDeviceDisconnected() {
-            super.onDeviceDisconnected()
             rscMeasurementCharacteristic = null
         }
     }

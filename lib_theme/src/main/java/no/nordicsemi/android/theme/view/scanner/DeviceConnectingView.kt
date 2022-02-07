@@ -1,4 +1,4 @@
-package no.nordicsemi.android.theme.view
+package no.nordicsemi.android.theme.view.scanner
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.theme.R
+import no.nordicsemi.android.theme.view.ScreenSection
 
 @Composable
 fun DeviceConnectingView() {

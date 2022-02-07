@@ -6,8 +6,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.theme.view.BackIconAppBar
-import no.nordicsemi.android.theme.view.DeviceConnectingView
-import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.dfu.R
 import no.nordicsemi.dfu.viewmodel.DFUViewModel
 
@@ -21,9 +19,9 @@ fun DFUScreen() {
             viewModel.onEvent(OnDisconnectButtonClick)
         }
 
-        when (state) {
-            is DisplayDataState -> DFUContentView(state.data) { viewModel.onEvent(it) }
-            LoadingState -> DeviceConnectingView()
-        }.exhaustive
+//        when (state) {
+//            is DisplayDataState -> DFUContentView(state.data) { viewModel.onEvent(it) }
+//            LoadingState -> DeviceConnectingView()
+//        }.exhaustive
     }
 }
