@@ -1,49 +1,64 @@
 package no.nordicsemi.android.cgms.data
 
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.*
-import no.nordicsemi.android.service.BleManagerStatus
+import android.bluetooth.BluetoothDevice
+import android.content.Context
+import android.util.Log
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import no.nordicsemi.android.cgms.repository.CGMManager
+import no.nordicsemi.android.cgms.repository.CGMService
+import no.nordicsemi.android.service.BleManagerResult
+import no.nordicsemi.android.service.ConnectingResult
+import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.android.utils.exhaustive
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class CGMRepository @Inject constructor() {
+internal class CGMRepository @Inject constructor(
+    @ApplicationContext
+    private val context: Context,
+    private val serviceManager: ServiceManager,
+) {
+    private var manager: CGMManager? = null
 
-    private val _data = MutableStateFlow(CGMData())
-    val data: StateFlow<CGMData> = _data.asStateFlow()
+    private val _data = MutableStateFlow<BleManagerResult<CGMData>>(ConnectingResult())
+    val data = _data.asStateFlow()
 
-    private val _command = MutableSharedFlow<CGMServiceCommand>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_LATEST)
-    val command = _command.asSharedFlow()
-
-    private val _status = MutableStateFlow(BleManagerStatus.CONNECTING)
-    val status = _status.asStateFlow()
-
-    fun emitNewBatteryLevel(batterLevel: Int) {
-        _data.tryEmit(_data.value.copy(batteryLevel = batterLevel))
+    fun launch(device: BluetoothDevice) {
+        serviceManager.startService(CGMService::class.java, device)
     }
 
-    fun emitNewRecords(records: List<CGMRecord>) {
-        _data.tryEmit(_data.value.copy(records = records))
-    }
+    fun startManager(device: BluetoothDevice, scope: CoroutineScope) {
+        val manager = CGMManager(context, scope)
 
-    fun setRequestStatus(requestStatus: RequestStatus) {
-        _data.tryEmit(_data.value.copy(requestStatus = requestStatus))
+        manager.dataHolder.status.onEach {
+            _data.value = it
+            Log.d("AAATESTAAA", "data: $it")
+        }.launchIn(scope)
+
+        manager.connect(device)
+            .useAutoConnect(false)
+            .retry(3, 100)
+            .enqueue()
     }
 
     fun sendNewServiceCommand(workingMode: CGMServiceCommand) {
-        if (_command.subscriptionCount.value > 0) {
-            _command.tryEmit(workingMode)
-        } else {
-            _status.tryEmit(BleManagerStatus.DISCONNECTED)
-        }
+        when (workingMode) {
+            CGMServiceCommand.REQUEST_ALL_RECORDS -> manager?.requestAllRecords()
+            CGMServiceCommand.REQUEST_LAST_RECORD -> manager?.requestLastRecord()
+            CGMServiceCommand.REQUEST_FIRST_RECORD -> manager?.requestFirstRecord()
+            CGMServiceCommand.DISCONNECT -> release()
+        }.exhaustive
     }
 
-    fun setNewStatus(status: BleManagerStatus) {
-        _status.value = status
-    }
-
-    fun clear() {
-        _status.value = BleManagerStatus.CONNECTING
-        _data.tryEmit(CGMData())
+    private fun release() {
+        serviceManager.stopService(CGMService::class.java)
+        manager?.disconnect()?.enqueue()
+        manager = null
     }
 }

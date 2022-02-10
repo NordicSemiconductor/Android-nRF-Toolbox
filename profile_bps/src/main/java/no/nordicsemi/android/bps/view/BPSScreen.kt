@@ -1,6 +1,5 @@
 package no.nordicsemi.android.bps.view
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -28,8 +27,6 @@ fun BPSScreen() {
         BackIconAppBar(stringResource(id = R.string.bps_title)) {
             viewModel.onEvent(DisconnectEvent)
         }
-
-        Log.d("AAATESTAAA", "state: $state")
 
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             when (state) {

@@ -26,11 +26,11 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
 import android.util.Log
 import android.util.SparseArray
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.common.callback.RecordAccessControlPointResponse
 import no.nordicsemi.android.ble.common.callback.cgm.CGMFeatureResponse
 import no.nordicsemi.android.ble.common.callback.cgm.CGMSpecificOpsControlPointResponse
@@ -43,10 +43,10 @@ import no.nordicsemi.android.ble.common.profile.cgm.CGMSpecificOpsControlPointCa
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
 import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.ble.ktx.suspendForValidResponse
+import no.nordicsemi.android.cgms.data.CGMData
 import no.nordicsemi.android.cgms.data.CGMRecord
-import no.nordicsemi.android.cgms.data.CGMRepository
 import no.nordicsemi.android.cgms.data.RequestStatus
-import no.nordicsemi.android.service.BatteryManager
+import no.nordicsemi.android.service.ConnectionObserverAdapter
 import java.util.*
 
 val CGMS_SERVICE_UUID: UUID = UUID.fromString("0000181F-0000-1000-8000-00805f9b34fb")
@@ -57,11 +57,13 @@ private val CGM_OPS_CONTROL_POINT_UUID = UUID.fromString("00002AAC-0000-1000-800
 
 private val RACP_UUID = UUID.fromString("00002A52-0000-1000-8000-00805f9b34fb")
 
+private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
+private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
+
 internal class CGMManager(
     context: Context,
-    scope: CoroutineScope,
-    private val repository: CGMRepository
-) : BatteryManager(context, scope) {
+    private val scope: CoroutineScope
+) : BleManager(context) {
 
     private var cgmStatusCharacteristic: BluetoothGattCharacteristic? = null
     private var cgmFeatureCharacteristic: BluetoothGattCharacteristic? = null
@@ -69,6 +71,7 @@ internal class CGMManager(
     private var cgmSpecificOpsControlPointCharacteristic: BluetoothGattCharacteristic? = null
     private var recordAccessControlPointCharacteristic: BluetoothGattCharacteristic? = null
     private val records: SparseArray<CGMRecord> = SparseArray<CGMRecord>()
+    private var batteryLevelCharacteristic: BluetoothGattCharacteristic? = null
 
     private var secured = false
 
@@ -80,17 +83,30 @@ internal class CGMManager(
         Log.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
     }
 
-    override fun onBatteryLevelChanged(batteryLevel: Int) {
-        repository.emitNewBatteryLevel(batteryLevel)
+    private val data = MutableStateFlow(CGMData())
+    val dataHolder = ConnectionObserverAdapter<CGMData>()
+
+    init {
+        setConnectionObserver(dataHolder)
+
+        data.onEach {
+            dataHolder.setValue(it)
+        }.launchIn(scope)
     }
 
-    override fun getGattCallback(): BatteryManagerGattCallback {
+    override fun getGattCallback(): BleManagerGattCallback {
         return CGMManagerGattCallback()
     }
 
-    private inner class CGMManagerGattCallback : BatteryManagerGattCallback() {
+    private inner class CGMManagerGattCallback : BleManagerGattCallback() {
         override fun initialize() {
             super.initialize()
+
+            scope.launch(exceptionHandler) {
+                val response =
+                    readCharacteristic(cgmFeatureCharacteristic).suspendForValidResponse<CGMFeatureResponse>()
+                this@CGMManager.secured = response.features.e2eCrcSupported
+            }
 
             scope.launch(exceptionHandler) {
                 val response =
@@ -115,7 +131,8 @@ internal class CGMManager(
                     val timestamp = sessionStartTime + it.timeOffset * 60000L
                     val record = CGMRecord(it.timeOffset, it.glucoseConcentration, timestamp)
                     records.put(record.sequenceNumber, record)
-                    repository.emitNewRecords(records.toList())
+
+                    data.value = data.value.copy(records = records.toList())
                 }.launchIn(scope)
 
             setIndicationCallback(cgmSpecificOpsControlPointCharacteristic).asValidResponseFlow<CGMSpecificOpsControlPointResponse>()
@@ -152,15 +169,10 @@ internal class CGMManager(
                     }
                 }.launchIn(scope)
 
-            scope.launch(exceptionHandler) {
-                enableNotifications(cgmMeasurementCharacteristic).suspend()
-            }
-            scope.launch(exceptionHandler) {
-                enableIndications(cgmSpecificOpsControlPointCharacteristic).suspend()
-            }
-            scope.launch(exceptionHandler) {
-                enableIndications(recordAccessControlPointCharacteristic).suspend()
-            }
+            enableNotifications(cgmMeasurementCharacteristic).enqueue()
+            enableIndications(cgmSpecificOpsControlPointCharacteristic).enqueue()
+            enableIndications(recordAccessControlPointCharacteristic).enqueue()
+            enableNotifications(batteryLevelCharacteristic).enqueue()
 
             if (sessionStartTime == 0L) {
                 scope.launch(exceptionHandler) {
@@ -179,9 +191,7 @@ internal class CGMManager(
                     val sequenceNumber = records.keyAt(records.size() - 1) + 1
                     writeCharacteristic(
                         recordAccessControlPointCharacteristic,
-                        RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(
-                            sequenceNumber
-                        ),
+                        RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber),
                         BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
                     ).suspend()
                 } else {
@@ -193,32 +203,31 @@ internal class CGMManager(
                 }
             } else {
                 recordAccessRequestInProgress = false
-                repository.setRequestStatus(RequestStatus.SUCCESS)
+                data.value = data.value.copy(requestStatus = RequestStatus.SUCCESS)
             }
         }
 
         private fun onNoRecordsFound() {
             recordAccessRequestInProgress = false
-            repository.setRequestStatus(RequestStatus.SUCCESS)
+            data.value = data.value.copy(requestStatus = RequestStatus.SUCCESS)
         }
 
         private fun onOperationCompleted(response: RecordAccessControlPointResponse) {
             when (response.requestCode) {
-                RecordAccessControlPointCallback.RACP_OP_CODE_ABORT_OPERATION -> repository.setRequestStatus(
-                    RequestStatus.ABORTED
-                )
+                RecordAccessControlPointCallback.RACP_OP_CODE_ABORT_OPERATION ->
+                    data.value = data.value.copy(requestStatus = RequestStatus.ABORTED)
                 else -> {
                     recordAccessRequestInProgress = false
-                    repository.setRequestStatus(RequestStatus.SUCCESS)
+                    data.value = data.value.copy(requestStatus = RequestStatus.SUCCESS)
                 }
             }
         }
 
         private fun onError(response: RecordAccessControlPointResponse) {
             if (response.errorCode == RecordAccessControlPointCallback.RACP_ERROR_OP_CODE_NOT_SUPPORTED) {
-                repository.setRequestStatus(RequestStatus.NOT_SUPPORTED)
+                data.value = data.value.copy(requestStatus = RequestStatus.NOT_SUPPORTED)
             } else {
-                repository.setRequestStatus(RequestStatus.FAILED)
+                data.value = data.value.copy(requestStatus = RequestStatus.FAILED)
             }
         }
 
@@ -255,7 +264,7 @@ internal class CGMManager(
     fun requestLastRecord() {
         if (recordAccessControlPointCharacteristic == null) return
         clear()
-        repository.setRequestStatus(RequestStatus.PENDING)
+        data.value = data.value.copy(requestStatus = RequestStatus.PENDING)
         recordAccessRequestInProgress = true
         scope.launch(exceptionHandler) {
             writeCharacteristic(
@@ -269,7 +278,7 @@ internal class CGMManager(
     fun requestFirstRecord() {
         if (recordAccessControlPointCharacteristic == null) return
         clear()
-        repository.setRequestStatus(RequestStatus.PENDING)
+        data.value = data.value.copy(requestStatus = RequestStatus.PENDING)
         recordAccessRequestInProgress = true
         scope.launch(exceptionHandler) {
             writeCharacteristic(
@@ -283,7 +292,7 @@ internal class CGMManager(
     fun requestAllRecords() {
         if (recordAccessControlPointCharacteristic == null) return
         clear()
-        repository.setRequestStatus(RequestStatus.PENDING)
+        data.value = data.value.copy(requestStatus = RequestStatus.PENDING)
         recordAccessRequestInProgress = true
         scope.launch(exceptionHandler) {
             writeCharacteristic(

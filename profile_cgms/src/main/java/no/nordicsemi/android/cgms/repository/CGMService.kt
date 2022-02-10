@@ -1,38 +1,27 @@
 package no.nordicsemi.android.cgms.repository
 
+import android.bluetooth.BluetoothDevice
+import android.content.Intent
+import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.cgms.data.CGMRepository
-import no.nordicsemi.android.cgms.data.CGMServiceCommand
-import no.nordicsemi.android.service.ForegroundBleService
-import no.nordicsemi.android.utils.exhaustive
+import no.nordicsemi.android.service.DEVICE_DATA
+import no.nordicsemi.android.service.NotificationService
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class CGMService : ForegroundBleService() {
+internal class CGMService : NotificationService() {
 
     @Inject
     lateinit var repository: CGMRepository
 
-    override val manager: CGMManager by lazy { CGMManager(this, scope, repository) }
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
 
-    override fun onCreate() {
-        super.onCreate()
+        val device = intent!!.getParcelableExtra<BluetoothDevice>(DEVICE_DATA)!!
 
-//        status.onEach {
-//            val status = it.mapToSimpleManagerStatus()
-//            repository.setNewStatus(status)
-//            stopIfDisconnected(status)
-//        }.launchIn(scope)
+        repository.startManager(device, lifecycleScope)
 
-        repository.command.onEach {
-            when (it) {
-                CGMServiceCommand.REQUEST_ALL_RECORDS -> manager.requestAllRecords()
-                CGMServiceCommand.REQUEST_LAST_RECORD -> manager.requestLastRecord()
-                CGMServiceCommand.REQUEST_FIRST_RECORD -> manager.requestFirstRecord()
-                CGMServiceCommand.DISCONNECT -> stopSelf()
-            }.exhaustive
-        }.launchIn(scope)
+        return START_REDELIVER_INTENT
     }
 }
