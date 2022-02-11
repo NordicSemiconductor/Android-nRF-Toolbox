@@ -9,3 +9,5 @@ internal data class OnWheelSizeSelected(val wheelSize: WheelSize) : CSCViewEvent
 internal data class OnSelectedSpeedUnitSelected(val selectedSpeedUnit: SpeedUnit) : CSCViewEvent()
 
 internal object OnDisconnectButtonClick : CSCViewEvent()
+
+internal object NavigateUp : CSCViewEvent()

@@ -1,31 +1,27 @@
 package no.nordicsemi.android.csc.repository
 
+import android.bluetooth.BluetoothDevice
+import android.content.Intent
+import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.csc.data.CSCRepository
-import no.nordicsemi.android.csc.data.DisconnectCommand
-import no.nordicsemi.android.csc.data.SetWheelSizeCommand
-import no.nordicsemi.android.service.ForegroundBleService
-import no.nordicsemi.android.utils.exhaustive
+import no.nordicsemi.android.service.DEVICE_DATA
+import no.nordicsemi.android.service.NotificationService
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class CSCService : ForegroundBleService() {
+internal class CSCService : NotificationService() {
 
     @Inject
     lateinit var repository: CSCRepository
 
-    override val manager: CSCManager by lazy { CSCManager(this, scope) }
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
 
-    override fun onCreate() {
-        super.onCreate()
+        val device = intent!!.getParcelableExtra<BluetoothDevice>(DEVICE_DATA)!!
 
-        repository.command.onEach {
-            when (it) {
-                DisconnectCommand -> stopSelf()
-                is SetWheelSizeCommand -> manager.setWheelSize(it.wheelSize)
-            }.exhaustive
-        }.launchIn(scope)
+        repository.start(device, lifecycleScope)
+
+        return START_REDELIVER_INTENT
     }
 }

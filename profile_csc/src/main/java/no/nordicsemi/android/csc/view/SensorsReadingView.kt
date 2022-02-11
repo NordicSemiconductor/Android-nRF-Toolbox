@@ -16,22 +16,22 @@ import no.nordicsemi.android.theme.view.ScreenSection
 import no.nordicsemi.android.theme.view.SectionTitle
 
 @Composable
-internal fun SensorsReadingView(state: CSCData) {
+internal fun SensorsReadingView(state: CSCData, speedUnit: SpeedUnit) {
     ScreenSection {
         SectionTitle(resId = R.drawable.ic_records, title = "Records")
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Column {
-            KeyValueField(stringResource(id = R.string.csc_field_speed), state.displaySpeed())
+            KeyValueField(stringResource(id = R.string.csc_field_speed), state.displaySpeed(speedUnit))
             Spacer(modifier = Modifier.height(4.dp))
             KeyValueField(stringResource(id = R.string.csc_field_cadence), state.displayCadence())
             Spacer(modifier = Modifier.height(4.dp))
-            KeyValueField(stringResource(id = R.string.csc_field_distance), state.displayDistance())
+            KeyValueField(stringResource(id = R.string.csc_field_distance), state.displayDistance(speedUnit))
             Spacer(modifier = Modifier.height(4.dp))
             KeyValueField(
                 stringResource(id = R.string.csc_field_total_distance),
-                state.displayTotalDistance()
+                state.displayTotalDistance(speedUnit)
             )
             Spacer(modifier = Modifier.height(4.dp))
             KeyValueField(stringResource(id = R.string.csc_field_gear_ratio), state.displayGearRatio())
@@ -46,5 +46,5 @@ internal fun SensorsReadingView(state: CSCData) {
 @Preview
 @Composable
 private fun Preview() {
-    SensorsReadingView(CSCData())
+    SensorsReadingView(CSCData(), SpeedUnit.KM_H)
 }

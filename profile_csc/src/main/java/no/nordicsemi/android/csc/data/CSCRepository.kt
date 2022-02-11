@@ -1,68 +1,74 @@
 package no.nordicsemi.android.csc.data
 
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.*
-import no.nordicsemi.android.csc.view.SpeedUnit
-import no.nordicsemi.android.service.BleManagerStatus
+import android.bluetooth.BluetoothDevice
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import no.nordicsemi.android.ble.ktx.suspend
+import no.nordicsemi.android.csc.repository.CSCManager
+import no.nordicsemi.android.csc.repository.CSCService
+import no.nordicsemi.android.service.BleManagerResult
+import no.nordicsemi.android.service.ConnectingResult
+import no.nordicsemi.android.service.ServiceManager
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class CSCRepository @Inject constructor() {
+class CSCRepository @Inject constructor(
+    @ApplicationContext
+    private val context: Context,
+    private val serviceManager: ServiceManager,
+) {
+    private var manager: CSCManager? = null
 
-    private val _data = MutableStateFlow(CSCData())
-    val data: StateFlow<CSCData> = _data.asStateFlow()
+    private val _data = MutableStateFlow<BleManagerResult<CSCData>>(ConnectingResult())
+    internal val data = _data.asStateFlow()
 
-    private val _command = MutableSharedFlow<CSCServiceCommand>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_LATEST)
-    val command = _command.asSharedFlow()
+    private val _isRunning = MutableStateFlow(false)
+    val isRunning = _isRunning.asStateFlow()
 
-    private val _status = MutableStateFlow(BleManagerStatus.CONNECTING)
-    val status = _status.asStateFlow()
-
-    fun setSpeedUnit(selectedSpeedUnit: SpeedUnit) {
-        _data.tryEmit(_data.value.copy(selectedSpeedUnit = selectedSpeedUnit))
+    fun launch(device: BluetoothDevice) {
+        serviceManager.startService(CSCService::class.java, device)
     }
 
-    fun setNewDistance(
-        totalDistance: Float,
-        distance: Float,
-        speed: Float,
-        wheelSize: WheelSize
-    ) {
-        _data.tryEmit(_data.value.copy(
-            totalDistance = totalDistance,
-            distance = distance,
-            speed = speed,
-            wheelSize = wheelSize
-        ))
-    }
+    fun start(device: BluetoothDevice, scope: CoroutineScope) {
+        val manager = CSCManager(context, scope)
+        this.manager = manager
 
-    fun setNewCrankCadence(
-        crankCadence: Float,
-        gearRatio: Float,
-        wheelSize: WheelSize
-    ) {
-        _data.tryEmit(_data.value.copy(cadence = crankCadence, gearRatio = gearRatio, wheelSize = wheelSize))
-    }
+        manager.dataHolder.status.onEach {
+            _data.value = it
+        }.launchIn(scope)
 
-    fun setBatteryLevel(batteryLevel: Int) {
-        _data.tryEmit(_data.value.copy(batteryLevel = batteryLevel))
-    }
-
-    fun sendNewServiceCommand(workingMode: CSCServiceCommand) {
-        if (_command.subscriptionCount.value > 0) {
-            _command.tryEmit(workingMode)
-        } else {
-            _status.tryEmit(BleManagerStatus.DISCONNECTED)
+        scope.launch {
+            manager.start(device)
         }
     }
 
-    fun setNewStatus(status: BleManagerStatus) {
-        _status.value = status
+    fun setWheelSize(wheelSize: WheelSize) {
+        manager?.setWheelSize(wheelSize)
     }
 
-    fun clear() {
-        _status.value = BleManagerStatus.CONNECTING
-        _data.tryEmit(CSCData())
+    private suspend fun CSCManager.start(device: BluetoothDevice) {
+        try {
+            connect(device)
+                .useAutoConnect(false)
+                .retry(3, 100)
+                .suspend()
+            _isRunning.value = true
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun release() {
+        serviceManager.stopService(CSCService::class.java)
+        manager?.disconnect()?.enqueue()
+        manager = null
+        _isRunning.value = false
     }
 }

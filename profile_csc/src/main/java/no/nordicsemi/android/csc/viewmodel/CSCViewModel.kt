@@ -3,16 +3,14 @@ package no.nordicsemi.android.csc.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.csc.data.CSCRepository
-import no.nordicsemi.android.csc.data.DisconnectCommand
-import no.nordicsemi.android.csc.data.SetWheelSizeCommand
-import no.nordicsemi.android.csc.repository.CSCService
 import no.nordicsemi.android.csc.repository.CSC_SERVICE_UUID
 import no.nordicsemi.android.csc.view.*
 import no.nordicsemi.android.navigation.*
-import no.nordicsemi.android.service.BleManagerStatus
-import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.android.utils.getDevice
 import no.nordicsemi.ui.scanner.ScannerDestinationId
@@ -21,19 +19,23 @@ import javax.inject.Inject
 @HiltViewModel
 internal class CSCViewModel @Inject constructor(
     private val repository: CSCRepository,
-    private val serviceManager: ServiceManager,
     private val navigationManager: NavigationManager
 ) : ViewModel() {
 
-    val state = repository.data.combine(repository.status) { data, status ->
-//        when (status) {
-//            BleManagerStatus.CONNECTING -> LoadingState
-//            BleManagerStatus.OK,
-//            BleManagerStatus.DISCONNECTED -> DisplayDataState(data)
-//        }
-    }.stateIn(viewModelScope, SharingStarted.Lazily, LoadingState)
+    private val _state = MutableStateFlow(CSCViewState())
+    val state = _state.asStateFlow()
 
     init {
+        if (!repository.isRunning.value) {
+            requestBluetoothDevice()
+        }
+
+        repository.data.onEach {
+            _state.value = _state.value.copy(cscManagerState = WorkingState(it))
+        }.launchIn(viewModelScope)
+    }
+
+    private fun requestBluetoothDevice() {
         navigationManager.navigateTo(ScannerDestinationId, UUIDArgument(CSC_SERVICE_UUID))
 
         navigationManager.recentResult.onEach {
@@ -41,44 +43,30 @@ internal class CSCViewModel @Inject constructor(
                 handleArgs(it)
             }
         }.launchIn(viewModelScope)
-
-        repository.status.onEach {
-            if (it == BleManagerStatus.DISCONNECTED) {
-                navigationManager.navigateUp()
-            }
-        }.launchIn(viewModelScope)
     }
 
     private fun handleArgs(args: DestinationResult) {
         when (args) {
             is CancelDestinationResult -> navigationManager.navigateUp()
-            is SuccessDestinationResult -> serviceManager.startService(CSCService::class.java, args.getDevice())
+            is SuccessDestinationResult -> repository.launch(args.getDevice().device)
         }.exhaustive
     }
 
     fun onEvent(event: CSCViewEvent) {
         when (event) {
-            is OnSelectedSpeedUnitSelected -> onSelectedSpeedUnit(event)
-            is OnWheelSizeSelected -> onWheelSizeChanged(event)
-            OnDisconnectButtonClick -> onDisconnectButtonClick()
+            is OnSelectedSpeedUnitSelected -> setSpeedUnit(event.selectedSpeedUnit)
+            is OnWheelSizeSelected -> repository.setWheelSize(event.wheelSize)
+            OnDisconnectButtonClick -> disconnect()
+            NavigateUp -> navigationManager.navigateUp()
         }.exhaustive
     }
 
-    private fun onSelectedSpeedUnit(event: OnSelectedSpeedUnitSelected) {
-        repository.setSpeedUnit(event.selectedSpeedUnit)
+    private fun setSpeedUnit(speedUnit: SpeedUnit) {
+        _state.value = _state.value.copy(speedUnit = speedUnit)
     }
 
-    private fun onWheelSizeChanged(event: OnWheelSizeSelected) {
-        repository.sendNewServiceCommand(SetWheelSizeCommand(event.wheelSize))
-    }
-
-    private fun onDisconnectButtonClick() {
-        repository.sendNewServiceCommand(DisconnectCommand)
-        repository.clear()
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        repository.clear()
+    private fun disconnect() {
+        repository.release()
+        navigationManager.navigateUp()
     }
 }

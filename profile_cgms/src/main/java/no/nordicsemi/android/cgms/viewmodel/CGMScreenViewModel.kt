@@ -14,7 +14,6 @@ import no.nordicsemi.android.cgms.view.*
 import no.nordicsemi.android.navigation.*
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.android.utils.getDevice
-import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import no.nordicsemi.ui.scanner.ScannerDestinationId
 import javax.inject.Inject
 
@@ -58,7 +57,7 @@ internal class CGMScreenViewModel @Inject constructor(
     private fun handleArgs(args: DestinationResult) {
         when (args) {
             is CancelDestinationResult -> navigationManager.navigateUp()
-            is SuccessDestinationResult -> connectDevice(args.getDevice())
+            is SuccessDestinationResult -> repository.launch(args.getDevice().device)
         }.exhaustive
     }
 
@@ -69,10 +68,6 @@ internal class CGMScreenViewModel @Inject constructor(
             CGMServiceCommand.REQUEST_FIRST_RECORD -> repository.requestFirstRecord()
             CGMServiceCommand.DISCONNECT -> disconnect()
         }.exhaustive
-    }
-
-    private fun connectDevice(deviceHolder: DiscoveredBluetoothDevice) {
-        repository.launch(deviceHolder.device)
     }
 
     private fun disconnect() {

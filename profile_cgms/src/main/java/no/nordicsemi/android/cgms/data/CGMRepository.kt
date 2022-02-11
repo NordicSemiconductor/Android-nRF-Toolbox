@@ -39,6 +39,7 @@ class CGMRepository @Inject constructor(
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
         val manager = CGMManager(context, scope)
+        this.manager = manager
 
         manager.dataHolder.status.onEach {
             _data.value = it

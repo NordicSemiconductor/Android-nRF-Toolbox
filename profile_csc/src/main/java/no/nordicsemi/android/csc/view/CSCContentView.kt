@@ -28,7 +28,7 @@ import no.nordicsemi.android.theme.view.dialog.ItemSelectedResult
 import no.nordicsemi.android.utils.exhaustive
 
 @Composable
-internal fun CSCContentView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
+internal fun CSCContentView(state: CSCData, speedUnit: SpeedUnit, onEvent: (CSCViewEvent) -> Unit) {
     val showDialog = rememberSaveable { mutableStateOf(false) }
 
     if (showDialog.value) {
@@ -51,11 +51,11 @@ internal fun CSCContentView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(16.dp)
     ) {
-        SettingsSection(state, onEvent) { showDialog.value = true }
+        SettingsSection(state, speedUnit, onEvent) { showDialog.value = true }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        SensorsReadingView(state = state)
+        SensorsReadingView(state = state, speedUnit)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -70,6 +70,7 @@ internal fun CSCContentView(state: CSCData, onEvent: (CSCViewEvent) -> Unit) {
 @Composable
 private fun SettingsSection(
     state: CSCData,
+    speedUnit: SpeedUnit,
     onEvent: (CSCViewEvent) -> Unit,
     onWheelButtonClick: () -> Unit,
 ) {
@@ -86,8 +87,8 @@ private fun SettingsSection(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            RadioButtonGroup(viewEntity = state.temperatureSettingsItems()) {
-                onEvent(OnSelectedSpeedUnitSelected(state.getSpeedUnit(it.label)))
+            RadioButtonGroup(viewEntity = speedUnit.temperatureSettingsItems()) {
+                onEvent(OnSelectedSpeedUnitSelected(it.label.toSpeedUnit()))
             }
         }
     }
@@ -96,5 +97,5 @@ private fun SettingsSection(
 @Preview
 @Composable
 private fun ConnectedPreview() {
-    CSCContentView(CSCData()) { }
+    CSCContentView(CSCData(), SpeedUnit.KM_H) { }
 }

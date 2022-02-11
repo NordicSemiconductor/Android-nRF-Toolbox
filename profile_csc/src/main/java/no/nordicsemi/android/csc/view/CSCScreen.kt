@@ -10,7 +10,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.csc.R
 import no.nordicsemi.android.csc.viewmodel.CSCViewModel
+import no.nordicsemi.android.service.*
 import no.nordicsemi.android.theme.view.BackIconAppBar
+import no.nordicsemi.android.theme.view.scanner.DeviceConnectingView
+import no.nordicsemi.android.theme.view.scanner.DeviceDisconnectedView
+import no.nordicsemi.android.theme.view.scanner.NoDeviceView
+import no.nordicsemi.android.theme.view.scanner.Reason
+import no.nordicsemi.android.utils.exhaustive
 
 @Composable
 fun CSCScreen() {
@@ -18,15 +24,22 @@ fun CSCScreen() {
     val state = viewModel.state.collectAsState().value
 
     Column {
-        BackIconAppBar(stringResource(id = R.string.csc_title)) {
-            viewModel.onEvent(OnDisconnectButtonClick)
-        }
+        val navigateUp = { viewModel.onEvent(NavigateUp) }
+
+        BackIconAppBar(stringResource(id = R.string.csc_title), navigateUp)
 
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-//            when (state) {
-//                is DisplayDataState -> CSCContentView(state.data) { viewModel.onEvent(it) }
-//                LoadingState -> DeviceConnectingView()
-//            }.exhaustive
+            when (state.cscManagerState) {
+                NoDeviceState -> NoDeviceView()
+                is WorkingState -> when (state.cscManagerState.result) {
+                    is ConnectingResult,
+                    is ReadyResult -> DeviceConnectingView { viewModel.onEvent(OnDisconnectButtonClick) }
+                    is DisconnectedResult -> DeviceDisconnectedView(Reason.USER, navigateUp)
+                    is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp)
+                    is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp)
+                    is SuccessResult -> CSCContentView(state.cscManagerState.result.data, state.speedUnit) { viewModel.onEvent(it) }
+                }
+            }.exhaustive
         }
     }
 }
