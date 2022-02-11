@@ -1,6 +1,5 @@
 package no.nordicsemi.android.gls.main.view
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -25,21 +24,21 @@ fun GLSScreen() {
     val state = viewModel.state.collectAsState().value
 
     Column {
+        val navigateUp = { viewModel.onEvent(DisconnectEvent) }
+
         BackIconAppBar(stringResource(id = R.string.gls_title)) {
             viewModel.onEvent(DisconnectEvent)
         }
-
-        Log.d("AAATESTAAA", "state: $state")
 
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             when (state) {
                 NoDeviceState -> NoDeviceView()
                 is WorkingState -> when (state.result) {
-                    is ConnectingResult -> DeviceConnectingView()
-                    is DisconnectedResult -> DeviceDisconnectedView(Reason.USER)
-                    is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS)
-                    is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE)
-                    is ReadyResult -> DeviceConnectingView()
+                    is ConnectingResult,
+                    is ReadyResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
+                    is DisconnectedResult -> DeviceDisconnectedView(Reason.USER, navigateUp)
+                    is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp)
+                    is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp)
                     is SuccessResult -> GLSContentView(state.result.data) { viewModel.onEvent(it) }
                 }
             }.exhaustive

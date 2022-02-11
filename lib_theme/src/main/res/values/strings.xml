@@ -5,10 +5,12 @@
     <string name="dialog">Dialog</string>
     <string name="cancel">CANCEL</string>
 
+    <string name="go_up">Go up</string>
+
     <string name="close_app">Close the application.</string>
     <string name="back_screen">Close the current screen.</string>
 
-    <string name="disconnect">DISCONNECT</string>
+    <string name="disconnect">Disconnect</string>
     <string name="field_battery">Battery</string>
 
     <string name="device_disconnected">Disconnected</string>

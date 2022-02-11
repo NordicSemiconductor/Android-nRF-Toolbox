@@ -8,6 +8,7 @@ import no.nordicsemi.android.hrs.view.HRSScreen
 import no.nordicsemi.android.hts.view.HTSScreen
 import no.nordicsemi.android.navigation.ComposeDestination
 import no.nordicsemi.android.navigation.ComposeDestinations
+import no.nordicsemi.android.nrftoolbox.view.HomeScreen
 import no.nordicsemi.android.prx.view.PRXScreen
 import no.nordicsemi.android.rscs.view.RSCSScreen
 import no.nordicsemi.android.uart.view.UARTScreen

@@ -24,19 +24,19 @@ fun CGMScreen() {
     val state = viewModel.state.collectAsState().value
 
     Column {
-        BackIconAppBar(stringResource(id = R.string.cgms_title)) {
-            viewModel.onEvent(DisconnectEvent)
-        }
+        val navigateUp = { viewModel.onEvent(NavigateUp) }
+
+        BackIconAppBar(stringResource(id = R.string.cgms_title), navigateUp)
 
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             when (state) {
                 NoDeviceState -> NoDeviceView()
                 is WorkingState -> when (state.result) {
-                    is ConnectingResult -> DeviceConnectingView()
-                    is DisconnectedResult -> DeviceDisconnectedView(Reason.USER)
-                    is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS)
-                    is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE)
-                    is ReadyResult -> DeviceConnectingView()
+                    is ConnectingResult,
+                    is ReadyResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
+                    is DisconnectedResult -> DeviceDisconnectedView(Reason.USER, navigateUp)
+                    is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp)
+                    is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp)
                     is SuccessResult -> CGMContentView(state.result.data) { viewModel.onEvent(it) }
                 }
             }.exhaustive

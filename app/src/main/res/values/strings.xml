@@ -20,6 +20,9 @@
     <string name="dfu_module">DFU</string>
     <string name="dfu_module_full">Available in separate application.</string>
 
-    <string name="bluetooth_services">Bluetooth services</string>
+    <string name="viewmodel_profiles">ViewModel profiles</string>
+    <string name="service_profiles">Service profiles</string>
     <string name="utils_services">Utils services</string>
+
+    <string name="running_profile_icon">Icon indicating if the profile is running</string>
 </resources>

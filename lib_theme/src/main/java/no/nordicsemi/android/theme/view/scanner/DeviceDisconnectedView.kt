@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.HighlightOff
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -22,11 +24,12 @@ enum class Reason {
 }
 
 @Composable
-fun DeviceDisconnectedView(reason: Reason) {
+fun DeviceDisconnectedView(reason: Reason, navigateUp: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ScreenSection {
             Icon(
@@ -62,11 +65,17 @@ fun DeviceDisconnectedView(reason: Reason) {
                 style = MaterialTheme.typography.bodyMedium
             )
         }
+
+        Spacer(modifier = Modifier.size(16.dp))
+
+        Button(onClick = { navigateUp() }) {
+            Text(text = stringResource(id = R.string.go_up))
+        }
     }
 }
 
 @Preview
 @Composable
 fun DeviceDisconnectedView_Preview() {
-    DeviceConnectingView()
+    DeviceConnectingView { }
 }

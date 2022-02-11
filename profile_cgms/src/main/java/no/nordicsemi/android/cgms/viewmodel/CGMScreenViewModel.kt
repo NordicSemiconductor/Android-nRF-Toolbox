@@ -1,6 +1,5 @@
 package no.nordicsemi.android.cgms.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,17 +28,30 @@ internal class CGMScreenViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     init {
+        if (!repository.isRunning.value) {
+            requestBluetoothDevice()
+        }
+
+        repository.data.onEach {
+            _state.value = WorkingState(it)
+        }.launchIn(viewModelScope)
+    }
+
+    fun onEvent(event: CGMViewEvent) {
+        when (event) {
+            DisconnectEvent -> disconnect()
+            is OnWorkingModeSelected -> onCommandReceived(event.workingMode)
+            NavigateUp -> navigationManager.navigateUp()
+        }.exhaustive
+    }
+
+    private fun requestBluetoothDevice() {
         navigationManager.navigateTo(ScannerDestinationId, UUIDArgument(CGMS_SERVICE_UUID))
 
         navigationManager.recentResult.onEach {
             if (it.destinationId == ScannerDestinationId) {
                 handleArgs(it)
             }
-        }.launchIn(viewModelScope)
-
-        repository.data.onEach {
-            _state.value = WorkingState(it)
-            Log.d("AAATESTAAA", "vm data: $it")
         }.launchIn(viewModelScope)
     }
 
@@ -50,11 +62,12 @@ internal class CGMScreenViewModel @Inject constructor(
         }.exhaustive
     }
 
-    fun onEvent(event: CGMViewEvent) {
-        when (event) {
-            DisconnectEvent -> disconnect()
-            is OnWorkingModeSelected -> repository.sendNewServiceCommand(event.workingMode)
-            NavigateUp -> navigationManager.navigateUp()
+    private fun onCommandReceived(workingMode: CGMServiceCommand) {
+        when (workingMode) {
+            CGMServiceCommand.REQUEST_ALL_RECORDS -> repository.requestAllRecords()
+            CGMServiceCommand.REQUEST_LAST_RECORD -> repository.requestLastRecord()
+            CGMServiceCommand.REQUEST_FIRST_RECORD -> repository.requestFirstRecord()
+            CGMServiceCommand.DISCONNECT -> disconnect()
         }.exhaustive
     }
 
@@ -63,6 +76,7 @@ internal class CGMScreenViewModel @Inject constructor(
     }
 
     private fun disconnect() {
-        repository.sendNewServiceCommand(CGMServiceCommand.DISCONNECT)
+        repository.release()
+        navigationManager.navigateUp()
     }
 }

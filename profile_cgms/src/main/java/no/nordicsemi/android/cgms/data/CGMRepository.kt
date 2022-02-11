@@ -2,24 +2,25 @@ package no.nordicsemi.android.cgms.data
 
 import android.bluetooth.BluetoothDevice
 import android.content.Context
-import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.cgms.repository.CGMManager
 import no.nordicsemi.android.cgms.repository.CGMService
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.ConnectingResult
 import no.nordicsemi.android.service.ServiceManager
-import no.nordicsemi.android.utils.exhaustive
+import java.lang.Exception
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class CGMRepository @Inject constructor(
+class CGMRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
@@ -27,38 +28,55 @@ internal class CGMRepository @Inject constructor(
     private var manager: CGMManager? = null
 
     private val _data = MutableStateFlow<BleManagerResult<CGMData>>(ConnectingResult())
-    val data = _data.asStateFlow()
+    internal val data = _data.asStateFlow()
+
+    private val _isRunning = MutableStateFlow(false)
+    val isRunning = _isRunning.asStateFlow()
 
     fun launch(device: BluetoothDevice) {
         serviceManager.startService(CGMService::class.java, device)
     }
 
-    fun startManager(device: BluetoothDevice, scope: CoroutineScope) {
+    fun start(device: BluetoothDevice, scope: CoroutineScope) {
         val manager = CGMManager(context, scope)
 
         manager.dataHolder.status.onEach {
             _data.value = it
-            Log.d("AAATESTAAA", "data: $it")
         }.launchIn(scope)
 
-        manager.connect(device)
-            .useAutoConnect(false)
-            .retry(3, 100)
-            .enqueue()
+        scope.launch {
+            manager.start(device)
+        }
     }
 
-    fun sendNewServiceCommand(workingMode: CGMServiceCommand) {
-        when (workingMode) {
-            CGMServiceCommand.REQUEST_ALL_RECORDS -> manager?.requestAllRecords()
-            CGMServiceCommand.REQUEST_LAST_RECORD -> manager?.requestLastRecord()
-            CGMServiceCommand.REQUEST_FIRST_RECORD -> manager?.requestFirstRecord()
-            CGMServiceCommand.DISCONNECT -> release()
-        }.exhaustive
+    private suspend fun CGMManager.start(device: BluetoothDevice) {
+        try {
+            connect(device)
+                .useAutoConnect(false)
+                .retry(3, 100)
+                .suspend()
+            _isRunning.value = true
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
-    private fun release() {
+    fun requestAllRecords() {
+        manager?.requestAllRecords()
+    }
+
+    fun requestLastRecord() {
+        manager?.requestLastRecord()
+    }
+
+    fun requestFirstRecord() {
+        manager?.requestFirstRecord()
+    }
+
+    fun release() {
         serviceManager.stopService(CGMService::class.java)
         manager?.disconnect()?.enqueue()
         manager = null
+        _isRunning.value = false
     }
 }

@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.common.callback.RecordAccessControlPointResponse
+import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
 import no.nordicsemi.android.ble.common.callback.cgm.CGMFeatureResponse
 import no.nordicsemi.android.ble.common.callback.cgm.CGMSpecificOpsControlPointResponse
 import no.nordicsemi.android.ble.common.callback.cgm.CGMStatusResponse
@@ -96,6 +97,11 @@ internal class CGMManager(
 
     override fun getGattCallback(): BleManagerGattCallback {
         return CGMManagerGattCallback()
+    }
+
+    override fun log(priority: Int, message: String) {
+        super.log(priority, message)
+        Log.d("COROUTINE-EXCEPTION", message)
     }
 
     private inner class CGMManagerGattCallback : BleManagerGattCallback() {
@@ -169,6 +175,11 @@ internal class CGMManager(
                     }
                 }.launchIn(scope)
 
+            setNotificationCallback(batteryLevelCharacteristic).asValidResponseFlow<BatteryLevelResponse>()
+                .onEach {
+                    data.value = data.value.copy(batteryLevel = it.batteryLevel)
+                }.launchIn(scope)
+
             enableNotifications(cgmMeasurementCharacteristic).enqueue()
             enableIndications(cgmSpecificOpsControlPointCharacteristic).enqueue()
             enableIndications(recordAccessControlPointCharacteristic).enqueue()
@@ -191,7 +202,9 @@ internal class CGMManager(
                     val sequenceNumber = records.keyAt(records.size() - 1) + 1
                     writeCharacteristic(
                         recordAccessControlPointCharacteristic,
-                        RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber),
+                        RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(
+                            sequenceNumber
+                        ),
                         BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
                     ).suspend()
                 } else {
@@ -232,28 +245,31 @@ internal class CGMManager(
         }
 
         override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
-            val service = gatt.getService(CGMS_SERVICE_UUID)
-            if (service != null) {
-                cgmStatusCharacteristic = service.getCharacteristic(CGM_STATUS_UUID)
-                cgmFeatureCharacteristic = service.getCharacteristic(CGM_FEATURE_UUID)
-                cgmMeasurementCharacteristic = service.getCharacteristic(CGM_MEASUREMENT_UUID)
-                cgmSpecificOpsControlPointCharacteristic = service.getCharacteristic(
-                    CGM_OPS_CONTROL_POINT_UUID
-                )
-                recordAccessControlPointCharacteristic = service.getCharacteristic(RACP_UUID)
+            gatt.getService(CGMS_SERVICE_UUID)?.run {
+                cgmStatusCharacteristic = getCharacteristic(CGM_STATUS_UUID)
+                cgmFeatureCharacteristic = getCharacteristic(CGM_FEATURE_UUID)
+                cgmMeasurementCharacteristic = getCharacteristic(CGM_MEASUREMENT_UUID)
+                cgmSpecificOpsControlPointCharacteristic = getCharacteristic(CGM_OPS_CONTROL_POINT_UUID)
+                recordAccessControlPointCharacteristic = getCharacteristic(RACP_UUID)
             }
-            return cgmMeasurementCharacteristic != null && cgmSpecificOpsControlPointCharacteristic != null && recordAccessControlPointCharacteristic != null && cgmStatusCharacteristic != null && cgmFeatureCharacteristic != null
+            gatt.getService(BATTERY_SERVICE_UUID)?.run {
+                batteryLevelCharacteristic = getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
+            }
+            return batteryLevelCharacteristic != null
+                    && cgmMeasurementCharacteristic != null
+                    && cgmSpecificOpsControlPointCharacteristic != null
+                    && recordAccessControlPointCharacteristic != null
+                    && cgmStatusCharacteristic != null
+                    && cgmFeatureCharacteristic != null
         }
 
-        override fun onServicesInvalidated() {}
-
-        override fun onDeviceDisconnected() {
-            super.onDeviceDisconnected()
+        override fun onServicesInvalidated() {
             cgmStatusCharacteristic = null
             cgmFeatureCharacteristic = null
             cgmMeasurementCharacteristic = null
             cgmSpecificOpsControlPointCharacteristic = null
             recordAccessControlPointCharacteristic = null
+            batteryLevelCharacteristic = null
         }
     }
 

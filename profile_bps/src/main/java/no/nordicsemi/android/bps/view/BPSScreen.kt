@@ -24,6 +24,8 @@ fun BPSScreen() {
     val state = viewModel.state.collectAsState().value
 
     Column {
+        val navigateUp = { viewModel.onEvent(DisconnectEvent) }
+
         BackIconAppBar(stringResource(id = R.string.bps_title)) {
             viewModel.onEvent(DisconnectEvent)
         }
@@ -32,11 +34,11 @@ fun BPSScreen() {
             when (state) {
                 NoDeviceState -> NoDeviceView()
                 is WorkingState -> when (state.result) {
-                    is ConnectingResult -> DeviceConnectingView()
-                    is DisconnectedResult -> DeviceDisconnectedView(Reason.USER)
-                    is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS)
-                    is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE)
-                    is ReadyResult -> DeviceConnectingView()
+                    is ConnectingResult,
+                    is ReadyResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
+                    is DisconnectedResult -> DeviceDisconnectedView(Reason.USER, navigateUp)
+                    is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp)
+                    is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp)
                     is SuccessResult -> BPSContentView(state.result.data) { viewModel.onEvent(it) }
                 }
             }.exhaustive

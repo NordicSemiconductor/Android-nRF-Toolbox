@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.HourglassTop
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -22,11 +24,12 @@ import no.nordicsemi.android.theme.R
 import no.nordicsemi.android.theme.view.ScreenSection
 
 @Composable
-fun DeviceConnectingView() {
+fun DeviceConnectingView(navigateUp: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ScreenSection {
             Icon(
@@ -64,11 +67,17 @@ fun DeviceConnectingView() {
                 style = MaterialTheme.typography.titleLarge
             )
         }
+
+        Spacer(modifier = Modifier.size(16.dp))
+
+        Button(onClick = { navigateUp() }) {
+            Text(text = stringResource(id = R.string.disconnect))
+        }
     }
 }
 
 @Preview
 @Composable
 fun DeviceConnectingView_Preview() {
-    DeviceConnectingView()
+    DeviceConnectingView { }
 }

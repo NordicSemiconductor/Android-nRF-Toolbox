@@ -20,7 +20,7 @@ internal class CGMService : NotificationService() {
 
         val device = intent!!.getParcelableExtra<BluetoothDevice>(DEVICE_DATA)!!
 
-        repository.startManager(device, lifecycleScope)
+        repository.start(device, lifecycleScope)
 
         return START_REDELIVER_INTENT
     }

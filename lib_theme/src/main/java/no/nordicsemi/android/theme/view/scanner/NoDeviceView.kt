@@ -70,5 +70,5 @@ fun NoDeviceView() {
 @Preview
 @Composable
 fun NoDeviceView_Preview() {
-    DeviceConnectingView()
+    DeviceConnectingView { }
 }

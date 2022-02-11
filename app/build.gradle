@@ -88,6 +88,7 @@ dependencies {
     implementation libs.bundles.hilt
     kapt libs.bundles.hiltkapt
 
+    implementation libs.bundles.icons
     implementation libs.bundles.compose
     implementation libs.androidx.core
     implementation libs.material
