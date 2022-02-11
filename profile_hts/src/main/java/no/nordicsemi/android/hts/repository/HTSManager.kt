@@ -24,70 +24,77 @@ package no.nordicsemi.android.hts.repository
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
-import android.util.Log
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import no.nordicsemi.android.ble.BleManager
+import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
 import no.nordicsemi.android.ble.common.callback.ht.TemperatureMeasurementResponse
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
-import no.nordicsemi.android.ble.ktx.suspend
-import no.nordicsemi.android.hts.data.HTSRepository
-import no.nordicsemi.android.service.BatteryManager
+import no.nordicsemi.android.hts.data.HTSData
+import no.nordicsemi.android.service.ConnectionObserverAdapter
 import java.util.*
 
 val HTS_SERVICE_UUID: UUID = UUID.fromString("00001809-0000-1000-8000-00805f9b34fb")
 private val HT_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A1C-0000-1000-8000-00805f9b34fb")
 
+private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
+private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
+
 internal class HTSManager internal constructor(
     context: Context,
-    scope: CoroutineScope,
-    private val dataHolder: HTSRepository
-) : BatteryManager(context, scope) {
+    private val scope: CoroutineScope,
+) : BleManager(context) {
 
+    private var batteryLevelCharacteristic: BluetoothGattCharacteristic? = null
     private var htCharacteristic: BluetoothGattCharacteristic? = null
 
-    private val exceptionHandler = CoroutineExceptionHandler { _, t->
-        Log.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
+    private val data = MutableStateFlow(HTSData())
+    val dataHolder = ConnectionObserverAdapter<HTSData>()
+
+    init {
+        setConnectionObserver(dataHolder)
+
+        data.onEach {
+            dataHolder.setValue(it)
+        }.launchIn(scope)
     }
 
-    override fun onBatteryLevelChanged(batteryLevel: Int) {
-        dataHolder.setBatteryLevel(batteryLevel)
-    }
-
-    override fun getGattCallback(): BatteryManagerGattCallback {
+    override fun getGattCallback(): BleManagerGattCallback {
         return HTManagerGattCallback()
     }
 
-    private inner class HTManagerGattCallback : BatteryManagerGattCallback() {
+    private inner class HTManagerGattCallback : BleManagerGattCallback() {
         override fun initialize() {
             super.initialize()
 
             setIndicationCallback(htCharacteristic)
                 .asValidResponseFlow<TemperatureMeasurementResponse>()
                 .onEach {
-                    dataHolder.setNewTemperature(it.temperature)
+                    data.tryEmit(data.value.copy(temperatureValue = it.temperature))
                 }.launchIn(scope)
+            enableIndications(htCharacteristic).enqueue()
 
-            scope.launch(exceptionHandler) {
-                enableIndications(htCharacteristic).suspend()
-            }
+            setNotificationCallback(batteryLevelCharacteristic).asValidResponseFlow<BatteryLevelResponse>().onEach {
+                data.value = data.value.copy(batteryLevel = it.batteryLevel)
+            }.launchIn(scope)
+            enableNotifications(batteryLevelCharacteristic).enqueue()
         }
 
         override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
-            val service = gatt.getService(HTS_SERVICE_UUID)
-            if (service != null) {
-                htCharacteristic = service.getCharacteristic(HT_MEASUREMENT_CHARACTERISTIC_UUID)
+            gatt.getService(HTS_SERVICE_UUID)?.run {
+                htCharacteristic = getCharacteristic(HT_MEASUREMENT_CHARACTERISTIC_UUID)
+            }
+            gatt.getService(BATTERY_SERVICE_UUID)?.run {
+                batteryLevelCharacteristic = getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
             }
             return htCharacteristic != null
         }
 
-        override fun onDeviceDisconnected() {
-            super.onDeviceDisconnected()
+        override fun onServicesInvalidated() {
             htCharacteristic = null
+            batteryLevelCharacteristic = null
         }
-
-        override fun onServicesInvalidated() {}
     }
 }

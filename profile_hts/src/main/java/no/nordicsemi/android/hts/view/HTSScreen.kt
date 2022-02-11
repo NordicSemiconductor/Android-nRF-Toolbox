@@ -10,7 +10,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.hts.R
 import no.nordicsemi.android.hts.viewmodel.HTSViewModel
+import no.nordicsemi.android.service.*
 import no.nordicsemi.android.theme.view.BackIconAppBar
+import no.nordicsemi.android.theme.view.scanner.DeviceConnectingView
+import no.nordicsemi.android.theme.view.scanner.DeviceDisconnectedView
+import no.nordicsemi.android.theme.view.scanner.NoDeviceView
+import no.nordicsemi.android.theme.view.scanner.Reason
+import no.nordicsemi.android.utils.exhaustive
 
 @Composable
 fun HTSScreen() {
@@ -18,15 +24,22 @@ fun HTSScreen() {
     val state = viewModel.state.collectAsState().value
 
     Column {
-        BackIconAppBar(stringResource(id = R.string.hts_title)) {
-            viewModel.onEvent(DisconnectEvent)
-        }
+        val navigateUp = { viewModel.onEvent(NavigateUp) }
+
+        BackIconAppBar(stringResource(id = R.string.hts_title), navigateUp)
 
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-//            when (state) {
-//                is DisplayDataState -> HTSContentView(state.data) { viewModel.onEvent(it) }
-//                LoadingState -> DeviceConnectingView()
-//            }.exhaustive
+            when (state.htsManagerState) {
+                NoDeviceState -> NoDeviceView()
+                is WorkingState -> when (state.htsManagerState.result) {
+                    is ConnectingResult,
+                    is ReadyResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
+                    is DisconnectedResult -> DeviceDisconnectedView(Reason.USER, navigateUp)
+                    is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp)
+                    is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp)
+                    is SuccessResult -> HTSContentView(state.htsManagerState.result.data, state.temperatureUnit) { viewModel.onEvent(it) }
+                }
+            }.exhaustive
         }
     }
 }

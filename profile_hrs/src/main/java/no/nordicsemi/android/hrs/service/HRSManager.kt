@@ -120,6 +120,7 @@ internal class HRSManager(
         override fun onServicesInvalidated() {
             bodySensorLocationCharacteristic = null
             heartRateCharacteristic = null
+            batteryLevelCharacteristic = null
         }
     }
 }

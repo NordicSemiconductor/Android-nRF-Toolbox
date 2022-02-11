@@ -7,4 +7,5 @@
     <string name="hts_kelvin">%.1f °K</string>
 
     <string name="hts_temperature">Temperature</string>
+    <string name="hts_records_section">Records</string>
 </resources>

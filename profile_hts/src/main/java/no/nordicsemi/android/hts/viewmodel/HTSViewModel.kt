@@ -9,7 +9,6 @@ import no.nordicsemi.android.hts.repository.HTSService
 import no.nordicsemi.android.hts.repository.HTS_SERVICE_UUID
 import no.nordicsemi.android.hts.view.*
 import no.nordicsemi.android.navigation.*
-import no.nordicsemi.android.service.BleManagerStatus
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.android.utils.getDevice
@@ -23,15 +22,20 @@ internal class HTSViewModel @Inject constructor(
     private val navigationManager: NavigationManager
 ) : ViewModel() {
 
-    val state = repository.data.combine(repository.status) { data, status ->
-//        when (status) {
-//            BleManagerStatus.CONNECTING -> LoadingState
-//            BleManagerStatus.OK,
-//            BleManagerStatus.DISCONNECTED -> DisplayDataState(data)
-//        }
-    }.stateIn(viewModelScope, SharingStarted.Lazily, LoadingState)
+    private val _state = MutableStateFlow(HTSViewState())
+    val state = _state.asStateFlow()
 
     init {
+        if (!repository.isRunning.value) {
+            requestBluetoothDevice()
+        }
+
+        repository.data.onEach {
+            _state.value = _state.value.copy(htsManagerState = WorkingState(it))
+        }.launchIn(viewModelScope)
+    }
+
+    private fun requestBluetoothDevice() {
         navigationManager.navigateTo(ScannerDestinationId, UUIDArgument(HTS_SERVICE_UUID))
 
         navigationManager.recentResult.onEach {
@@ -39,39 +43,29 @@ internal class HTSViewModel @Inject constructor(
                 handleArgs(it)
             }
         }.launchIn(viewModelScope)
-
-        repository.status.onEach {
-            if (it == BleManagerStatus.DISCONNECTED) {
-                navigationManager.navigateUp()
-            }
-        }.launchIn(viewModelScope)
     }
 
     private fun handleArgs(args: DestinationResult) {
         when (args) {
             is CancelDestinationResult -> navigationManager.navigateUp()
-            is SuccessDestinationResult -> serviceManager.startService(HTSService::class.java, args.getDevice())
+            is SuccessDestinationResult -> repository.launch(args.getDevice().device)
         }.exhaustive
     }
 
     fun onEvent(event: HTSScreenViewEvent) {
         when (event) {
-            DisconnectEvent -> onDisconnectButtonClick()
+            DisconnectEvent -> disconnect()
             is OnTemperatureUnitSelected -> onTemperatureUnitSelected(event)
+            NavigateUp -> navigationManager.navigateUp()
         }.exhaustive
     }
 
-    private fun onDisconnectButtonClick() {
-        repository.sendDisconnectCommand()
-        repository.clear()
+    private fun disconnect() {
+        repository.release()
+        navigationManager.navigateUp()
     }
 
     private fun onTemperatureUnitSelected(event: OnTemperatureUnitSelected) {
-        repository.setTemperatureUnit(event.value)
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        repository.clear()
+        _state.value = _state.value.copy(temperatureUnit = event.value)
     }
 }

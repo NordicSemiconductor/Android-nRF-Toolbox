@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.cgms.data.CGMRepository
 import no.nordicsemi.android.csc.data.CSCRepository
 import no.nordicsemi.android.hrs.data.HRSRepository
+import no.nordicsemi.android.hts.data.HTSRepository
 import no.nordicsemi.android.navigation.NavigationManager
 import no.nordicsemi.android.nrftoolbox.ProfileDestination
 import no.nordicsemi.android.nrftoolbox.view.HomeViewState
@@ -20,7 +21,8 @@ class HomeViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     cgmRepository: CGMRepository,
     cscRepository: CSCRepository,
-    hrsRepository: HRSRepository
+    hrsRepository: HRSRepository,
+    htsRepository: HTSRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeViewState())
@@ -37,6 +39,10 @@ class HomeViewModel @Inject constructor(
 
         hrsRepository.isRunning.onEach {
             _state.value = _state.value.copy(isHRSModuleRunning = it)
+        }.launchIn(viewModelScope)
+
+        htsRepository.isRunning.onEach {
+            _state.value = _state.value.copy(isHTSModuleRunning = it)
         }.launchIn(viewModelScope)
     }
 
