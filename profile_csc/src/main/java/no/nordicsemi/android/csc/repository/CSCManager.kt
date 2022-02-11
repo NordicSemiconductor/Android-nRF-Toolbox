@@ -24,18 +24,14 @@ package no.nordicsemi.android.csc.repository
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
-import android.util.Log
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
 import no.nordicsemi.android.ble.common.callback.csc.CyclingSpeedAndCadenceMeasurementResponse
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
-import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.csc.data.WheelSize
 import no.nordicsemi.android.service.ConnectionObserverAdapter
@@ -60,10 +56,6 @@ internal class CSCManager(
 
     private val data = MutableStateFlow(CSCData())
     val dataHolder = ConnectionObserverAdapter<CSCData>()
-
-    private val exceptionHandler = CoroutineExceptionHandler { _, t ->
-        Log.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
-    }
 
     init {
         setConnectionObserver(dataHolder)
@@ -107,18 +99,12 @@ internal class CSCManager(
 
                     previousResponse = it
                 }.launchIn(scope)
-
-            scope.launch(exceptionHandler) {
-                enableNotifications(cscMeasurementCharacteristic).suspend()
-            }
+            enableNotifications(cscMeasurementCharacteristic).enqueue()
 
             setNotificationCallback(batteryLevelCharacteristic).asValidResponseFlow<BatteryLevelResponse>().onEach {
                 data.value = data.value.copy(batteryLevel = it.batteryLevel)
             }.launchIn(scope)
-
-            scope.launch {
-                enableNotifications(batteryLevelCharacteristic).suspend()
-            }
+            enableNotifications(batteryLevelCharacteristic).enqueue()
         }
 
         public override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {

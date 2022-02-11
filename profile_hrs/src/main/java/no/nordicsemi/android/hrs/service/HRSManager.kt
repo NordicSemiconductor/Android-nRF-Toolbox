@@ -24,74 +24,95 @@ package no.nordicsemi.android.hrs.service
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
+import android.util.Log
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.ble.BleManager
+import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
 import no.nordicsemi.android.ble.common.callback.hr.BodySensorLocationResponse
 import no.nordicsemi.android.ble.common.callback.hr.HeartRateMeasurementResponse
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
-import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.ble.ktx.suspendForValidResponse
-import no.nordicsemi.android.hrs.data.HRSRepository
-import no.nordicsemi.android.service.BatteryManager
+import no.nordicsemi.android.hrs.data.HRSData
+import no.nordicsemi.android.service.ConnectionObserverAdapter
+import no.nordicsemi.android.utils.launchWithCatch
 import java.util.*
 
 val HRS_SERVICE_UUID: UUID = UUID.fromString("0000180D-0000-1000-8000-00805f9b34fb")
 private val BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID = UUID.fromString("00002A38-0000-1000-8000-00805f9b34fb")
 private val HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb")
 
+private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
+private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
+
 internal class HRSManager(
     context: Context,
-    scope: CoroutineScope,
-    private val dataHolder: HRSRepository
-) : BatteryManager(context, scope) {
+    private val scope: CoroutineScope,
+) : BleManager(context) {
 
+    private var batteryLevelCharacteristic: BluetoothGattCharacteristic? = null
     private var heartRateCharacteristic: BluetoothGattCharacteristic? = null
     private var bodySensorLocationCharacteristic: BluetoothGattCharacteristic? = null
 
-    override fun onBatteryLevelChanged(batteryLevel: Int) {
-        dataHolder.setBatteryLevel(batteryLevel)
+    private val data = MutableStateFlow(HRSData())
+    val dataHolder = ConnectionObserverAdapter<HRSData>()
+
+    init {
+        setConnectionObserver(dataHolder)
+
+        data.onEach {
+            dataHolder.setValue(it)
+        }.launchIn(scope)
     }
 
-    override fun getGattCallback(): BatteryManagerGattCallback {
+    override fun getGattCallback(): BleManagerGattCallback {
         return HeartRateManagerCallback()
     }
 
-    private inner class HeartRateManagerCallback : BatteryManagerGattCallback() {
+    private inner class HeartRateManagerCallback : BleManagerGattCallback() {
         override fun initialize() {
             super.initialize()
 
-            scope.launch {
-                val data = readCharacteristic(bodySensorLocationCharacteristic)
+            scope.launchWithCatch {
+                val readData = readCharacteristic(bodySensorLocationCharacteristic)
                     .suspendForValidResponse<BodySensorLocationResponse>()
 
-                dataHolder.setSensorLocation(data.sensorLocation)
+                data.value = data.value.copy(sensorLocation = readData.sensorLocation)
             }
 
             setNotificationCallback(heartRateCharacteristic).asValidResponseFlow<HeartRateMeasurementResponse>()
                 .onEach {
-                    dataHolder.addNewHeartRate(it.heartRate)
+                    val result = data.value.heartRates.toMutableList().apply {
+                        add(it.heartRate)
+                    }
+                    data.tryEmit(data.value.copy(heartRates = result))
                 }.launchIn(scope)
+            enableNotifications(heartRateCharacteristic).enqueue()
 
-            scope.launch {
-                enableNotifications(heartRateCharacteristic).suspend()
-            }
+            setNotificationCallback(batteryLevelCharacteristic).asValidResponseFlow<BatteryLevelResponse>().onEach {
+                data.value = data.value.copy(batteryLevel = it.batteryLevel)
+            }.launchIn(scope)
+            enableNotifications(batteryLevelCharacteristic).enqueue()
         }
 
         override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
-            val service = gatt.getService(HRS_SERVICE_UUID)
-            if (service != null) {
-                heartRateCharacteristic = service.getCharacteristic(HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID)
+            gatt.getService(HRS_SERVICE_UUID)?.run {
+                heartRateCharacteristic = getCharacteristic(HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID)
             }
-            return heartRateCharacteristic != null
+            gatt.getService(BATTERY_SERVICE_UUID)?.run {
+                batteryLevelCharacteristic = getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
+            }
+            return heartRateCharacteristic != null && batteryLevelCharacteristic != null
         }
 
         override fun isOptionalServiceSupported(gatt: BluetoothGatt): Boolean {
             super.isOptionalServiceSupported(gatt)
-            val service = gatt.getService(HRS_SERVICE_UUID)
-            if (service != null) {
-                bodySensorLocationCharacteristic = service.getCharacteristic(BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID)
+            gatt.getService(HRS_SERVICE_UUID)?.run {
+                bodySensorLocationCharacteristic = getCharacteristic(BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID)
             }
             return bodySensorLocationCharacteristic != null
         }
