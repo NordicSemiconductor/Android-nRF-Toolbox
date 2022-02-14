@@ -24,66 +24,81 @@ package no.nordicsemi.android.rscs.repository
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
-import android.util.Log
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.common.callback.rsc.RunningSpeedAndCadenceMeasurementResponse
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
 import no.nordicsemi.android.ble.ktx.suspend
-import no.nordicsemi.android.rscs.data.RSCSRepository
-import no.nordicsemi.android.service.BatteryManager
+import no.nordicsemi.android.rscs.data.RSCSData
+import no.nordicsemi.android.service.ConnectionObserverAdapter
+import no.nordicsemi.android.utils.launchWithCatch
 import java.util.*
 
 val RSCS_SERVICE_UUID: UUID = UUID.fromString("00001814-0000-1000-8000-00805F9B34FB")
 private val RSC_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A53-0000-1000-8000-00805F9B34FB")
 
+private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
+private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
+
 internal class RSCSManager internal constructor(
     context: Context,
-    scope: CoroutineScope,
-    private val dataHolder: RSCSRepository
-) : BatteryManager(context, scope) {
+    private val scope: CoroutineScope
+) : BleManager(context) {
 
+    private var batteryLevelCharacteristic: BluetoothGattCharacteristic? = null
     private var rscMeasurementCharacteristic: BluetoothGattCharacteristic? = null
 
-    private val exceptionHandler = CoroutineExceptionHandler { _, t->
-        Log.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
+    private val data = MutableStateFlow(RSCSData())
+    val dataHolder = ConnectionObserverAdapter<RSCSData>()
+
+    init {
+        setConnectionObserver(dataHolder)
+
+        data.onEach {
+            dataHolder.setValue(it)
+        }.launchIn(scope)
     }
 
-    override fun onBatteryLevelChanged(batteryLevel: Int) {
-        dataHolder.setBatteryLevel(batteryLevel)
-    }
-
-    override fun getGattCallback(): BatteryManagerGattCallback {
-        return RSCManagerGattCallback()
-    }
-
-    private inner class RSCManagerGattCallback : BatteryManagerGattCallback() {
+    private inner class RSCManagerGattCallback : BleManagerGattCallback() {
 
         override fun initialize() {
             super.initialize()
             setNotificationCallback(rscMeasurementCharacteristic).asValidResponseFlow<RunningSpeedAndCadenceMeasurementResponse>()
                 .onEach {
-                    dataHolder.setNewData(it.isRunning, it.instantaneousSpeed, it.instantaneousCadence, it.strideLength, it.totalDistance)
-                }.launchIn(scope)
+                    data.tryEmit(data.value.copy(
+                        running = it.isRunning,
+                        instantaneousCadence = it.instantaneousCadence,
+                        instantaneousSpeed = it.instantaneousSpeed,
+                        strideLength = it.strideLength,
+                        totalDistance = it.totalDistance
+                    ))
+                    }.launchIn(scope)
 
-            scope.launch(exceptionHandler) {
+            scope.launchWithCatch {
                 enableNotifications(rscMeasurementCharacteristic).suspend()
             }
         }
 
         public override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
-            val service = gatt.getService(RSCS_SERVICE_UUID)
-            if (service != null) {
-                rscMeasurementCharacteristic = service.getCharacteristic(RSC_MEASUREMENT_CHARACTERISTIC_UUID)
+            gatt.getService(RSCS_SERVICE_UUID)?.run {
+                rscMeasurementCharacteristic = getCharacteristic(RSC_MEASUREMENT_CHARACTERISTIC_UUID)
             }
-            return rscMeasurementCharacteristic != null
+            gatt.getService(BATTERY_SERVICE_UUID)?.run {
+                batteryLevelCharacteristic = getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
+            }
+            return rscMeasurementCharacteristic != null && batteryLevelCharacteristic != null
         }
 
         override fun onServicesInvalidated() {
             rscMeasurementCharacteristic = null
+            batteryLevelCharacteristic = null
         }
+    }
+
+    override fun getGattCallback(): BleManagerGattCallback {
+        return RSCManagerGattCallback()
     }
 }

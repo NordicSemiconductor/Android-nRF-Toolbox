@@ -1,31 +1,30 @@
 package no.nordicsemi.android.rscs.repository
 
+import android.bluetooth.BluetoothDevice
+import android.content.Intent
+import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.rscs.data.RSCSRepository
+import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.ForegroundBleService
+import no.nordicsemi.android.service.NotificationService
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class RSCSService : ForegroundBleService() {
+internal class RSCSService : NotificationService() {
 
     @Inject
     lateinit var repository: RSCSRepository
 
-    override val manager: RSCSManager by lazy { RSCSManager(this, scope, repository) }
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
 
-    override fun onCreate() {
-        super.onCreate()
+        val device = intent!!.getParcelableExtra<BluetoothDevice>(DEVICE_DATA)!!
 
-//        status.onEach {
-//            val status = it.mapToSimpleManagerStatus()
-//            repository.setNewStatus(status)
-//            stopIfDisconnected(status)
-//        }.launchIn(scope)
+        repository.start(device, lifecycleScope)
 
-        repository.command.onEach {
-            stopSelf()
-        }.launchIn(scope)
+        return START_REDELIVER_INTENT
     }
 }

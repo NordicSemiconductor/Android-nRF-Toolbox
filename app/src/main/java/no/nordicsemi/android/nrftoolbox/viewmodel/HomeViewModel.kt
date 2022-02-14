@@ -14,6 +14,8 @@ import no.nordicsemi.android.hts.data.HTSRepository
 import no.nordicsemi.android.navigation.NavigationManager
 import no.nordicsemi.android.nrftoolbox.ProfileDestination
 import no.nordicsemi.android.nrftoolbox.view.HomeViewState
+import no.nordicsemi.android.prx.data.PRXRepository
+import no.nordicsemi.android.rscs.data.RSCSRepository
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,7 +24,9 @@ class HomeViewModel @Inject constructor(
     cgmRepository: CGMRepository,
     cscRepository: CSCRepository,
     hrsRepository: HRSRepository,
-    htsRepository: HTSRepository
+    htsRepository: HTSRepository,
+    prxRepository: PRXRepository,
+    rscsRepository: RSCSRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeViewState())
@@ -43,6 +47,14 @@ class HomeViewModel @Inject constructor(
 
         htsRepository.isRunning.onEach {
             _state.value = _state.value.copy(isHTSModuleRunning = it)
+        }.launchIn(viewModelScope)
+
+        prxRepository.isRunning.onEach {
+            _state.value = _state.value.copy(isPRXModuleRunning = it)
+        }.launchIn(viewModelScope)
+
+        rscsRepository.isRunning.onEach {
+            _state.value = _state.value.copy(isRSCSModuleRunning = it)
         }.launchIn(viewModelScope)
     }
 
