@@ -1,62 +1,97 @@
 package no.nordicsemi.android.prx.data
 
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.*
-import no.nordicsemi.android.service.BleManagerStatus
+import android.bluetooth.BluetoothDevice
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import no.nordicsemi.android.ble.ktx.suspend
+import no.nordicsemi.android.prx.repository.AlarmHandler
+import no.nordicsemi.android.prx.repository.PRXManager
+import no.nordicsemi.android.prx.repository.PRXService
+import no.nordicsemi.android.prx.repository.ProximityServerManager
+import no.nordicsemi.android.service.BleManagerResult
+import no.nordicsemi.android.service.ConnectingResult
+import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.android.service.SuccessResult
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class PRXRepository @Inject constructor() {
+internal class PRXRepository @Inject constructor(
+    @ApplicationContext
+    private val context: Context,
+    private val serviceManager: ServiceManager,
+    private val proximityServerManager: ProximityServerManager,
+    private val alarmHandler: AlarmHandler
+) {
 
-    private val _data = MutableStateFlow(PRXData())
-    val data: StateFlow<PRXData> = _data
+    private var manager: PRXManager? = null
 
-    private val _command = MutableSharedFlow<PRXCommand>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val command = _command.asSharedFlow()
+    private val _data = MutableStateFlow<BleManagerResult<PRXData>>(ConnectingResult())
+    internal val data = _data.asStateFlow()
 
-    private val _status = MutableStateFlow(BleManagerStatus.CONNECTING)
-    val status = _status.asStateFlow()
+    private val _isRunning = MutableStateFlow(false)
+    val isRunning = _isRunning.asStateFlow()
 
-    fun setBatteryLevel(batteryLevel: Int) {
-        _data.tryEmit(_data.value.copy(batteryLevel = batteryLevel))
+    fun launch(device: BluetoothDevice) {
+        serviceManager.startService(PRXService::class.java, device)
+        proximityServerManager.open()
     }
 
-    fun setLocalAlarmLevel(value: Int) {
-        val alarmLevel = AlarmLevel.create(value)
-        _data.tryEmit(_data.value.copy(localAlarmLevel = alarmLevel))
-    }
+    fun start(device: BluetoothDevice, scope: CoroutineScope) {
+        val manager = PRXManager(context, scope)
+        this.manager = manager
+        manager.useServer(proximityServerManager)
 
-    fun setLocalAlarmLevel(alarmLevel: AlarmLevel) {
-        _data.tryEmit(_data.value.copy(localAlarmLevel = alarmLevel))
-    }
+        manager.dataHolder.status.onEach {
+            _data.value = it
+            handleLocalAlarm(it)
+        }.launchIn(scope)
 
-    fun setLinkLossLevel(value: Int) {
-        val alarmLevel = AlarmLevel.create(value)
-        _data.tryEmit(_data.value.copy(linkLossAlarmLevel = alarmLevel))
-    }
-
-    fun setRemoteAlarmLevel(isOn: Boolean) {
-        _data.tryEmit(_data.value.copy(isRemoteAlarm = isOn))
-    }
-
-    fun invokeCommand(command: PRXCommand) {
-        if (command == Disconnect) {
-            _command.tryEmit(command)
-            _status.tryEmit(BleManagerStatus.DISCONNECTED)
-        } else if (_command.subscriptionCount.value > 0) {
-            _command.tryEmit(command)
-        } else {
-            _status.tryEmit(BleManagerStatus.DISCONNECTED)
+        scope.launch {
+            manager.start(device)
         }
     }
 
-    fun setNewStatus(status: BleManagerStatus) {
-        _status.value = status
+    private suspend fun PRXManager.start(device: BluetoothDevice) {
+        try {
+            connect(device)
+                .useAutoConnect(false)
+                .retry(3, 100)
+                .suspend()
+            _isRunning.value = true
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
-    fun clear() {
-        _status.value = BleManagerStatus.CONNECTING
-        _data.tryEmit(PRXData())
+    private fun handleLocalAlarm(result: BleManagerResult<PRXData>) {
+        (result as? SuccessResult<PRXData>)?.let {
+            if (it.data.localAlarmLevel != AlarmLevel.NONE) {
+                alarmHandler.playAlarm(it.data.localAlarmLevel)
+            } else {
+                alarmHandler.pauseAlarm()
+            }
+        }
+    }
+
+    fun enableAlarm() {
+        manager?.writeImmediateAlert(true)
+    }
+
+    fun disableAlarm() {
+        manager?.writeImmediateAlert(false)
+    }
+
+    fun release() {
+        serviceManager.stopService(PRXService::class.java)
+        manager?.disconnect()?.enqueue()
+        manager = null
+        _isRunning.value = false
     }
 }

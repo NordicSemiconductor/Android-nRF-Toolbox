@@ -26,65 +26,84 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattServer
 import android.content.Context
-import android.util.Log
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.common.callback.alert.AlertLevelDataCallback
+import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
 import no.nordicsemi.android.ble.common.data.alert.AlertLevelData
+import no.nordicsemi.android.ble.ktx.asValidResponseFlow
 import no.nordicsemi.android.ble.ktx.suspend
-import no.nordicsemi.android.prx.data.PRXRepository
-import no.nordicsemi.android.service.BatteryManager
+import no.nordicsemi.android.prx.data.AlarmLevel
+import no.nordicsemi.android.prx.data.PRXData
+import no.nordicsemi.android.service.ConnectionObserverAdapter
+import no.nordicsemi.android.utils.launchWithCatch
 import java.util.*
 
-val LINK_LOSS_SERVICE_UUID = UUID.fromString("00001803-0000-1000-8000-00805f9b34fb")
 val PRX_SERVICE_UUID = UUID.fromString("00001802-0000-1000-8000-00805f9b34fb")
+val LINK_LOSS_SERVICE_UUID = UUID.fromString("00001803-0000-1000-8000-00805f9b34fb")
 val ALERT_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A06-0000-1000-8000-00805f9b34fb")
+
+private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
+private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
 
 internal class PRXManager(
     context: Context,
-    scope: CoroutineScope,
-    private val dataHolder: PRXRepository
-) : BatteryManager(context, scope) {
+    private val scope: CoroutineScope,
+) : BleManager(context) {
 
+    private var batteryLevelCharacteristic: BluetoothGattCharacteristic? = null
     private var alertLevelCharacteristic: BluetoothGattCharacteristic? = null
     private var linkLossCharacteristic: BluetoothGattCharacteristic? = null
 
     private var localAlertLevelCharacteristic: BluetoothGattCharacteristic? = null
     private var linkLossServerCharacteristic: BluetoothGattCharacteristic? = null
 
-    private val exceptionHandler = CoroutineExceptionHandler { _, t->
-        Log.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
+    private var isAlertEnabled = false
+
+    private val data = MutableStateFlow(PRXData())
+    val dataHolder = ConnectionObserverAdapter<PRXData>()
+
+    init {
+        setConnectionObserver(dataHolder)
+
+        data.onEach {
+            dataHolder.setValue(it)
+        }.launchIn(scope)
     }
 
-    var isAlertEnabled = false
-        private set
-
-    private inner class ProximityManagerGattCallback : BatteryManagerGattCallback() {
+    private inner class ProximityManagerGattCallback : BleManagerGattCallback() {
         override fun initialize() {
             super.initialize()
 
             setWriteCallback(localAlertLevelCharacteristic)
                 .with(object : AlertLevelDataCallback() {
                     override fun onAlertLevelChanged(device: BluetoothDevice, level: Int) {
-                        dataHolder.setLocalAlarmLevel(level)
+                        data.value = data.value.copy(localAlarmLevel = AlarmLevel.create(level))
                     }
                 })
 
             setWriteCallback(linkLossServerCharacteristic)
                 .with(object : AlertLevelDataCallback() {
                     override fun onAlertLevelChanged(device: BluetoothDevice, level: Int) {
-                        dataHolder.setLinkLossLevel(level)
+                        data.value = data.value.copy(linkLossAlarmLevel = AlarmLevel.create(level))
                     }
                 })
 
-            scope.launch(exceptionHandler) {
-                writeCharacteristic(
-                    linkLossCharacteristic,
-                    AlertLevelData.highAlert(),
-                    BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-                ).suspend()
-            }
+            writeCharacteristic(
+                linkLossCharacteristic,
+                AlertLevelData.highAlert(),
+                BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+            ).enqueue()
+
+            setNotificationCallback(batteryLevelCharacteristic)
+                .asValidResponseFlow<BatteryLevelResponse>()
+                .onEach {
+                    data.value = data.value.copy(batteryLevel = it.batteryLevel)
+                }.launchIn(scope)
+            enableNotifications(batteryLevelCharacteristic).enqueue()
         }
 
         override fun onServerReady(server: BluetoothGattServer) {
@@ -98,29 +117,26 @@ internal class PRXManager(
             }
         }
 
-        override fun onServicesInvalidated() { }
-
         override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
-            val llService = gatt.getService(LINK_LOSS_SERVICE_UUID)
-            if (llService != null) {
-                linkLossCharacteristic = llService.getCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID)
+            gatt.getService(LINK_LOSS_SERVICE_UUID)?.run {
+                linkLossCharacteristic = getCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID)
+            }
+            gatt.getService(BATTERY_SERVICE_UUID)?.run {
+                batteryLevelCharacteristic = getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
             }
             return linkLossCharacteristic != null
         }
 
         override fun isOptionalServiceSupported(gatt: BluetoothGatt): Boolean {
             super.isOptionalServiceSupported(gatt)
-            val iaService = gatt.getService(PRX_SERVICE_UUID)
-            if (iaService != null) {
-                alertLevelCharacteristic = iaService.getCharacteristic(
-                    ALERT_LEVEL_CHARACTERISTIC_UUID
-                )
+            gatt.getService(PRX_SERVICE_UUID)?.run {
+                alertLevelCharacteristic = getCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID)
             }
-            return alertLevelCharacteristic != null
+            return alertLevelCharacteristic != null && batteryLevelCharacteristic != null
         }
 
-        override fun onDeviceDisconnected() {
-            super.onDeviceDisconnected()
+        override fun onServicesInvalidated() {
+            batteryLevelCharacteristic = null
             alertLevelCharacteristic = null
             linkLossCharacteristic = null
             localAlertLevelCharacteristic = null
@@ -131,7 +147,7 @@ internal class PRXManager(
 
     fun writeImmediateAlert(on: Boolean) {
         if (!isConnected) return
-        scope.launch(exceptionHandler) {
+        scope.launchWithCatch {
             writeCharacteristic(
                 alertLevelCharacteristic,
                 if (on) AlertLevelData.highAlert() else AlertLevelData.noAlert(),
@@ -139,12 +155,8 @@ internal class PRXManager(
             ).suspend()
 
             isAlertEnabled = on
-            dataHolder.setRemoteAlarmLevel(on)
+            data.value = data.value.copy(isRemoteAlarm = on)
         }
-    }
-
-    override fun onBatteryLevelChanged(batteryLevel: Int) {
-        dataHolder.setBatteryLevel(batteryLevel)
     }
 
     override fun getGattCallback(): BleManagerGattCallback {

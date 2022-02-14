@@ -25,11 +25,16 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import android.content.Context
 import android.util.Log
+import dagger.hilt.android.qualifiers.ApplicationContext
 import no.nordicsemi.android.ble.BleServerManager
 import no.nordicsemi.android.ble.common.data.alert.AlertLevelData
-import java.util.*
+import javax.inject.Inject
 
-internal class ProximityServerManager(context: Context) : BleServerManager(context) {
+internal class ProximityServerManager @Inject constructor(
+    @ApplicationContext
+    context: Context
+) : BleServerManager(context) {
+
     override fun log(priority: Int, message: String) {
         Log.println(priority, "BleManager", message)
     }

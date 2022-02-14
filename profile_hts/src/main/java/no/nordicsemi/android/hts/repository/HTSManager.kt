@@ -89,7 +89,7 @@ internal class HTSManager internal constructor(
             gatt.getService(BATTERY_SERVICE_UUID)?.run {
                 batteryLevelCharacteristic = getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
             }
-            return htCharacteristic != null
+            return htCharacteristic != null && batteryLevelCharacteristic != null
         }
 
         override fun onServicesInvalidated() {

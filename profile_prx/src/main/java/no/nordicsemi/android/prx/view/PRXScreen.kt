@@ -11,7 +11,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.prx.R
 import no.nordicsemi.android.prx.viewmodel.PRXViewModel
+import no.nordicsemi.android.service.*
 import no.nordicsemi.android.theme.view.BackIconAppBar
+import no.nordicsemi.android.theme.view.scanner.DeviceConnectingView
+import no.nordicsemi.android.theme.view.scanner.DeviceDisconnectedView
+import no.nordicsemi.android.theme.view.scanner.NoDeviceView
+import no.nordicsemi.android.theme.view.scanner.Reason
+import no.nordicsemi.android.utils.exhaustive
 
 @Composable
 fun PRXScreen() {
@@ -19,15 +25,22 @@ fun PRXScreen() {
     val state = viewModel.state.collectAsState().value
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        BackIconAppBar(stringResource(id = R.string.prx_title)) {
-            viewModel.onEvent(DisconnectEvent)
-        }
+        val navigateUp = { viewModel.onEvent(NavigateUpEvent) }
+
+        BackIconAppBar(stringResource(id = R.string.prx_title), navigateUp)
 
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-//            when (state) {
-//                is DisplayDataState -> ContentView(state.data) { viewModel.onEvent(it) }
-//                LoadingState -> DeviceConnectingView()
-//            }.exhaustive
+            when (state) {
+                NoDeviceState -> NoDeviceView()
+                is WorkingState -> when (state.result) {
+                    is ConnectingResult,
+                    is ReadyResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
+                    is DisconnectedResult -> DeviceDisconnectedView(Reason.USER, navigateUp)
+                    is LinkLossResult -> DeviceOutOfRangeView { viewModel.onEvent(DisconnectEvent) }
+                    is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp)
+                    is SuccessResult -> ContentView(state.result.data) { viewModel.onEvent(it) }
+                }
+            }.exhaustive
         }
     }
 }

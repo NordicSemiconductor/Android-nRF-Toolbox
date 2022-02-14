@@ -14,4 +14,7 @@
 
     <string name="prx_is_remote_alarm">Remote alarm</string>
     <string name="prx_local_alarm_level">Local alarm level</string>
+
+    <string name="prx_device_out_of_range">Device out of range</string>
+    <string name="prx_device_out_of_range_reason">Device is out of range and it has disconnected. It should reconnect automatically after device is in range again.</string>
 </resources>

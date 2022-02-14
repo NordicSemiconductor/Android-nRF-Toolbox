@@ -3,9 +3,11 @@ package no.nordicsemi.android.hts.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.hts.data.HTSRepository
-import no.nordicsemi.android.hts.repository.HTSService
 import no.nordicsemi.android.hts.repository.HTS_SERVICE_UUID
 import no.nordicsemi.android.hts.view.*
 import no.nordicsemi.android.navigation.*
