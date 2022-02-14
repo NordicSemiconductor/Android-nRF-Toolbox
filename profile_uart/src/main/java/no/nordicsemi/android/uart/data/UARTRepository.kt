@@ -1,58 +1,74 @@
 package no.nordicsemi.android.uart.data
 
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
+import android.bluetooth.BluetoothDevice
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import no.nordicsemi.android.service.BleManagerStatus
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import no.nordicsemi.android.ble.ktx.suspend
+import no.nordicsemi.android.service.BleManagerResult
+import no.nordicsemi.android.service.ConnectingResult
+import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.android.uart.repository.UARTManager
+import no.nordicsemi.android.uart.repository.UARTService
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class UARTRepository @Inject constructor() {
+class UARTRepository @Inject constructor(
+    @ApplicationContext
+    private val context: Context,
+    private val serviceManager: ServiceManager,
+) {
+    private var manager: UARTManager? = null
 
-    private val _data = MutableStateFlow(UARTData())
-    val data = _data.asStateFlow()
+    private val _data = MutableStateFlow<BleManagerResult<UARTData>>(ConnectingResult())
+    internal val data = _data.asStateFlow()
 
-    private val _command = MutableSharedFlow<UARTServiceCommand>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_LATEST)
-    val command = _command.asSharedFlow()
+    private val _isRunning = MutableStateFlow(false)
+    val isRunning = _isRunning.asStateFlow()
 
-    private val _status = MutableStateFlow(BleManagerStatus.CONNECTING)
-    val status = _status.asStateFlow()
-
-    fun addNewMacro(macro: UARTMacro) {
-        _data.tryEmit(_data.value.copy(macros = _data.value.macros + macro))
+    fun launch(device: BluetoothDevice) {
+        serviceManager.startService(UARTService::class.java, device)
     }
 
-    fun deleteMacro(macro: UARTMacro) {
-        val macros = _data.value.macros.toMutableList().apply {
-            remove(macro)
-        }
-        _data.tryEmit(_data.value.copy(macros = macros))
-    }
+    fun start(device: BluetoothDevice, scope: CoroutineScope) {
+        val manager = UARTManager(context, scope)
+        this.manager = manager
 
-    fun emitNewMessage(message: String) {
-        _data.tryEmit(_data.value.copy(text = message))
-    }
+        manager.dataHolder.status.onEach {
+            _data.value = it
+        }.launchIn(scope)
 
-    fun emitNewBatteryLevel(batteryLevel: Int) {
-        _data.tryEmit(_data.value.copy(batteryLevel = batteryLevel))
-    }
-
-    fun sendNewCommand(command: UARTServiceCommand) {
-        if (_command.subscriptionCount.value > 0) {
-            _command.tryEmit(command)
-        } else {
-            _status.tryEmit(BleManagerStatus.DISCONNECTED)
+        scope.launch {
+            manager.start(device)
         }
     }
 
-    fun setNewStatus(status: BleManagerStatus) {
-        _status.value = status
+    fun runMacro(macro: UARTMacro) {
+        manager?.send(macro.command)
     }
 
-    fun clear() {
-        _status.value = BleManagerStatus.CONNECTING
+    private suspend fun UARTManager.start(device: BluetoothDevice) {
+        try {
+            connect(device)
+                .useAutoConnect(false)
+                .retry(3, 100)
+                .suspend()
+            _isRunning.value = true
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun release() {
+        serviceManager.stopService(UARTService::class.java)
+        manager?.disconnect()?.enqueue()
+        manager = null
+        _isRunning.value = false
     }
 }

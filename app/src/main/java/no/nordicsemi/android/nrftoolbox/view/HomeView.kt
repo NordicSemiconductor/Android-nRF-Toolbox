@@ -19,6 +19,8 @@ import no.nordicsemi.android.nrftoolbox.R
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewModel
 import no.nordicsemi.android.theme.view.TitleAppBar
 
+private const val DFU_LINK = "https://github.com/NordicSemiconductor/Android-DFU-Library"
+
 @Composable
 fun HomeScreen() {
     val viewModel: HomeViewModel = hiltViewModel()
@@ -111,7 +113,7 @@ fun HomeScreen() {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                FeatureButton(R.drawable.ic_uart, R.string.uart_module, R.string.uart_module_full) {
+                FeatureButton(R.drawable.ic_uart, R.string.uart_module, R.string.uart_module_full, state.isUARTModuleRunning) {
                     viewModel.openProfile(ProfileDestination.UART)
                 }
 
@@ -119,7 +121,7 @@ fun HomeScreen() {
 
                 val uriHandler = LocalUriHandler.current
                 FeatureButton(R.drawable.ic_dfu, R.string.dfu_module, R.string.dfu_module_full) {
-                    uriHandler.openUri("https://github.com/NordicSemiconductor/Android-DFU-Library")
+                    uriHandler.openUri(DFU_LINK)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))

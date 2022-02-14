@@ -9,4 +9,6 @@ internal data class OnDeleteMacro(val macro: UARTMacro) : UARTViewEvent()
 
 internal data class OnRunMacro(val macro: UARTMacro) : UARTViewEvent()
 
-internal object OnDisconnectButtonClick : UARTViewEvent()
+internal object DisconnectEvent : UARTViewEvent()
+
+internal object NavigateUp : UARTViewEvent()

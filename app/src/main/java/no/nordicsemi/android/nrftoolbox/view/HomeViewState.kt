@@ -6,5 +6,6 @@ data class HomeViewState(
     val isHTSModuleRunning: Boolean = false,
     val isRSCSModuleRunning: Boolean = false,
     val isPRXModuleRunning: Boolean = false,
-    val isCGMModuleRunning: Boolean = false
+    val isCGMModuleRunning: Boolean = false,
+    val isUARTModuleRunning: Boolean = false
 )

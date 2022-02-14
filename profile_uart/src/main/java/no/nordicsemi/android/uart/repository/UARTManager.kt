@@ -26,53 +26,66 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import android.content.Context
 import android.text.TextUtils
-import android.util.Log
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.WriteRequest
+import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
 import no.nordicsemi.android.ble.ktx.asFlow
-import no.nordicsemi.android.ble.ktx.suspend
-import no.nordicsemi.android.service.BatteryManager
-import no.nordicsemi.android.uart.data.UARTRepository
+import no.nordicsemi.android.ble.ktx.asValidResponseFlow
+import no.nordicsemi.android.service.ConnectionObserverAdapter
+import no.nordicsemi.android.uart.data.UARTData
 import no.nordicsemi.android.utils.EMPTY
+import no.nordicsemi.android.utils.launchWithCatch
 import java.util.*
 
 val UART_SERVICE_UUID = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")
 private val UART_RX_CHARACTERISTIC_UUID = UUID.fromString("6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
 private val UART_TX_CHARACTERISTIC_UUID = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
 
+private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
+private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
+
 internal class UARTManager(
     context: Context,
-    scope: CoroutineScope,
-    private val dataHolder: UARTRepository
-) : BatteryManager(context, scope) {
+    private val scope: CoroutineScope,
+) : BleManager(context) {
+
+    private var batteryLevelCharacteristic: BluetoothGattCharacteristic? = null
 
     private var rxCharacteristic: BluetoothGattCharacteristic? = null
     private var txCharacteristic: BluetoothGattCharacteristic? = null
 
-    private val exceptionHandler = CoroutineExceptionHandler { _, t->
-        Log.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
-    }
-
     private var useLongWrite = true
 
-    private inner class UARTManagerGattCallback : BatteryManagerGattCallback() {
+    private val data = MutableStateFlow(UARTData())
+    val dataHolder = ConnectionObserverAdapter<UARTData>()
+
+    init {
+        setConnectionObserver(dataHolder)
+
+        data.onEach {
+            dataHolder.setValue(it)
+        }.launchIn(scope)
+    }
+
+    private inner class UARTManagerGattCallback : BleManagerGattCallback() {
 
         override fun initialize() {
             setNotificationCallback(txCharacteristic).asFlow().onEach {
                 val text: String = it.getStringValue(0) ?: String.EMPTY
-                dataHolder.emitNewMessage(text)
+                data.tryEmit(data.value.copy(text = text))
             }
 
-            scope.launch(exceptionHandler) {
-                requestMtu(260).suspend()
-            }
+            requestMtu(260).enqueue()
+            enableNotifications(txCharacteristic).enqueue()
 
-            scope.launch(exceptionHandler) {
-                enableNotifications(txCharacteristic).suspend()
-            }
+            setNotificationCallback(batteryLevelCharacteristic).asValidResponseFlow<BatteryLevelResponse>().onEach {
+                data.value = data.value.copy(batteryLevel = it.batteryLevel)
+            }.launchIn(scope)
+            enableNotifications(batteryLevelCharacteristic).enqueue()
         }
 
         override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
@@ -100,24 +113,24 @@ internal class UARTManager(
                     useLongWrite = false
                 }
             }
-            return rxCharacteristic != null && txCharacteristic != null && (writeRequest || writeCommand)
-        }
-
-        override fun onDeviceDisconnected() {
-            rxCharacteristic = null
-            txCharacteristic = null
-            useLongWrite = true
+            gatt.getService(BATTERY_SERVICE_UUID)?.run {
+                batteryLevelCharacteristic = getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
+            }
+            return rxCharacteristic != null && txCharacteristic != null && batteryLevelCharacteristic != null && (writeRequest || writeCommand)
         }
 
         override fun onServicesInvalidated() {
-
+            batteryLevelCharacteristic = null
+            rxCharacteristic = null
+            txCharacteristic = null
+            useLongWrite = true
         }
     }
 
     fun send(text: String) {
         if (rxCharacteristic == null) return
         if (!TextUtils.isEmpty(text)) {
-            scope.launch(exceptionHandler) {
+            scope.launchWithCatch {
                 val request: WriteRequest = writeCharacteristic(rxCharacteristic, text.toByteArray(), BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
                 if (!useLongWrite) {
                     request.split()
@@ -127,11 +140,7 @@ internal class UARTManager(
         }
     }
 
-    override fun onBatteryLevelChanged(batteryLevel: Int) {
-        dataHolder.emitNewBatteryLevel(batteryLevel)
-    }
-
-    override fun getGattCallback(): BatteryManagerGattCallback {
+    override fun getGattCallback(): BleManagerGattCallback {
         return UARTManagerGattCallback()
     }
 }

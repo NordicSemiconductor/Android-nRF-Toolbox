@@ -3,14 +3,13 @@ package no.nordicsemi.android.uart.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.navigation.*
-import no.nordicsemi.android.service.BleManagerStatus
-import no.nordicsemi.android.service.ServiceManager
-import no.nordicsemi.android.uart.data.DisconnectCommand
-import no.nordicsemi.android.uart.data.SendTextCommand
+import no.nordicsemi.android.uart.data.UARTMacro
 import no.nordicsemi.android.uart.data.UARTRepository
-import no.nordicsemi.android.uart.repository.UARTService
 import no.nordicsemi.android.uart.repository.UART_SERVICE_UUID
 import no.nordicsemi.android.uart.view.*
 import no.nordicsemi.android.utils.exhaustive
@@ -21,19 +20,23 @@ import javax.inject.Inject
 @HiltViewModel
 internal class UARTViewModel @Inject constructor(
     private val repository: UARTRepository,
-    private val serviceManager: ServiceManager,
     private val navigationManager: NavigationManager
 ) : ViewModel() {
 
-    val state = repository.data.combine(repository.status) { data, status ->
-//        when (status) {
-//            BleManagerStatus.CONNECTING -> LoadingState
-//            BleManagerStatus.OK,
-//            BleManagerStatus.DISCONNECTED -> DisplayDataState(data)
-//        }
-    }.stateIn(viewModelScope, SharingStarted.Lazily, LoadingState)
+    private val _state = MutableStateFlow(UARTViewState())
+    val state = _state.asStateFlow()
 
     init {
+        if (!repository.isRunning.value) {
+            requestBluetoothDevice()
+        }
+
+        repository.data.onEach {
+            _state.value = _state.value.copy(uartManagerState = WorkingState(it))
+        }.launchIn(viewModelScope)
+    }
+
+    private fun requestBluetoothDevice() {
         navigationManager.navigateTo(ScannerDestinationId, UUIDArgument(UART_SERVICE_UUID))
 
         navigationManager.recentResult.onEach {
@@ -41,32 +44,38 @@ internal class UARTViewModel @Inject constructor(
                 handleArgs(it)
             }
         }.launchIn(viewModelScope)
-
-        repository.status.onEach {
-            if (it == BleManagerStatus.DISCONNECTED) {
-                navigationManager.navigateUp()
-            }
-        }.launchIn(viewModelScope)
     }
 
     private fun handleArgs(args: DestinationResult) {
         when (args) {
             is CancelDestinationResult -> navigationManager.navigateUp()
-            is SuccessDestinationResult -> serviceManager.startService(UARTService::class.java, args.getDevice())
+            is SuccessDestinationResult -> repository.launch(args.getDevice().device)
         }.exhaustive
     }
 
     fun onEvent(event: UARTViewEvent) {
         when (event) {
-            is OnCreateMacro -> repository.addNewMacro(event.macro)
-            is OnDeleteMacro -> repository.deleteMacro(event.macro)
-            OnDisconnectButtonClick -> repository.sendNewCommand(DisconnectCommand)
-            is OnRunMacro -> repository.sendNewCommand(SendTextCommand(event.macro.command))
+            is OnCreateMacro -> addNewMacro(event.macro)
+            is OnDeleteMacro -> deleteMacro(event.macro)
+            DisconnectEvent -> disconnect()
+            is OnRunMacro -> repository.runMacro(event.macro)
+            NavigateUp -> navigationManager.navigateUp()
         }.exhaustive
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        repository.clear()
+    private fun addNewMacro(macro: UARTMacro) {
+        _state.tryEmit(_state.value.copy(macros = _state.value.macros + macro))
+    }
+
+    private fun deleteMacro(macro: UARTMacro) {
+        val macros = _state.value.macros.toMutableList().apply {
+            remove(macro)
+        }
+        _state.tryEmit(_state.value.copy(macros = macros))
+    }
+
+    private fun disconnect() {
+        repository.release()
+        navigationManager.navigateUp()
     }
 }

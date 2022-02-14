@@ -1,37 +1,27 @@
 package no.nordicsemi.android.uart.repository
 
+import android.bluetooth.BluetoothDevice
+import android.content.Intent
+import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import no.nordicsemi.android.service.ForegroundBleService
-import no.nordicsemi.android.uart.data.DisconnectCommand
-import no.nordicsemi.android.uart.data.SendTextCommand
+import no.nordicsemi.android.service.DEVICE_DATA
+import no.nordicsemi.android.service.NotificationService
 import no.nordicsemi.android.uart.data.UARTRepository
-import no.nordicsemi.android.utils.exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class UARTService : ForegroundBleService() {
+internal class UARTService : NotificationService() {
 
     @Inject
     lateinit var repository: UARTRepository
 
-    override val manager: UARTManager by lazy { UARTManager(this, scope, repository) }
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
 
-    override fun onCreate() {
-        super.onCreate()
+        val device = intent!!.getParcelableExtra<BluetoothDevice>(DEVICE_DATA)!!
 
-//        status.onEach {
-//            val status = it.mapToSimpleManagerStatus()
-//            repository.setNewStatus(status)
-//            stopIfDisconnected(status)
-//        }.launchIn(scope)
+        repository.start(device, lifecycleScope)
 
-        repository.command.onEach {
-            when (it) {
-                DisconnectCommand -> stopSelf()
-                is SendTextCommand -> manager.send(it.command)
-            }.exhaustive
-        }.launchIn(scope)
+        return START_REDELIVER_INTENT
     }
 }

@@ -18,19 +18,26 @@ import no.nordicsemi.android.theme.view.ScreenSection
 import no.nordicsemi.android.theme.view.SectionTitle
 import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.uart.data.UARTData
+import no.nordicsemi.android.uart.data.UARTMacro
 
 @Composable
-internal fun UARTContentView(state: UARTData, onEvent: (UARTViewEvent) -> Unit) {
+internal fun UARTContentView(state: UARTData, macros: List<UARTMacro>, onEvent: (UARTViewEvent) -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(16.dp)
     ) {
-        InputSection(state, onEvent)
+        InputSection(macros, onEvent)
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        if (state.text.isNotEmpty()) {
+            OutputSection(state.text)
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
         Button(
-            onClick = { onEvent(OnDisconnectButtonClick) }
+            onClick = { onEvent(DisconnectEvent) }
         ) {
             Text(text = stringResource(id = R.string.disconnect))
         }
@@ -38,7 +45,7 @@ internal fun UARTContentView(state: UARTData, onEvent: (UARTViewEvent) -> Unit) 
 }
 
 @Composable
-private fun InputSection(state: UARTData, onEvent: (UARTViewEvent) -> Unit) {
+private fun InputSection(macros: List<UARTMacro>, onEvent: (UARTViewEvent) -> Unit) {
     val showSearchDialog = remember { mutableStateOf(false) }
 
     if (showSearchDialog.value) {
@@ -53,13 +60,13 @@ private fun InputSection(state: UARTData, onEvent: (UARTViewEvent) -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            state.macros.forEach {
+            macros.forEach {
                 MacroItem(macro = it, onEvent = onEvent)
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            if (state.macros.isEmpty()) {
+            if (macros.isEmpty()) {
                 Text(
                     text = stringResource(id = R.string.uart_no_macros_info),
                     style = MaterialTheme.typography.bodyMedium
@@ -78,7 +85,7 @@ private fun InputSection(state: UARTData, onEvent: (UARTViewEvent) -> Unit) {
 }
 
 @Composable
-private fun OutputSection(state: UARTData, onEvent: (UARTViewEvent) -> Unit) {
+private fun OutputSection(text: String) {
     ScreenSection {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
@@ -87,7 +94,7 @@ private fun OutputSection(state: UARTData, onEvent: (UARTViewEvent) -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-
+            Text(text = text)
         }
     }
 }
