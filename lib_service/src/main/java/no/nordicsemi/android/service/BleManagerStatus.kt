@@ -13,6 +13,10 @@ sealed class BleManagerResult <T> {
     fun hasBeenDisconnected(): Boolean {
         return this is LinkLossResult || this is DisconnectedResult || this is MissingServiceResult
     }
+
+    fun hasBeenDisconnectedWithoutLinkLoss(): Boolean {
+        return this is DisconnectedResult || this is MissingServiceResult
+    }
 }
 
 class ConnectingResult<T> : BleManagerResult<T>()

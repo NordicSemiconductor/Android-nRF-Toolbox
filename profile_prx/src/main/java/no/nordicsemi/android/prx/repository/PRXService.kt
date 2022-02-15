@@ -24,7 +24,7 @@ internal class PRXService : NotificationService() {
 
         repository.start(device, lifecycleScope)
 
-        repository.hasBeenDisconnected.onEach {
+        repository.hasBeenDisconnectedWithoutLinkLoss.onEach {
             if (it) stopSelf()
         }.launchIn(lifecycleScope)
 

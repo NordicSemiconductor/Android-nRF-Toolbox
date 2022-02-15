@@ -11,10 +11,7 @@ import no.nordicsemi.android.prx.repository.AlarmHandler
 import no.nordicsemi.android.prx.repository.PRXManager
 import no.nordicsemi.android.prx.repository.PRXService
 import no.nordicsemi.android.prx.repository.ProximityServerManager
-import no.nordicsemi.android.service.BleManagerResult
-import no.nordicsemi.android.service.ConnectingResult
-import no.nordicsemi.android.service.ServiceManager
-import no.nordicsemi.android.service.SuccessResult
+import no.nordicsemi.android.service.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,7 +30,7 @@ class PRXRepository @Inject internal constructor(
     internal val data = _data.asStateFlow()
 
     val isRunning = data.map { it.isRunning() }
-    val hasBeenDisconnected = data.map { it.hasBeenDisconnected() }
+    val hasBeenDisconnectedWithoutLinkLoss = data.map { it.hasBeenDisconnectedWithoutLinkLoss() }
 
     fun launch(device: BluetoothDevice) {
         serviceManager.startService(PRXService::class.java, device)
@@ -50,20 +47,14 @@ class PRXRepository @Inject internal constructor(
             handleLocalAlarm(it)
         }.launchIn(scope)
 
-        scope.launch {
-            manager.start(device)
-        }
+        manager.start(device)
     }
 
-    private suspend fun PRXManager.start(device: BluetoothDevice) {
-        try {
-            connect(device)
-                .useAutoConnect(false)
-                .retry(3, 100)
-                .suspend()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+    private fun PRXManager.start(device: BluetoothDevice) {
+        connect(device)
+            .useAutoConnect(true)
+            .retry(3, 100)
+            .enqueue()
     }
 
     private fun handleLocalAlarm(result: BleManagerResult<PRXData>) {
@@ -74,6 +65,10 @@ class PRXRepository @Inject internal constructor(
                 alarmHandler.pauseAlarm()
             }
         }
+//        (result as? LinkLossResult<PRXData>)?.let {
+//            alarmHandler.playAlarm(it.data.localAlarmLevel)
+//            repository.setLocalAlarmLevel(repository.data.value.linkLossAlarmLevel)
+//        }
     }
 
     fun enableAlarm() {
