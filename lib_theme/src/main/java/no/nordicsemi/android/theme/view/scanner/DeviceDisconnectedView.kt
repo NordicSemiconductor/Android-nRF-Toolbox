@@ -20,7 +20,7 @@ import no.nordicsemi.android.theme.R
 import no.nordicsemi.android.theme.view.ScreenSection
 
 enum class Reason {
-    USER, LINK_LOSS, MISSING_SERVICE
+    USER, UNKNOWN, LINK_LOSS, MISSING_SERVICE
 }
 
 @Composable
@@ -57,6 +57,7 @@ fun DeviceDisconnectedView(reason: Reason, navigateUp: () -> Unit) {
                 Reason.USER -> stringResource(id = R.string.device_reason_user)
                 Reason.LINK_LOSS -> stringResource(id = R.string.device_reason_link_loss)
                 Reason.MISSING_SERVICE -> stringResource(id = R.string.device_reason_missing_service)
+                Reason.UNKNOWN -> stringResource(id = R.string.device_reason_unknown)
             }
 
             Text(

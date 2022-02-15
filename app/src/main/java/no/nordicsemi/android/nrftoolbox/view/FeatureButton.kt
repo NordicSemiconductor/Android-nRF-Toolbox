@@ -6,16 +6,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
@@ -41,6 +37,12 @@ fun FeatureButton(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            val color = if (isRunning == true) {
+                colorResource(id = R.color.nordicGrass)
+            } else {
+                MaterialTheme.colorScheme.secondary
+            }
+
             Image(
                 painter = painterResource(iconId),
                 contentDescription = stringResource(id = name),
@@ -49,7 +51,7 @@ fun FeatureButton(
                 modifier = Modifier
                     .size(64.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.secondary)
+                    .background(color)
                     .padding(16.dp)
             )
 
@@ -61,32 +63,7 @@ fun FeatureButton(
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
             )
-
-            Spacer(modifier = Modifier.size(16.dp))
-
-//            Text(
-//                text = stringResource(id = nameCode),
-//                style = MaterialTheme.typography.headlineSmall,
-//                textAlign = TextAlign.Center
-//            )
-
-            isRunning?.let {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_running_indicator),
-                    contentDescription = stringResource(id = R.string.running_profile_icon),
-                    tint = getRunningIndicatorColor(it)
-                )
-            }
         }
-    }
-}
-
-@Composable
-private fun getRunningIndicatorColor(isRunning: Boolean): Color {
-    return if (isRunning) {
-        colorResource(id = R.color.nordicGrass)
-    } else {
-        MaterialTheme.colorScheme.outline
     }
 }
 

@@ -175,7 +175,7 @@ internal class GLSManager @Inject constructor(
             gatt.getService(BATTERY_SERVICE_UUID)?.run {
                 batteryLevelCharacteristic = getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
             }
-            return glucoseMeasurementCharacteristic != null && recordAccessControlPointCharacteristic != null && glucoseMeasurementContextCharacteristic != null && batteryLevelCharacteristic != null
+            return glucoseMeasurementCharacteristic != null && recordAccessControlPointCharacteristic != null && batteryLevelCharacteristic != null
         }
 
         override fun onServicesInvalidated() {}

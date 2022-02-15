@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.ble.BleManager
+import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
 import no.nordicsemi.android.ble.common.callback.rsc.RunningSpeedAndCadenceMeasurementResponse
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
 import no.nordicsemi.android.ble.ktx.suspend
@@ -76,10 +77,14 @@ internal class RSCSManager internal constructor(
                         totalDistance = it.totalDistance
                     ))
                     }.launchIn(scope)
+            enableNotifications(rscMeasurementCharacteristic).enqueue()
 
-            scope.launchWithCatch {
-                enableNotifications(rscMeasurementCharacteristic).suspend()
-            }
+            setNotificationCallback(batteryLevelCharacteristic)
+                .asValidResponseFlow<BatteryLevelResponse>()
+                .onEach {
+                    data.value = data.value.copy(batteryLevel = it.batteryLevel)
+                }.launchIn(scope)
+            enableNotifications(batteryLevelCharacteristic).enqueue()
         }
 
         public override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {

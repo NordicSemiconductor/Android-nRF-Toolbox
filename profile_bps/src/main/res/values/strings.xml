@@ -2,7 +2,7 @@
 <resources>
     <string name="bps_title">Blood pressure</string>
 
-    <string name="bps_records">Records</string>
+    <string name="bps_records">Data</string>
 
     <string name="bps_systolic">Systolic</string>
     <string name="bps_diastolic">Diastolic</string>

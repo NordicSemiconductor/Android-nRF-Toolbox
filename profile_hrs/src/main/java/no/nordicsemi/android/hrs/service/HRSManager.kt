@@ -24,13 +24,10 @@ package no.nordicsemi.android.hrs.service
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
-import android.util.Log
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
 import no.nordicsemi.android.ble.common.callback.hr.BodySensorLocationResponse

@@ -32,11 +32,11 @@ fun CSCScreen() {
             when (state.cscManagerState) {
                 NoDeviceState -> NoDeviceView()
                 is WorkingState -> when (state.cscManagerState.result) {
-                    is ConnectingResult,
-                    is ReadyResult -> DeviceConnectingView { viewModel.onEvent(OnDisconnectButtonClick) }
+                    is ConnectingResult -> DeviceConnectingView { viewModel.onEvent(OnDisconnectButtonClick) }
                     is DisconnectedResult -> DeviceDisconnectedView(Reason.USER, navigateUp)
                     is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp)
                     is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp)
+                    is UnknownErrorResult -> DeviceDisconnectedView(Reason.UNKNOWN, navigateUp)
                     is SuccessResult -> CSCContentView(state.cscManagerState.result.data, state.speedUnit) { viewModel.onEvent(it) }
                 }
             }.exhaustive

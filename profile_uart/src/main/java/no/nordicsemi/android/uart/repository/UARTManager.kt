@@ -41,7 +41,7 @@ import no.nordicsemi.android.utils.EMPTY
 import no.nordicsemi.android.utils.launchWithCatch
 import java.util.*
 
-val UART_SERVICE_UUID = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")
+val UART_SERVICE_UUID: UUID = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")
 private val UART_RX_CHARACTERISTIC_UUID = UUID.fromString("6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
 private val UART_TX_CHARACTERISTIC_UUID = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
 
@@ -116,7 +116,7 @@ internal class UARTManager(
             gatt.getService(BATTERY_SERVICE_UUID)?.run {
                 batteryLevelCharacteristic = getCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
             }
-            return rxCharacteristic != null && txCharacteristic != null && batteryLevelCharacteristic != null && (writeRequest || writeCommand)
+            return rxCharacteristic != null && txCharacteristic != null && (writeRequest || writeCommand)
         }
 
         override fun onServicesInvalidated() {

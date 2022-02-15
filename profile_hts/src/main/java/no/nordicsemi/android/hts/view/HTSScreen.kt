@@ -32,11 +32,11 @@ fun HTSScreen() {
             when (state.htsManagerState) {
                 NoDeviceState -> NoDeviceView()
                 is WorkingState -> when (state.htsManagerState.result) {
-                    is ConnectingResult,
-                    is ReadyResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
+                    is ConnectingResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
                     is DisconnectedResult -> DeviceDisconnectedView(Reason.USER, navigateUp)
                     is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp)
                     is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp)
+                    is UnknownErrorResult -> DeviceDisconnectedView(Reason.UNKNOWN, navigateUp)
                     is SuccessResult -> HTSContentView(state.htsManagerState.result.data, state.temperatureUnit) { viewModel.onEvent(it) }
                 }
             }.exhaustive

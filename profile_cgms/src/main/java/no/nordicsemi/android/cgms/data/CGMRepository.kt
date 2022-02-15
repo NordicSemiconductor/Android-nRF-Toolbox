@@ -4,10 +4,7 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.cgms.repository.CGMManager
@@ -30,8 +27,8 @@ class CGMRepository @Inject constructor(
     private val _data = MutableStateFlow<BleManagerResult<CGMData>>(ConnectingResult())
     internal val data = _data.asStateFlow()
 
-    private val _isRunning = MutableStateFlow(false)
-    val isRunning = _isRunning.asStateFlow()
+    val isRunning = data.map { it.isRunning() }
+    val hasBeenDisconnected = data.map { it.hasBeenDisconnected() }
 
     fun launch(device: BluetoothDevice) {
         serviceManager.startService(CGMService::class.java, device)
@@ -56,7 +53,6 @@ class CGMRepository @Inject constructor(
                 .useAutoConnect(false)
                 .retry(3, 100)
                 .suspend()
-            _isRunning.value = true
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -75,9 +71,7 @@ class CGMRepository @Inject constructor(
     }
 
     fun release() {
-        serviceManager.stopService(CGMService::class.java)
         manager?.disconnect()?.enqueue()
         manager = null
-        _isRunning.value = false
     }
 }

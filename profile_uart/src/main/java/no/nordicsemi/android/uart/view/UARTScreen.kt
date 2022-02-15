@@ -26,20 +26,17 @@ fun UARTScreen() {
     Column {
         val navigateUp = { viewModel.onEvent(NavigateUp) }
 
-        BackIconAppBar(stringResource(id = R.string.uart_title)) {
-            viewModel.onEvent(DisconnectEvent)
-        }
+        BackIconAppBar(stringResource(id = R.string.uart_title), navigateUp)
 
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             when (state.uartManagerState) {
                 NoDeviceState -> NoDeviceView()
                 is WorkingState -> when (state.uartManagerState.result) {
-                    is ConnectingResult,
-                    is ReadyResult
-                    -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
+                    is ConnectingResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
                     is DisconnectedResult -> DeviceDisconnectedView(Reason.USER, navigateUp)
                     is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp)
                     is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp)
+                    is UnknownErrorResult -> DeviceDisconnectedView(Reason.UNKNOWN, navigateUp)
                     is SuccessResult -> UARTContentView(state.uartManagerState.result.data, state.macros) { viewModel.onEvent(it) }
                 }
             }.exhaustive

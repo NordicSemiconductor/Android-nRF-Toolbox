@@ -5,7 +5,7 @@
     <string name="dialog">Dialog</string>
     <string name="cancel">CANCEL</string>
 
-    <string name="go_up">Go up</string>
+    <string name="go_up">Back</string>
 
     <string name="close_app">Close the application.</string>
     <string name="back_screen">Close the current screen.</string>
@@ -15,10 +15,11 @@
 
     <string name="device_disconnected">Disconnected</string>
     <string name="device_reason_user">Device disconnected successfully.</string>
+    <string name="device_reason_unknown">Device disconnected with unknown reason.</string>
     <string name="device_reason_link_loss">Device signal has been lost.</string>
     <string name="device_reason_missing_service">Device was disconnected, because required services are missing.</string>
 
-    <string name="device_connecting">Connecting</string>
+    <string name="device_connecting">Connecting...</string>
     <string name="device_explanation">The mobile is trying to connect to peripheral device.</string>
     <string name="device_please_wait">Please wait...</string>
 </resources>

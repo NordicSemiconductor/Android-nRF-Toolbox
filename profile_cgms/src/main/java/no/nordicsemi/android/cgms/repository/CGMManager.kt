@@ -26,7 +26,7 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
 import android.util.Log
 import android.util.SparseArray
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -48,6 +48,7 @@ import no.nordicsemi.android.cgms.data.CGMData
 import no.nordicsemi.android.cgms.data.CGMRecord
 import no.nordicsemi.android.cgms.data.RequestStatus
 import no.nordicsemi.android.service.ConnectionObserverAdapter
+import no.nordicsemi.android.utils.launchWithCatch
 import java.util.*
 
 val CGMS_SERVICE_UUID: UUID = UUID.fromString("0000181F-0000-1000-8000-00805f9b34fb")
@@ -80,10 +81,6 @@ internal class CGMManager(
 
     private var sessionStartTime: Long = 0
 
-    private val exceptionHandler = CoroutineExceptionHandler { _, t ->
-        Log.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
-    }
-
     private val data = MutableStateFlow(CGMData())
     val dataHolder = ConnectionObserverAdapter<CGMData>()
 
@@ -101,32 +98,17 @@ internal class CGMManager(
 
     override fun log(priority: Int, message: String) {
         super.log(priority, message)
-        Log.d("COROUTINE-EXCEPTION", message)
+        Log.d("CGM-PROFILE", message)
     }
 
     private inner class CGMManagerGattCallback : BleManagerGattCallback() {
         override fun initialize() {
             super.initialize()
 
-            scope.launch(exceptionHandler) {
-                val response =
-                    readCharacteristic(cgmFeatureCharacteristic).suspendForValidResponse<CGMFeatureResponse>()
-                this@CGMManager.secured = response.features.e2eCrcSupported
-            }
-
-            scope.launch(exceptionHandler) {
-                val response =
-                    readCharacteristic(cgmFeatureCharacteristic).suspendForValidResponse<CGMFeatureResponse>()
-                this@CGMManager.secured = response.features.e2eCrcSupported
-            }
-
-            scope.launch(exceptionHandler) {
-                val response =
-                    readCharacteristic(cgmStatusCharacteristic).suspendForValidResponse<CGMStatusResponse>()
-                if (response.status?.sessionStopped == false) {
-                    sessionStartTime = System.currentTimeMillis() - response.timeOffset * 60000L
-                }
-            }
+            enableNotifications(cgmMeasurementCharacteristic).enqueue()
+            enableIndications(cgmSpecificOpsControlPointCharacteristic).enqueue()
+            enableIndications(recordAccessControlPointCharacteristic).enqueue()
+            enableNotifications(batteryLevelCharacteristic).enqueue()
 
             setNotificationCallback(cgmMeasurementCharacteristic).asValidResponseFlow<ContinuousGlucoseMeasurementResponse>()
                 .onEach {
@@ -164,7 +146,7 @@ internal class CGMManager(
 
             setIndicationCallback(recordAccessControlPointCharacteristic).asValidResponseFlow<RecordAccessControlPointResponse>()
                 .onEach {
-                    if (it.isOperationCompleted && !it.wereRecordsFound() && it.numberOfRecords > 0) {
+                    if (it.isOperationCompleted && it.wereRecordsFound() && it.numberOfRecords > 0) {
                         onRecordsReceived(it)
                     } else if (it.isOperationCompleted && !it.wereRecordsFound()) {
                         onNoRecordsFound()
@@ -180,13 +162,16 @@ internal class CGMManager(
                     data.value = data.value.copy(batteryLevel = it.batteryLevel)
                 }.launchIn(scope)
 
-            enableNotifications(cgmMeasurementCharacteristic).enqueue()
-            enableIndications(cgmSpecificOpsControlPointCharacteristic).enqueue()
-            enableIndications(recordAccessControlPointCharacteristic).enqueue()
-            enableNotifications(batteryLevelCharacteristic).enqueue()
+            scope.launchWithCatch {
+                val cgmResponse = readCharacteristic(cgmFeatureCharacteristic).suspendForValidResponse<CGMFeatureResponse>()
+                this@CGMManager.secured = cgmResponse.features.e2eCrcSupported
 
-            if (sessionStartTime == 0L) {
-                scope.launch(exceptionHandler) {
+                val response = readCharacteristic(cgmStatusCharacteristic).suspendForValidResponse<CGMStatusResponse>()
+                if (response.status?.sessionStopped == false) {
+                    sessionStartTime = System.currentTimeMillis() - response.timeOffset * 60000L
+                }
+
+                if (sessionStartTime == 0L) {
                     writeCharacteristic(
                         cgmSpecificOpsControlPointCharacteristic,
                         CGMSpecificOpsControlPointData.startSession(secured),
@@ -282,7 +267,7 @@ internal class CGMManager(
         clear()
         data.value = data.value.copy(requestStatus = RequestStatus.PENDING)
         recordAccessRequestInProgress = true
-        scope.launch(exceptionHandler) {
+        scope.launchWithCatch {
             writeCharacteristic(
                 recordAccessControlPointCharacteristic,
                 RecordAccessControlPointData.reportLastStoredRecord(),
@@ -296,7 +281,7 @@ internal class CGMManager(
         clear()
         data.value = data.value.copy(requestStatus = RequestStatus.PENDING)
         recordAccessRequestInProgress = true
-        scope.launch(exceptionHandler) {
+        scope.launchWithCatch {
             writeCharacteristic(
                 recordAccessControlPointCharacteristic,
                 RecordAccessControlPointData.reportFirstStoredRecord(),
@@ -310,7 +295,7 @@ internal class CGMManager(
         clear()
         data.value = data.value.copy(requestStatus = RequestStatus.PENDING)
         recordAccessRequestInProgress = true
-        scope.launch(exceptionHandler) {
+        scope.launchWithCatch {
             writeCharacteristic(
                 recordAccessControlPointCharacteristic,
                 RecordAccessControlPointData.reportNumberOfAllStoredRecords(),

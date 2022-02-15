@@ -3,10 +3,8 @@ package no.nordicsemi.android.prx.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import no.nordicsemi.android.navigation.*
 import no.nordicsemi.android.prx.data.PRXRepository
 import no.nordicsemi.android.prx.repository.PRX_SERVICE_UUID
@@ -26,8 +24,10 @@ internal class PRXViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     init {
-        if (!repository.isRunning.value) {
-            requestBluetoothDevice()
+        viewModelScope.launch {
+            if (repository.isRunning.firstOrNull() == false) {
+                requestBluetoothDevice()
+            }
         }
 
         repository.data.onEach {

@@ -26,20 +26,17 @@ fun RSCSScreen() {
     Column {
         val navigateUp = { viewModel.onEvent(NavigateUpEvent) }
 
-        BackIconAppBar(stringResource(id = R.string.rscs_title)) {
-            viewModel.onEvent(DisconnectEvent)
-        }
+        BackIconAppBar(stringResource(id = R.string.rscs_title), navigateUp)
 
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             when (state) {
                 NoDeviceState -> NoDeviceView()
                 is WorkingState -> when (state.result) {
-                    is ConnectingResult,
-                    is ReadyResult
-                    -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
+                    is ConnectingResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
                     is DisconnectedResult -> DeviceDisconnectedView(Reason.USER, navigateUp)
                     is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp)
                     is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp)
+                    is UnknownErrorResult -> DeviceDisconnectedView(Reason.UNKNOWN, navigateUp)
                     is SuccessResult -> RSCSContentView(state.result.data) { viewModel.onEvent(it) }
                 }
             }.exhaustive
