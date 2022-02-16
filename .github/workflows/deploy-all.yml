@@ -1,4 +1,4 @@
-name: Deploy to Google Play Alpha & Nexus
+name: Deploy Internal & create Readme
 on:
   push:
     tags:
