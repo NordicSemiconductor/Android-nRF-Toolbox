@@ -27,38 +27,37 @@ dependencyResolutionManagement {
             alias('nordic-theme').to('no.nordicsemi.android.common', 'theme').versionRef('commonlibraries')
 
             alias('localbroadcastmanager').to('androidx.localbroadcastmanager:localbroadcastmanager:1.1.0')
-            alias('material').to('com.google.android.material:material:1.6.0-alpha01')
+            alias('material').to('com.google.android.material:material:1.6.0-alpha02')
 
-            version('lifecycle', '2.4.0')
+            version('lifecycle', '2.4.1')
             alias('lifecycle-activity').to('androidx.lifecycle', 'lifecycle-runtime-ktx').versionRef('lifecycle')
             alias('lifecycle-service').to('androidx.lifecycle', 'lifecycle-service').versionRef('lifecycle')
+            alias('compose-lifecycle').to('androidx.lifecycle', 'lifecycle-viewmodel-compose').versionRef('lifecycle')
 
             alias('androidx-core').to('androidx.core:core-ktx:1.7.0')
             alias('compose-activity').to('androidx.activity:activity-compose:1.4.0')
-            alias('compose-lifecycle').to('androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0')
 
             version('compose', '1.1.0')
-            alias('compose-livedata').to('androidx.compose.runtime', 'runtime-livedata').versionRef('compose')
             alias('compose-ui').to('androidx.compose.ui', 'ui').versionRef('compose')
-            alias('compose-material').to('androidx.compose.material3:material3:1.0.0-alpha04')
+            alias('compose-material').to('androidx.compose.material3:material3:1.0.0-alpha05')
             alias('compose-tooling-preview').to('androidx.compose.ui', 'ui-tooling-preview').versionRef('compose')
-            alias('compose-navigation').to('androidx.navigation:navigation-compose:2.4.0-alpha09')
-            bundle('compose', ['compose-livedata', 'compose-ui', 'compose-material', 'compose-tooling-preview', 'compose-navigation'])
+            alias('compose-navigation').to('androidx.navigation:navigation-compose:2.4.1')
+            bundle('compose', ['compose-ui', 'compose-material', 'compose-tooling-preview', 'compose-navigation'])
 
             alias('material-icons').to('androidx.compose.material', 'material-icons-core').versionRef('compose')
             alias('material-icons-extended').to('androidx.compose.material', 'material-icons-extended').versionRef('compose')
             bundle('icons', ['material-icons', 'material-icons-extended'])
 
-            alias('hilt-android').to('com.google.dagger:hilt-android:2.38.1')
+            alias('hilt-android').to('com.google.dagger:hilt-android:2.40.4')
             alias('hilt-compiler').to('com.google.dagger:hilt-compiler:2.40.4')
-            alias('hilt-compose').to('androidx.hilt:hilt-navigation-compose:1.0.0-rc01')
+            alias('hilt-compose').to('androidx.hilt:hilt-navigation-compose:1.0.0')
             alias('hilt-lifecycle').to('androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03')
             alias('hilt-lifecyclecompiler').to('androidx.hilt:hilt-compiler:1.0.0')
             bundle('hilt', ['hilt-android', 'hilt-compose', 'hilt-lifecycle'])
             bundle('hiltkapt', ['hilt-compiler', 'hilt-lifecyclecompiler'])
 
-            alias('kotlin-coroutines').to('org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2')
-            alias('google-permissions').to('com.google.accompanist:accompanist-permissions:0.18.0')
+            alias('kotlin-coroutines').to('org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0')
+            alias('google-permissions').to('com.google.accompanist:accompanist-permissions:0.20.0')
             alias('chart').to('com.github.PhilJay:MPAndroidChart:v3.1.0')
 
             //-- Test ------------------------------------------------------------------------------

@@ -7,6 +7,6 @@ internal data class CSCData(
     val distance: Float = 0f,
     val totalDistance: Float = 0f,
     val gearRatio: Float = 0f,
-    val batteryLevel: Int = 0,
+    val batteryLevel: Int? = null,
     val wheelSize: WheelSize = WheelSize()
 )

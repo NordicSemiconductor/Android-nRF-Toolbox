@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
-import no.nordicsemi.android.uart.data.UARTRepository
 import javax.inject.Inject
 
 @AndroidEntryPoint

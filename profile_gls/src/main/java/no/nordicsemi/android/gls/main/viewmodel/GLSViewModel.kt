@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import no.nordicsemi.android.gls.GlsDetailsDestinationId
-import no.nordicsemi.android.gls.data.GLSRepository
+import no.nordicsemi.android.gls.repository.GLSRepository
 import no.nordicsemi.android.gls.data.GLS_SERVICE_UUID
 import no.nordicsemi.android.gls.main.view.*
 import no.nordicsemi.android.navigation.*

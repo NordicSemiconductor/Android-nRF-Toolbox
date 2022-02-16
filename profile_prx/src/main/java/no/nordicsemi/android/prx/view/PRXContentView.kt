@@ -34,9 +34,11 @@ internal fun ContentView(state: PRXData, onEvent: (PRXScreenViewEvent) -> Unit) 
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        BatteryLevelView(state.batteryLevel)
+        state.batteryLevel?.let {
+            BatteryLevelView(it)
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         Button(
             onClick = { onEvent(DisconnectEvent) }
@@ -89,12 +91,12 @@ private fun RecordsSection(state: PRXData) {
         Column {
             KeyValueField(
                 stringResource(id = R.string.prx_is_remote_alarm),
-                state.isRemoteAlarm.toString()
+                state.isRemoteAlarm.toDisplayString()
             )
             Spacer(modifier = Modifier.height(4.dp))
             KeyValueField(
                 stringResource(id = R.string.prx_local_alarm_level),
-                state.localAlarmLevel.toDisplayString()
+                state.localAlarmLevel.toDisplayString().uppercase()
             )
         }
     }

@@ -4,7 +4,7 @@ import no.nordicsemi.android.ble.common.profile.bp.BloodPressureTypes
 import java.util.*
 
 data class BPSData(
-    val batteryLevel: Int = 0,
+    val batteryLevel: Int? = null,
     val cuffPressure: Float = 0f,
     val unit: Int = 0,
     val pulseRate: Float? = null,

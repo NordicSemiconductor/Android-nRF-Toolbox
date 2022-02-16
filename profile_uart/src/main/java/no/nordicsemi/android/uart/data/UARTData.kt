@@ -4,5 +4,5 @@ import no.nordicsemi.android.utils.EMPTY
 
 internal data class UARTData(
     val text: String = String.EMPTY,
-    val batteryLevel: Int = 0
+    val batteryLevel: Int? = null,
 )

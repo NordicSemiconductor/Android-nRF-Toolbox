@@ -50,9 +50,11 @@ internal fun HTSContentView(state: HTSData, temperatureUnit: TemperatureUnit, on
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        BatteryLevelView(state.batteryLevel)
+        state.batteryLevel?.let {
+            BatteryLevelView(it)
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         Button(
             onClick = { onEvent(DisconnectEvent) }

@@ -1,7 +1,7 @@
 package no.nordicsemi.android.prx.data
 
 internal data class PRXData(
-    val batteryLevel: Int = 0,
+    val batteryLevel: Int? = null,
     val localAlarmLevel: AlarmLevel = AlarmLevel.NONE,
     val isRemoteAlarm: Boolean = false,
     val linkLossAlarmLevel: AlarmLevel = AlarmLevel.HIGH

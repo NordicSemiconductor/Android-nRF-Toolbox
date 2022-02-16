@@ -36,7 +36,9 @@ internal fun BPSSensorsReadingView(state: BPSData) {
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    BatteryLevelView(state.batteryLevel)
+    state.batteryLevel?.let {
+        BatteryLevelView(it)
+    }
 }
 
 @Preview

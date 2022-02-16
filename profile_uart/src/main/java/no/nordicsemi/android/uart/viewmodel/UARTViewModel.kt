@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.navigation.*
 import no.nordicsemi.android.uart.data.UARTMacro
-import no.nordicsemi.android.uart.data.UARTRepository
-import no.nordicsemi.android.uart.repository.UART_SERVICE_UUID
+import no.nordicsemi.android.uart.data.UART_SERVICE_UUID
+import no.nordicsemi.android.uart.repository.UARTRepository
 import no.nordicsemi.android.uart.view.*
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.android.utils.getDevice

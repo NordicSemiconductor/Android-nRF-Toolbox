@@ -6,8 +6,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.navigation.*
-import no.nordicsemi.android.rscs.data.RSCSRepository
-import no.nordicsemi.android.rscs.repository.RSCS_SERVICE_UUID
+import no.nordicsemi.android.rscs.data.RSCS_SERVICE_UUID
+import no.nordicsemi.android.rscs.repository.RSCSRepository
 import no.nordicsemi.android.rscs.view.*
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.android.utils.getDevice

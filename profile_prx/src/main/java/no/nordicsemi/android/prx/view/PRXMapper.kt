@@ -6,6 +6,14 @@ import no.nordicsemi.android.prx.R
 import no.nordicsemi.android.prx.data.AlarmLevel
 
 @Composable
+internal fun Boolean.toDisplayString(): String {
+    return when (this) {
+        true -> stringResource(id = R.string.prx_alarm_on)
+        false -> stringResource(id = R.string.prx_alarm_off)
+    }.uppercase()
+}
+
+@Composable
 internal fun AlarmLevel.toDisplayString(): String {
     return when (this) {
         AlarmLevel.NONE -> stringResource(id = R.string.prx_alarm_level_none)

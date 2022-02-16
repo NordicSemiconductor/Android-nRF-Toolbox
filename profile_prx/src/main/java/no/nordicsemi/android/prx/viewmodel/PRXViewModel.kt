@@ -6,8 +6,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.navigation.*
-import no.nordicsemi.android.prx.data.PRXRepository
-import no.nordicsemi.android.prx.repository.PRX_SERVICE_UUID
+import no.nordicsemi.android.prx.data.PRX_SERVICE_UUID
+import no.nordicsemi.android.prx.repository.PRXRepository
 import no.nordicsemi.android.prx.view.*
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.android.utils.getDevice

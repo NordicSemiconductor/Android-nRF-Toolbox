@@ -5,9 +5,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.cgms.data.CGMRepository
+import no.nordicsemi.android.cgms.data.CGMS_SERVICE_UUID
+import no.nordicsemi.android.cgms.repository.CGMRepository
 import no.nordicsemi.android.cgms.data.CGMServiceCommand
-import no.nordicsemi.android.cgms.repository.CGMS_SERVICE_UUID
 import no.nordicsemi.android.cgms.view.*
 import no.nordicsemi.android.navigation.*
 import no.nordicsemi.android.utils.exhaustive

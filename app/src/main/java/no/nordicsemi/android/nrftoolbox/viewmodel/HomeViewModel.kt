@@ -7,16 +7,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import no.nordicsemi.android.cgms.data.CGMRepository
-import no.nordicsemi.android.csc.data.CSCRepository
-import no.nordicsemi.android.hrs.data.HRSRepository
-import no.nordicsemi.android.hts.data.HTSRepository
+import no.nordicsemi.android.cgms.repository.CGMRepository
+import no.nordicsemi.android.csc.repository.CSCRepository
+import no.nordicsemi.android.hrs.service.HRSRepository
+import no.nordicsemi.android.hts.repository.HTSRepository
 import no.nordicsemi.android.navigation.NavigationManager
 import no.nordicsemi.android.nrftoolbox.ProfileDestination
 import no.nordicsemi.android.nrftoolbox.view.HomeViewState
-import no.nordicsemi.android.prx.data.PRXRepository
-import no.nordicsemi.android.rscs.data.RSCSRepository
-import no.nordicsemi.android.uart.data.UARTRepository
+import no.nordicsemi.android.prx.repository.PRXRepository
+import no.nordicsemi.android.rscs.repository.RSCSRepository
+import no.nordicsemi.android.uart.repository.UARTRepository
 import javax.inject.Inject
 
 @HiltViewModel

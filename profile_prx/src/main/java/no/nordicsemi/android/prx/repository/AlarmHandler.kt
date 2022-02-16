@@ -20,7 +20,7 @@ internal class AlarmHandler @Inject constructor(
     private val TAG = "ALARM_MANAGER"
 
     private var mediaPlayer = MediaPlayer()
-    private var originalVolume = 0
+    private var volume = 0
 
     init {
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM)
@@ -38,17 +38,16 @@ internal class AlarmHandler @Inject constructor(
 
     fun playAlarm(alarmLevel: AlarmLevel) {
         val am = context.getSystemService(LifecycleService.AUDIO_SERVICE) as AudioManager
-        originalVolume = am.getStreamVolume(AudioManager.STREAM_ALARM)
 
-        val soundLevel = when (alarmLevel) {
+        volume = when (alarmLevel) {
             AlarmLevel.NONE -> 0
-            AlarmLevel.MEDIUM -> originalVolume / 2
-            AlarmLevel.HIGH -> originalVolume
+            AlarmLevel.MEDIUM -> am.getStreamVolume(AudioManager.STREAM_NOTIFICATION)
+            AlarmLevel.HIGH -> am.getStreamVolume(AudioManager.STREAM_ALARM)
         }
 
         am.setStreamVolume(
             AudioManager.STREAM_ALARM,
-            soundLevel,
+            volume,
             AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE
         )
         try {
@@ -65,7 +64,7 @@ internal class AlarmHandler @Inject constructor(
                 mediaPlayer.stop()
                 // Restore original volume
                 val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                am.setStreamVolume(AudioManager.STREAM_ALARM, originalVolume, 0)
+                am.setStreamVolume(AudioManager.STREAM_ALARM, volume, 0)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Prepare Alarm failed: ", e)

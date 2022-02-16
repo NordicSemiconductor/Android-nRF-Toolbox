@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.hrs.data.HRSRepository
-import no.nordicsemi.android.hrs.service.HRS_SERVICE_UUID
+import no.nordicsemi.android.hrs.data.HRS_SERVICE_UUID
+import no.nordicsemi.android.hrs.service.HRSRepository
 import no.nordicsemi.android.hrs.view.*
 import no.nordicsemi.android.navigation.*
 import no.nordicsemi.android.utils.exhaustive

@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import no.nordicsemi.android.bps.data.BPSRepository
-import no.nordicsemi.android.bps.repository.BPS_SERVICE_UUID
+import no.nordicsemi.android.bps.data.BPS_SERVICE_UUID
+import no.nordicsemi.android.bps.repository.BPSRepository
 import no.nordicsemi.android.bps.view.*
 import no.nordicsemi.android.navigation.*
 import no.nordicsemi.android.utils.exhaustive

@@ -15,6 +15,10 @@ class ConnectionObserverAdapter<T> : ConnectionObserver {
 
     private var lastValue: T? = null
 
+    private fun getData(): T? {
+        return (_status.value as? SuccessResult)?.data
+    }
+
     override fun onDeviceConnecting(device: BluetoothDevice) {
         Log.d(TAG, "onDeviceConnecting()")
     }
@@ -41,7 +45,7 @@ class ConnectionObserverAdapter<T> : ConnectionObserver {
         Log.d(TAG, "onDeviceDisconnected(), reason: $reason")
         _status.value = when (reason) {
             ConnectionObserver.REASON_NOT_SUPPORTED -> MissingServiceResult()
-            ConnectionObserver.REASON_LINK_LOSS -> LinkLossResult()
+            ConnectionObserver.REASON_LINK_LOSS -> LinkLossResult(getData()!!)
             ConnectionObserver.REASON_SUCCESS -> DisconnectedResult()
             else -> UnknownErrorResult()
         }

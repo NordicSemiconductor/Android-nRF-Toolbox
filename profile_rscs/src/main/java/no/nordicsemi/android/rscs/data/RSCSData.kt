@@ -1,7 +1,7 @@
 package no.nordicsemi.android.rscs.data
 
 internal data class RSCSData(
-    val batteryLevel: Int = 0,
+    val batteryLevel: Int? = null,
     val running: Boolean = false,
     val instantaneousSpeed: Float = 1.0f,
     val instantaneousCadence: Int = 0,
