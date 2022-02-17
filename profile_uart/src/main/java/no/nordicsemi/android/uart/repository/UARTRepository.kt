@@ -10,8 +10,8 @@ import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.ConnectingResult
 import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.android.uart.data.*
 import no.nordicsemi.android.uart.data.UARTData
-import no.nordicsemi.android.uart.data.UARTMacro
 import no.nordicsemi.android.uart.data.UARTManager
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -48,7 +48,7 @@ class UARTRepository @Inject constructor(
     }
 
     fun runMacro(macro: UARTMacro) {
-        manager?.send(macro.command)
+        manager?.send(macro.command.parseWithNewLineChar(macro.newLineChar))
     }
 
     private suspend fun UARTManager.start(device: BluetoothDevice) {

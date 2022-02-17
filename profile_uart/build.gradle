@@ -1,5 +1,26 @@
 apply from: rootProject.file("library.gradle")
 apply plugin: 'kotlin-parcelize'
+apply plugin: 'com.google.protobuf'
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.14.0"
+    }
+
+    // Generates the java Protobuf-lite code for the Protobufs in this project. See
+    // https://github.com/google/protobuf-gradle-plugin#customizing-protobuf-compilation
+    // for more information.
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option 'lite'
+                }
+            }
+        }
+    }
+
+}
 
 dependencies {
     implementation project(":lib_service")
@@ -14,6 +35,7 @@ dependencies {
     implementation libs.nordic.ui.scanner
     implementation libs.nordic.navigation
 
+    implementation libs.bundles.datastore
     implementation libs.bundles.compose
     implementation libs.androidx.core
     implementation libs.material

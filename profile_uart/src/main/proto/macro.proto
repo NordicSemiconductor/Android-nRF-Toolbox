@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option java_package = "no.nordicsemi.android";
+option java_multiple_files = true;
+
+message Macro {
+  string name = 1;
+  enum NewLineType {
+    LF = 0;
+    LF_CR = 1;
+    CR = 2;
+  }
+  NewLineType newLineType = 2;
+}
+
+message MacroSettings {
+  string macros = 1;
+}
