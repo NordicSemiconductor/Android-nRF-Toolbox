@@ -36,7 +36,6 @@ import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
 import no.nordicsemi.android.ble.ktx.asFlow
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
 import no.nordicsemi.android.service.ConnectionObserverAdapter
-import no.nordicsemi.android.uart.data.UARTData
 import no.nordicsemi.android.utils.EMPTY
 import no.nordicsemi.android.utils.launchWithCatch
 import java.util.*
@@ -76,7 +75,7 @@ internal class UARTManager(
         override fun initialize() {
             setNotificationCallback(txCharacteristic).asFlow().onEach {
                 val text: String = it.getStringValue(0) ?: String.EMPTY
-                data.tryEmit(data.value.copy(text = text))
+                data.value = data.value.copy(text = text)
             }
 
             requestMtu(260).enqueue()

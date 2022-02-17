@@ -1,12 +1,7 @@
 package no.nordicsemi.android.uart.view
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -42,11 +37,11 @@ internal fun MacroItem(macro: UARTMacro, onEvent: (UARTViewEvent) -> Unit) {
 
             Spacer(modifier = Modifier.size(16.dp))
 
-            Column(modifier = Modifier.weight(1f)) {
+            Column(modifier = Modifier.weight(1f).padding(vertical = 8.dp)) {
                 Text(
-                    text = macro.alias,
+                    text = stringResource(id = R.string.uart_macro_dialog_selected_eol, macro.newLineChar.toDisplayString()),
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
                 Text(
                     text = stringResource(id = R.string.uart_command_field, macro.command),

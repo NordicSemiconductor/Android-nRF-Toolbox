@@ -26,15 +26,13 @@ internal fun UARTContentView(state: UARTData, macros: List<UARTMacro>, onEvent: 
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(16.dp)
     ) {
-        InputSection(macros, onEvent)
+        OutputSection(state.text)
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (state.text.isNotEmpty()) {
-            OutputSection(state.text)
+        InputSection(macros, onEvent)
 
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = { onEvent(DisconnectEvent) }
@@ -94,7 +92,7 @@ private fun OutputSection(text: String) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(text = text)
+            Text(text = text.ifBlank { stringResource(id = R.string.uart_output_placeholder) })
         }
     }
 }

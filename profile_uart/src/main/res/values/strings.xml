@@ -20,4 +20,13 @@
     <string name="uart_macro_dialog_command">Command</string>
     <string name="uart_macro_dialog_confirm">Confirm</string>
     <string name="uart_macro_dialog_dismiss">Dismiss</string>
+
+    <string name="uart_macro_dialog_eol">EOL:</string>
+    <string name="uart_macro_dialog_selected_eol">EOL: %s</string>
+    <string name="uart_macro_dialog_lf">LF</string>
+    <string name="uart_macro_dialog_cr_lf">CR + LF</string>
+    <string name="uart_macro_dialog_cr">CR</string>
+
+    <string name="uart_output_placeholder">The incoming messages will be displayed here.</string>
+    <string name="uart_macro_error">Provided command cannot be empty.</string>
 </resources>
