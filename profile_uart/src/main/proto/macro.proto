@@ -14,5 +14,5 @@ message Macro {
 }
 
 message MacroSettings {
-  string macros = 1;
+  repeated Macro macros = 1;
 }

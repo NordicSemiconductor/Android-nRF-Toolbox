@@ -3,10 +3,12 @@ package no.nordicsemi.android.uart.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.navigation.*
 import no.nordicsemi.android.uart.data.UARTMacro
+import no.nordicsemi.android.uart.data.UARTPersistentDataSource
 import no.nordicsemi.android.uart.data.UART_SERVICE_UUID
 import no.nordicsemi.android.uart.repository.UARTRepository
 import no.nordicsemi.android.uart.view.*
@@ -18,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 internal class UARTViewModel @Inject constructor(
     private val repository: UARTRepository,
-    private val navigationManager: NavigationManager
+    private val navigationManager: NavigationManager,
+    private val dataSource: UARTPersistentDataSource
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UARTViewState())
@@ -33,6 +36,10 @@ internal class UARTViewModel @Inject constructor(
 
         repository.data.onEach {
             _state.value = _state.value.copy(uartManagerState = WorkingState(it))
+        }.launchIn(viewModelScope)
+
+        dataSource.macros.onEach {
+            _state.value = _state.value.copy(macros = it)
         }.launchIn(viewModelScope)
     }
 
@@ -64,14 +71,15 @@ internal class UARTViewModel @Inject constructor(
     }
 
     private fun addNewMacro(macro: UARTMacro) {
-        _state.tryEmit(_state.value.copy(macros = _state.value.macros + macro))
+        viewModelScope.launch(Dispatchers.IO) {
+            dataSource.addNewMacro(macro)
+        }
     }
 
     private fun deleteMacro(macro: UARTMacro) {
-        val macros = _state.value.macros.toMutableList().apply {
-            remove(macro)
+        viewModelScope.launch(Dispatchers.IO) {
+            dataSource.deleteMacro(macro)
         }
-        _state.tryEmit(_state.value.copy(macros = macros))
     }
 
     private fun disconnect() {

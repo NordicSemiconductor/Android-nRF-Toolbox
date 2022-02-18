@@ -1,23 +1,25 @@
 package no.nordicsemi.android.uart.data
 
+import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
-import no.nordicsemi.android.Macro
+import androidx.datastore.preferences.protobuf.InvalidProtocolBufferException
+import no.nordicsemi.android.MacroSettings
 import java.io.InputStream
 import java.io.OutputStream
 
-object MacroSerializer : Serializer<Macro> {
-    override val defaultValue: UARTMacro = Macro.getDefaultInstance()
+object MacroSerializer : Serializer<MacroSettings> {
+    override val defaultValue: MacroSettings = MacroSettings.getDefaultInstance()
 
-    override suspend fun readFrom(input: InputStream): UARTMacro {
+    override suspend fun readFrom(input: InputStream): MacroSettings {
         try {
-            return Settings.parseFrom(input)
+            return MacroSettings.parseFrom(input)
         } catch (exception: InvalidProtocolBufferException) {
             throw CorruptionException("Cannot read proto.", exception)
         }
     }
 
     override suspend fun writeTo(
-        t: UARTMacro,
+        t: MacroSettings,
         output: OutputStream
     ) = t.writeTo(output)
 }
