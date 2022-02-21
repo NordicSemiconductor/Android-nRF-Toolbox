@@ -4,7 +4,7 @@ apply plugin: 'com.google.protobuf'
 
 protobuf {
     protoc {
-        artifact = 'com.google.protobuf:protoc:3.14.0'
+        artifact = 'com.google.protobuf:protoc:3.14.0:osx-x86_64'
     }
 
     // Generates the java Protobuf-lite code for the Protobufs in this project. See
@@ -27,6 +27,10 @@ dependencies {
     implementation project(":lib_theme")
     implementation project(":lib_utils")
 
+    implementation libs.room.runtime
+    implementation libs.room.ktx
+    kapt libs.room.compiler
+
     implementation libs.nordic.ble.common
     implementation libs.nordic.ble.ktx
 
@@ -45,4 +49,9 @@ dependencies {
     implementation libs.compose.activity
 
     testImplementation libs.bundles.test
+
+    implementation('org.simpleframework:simple-xml:2.7.1') {
+        exclude group: 'stax', module: 'stax-api'
+        exclude group: 'xpp3', module: 'xpp3'
+    }
 }

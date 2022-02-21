@@ -66,6 +66,11 @@ dependencyResolutionManagement {
             alias('google-permissions').to('com.google.accompanist:accompanist-permissions:0.20.0')
             alias('chart').to('com.github.PhilJay:MPAndroidChart:v3.1.0')
 
+            version('room', '2.4.1')
+            alias('room-runtime').to('androidx.room', 'room-runtime').versionRef('room')
+            alias('room-ktx').to('androidx.room', 'room-ktx').versionRef('room')
+            alias('room-compiler').to('androidx.room', 'room-compiler').versionRef('room')
+
             //-- Test ------------------------------------------------------------------------------
             alias('test-junit').to('junit:junit:4.13.2')
             alias('android-test-junit').to('androidx.test.ext:junit:1.1.3')

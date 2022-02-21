@@ -38,8 +38,8 @@ internal class UARTViewModel @Inject constructor(
             _state.value = _state.value.copy(uartManagerState = WorkingState(it))
         }.launchIn(viewModelScope)
 
-        dataSource.macros.onEach {
-            _state.value = _state.value.copy(macros = it)
+        dataSource.getConfigurations().onEach {
+            _state.value = _state.value.copy(configuration = it)
         }.launchIn(viewModelScope)
     }
 

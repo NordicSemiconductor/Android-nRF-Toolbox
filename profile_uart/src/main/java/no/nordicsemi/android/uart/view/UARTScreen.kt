@@ -37,7 +37,7 @@ fun UARTScreen() {
                     is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp)
                     is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp)
                     is UnknownErrorResult -> DeviceDisconnectedView(Reason.UNKNOWN, navigateUp)
-                    is SuccessResult -> UARTContentView(state.uartManagerState.result.data, state.macros) { viewModel.onEvent(it) }
+                    is SuccessResult -> UARTContentView(state.uartManagerState.result.data, state.configuration) { viewModel.onEvent(it) }
                 }
             }.exhaustive
         }

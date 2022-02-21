@@ -1,11 +1,11 @@
 package no.nordicsemi.android.uart.view
 
 import no.nordicsemi.android.service.BleManagerResult
+import no.nordicsemi.android.uart.data.UARTConfiguration
 import no.nordicsemi.android.uart.data.UARTData
-import no.nordicsemi.android.uart.data.UARTMacro
 
 internal data class UARTViewState(
-    val macros: List<UARTMacro> = emptyList(),
+    val configuration: List<UARTConfiguration> = emptyList(),
     val uartManagerState: HTSManagerState = NoDeviceState
 )
 

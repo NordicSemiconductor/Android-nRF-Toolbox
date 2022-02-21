@@ -16,19 +16,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import no.nordicsemi.android.material.you.HorizontalLabelRadioButtonGroup
+import no.nordicsemi.android.material.you.RadioButtonGroup
 import no.nordicsemi.android.material.you.RadioButtonItem
 import no.nordicsemi.android.material.you.RadioGroupViewEntity
 import no.nordicsemi.android.material.you.TextField
 import no.nordicsemi.android.uart.R
-import no.nordicsemi.android.uart.data.NewLineChar
+import no.nordicsemi.android.uart.data.MacroEol
+import no.nordicsemi.android.uart.data.MacroIcon
 import no.nordicsemi.android.uart.data.UARTMacro
 import no.nordicsemi.android.utils.EMPTY
 
 @Composable
 internal fun UARTAddMacroDialog(onDismiss: () -> Unit, onEvent: (UARTViewEvent) -> Unit) {
     val command = remember { mutableStateOf(String.EMPTY) }
-    val newLineChar = remember { mutableStateOf(NewLineChar.LF) }
+    val newLineChar = remember { mutableStateOf(MacroEol.LF) }
     val isError = remember { mutableStateOf(false) }
 
     Dialog(onDismissRequest = { onDismiss() }) {
@@ -84,7 +85,7 @@ internal fun UARTAddMacroDialog(onDismiss: () -> Unit, onEvent: (UARTViewEvent) 
                             TextButton(onClick = {
                                 if (isCommandValid(command.value)) {
                                     onDismiss()
-                                    onEvent(OnCreateMacro(UARTMacro(command.value, newLineChar.value)))
+                                    onEvent(OnCreateMacro(UARTMacro(MacroIcon.DOWN, command.value, newLineChar.value)))
                                 } else {
                                     isError.value = true
                                 }
@@ -100,8 +101,8 @@ internal fun UARTAddMacroDialog(onDismiss: () -> Unit, onEvent: (UARTViewEvent) 
 }
 
 @Composable
-private fun NewLineCharSection(checkedItem: NewLineChar, onItemClick: (NewLineChar) -> Unit) {
-    val items = NewLineChar.values().map {
+private fun NewLineCharSection(checkedItem: MacroEol, onItemClick: (MacroEol) -> Unit) {
+    val items = MacroEol.values().map {
         RadioButtonItem(it.toDisplayString(), it == checkedItem)
     }
     val viewEntity = RadioGroupViewEntity(items)
@@ -112,9 +113,9 @@ private fun NewLineCharSection(checkedItem: NewLineChar, onItemClick: (NewLineCh
             style = MaterialTheme.typography.labelLarge
         )
 
-        HorizontalLabelRadioButtonGroup(viewEntity) {
+        RadioButtonGroup(viewEntity) {
             val i = items.indexOf(it)
-            onItemClick(NewLineChar.values()[i])
+            onItemClick(MacroEol.values()[i])
         }
     }
 }

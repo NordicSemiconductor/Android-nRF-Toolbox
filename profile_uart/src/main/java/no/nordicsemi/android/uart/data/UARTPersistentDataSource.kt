@@ -1,78 +1,51 @@
 package no.nordicsemi.android.uart.data
 
-import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.dataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import no.nordicsemi.android.Macro
-import no.nordicsemi.android.MacroSettings
+import no.nordicsemi.android.uart.db.*
+import org.simpleframework.xml.Serializer
+import org.simpleframework.xml.core.Persister
+import org.simpleframework.xml.strategy.Strategy
+import org.simpleframework.xml.strategy.VisitorStrategy
+import org.simpleframework.xml.stream.Format
+import org.simpleframework.xml.stream.HyphenStyle
+import java.io.StringWriter
 import javax.inject.Inject
 import javax.inject.Singleton
-
-private const val MACRO_FILE = "macro.proto"
 
 @Singleton
 internal class UARTPersistentDataSource @Inject constructor(
     @ApplicationContext
-    private val context: Context
+    private val configurationsDao: ConfigurationsDao,
 ) {
-    private val Context.dataStore: DataStore<MacroSettings> by dataStore(fileName = MACRO_FILE, MacroSerializer)
 
-    val macros = context.dataStore.data.map {
-        it.macrosList.map {
-            UARTMacro(it.name, it.newLineType.toNewLineChar())
+    fun getConfigurations(): Flow<List<UARTConfiguration>> = configurationsDao.load().map {
+        it.map {
+            val xml: String = it.xml
+            val format = Format(HyphenStyle())
+            val serializer: Serializer = Persister(format)
+            val configuration = serializer.read(XmlConfiguration::class.java, xml)
+
+            UARTConfiguration(configuration.name ?: "Unknown", createMacro(configuration.commands))
         }
     }
 
-    suspend fun saveMacros(uartMacros: List<UARTMacro>) {
-        context.dataStore.updateData { settings ->
-            val macros = uartMacros.map { it.toMacro() }
-            settings.toBuilder()
-                .clearMacros()
-                .addAllMacros(macros)
-                .build()
+    private fun createMacro(macros: Array<XmlCommand?>): List<UARTMacro> {
+        return macros.filterNotNull().mapNotNull {
+            val icon = MacroIcon.create(it.iconIndex)
+            it.command?.let { c -> UARTMacro(icon, c, it.eol) }
         }
     }
 
-    suspend fun addNewMacro(uartMacro: UARTMacro) {
-        context.dataStore.updateData { settings ->
-            settings.toBuilder()
-                .addMacros(uartMacro.toMacro())
-                .build()
-        }
-    }
+    suspend fun saveConfiguration(configuration: UARTConfiguration) {
+        val format = Format(HyphenStyle())
+        val strategy: Strategy = VisitorStrategy(CommentVisitor())
+        val serializer: Serializer = Persister(strategy, format)
+        val writer = StringWriter()
+        serializer.write(configuration, writer)
+        val xml = writer.toString()
 
-    suspend fun deleteMacro(uartMacro: UARTMacro) {
-        context.dataStore.updateData { settings ->
-            val i = settings.macrosList.map { it.name }.indexOf(uartMacro.command)
-            settings.toBuilder()
-                .removeMacros(i)
-                .build()
-        }
-    }
-
-    private fun UARTMacro.toMacro(): Macro {
-        return Macro.newBuilder()
-            .setName(command)
-            .setNewLineType(newLineChar.toMacroNewLineType())
-            .build()
-    }
-
-    private fun NewLineChar.toMacroNewLineType(): Macro.NewLineType {
-        return when (this) {
-            NewLineChar.LF -> Macro.NewLineType.LF
-            NewLineChar.CR_LF -> Macro.NewLineType.LF_CR
-            NewLineChar.CR -> Macro.NewLineType.CR
-        }
-    }
-
-    private fun Macro.NewLineType.toNewLineChar(): NewLineChar {
-        return when (this) {
-            Macro.NewLineType.LF -> NewLineChar.LF
-            Macro.NewLineType.LF_CR -> NewLineChar.CR_LF
-            Macro.NewLineType.CR -> NewLineChar.CR
-            Macro.NewLineType.UNRECOGNIZED -> throw IllegalArgumentException("Unrecognized NewLineChar.")
-        }
+        configurationsDao.insert(Configuration(0, configuration.name, xml, 0))
     }
 }
