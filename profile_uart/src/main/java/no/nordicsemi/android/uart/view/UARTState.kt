@@ -5,9 +5,16 @@ import no.nordicsemi.android.uart.data.UARTConfiguration
 import no.nordicsemi.android.uart.data.UARTData
 
 internal data class UARTViewState(
-    val configuration: List<UARTConfiguration> = emptyList(),
+    val editedPosition: Int? = null,
+    val selectedConfigurationIndex: Int? = null,
+    val isConfigurationEdited: Boolean = false,
+    val configurations: List<UARTConfiguration> = emptyList(),
     val uartManagerState: HTSManagerState = NoDeviceState
-)
+) {
+    val showEditDialog: Boolean = editedPosition != null
+
+    val selectedConfiguration: UARTConfiguration? = selectedConfigurationIndex?.let { configurations[it] }
+}
 
 internal sealed class HTSManagerState
 

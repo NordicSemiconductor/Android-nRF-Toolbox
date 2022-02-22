@@ -28,13 +28,13 @@ import org.simpleframework.xml.core.PersistenceException
 import org.simpleframework.xml.core.Validate
 
 @Root
-internal class XmlConfiguration {
+internal class XmlConfiguration @JvmOverloads constructor(
+    @field:Attribute(required = false, empty = "Unnamed")
+    var name: String? = "",
 
-    @Attribute(required = false, empty = "Unnamed")
-    var name: String? = null
-
-    @ElementArray
-    val commands: Array<XmlCommand?> = arrayOfNulls(COMMANDS_COUNT)
+    @field:ElementArray
+    var commands: Array<XmlCommand?> = arrayOfNulls(COMMANDS_COUNT)
+) {
 
     @Validate
     @Throws(PersistenceException::class)

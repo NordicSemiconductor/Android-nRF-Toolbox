@@ -1,6 +1,6 @@
 package no.nordicsemi.android.uart.data
 
-import dagger.hilt.android.qualifiers.ApplicationContext
+import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.uart.db.*
@@ -16,7 +16,6 @@ import javax.inject.Singleton
 
 @Singleton
 internal class UARTPersistentDataSource @Inject constructor(
-    @ApplicationContext
     private val configurationsDao: ConfigurationsDao,
 ) {
 
@@ -31,10 +30,14 @@ internal class UARTPersistentDataSource @Inject constructor(
         }
     }
 
-    private fun createMacro(macros: Array<XmlCommand?>): List<UARTMacro> {
-        return macros.filterNotNull().mapNotNull {
-            val icon = MacroIcon.create(it.iconIndex)
-            it.command?.let { c -> UARTMacro(icon, c, it.eol) }
+    private fun createMacro(macros: Array<XmlCommand?>): List<UARTMacro?> {
+        return macros.map {
+            if (it == null) {
+                null
+            } else {
+                val icon = MacroIcon.create(it.iconIndex)
+                it.command?.let { c -> UARTMacro(icon, c, it.eol) }
+            }
         }
     }
 
@@ -47,5 +50,9 @@ internal class UARTPersistentDataSource @Inject constructor(
         val xml = writer.toString()
 
         configurationsDao.insert(Configuration(0, configuration.name, xml, 0))
+    }
+
+    suspend fun deleteConfiguration(configuration: UARTConfiguration) {
+        configurationsDao.delete(configuration.name)
     }
 }

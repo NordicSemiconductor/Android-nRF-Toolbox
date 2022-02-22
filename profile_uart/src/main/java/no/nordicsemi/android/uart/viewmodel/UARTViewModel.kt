@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.navigation.*
+import no.nordicsemi.android.uart.data.UARTConfiguration
 import no.nordicsemi.android.uart.data.UARTMacro
 import no.nordicsemi.android.uart.data.UARTPersistentDataSource
 import no.nordicsemi.android.uart.data.UART_SERVICE_UUID
@@ -39,7 +40,7 @@ internal class UARTViewModel @Inject constructor(
         }.launchIn(viewModelScope)
 
         dataSource.getConfigurations().onEach {
-            _state.value = _state.value.copy(configuration = it)
+            _state.value = _state.value.copy(configurations = it)
         }.launchIn(viewModelScope)
     }
 
@@ -67,18 +68,68 @@ internal class UARTViewModel @Inject constructor(
             DisconnectEvent -> disconnect()
             is OnRunMacro -> repository.runMacro(event.macro)
             NavigateUp -> navigationManager.navigateUp()
+            is OnEditMacro -> onEditMacro(event)
+            OnEditFinish -> onEditFinish()
+            is OnConfigurationSelected -> onConfigurationSelected(event)
+            is OnAddConfiguration -> onAddConfiguration(event)
+            OnDeleteConfiguration -> deleteConfiguration()
+            OnEditConfiguration -> onEditConfiguration()
         }.exhaustive
+    }
+
+    private fun onEditConfiguration() {
+        _state.value = _state.value.copy(isConfigurationEdited = true)
+    }
+
+    private fun onAddConfiguration(event: OnAddConfiguration) {
+        viewModelScope.launch(Dispatchers.IO) {
+            dataSource.saveConfiguration(UARTConfiguration(event.name))
+        }
+    }
+
+    private fun onEditMacro(event: OnEditMacro) {
+        _state.value = _state.value.copy(editedPosition = event.position)
+    }
+
+    private fun onEditFinish() {
+        _state.value = _state.value.copy(editedPosition = null)
+    }
+
+    private fun onConfigurationSelected(event: OnConfigurationSelected) {
+        _state.value = _state.value.copy(selectedConfigurationIndex = _state.value.configurations.indexOf(event.configuration))
     }
 
     private fun addNewMacro(macro: UARTMacro) {
         viewModelScope.launch(Dispatchers.IO) {
-            dataSource.addNewMacro(macro)
+            _state.value.selectedConfiguration?.let {
+                val macros = it.macros.toMutableList().apply {
+                    set(_state.value.editedPosition!!, macro)
+                }
+                val newConf = it.copy(macros = macros)
+                val newConfs = _state.value.configurations.map {
+                    if (it.name == newConf.name) {
+                        newConf
+                    } else {
+                        it
+                    }
+                }
+                dataSource.saveConfiguration(newConf)
+                _state.value = _state.value.copy(editedPosition = null)
+            }
+        }
+    }
+
+    private fun deleteConfiguration() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _state.value.selectedConfiguration?.let {
+                dataSource.deleteConfiguration(it)
+            }
         }
     }
 
     private fun deleteMacro(macro: UARTMacro) {
         viewModelScope.launch(Dispatchers.IO) {
-            dataSource.deleteMacro(macro)
+//            dataSource.deleteMacro(macro)
         }
     }
 

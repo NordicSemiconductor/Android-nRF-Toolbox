@@ -72,10 +72,6 @@ internal class BPSManager(
         return Log.VERBOSE
     }
 
-    override fun log(priority: Int, message: String) {
-        Log.println(priority, "AAA", message)
-    }
-
     override fun getGattCallback(): BleManagerGattCallback {
         return BloodPressureManagerGattCallback()
     }

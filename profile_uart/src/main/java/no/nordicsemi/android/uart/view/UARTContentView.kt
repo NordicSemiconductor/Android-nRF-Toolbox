@@ -1,11 +1,13 @@
 package no.nordicsemi.android.uart.view
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -18,10 +20,9 @@ import no.nordicsemi.android.theme.view.ScreenSection
 import no.nordicsemi.android.theme.view.SectionTitle
 import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.uart.data.UARTData
-import no.nordicsemi.android.uart.data.UARTMacro
 
 @Composable
-internal fun UARTContentView(state: UARTData, macros: List<UARTMacro>, onEvent: (UARTViewEvent) -> Unit) {
+internal fun UARTContentView(state: UARTData, viewState: UARTViewState, onEvent: (UARTViewEvent) -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(16.dp)
@@ -30,7 +31,7 @@ internal fun UARTContentView(state: UARTData, macros: List<UARTMacro>, onEvent: 
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        InputSection(macros, onEvent)
+        InputSection(viewState, onEvent)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -43,11 +44,11 @@ internal fun UARTContentView(state: UARTData, macros: List<UARTMacro>, onEvent: 
 }
 
 @Composable
-private fun InputSection(macros: List<UARTMacro>, onEvent: (UARTViewEvent) -> Unit) {
-    val showSearchDialog = remember { mutableStateOf(false) }
+private fun InputSection(viewState: UARTViewState, onEvent: (UARTViewEvent) -> Unit) {
+    val showDialog = remember { mutableStateOf(false) }
 
-    if (showSearchDialog.value) {
-        UARTAddMacroDialog(onDismiss = { showSearchDialog.value = false }, onEvent = onEvent)
+    if (showDialog.value) {
+        UARTAddConfigurationDialog(onEvent)
     }
 
     ScreenSection {
@@ -58,25 +59,31 @@ private fun InputSection(macros: List<UARTMacro>, onEvent: (UARTViewEvent) -> Un
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            macros.forEach {
-                MacroItem(macro = it, onEvent = onEvent)
+            Row {
+                Box(modifier = Modifier.weight(1f)) {
+                    UARTConfigurationPicker(viewState, onEvent)
+                }
+                
+                IconButton(onClick = { showDialog.value = true }) {
+                    Icon(Icons.Default.Add, stringResource(id = R.string.uart_configuration_add))
+                }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                viewState.selectedConfiguration?.let {
+
+                    IconButton(onClick = { onEvent(OnEditConfiguration) }) {
+                        Icon(Icons.Default.Edit, stringResource(id = R.string.uart_configuration_edit))
+                    }
+
+                    IconButton(onClick = { onEvent(OnDeleteConfiguration) }) {
+                        Icon(Icons.Default.Delete, stringResource(id = R.string.uart_configuration_delete))
+                    }
+                }
             }
 
-            if (macros.isEmpty()) {
-                Text(
-                    text = stringResource(id = R.string.uart_no_macros_info),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
+            viewState.selectedConfiguration?.let {
                 Spacer(modifier = Modifier.height(16.dp))
-            }
 
-            Button(
-                onClick = { showSearchDialog.value = true }
-            ) {
-                Text(text = stringResource(id = R.string.uart_add_macro))
+                UARTMacroView(it, viewState.isConfigurationEdited, onEvent)
             }
         }
     }

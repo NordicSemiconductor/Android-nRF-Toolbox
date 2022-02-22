@@ -4,8 +4,15 @@
 
     <string name="uart_no_macros_info">Please define a macro to send command to the device.</string>
 
+    <string name="uart_configuration_add">Add selected configuration.</string>
+    <string name="uart_configuration_delete">Delete selected configuration.</string>
+    <string name="uart_configuration_edit">Edit selected configuration.</string>
+
     <string name="uart_input">Macros</string>
     <string name="uart_output">Output</string>
+    <string name="uart_configuration_picker_hint">Select configuration</string>
+    <string name="uart_configuration_picker_not_selected">Not selected.</string>
+    <string name="uart_configuration_picker_dialog">Select configuration</string>
 
     <string name="uart_command_field">Command: %s</string>
 
@@ -29,4 +36,9 @@
 
     <string name="uart_output_placeholder">The incoming messages will be displayed here.</string>
     <string name="uart_macro_error">Provided command cannot be empty.</string>
+
+    <string name="uart_name">Name</string>
+    <string name="uart_name_empty">Provided name cannot be empty.</string>
+
+    <string name="uart_macro_icon">Icon representing defined command.</string>
 </resources>

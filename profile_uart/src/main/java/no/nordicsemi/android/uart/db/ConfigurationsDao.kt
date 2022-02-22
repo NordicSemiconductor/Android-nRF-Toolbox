@@ -14,4 +14,7 @@ internal interface ConfigurationsDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(configuration: Configuration)
+
+    @Query("DELETE FROM configurations WHERE name = :name")
+    suspend fun delete(name: String)
 }

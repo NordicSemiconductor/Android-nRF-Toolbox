@@ -5,6 +5,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -23,6 +25,10 @@ fun UARTScreen() {
     val viewModel: UARTViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
 
+    if (state.showEditDialog) {
+        UARTAddMacroDialog { viewModel.onEvent(it) }
+    }
+
     Column {
         val navigateUp = { viewModel.onEvent(NavigateUp) }
 
@@ -37,7 +43,7 @@ fun UARTScreen() {
                     is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp)
                     is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp)
                     is UnknownErrorResult -> DeviceDisconnectedView(Reason.UNKNOWN, navigateUp)
-                    is SuccessResult -> UARTContentView(state.uartManagerState.result.data, state.configuration) { viewModel.onEvent(it) }
+                    is SuccessResult -> UARTContentView(state.uartManagerState.result.data, state) { viewModel.onEvent(it) }
                 }
             }.exhaustive
         }
