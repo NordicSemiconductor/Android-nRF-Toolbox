@@ -7,7 +7,7 @@ internal sealed class UARTViewEvent
 
 internal data class OnEditMacro(val position: Int) : UARTViewEvent()
 internal data class OnCreateMacro(val macro: UARTMacro) : UARTViewEvent()
-internal data class OnDeleteMacro(val macro: UARTMacro) : UARTViewEvent()
+internal object OnDeleteMacro : UARTViewEvent()
 internal object OnEditFinish : UARTViewEvent()
 
 internal data class OnConfigurationSelected(val configuration: UARTConfiguration) : UARTViewEvent()
@@ -16,6 +16,7 @@ internal object OnEditConfiguration : UARTViewEvent()
 internal object OnDeleteConfiguration : UARTViewEvent()
 internal data class OnRunMacro(val macro: UARTMacro) : UARTViewEvent()
 
+internal object ClearOutputItems : UARTViewEvent()
 internal object DisconnectEvent : UARTViewEvent()
 
 internal object NavigateUp : UARTViewEvent()

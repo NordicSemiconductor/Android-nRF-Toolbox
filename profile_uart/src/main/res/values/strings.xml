@@ -22,11 +22,14 @@
     <string name="uart_add_macro">Add macro</string>
     <string name="uart_output_info">Here will be displayed read value from GATT characteristic.</string>
 
+    <string name="uart_configuration_dialog_title">Add configuration</string>
+    <string name="uart_configuration_hint">Configuration</string>
     <string name="uart_macro_dialog_title">Add macro</string>
     <string name="uart_macro_dialog_alias">Alias</string>
     <string name="uart_macro_dialog_command">Command</string>
     <string name="uart_macro_dialog_confirm">Confirm</string>
     <string name="uart_macro_dialog_dismiss">Dismiss</string>
+    <string name="uart_macro_dialog_delete">Delete</string>
 
     <string name="uart_macro_dialog_eol">EOL:</string>
     <string name="uart_macro_dialog_selected_eol">EOL: %s</string>
@@ -41,4 +44,9 @@
     <string name="uart_name_empty">Provided name cannot be empty.</string>
 
     <string name="uart_macro_icon">Icon representing defined command.</string>
+
+    <string name="uart_delete_dialog_title">Delete configuration?</string>
+    <string name="uart_delete_dialog_info">Are you sure that you want to delete this configuration? Your data will be irretrievably lost.</string>
+    <string name="uart_delete_dialog_confirm">Confirm</string>
+    <string name="uart_delete_dialog_cancel">Cancel</string>
 </resources>

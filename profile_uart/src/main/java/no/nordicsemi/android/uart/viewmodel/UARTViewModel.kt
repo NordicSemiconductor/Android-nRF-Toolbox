@@ -64,7 +64,7 @@ internal class UARTViewModel @Inject constructor(
     fun onEvent(event: UARTViewEvent) {
         when (event) {
             is OnCreateMacro -> addNewMacro(event.macro)
-            is OnDeleteMacro -> deleteMacro(event.macro)
+            OnDeleteMacro -> deleteMacro()
             DisconnectEvent -> disconnect()
             is OnRunMacro -> repository.runMacro(event.macro)
             NavigateUp -> navigationManager.navigateUp()
@@ -74,16 +74,19 @@ internal class UARTViewModel @Inject constructor(
             is OnAddConfiguration -> onAddConfiguration(event)
             OnDeleteConfiguration -> deleteConfiguration()
             OnEditConfiguration -> onEditConfiguration()
+            ClearOutputItems -> repository.clearItems()
         }.exhaustive
     }
 
     private fun onEditConfiguration() {
-        _state.value = _state.value.copy(isConfigurationEdited = true)
+        val isEdited = _state.value.isConfigurationEdited
+        _state.value = _state.value.copy(isConfigurationEdited = !isEdited)
     }
 
     private fun onAddConfiguration(event: OnAddConfiguration) {
         viewModelScope.launch(Dispatchers.IO) {
-            dataSource.saveConfiguration(UARTConfiguration(event.name))
+            dataSource.saveConfiguration(UARTConfiguration(null, event.name))
+            _state.value = _state.value.copy(selectedConfigurationName = event.name)
         }
     }
 
@@ -96,7 +99,7 @@ internal class UARTViewModel @Inject constructor(
     }
 
     private fun onConfigurationSelected(event: OnConfigurationSelected) {
-        _state.value = _state.value.copy(selectedConfigurationIndex = _state.value.configurations.indexOf(event.configuration))
+        _state.value = _state.value.copy(selectedConfigurationName = event.configuration.name)
     }
 
     private fun addNewMacro(macro: UARTMacro) {
@@ -106,13 +109,6 @@ internal class UARTViewModel @Inject constructor(
                     set(_state.value.editedPosition!!, macro)
                 }
                 val newConf = it.copy(macros = macros)
-                val newConfs = _state.value.configurations.map {
-                    if (it.name == newConf.name) {
-                        newConf
-                    } else {
-                        it
-                    }
-                }
                 dataSource.saveConfiguration(newConf)
                 _state.value = _state.value.copy(editedPosition = null)
             }
@@ -127,9 +123,16 @@ internal class UARTViewModel @Inject constructor(
         }
     }
 
-    private fun deleteMacro(macro: UARTMacro) {
+    private fun deleteMacro() {
         viewModelScope.launch(Dispatchers.IO) {
-//            dataSource.deleteMacro(macro)
+            _state.value.selectedConfiguration?.let {
+                val macros = it.macros.toMutableList().apply {
+                    set(_state.value.editedPosition!!, null)
+                }
+                val newConf = it.copy(macros = macros)
+                dataSource.saveConfiguration(newConf)
+                _state.value = _state.value.copy(editedPosition = null)
+            }
         }
     }
 

@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -84,6 +85,7 @@ private fun MacroButton(
     Image(
         painter = painterResource(id = macro.icon.toResId()),
         contentDescription = stringResource(id = R.string.uart_macro_icon),
+        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary),
         modifier = Modifier
             .size(buttonSize)
             .clip(RoundedCornerShape(10.dp))
@@ -104,15 +106,17 @@ private fun EmptyButton(
     position: Int,
     onEvent: (UARTViewEvent) -> Unit
 ) {
-    Box(modifier = Modifier
-        .size(buttonSize)
-        .clip(RoundedCornerShape(10.dp))
-        .clickable {
-            if (isEdited) {
-                onEvent(OnEditMacro(position))
+    Box(
+        modifier = Modifier
+            .size(buttonSize)
+            .clip(RoundedCornerShape(10.dp))
+            .clickable {
+                if (isEdited) {
+                    onEvent(OnEditMacro(position))
+                }
             }
-        }
-        .background(getBackground(isEdited)))
+            .background(getBackground(isEdited))
+    )
 }
 
 @Composable
@@ -120,6 +124,6 @@ private fun getBackground(isEdited: Boolean): Color {
     return if (!isEdited) {
         MaterialTheme.colorScheme.primary
     } else {
-        MaterialTheme.colorScheme.secondary
+        MaterialTheme.colorScheme.tertiary
     }
 }

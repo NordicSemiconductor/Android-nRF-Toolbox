@@ -75,10 +75,10 @@ internal class UARTManager(
         override fun initialize() {
             setNotificationCallback(txCharacteristic).asFlow().onEach {
                 val text: String = it.getStringValue(0) ?: String.EMPTY
-                data.value = data.value.copy(text = text)
-            }
+                data.value = data.value.copy(messages = data.value.messages + UARTOutputRecord(text))
+            }.launchIn(scope)
 
-            requestMtu(260).enqueue()
+            requestMtu(517).enqueue()
             enableNotifications(txCharacteristic).enqueue()
 
             setNotificationCallback(batteryLevelCharacteristic).asValidResponseFlow<BatteryLevelResponse>().onEach {
@@ -88,7 +88,7 @@ internal class UARTManager(
         }
 
         override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
-            val service: BluetoothGattService = gatt.getService(UART_SERVICE_UUID)
+            val service: BluetoothGattService? = gatt.getService(UART_SERVICE_UUID)
             if (service != null) {
                 rxCharacteristic = service.getCharacteristic(UART_RX_CHARACTERISTIC_UUID)
                 txCharacteristic = service.getCharacteristic(UART_TX_CHARACTERISTIC_UUID)
@@ -99,16 +99,13 @@ internal class UARTManager(
             rxCharacteristic?.let {
                 val rxProperties: Int = it.properties
                 writeRequest = rxProperties and BluetoothGattCharacteristic.PROPERTY_WRITE > 0
-                writeCommand =
-                    rxProperties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE > 0
+                writeCommand = rxProperties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE > 0
 
                 // Set the WRITE REQUEST type when the characteristic supports it.
                 // This will allow to send long write (also if the characteristic support it).
                 // In case there is no WRITE REQUEST property, this manager will divide texts
                 // longer then MTU-3 bytes into up to MTU-3 bytes chunks.
-                if (writeRequest) {
-                    it.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-                } else {
+                if (!writeRequest) {
                     useLongWrite = false
                 }
             }
@@ -130,13 +127,22 @@ internal class UARTManager(
         if (rxCharacteristic == null) return
         if (!TextUtils.isEmpty(text)) {
             scope.launchWithCatch {
-                val request: WriteRequest = writeCharacteristic(rxCharacteristic, text.toByteArray(), BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
+                val writeType = if (useLongWrite) {
+                    BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+                } else {
+                    BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
+                }
+                val request: WriteRequest = writeCharacteristic(rxCharacteristic, text.toByteArray(), writeType)
                 if (!useLongWrite) {
                     request.split()
                 }
                 request.enqueue()
             }
         }
+    }
+
+    fun clearItems() {
+        data.value = data.value.copy(messages = emptyList())
     }
 
     override fun getGattCallback(): BleManagerGattCallback {

@@ -48,7 +48,13 @@ class UARTRepository @Inject constructor(
     }
 
     fun runMacro(macro: UARTMacro) {
-        manager?.send(macro.command.parseWithNewLineChar(macro.newLineChar))
+        macro.command?.parseWithNewLineChar(macro.newLineChar)?.let {
+            manager?.send(it)
+        }
+    }
+
+    fun clearItems() {
+        manager?.clearItems()
     }
 
     private suspend fun UARTManager.start(device: BluetoothDevice) {

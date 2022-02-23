@@ -2,13 +2,7 @@ package no.nordicsemi.android.theme.view.dialog
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -22,7 +16,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import no.nordicsemi.android.material.you.Card
 import no.nordicsemi.android.theme.R
@@ -51,9 +44,11 @@ fun StringListView(config: StringListDialogConfig) {
             ) {
                 Text(
                     text = config.title ?: stringResource(id = R.string.dialog).toAnnotatedString(),
-                    fontSize = 20.sp
+                    style = MaterialTheme.typography.headlineMedium
                 )
             }
+
+            Spacer(modifier = Modifier.size(8.dp))
 
             Column(
                 modifier = Modifier
@@ -62,29 +57,26 @@ fun StringListView(config: StringListDialogConfig) {
             ) {
 
                 config.items.forEachIndexed { i, entry ->
-                    Column(
+                    Row(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
                             .clickable { config.onResult(ItemSelectedResult(i)) }
                             .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row {
-                            config.leftIcon?.let {
-                                Image(
-                                    modifier = Modifier.padding(horizontal = 4.dp),
-                                    painter = painterResource(it),
-                                    contentDescription = "Content image",
-                                )
-                            }
-                            Text(
-                                text = entry,
-                                fontSize = 16.sp,
-                                modifier = Modifier
-                                    .fillMaxWidth()
+                        config.leftIcon?.let {
+                            Image(
+                                modifier = Modifier.padding(horizontal = 4.dp),
+                                painter = painterResource(it),
+                                contentDescription = "Content image",
                             )
                         }
+                        Text(
+                            text = entry,
+                            modifier = Modifier.fillMaxWidth(),
+                            style = MaterialTheme.typography.titleLarge
+                        )
                     }
-
                 }
             }
 

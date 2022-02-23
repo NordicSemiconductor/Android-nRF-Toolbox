@@ -3,17 +3,24 @@ package no.nordicsemi.android.uart.view
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.uart.data.UARTConfiguration
 import no.nordicsemi.android.uart.data.UARTData
+import no.nordicsemi.android.uart.data.UARTMacro
 
 internal data class UARTViewState(
     val editedPosition: Int? = null,
-    val selectedConfigurationIndex: Int? = null,
+    val selectedConfigurationName: String? = null,
     val isConfigurationEdited: Boolean = false,
     val configurations: List<UARTConfiguration> = emptyList(),
     val uartManagerState: HTSManagerState = NoDeviceState
 ) {
     val showEditDialog: Boolean = editedPosition != null
 
-    val selectedConfiguration: UARTConfiguration? = selectedConfigurationIndex?.let { configurations[it] }
+    val selectedConfiguration: UARTConfiguration? = configurations.find { selectedConfigurationName == it.name }
+
+    val selectedMacro: UARTMacro? = selectedConfiguration?.let { configuration ->
+        editedPosition?.let {
+            configuration.macros.getOrNull(it)
+        }
+    }
 }
 
 internal sealed class HTSManagerState

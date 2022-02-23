@@ -1,6 +1,5 @@
 package no.nordicsemi.android.uart.data
 
-import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.uart.db.*
@@ -26,17 +25,17 @@ internal class UARTPersistentDataSource @Inject constructor(
             val serializer: Serializer = Persister(format)
             val configuration = serializer.read(XmlConfiguration::class.java, xml)
 
-            UARTConfiguration(configuration.name ?: "Unknown", createMacro(configuration.commands))
+            UARTConfiguration(it._id, configuration.name ?: "Unknown", createMacro(configuration.commands))
         }
     }
 
-    private fun createMacro(macros: Array<XmlCommand?>): List<UARTMacro?> {
+    private fun createMacro(macros: Array<XmlMacro?>): List<UARTMacro?> {
         return macros.map {
             if (it == null) {
                 null
             } else {
                 val icon = MacroIcon.create(it.iconIndex)
-                it.command?.let { c -> UARTMacro(icon, c, it.eol) }
+                UARTMacro(icon, it.command, it.eol)
             }
         }
     }
@@ -46,13 +45,29 @@ internal class UARTPersistentDataSource @Inject constructor(
         val strategy: Strategy = VisitorStrategy(CommentVisitor())
         val serializer: Serializer = Persister(strategy, format)
         val writer = StringWriter()
-        serializer.write(configuration, writer)
+        serializer.write(configuration.toXmlConfiguration(), writer)
         val xml = writer.toString()
 
-        configurationsDao.insert(Configuration(0, configuration.name, xml, 0))
+        configurationsDao.insert(Configuration(configuration.id, configuration.name, xml, 0))
     }
 
     suspend fun deleteConfiguration(configuration: UARTConfiguration) {
         configurationsDao.delete(configuration.name)
+    }
+
+    private fun UARTConfiguration.toXmlConfiguration(): XmlConfiguration {
+        val xmlConfiguration = XmlConfiguration()
+        xmlConfiguration.name = name
+        val commands = macros.map { macro ->
+            macro?.let {
+                XmlMacro().apply {
+                    setEol(it.newLineChar.index)
+                    command = it.command
+                    iconIndex = it.icon.index
+                }
+            }
+        }.toTypedArray()
+        xmlConfiguration.commands = commands
+        return xmlConfiguration
     }
 }

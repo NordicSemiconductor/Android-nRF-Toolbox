@@ -1,6 +1,6 @@
 package no.nordicsemi.android.uart.data
 
-enum class MacroIcon(val index: Int) {
+enum class MacroIcon(public val index: Int) {
     LEFT(0),
     UP(1),
     RIGHT(2),

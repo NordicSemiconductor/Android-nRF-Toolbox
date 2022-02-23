@@ -26,7 +26,7 @@ fun UARTScreen() {
     val state = viewModel.state.collectAsState().value
 
     if (state.showEditDialog) {
-        UARTAddMacroDialog { viewModel.onEvent(it) }
+        UARTAddMacroDialog(state.selectedMacro) { viewModel.onEvent(it) }
     }
 
     Column {

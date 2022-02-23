@@ -16,7 +16,7 @@ internal class CommentVisitor : Visitor {
     }
 
     override fun write(type: Type, node: NodeMap<OutputNode>) {
-        if (type.type == Array<XmlCommand>::class.java) {
+        if (type.type == Array<XmlMacro>::class.java) {
             val element = node.node
             val builder =
                 StringBuilder("A configuration must have 9 commands, one for each button.\n        Possible icons are:")

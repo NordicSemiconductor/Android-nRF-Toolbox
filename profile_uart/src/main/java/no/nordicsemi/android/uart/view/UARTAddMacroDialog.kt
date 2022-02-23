@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,11 +39,11 @@ private const val GRID_SIZE = 5
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-internal fun UARTAddMacroDialog(onEvent: (UARTViewEvent) -> Unit) {
-    val newLineChar = remember { mutableStateOf(MacroEol.LF) }
-    val command = remember { mutableStateOf(String.EMPTY) }
-    val isError = remember { mutableStateOf(false) }
-    val selectedIcon = remember { mutableStateOf(MacroIcon.values()[0]) }
+internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (UARTViewEvent) -> Unit) {
+    val newLineChar = rememberSaveable { mutableStateOf(macro?.newLineChar ?: MacroEol.LF) }
+    val command = rememberSaveable { mutableStateOf(macro?.command ?: String.EMPTY) }
+    val isError = rememberSaveable { mutableStateOf(false) }
+    val selectedIcon = rememberSaveable { mutableStateOf(macro?.icon ?: MacroIcon.values()[0]) }
 
     Dialog(onDismissRequest = { onEvent(OnEditFinish) }) {
         Surface(
@@ -95,36 +96,43 @@ internal fun UARTAddMacroDialog(onEvent: (UARTViewEvent) -> Unit) {
                                 .background(background)
                         )
                     }
-                }
 
-                Spacer(modifier = Modifier.size(16.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(onClick = { onEvent(OnEditFinish) }) {
-                        Text(stringResource(id = R.string.uart_macro_dialog_dismiss))
-                    }
+                    item(span = { GridItemSpan(GRID_SIZE) }) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            TextButton(onClick = { onEvent(OnEditFinish) }) {
+                                Text(stringResource(id = R.string.uart_macro_dialog_dismiss))
+                            }
 
-                    Spacer(modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.size(16.dp))
 
-                    TextButton(onClick = {
-                        if (isCommandValid(command.value)) {
-                            onEvent(
-                                OnCreateMacro(
-                                    UARTMacro(
-                                        selectedIcon.value,
-                                        command.value,
-                                        newLineChar.value
+                            TextButton(onClick = { onEvent(OnDeleteMacro) }) {
+                                Text(stringResource(id = R.string.uart_macro_dialog_delete))
+                            }
+
+                            Spacer(modifier = Modifier.size(16.dp))
+
+                            TextButton(onClick = {
+                                if (isCommandValid(command.value)) {
+                                    onEvent(
+                                        OnCreateMacro(
+                                            UARTMacro(
+                                                selectedIcon.value,
+                                                command.value,
+                                                newLineChar.value
+                                            )
+                                        )
                                     )
-                                )
-                            )
-                        } else {
-                            isError.value = true
+                                } else {
+                                    isError.value = true
+                                }
+                            }) {
+                                Text(stringResource(id = R.string.uart_macro_dialog_confirm))
+                            }
                         }
-                    }) {
-                        Text(stringResource(id = R.string.uart_macro_dialog_confirm))
                     }
                 }
             }

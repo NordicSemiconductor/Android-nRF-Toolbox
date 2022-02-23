@@ -56,7 +56,8 @@ private fun createConfig(entries: List<String>, onResult: (StringListDialogResul
     return StringListDialogConfig(
         title = stringResource(id = R.string.uart_configuration_picker_dialog).toAnnotatedString(),
         items = entries,
-        onResult = onResult
+        onResult = onResult,
+        leftIcon = R.drawable.ic_uart_settings
     )
 }
 

@@ -1,8 +1,14 @@
 package no.nordicsemi.android.uart.data
 
-import no.nordicsemi.android.utils.EMPTY
-
 internal data class UARTData(
-    val text: String = String.EMPTY,
+    val messages: List<UARTOutputRecord> = emptyList(),
     val batteryLevel: Int? = null,
+) {
+
+    val displayMessages = messages.reversed().take(10)
+}
+
+internal data class UARTOutputRecord(
+    val text: String,
+    val timestamp: Long = System.currentTimeMillis()
 )
