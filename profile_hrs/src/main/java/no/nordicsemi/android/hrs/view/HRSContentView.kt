@@ -14,8 +14,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.hrs.R
 import no.nordicsemi.android.hrs.data.HRSData
+import no.nordicsemi.android.material.you.ScreenSection
 import no.nordicsemi.android.theme.view.BatteryLevelView
-import no.nordicsemi.android.theme.view.ScreenSection
 import no.nordicsemi.android.theme.view.SectionTitle
 
 @Composable

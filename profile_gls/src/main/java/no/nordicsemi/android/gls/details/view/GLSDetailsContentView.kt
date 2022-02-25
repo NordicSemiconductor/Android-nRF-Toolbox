@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.gls.R
 import no.nordicsemi.android.gls.data.GLSRecord
 import no.nordicsemi.android.gls.main.view.toDisplayString
-import no.nordicsemi.android.theme.view.ScreenSection
+import no.nordicsemi.android.material.you.ScreenSection
 
 @Composable
 internal fun GLSDetailsContentView(record: GLSRecord) {

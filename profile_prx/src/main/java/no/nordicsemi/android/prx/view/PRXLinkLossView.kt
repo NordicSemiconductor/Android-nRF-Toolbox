@@ -16,8 +16,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.prx.R
 import no.nordicsemi.android.theme.R as themeR
-import no.nordicsemi.android.theme.view.ScreenSection
 import androidx.compose.material.icons.filled.HighlightOff
+import no.nordicsemi.android.material.you.ScreenSection
 
 @Composable
 fun DeviceOutOfRangeView(navigateUp: () -> Unit) {

@@ -12,7 +12,7 @@ import no.nordicsemi.android.csc.R
 import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.theme.view.BatteryLevelView
 import no.nordicsemi.android.theme.view.KeyValueField
-import no.nordicsemi.android.theme.view.ScreenSection
+import no.nordicsemi.android.material.you.ScreenSection
 import no.nordicsemi.android.theme.view.SectionTitle
 
 @Composable

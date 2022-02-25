@@ -21,7 +21,7 @@ import no.nordicsemi.android.csc.R
 import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.csc.data.WheelSize
 import no.nordicsemi.android.material.you.RadioButtonGroup
-import no.nordicsemi.android.theme.view.ScreenSection
+import no.nordicsemi.android.material.you.ScreenSection
 import no.nordicsemi.android.theme.view.SectionTitle
 import no.nordicsemi.android.theme.view.dialog.FlowCanceled
 import no.nordicsemi.android.theme.view.dialog.ItemSelectedResult

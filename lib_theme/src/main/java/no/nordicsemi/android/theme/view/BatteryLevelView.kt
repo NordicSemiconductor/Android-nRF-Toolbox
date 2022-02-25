@@ -2,6 +2,7 @@ package no.nordicsemi.android.theme.view
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import no.nordicsemi.android.material.you.ScreenSection
 import no.nordicsemi.android.theme.R
 
 @Composable

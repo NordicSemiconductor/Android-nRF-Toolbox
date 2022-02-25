@@ -13,11 +13,11 @@ import no.nordicsemi.android.prx.R
 import no.nordicsemi.android.prx.viewmodel.PRXViewModel
 import no.nordicsemi.android.service.*
 import no.nordicsemi.android.theme.view.BackIconAppBar
-import no.nordicsemi.android.theme.view.scanner.DeviceConnectingView
-import no.nordicsemi.android.theme.view.scanner.DeviceDisconnectedView
-import no.nordicsemi.android.theme.view.scanner.NoDeviceView
-import no.nordicsemi.android.theme.view.scanner.Reason
+import no.nordicsemi.ui.scanner.ui.DeviceConnectingView
+import no.nordicsemi.ui.scanner.ui.NoDeviceView
 import no.nordicsemi.android.utils.exhaustive
+import no.nordicsemi.ui.scanner.ui.DeviceDisconnectedView
+import no.nordicsemi.ui.scanner.ui.Reason
 
 @Composable
 fun PRXScreen() {

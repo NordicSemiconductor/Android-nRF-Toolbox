@@ -9,6 +9,7 @@ dependencies {
     implementation libs.nordic.ble.common
     implementation libs.nordic.ble.ktx
 
+    implementation libs.nordic.theme
     implementation libs.nordic.log
     implementation libs.nordic.ui.scanner
     implementation libs.nordic.navigation

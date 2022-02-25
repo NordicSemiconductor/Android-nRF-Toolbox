@@ -21,7 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.nrftoolbox.R
-import no.nordicsemi.android.theme.view.ScreenSection
+import no.nordicsemi.android.material.you.ScreenSection
 
 @Composable
 fun FeatureButton(

@@ -18,7 +18,7 @@ import no.nordicsemi.android.cgms.data.CGMRecord
 import no.nordicsemi.android.cgms.data.CGMServiceCommand
 import no.nordicsemi.android.cgms.data.RequestStatus
 import no.nordicsemi.android.theme.view.BatteryLevelView
-import no.nordicsemi.android.theme.view.ScreenSection
+import no.nordicsemi.android.material.you.ScreenSection
 import no.nordicsemi.android.theme.view.SectionTitle
 import androidx.compose.material3.CircularProgressIndicator
 

@@ -24,7 +24,7 @@ import no.nordicsemi.android.gls.data.WorkingMode
 import no.nordicsemi.android.gls.main.viewmodel.GLSViewModel
 import androidx.compose.material3.CircularProgressIndicator
 import no.nordicsemi.android.theme.view.BatteryLevelView
-import no.nordicsemi.android.theme.view.ScreenSection
+import no.nordicsemi.android.material.you.ScreenSection
 import no.nordicsemi.android.theme.view.SectionTitle
 
 @Composable
