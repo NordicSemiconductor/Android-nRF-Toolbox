@@ -1,9 +1,5 @@
 package no.nordicsemi.android.service
 
-enum class BleManagerStatus {
-    CONNECTING, OK, LINK_LOSS, DISCONNECTED, MISSING_SERVICE
-}
-
 sealed class BleManagerResult <T> {
 
     fun isRunning(): Boolean {

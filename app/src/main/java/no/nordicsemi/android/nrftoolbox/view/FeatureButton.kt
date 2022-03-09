@@ -20,8 +20,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.nrftoolbox.R
 import no.nordicsemi.android.material.you.ScreenSection
+import no.nordicsemi.android.nrftoolbox.R
 
 @Composable
 fun FeatureButton(
@@ -43,17 +43,39 @@ fun FeatureButton(
                 MaterialTheme.colorScheme.secondary
             }
 
-            Image(
-                painter = painterResource(iconId),
-                contentDescription = stringResource(id = name),
-                contentScale = ContentScale.Crop,
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary),
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(CircleShape)
-                    .background(color)
-                    .padding(16.dp)
-            )
+            Box {
+                if (isRunning == true) {
+                    Image(
+                        painter = painterResource(iconId),
+                        contentDescription = stringResource(id = name),
+                        contentScale = ContentScale.Crop,
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary),
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(CircleShape)
+                            .background(color)
+                            .padding(16.dp)
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(R.drawable.ic_ukraine_flag),
+                        contentDescription = stringResource(id = name),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(CircleShape)
+                    )
+                    Image(
+                        painter = painterResource(iconId),
+                        contentDescription = stringResource(id = name),
+                        contentScale = ContentScale.Crop,
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary),
+                        modifier = Modifier
+                            .size(64.dp)
+                            .padding(16.dp)
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.size(16.dp))
 
