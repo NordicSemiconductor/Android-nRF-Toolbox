@@ -19,7 +19,7 @@ dependencyResolutionManagement {
             library('timber-arcao', 'com.arcao:slf4j-timber:3.1')
             bundle('icons', ['nordic-log', 'timber-main', 'timber-arcao'])
 
-            version('commonlibraries', '1.0.2')
+            version('commonlibraries', '1.0.3')
             library('nordic-ui-scanner', 'no.nordicsemi.android.common', 'uiscanner').versionRef('commonlibraries')
             library('nordic-navigation', 'no.nordicsemi.android.common', 'navigation').versionRef('commonlibraries')
             library('nordic-theme', 'no.nordicsemi.android.common', 'theme').versionRef('commonlibraries')
