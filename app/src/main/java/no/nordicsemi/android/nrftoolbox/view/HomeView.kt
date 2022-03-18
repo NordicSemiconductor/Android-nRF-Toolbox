@@ -19,7 +19,7 @@ import no.nordicsemi.android.nrftoolbox.R
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewModel
 import no.nordicsemi.android.theme.view.TitleAppBar
 
-private const val DFU_LINK = "https://github.com/NordicSemiconductor/Android-DFU-Library"
+private const val DFU_LINK = "https://play.google.com/store/apps/details?id=no.nordicsemi.android.dfu"
 
 @Composable
 fun HomeScreen() {
