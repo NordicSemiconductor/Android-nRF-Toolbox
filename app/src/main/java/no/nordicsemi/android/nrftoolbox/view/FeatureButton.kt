@@ -29,6 +29,7 @@ fun FeatureButton(
     @StringRes nameCode: Int,
     @StringRes name: Int,
     isRunning: Boolean? = null,
+    @StringRes description: Int? = null,
     onClick: () -> Unit
 ) {
     ScreenSection(onClick = onClick) {
@@ -57,12 +58,26 @@ fun FeatureButton(
 
             Spacer(modifier = Modifier.size(16.dp))
 
-            Text(
-                text = stringResource(id = name),
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Center
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(id = name),
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center
+                )
+
+                description?.let {
+                    Spacer(modifier = Modifier.size(4.dp))
+
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = stringResource(id = it),
+                        style = MaterialTheme.typography.labelMedium,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }

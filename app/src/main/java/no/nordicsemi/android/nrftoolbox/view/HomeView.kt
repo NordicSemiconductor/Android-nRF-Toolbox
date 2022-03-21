@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -19,6 +20,7 @@ import no.nordicsemi.android.nrftoolbox.R
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewModel
 import no.nordicsemi.android.theme.view.TitleAppBar
 
+private const val DFU_PACKAGE_NAME = "no.nordicsemi.android.dfu"
 private const val DFU_LINK = "https://play.google.com/store/apps/details?id=no.nordicsemi.android.dfu"
 
 @Composable
@@ -120,8 +122,15 @@ fun HomeScreen() {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 val uriHandler = LocalUriHandler.current
-                FeatureButton(R.drawable.ic_dfu, R.string.dfu_module, R.string.dfu_module_full) {
-                    uriHandler.openUri(DFU_LINK)
+                val context = LocalContext.current
+                val packageManger = context.packageManager
+                FeatureButton(R.drawable.ic_dfu, R.string.dfu_module, R.string.dfu_module_full, null, R.string.dfu_module_info) {
+                    val intent = packageManger.getLaunchIntentForPackage(DFU_PACKAGE_NAME)
+                    if (intent != null) {
+                        context.startActivity(intent)
+                    } else {
+                        uriHandler.openUri(DFU_LINK)
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))

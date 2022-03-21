@@ -18,7 +18,8 @@
     <string name="uart_module">UART</string>
     <string name="uart_module_full">Serial port over BLE</string>
     <string name="dfu_module">DFU</string>
-    <string name="dfu_module_full">Available in separate application.</string>
+    <string name="dfu_module_full">Device Firmware Update</string>
+    <string name="dfu_module_info">Available in separate application.</string>
 
     <string name="viewmodel_profiles">ViewModel profiles</string>
     <string name="service_profiles">Service profiles</string>
