@@ -13,10 +13,8 @@ jobs:
           ref: main
           fetch-depth: 0
       - shell: bash
-        env:
-          CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
         run: |
-          git config user.email $CONTACT_EMAIL
+          git config user.email mag@nordicsemi.no
           git config user.name "Github Action"
           VERSION=`git describe --tags --abbrev=0`
           VERSION=`./moustache/split.sh $VERSION`
