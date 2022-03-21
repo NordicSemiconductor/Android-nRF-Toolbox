@@ -25,7 +25,6 @@ class ConnectionObserverAdapter<T> : ConnectionObserver {
 
     override fun onDeviceConnected(device: BluetoothDevice) {
         Log.d(TAG, "onDeviceConnected()")
-        _status.value = SuccessResult(lastValue!!)
     }
 
     override fun onDeviceFailedToConnect(device: BluetoothDevice, reason: Int) {
@@ -35,6 +34,7 @@ class ConnectionObserverAdapter<T> : ConnectionObserver {
 
     override fun onDeviceReady(device: BluetoothDevice) {
         Log.d(TAG, "onDeviceReady()")
+        _status.value = SuccessResult(lastValue!!)
     }
 
     override fun onDeviceDisconnecting(device: BluetoothDevice) {

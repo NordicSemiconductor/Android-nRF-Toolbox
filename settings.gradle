@@ -9,17 +9,16 @@ dependencyResolutionManagement {
 
     versionCatalogs {
         libs {
-            library('nordic-ble-common', 'no.nordicsemi.android:ble-common:2.4.0.beta02')
-            library('nordic-ble-ktx', 'no.nordicsemi.android:ble-ktx:2.4.0-beta01')
+            library('nordic-ble-common', 'no.nordicsemi.android:ble-common:2.4.0-beta03')
+            library('nordic-ble-ktx', 'no.nordicsemi.android:ble-ktx:2.4.0-beta03')
             library('nordic-scanner', 'no.nordicsemi.android.support.v18:scanner:1.6.0')
-            library('nordic-dfu', 'no.nordicsemi.android:dfu:1.12.1-beta01')
 
             library('nordic-log', 'no.nordicsemi.android:log-timber:2.3.0')
             library('timber-main', 'com.jakewharton.timber:timber:5.0.1')
             library('timber-arcao', 'com.arcao:slf4j-timber:3.1')
             bundle('icons', ['nordic-log', 'timber-main', 'timber-arcao'])
 
-            version('commonlibraries', '1.0.4')
+            version('commonlibraries', '1.0.5')
             library('nordic-ui-scanner', 'no.nordicsemi.android.common', 'uiscanner').versionRef('commonlibraries')
             library('nordic-navigation', 'no.nordicsemi.android.common', 'navigation').versionRef('commonlibraries')
             library('nordic-theme', 'no.nordicsemi.android.common', 'theme').versionRef('commonlibraries')
