@@ -34,15 +34,15 @@ internal fun CSCData.displayDistance(speedUnit: SpeedUnit): String {
     return when (speedUnit) {
         SpeedUnit.M_S -> String.format("%.0f m", distance)
         SpeedUnit.KM_H -> String.format("%.0f m", distance)
-        SpeedUnit.MPH -> String.format("%.0f yd", distance)
+        SpeedUnit.MPH -> String.format("%.0f yd", distance.toYards())
     }
 }
 
 internal fun CSCData.displayTotalDistance(speedUnit: SpeedUnit): String {
     return when (speedUnit) {
-        SpeedUnit.M_S -> String.format("%.2f km", totalDistance)
-        SpeedUnit.KM_H -> String.format("%.2f km", totalDistance)
-        SpeedUnit.MPH -> String.format("%.2f mile", totalDistance)
+        SpeedUnit.M_S -> String.format("%.2f m", totalDistance)
+        SpeedUnit.KM_H -> String.format("%.2f km", totalDistance.toKilometers())
+        SpeedUnit.MPH -> String.format("%.2f mile", totalDistance.toMiles())
     }
 }
 
@@ -75,5 +75,17 @@ private fun displayTemperature(unit: SpeedUnit): String {
         SpeedUnit.M_S -> DISPLAY_M_S
         SpeedUnit.MPH -> DISPLAY_MPH
     }
+}
+
+private fun Float.toYards(): Float {
+    return this*1.0936f
+}
+
+private fun Float.toKilometers(): Float {
+    return this/1000f
+}
+
+private fun Float.toMiles(): Float {
+    return this*0.0006f
 }
 
