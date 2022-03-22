@@ -42,6 +42,12 @@ internal class UARTViewModel @Inject constructor(
         dataSource.getConfigurations().onEach {
             _state.value = _state.value.copy(configurations = it)
         }.launchIn(viewModelScope)
+
+        repository.lastConfigurationName.onEach {
+            it?.let {
+                _state.value = _state.value.copy(selectedConfigurationName = it)
+            }
+        }.launchIn(viewModelScope)
     }
 
     private fun requestBluetoothDevice() {
@@ -88,6 +94,7 @@ internal class UARTViewModel @Inject constructor(
             dataSource.saveConfiguration(UARTConfiguration(null, event.name))
             _state.value = _state.value.copy(selectedConfigurationName = event.name)
         }
+        saveLastConfigurationName(event.name)
     }
 
     private fun onEditMacro(event: OnEditMacro) {
@@ -99,7 +106,13 @@ internal class UARTViewModel @Inject constructor(
     }
 
     private fun onConfigurationSelected(event: OnConfigurationSelected) {
-        _state.value = _state.value.copy(selectedConfigurationName = event.configuration.name)
+        saveLastConfigurationName(event.configuration.name)
+    }
+
+    private fun saveLastConfigurationName(name: String) {
+        viewModelScope.launch {
+            repository.saveConfigurationName(name)
+        }
     }
 
     private fun addNewMacro(macro: UARTMacro) {

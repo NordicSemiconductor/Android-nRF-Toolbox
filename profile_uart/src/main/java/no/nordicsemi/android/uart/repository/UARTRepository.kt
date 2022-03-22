@@ -17,10 +17,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class UARTRepository @Inject constructor(
+class UARTRepository @Inject internal constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
+    private val configurationDataSource: ConfigurationDataSource
 ) {
     private var manager: UARTManager? = null
 
@@ -29,6 +30,8 @@ class UARTRepository @Inject constructor(
 
     val isRunning = data.map { it.isRunning() }
     val hasBeenDisconnected = data.map { it.hasBeenDisconnected() }
+
+    val lastConfigurationName = configurationDataSource.lastConfigurationName
 
     fun launch(device: BluetoothDevice) {
         serviceManager.startService(UARTService::class.java, device)
@@ -55,6 +58,10 @@ class UARTRepository @Inject constructor(
 
     fun clearItems() {
         manager?.clearItems()
+    }
+
+    suspend fun saveConfigurationName(name: String) {
+        configurationDataSource.saveConfigurationName(name)
     }
 
     private suspend fun UARTManager.start(device: BluetoothDevice) {
