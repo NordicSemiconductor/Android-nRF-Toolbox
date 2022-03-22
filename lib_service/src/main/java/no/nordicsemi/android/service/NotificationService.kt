@@ -74,7 +74,7 @@ abstract class NotificationService : LifecycleService() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name))
             .setContentText(getString(messageResId, "Device"))
-            .setSmallIcon(R.drawable.ic_notification_icon)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setColor(ContextCompat.getColor(this, R.color.md_theme_primary))
             .setContentIntent(pendingIntent)
             .build()

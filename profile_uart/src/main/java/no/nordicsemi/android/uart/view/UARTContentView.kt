@@ -155,9 +155,18 @@ private fun OutputSection(records: List<UARTOutputRecord>, onEvent: (UARTViewEve
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                SectionTitle(resId = R.drawable.ic_output, title = stringResource(R.string.uart_output), modifier = Modifier)
+                SectionTitle(
+                    resId = R.drawable.ic_output,
+                    title = stringResource(R.string.uart_output),
+                    modifier = Modifier
+                )
 
-                Icon(Icons.Default.Delete, contentDescription = "Clear items.", modifier = Modifier.clickable { onEvent(ClearOutputItems) })
+                IconButton(onClick = { onEvent(ClearOutputItems) }) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Clear items.",
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))

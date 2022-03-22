@@ -21,6 +21,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -83,7 +84,7 @@ internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (UARTViewEvent) -> U
                         val background = if (selectedIcon.value == icon) {
                             MaterialTheme.colorScheme.primaryContainer
                         } else {
-                            MaterialTheme.colorScheme.secondaryContainer
+                            Color.Transparent
                         }
 
                         Image(
@@ -96,7 +97,6 @@ internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (UARTViewEvent) -> U
                                 .background(background)
                         )
                     }
-
 
                     item(span = { GridItemSpan(GRID_SIZE) }) {
                         Row(
