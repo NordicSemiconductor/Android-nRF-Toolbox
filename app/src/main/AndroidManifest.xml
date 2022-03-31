@@ -2,6 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="no.nordicsemi.android.nrftoolbox">
 
+    <queries>
+        <package android:name="no.nordicsemi.android.dfu" />
+
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+
     <application
         android:name=".NrfToolboxApplication"
         android:allowBackup="true"

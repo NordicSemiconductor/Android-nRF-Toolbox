@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.OnLifecycleEvent
 import no.nordicsemi.android.nrftoolbox.BuildConfig
 import no.nordicsemi.android.nrftoolbox.ProfileDestination
 import no.nordicsemi.android.nrftoolbox.R
@@ -51,14 +52,14 @@ fun HomeScreen() {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                FeatureButton(R.drawable.ic_bps, R.string.bps_module, R.string.bps_module_full) {
-                    viewModel.openProfile(ProfileDestination.BPS)
+                FeatureButton(R.drawable.ic_gls, R.string.gls_module, R.string.gls_module_full) {
+                    viewModel.openProfile(ProfileDestination.GLS)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                FeatureButton(R.drawable.ic_gls, R.string.gls_module, R.string.gls_module_full) {
-                    viewModel.openProfile(ProfileDestination.GLS)
+                FeatureButton(R.drawable.ic_bps, R.string.bps_module, R.string.bps_module_full) {
+                    viewModel.openProfile(ProfileDestination.BPS)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -95,14 +96,14 @@ fun HomeScreen() {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                FeatureButton(R.drawable.ic_prx, R.string.prx_module, R.string.prx_module_full, state.isPRXModuleRunning) {
-                    viewModel.openProfile(ProfileDestination.PRX)
+                FeatureButton(R.drawable.ic_cgm, R.string.cgm_module, R.string.cgm_module_full, state.isCGMModuleRunning) {
+                    viewModel.openProfile(ProfileDestination.CGMS)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                FeatureButton(R.drawable.ic_cgm, R.string.cgm_module, R.string.cgm_module_full, state.isCGMModuleRunning) {
-                    viewModel.openProfile(ProfileDestination.CGMS)
+                FeatureButton(R.drawable.ic_prx, R.string.prx_module, R.string.prx_module_full, state.isPRXModuleRunning) {
+                    viewModel.openProfile(ProfileDestination.PRX)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -124,7 +125,12 @@ fun HomeScreen() {
                 val uriHandler = LocalUriHandler.current
                 val context = LocalContext.current
                 val packageManger = context.packageManager
-                FeatureButton(R.drawable.ic_dfu, R.string.dfu_module, R.string.dfu_module_full, null, R.string.dfu_module_info) {
+
+                val description = packageManger.getLaunchIntentForPackage(DFU_PACKAGE_NAME)?.let {
+                    R.string.dfu_module_info
+                } ?: R.string.dfu_module_install
+
+                FeatureButton(R.drawable.ic_dfu, R.string.dfu_module, R.string.dfu_module_full, null, description) {
                     val intent = packageManger.getLaunchIntentForPackage(DFU_PACKAGE_NAME)
                     if (intent != null) {
                         context.startActivity(intent)

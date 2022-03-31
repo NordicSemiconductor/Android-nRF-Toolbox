@@ -7,5 +7,11 @@ data class HomeViewState(
     val isRSCSModuleRunning: Boolean = false,
     val isPRXModuleRunning: Boolean = false,
     val isCGMModuleRunning: Boolean = false,
-    val isUARTModuleRunning: Boolean = false
-)
+    val isUARTModuleRunning: Boolean = false,
+    val refreshToggle: Boolean = false
+) {
+
+    fun copyWithRefresh(): HomeViewState {
+        return copy(refreshToggle = !refreshToggle)
+    }
+}

@@ -39,14 +39,10 @@ internal fun UARTAddConfigurationDialog(onEvent: (UARTViewEvent) -> Unit, onDism
                         .padding(16.dp)
                 )
 
-//                Spacer(modifier = Modifier.height(16.dp))
-
                 NameInput(name, isError)
 
-//                Spacer(modifier = Modifier.height(16.dp))
-
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = { onDismiss() }) {
@@ -96,8 +92,6 @@ private fun NameInput(
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.error
         )
-
-        Spacer(modifier = Modifier.size(16.dp))
     }
 }
 

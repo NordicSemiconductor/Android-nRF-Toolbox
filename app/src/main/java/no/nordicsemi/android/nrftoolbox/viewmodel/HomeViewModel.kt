@@ -1,5 +1,6 @@
 package no.nordicsemi.android.nrftoolbox.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,6 +14,7 @@ import no.nordicsemi.android.hrs.service.HRSRepository
 import no.nordicsemi.android.hts.repository.HTSRepository
 import no.nordicsemi.android.navigation.NavigationManager
 import no.nordicsemi.android.nrftoolbox.ProfileDestination
+import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
 import no.nordicsemi.android.nrftoolbox.view.HomeViewState
 import no.nordicsemi.android.prx.repository.PRXRepository
 import no.nordicsemi.android.rscs.repository.RSCSRepository
@@ -22,6 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
+    private val activitySignals: ActivitySignals,
     cgmRepository: CGMRepository,
     cscRepository: CSCRepository,
     hrsRepository: HRSRepository,
@@ -61,6 +64,10 @@ class HomeViewModel @Inject constructor(
 
         uartRepository.isRunning.onEach {
             _state.value = _state.value.copy(isUARTModuleRunning = it)
+        }.launchIn(viewModelScope)
+
+        activitySignals.state.onEach {
+            _state.value = _state.value.copyWithRefresh()
         }.launchIn(viewModelScope)
     }
 
