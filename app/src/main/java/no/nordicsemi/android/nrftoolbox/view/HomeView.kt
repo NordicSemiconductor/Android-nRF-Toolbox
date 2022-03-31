@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.OnLifecycleEvent
 import no.nordicsemi.android.nrftoolbox.BuildConfig
 import no.nordicsemi.android.nrftoolbox.ProfileDestination
 import no.nordicsemi.android.nrftoolbox.R
@@ -124,7 +125,12 @@ fun HomeScreen() {
                 val uriHandler = LocalUriHandler.current
                 val context = LocalContext.current
                 val packageManger = context.packageManager
-                FeatureButton(R.drawable.ic_dfu, R.string.dfu_module, R.string.dfu_module_full, null, R.string.dfu_module_info) {
+
+                val description = packageManger.getLaunchIntentForPackage(DFU_PACKAGE_NAME)?.let {
+                    R.string.dfu_module_info
+                } ?: R.string.dfu_module_install
+
+                FeatureButton(R.drawable.ic_dfu, R.string.dfu_module, R.string.dfu_module_full, null, description) {
                     val intent = packageManger.getLaunchIntentForPackage(DFU_PACKAGE_NAME)
                     if (intent != null) {
                         context.startActivity(intent)

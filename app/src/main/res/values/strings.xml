@@ -20,6 +20,7 @@
     <string name="dfu_module">DFU</string>
     <string name="dfu_module_full">Device Firmware Update</string>
     <string name="dfu_module_info">Available in separate application.</string>
+    <string name="dfu_module_install">Install from Google Play Store.</string>
 
     <string name="viewmodel_profiles">ViewModel profiles</string>
     <string name="service_profiles">Service profiles</string>
