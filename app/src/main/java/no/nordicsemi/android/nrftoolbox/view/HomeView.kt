@@ -52,14 +52,14 @@ fun HomeScreen() {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                FeatureButton(R.drawable.ic_bps, R.string.bps_module, R.string.bps_module_full) {
-                    viewModel.openProfile(ProfileDestination.BPS)
+                FeatureButton(R.drawable.ic_gls, R.string.gls_module, R.string.gls_module_full) {
+                    viewModel.openProfile(ProfileDestination.GLS)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                FeatureButton(R.drawable.ic_gls, R.string.gls_module, R.string.gls_module_full) {
-                    viewModel.openProfile(ProfileDestination.GLS)
+                FeatureButton(R.drawable.ic_bps, R.string.bps_module, R.string.bps_module_full) {
+                    viewModel.openProfile(ProfileDestination.BPS)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -96,14 +96,14 @@ fun HomeScreen() {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                FeatureButton(R.drawable.ic_prx, R.string.prx_module, R.string.prx_module_full, state.isPRXModuleRunning) {
-                    viewModel.openProfile(ProfileDestination.PRX)
+                FeatureButton(R.drawable.ic_cgm, R.string.cgm_module, R.string.cgm_module_full, state.isCGMModuleRunning) {
+                    viewModel.openProfile(ProfileDestination.CGMS)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                FeatureButton(R.drawable.ic_cgm, R.string.cgm_module, R.string.cgm_module_full, state.isCGMModuleRunning) {
-                    viewModel.openProfile(ProfileDestination.CGMS)
+                FeatureButton(R.drawable.ic_prx, R.string.prx_module, R.string.prx_module_full, state.isPRXModuleRunning) {
+                    viewModel.openProfile(ProfileDestination.PRX)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
