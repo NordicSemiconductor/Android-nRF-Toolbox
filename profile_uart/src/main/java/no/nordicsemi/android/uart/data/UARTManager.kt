@@ -26,6 +26,7 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import android.content.Context
 import android.text.TextUtils
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -35,6 +36,7 @@ import no.nordicsemi.android.ble.WriteRequest
 import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
 import no.nordicsemi.android.ble.ktx.asFlow
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
+import no.nordicsemi.android.log.ToolboxLogger
 import no.nordicsemi.android.service.ConnectionObserverAdapter
 import no.nordicsemi.android.utils.EMPTY
 import no.nordicsemi.android.utils.launchWithCatch
@@ -50,6 +52,7 @@ private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1
 internal class UARTManager(
     context: Context,
     private val scope: CoroutineScope,
+    private val logger: ToolboxLogger
 ) : BleManager(context) {
 
     private var batteryLevelCharacteristic: BluetoothGattCharacteristic? = null
@@ -68,6 +71,14 @@ internal class UARTManager(
         data.onEach {
             dataHolder.setValue(it)
         }.launchIn(scope)
+    }
+
+    override fun log(priority: Int, message: String) {
+        logger.log(priority, message)
+    }
+
+    override fun getMinLogPriority(): Int {
+        return Log.VERBOSE
     }
 
     private inner class UARTManagerGattCallback : BleManagerGattCallback() {

@@ -12,6 +12,16 @@
         </intent>
     </queries>
 
+    <queries>
+        <package android:name="no.nordicsemi.android.log" />
+
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+
     <application
         android:name=".NrfToolboxApplication"
         android:allowBackup="true"

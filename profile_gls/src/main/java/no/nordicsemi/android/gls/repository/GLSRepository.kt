@@ -14,6 +14,7 @@ import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.gls.data.GLSData
 import no.nordicsemi.android.gls.data.GLSManager
 import no.nordicsemi.android.gls.data.WorkingMode
+import no.nordicsemi.android.log.ToolboxLogger
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.utils.exhaustive
 import javax.inject.Inject
@@ -21,14 +22,14 @@ import javax.inject.Inject
 @ViewModelScoped
 internal class GLSRepository @Inject constructor(
     @ApplicationContext
-    private val context: Context,
+    private val context: Context
 ) {
 
     private var manager: GLSManager? = null
 
     fun downloadData(device: BluetoothDevice): Flow<BleManagerResult<GLSData>> = callbackFlow {
         val scope = this
-        val managerInstance = manager ?: GLSManager(context, scope).apply {
+        val managerInstance = manager ?: GLSManager(context, scope, ToolboxLogger(context, "GLS")).apply {
             try {
                 connect(device)
                     .useAutoConnect(false)

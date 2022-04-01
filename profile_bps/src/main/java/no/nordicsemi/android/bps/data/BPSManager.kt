@@ -36,8 +36,7 @@ import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
 import no.nordicsemi.android.ble.common.callback.bps.BloodPressureMeasurementResponse
 import no.nordicsemi.android.ble.common.callback.bps.IntermediateCuffPressureResponse
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
-import no.nordicsemi.android.bps.data.BPSData
-import no.nordicsemi.android.bps.data.copyWithNewResponse
+import no.nordicsemi.android.log.ToolboxLogger
 import no.nordicsemi.android.service.ConnectionObserverAdapter
 import java.util.*
 
@@ -50,7 +49,8 @@ private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1
 
 internal class BPSManager(
     @ApplicationContext context: Context,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    private val logger: ToolboxLogger
 ) : BleManager(context) {
 
     private var batteryLevelCharacteristic: BluetoothGattCharacteristic? = null
@@ -66,6 +66,10 @@ internal class BPSManager(
         data.onEach {
             dataHolder.setValue(it)
         }.launchIn(scope)
+    }
+
+    override fun log(priority: Int, message: String) {
+        logger.log(priority, message)
     }
 
     override fun getMinLogPriority(): Int {

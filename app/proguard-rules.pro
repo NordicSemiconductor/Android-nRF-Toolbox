@@ -5,6 +5,8 @@
 -keep class org.simpleframework.xml.core.** { *; }
 -keep class org.simpleframework.xml.util.** { *; }
 
+-keep class no.nordicsemi.android.log.** { *; }
+
 -keepattributes ElementList, Root, InnerClasses, LineNumberTable
 
 -keepclasseswithmembers class * {

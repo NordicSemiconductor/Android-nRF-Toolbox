@@ -5,6 +5,7 @@ import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
+import no.nordicsemi.android.log.ToolboxLogger
 import no.nordicsemi.android.prx.data.AlarmLevel
 import no.nordicsemi.android.prx.data.PRXData
 import no.nordicsemi.android.prx.data.PRXManager
@@ -36,7 +37,7 @@ class PRXRepository @Inject internal constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = PRXManager(context, scope)
+        val manager = PRXManager(context, scope, ToolboxLogger(context, "PRX"))
         this.manager = manager
         manager.useServer(proximityServerManager)
 

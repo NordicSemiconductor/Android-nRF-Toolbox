@@ -24,6 +24,7 @@ package no.nordicsemi.android.hts.data
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -32,7 +33,7 @@ import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
 import no.nordicsemi.android.ble.common.callback.ht.TemperatureMeasurementResponse
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
-import no.nordicsemi.android.hts.data.HTSData
+import no.nordicsemi.android.log.ToolboxLogger
 import no.nordicsemi.android.service.ConnectionObserverAdapter
 import java.util.*
 
@@ -45,6 +46,7 @@ private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1
 internal class HTSManager internal constructor(
     context: Context,
     private val scope: CoroutineScope,
+    private val logger: ToolboxLogger
 ) : BleManager(context) {
 
     private var batteryLevelCharacteristic: BluetoothGattCharacteristic? = null
@@ -59,6 +61,14 @@ internal class HTSManager internal constructor(
         data.onEach {
             dataHolder.setValue(it)
         }.launchIn(scope)
+    }
+
+    override fun log(priority: Int, message: String) {
+        logger.log(priority, message)
+    }
+
+    override fun getMinLogPriority(): Int {
+        return Log.VERBOSE
     }
 
     override fun getGattCallback(): BleManagerGattCallback {

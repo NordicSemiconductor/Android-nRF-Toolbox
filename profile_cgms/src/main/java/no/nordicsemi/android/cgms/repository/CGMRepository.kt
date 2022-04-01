@@ -9,10 +9,10 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.cgms.data.CGMData
 import no.nordicsemi.android.cgms.data.CGMManager
+import no.nordicsemi.android.log.ToolboxLogger
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.ConnectingResult
 import no.nordicsemi.android.service.ServiceManager
-import java.lang.Exception
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,7 +20,7 @@ import javax.inject.Singleton
 class CGMRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val serviceManager: ServiceManager,
+    private val serviceManager: ServiceManager
 ) {
     private var manager: CGMManager? = null
 
@@ -35,7 +35,7 @@ class CGMRepository @Inject constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = CGMManager(context, scope)
+        val manager = CGMManager(context, scope, ToolboxLogger(context, "CGMS"))
         this.manager = manager
 
         manager.dataHolder.status.onEach {

@@ -24,6 +24,7 @@ package no.nordicsemi.android.rscs.data
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -32,10 +33,8 @@ import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
 import no.nordicsemi.android.ble.common.callback.rsc.RunningSpeedAndCadenceMeasurementResponse
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
-import no.nordicsemi.android.ble.ktx.suspend
-import no.nordicsemi.android.rscs.data.RSCSData
+import no.nordicsemi.android.log.ToolboxLogger
 import no.nordicsemi.android.service.ConnectionObserverAdapter
-import no.nordicsemi.android.utils.launchWithCatch
 import java.util.*
 
 val RSCS_SERVICE_UUID: UUID = UUID.fromString("00001814-0000-1000-8000-00805F9B34FB")
@@ -46,7 +45,8 @@ private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1
 
 internal class RSCSManager internal constructor(
     context: Context,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    private val logger: ToolboxLogger
 ) : BleManager(context) {
 
     private var batteryLevelCharacteristic: BluetoothGattCharacteristic? = null
@@ -61,6 +61,14 @@ internal class RSCSManager internal constructor(
         data.onEach {
             dataHolder.setValue(it)
         }.launchIn(scope)
+    }
+
+    override fun log(priority: Int, message: String) {
+        logger.log(priority, message)
+    }
+
+    override fun getMinLogPriority(): Int {
+        return Log.VERBOSE
     }
 
     private inner class RSCManagerGattCallback : BleManagerGattCallback() {

@@ -26,6 +26,7 @@ dependencies {
     implementation project(":lib_service")
     implementation project(":lib_theme")
     implementation project(":lib_utils")
+    implementation project(":lib_log")
 
     implementation libs.room.runtime
     implementation libs.room.ktx
@@ -34,7 +35,6 @@ dependencies {
     implementation libs.nordic.ble.common
     implementation libs.nordic.ble.ktx
 
-    implementation libs.nordic.log
     implementation libs.nordic.theme
     implementation libs.nordic.ui.scanner
     implementation libs.nordic.navigation

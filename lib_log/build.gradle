@@ -1,0 +1,5 @@
+apply from: rootProject.file("library.gradle")
+
+dependencies {
+    implementation libs.nordic.log
+}
