@@ -16,7 +16,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -91,7 +90,7 @@ internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (UARTViewEvent) -> U
                         Image(
                             painter = painterResource(id = icon.toResId()),
                             contentDescription = stringResource(id = R.string.uart_macro_icon),
-                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary),
+                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer),
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(RoundedCornerShape(10.dp))
