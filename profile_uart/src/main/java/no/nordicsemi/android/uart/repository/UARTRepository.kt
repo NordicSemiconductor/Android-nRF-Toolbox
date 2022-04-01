@@ -7,12 +7,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.ktx.suspend
+import no.nordicsemi.android.log.ToolboxLogger
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.ConnectingResult
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.uart.data.*
-import no.nordicsemi.android.uart.data.UARTData
-import no.nordicsemi.android.uart.data.UARTManager
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,7 +20,8 @@ class UARTRepository @Inject internal constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
-    private val configurationDataSource: ConfigurationDataSource
+    private val configurationDataSource: ConfigurationDataSource,
+    private val logger: ToolboxLogger
 ) {
     private var manager: UARTManager? = null
 
@@ -38,7 +38,7 @@ class UARTRepository @Inject internal constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = UARTManager(context, scope)
+        val manager = UARTManager(context, scope, logger)
         this.manager = manager
 
         manager.dataHolder.status.onEach {

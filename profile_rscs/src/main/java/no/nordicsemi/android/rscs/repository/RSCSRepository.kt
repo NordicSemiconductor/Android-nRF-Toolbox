@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.ktx.suspend
+import no.nordicsemi.android.log.ToolboxLogger
 import no.nordicsemi.android.rscs.data.RSCSData
 import no.nordicsemi.android.rscs.data.RSCSManager
 import no.nordicsemi.android.service.BleManagerResult
@@ -20,6 +21,7 @@ class RSCSRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
+    private val logger: ToolboxLogger
 ) {
     private var manager: RSCSManager? = null
 
@@ -34,7 +36,7 @@ class RSCSRepository @Inject constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = RSCSManager(context, scope)
+        val manager = RSCSManager(context, scope, logger)
         this.manager = manager
 
         manager.dataHolder.status.onEach {

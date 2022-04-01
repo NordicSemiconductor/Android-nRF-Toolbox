@@ -10,6 +10,7 @@ import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.csc.data.CSCManager
 import no.nordicsemi.android.csc.data.WheelSize
+import no.nordicsemi.android.log.ToolboxLogger
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.ConnectingResult
 import no.nordicsemi.android.service.ServiceManager
@@ -21,6 +22,7 @@ class CSCRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
+    private val logger: ToolboxLogger
 ) {
     private var manager: CSCManager? = null
 
@@ -35,7 +37,7 @@ class CSCRepository @Inject constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = CSCManager(context, scope)
+        val manager = CSCManager(context, scope, logger)
         this.manager = manager
 
         manager.dataHolder.status.onEach {

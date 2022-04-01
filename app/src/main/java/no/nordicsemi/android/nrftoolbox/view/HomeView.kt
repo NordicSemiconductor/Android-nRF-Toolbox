@@ -14,7 +14,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.OnLifecycleEvent
 import no.nordicsemi.android.nrftoolbox.BuildConfig
 import no.nordicsemi.android.nrftoolbox.ProfileDestination
 import no.nordicsemi.android.nrftoolbox.R
@@ -23,6 +22,9 @@ import no.nordicsemi.android.theme.view.TitleAppBar
 
 private const val DFU_PACKAGE_NAME = "no.nordicsemi.android.dfu"
 private const val DFU_LINK = "https://play.google.com/store/apps/details?id=no.nordicsemi.android.dfu"
+
+private const val LOGGER_PACKAGE_NAME = "no.nordicsemi.android.log"
+private const val LOGGER_LINK = "https://play.google.com/store/apps/details?id=no.nordicsemi.android.log"
 
 @Composable
 fun HomeScreen() {
@@ -136,6 +138,21 @@ fun HomeScreen() {
                         context.startActivity(intent)
                     } else {
                         uriHandler.openUri(DFU_LINK)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                val loggerDescription = packageManger.getLaunchIntentForPackage(LOGGER_PACKAGE_NAME)?.let {
+                    R.string.logger_module_info
+                } ?: R.string.dfu_module_install
+
+                FeatureButton(R.drawable.ic_logger, R.string.logger_module, R.string.logger_module_full, null, loggerDescription) {
+                    val intent = packageManger.getLaunchIntentForPackage(LOGGER_PACKAGE_NAME)
+                    if (intent != null) {
+                        context.startActivity(intent)
+                    } else {
+                        uriHandler.openUri(LOGGER_LINK)
                     }
                 }
 

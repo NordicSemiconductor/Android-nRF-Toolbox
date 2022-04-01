@@ -13,10 +13,7 @@ dependencyResolutionManagement {
             library('nordic-ble-ktx', 'no.nordicsemi.android:ble-ktx:2.4.0-beta03')
             library('nordic-scanner', 'no.nordicsemi.android.support.v18:scanner:1.6.0')
 
-            library('nordic-log', 'no.nordicsemi.android:log-timber:2.3.0')
-            library('timber-main', 'com.jakewharton.timber:timber:5.0.1')
-            library('timber-arcao', 'com.arcao:slf4j-timber:3.1')
-            bundle('icons', ['nordic-log', 'timber-main', 'timber-arcao'])
+            library('nordic-log', 'no.nordicsemi.android:log:2.3.0')
 
             version('commonlibraries', '1.0.5')
             library('nordic-ui-scanner', 'no.nordicsemi.android.common', 'uiscanner').versionRef('commonlibraries')
@@ -100,6 +97,7 @@ include ':profile_uart'
 include ':lib_service'
 include ':lib_theme'
 include ':lib_utils'
+include ':lib_log'
 
 if (file('../Android-Common-Libraries').exists()) {
     includeBuild('../Android-Common-Libraries')

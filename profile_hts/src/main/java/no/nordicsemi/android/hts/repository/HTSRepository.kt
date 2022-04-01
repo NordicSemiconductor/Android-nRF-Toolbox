@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.hts.data.HTSData
 import no.nordicsemi.android.hts.data.HTSManager
+import no.nordicsemi.android.log.ToolboxLogger
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.ConnectingResult
 import no.nordicsemi.android.service.ServiceManager
@@ -20,6 +21,7 @@ class HTSRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
+    private val logger: ToolboxLogger
 ) {
     private var manager: HTSManager? = null
 
@@ -34,7 +36,7 @@ class HTSRepository @Inject constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = HTSManager(context, scope)
+        val manager = HTSManager(context, scope, logger)
         this.manager = manager
 
         manager.dataHolder.status.onEach {

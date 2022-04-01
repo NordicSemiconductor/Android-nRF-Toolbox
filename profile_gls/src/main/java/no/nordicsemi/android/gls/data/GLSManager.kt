@@ -39,6 +39,7 @@ import no.nordicsemi.android.ble.common.callback.glucose.GlucoseMeasurementRespo
 import no.nordicsemi.android.ble.common.data.RecordAccessControlPointData
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
 import no.nordicsemi.android.ble.ktx.suspend
+import no.nordicsemi.android.log.ToolboxLogger
 import no.nordicsemi.android.service.ConnectionObserverAdapter
 import no.nordicsemi.android.utils.launchWithCatch
 import java.util.*
@@ -58,7 +59,8 @@ private val BATTERY_LEVEL_CHARACTERISTIC_UUID =
 internal class GLSManager @Inject constructor(
     @ApplicationContext
     context: Context,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    private val logger: ToolboxLogger
 ) : BleManager(context) {
 
     private var batteryLevelCharacteristic: BluetoothGattCharacteristic? = null
@@ -75,6 +77,14 @@ internal class GLSManager @Inject constructor(
         data.onEach {
             dataHolder.setValue(it)
         }.launchIn(scope)
+    }
+
+    override fun log(priority: Int, message: String) {
+        logger.log(priority, message)
+    }
+
+    override fun getMinLogPriority(): Int {
+        return Log.VERBOSE
     }
 
     override fun getGattCallback(): BleManagerGattCallback {
