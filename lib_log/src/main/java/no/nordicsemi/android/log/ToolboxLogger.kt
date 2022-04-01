@@ -12,7 +12,7 @@ internal const val LOG_TAG = "nRF Toolbox"
 @Singleton
 class ToolboxLogger @Inject constructor(
     @ApplicationContext
-    private val context: Context
+    private val context: Context,
 ) {
 
     private var logSession: LogSession? = null
@@ -20,7 +20,7 @@ class ToolboxLogger @Inject constructor(
     fun log(@LogLevel level: Int, message: String) {
         val logSession = getLogger()
         if (logSession != null) {
-            Logger.log(logSession, level, message)
+            Logger.log(logSession, LogContract.Log.Level.fromPriority(level), message)
         }
         Log.println(level, LOG_TAG, message)
     }
