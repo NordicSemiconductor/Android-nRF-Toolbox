@@ -22,15 +22,14 @@ import javax.inject.Inject
 @ViewModelScoped
 internal class GLSRepository @Inject constructor(
     @ApplicationContext
-    private val context: Context,
-    private val logger: ToolboxLogger
+    private val context: Context
 ) {
 
     private var manager: GLSManager? = null
 
     fun downloadData(device: BluetoothDevice): Flow<BleManagerResult<GLSData>> = callbackFlow {
         val scope = this
-        val managerInstance = manager ?: GLSManager(context, scope, logger).apply {
+        val managerInstance = manager ?: GLSManager(context, scope, ToolboxLogger(context, "GLS")).apply {
             try {
                 connect(device)
                     .useAutoConnect(false)

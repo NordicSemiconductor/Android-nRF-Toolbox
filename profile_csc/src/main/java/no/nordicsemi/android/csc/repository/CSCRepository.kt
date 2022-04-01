@@ -21,8 +21,7 @@ import javax.inject.Singleton
 class CSCRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val serviceManager: ServiceManager,
-    private val logger: ToolboxLogger
+    private val serviceManager: ServiceManager
 ) {
     private var manager: CSCManager? = null
 
@@ -37,7 +36,7 @@ class CSCRepository @Inject constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = CSCManager(context, scope, logger)
+        val manager = CSCManager(context, scope, ToolboxLogger(context, "CSC"))
         this.manager = manager
 
         manager.dataHolder.status.onEach {

@@ -20,8 +20,7 @@ class UARTRepository @Inject internal constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
-    private val configurationDataSource: ConfigurationDataSource,
-    private val logger: ToolboxLogger
+    private val configurationDataSource: ConfigurationDataSource
 ) {
     private var manager: UARTManager? = null
 
@@ -38,7 +37,7 @@ class UARTRepository @Inject internal constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = UARTManager(context, scope, logger)
+        val manager = UARTManager(context, scope, ToolboxLogger(context, "UART"))
         this.manager = manager
 
         manager.dataHolder.status.onEach {

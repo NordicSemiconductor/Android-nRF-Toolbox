@@ -20,8 +20,7 @@ import javax.inject.Singleton
 class CGMRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val serviceManager: ServiceManager,
-    private val logger: ToolboxLogger
+    private val serviceManager: ServiceManager
 ) {
     private var manager: CGMManager? = null
 
@@ -36,7 +35,7 @@ class CGMRepository @Inject constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = CGMManager(context, scope, logger)
+        val manager = CGMManager(context, scope, ToolboxLogger(context, "CGMS"))
         this.manager = manager
 
         manager.dataHolder.status.onEach {

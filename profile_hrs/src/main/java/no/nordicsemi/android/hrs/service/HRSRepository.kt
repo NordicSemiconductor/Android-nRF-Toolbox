@@ -20,8 +20,7 @@ import javax.inject.Singleton
 class HRSRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val serviceManager: ServiceManager,
-    private val logger: ToolboxLogger
+    private val serviceManager: ServiceManager
 ) {
     private var manager: HRSManager? = null
 
@@ -36,7 +35,7 @@ class HRSRepository @Inject constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = HRSManager(context, scope, logger)
+        val manager = HRSManager(context, scope, ToolboxLogger(context, "HRS"))
         this.manager = manager
 
         manager.dataHolder.status.onEach {

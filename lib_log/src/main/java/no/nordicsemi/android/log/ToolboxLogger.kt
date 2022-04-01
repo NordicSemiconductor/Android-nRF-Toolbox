@@ -2,17 +2,13 @@ package no.nordicsemi.android.log
 
 import android.content.Context
 import android.util.Log
-import dagger.hilt.android.qualifiers.ApplicationContext
 import no.nordicsemi.android.log.annotation.LogLevel
-import javax.inject.Inject
-import javax.inject.Singleton
 
 internal const val LOG_TAG = "nRF Toolbox"
 
-@Singleton
-class ToolboxLogger @Inject constructor(
-    @ApplicationContext
+class ToolboxLogger(
     private val context: Context,
+    private val key: String,
 ) {
 
     private var logSession: LogSession? = null
@@ -26,7 +22,7 @@ class ToolboxLogger @Inject constructor(
     }
 
     private fun getLogger(): LogSession? {
-        logSession = logSession ?: Logger.newSession(context, "key", LOG_TAG)
+        logSession = logSession ?: Logger.newSession(context, key, LOG_TAG)
         return logSession
     }
 }

@@ -18,13 +18,12 @@ import javax.inject.Inject
 @ViewModelScoped
 internal class BPSRepository @Inject constructor(
     @ApplicationContext
-    private val context: Context,
-    private val logger: ToolboxLogger
+    private val context: Context
 ) {
 
     fun downloadData(device: BluetoothDevice): Flow<BleManagerResult<BPSData>> = callbackFlow {
         val scope = this
-        val manager = BPSManager(context, scope, logger)
+        val manager = BPSManager(context, scope, ToolboxLogger(context, "BPS"))
 
         manager.dataHolder.status.onEach {
             trySend(it)

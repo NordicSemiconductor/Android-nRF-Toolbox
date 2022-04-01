@@ -20,8 +20,7 @@ import javax.inject.Singleton
 class RSCSRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val serviceManager: ServiceManager,
-    private val logger: ToolboxLogger
+    private val serviceManager: ServiceManager
 ) {
     private var manager: RSCSManager? = null
 
@@ -36,7 +35,7 @@ class RSCSRepository @Inject constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = RSCSManager(context, scope, logger)
+        val manager = RSCSManager(context, scope, ToolboxLogger(context, "RSCS"))
         this.manager = manager
 
         manager.dataHolder.status.onEach {

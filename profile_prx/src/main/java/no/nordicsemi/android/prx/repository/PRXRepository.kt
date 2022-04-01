@@ -20,8 +20,7 @@ class PRXRepository @Inject internal constructor(
     private val context: Context,
     private val serviceManager: ServiceManager,
     private val proximityServerManager: ProximityServerManager,
-    private val alarmHandler: AlarmHandler,
-    private val logger: ToolboxLogger
+    private val alarmHandler: AlarmHandler
 ) {
 
     private var manager: PRXManager? = null
@@ -38,7 +37,7 @@ class PRXRepository @Inject internal constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = PRXManager(context, scope, logger)
+        val manager = PRXManager(context, scope, ToolboxLogger(context, "PRX"))
         this.manager = manager
         manager.useServer(proximityServerManager)
 
