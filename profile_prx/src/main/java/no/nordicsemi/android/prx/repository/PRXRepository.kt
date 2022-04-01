@@ -5,7 +5,7 @@ import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
-import no.nordicsemi.android.log.ToolboxLogger
+import no.nordicsemi.android.logger.ToolboxLogger
 import no.nordicsemi.android.prx.data.AlarmLevel
 import no.nordicsemi.android.prx.data.PRXData
 import no.nordicsemi.android.prx.data.PRXManager

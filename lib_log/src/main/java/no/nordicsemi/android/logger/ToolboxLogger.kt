@@ -1,7 +1,10 @@
-package no.nordicsemi.android.log
+package no.nordicsemi.android.logger
 
 import android.content.Context
 import android.util.Log
+import no.nordicsemi.android.log.LogContract
+import no.nordicsemi.android.log.LogSession
+import no.nordicsemi.android.log.Logger
 import no.nordicsemi.android.log.annotation.LogLevel
 
 internal const val LOG_TAG = "nRF Toolbox"

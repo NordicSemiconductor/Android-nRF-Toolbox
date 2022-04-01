@@ -45,7 +45,7 @@ import no.nordicsemi.android.ble.ktx.asValidResponseFlow
 import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.ble.ktx.suspendForValidResponse
 import no.nordicsemi.android.cgms.repository.toList
-import no.nordicsemi.android.log.ToolboxLogger
+import no.nordicsemi.android.logger.ToolboxLogger
 import no.nordicsemi.android.service.ConnectionObserverAdapter
 import no.nordicsemi.android.utils.launchWithCatch
 import java.util.*

@@ -10,7 +10,7 @@ import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.csc.data.CSCManager
 import no.nordicsemi.android.csc.data.WheelSize
-import no.nordicsemi.android.log.ToolboxLogger
+import no.nordicsemi.android.logger.ToolboxLogger
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.ConnectingResult
 import no.nordicsemi.android.service.ServiceManager

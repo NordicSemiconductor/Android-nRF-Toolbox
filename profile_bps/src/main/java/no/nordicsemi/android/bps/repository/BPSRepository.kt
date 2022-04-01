@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.bps.data.BPSData
 import no.nordicsemi.android.bps.data.BPSManager
-import no.nordicsemi.android.log.ToolboxLogger
+import no.nordicsemi.android.logger.ToolboxLogger
 import no.nordicsemi.android.service.BleManagerResult
 import javax.inject.Inject
 

@@ -14,7 +14,7 @@ import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.gls.data.GLSData
 import no.nordicsemi.android.gls.data.GLSManager
 import no.nordicsemi.android.gls.data.WorkingMode
-import no.nordicsemi.android.log.ToolboxLogger
+import no.nordicsemi.android.logger.ToolboxLogger
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.utils.exhaustive
 import javax.inject.Inject
