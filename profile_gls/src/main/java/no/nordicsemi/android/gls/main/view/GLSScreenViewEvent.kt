@@ -10,3 +10,5 @@ internal data class OnWorkingModeSelected(val workingMode: WorkingMode) : GLSScr
 internal data class OnGLSRecordClick(val record: GLSRecord) : GLSScreenViewEvent()
 
 internal object DisconnectEvent : GLSScreenViewEvent()
+
+internal object OpenLoggerEvent : GLSScreenViewEvent()

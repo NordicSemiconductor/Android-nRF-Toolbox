@@ -58,6 +58,7 @@ internal class CSCViewModel @Inject constructor(
             is OnWheelSizeSelected -> repository.setWheelSize(event.wheelSize)
             OnDisconnectButtonClick -> disconnect()
             NavigateUp -> navigationManager.navigateUp()
+            OpenLogger -> repository.openLogger()
         }.exhaustive
     }
 

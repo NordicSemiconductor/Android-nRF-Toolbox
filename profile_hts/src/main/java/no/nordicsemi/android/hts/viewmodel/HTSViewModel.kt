@@ -57,6 +57,7 @@ internal class HTSViewModel @Inject constructor(
             DisconnectEvent -> disconnect()
             is OnTemperatureUnitSelected -> onTemperatureUnitSelected(event)
             NavigateUp -> navigationManager.navigateUp()
+            OpenLoggerEvent -> repository.openLogger()
         }.exhaustive
     }
 

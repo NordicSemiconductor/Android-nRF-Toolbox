@@ -58,6 +58,7 @@ internal class PRXViewModel @Inject constructor(
             TurnOffAlert -> repository.disableAlarm()
             TurnOnAlert -> repository.enableAlarm()
             NavigateUpEvent -> navigationManager.navigateUp()
+            OpenLoggerEvent -> repository.openLogger()
         }.exhaustive
     }
 

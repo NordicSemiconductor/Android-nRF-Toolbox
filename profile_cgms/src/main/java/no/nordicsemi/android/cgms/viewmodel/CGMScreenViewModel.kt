@@ -41,6 +41,7 @@ internal class CGMScreenViewModel @Inject constructor(
             DisconnectEvent -> disconnect()
             is OnWorkingModeSelected -> onCommandReceived(event.workingMode)
             NavigateUp -> navigationManager.navigateUp()
+            OpenLoggerEvent -> repository.openLogger()
         }.exhaustive
     }
 

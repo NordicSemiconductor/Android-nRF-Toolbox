@@ -20,3 +20,4 @@ internal object ClearOutputItems : UARTViewEvent()
 internal object DisconnectEvent : UARTViewEvent()
 
 internal object NavigateUp : UARTViewEvent()
+internal object OpenLogger : UARTViewEvent()

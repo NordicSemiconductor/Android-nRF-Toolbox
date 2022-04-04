@@ -12,18 +12,25 @@ import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.bps.data.BPSData
 import no.nordicsemi.android.bps.data.BPSManager
 import no.nordicsemi.android.logger.ToolboxLogger
+import no.nordicsemi.android.logger.ToolboxLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
 import javax.inject.Inject
 
 @ViewModelScoped
 internal class BPSRepository @Inject constructor(
     @ApplicationContext
-    private val context: Context
+    private val context: Context,
+    private val toolboxLoggerFactory: ToolboxLoggerFactory
 ) {
+
+    private var logger: ToolboxLogger? = null
 
     fun downloadData(device: BluetoothDevice): Flow<BleManagerResult<BPSData>> = callbackFlow {
         val scope = this
-        val manager = BPSManager(context, scope, ToolboxLogger(context, "BPS", device.address))
+        val createdLogger = toolboxLoggerFactory.create("BPS", device.address).also {
+            logger = it
+        }
+        val manager = BPSManager(context, scope, createdLogger)
 
         manager.dataHolder.status.onEach {
             trySend(it)
@@ -36,6 +43,12 @@ internal class BPSRepository @Inject constructor(
 
         awaitClose {
             manager.disconnect().enqueue()
+            logger = null
         }
     }
+
+    fun openLogger() {
+        logger?.openLogger()
+    }
+
 }

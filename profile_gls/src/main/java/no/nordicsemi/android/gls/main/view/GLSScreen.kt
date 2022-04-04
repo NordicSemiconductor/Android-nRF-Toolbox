@@ -12,6 +12,7 @@ import no.nordicsemi.android.gls.R
 import no.nordicsemi.android.gls.main.viewmodel.GLSViewModel
 import no.nordicsemi.android.service.*
 import no.nordicsemi.android.theme.view.BackIconAppBar
+import no.nordicsemi.android.theme.view.LoggerIconAppBar
 import no.nordicsemi.ui.scanner.ui.DeviceConnectingView
 import no.nordicsemi.ui.scanner.ui.NoDeviceView
 import no.nordicsemi.android.utils.exhaustive
@@ -26,8 +27,10 @@ fun GLSScreen() {
     Column {
         val navigateUp = { viewModel.onEvent(DisconnectEvent) }
 
-        BackIconAppBar(stringResource(id = R.string.gls_title)) {
+        LoggerIconAppBar(stringResource(id = R.string.gls_title), {
             viewModel.onEvent(DisconnectEvent)
+        }) {
+            viewModel.onEvent(OpenLoggerEvent)
         }
 
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {

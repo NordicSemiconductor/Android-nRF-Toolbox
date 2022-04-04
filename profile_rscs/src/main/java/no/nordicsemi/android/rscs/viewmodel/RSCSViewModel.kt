@@ -56,6 +56,7 @@ internal class RSCSViewModel @Inject constructor(
         when (event) {
             DisconnectEvent -> disconnect()
             NavigateUpEvent -> navigationManager.navigateUp()
+            OpenLoggerEvent -> repository.openLogger()
         }.exhaustive
     }
 

@@ -9,3 +9,5 @@ internal object TurnOnAlert : PRXScreenViewEvent()
 internal object TurnOffAlert : PRXScreenViewEvent()
 
 internal object DisconnectEvent : PRXScreenViewEvent()
+
+internal object OpenLoggerEvent : PRXScreenViewEvent()
