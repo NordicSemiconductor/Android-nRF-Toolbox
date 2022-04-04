@@ -21,6 +21,7 @@
  */
 package no.nordicsemi.android.uart.data
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
@@ -36,6 +37,7 @@ import no.nordicsemi.android.ble.WriteRequest
 import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
 import no.nordicsemi.android.ble.ktx.asFlow
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
+import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.logger.ToolboxLogger
 import no.nordicsemi.android.service.ConnectionObserverAdapter
 import no.nordicsemi.android.utils.EMPTY
@@ -83,9 +85,11 @@ internal class UARTManager(
 
     private inner class UARTManagerGattCallback : BleManagerGattCallback() {
 
+        @SuppressLint("WrongConstant")
         override fun initialize() {
             setNotificationCallback(txCharacteristic).asFlow().onEach {
                 val text: String = it.getStringValue(0) ?: String.EMPTY
+                log(10, "\"$text\" received")
                 data.value = data.value.copy(messages = data.value.messages + UARTOutputRecord(text))
             }.launchIn(scope)
 
@@ -134,6 +138,7 @@ internal class UARTManager(
         }
     }
 
+    @SuppressLint("WrongConstant")
     fun send(text: String) {
         if (rxCharacteristic == null) return
         if (!TextUtils.isEmpty(text)) {
@@ -147,7 +152,8 @@ internal class UARTManager(
                 if (!useLongWrite) {
                     request.split()
                 }
-                request.enqueue()
+                request.suspend()
+                log(10, "\"$text\" sent")
             }
         }
     }

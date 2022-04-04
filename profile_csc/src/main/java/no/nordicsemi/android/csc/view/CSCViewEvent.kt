@@ -11,3 +11,5 @@ internal data class OnSelectedSpeedUnitSelected(val selectedSpeedUnit: SpeedUnit
 internal object OnDisconnectButtonClick : CSCViewEvent()
 
 internal object NavigateUp : CSCViewEvent()
+
+internal object OpenLogger : CSCViewEvent()

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.logger.ToolboxLogger
+import no.nordicsemi.android.logger.ToolboxLoggerFactory
 import no.nordicsemi.android.rscs.data.RSCSData
 import no.nordicsemi.android.rscs.data.RSCSManager
 import no.nordicsemi.android.service.BleManagerResult
@@ -20,9 +21,11 @@ import javax.inject.Singleton
 class RSCSRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val serviceManager: ServiceManager
+    private val serviceManager: ServiceManager,
+    private val toolboxLoggerFactory: ToolboxLoggerFactory
 ) {
     private var manager: RSCSManager? = null
+    private var logger: ToolboxLogger? = null
 
     private val _data = MutableStateFlow<BleManagerResult<RSCSData>>(ConnectingResult())
     internal val data = _data.asStateFlow()
@@ -35,7 +38,10 @@ class RSCSRepository @Inject constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = RSCSManager(context, scope, ToolboxLogger(context, "RSCS"))
+        val createdLogger = toolboxLoggerFactory.create("RSCS", device.address).also {
+            logger = it
+        }
+        val manager = RSCSManager(context, scope, createdLogger)
         this.manager = manager
 
         manager.dataHolder.status.onEach {
@@ -45,6 +51,10 @@ class RSCSRepository @Inject constructor(
         scope.launch {
             manager.start(device)
         }
+    }
+
+    fun openLogger() {
+        logger?.openLogger()
     }
 
     private suspend fun RSCSManager.start(device: BluetoothDevice) {
@@ -61,5 +71,6 @@ class RSCSRepository @Inject constructor(
     fun release() {
         manager?.disconnect()?.enqueue()
         manager = null
+        logger = null
     }
 }

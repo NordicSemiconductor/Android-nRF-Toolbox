@@ -7,3 +7,5 @@ internal data class OnTemperatureUnitSelected(val value: TemperatureUnit) : HTSS
 internal object DisconnectEvent : HTSScreenViewEvent()
 
 internal object NavigateUp : HTSScreenViewEvent()
+
+internal object OpenLoggerEvent : HTSScreenViewEvent()

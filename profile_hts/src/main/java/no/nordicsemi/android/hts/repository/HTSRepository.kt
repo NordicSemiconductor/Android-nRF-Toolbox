@@ -10,6 +10,7 @@ import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.hts.data.HTSData
 import no.nordicsemi.android.hts.data.HTSManager
 import no.nordicsemi.android.logger.ToolboxLogger
+import no.nordicsemi.android.logger.ToolboxLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.ConnectingResult
 import no.nordicsemi.android.service.ServiceManager
@@ -20,9 +21,11 @@ import javax.inject.Singleton
 class HTSRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val serviceManager: ServiceManager
+    private val serviceManager: ServiceManager,
+    private val toolboxLoggerFactory: ToolboxLoggerFactory
 ) {
     private var manager: HTSManager? = null
+    private var logger: ToolboxLogger? = null
 
     private val _data = MutableStateFlow<BleManagerResult<HTSData>>(ConnectingResult())
     internal val data = _data.asStateFlow()
@@ -35,7 +38,10 @@ class HTSRepository @Inject constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = HTSManager(context, scope, ToolboxLogger(context, "HTS"))
+        val createdLogger = toolboxLoggerFactory.create("HTS", device.address).also {
+            logger = it
+        }
+        val manager = HTSManager(context, scope, createdLogger)
         this.manager = manager
 
         manager.dataHolder.status.onEach {
@@ -45,6 +51,10 @@ class HTSRepository @Inject constructor(
         scope.launch {
             manager.start(device)
         }
+    }
+
+    fun openLogger() {
+        logger?.openLogger()
     }
 
     private suspend fun HTSManager.start(device: BluetoothDevice) {
@@ -60,6 +70,7 @@ class HTSRepository @Inject constructor(
 
     fun release() {
         manager?.disconnect()?.enqueue()
+        logger = null
         manager = null
     }
 }

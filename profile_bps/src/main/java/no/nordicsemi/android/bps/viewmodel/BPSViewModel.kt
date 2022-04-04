@@ -46,6 +46,7 @@ internal class BPSViewModel @Inject constructor(
     fun onEvent(event: BPSScreenViewEvent) {
         when (event) {
             DisconnectEvent -> navigationManager.navigateUp()
+            OpenLoggerEvent -> repository.openLogger()
         }.exhaustive
     }
 

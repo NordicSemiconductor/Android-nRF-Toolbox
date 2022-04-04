@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.logger.ToolboxLogger
+import no.nordicsemi.android.logger.ToolboxLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.ConnectingResult
 import no.nordicsemi.android.service.ServiceManager
@@ -20,9 +21,11 @@ class UARTRepository @Inject internal constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
-    private val configurationDataSource: ConfigurationDataSource
+    private val configurationDataSource: ConfigurationDataSource,
+    private val toolboxLoggerFactory: ToolboxLoggerFactory
 ) {
     private var manager: UARTManager? = null
+    private var logger: ToolboxLogger? = null
 
     private val _data = MutableStateFlow<BleManagerResult<UARTData>>(ConnectingResult())
     internal val data = _data.asStateFlow()
@@ -37,7 +40,10 @@ class UARTRepository @Inject internal constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = UARTManager(context, scope, ToolboxLogger(context, "UART"))
+        val createdLogger = toolboxLoggerFactory.create("UART", device.address).also {
+            logger = it
+        }
+        val manager = UARTManager(context, scope, createdLogger)
         this.manager = manager
 
         manager.dataHolder.status.onEach {
@@ -59,6 +65,10 @@ class UARTRepository @Inject internal constructor(
         manager?.clearItems()
     }
 
+    fun openLogger() {
+        logger?.openLogger()
+    }
+
     suspend fun saveConfigurationName(name: String) {
         configurationDataSource.saveConfigurationName(name)
     }
@@ -77,5 +87,6 @@ class UARTRepository @Inject internal constructor(
     fun release() {
         manager?.disconnect()?.enqueue()
         manager = null
+        logger = null
     }
 }

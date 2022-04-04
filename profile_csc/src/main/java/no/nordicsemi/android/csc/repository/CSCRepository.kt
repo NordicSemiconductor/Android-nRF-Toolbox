@@ -11,6 +11,7 @@ import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.csc.data.CSCManager
 import no.nordicsemi.android.csc.data.WheelSize
 import no.nordicsemi.android.logger.ToolboxLogger
+import no.nordicsemi.android.logger.ToolboxLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.ConnectingResult
 import no.nordicsemi.android.service.ServiceManager
@@ -21,9 +22,11 @@ import javax.inject.Singleton
 class CSCRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val serviceManager: ServiceManager
+    private val serviceManager: ServiceManager,
+    private val toolboxLoggerFactory: ToolboxLoggerFactory
 ) {
     private var manager: CSCManager? = null
+    private var logger: ToolboxLogger? = null
 
     private val _data = MutableStateFlow<BleManagerResult<CSCData>>(ConnectingResult())
     internal val data = _data.asStateFlow()
@@ -36,7 +39,10 @@ class CSCRepository @Inject constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = CSCManager(context, scope, ToolboxLogger(context, "CSC"))
+        val createdLogger = toolboxLoggerFactory.create("CSC", device.address).also {
+            logger = it
+        }
+        val manager = CSCManager(context, scope, createdLogger)
         this.manager = manager
 
         manager.dataHolder.status.onEach {
@@ -63,8 +69,13 @@ class CSCRepository @Inject constructor(
         }
     }
 
+    fun openLogger() {
+        logger?.openLogger()
+    }
+
     fun release() {
         manager?.disconnect()?.enqueue()
+        logger = null
         manager = null
     }
 }

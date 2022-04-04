@@ -15,6 +15,7 @@ import no.nordicsemi.android.gls.data.GLSData
 import no.nordicsemi.android.gls.data.GLSManager
 import no.nordicsemi.android.gls.data.WorkingMode
 import no.nordicsemi.android.logger.ToolboxLogger
+import no.nordicsemi.android.logger.ToolboxLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.utils.exhaustive
 import javax.inject.Inject
@@ -22,14 +23,19 @@ import javax.inject.Inject
 @ViewModelScoped
 internal class GLSRepository @Inject constructor(
     @ApplicationContext
-    private val context: Context
+    private val context: Context,
+    private val toolboxLoggerFactory: ToolboxLoggerFactory
 ) {
 
     private var manager: GLSManager? = null
+    private var logger: ToolboxLogger? = null
 
     fun downloadData(device: BluetoothDevice): Flow<BleManagerResult<GLSData>> = callbackFlow {
         val scope = this
-        val managerInstance = manager ?: GLSManager(context, scope, ToolboxLogger(context, "GLS")).apply {
+        val createdLogger = toolboxLoggerFactory.create("GLS", device.address).also {
+            logger = it
+        }
+        val managerInstance = manager ?: GLSManager(context, scope, createdLogger).apply {
             try {
                 connect(device)
                     .useAutoConnect(false)
@@ -48,9 +54,14 @@ internal class GLSRepository @Inject constructor(
         awaitClose {
             launch {
                 manager?.disconnect()?.suspend()
+                logger = null
                 manager = null
             }
         }
+    }
+
+    fun openLogger() {
+        logger?.openLogger()
     }
 
     fun requestMode(workingMode: WorkingMode) {

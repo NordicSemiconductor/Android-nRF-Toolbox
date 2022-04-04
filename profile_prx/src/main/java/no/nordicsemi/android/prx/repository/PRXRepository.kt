@@ -6,6 +6,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import no.nordicsemi.android.logger.ToolboxLogger
+import no.nordicsemi.android.logger.ToolboxLoggerFactory
 import no.nordicsemi.android.prx.data.AlarmLevel
 import no.nordicsemi.android.prx.data.PRXData
 import no.nordicsemi.android.prx.data.PRXManager
@@ -20,10 +21,12 @@ class PRXRepository @Inject internal constructor(
     private val context: Context,
     private val serviceManager: ServiceManager,
     private val proximityServerManager: ProximityServerManager,
-    private val alarmHandler: AlarmHandler
+    private val alarmHandler: AlarmHandler,
+    private val toolboxLoggerFactory: ToolboxLoggerFactory
 ) {
 
     private var manager: PRXManager? = null
+    private var logger: ToolboxLogger? = null
 
     private val _data = MutableStateFlow<BleManagerResult<PRXData>>(ConnectingResult())
     internal val data = _data.asStateFlow()
@@ -37,7 +40,10 @@ class PRXRepository @Inject internal constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = PRXManager(context, scope, ToolboxLogger(context, "PRX"))
+        val createdLogger = toolboxLoggerFactory.create("PRX", device.address).also {
+            logger = it
+        }
+        val manager = PRXManager(context, scope, createdLogger)
         this.manager = manager
         manager.useServer(proximityServerManager)
 
@@ -73,9 +79,14 @@ class PRXRepository @Inject internal constructor(
         manager?.writeImmediateAlert(false)
     }
 
+    fun openLogger() {
+        logger?.openLogger()
+    }
+
     fun release() {
         alarmHandler.releaseAlarm()
         manager?.disconnect()?.enqueue()
         manager = null
+        logger = null
     }
 }

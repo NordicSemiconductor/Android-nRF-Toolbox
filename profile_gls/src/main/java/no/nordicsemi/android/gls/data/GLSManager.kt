@@ -56,8 +56,7 @@ private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-0080
 private val BATTERY_LEVEL_CHARACTERISTIC_UUID =
     UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
 
-internal class GLSManager @Inject constructor(
-    @ApplicationContext
+internal class GLSManager(
     context: Context,
     private val scope: CoroutineScope,
     private val logger: ToolboxLogger

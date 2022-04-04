@@ -9,3 +9,5 @@ internal data class OnWorkingModeSelected(val workingMode: CGMServiceCommand) : 
 internal object NavigateUp : CGMViewEvent()
 
 internal object DisconnectEvent : CGMViewEvent()
+
+internal object OpenLoggerEvent : CGMViewEvent()

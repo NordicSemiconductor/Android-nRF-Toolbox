@@ -12,6 +12,7 @@ import no.nordicsemi.android.cgms.R
 import no.nordicsemi.android.cgms.viewmodel.CGMScreenViewModel
 import no.nordicsemi.android.service.*
 import no.nordicsemi.android.theme.view.BackIconAppBar
+import no.nordicsemi.android.theme.view.LoggerIconAppBar
 import no.nordicsemi.ui.scanner.ui.DeviceConnectingView
 import no.nordicsemi.ui.scanner.ui.NoDeviceView
 import no.nordicsemi.android.utils.exhaustive
@@ -26,7 +27,9 @@ fun CGMScreen() {
     Column {
         val navigateUp = { viewModel.onEvent(NavigateUp) }
 
-        BackIconAppBar(stringResource(id = R.string.cgms_title), navigateUp)
+        LoggerIconAppBar(stringResource(id = R.string.cgms_title), navigateUp) {
+            viewModel.onEvent(OpenLoggerEvent)
+        }
 
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             when (state) {

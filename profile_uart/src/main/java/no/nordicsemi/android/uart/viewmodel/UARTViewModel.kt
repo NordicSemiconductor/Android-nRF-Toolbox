@@ -81,6 +81,7 @@ internal class UARTViewModel @Inject constructor(
             OnDeleteConfiguration -> deleteConfiguration()
             OnEditConfiguration -> onEditConfiguration()
             ClearOutputItems -> repository.clearItems()
+            OpenLogger -> repository.openLogger()
         }.exhaustive
     }
 

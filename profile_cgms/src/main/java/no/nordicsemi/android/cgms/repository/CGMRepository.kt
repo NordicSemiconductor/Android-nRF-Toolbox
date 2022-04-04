@@ -10,6 +10,7 @@ import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.cgms.data.CGMData
 import no.nordicsemi.android.cgms.data.CGMManager
 import no.nordicsemi.android.logger.ToolboxLogger
+import no.nordicsemi.android.logger.ToolboxLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.ConnectingResult
 import no.nordicsemi.android.service.ServiceManager
@@ -20,9 +21,11 @@ import javax.inject.Singleton
 class CGMRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val serviceManager: ServiceManager
+    private val serviceManager: ServiceManager,
+    private val toolboxLoggerFactory: ToolboxLoggerFactory
 ) {
     private var manager: CGMManager? = null
+    private var logger: ToolboxLogger? = null
 
     private val _data = MutableStateFlow<BleManagerResult<CGMData>>(ConnectingResult())
     internal val data = _data.asStateFlow()
@@ -35,7 +38,10 @@ class CGMRepository @Inject constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = CGMManager(context, scope, ToolboxLogger(context, "CGMS"))
+        val createdLogger = toolboxLoggerFactory.create("CGMS", device.address).also {
+            logger = it
+        }
+        val manager = CGMManager(context, scope, createdLogger)
         this.manager = manager
 
         manager.dataHolder.status.onEach {
@@ -70,8 +76,13 @@ class CGMRepository @Inject constructor(
         manager?.requestFirstRecord()
     }
 
+    fun openLogger() {
+        logger?.openLogger()
+    }
+
     fun release() {
         manager?.disconnect()?.enqueue()
+        logger = null
         manager = null
     }
 }

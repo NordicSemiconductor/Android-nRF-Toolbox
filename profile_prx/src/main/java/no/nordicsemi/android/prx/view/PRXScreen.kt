@@ -13,6 +13,7 @@ import no.nordicsemi.android.prx.R
 import no.nordicsemi.android.prx.viewmodel.PRXViewModel
 import no.nordicsemi.android.service.*
 import no.nordicsemi.android.theme.view.BackIconAppBar
+import no.nordicsemi.android.theme.view.LoggerIconAppBar
 import no.nordicsemi.ui.scanner.ui.DeviceConnectingView
 import no.nordicsemi.ui.scanner.ui.NoDeviceView
 import no.nordicsemi.android.utils.exhaustive
@@ -27,7 +28,9 @@ fun PRXScreen() {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         val navigateUp = { viewModel.onEvent(NavigateUpEvent) }
 
-        BackIconAppBar(stringResource(id = R.string.prx_title), navigateUp)
+        LoggerIconAppBar(stringResource(id = R.string.prx_title), navigateUp) {
+            viewModel.onEvent(OpenLoggerEvent)
+        }
 
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             when (state) {

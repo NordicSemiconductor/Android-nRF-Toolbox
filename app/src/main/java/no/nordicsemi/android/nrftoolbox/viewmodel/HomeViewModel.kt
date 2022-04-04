@@ -12,6 +12,7 @@ import no.nordicsemi.android.cgms.repository.CGMRepository
 import no.nordicsemi.android.csc.repository.CSCRepository
 import no.nordicsemi.android.hrs.service.HRSRepository
 import no.nordicsemi.android.hts.repository.HTSRepository
+import no.nordicsemi.android.logger.LoggerAppRunner
 import no.nordicsemi.android.navigation.NavigationManager
 import no.nordicsemi.android.nrftoolbox.ProfileDestination
 import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
@@ -32,6 +33,7 @@ class HomeViewModel @Inject constructor(
     prxRepository: PRXRepository,
     rscsRepository: RSCSRepository,
     uartRepository: UARTRepository,
+    private val loggerAppRunner: LoggerAppRunner
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeViewState())
@@ -73,5 +75,9 @@ class HomeViewModel @Inject constructor(
 
     fun openProfile(destination: ProfileDestination) {
         navigationManager.navigateTo(destination.destination.id)
+    }
+
+    fun openLogger() {
+        loggerAppRunner.runLogger()
     }
 }
