@@ -1,8 +1,6 @@
 package no.nordicsemi.android.logger
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -31,7 +29,8 @@ class ToolboxLogger @AssistedInject constructor(
         if (logSession != null) {
             Logger.log(logSession, LogContract.Log.Level.fromPriority(level), message)
         }
-        Log.println(level, LOG_TAG, message)
+        val logPriority = if (level <= Log.ASSERT) level else Log.INFO
+        Log.println(logPriority, LOG_TAG, message)
     }
 
     fun openLogger() {
