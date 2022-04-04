@@ -29,7 +29,7 @@ internal class GLSRepository @Inject constructor(
 
     fun downloadData(device: BluetoothDevice): Flow<BleManagerResult<GLSData>> = callbackFlow {
         val scope = this
-        val managerInstance = manager ?: GLSManager(context, scope, ToolboxLogger(context, "GLS")).apply {
+        val managerInstance = manager ?: GLSManager(context, scope, ToolboxLogger(context, "GLS", device.address)).apply {
             try {
                 connect(device)
                     .useAutoConnect(false)

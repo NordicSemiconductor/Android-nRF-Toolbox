@@ -35,7 +35,7 @@ class CGMRepository @Inject constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = CGMManager(context, scope, ToolboxLogger(context, "CGMS"))
+        val manager = CGMManager(context, scope, ToolboxLogger(context, "CGMS", device.address))
         this.manager = manager
 
         manager.dataHolder.status.onEach {

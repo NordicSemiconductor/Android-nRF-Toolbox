@@ -36,7 +36,7 @@ class CSCRepository @Inject constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = CSCManager(context, scope, ToolboxLogger(context, "CSC"))
+        val manager = CSCManager(context, scope, ToolboxLogger(context, "CSC", device.address))
         this.manager = manager
 
         manager.dataHolder.status.onEach {

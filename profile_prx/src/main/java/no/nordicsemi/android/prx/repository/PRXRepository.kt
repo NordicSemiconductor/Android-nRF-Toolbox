@@ -37,7 +37,7 @@ class PRXRepository @Inject internal constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = PRXManager(context, scope, ToolboxLogger(context, "PRX"))
+        val manager = PRXManager(context, scope, ToolboxLogger(context, "PRX", device.address))
         this.manager = manager
         manager.useServer(proximityServerManager)
 

@@ -35,7 +35,7 @@ class RSCSRepository @Inject constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = RSCSManager(context, scope, ToolboxLogger(context, "RSCS"))
+        val manager = RSCSManager(context, scope, ToolboxLogger(context, "RSCS", device.address))
         this.manager = manager
 
         manager.dataHolder.status.onEach {

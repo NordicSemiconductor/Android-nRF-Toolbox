@@ -35,7 +35,7 @@ class HRSRepository @Inject constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = HRSManager(context, scope, ToolboxLogger(context, "HRS"))
+        val manager = HRSManager(context, scope, ToolboxLogger(context, "HRS", device.address))
         this.manager = manager
 
         manager.dataHolder.status.onEach {

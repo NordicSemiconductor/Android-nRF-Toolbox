@@ -37,7 +37,7 @@ class UARTRepository @Inject internal constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = UARTManager(context, scope, ToolboxLogger(context, "UART"))
+        val manager = UARTManager(context, scope, ToolboxLogger(context, "UART", device.address))
         this.manager = manager
 
         manager.dataHolder.status.onEach {

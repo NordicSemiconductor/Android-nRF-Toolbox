@@ -23,7 +23,7 @@ internal class BPSRepository @Inject constructor(
 
     fun downloadData(device: BluetoothDevice): Flow<BleManagerResult<BPSData>> = callbackFlow {
         val scope = this
-        val manager = BPSManager(context, scope, ToolboxLogger(context, "BPS"))
+        val manager = BPSManager(context, scope, ToolboxLogger(context, "BPS", device.address))
 
         manager.dataHolder.status.onEach {
             trySend(it)

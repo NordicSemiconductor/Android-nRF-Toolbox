@@ -35,7 +35,7 @@ class HTSRepository @Inject constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val manager = HTSManager(context, scope, ToolboxLogger(context, "HTS"))
+        val manager = HTSManager(context, scope, ToolboxLogger(context, "HTS", device.address))
         this.manager = manager
 
         manager.dataHolder.status.onEach {

@@ -11,6 +11,7 @@ internal const val LOG_TAG = "nRF Toolbox"
 
 class ToolboxLogger(
     private val context: Context,
+    private val profile: String,
     private val key: String,
 ) {
 
@@ -25,7 +26,7 @@ class ToolboxLogger(
     }
 
     private fun getLogger(): LogSession? {
-        logSession = logSession ?: Logger.newSession(context, key, LOG_TAG)
+        logSession = logSession ?: Logger.newSession(context, profile, key, LOG_TAG)
         return logSession
     }
 }
