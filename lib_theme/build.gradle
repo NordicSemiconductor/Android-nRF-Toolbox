@@ -1,5 +1,9 @@
 apply from: rootProject.file("library.gradle")
 
+android {
+    namespace 'no.nordicsemi.android.theme'
+}
+
 dependencies {
     implementation project(":lib_log")
 

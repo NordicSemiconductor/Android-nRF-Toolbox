@@ -24,3 +24,7 @@ dependencies {
 
     testImplementation libs.bundles.test
 }
+
+android {
+    namespace 'no.nordicsemi.android.csc'
+}

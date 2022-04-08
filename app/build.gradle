@@ -8,6 +8,8 @@ plugins {
 apply from: rootProject.file("gradle/git-tag-version.gradle")
 
 android {
+    namespace 'no.nordicsemi.android.nrftoolbox'
+
     compileSdk android_api_version
 
     defaultConfig {
@@ -76,7 +78,6 @@ dependencies {
     implementation project(':profile_rscs')
 
     implementation project(':profile_uart')
-//    implementation project(':profile_dfu')
 
     implementation project(":lib_theme")
     implementation project(":lib_utils")

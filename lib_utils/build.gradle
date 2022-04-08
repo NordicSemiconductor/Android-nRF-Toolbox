@@ -1,6 +1,10 @@
 apply from: rootProject.file("library.gradle")
 apply plugin: 'kotlin-parcelize'
 
+android {
+    namespace 'no.nordicsemi.android.utils'
+}
+
 dependencies {
     implementation libs.nordic.navigation
     implementation libs.nordic.ui.scanner
