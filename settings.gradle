@@ -94,6 +94,7 @@ include ':profile_prx'
 include ':profile_rscs'
 include ':profile_uart'
 
+include ':lib_analytics'
 include ':lib_service'
 include ':lib_theme'
 include ':lib_utils'

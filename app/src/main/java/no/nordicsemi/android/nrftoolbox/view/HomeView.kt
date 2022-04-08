@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import no.nordicsemi.android.analytics.ProfileOpenEvent
 import no.nordicsemi.android.logger.LoggerAppRunner
 import no.nordicsemi.android.nrftoolbox.BuildConfig
 import no.nordicsemi.android.nrftoolbox.ProfileDestination
@@ -56,12 +57,14 @@ fun HomeScreen() {
 
                 FeatureButton(R.drawable.ic_gls, R.string.gls_module, R.string.gls_module_full) {
                     viewModel.openProfile(ProfileDestination.GLS)
+                    viewModel.logEvent(ProfileOpenEvent.GLS)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_bps, R.string.bps_module, R.string.bps_module_full) {
                     viewModel.openProfile(ProfileDestination.BPS)
+                    viewModel.logEvent(ProfileOpenEvent.BPS)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -76,36 +79,42 @@ fun HomeScreen() {
 
                 FeatureButton(R.drawable.ic_csc, R.string.csc_module, R.string.csc_module_full, state.isCSCModuleRunning) {
                     viewModel.openProfile(ProfileDestination.CSC)
+                    viewModel.logEvent(ProfileOpenEvent.CSC)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_hrs, R.string.hrs_module, R.string.hrs_module_full, state.isHRSModuleRunning) {
                     viewModel.openProfile(ProfileDestination.HRS)
+                    viewModel.logEvent(ProfileOpenEvent.HRS)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_hts, R.string.hts_module, R.string.hts_module_full, state.isHTSModuleRunning) {
                     viewModel.openProfile(ProfileDestination.HTS)
+                    viewModel.logEvent(ProfileOpenEvent.HTS)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_rscs, R.string.rscs_module, R.string.rscs_module_full, state.isRSCSModuleRunning) {
                     viewModel.openProfile(ProfileDestination.RSCS)
+                    viewModel.logEvent(ProfileOpenEvent.RSCS)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_cgm, R.string.cgm_module, R.string.cgm_module_full, state.isCGMModuleRunning) {
                     viewModel.openProfile(ProfileDestination.CGMS)
+                    viewModel.logEvent(ProfileOpenEvent.CGMS)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_prx, R.string.prx_module, R.string.prx_module_full, state.isPRXModuleRunning) {
                     viewModel.openProfile(ProfileDestination.PRX)
+                    viewModel.logEvent(ProfileOpenEvent.PRX)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -120,6 +129,7 @@ fun HomeScreen() {
 
                 FeatureButton(R.drawable.ic_uart, R.string.uart_module, R.string.uart_module_full, state.isUARTModuleRunning) {
                     viewModel.openProfile(ProfileDestination.UART)
+                    viewModel.logEvent(ProfileOpenEvent.UART)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -139,6 +149,7 @@ fun HomeScreen() {
                     } else {
                         uriHandler.openUri(DFU_LINK)
                     }
+                    viewModel.logEvent(ProfileOpenEvent.DFU)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -149,6 +160,7 @@ fun HomeScreen() {
 
                 FeatureButton(R.drawable.ic_logger, R.string.logger_module, R.string.logger_module_full, null, loggerDescription) {
                     viewModel.openLogger()
+                    viewModel.logEvent(ProfileOpenEvent.LOGGER)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))

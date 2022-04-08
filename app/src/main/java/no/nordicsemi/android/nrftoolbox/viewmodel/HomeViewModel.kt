@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import no.nordicsemi.android.analytics.AppAnalytics
+import no.nordicsemi.android.analytics.ProfileOpenEvent
 import no.nordicsemi.android.cgms.repository.CGMRepository
 import no.nordicsemi.android.csc.repository.CSCRepository
 import no.nordicsemi.android.hrs.service.HRSRepository
@@ -33,7 +35,8 @@ class HomeViewModel @Inject constructor(
     prxRepository: PRXRepository,
     rscsRepository: RSCSRepository,
     uartRepository: UARTRepository,
-    private val loggerAppRunner: LoggerAppRunner
+    private val loggerAppRunner: LoggerAppRunner,
+    private val analytics: AppAnalytics
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeViewState())
@@ -79,5 +82,9 @@ class HomeViewModel @Inject constructor(
 
     fun openLogger() {
         loggerAppRunner.runLogger()
+    }
+
+    fun logEvent(event: ProfileOpenEvent) {
+        analytics.logEvent(event)
     }
 }

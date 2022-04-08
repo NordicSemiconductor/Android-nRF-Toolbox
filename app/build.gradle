@@ -4,6 +4,7 @@ plugins {
     id 'kotlin-parcelize'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
+    id 'com.google.firebase.crashlytics'
 }
 apply from: rootProject.file("gradle/git-tag-version.gradle")
 
@@ -64,8 +65,6 @@ android {
 }
 
 dependencies {
-    implementation libs.nordic.theme
-
     //Hilt requires to implement every module in the main app module
     //https://github.com/google/dagger/issues/2123
     implementation project(':profile_bps')
@@ -79,11 +78,13 @@ dependencies {
 
     implementation project(':profile_uart')
 
+    implementation project(":lib_analytics")
     implementation project(":lib_theme")
     implementation project(":lib_utils")
     implementation project(":lib_service")
     implementation project(":lib_log")
 
+    implementation libs.nordic.theme
     implementation libs.nordic.ble.common
     implementation libs.nordic.ui.scanner
     implementation libs.nordic.navigation
