@@ -1,6 +1,5 @@
 package no.nordicsemi.android.uart.view
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -15,11 +14,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.material.you.ScreenSection
+import no.nordicsemi.android.material.you.*
 import no.nordicsemi.android.theme.view.SectionTitle
 import no.nordicsemi.android.uart.R
+import no.nordicsemi.android.uart.data.MacroEol
 import no.nordicsemi.android.uart.data.UARTData
 import no.nordicsemi.android.uart.data.UARTOutputRecord
+import no.nordicsemi.android.utils.EMPTY
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -33,13 +34,17 @@ internal fun UARTContentView(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(16.dp)
     ) {
-        InputSection(viewState, onEvent)
+        InputSection(onEvent = onEvent)
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.size(16.dp))
+
+        MacroSection(viewState, onEvent)
+
+        Spacer(modifier = Modifier.size(16.dp))
 
         OutputSection(state.displayMessages, onEvent)
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.size(16.dp))
 
         Button(
             onClick = { onEvent(DisconnectEvent) }
@@ -50,7 +55,58 @@ internal fun UARTContentView(
 }
 
 @Composable
-private fun InputSection(viewState: UARTViewState, onEvent: (UARTViewEvent) -> Unit) {
+private fun InputSection(onEvent: (UARTViewEvent) -> Unit) {
+    val text = rememberSaveable { mutableStateOf(String.EMPTY) }
+    val hint = stringResource(id = R.string.uart_input_hint)
+    val checkedItem = rememberSaveable { mutableStateOf(MacroEol.values()[0]) }
+
+    val items = MacroEol.values().map {
+        RadioButtonItem(it.toDisplayString(), it == checkedItem.value)
+    }
+    val viewEntity = RadioGroupViewEntity(items)
+
+    ScreenSection {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            SectionTitle(resId = R.drawable.ic_input, title = stringResource(R.string.uart_input))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(id = R.string.uart_macro_dialog_eol),
+                    style = MaterialTheme.typography.labelLarge
+                )
+
+                RadioButtonGroup(viewEntity) {
+                    val i = items.indexOf(it)
+                    checkedItem.value = MacroEol.values()[i]
+                }
+            }
+
+            Spacer(modifier = Modifier.size(16.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(modifier = Modifier.weight(1f)) {
+                    TextField(text = text.value, hint = hint) {
+                        text.value = it
+                    }
+                }
+
+                Spacer(modifier = Modifier.size(16.dp))
+
+                Button(
+                    onClick = { onEvent(OnRunInput(text.value, checkedItem.value)) },
+                    modifier = Modifier.padding(top = 6.dp)
+                ) {
+                    Text(text = stringResource(id = R.string.uart_send))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MacroSection(viewState: UARTViewState, onEvent: (UARTViewEvent) -> Unit) {
     val showAddDialog = rememberSaveable { mutableStateOf(false) }
     val showDeleteDialog = rememberSaveable { mutableStateOf(false) }
 
@@ -66,7 +122,7 @@ private fun InputSection(viewState: UARTViewState, onEvent: (UARTViewEvent) -> U
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            SectionTitle(resId = R.drawable.ic_input, title = stringResource(R.string.uart_input))
+            SectionTitle(resId = R.drawable.ic_input, title = stringResource(R.string.uart_macros))
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -169,7 +225,7 @@ private fun OutputSection(records: List<UARTOutputRecord>, onEvent: (UARTViewEve
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.size(16.dp))
 
             Column(modifier = Modifier.fillMaxWidth()) {
                 if (records.isEmpty()) {

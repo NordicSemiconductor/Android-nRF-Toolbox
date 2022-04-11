@@ -82,6 +82,7 @@ internal class UARTViewModel @Inject constructor(
             OnEditConfiguration -> onEditConfiguration()
             ClearOutputItems -> repository.clearItems()
             OpenLogger -> repository.openLogger()
+            is OnRunInput -> repository.sendText(event.text, event.newLineChar)
         }.exhaustive
     }
 

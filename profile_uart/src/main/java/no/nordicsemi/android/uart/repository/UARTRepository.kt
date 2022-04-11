@@ -55,6 +55,10 @@ class UARTRepository @Inject internal constructor(
         }
     }
 
+    fun sendText(text: String, newLineChar: MacroEol) {
+        manager?.send(text.parseWithNewLineChar(newLineChar))
+    }
+
     fun runMacro(macro: UARTMacro) {
         macro.command?.parseWithNewLineChar(macro.newLineChar)?.let {
             manager?.send(it)
