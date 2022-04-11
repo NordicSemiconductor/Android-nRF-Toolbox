@@ -20,7 +20,7 @@ jobs:
           SONATYPE_STATING_PROFILE_ID: ${{ secrets.SONATYPE_STATING_PROFILE_ID }}
         run: |
           pwd
-          echo "${{ secrets.GOOGLE_SERVICES }}" | base64 --decode > lib_analytics/src/main/res/values/keys.xml
+          echo "${{ secrets.GOOGLE_SERVICES }}" | base64 --decode > lib_analytics/src/main/res/values/values.xml
           echo "${{ secrets.KEYSTORE_FILE }}" > keystore.asc
           gpg -d --passphrase "${{ secrets.KEYSTORE_FILE_PSWD }}" --batch keystore.asc > keystore
           echo "${{ secrets.GPG_FILE }}" > sec.gpg.asc
