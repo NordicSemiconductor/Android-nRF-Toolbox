@@ -8,7 +8,10 @@
     <string name="uart_configuration_delete">Delete selected configuration.</string>
     <string name="uart_configuration_edit">Edit selected configuration.</string>
 
-    <string name="uart_input">Macros</string>
+    <string name="uart_send">Send</string>
+    <string name="uart_input">Input</string>
+    <string name="uart_input_hint">Text to send</string>
+    <string name="uart_macros">Macros</string>
     <string name="uart_output">Output</string>
     <string name="uart_configuration_picker_hint">Select configuration</string>
     <string name="uart_configuration_picker_not_selected">Not selected.</string>

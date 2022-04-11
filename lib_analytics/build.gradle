@@ -9,3 +9,14 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-crashlytics'
 }
+
+task copyGoogleIdValuesTask(type: Copy) {
+    from 'src/main/res/values/values.xml'
+    into "$project.buildDir/generated/res/google-services/release/values/"
+}
+
+import com.google.firebase.crashlytics.buildtools.gradle.tasks.UploadMappingFileTask
+
+tasks.withType(UploadMappingFileTask).configureEach {
+    dependsOn(copyGoogleIdValuesTask)
+}

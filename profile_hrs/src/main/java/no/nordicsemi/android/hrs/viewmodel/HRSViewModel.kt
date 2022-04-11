@@ -31,7 +31,8 @@ internal class HRSViewModel @Inject constructor(
         }
 
         repository.data.onEach {
-            _state.value = WorkingState(it)
+            val zoomIn = (_state.value as? WorkingState)?.zoomIn ?: false
+            _state.value = WorkingState(it, zoomIn)
         }.launchIn(viewModelScope)
     }
 
@@ -57,7 +58,14 @@ internal class HRSViewModel @Inject constructor(
             DisconnectEvent -> disconnect()
             NavigateUpEvent -> navigationManager.navigateUp()
             OpenLoggerEvent -> repository.openLogger()
+            SwitchZoomEvent -> onZoomButtonClicked()
         }.exhaustive
+    }
+
+    private fun onZoomButtonClicked() {
+        (_state.value as? WorkingState)?.let {
+            _state.value = it.copy(zoomIn = !it.zoomIn)
+        }
     }
 
     private fun disconnect() {
