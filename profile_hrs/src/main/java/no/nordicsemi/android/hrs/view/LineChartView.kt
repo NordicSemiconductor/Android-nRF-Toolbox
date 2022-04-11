@@ -17,24 +17,31 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import no.nordicsemi.android.hrs.data.HRSData
-import java.util.*
 
 private const val X_AXIS_ELEMENTS_COUNT = 40f
 
+private const val AXIS_MIN = 0
+private const val AXIS_MAX = 300
+
 @Composable
-internal fun LineChartView(state: HRSData) {
+internal fun LineChartView(state: HRSData, zoomIn: Boolean,) {
     val items = state.heartRates.takeLast(X_AXIS_ELEMENTS_COUNT.toInt()).reversed()
     val isSystemInDarkTheme = isSystemInDarkTheme()
     AndroidView(
         modifier = Modifier
             .fillMaxWidth()
             .height(300.dp),
-        factory = { createLineChartView(isSystemInDarkTheme, it, items) },
-        update = { updateData(items, it) }
+        factory = { createLineChartView(isSystemInDarkTheme, it, items, zoomIn) },
+        update = { updateData(items, it, zoomIn) }
     )
 }
 
-internal fun createLineChartView(isDarkTheme: Boolean, context: Context, points: List<Int>): LineChart {
+internal fun createLineChartView(
+    isDarkTheme: Boolean,
+    context: Context,
+    points: List<Int>,
+    zoomIn: Boolean
+): LineChart {
     return LineChart(context).apply {
         description.isEnabled = false
 
@@ -73,8 +80,8 @@ internal fun createLineChartView(isDarkTheme: Boolean, context: Context, points:
         axisLeft.apply {
             enableGridDashedLine(10f, 10f, 0f)
 
-            axisMaximum = 300f
-            axisMinimum = 100f
+            axisMaximum = points.getMax(zoomIn)
+            axisMinimum = points.getMin(zoomIn)
         }
         axisRight.isEnabled = false
 
@@ -153,12 +160,16 @@ internal fun createLineChartView(isDarkTheme: Boolean, context: Context, points:
     }
 }
 
-private fun updateData(points: List<Int>, chart: LineChart) {
+private fun updateData(points: List<Int>, chart: LineChart, zoomIn: Boolean) {
     val entries = points.mapIndexed { i, v ->
         Entry(-i.toFloat(), v.toFloat())
     }.reversed()
 
     with(chart) {
+        axisLeft.apply {
+            axisMaximum = points.getMax(zoomIn)
+            axisMinimum = points.getMin(zoomIn)
+        }
         if (data != null && data.dataSetCount > 0) {
             val set1 = data!!.getDataSetByIndex(0) as LineDataSet
             set1.values = entries
@@ -168,4 +179,20 @@ private fun updateData(points: List<Int>, chart: LineChart) {
             invalidate()
         }
     }
+}
+
+private fun List<Int>.getMin(zoomIn: Boolean): Float {
+    return if (zoomIn) {
+        minOrNull() ?: AXIS_MIN
+    } else {
+        AXIS_MIN
+    }.toFloat()
+}
+
+private fun List<Int>.getMax(zoomIn: Boolean): Float {
+    return if (zoomIn) {
+        maxOrNull() ?: AXIS_MAX
+    } else {
+        AXIS_MAX
+    }.toFloat()
 }

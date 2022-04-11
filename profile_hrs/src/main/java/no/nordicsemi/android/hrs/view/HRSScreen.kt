@@ -11,12 +11,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.hrs.R
 import no.nordicsemi.android.hrs.viewmodel.HRSViewModel
 import no.nordicsemi.android.service.*
-import no.nordicsemi.android.theme.view.BackIconAppBar
 import no.nordicsemi.android.theme.view.LoggerIconAppBar
-import no.nordicsemi.ui.scanner.ui.DeviceConnectingView
-import no.nordicsemi.ui.scanner.ui.NoDeviceView
 import no.nordicsemi.android.utils.exhaustive
+import no.nordicsemi.ui.scanner.ui.DeviceConnectingView
 import no.nordicsemi.ui.scanner.ui.DeviceDisconnectedView
+import no.nordicsemi.ui.scanner.ui.NoDeviceView
 import no.nordicsemi.ui.scanner.ui.Reason
 
 @Composable
@@ -40,7 +39,7 @@ fun HRSScreen() {
                     is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp)
                     is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp)
                     is UnknownErrorResult -> DeviceDisconnectedView(Reason.UNKNOWN, navigateUp)
-                    is SuccessResult -> HRSContentView(state.result.data) { viewModel.onEvent(it) }
+                    is SuccessResult -> HRSContentView(state.result.data, state.zoomIn) { viewModel.onEvent(it) }
                 }
             }.exhaustive
         }
