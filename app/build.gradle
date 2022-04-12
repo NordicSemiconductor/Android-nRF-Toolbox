@@ -4,9 +4,13 @@ plugins {
     id 'kotlin-parcelize'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
-    id 'com.google.firebase.crashlytics'
 }
 apply from: rootProject.file("gradle/git-tag-version.gradle")
+
+if (getGradle().getStartParameter().getTaskRequests().toString().contains("Release")){
+    apply plugin: 'com.google.gms.google-services'
+    apply plugin: 'com.google.firebase.crashlytics'
+}
 
 android {
     namespace 'no.nordicsemi.android.nrftoolbox'
