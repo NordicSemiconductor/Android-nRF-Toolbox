@@ -1,6 +1,14 @@
 package no.nordicsemi.android.analytics
 
-enum class ProfileOpenEvent(internal val firebaseName: String) {
+sealed interface AppEvent {
+    val eventName: String
+}
+
+object AppOpenEvent : AppEvent {
+    override val eventName: String = "APP_OPEN"
+}
+
+enum class ProfileOpenEvent(override val eventName: String) : AppEvent {
     BPS("BPS_PROFILE_OPEN"),
     CGMS("CGMS_PROFILE_OPEN"),
     CSC("CSC_PROFILE_OPEN"),
