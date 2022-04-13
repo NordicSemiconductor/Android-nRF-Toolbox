@@ -3,13 +3,13 @@ on:
   push:
     tags:
       - '*'
-  workflow_dispatch:
 jobs:
   generateReadme:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
+          ref: main
           fetch-depth: 0
       - shell: bash
         run: |
@@ -27,6 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          ref: main
           fetch-depth: 0
       - shell: bash
         env:
