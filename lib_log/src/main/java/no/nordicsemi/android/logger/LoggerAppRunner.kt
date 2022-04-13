@@ -3,7 +3,6 @@ package no.nordicsemi.android.logger
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.ui.platform.AndroidUriHandler
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -17,13 +16,15 @@ class LoggerAppRunner @Inject constructor(
 
     fun runLogger() {
         val packageManger = context.packageManager
-        val uriHandler = AndroidUriHandler(context)
 
         val intent = packageManger.getLaunchIntentForPackage(LOGGER_PACKAGE_NAME)
         if (intent != null) {
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             context.startActivity(intent)
         } else {
-            uriHandler.openUri(LOGGER_LINK)
+            val launchIntent = Intent(Intent.ACTION_VIEW, Uri.parse(LOGGER_LINK))
+            launchIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            context.startActivity(launchIntent)
         }
     }
 
