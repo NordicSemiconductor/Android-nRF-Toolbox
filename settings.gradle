@@ -9,8 +9,8 @@ dependencyResolutionManagement {
 
     versionCatalogs {
         libs {
-            library('nordic-ble-common', 'no.nordicsemi.android:ble-common:2.4.0-beta03')
-            library('nordic-ble-ktx', 'no.nordicsemi.android:ble-ktx:2.4.0-beta03')
+            library('nordic-ble-common', 'no.nordicsemi.android:ble-common:2.4.0')
+            library('nordic-ble-ktx', 'no.nordicsemi.android:ble-ktx:2.4.0')
             library('nordic-scanner', 'no.nordicsemi.android.support.v18:scanner:1.6.0')
 
             library('nordic-log', 'no.nordicsemi.android:log:2.3.0')
