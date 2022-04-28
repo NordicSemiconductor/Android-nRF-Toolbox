@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
+import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.cgms.data.CGMS_SERVICE_UUID
 import no.nordicsemi.android.cgms.repository.CGMRepository
@@ -39,7 +40,7 @@ internal class CGMViewModel @Inject constructor(
             _state.value = WorkingState(it)
 
             (it as? SuccessResult)?.let {
-                analytics.logEvent(ProfileConnectedEvent.CGMS)
+                analytics.logEvent(ProfileConnectedEvent(Profile.CGMS))
             }
         }.launchIn(viewModelScope)
     }

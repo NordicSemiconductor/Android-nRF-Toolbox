@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
+import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.csc.data.CSC_SERVICE_UUID
 import no.nordicsemi.android.csc.repository.CSCRepository
@@ -38,7 +39,7 @@ internal class CSCViewModel @Inject constructor(
             _state.value = _state.value.copy(cscManagerState = WorkingState(it))
 
             (it as? SuccessResult)?.let {
-                analytics.logEvent(ProfileConnectedEvent.CSC)
+                analytics.logEvent(ProfileConnectedEvent(Profile.CSC))
             }
         }.launchIn(viewModelScope)
     }

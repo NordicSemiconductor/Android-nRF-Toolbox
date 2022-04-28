@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
+import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.hts.data.HTS_SERVICE_UUID
 import no.nordicsemi.android.hts.repository.HTSRepository
@@ -38,7 +39,7 @@ internal class HTSViewModel @Inject constructor(
             _state.value = _state.value.copy(htsManagerState = WorkingState(it))
 
             (it as? SuccessResult)?.let {
-                analytics.logEvent(ProfileConnectedEvent.HTS)
+                analytics.logEvent(ProfileConnectedEvent(Profile.HTS))
             }
         }.launchIn(viewModelScope)
     }

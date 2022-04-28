@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.analytics.AppAnalytics
+import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.bps.data.BPS_SERVICE_UUID
 import no.nordicsemi.android.bps.repository.BPSRepository
@@ -59,7 +60,7 @@ internal class BPSViewModel @Inject constructor(
             _state.value = WorkingState(it)
 
             (it as? SuccessResult)?.let {
-                analytics.logEvent(ProfileConnectedEvent.BPS)
+                analytics.logEvent(ProfileConnectedEvent(Profile.BPS))
             }
         }.launchIn(viewModelScope)
     }

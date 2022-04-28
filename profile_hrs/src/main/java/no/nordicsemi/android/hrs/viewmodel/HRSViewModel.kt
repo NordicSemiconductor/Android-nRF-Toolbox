@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
+import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.hrs.data.HRS_SERVICE_UUID
 import no.nordicsemi.android.hrs.service.HRSRepository
@@ -39,7 +40,7 @@ internal class HRSViewModel @Inject constructor(
             _state.value = WorkingState(it, zoomIn)
 
             (it as? SuccessResult)?.let {
-                analytics.logEvent(ProfileConnectedEvent.HRS)
+                analytics.logEvent(ProfileConnectedEvent(Profile.HRS))
             }
         }.launchIn(viewModelScope)
     }

@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
+import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.navigation.*
 import no.nordicsemi.android.service.IdleResult
@@ -47,7 +48,7 @@ internal class UARTViewModel @Inject constructor(
             _state.value = _state.value.copy(uartManagerState = WorkingState(it))
 
             (it as? SuccessResult)?.let {
-                analytics.logEvent(ProfileConnectedEvent.UART)
+                analytics.logEvent(ProfileConnectedEvent(Profile.UART))
             }
         }.launchIn(viewModelScope)
 

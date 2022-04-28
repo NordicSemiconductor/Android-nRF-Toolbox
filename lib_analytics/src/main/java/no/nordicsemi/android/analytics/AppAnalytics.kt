@@ -16,7 +16,7 @@ class AppAnalytics @Inject constructor(
 
     private val firebase by lazy { FirebaseAnalytics.getInstance(context) }
 
-    fun logEvent(event: AppEvent) {
-        firebase.logEvent(event.eventName, null)
+    fun logEvent(event: FirebaseEvent) {
+        firebase.logEvent(event.eventName, event.params)
     }
 }

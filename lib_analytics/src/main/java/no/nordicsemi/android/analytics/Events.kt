@@ -1,36 +1,35 @@
 package no.nordicsemi.android.analytics
 
-sealed interface AppEvent {
-    val eventName: String
+import android.os.Bundle
+
+sealed class FirebaseEvent(val eventName: String, val params: Bundle?)
+
+object AppOpenEvent : FirebaseEvent("APP_OPEN", null)
+
+class ProfileOpenEvent : FirebaseEvent {
+
+    constructor(profile: Profile) : super(EVENT_NAME, createBundle(profile.displayName))
+
+    constructor(link: Link) : super(EVENT_NAME, createBundle(link.displayName))
+
+    companion object {
+        private const val EVENT_NAME = "PROFILE_OPEN"
+    }
 }
 
-object AppOpenEvent : AppEvent {
-    override val eventName: String = "APP_OPEN"
+class ProfileConnectedEvent : FirebaseEvent {
+
+    constructor(profile: Profile) : super(EVENT_NAME, createBundle(profile.displayName))
+
+    constructor(link: Link) : super(EVENT_NAME, createBundle(link.displayName))
+
+    companion object {
+        private const val EVENT_NAME = "PROFILE_CONNECTED"
+    }
 }
 
-enum class ProfileOpenEvent(override val eventName: String) : AppEvent {
-    BPS("BPS_PROFILE_OPEN"),
-    CGMS("CGMS_PROFILE_OPEN"),
-    CSC("CSC_PROFILE_OPEN"),
-    GLS("GLS_PROFILE_OPEN"),
-    HRS("HRS_PROFILE_OPEN"),
-    HTS("HTS_PROFILE_OPEN"),
-    PRX("PRX_PROFILE_OPEN"),
-    RSCS("RSCS_PROFILE_OPEN"),
-    UART("UART_PROFILE_OPEN"),
+const val PROFILE_PARAM_KEY = "PROFILE_NAME"
 
-    DFU("DFU_PROFILE_OPEN"),
-    LOGGER("LOGGER_PROFILE_OPEN"),
-}
-
-enum class ProfileConnectedEvent(override val eventName: String) : AppEvent {
-    BPS("BPS_CONNECTED"),
-    CGMS("CGMS_CONNECTED"),
-    CSC("CSC_CONNECTED"),
-    GLS("GLS_CONNECTED"),
-    HRS("HRS_CONNECTED"),
-    HTS("HTS_CONNECTED"),
-    PRX("PRX_CONNECTED"),
-    RSCS("RSCS_CONNECTED"),
-    UART("UART_CONNECTED"),
+private fun createBundle(name: String): Bundle {
+    return Bundle().apply { putString(PROFILE_PARAM_KEY, name) }
 }
