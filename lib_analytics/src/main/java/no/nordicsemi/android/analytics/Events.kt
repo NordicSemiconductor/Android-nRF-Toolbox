@@ -22,3 +22,15 @@ enum class ProfileOpenEvent(override val eventName: String) : AppEvent {
     DFU("DFU_PROFILE_OPEN"),
     LOGGER("LOGGER_PROFILE_OPEN"),
 }
+
+enum class ProfileConnectedEvent(override val eventName: String) : AppEvent {
+    BPS("BPS_CONNECTED"),
+    CGMS("CGMS_CONNECTED"),
+    CSC("CSC_CONNECTED"),
+    GLS("GLS_CONNECTED"),
+    HRS("HRS_CONNECTED"),
+    HTS("HTS_CONNECTED"),
+    PRX("PRX_CONNECTED"),
+    RSCS("RSCS_CONNECTED"),
+    UART("UART_CONNECTED"),
+}

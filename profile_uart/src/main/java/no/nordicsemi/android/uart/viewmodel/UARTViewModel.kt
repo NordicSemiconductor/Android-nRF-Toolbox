@@ -6,8 +6,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.analytics.AppAnalytics
+import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.navigation.*
 import no.nordicsemi.android.service.IdleResult
+import no.nordicsemi.android.service.SuccessResult
 import no.nordicsemi.android.uart.data.UARTConfiguration
 import no.nordicsemi.android.uart.data.UARTMacro
 import no.nordicsemi.android.uart.data.UARTPersistentDataSource
@@ -23,7 +26,8 @@ import javax.inject.Inject
 internal class UARTViewModel @Inject constructor(
     private val repository: UARTRepository,
     private val navigationManager: NavigationManager,
-    private val dataSource: UARTPersistentDataSource
+    private val dataSource: UARTPersistentDataSource,
+    private val analytics: AppAnalytics
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UARTViewState())
@@ -41,6 +45,10 @@ internal class UARTViewModel @Inject constructor(
                 return@onEach
             }
             _state.value = _state.value.copy(uartManagerState = WorkingState(it))
+
+            (it as? SuccessResult)?.let {
+                analytics.logEvent(ProfileConnectedEvent.UART)
+            }
         }.launchIn(viewModelScope)
 
         dataSource.getConfigurations().onEach {

@@ -7,10 +7,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import no.nordicsemi.android.analytics.AppAnalytics
+import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.bps.data.BPS_SERVICE_UUID
 import no.nordicsemi.android.bps.repository.BPSRepository
 import no.nordicsemi.android.bps.view.*
 import no.nordicsemi.android.navigation.*
+import no.nordicsemi.android.service.SuccessResult
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.android.utils.getDevice
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
@@ -20,7 +23,8 @@ import javax.inject.Inject
 @HiltViewModel
 internal class BPSViewModel @Inject constructor(
     private val repository: BPSRepository,
-    private val navigationManager: NavigationManager
+    private val navigationManager: NavigationManager,
+    private val analytics: AppAnalytics
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<BPSViewState>(NoDeviceState)
@@ -53,6 +57,10 @@ internal class BPSViewModel @Inject constructor(
     private fun connectDevice(device: DiscoveredBluetoothDevice) {
         repository.downloadData(device).onEach {
             _state.value = WorkingState(it)
+
+            (it as? SuccessResult)?.let {
+                analytics.logEvent(ProfileConnectedEvent.BPS)
+            }
         }.launchIn(viewModelScope)
     }
 }
