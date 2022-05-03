@@ -1,6 +1,9 @@
 package no.nordicsemi.android.uart.view
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -8,9 +11,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -215,6 +216,8 @@ private fun DeleteConfigurationDialog(onEvent: (UARTViewEvent) -> Unit, onDismis
 
 @Composable
 private fun OutputSection(records: List<UARTRecord>, onEvent: (UARTViewEvent) -> Unit) {
+    val scrollDown = remember { mutableStateOf(true) }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
@@ -227,40 +230,64 @@ private fun OutputSection(records: List<UARTRecord>, onEvent: (UARTViewEvent) ->
             SectionTitle(
                 resId = R.drawable.ic_output,
                 title = stringResource(R.string.uart_output),
-                modifier = Modifier
+                modifier = Modifier,
+                menu = { Menu(scrollDown, onEvent) }
             )
-
-            IconButton(onClick = { onEvent(ClearOutputItems) }) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = "Clear items.",
-                )
-            }
         }
 
         Spacer(modifier = Modifier.size(16.dp))
 
-        val coroutineScope = rememberCoroutineScope()
-        val scrollState = rememberScrollState()
+        val listState = rememberLazyListState()
 
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .verticalScroll(scrollState)
-            .onGloballyPositioned {
-                coroutineScope.launch {
-                    scrollState.animateScrollTo(Int.MAX_VALUE)
-                }
-            }
+        LazyColumn(
+            userScrollEnabled = !scrollDown.value,
+            modifier = Modifier
+                .fillMaxWidth(),
+            state = listState
         ) {
             if (records.isEmpty()) {
-                Text(text = stringResource(id = R.string.uart_output_placeholder))
+                item { Text(text = stringResource(id = R.string.uart_output_placeholder)) }
             } else {
                 records.forEach {
-                    MessageItem(record = it)
+                    item {
+                        MessageItem(record = it)
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
             }
+        }
+
+        LaunchedEffect(records) {
+            if (!scrollDown.value || records.isEmpty()) {
+                return@LaunchedEffect
+            }
+            launch {
+                listState.scrollToItem(records.lastIndex)
+            }
+        }
+    }
+}
+
+@Composable
+private fun Menu(scrollDown: MutableState<Boolean>, onEvent: (UARTViewEvent) -> Unit) {
+    val icon = when (scrollDown.value) {
+        true -> R.drawable.ic_sync_down_off
+        false -> R.drawable.ic_sync_down
+    }
+    Row {
+        IconButton(onClick = { scrollDown.value = !scrollDown.value }) {
+            Icon(
+                painter = painterResource(id = icon),
+                contentDescription = stringResource(id = R.string.uart_scroll_down)
+            )
+        }
+
+        IconButton(onClick = { onEvent(ClearOutputItems) }) {
+            Icon(
+                Icons.Default.Delete,
+                contentDescription = stringResource(id = R.string.uart_clear_items),
+            )
         }
     }
 }
