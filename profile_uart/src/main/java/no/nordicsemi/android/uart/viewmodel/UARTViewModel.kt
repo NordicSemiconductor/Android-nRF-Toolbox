@@ -83,7 +83,12 @@ internal class UARTViewModel @Inject constructor(
             ClearOutputItems -> repository.clearItems()
             OpenLogger -> repository.openLogger()
             is OnRunInput -> repository.sendText(event.text, event.newLineChar)
+            MacroInputSwitchClick -> onMacroInputSwitch()
         }.exhaustive
+    }
+
+    private fun onMacroInputSwitch() {
+        _state.value = _state.value.copy(isInputVisible = !state.value.isInputVisible)
     }
 
     private fun onEditConfiguration() {

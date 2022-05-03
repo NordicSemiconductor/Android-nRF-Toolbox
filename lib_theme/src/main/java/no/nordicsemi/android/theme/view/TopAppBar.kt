@@ -71,6 +71,7 @@ fun BackIconAppBar(text: String, onClick: () -> Unit) {
             IconButton(onClick = { onClick() }) {
                 Icon(
                     Icons.Default.ArrowBack,
+                    tint = MaterialTheme.colorScheme.onPrimary,
                     contentDescription = stringResource(id = R.string.back_screen),
                 )
             }
@@ -103,6 +104,7 @@ fun LoggerIconAppBar(text: String, onClick: () -> Unit, onLoggerClick: () -> Uni
             IconButton(onClick = { onClick() }) {
                 Icon(
                     Icons.Default.ArrowBack,
+                    tint = MaterialTheme.colorScheme.onPrimary,
                     contentDescription = stringResource(id = R.string.back_screen),
                 )
             }

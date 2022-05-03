@@ -53,6 +53,7 @@
     <string name="uart_delete_dialog_confirm">Confirm</string>
     <string name="uart_delete_dialog_cancel">Cancel</string>
 
+    <string name="uart_input_macro">Click to switch between text input and macro input.</string>
     <string name="uart_clear_items">Clear items.</string>
     <string name="uart_scroll_down">Click to constantly scroll view to the latest available log.</string>
     <string name="uart_input_log">--&gt; %s</string>
