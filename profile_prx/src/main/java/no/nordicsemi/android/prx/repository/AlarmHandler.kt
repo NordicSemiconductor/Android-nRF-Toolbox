@@ -12,23 +12,29 @@ internal class AlarmHandler @Inject constructor(
     private val context: Context
 ) {
 
-    private val ringtone = RingtoneManager.getRingtone(context, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE))
+    private val highLevelRingtone = RingtoneManager.getRingtone(context, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)).apply {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            volume = 1f
+        }
+    }
+
+    private val mediumLevelRingtone = RingtoneManager.getRingtone(context, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)).apply {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            volume = 0.5f
+        }
+    }
 
     fun playAlarm(alarmLevel: AlarmLevel) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            ringtone.volume = when (alarmLevel) {
-                AlarmLevel.NONE -> 0f
-                AlarmLevel.MEDIUM -> 0.5f
-                AlarmLevel.HIGH -> 1f
-            }
+        val ringtone = when (alarmLevel) {
+            AlarmLevel.NONE -> null
+            AlarmLevel.MEDIUM -> mediumLevelRingtone
+            AlarmLevel.HIGH -> highLevelRingtone
         }
-
-        ringtone.play()
+        ringtone?.play()
     }
 
     fun pauseAlarm() {
-        if (ringtone.isPlaying) {
-            ringtone.stop()
-        }
+        highLevelRingtone.takeIf { it.isPlaying }?.stop()
+        mediumLevelRingtone.takeIf { it.isPlaying }?.stop()
     }
 }
