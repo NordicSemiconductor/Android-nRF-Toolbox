@@ -1,13 +1,12 @@
 package no.nordicsemi.android.uart.view
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.GridItemSpan
-import androidx.compose.foundation.lazy.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -38,7 +37,6 @@ import no.nordicsemi.android.utils.EMPTY
 
 private const val GRID_SIZE = 5
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (UARTViewEvent) -> Unit) {
     val newLineChar = rememberSaveable { mutableStateOf(macro?.newLineChar ?: MacroEol.LF) }
@@ -62,7 +60,7 @@ internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (UARTViewEvent) -> U
                 )
 
                 LazyVerticalGrid(
-                    cells = GridCells.Fixed(GRID_SIZE),
+                    columns = GridCells.Fixed(GRID_SIZE),
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
                         .wrapContentHeight()

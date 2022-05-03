@@ -32,9 +32,6 @@ fun StringListDialog(config: StringListDialogConfig) {
 fun StringListView(config: StringListDialogConfig) {
     Card(
         modifier = Modifier.height(300.dp),
-        backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
-        shape = RoundedCornerShape(10.dp),
-        elevation = 0.dp
     ) {
         Column(
             modifier = Modifier.padding(16.dp),

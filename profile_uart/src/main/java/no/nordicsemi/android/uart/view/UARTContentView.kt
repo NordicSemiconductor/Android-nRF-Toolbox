@@ -1,7 +1,6 @@
 package no.nordicsemi.android.uart.view
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.RowScopeInstance.weight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -36,10 +35,12 @@ internal fun UARTContentView(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier.padding(16.dp).fillMaxSize()
     ) {
 
-        OutputSection(state.displayMessages, onEvent)
+        ScreenSection(modifier = Modifier.fillMaxSize()) {
+            OutputSection(state.displayMessages, onEvent)
+        }
 
         Spacer(modifier = Modifier.size(16.dp))
 
@@ -207,40 +208,38 @@ private fun DeleteConfigurationDialog(onEvent: (UARTViewEvent) -> Unit, onDismis
 
 @Composable
 private fun OutputSection(records: List<UARTRecord>, onEvent: (UARTViewEvent) -> Unit) {
-    ScreenSection(modifier = Modifier.weight(1f)) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                SectionTitle(
-                    resId = R.drawable.ic_output,
-                    title = stringResource(R.string.uart_output),
-                    modifier = Modifier
+            SectionTitle(
+                resId = R.drawable.ic_output,
+                title = stringResource(R.string.uart_output),
+                modifier = Modifier
+            )
+
+            IconButton(onClick = { onEvent(ClearOutputItems) }) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Clear items.",
                 )
-
-                IconButton(onClick = { onEvent(ClearOutputItems) }) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = "Clear items.",
-                    )
-                }
             }
+        }
 
-            Spacer(modifier = Modifier.size(16.dp))
+        Spacer(modifier = Modifier.size(16.dp))
 
-            Column(modifier = Modifier.fillMaxWidth()) {
-                if (records.isEmpty()) {
-                    Text(text = stringResource(id = R.string.uart_output_placeholder))
-                } else {
-                    records.forEach {
-                        MessageItem(record = it)
+        Column(modifier = Modifier.fillMaxWidth()) {
+            if (records.isEmpty()) {
+                Text(text = stringResource(id = R.string.uart_output_placeholder))
+            } else {
+                records.forEach {
+                    MessageItem(record = it)
 
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
