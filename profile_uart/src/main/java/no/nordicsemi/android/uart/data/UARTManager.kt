@@ -90,7 +90,7 @@ internal class UARTManager(
             setNotificationCallback(txCharacteristic).asFlow().onEach {
                 val text: String = it.getStringValue(0) ?: String.EMPTY
                 log(10, "\"$text\" received")
-                data.value = data.value.copy(messages = data.value.messages + UARTOutputRecord(text))
+                data.value = data.value.copy(messages = data.value.messages + UARTRecord(text, UARTRecordType.OUTPUT))
             }.launchIn(scope)
 
             requestMtu(517).enqueue()
@@ -153,6 +153,7 @@ internal class UARTManager(
                     request.split()
                 }
                 request.suspend()
+                data.value = data.value.copy(messages = data.value.messages + UARTRecord(text, UARTRecordType.INPUT))
                 log(10, "\"$text\" sent")
             }
         }

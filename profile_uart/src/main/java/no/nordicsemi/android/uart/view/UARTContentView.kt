@@ -1,6 +1,7 @@
 package no.nordicsemi.android.uart.view
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.RowScopeInstance.weight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -11,6 +12,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -19,7 +22,8 @@ import no.nordicsemi.android.theme.view.SectionTitle
 import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.uart.data.MacroEol
 import no.nordicsemi.android.uart.data.UARTData
-import no.nordicsemi.android.uart.data.UARTOutputRecord
+import no.nordicsemi.android.uart.data.UARTRecord
+import no.nordicsemi.android.uart.data.UARTRecordType
 import no.nordicsemi.android.utils.EMPTY
 import java.text.SimpleDateFormat
 import java.util.*
@@ -34,15 +38,16 @@ internal fun UARTContentView(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(16.dp)
     ) {
-        InputSection(onEvent = onEvent)
-
-        Spacer(modifier = Modifier.size(16.dp))
-
-        MacroSection(viewState, onEvent)
-
-        Spacer(modifier = Modifier.size(16.dp))
 
         OutputSection(state.displayMessages, onEvent)
+
+        Spacer(modifier = Modifier.size(16.dp))
+
+//        MacroSection(viewState, onEvent)
+//
+//        Spacer(modifier = Modifier.size(16.dp))
+
+        InputSection(onEvent = onEvent)
 
         Spacer(modifier = Modifier.size(16.dp))
 
@@ -201,8 +206,8 @@ private fun DeleteConfigurationDialog(onEvent: (UARTViewEvent) -> Unit, onDismis
 }
 
 @Composable
-private fun OutputSection(records: List<UARTOutputRecord>, onEvent: (UARTViewEvent) -> Unit) {
-    ScreenSection {
+private fun OutputSection(records: List<UARTRecord>, onEvent: (UARTViewEvent) -> Unit) {
+    ScreenSection(modifier = Modifier.weight(1f)) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -243,7 +248,7 @@ private fun OutputSection(records: List<UARTOutputRecord>, onEvent: (UARTViewEve
 }
 
 @Composable
-private fun MessageItem(record: UARTOutputRecord) {
+private fun MessageItem(record: UARTRecord) {
     Column {
         Text(
             text = record.timeToString(),
@@ -252,14 +257,31 @@ private fun MessageItem(record: UARTOutputRecord) {
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = record.text,
-            style = MaterialTheme.typography.bodyMedium
+            text = createRecordText(record = record),
+            style = MaterialTheme.typography.bodyMedium,
+            color = createRecordColor(record = record)
         )
+    }
+}
+
+@Composable
+private fun createRecordText(record: UARTRecord): String {
+    return when (record.type) {
+        UARTRecordType.INPUT -> stringResource(id = R.string.uart_input_log, record.text)
+        UARTRecordType.OUTPUT -> stringResource(id = R.string.uart_output_log, record.text)
+    }
+}
+
+@Composable
+private fun createRecordColor(record: UARTRecord): Color {
+    return when (record.type) {
+        UARTRecordType.INPUT -> colorResource(id = R.color.nordicGrass)
+        UARTRecordType.OUTPUT -> MaterialTheme.colorScheme.onBackground
     }
 }
 
 private val datFormatter = SimpleDateFormat("dd MMMM yyyy, HH:mm:ss", Locale.ENGLISH)
 
-private fun UARTOutputRecord.timeToString(): String {
+private fun UARTRecord.timeToString(): String {
     return datFormatter.format(timestamp)
 }
