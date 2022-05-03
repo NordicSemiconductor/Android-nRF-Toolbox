@@ -1,15 +1,10 @@
 package no.nordicsemi.android.prx.repository
 
 import android.content.Context
-import android.media.AudioManager
-import android.media.MediaPlayer
 import android.media.RingtoneManager
-import android.util.Log
-import androidx.lifecycle.LifecycleService
+import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
 import no.nordicsemi.android.prx.data.AlarmLevel
-import java.io.IOException
-import java.lang.Exception
 import javax.inject.Inject
 
 internal class AlarmHandler @Inject constructor(
@@ -17,61 +12,23 @@ internal class AlarmHandler @Inject constructor(
     private val context: Context
 ) {
 
-    private val TAG = "ALARM_MANAGER"
-
-    private var mediaPlayer = MediaPlayer()
-    private var volume = 0
-
-    init {
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM)
-        mediaPlayer.isLooping = true
-        mediaPlayer.setVolume(1.0f, 1.0f)
-        try {
-            mediaPlayer.setDataSource(
-                context,
-                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-            )
-        } catch (e: IOException) {
-            Log.e(TAG, "Initialize Alarm failed: ", e)
-        }
-    }
+    private val ringtone = RingtoneManager.getRingtone(context, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE))
 
     fun playAlarm(alarmLevel: AlarmLevel) {
-        val am = context.getSystemService(LifecycleService.AUDIO_SERVICE) as AudioManager
-
-        volume = when (alarmLevel) {
-            AlarmLevel.NONE -> 0
-            AlarmLevel.MEDIUM -> am.getStreamVolume(AudioManager.STREAM_NOTIFICATION)
-            AlarmLevel.HIGH -> am.getStreamVolume(AudioManager.STREAM_ALARM)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            ringtone.volume = when (alarmLevel) {
+                AlarmLevel.NONE -> 0f
+                AlarmLevel.MEDIUM -> 0.5f
+                AlarmLevel.HIGH -> 1f
+            }
         }
 
-        am.setStreamVolume(
-            AudioManager.STREAM_ALARM,
-            volume,
-            AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE
-        )
-        try {
-            mediaPlayer.prepare()
-            mediaPlayer.start()
-        } catch (e: Exception) {
-            Log.e(TAG, "Prepare Alarm failed: ", e)
-        }
+        ringtone.play()
     }
 
     fun pauseAlarm() {
-        try {
-            if (mediaPlayer.isPlaying) {
-                mediaPlayer.stop()
-                // Restore original volume
-                val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                am.setStreamVolume(AudioManager.STREAM_ALARM, volume, 0)
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Prepare Alarm failed: ", e)
+        if (ringtone.isPlaying) {
+            ringtone.stop()
         }
-    }
-
-    fun releaseAlarm() {
-        mediaPlayer.release()
     }
 }
