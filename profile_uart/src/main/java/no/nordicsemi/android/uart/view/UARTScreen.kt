@@ -35,18 +35,25 @@ fun UARTScreen() {
             viewModel.onEvent(OpenLogger)
         }
 
-        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        Column(modifier = Modifier) {
             when (state.uartManagerState) {
                 NoDeviceState -> NoDeviceView()
                 is WorkingState -> when (state.uartManagerState.result) {
-                    is ConnectingResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
-                    is DisconnectedResult -> DeviceDisconnectedView(Reason.USER, navigateUp)
-                    is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp)
-                    is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp)
-                    is UnknownErrorResult -> DeviceDisconnectedView(Reason.UNKNOWN, navigateUp)
+                    is ConnectingResult -> Scroll { DeviceConnectingView { viewModel.onEvent(DisconnectEvent) } }
+                    is DisconnectedResult -> Scroll { DeviceDisconnectedView(Reason.USER, navigateUp) }
+                    is LinkLossResult -> Scroll { DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp) }
+                    is MissingServiceResult -> Scroll { DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp) }
+                    is UnknownErrorResult -> Scroll { DeviceDisconnectedView(Reason.UNKNOWN, navigateUp) }
                     is SuccessResult -> UARTContentView(state.uartManagerState.result.data, state) { viewModel.onEvent(it) }
                 }
             }.exhaustive
         }
+    }
+}
+
+@Composable
+fun Scroll(content: @Composable () -> Unit) {
+    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        content()
     }
 }

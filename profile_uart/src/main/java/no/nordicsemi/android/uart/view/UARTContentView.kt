@@ -1,6 +1,8 @@
 package no.nordicsemi.android.uart.view
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -8,14 +10,17 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import no.nordicsemi.android.material.you.*
 import no.nordicsemi.android.theme.view.SectionTitle
 import no.nordicsemi.android.uart.R
@@ -35,10 +40,12 @@ internal fun UARTContentView(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(16.dp).fillMaxSize()
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxSize()
     ) {
 
-        ScreenSection(modifier = Modifier.fillMaxSize()) {
+        ScreenSection(modifier = Modifier.weight(1f)) {
             OutputSection(state.displayMessages, onEvent)
         }
 
@@ -209,7 +216,8 @@ private fun DeleteConfigurationDialog(onEvent: (UARTViewEvent) -> Unit, onDismis
 @Composable
 private fun OutputSection(records: List<UARTRecord>, onEvent: (UARTViewEvent) -> Unit) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize()
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -232,7 +240,18 @@ private fun OutputSection(records: List<UARTRecord>, onEvent: (UARTViewEvent) ->
 
         Spacer(modifier = Modifier.size(16.dp))
 
-        Column(modifier = Modifier.fillMaxWidth()) {
+        val coroutineScope = rememberCoroutineScope()
+        val scrollState = rememberScrollState()
+
+        Column(modifier = Modifier
+            .fillMaxWidth()
+            .verticalScroll(scrollState)
+            .onGloballyPositioned {
+                coroutineScope.launch {
+                    scrollState.animateScrollTo(Int.MAX_VALUE)
+                }
+            }
+        ) {
             if (records.isEmpty()) {
                 Text(text = stringResource(id = R.string.uart_output_placeholder))
             } else {
