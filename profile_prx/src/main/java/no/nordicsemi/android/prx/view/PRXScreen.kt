@@ -12,12 +12,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.prx.R
 import no.nordicsemi.android.prx.viewmodel.PRXViewModel
 import no.nordicsemi.android.service.*
-import no.nordicsemi.android.theme.view.BackIconAppBar
 import no.nordicsemi.android.theme.view.LoggerIconAppBar
-import no.nordicsemi.ui.scanner.ui.DeviceConnectingView
-import no.nordicsemi.ui.scanner.ui.NoDeviceView
 import no.nordicsemi.android.utils.exhaustive
+import no.nordicsemi.ui.scanner.ui.DeviceConnectingView
 import no.nordicsemi.ui.scanner.ui.DeviceDisconnectedView
+import no.nordicsemi.ui.scanner.ui.NoDeviceView
 import no.nordicsemi.ui.scanner.ui.Reason
 
 @Composable
@@ -36,6 +35,7 @@ fun PRXScreen() {
             when (state) {
                 NoDeviceState -> NoDeviceView()
                 is WorkingState -> when (state.result) {
+                    is IdleResult,
                     is ConnectingResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
                     is DisconnectedResult -> DeviceDisconnectedView(Reason.USER, navigateUp)
                     is LinkLossResult -> DeviceOutOfRangeView { viewModel.onEvent(DisconnectEvent) }

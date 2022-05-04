@@ -10,7 +10,7 @@ import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.logger.ToolboxLogger
 import no.nordicsemi.android.logger.ToolboxLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
-import no.nordicsemi.android.service.ConnectingResult
+import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.uart.data.*
 import javax.inject.Inject
@@ -22,13 +22,20 @@ class UARTRepository @Inject internal constructor(
     private val context: Context,
     private val serviceManager: ServiceManager,
     private val configurationDataSource: ConfigurationDataSource,
-    private val toolboxLoggerFactory: ToolboxLoggerFactory
+    private val toolboxLoggerFactory: ToolboxLoggerFactory,
+    private val sp: UARTSharedPrefs
 ) {
     private var manager: UARTManager? = null
     private var logger: ToolboxLogger? = null
 
-    private val _data = MutableStateFlow<BleManagerResult<UARTData>>(ConnectingResult())
+    private val _data = MutableStateFlow<BleManagerResult<UARTData>>(IdleResult())
     internal val data = _data.asStateFlow()
+
+    var showTutorial: Boolean
+        get() = sp.showTutorial
+        set(value) {
+            sp.showTutorial = value
+        }
 
     val isRunning = data.map { it.isRunning() }
     val hasBeenDisconnected = data.map { it.hasBeenDisconnected() }

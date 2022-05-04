@@ -15,6 +15,7 @@ sealed class BleManagerResult <T> {
     }
 }
 
+class IdleResult<T> : BleManagerResult<T>()
 class ConnectingResult<T> : BleManagerResult<T>()
 data class SuccessResult<T>(val data: T) : BleManagerResult<T>()
 

@@ -34,6 +34,7 @@ fun HRSScreen() {
             when (state) {
                 NoDeviceState -> NoDeviceView()
                 is WorkingState -> when (state.result) {
+                    is IdleResult,
                     is ConnectingResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
                     is DisconnectedResult -> DeviceDisconnectedView(Reason.USER, navigateUp)
                     is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp)

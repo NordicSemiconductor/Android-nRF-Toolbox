@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.navigation.*
+import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.uart.data.UARTConfiguration
 import no.nordicsemi.android.uart.data.UARTMacro
 import no.nordicsemi.android.uart.data.UARTPersistentDataSource
@@ -30,12 +31,17 @@ internal class UARTViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            if (repository.isRunning.firstOrNull() == false) {
+            if (repository.showTutorial) {
+                _state.value = _state.value.copy(uartManagerState = TutorialState)
+            } else if (repository.isRunning.firstOrNull() == false) {
                 requestBluetoothDevice()
             }
         }
 
         repository.data.onEach {
+            if (it is IdleResult) {
+                return@onEach
+            }
             _state.value = _state.value.copy(uartManagerState = WorkingState(it))
         }.launchIn(viewModelScope)
 
@@ -85,6 +91,16 @@ internal class UARTViewModel @Inject constructor(
             is OnRunInput -> repository.sendText(event.text, event.newLineChar)
             MacroInputSwitchClick -> onMacroInputSwitch()
         }.exhaustive
+    }
+
+    fun onTutorialClose() {
+        repository.showTutorial = false
+        _state.value = _state.value.copy(uartManagerState = NoDeviceState)
+        viewModelScope.launch {
+            if (repository.isRunning.firstOrNull() == false) {
+                requestBluetoothDevice()
+            }
+        }
     }
 
     private fun onMacroInputSwitch() {

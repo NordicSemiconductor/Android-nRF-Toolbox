@@ -29,3 +29,5 @@ internal sealed class HTSManagerState
 internal data class WorkingState(val result: BleManagerResult<UARTData>) : HTSManagerState()
 
 internal object NoDeviceState : HTSManagerState()
+
+internal object TutorialState : HTSManagerState()
