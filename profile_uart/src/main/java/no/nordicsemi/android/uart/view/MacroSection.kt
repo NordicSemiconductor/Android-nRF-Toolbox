@@ -31,65 +31,69 @@ internal fun MacroSection(viewState: UARTViewState, onEvent: (UARTViewEvent) -> 
         DeleteConfigurationDialog(onEvent) { showDeleteDialog.value = false }
     }
 
-    ScreenSection {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            SectionTitle(
-                resId = R.drawable.ic_macro,
-                title = stringResource(R.string.uart_macros),
-                menu = {
-                    IconButton(onClick = { onEvent(MacroInputSwitchClick) }) {
+    if (viewState.showEditDialog) {
+        UARTAddMacroDialog(viewState.selectedMacro) { onEvent(it) }
+    }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(16.dp).fillMaxSize()
+    ) {
+        ScreenSection {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                SectionTitle(
+                    resId = R.drawable.ic_macro,
+                    title = stringResource(R.string.uart_macros),
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row {
+                    Box(modifier = Modifier.weight(1f)) {
+                        UARTConfigurationPicker(viewState, onEvent)
+                    }
+
+                    IconButton(onClick = { showAddDialog.value = true }) {
                         Icon(
-                            painterResource(id = R.drawable.ic_input),
-                            contentDescription = stringResource(id = R.string.uart_input_macro),
+                            Icons.Default.Add,
+                            stringResource(id = R.string.uart_configuration_add)
                         )
                     }
-                }
-            )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                    viewState.selectedConfiguration?.let {
 
-            Row {
-                Box(modifier = Modifier.weight(1f)) {
-                    UARTConfigurationPicker(viewState, onEvent)
-                }
+                        if (!viewState.isConfigurationEdited) {
+                            IconButton(onClick = { onEvent(OnEditConfiguration) }) {
+                                Icon(
+                                    Icons.Default.Edit,
+                                    stringResource(id = R.string.uart_configuration_edit)
+                                )
+                            }
+                        } else {
+                            IconButton(onClick = { onEvent(OnEditConfiguration) }) {
+                                Icon(
+                                    painterResource(id = R.drawable.ic_pencil_off),
+                                    stringResource(id = R.string.uart_configuration_edit)
+                                )
+                            }
+                        }
 
-                IconButton(onClick = { showAddDialog.value = true }) {
-                    Icon(Icons.Default.Add, stringResource(id = R.string.uart_configuration_add))
+                        IconButton(onClick = { showDeleteDialog.value = true }) {
+                            Icon(
+                                Icons.Default.Delete,
+                                stringResource(id = R.string.uart_configuration_delete)
+                            )
+                        }
+                    }
                 }
 
                 viewState.selectedConfiguration?.let {
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                    if (!viewState.isConfigurationEdited) {
-                        IconButton(onClick = { onEvent(OnEditConfiguration) }) {
-                            Icon(
-                                Icons.Default.Edit,
-                                stringResource(id = R.string.uart_configuration_edit)
-                            )
-                        }
-                    } else {
-                        IconButton(onClick = { onEvent(OnEditConfiguration) }) {
-                            Icon(
-                                painterResource(id = R.drawable.ic_pencil_off),
-                                stringResource(id = R.string.uart_configuration_edit)
-                            )
-                        }
-                    }
-
-                    IconButton(onClick = { showDeleteDialog.value = true }) {
-                        Icon(
-                            Icons.Default.Delete,
-                            stringResource(id = R.string.uart_configuration_delete)
-                        )
-                    }
+                    UARTMacroView(it, viewState.isConfigurationEdited, onEvent)
                 }
-            }
-
-            viewState.selectedConfiguration?.let {
-                Spacer(modifier = Modifier.height(16.dp))
-
-                UARTMacroView(it, viewState.isConfigurationEdited, onEvent)
             }
         }
     }

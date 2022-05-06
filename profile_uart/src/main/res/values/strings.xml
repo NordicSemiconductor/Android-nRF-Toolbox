@@ -58,4 +58,7 @@
     <string name="uart_scroll_down">Click to constantly scroll view to the latest available log.</string>
     <string name="uart_input_log">--&gt; %s</string>
     <string name="uart_output_log" tools:ignore="TypographyDashes">&lt;-- %s</string>
+
+    <string name="uart_settings">Settings</string>
+    <string name="uart_settings_button">Go to settings screen.</string>
 </resources>

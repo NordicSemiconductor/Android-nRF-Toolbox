@@ -26,7 +26,7 @@ fun CGMScreen() {
     Column {
         val navigateUp = { viewModel.onEvent(NavigateUp) }
 
-        LoggerIconAppBar(stringResource(id = R.string.cgms_title), navigateUp) {
+        LoggerIconAppBar(stringResource(id = R.string.cgms_title), navigateUp, { viewModel.onEvent(DisconnectEvent)}) {
             viewModel.onEvent(OpenLoggerEvent)
         }
 

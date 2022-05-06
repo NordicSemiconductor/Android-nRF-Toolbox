@@ -1,8 +1,6 @@
 package no.nordicsemi.android.uart.view
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +20,28 @@ import no.nordicsemi.android.utils.EMPTY
 internal fun InputSection(onEvent: (UARTViewEvent) -> Unit) {
     val text = rememberSaveable { mutableStateOf(String.EMPTY) }
     val hint = stringResource(id = R.string.uart_input_hint)
+    val checkedItem = rememberSaveable { mutableStateOf(MacroEol.values()[0]) }
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.weight(1f)) {
+            TextField(text = text.value, hint = hint) {
+                text.value = it
+            }
+        }
+
+        Spacer(modifier = Modifier.size(16.dp))
+
+        Button(
+            onClick = { onEvent(OnRunInput(text.value, checkedItem.value)) },
+            modifier = Modifier.padding(top = 6.dp)
+        ) {
+            Text(text = stringResource(id = R.string.uart_send))
+        }
+    }
+}
+
+@Composable
+internal fun EditInputSection(onEvent: (UARTViewEvent) -> Unit) {
     val checkedItem = rememberSaveable { mutableStateOf(MacroEol.values()[0]) }
 
     val items = MacroEol.values().map {
@@ -59,23 +79,6 @@ internal fun InputSection(onEvent: (UARTViewEvent) -> Unit) {
             }
 
             Spacer(modifier = Modifier.size(16.dp))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(modifier = Modifier.weight(1f)) {
-                    TextField(text = text.value, hint = hint) {
-                        text.value = it
-                    }
-                }
-
-                Spacer(modifier = Modifier.size(16.dp))
-
-                Button(
-                    onClick = { onEvent(OnRunInput(text.value, checkedItem.value)) },
-                    modifier = Modifier.padding(top = 6.dp)
-                ) {
-                    Text(text = stringResource(id = R.string.uart_send))
-                }
-            }
         }
     }
 }

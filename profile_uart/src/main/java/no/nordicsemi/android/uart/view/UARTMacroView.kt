@@ -19,7 +19,7 @@ import no.nordicsemi.android.uart.data.UARTConfiguration
 import no.nordicsemi.android.uart.data.UARTMacro
 
 private val divider = 4.dp
-private val buttonSize = 80.dp
+private val buttonSize = 80.dp //Minimum touch area
 
 @Composable
 internal fun UARTMacroView(

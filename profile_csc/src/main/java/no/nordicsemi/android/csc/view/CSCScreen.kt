@@ -26,7 +26,7 @@ fun CSCScreen() {
     Column {
         val navigateUp = { viewModel.onEvent(NavigateUp) }
 
-        LoggerIconAppBar(stringResource(id = R.string.csc_title), navigateUp) {
+        LoggerIconAppBar(stringResource(id = R.string.csc_title), navigateUp, { viewModel.onEvent(OnDisconnectButtonClick) }) {
             viewModel.onEvent(OpenLogger)
         }
 

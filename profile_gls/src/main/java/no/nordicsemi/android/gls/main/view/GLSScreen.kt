@@ -28,7 +28,7 @@ fun GLSScreen() {
 
         LoggerIconAppBar(stringResource(id = R.string.gls_title), {
             viewModel.onEvent(DisconnectEvent)
-        }) {
+        }, { viewModel.onEvent(DisconnectEvent) }) {
             viewModel.onEvent(OpenLoggerEvent)
         }
 

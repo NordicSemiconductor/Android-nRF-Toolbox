@@ -37,9 +37,9 @@ dependencyResolutionManagement {
             library('datastore-protobuf', 'com.google.protobuf:protobuf-javalite:3.18.0')
             bundle('datastore', ['datastore-core', 'datastore-prefs', 'datastore-protobuf'])
 
-            version('compose', '1.1.0')
+            version('compose', '1.2.0-alpha07')
             library('compose-ui', 'androidx.compose.ui', 'ui').versionRef('compose')
-            library('compose-material', 'androidx.compose.material3:material3:1.0.0-alpha10')
+            library('compose-material', 'androidx.compose.material3:material3:1.0.0-alpha09')
             library('compose-tooling-preview', 'androidx.compose.ui', 'ui-tooling-preview').versionRef('compose')
             library('compose-navigation', 'androidx.navigation:navigation-compose:2.4.1')
             bundle('compose', ['compose-ui', 'compose-material', 'compose-tooling-preview', 'compose-navigation'])

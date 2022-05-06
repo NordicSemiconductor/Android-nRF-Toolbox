@@ -8,9 +8,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import no.nordicsemi.android.material.you.PagerView
+import no.nordicsemi.android.material.you.PagerViewEntity
+import no.nordicsemi.android.material.you.PagerViewItem
 import no.nordicsemi.android.service.*
 import no.nordicsemi.android.theme.view.LoggerIconAppBar
 import no.nordicsemi.android.uart.R
+import no.nordicsemi.android.uart.data.UARTData
 import no.nordicsemi.android.uart.viewmodel.UARTViewModel
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.ui.scanner.ui.DeviceConnectingView
@@ -23,14 +27,10 @@ fun UARTScreen() {
     val viewModel: UARTViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
 
-    if (state.showEditDialog) {
-        UARTAddMacroDialog(state.selectedMacro) { viewModel.onEvent(it) }
-    }
-
     Column {
         val navigateUp = { viewModel.onEvent(NavigateUp) }
 
-        LoggerIconAppBar(stringResource(id = R.string.uart_title), navigateUp) {
+        LoggerIconAppBar(stringResource(id = R.string.uart_title), navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
             viewModel.onEvent(OpenLogger)
         }
 
@@ -44,21 +44,27 @@ fun UARTScreen() {
                     is LinkLossResult -> Scroll { DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp) }
                     is MissingServiceResult -> Scroll { DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp) }
                     is UnknownErrorResult -> Scroll { DeviceDisconnectedView(Reason.UNKNOWN, navigateUp) }
-                    is SuccessResult -> {
-//                        val i1 = PagerViewEntity(
-//                            listOf(
-//                                PagerViewItem("aaa") { Text("aa") },
-//                                PagerViewItem("bbb") { Text("bb") }
-//                            )
-//                        )
-//                        PagerView(i1)
-                        UARTContentView(state.uartManagerState.result.data, state) { viewModel.onEvent(it) }
-                    }
+                    is SuccessResult -> SuccessScreen(state.uartManagerState.result.data, state, viewModel)
                 }
                 TutorialState -> TutorialScreen(viewModel)
             }.exhaustive
         }
     }
+}
+
+@Composable
+private fun SuccessScreen(data: UARTData, state: UARTViewState, viewModel: UARTViewModel) {
+    val viewEntity = PagerViewEntity(
+        listOf(
+            PagerViewItem(stringResource(id = R.string.uart_input)) {
+                UARTContentView(data) { viewModel.onEvent(it) }
+            },
+            PagerViewItem(stringResource(id = R.string.uart_macros)) {
+                MacroSection(state) { viewModel.onEvent(it) }
+            }
+        )
+    )
+    PagerView(viewEntity)
 }
 
 @Composable

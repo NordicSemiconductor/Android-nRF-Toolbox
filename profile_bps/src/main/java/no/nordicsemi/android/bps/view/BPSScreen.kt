@@ -28,7 +28,7 @@ fun BPSScreen() {
 
         LoggerIconAppBar(stringResource(id = R.string.bps_title), {
             viewModel.onEvent(DisconnectEvent)
-        }) {
+        }, { viewModel.onEvent(DisconnectEvent) }) {
             viewModel.onEvent(OpenLoggerEvent)
         }
 

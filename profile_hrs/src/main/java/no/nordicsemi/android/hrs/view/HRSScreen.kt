@@ -26,7 +26,7 @@ fun HRSScreen() {
     Column {
         val navigateUp = { viewModel.onEvent(NavigateUpEvent) }
 
-        LoggerIconAppBar(stringResource(id = R.string.hrs_title), navigateUp) {
+        LoggerIconAppBar(stringResource(id = R.string.hrs_title), navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
             viewModel.onEvent(OpenLoggerEvent)
         }
 
