@@ -1,6 +1,8 @@
 package no.nordicsemi.android.uart.view
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -10,7 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.material.you.*
+import no.nordicsemi.android.material.you.RadioButtonGroup
+import no.nordicsemi.android.material.you.RadioButtonItem
+import no.nordicsemi.android.material.you.RadioGroupViewEntity
+import no.nordicsemi.android.material.you.ScreenSection
 import no.nordicsemi.android.theme.view.SectionTitle
 import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.uart.data.MacroEol
@@ -24,9 +29,17 @@ internal fun InputSection(onEvent: (UARTViewEvent) -> Unit) {
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(modifier = Modifier.weight(1f)) {
-            TextField(text = text.value, hint = hint) {
-                text.value = it
-            }
+
+            TextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .verticalScroll(rememberScrollState()),
+                value = text.value,
+                label = { Text(hint) },
+                onValueChange = { newValue: String ->
+                    text.value = newValue
+                })
         }
 
         Spacer(modifier = Modifier.size(16.dp))
