@@ -32,7 +32,10 @@ internal fun InputSection(onEvent: (UARTViewEvent) -> Unit) {
         Spacer(modifier = Modifier.size(16.dp))
 
         Button(
-            onClick = { onEvent(OnRunInput(text.value, checkedItem.value)) },
+            onClick = {
+                onEvent(OnRunInput(text.value, checkedItem.value))
+                text.value = String.EMPTY
+            },
             modifier = Modifier.padding(top = 6.dp)
         ) {
             Text(text = stringResource(id = R.string.uart_send))
