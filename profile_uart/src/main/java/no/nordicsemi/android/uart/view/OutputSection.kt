@@ -2,6 +2,7 @@ package no.nordicsemi.android.uart.view
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -9,12 +10,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -27,8 +30,6 @@ import java.util.*
 
 @Composable
 internal fun OutputSection(records: List<UARTRecord>, onEvent: (UARTViewEvent) -> Unit) {
-    val scrollDown = remember { mutableStateOf(true) }
-
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
@@ -42,19 +43,20 @@ internal fun OutputSection(records: List<UARTRecord>, onEvent: (UARTViewEvent) -
                 resId = R.drawable.ic_output,
                 title = stringResource(R.string.uart_output),
                 modifier = Modifier,
-                menu = { Menu(scrollDown, onEvent) }
+                menu = { Menu(onEvent) }
             )
         }
 
         Spacer(modifier = Modifier.size(16.dp))
 
-        val listState = rememberLazyListState()
+        val scrollState = rememberLazyListState()
+        val scrollDown = remember {
+            derivedStateOf { scrollState.isScrolledToTheEnd() }
+        }
 
         LazyColumn(
-            userScrollEnabled = !scrollDown.value,
-            modifier = Modifier
-                .fillMaxWidth(),
-            state = listState
+            modifier = Modifier.fillMaxWidth(),
+            state = scrollState
         ) {
             if (records.isEmpty()) {
                 item { Text(text = stringResource(id = R.string.uart_output_placeholder)) }
@@ -74,11 +76,13 @@ internal fun OutputSection(records: List<UARTRecord>, onEvent: (UARTViewEvent) -
                 return@LaunchedEffect
             }
             launch {
-                listState.scrollToItem(records.lastIndex)
+                scrollState.scrollToItem(records.lastIndex)
             }
         }
     }
 }
+
+fun LazyListState.isScrolledToTheEnd() = layoutInfo.visibleItemsInfo.lastOrNull()?.index == layoutInfo.totalItemsCount - 1
 
 @Composable
 private fun MessageItem(record: UARTRecord) {
@@ -98,19 +102,8 @@ private fun MessageItem(record: UARTRecord) {
 }
 
 @Composable
-private fun Menu(scrollDown: MutableState<Boolean>, onEvent: (UARTViewEvent) -> Unit) {
-    val icon = when (scrollDown.value) {
-        true -> R.drawable.ic_sync_down_off
-        false -> R.drawable.ic_sync_down
-    }
+private fun Menu(onEvent: (UARTViewEvent) -> Unit) {
     Row {
-        IconButton(onClick = { scrollDown.value = !scrollDown.value }) {
-            Icon(
-                painter = painterResource(id = icon),
-                contentDescription = stringResource(id = R.string.uart_scroll_down)
-            )
-        }
-
         IconButton(onClick = { onEvent(ClearOutputItems) }) {
             Icon(
                 Icons.Default.Delete,

@@ -27,7 +27,5 @@ internal fun UARTContentView(
         Spacer(modifier = Modifier.size(16.dp))
 
         InputSection(onEvent = onEvent)
-
-        Spacer(modifier = Modifier.size(16.dp))
     }
 }
