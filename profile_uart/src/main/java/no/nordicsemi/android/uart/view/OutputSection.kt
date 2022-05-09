@@ -1,9 +1,11 @@
 package no.nordicsemi.android.uart.view
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
@@ -16,8 +18,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -63,7 +64,10 @@ internal fun OutputSection(records: List<UARTRecord>, onEvent: (UARTViewEvent) -
             } else {
                 records.forEach {
                     item {
-                        MessageItem(record = it)
+                        when (it.type) {
+                            UARTRecordType.INPUT -> MessageItemInput(record = it)
+                            UARTRecordType.OUTPUT -> MessageItemOutput(record = it)
+                        }
 
                         Spacer(modifier = Modifier.height(16.dp))
                     }
@@ -85,19 +89,57 @@ internal fun OutputSection(records: List<UARTRecord>, onEvent: (UARTViewEvent) -
 fun LazyListState.isScrolledToTheEnd() = layoutInfo.visibleItemsInfo.lastOrNull()?.index == layoutInfo.totalItemsCount - 1
 
 @Composable
-private fun MessageItem(record: UARTRecord) {
-    Column {
-        Text(
-            text = record.timeToString(),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.outline
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = createRecordText(record = record),
-            style = MaterialTheme.typography.bodyMedium,
-            color = createRecordColor(record = record)
-        )
+private fun MessageItemInput(record: UARTRecord) {
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.CenterEnd
+    ) {
+        Column(
+            modifier = Modifier
+                .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp, bottomStart = 10.dp))
+                .background(MaterialTheme.colorScheme.secondary)
+                .padding(8.dp),
+            horizontalAlignment = Alignment.End
+        ) {
+            Text(
+                text = record.timeToString(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.inverseOnSurface
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = record.text,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSecondary
+            )
+        }
+    }
+}
+
+@Composable
+private fun MessageItemOutput(record: UARTRecord) {
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Column(
+            modifier = Modifier
+                .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp, bottomEnd = 10.dp))
+                .background(MaterialTheme.colorScheme.primary)
+                .padding(8.dp)
+        ) {
+            Text(
+                text = record.timeToString(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.inverseOnSurface,
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = record.text,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+        }
     }
 }
 
@@ -110,22 +152,6 @@ private fun Menu(onEvent: (UARTViewEvent) -> Unit) {
                 contentDescription = stringResource(id = R.string.uart_clear_items),
             )
         }
-    }
-}
-
-@Composable
-private fun createRecordText(record: UARTRecord): String {
-    return when (record.type) {
-        UARTRecordType.INPUT -> stringResource(id = R.string.uart_input_log, record.text)
-        UARTRecordType.OUTPUT -> stringResource(id = R.string.uart_output_log, record.text)
-    }
-}
-
-@Composable
-private fun createRecordColor(record: UARTRecord): Color {
-    return when (record.type) {
-        UARTRecordType.INPUT -> colorResource(id = R.color.nordicGrass)
-        UARTRecordType.OUTPUT -> MaterialTheme.colorScheme.onBackground
     }
 }
 

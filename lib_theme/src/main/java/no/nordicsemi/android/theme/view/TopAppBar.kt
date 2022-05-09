@@ -103,7 +103,7 @@ fun LoggerIconAppBar(text: String, onClick: () -> Unit, onDisconnectClick: () ->
             }
         },
         actions = {
-            Button(onClick = { onDisconnectClick() }) {
+            TextButton(onClick = { onDisconnectClick() }) {
                 Text(stringResource(id = R.string.disconnect))
             }
             IconButton(onClick = { onLoggerClick() }) {
