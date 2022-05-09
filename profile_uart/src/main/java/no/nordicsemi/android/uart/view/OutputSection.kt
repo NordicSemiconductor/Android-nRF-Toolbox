@@ -90,10 +90,16 @@ fun LazyListState.isScrolledToTheEnd() = layoutInfo.visibleItemsInfo.lastOrNull(
 
 @Composable
 private fun MessageItemInput(record: UARTRecord) {
-    Box(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.CenterEnd
+        horizontalAlignment = Alignment.End
     ) {
+        Text(
+            text = record.timeToString(),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(4.dp))
         Column(
             modifier = Modifier
                 .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp, bottomStart = 10.dp))
@@ -101,12 +107,6 @@ private fun MessageItemInput(record: UARTRecord) {
                 .padding(8.dp),
             horizontalAlignment = Alignment.End
         ) {
-            Text(
-                text = record.timeToString(),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.inverseOnSurface
-            )
-            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = record.text,
                 style = MaterialTheme.typography.bodyMedium,
@@ -118,22 +118,22 @@ private fun MessageItemInput(record: UARTRecord) {
 
 @Composable
 private fun MessageItemOutput(record: UARTRecord) {
-    Box(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.CenterStart
+        horizontalAlignment = Alignment.Start
     ) {
+        Text(
+            text = record.timeToString(),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
         Column(
             modifier = Modifier
                 .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp, bottomEnd = 10.dp))
                 .background(MaterialTheme.colorScheme.primary)
                 .padding(8.dp)
         ) {
-            Text(
-                text = record.timeToString(),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.inverseOnSurface,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = record.text,
                 style = MaterialTheme.typography.bodyMedium,

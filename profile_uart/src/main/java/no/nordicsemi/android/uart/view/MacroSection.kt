@@ -1,6 +1,8 @@
 package no.nordicsemi.android.uart.view
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -37,8 +39,9 @@ internal fun MacroSection(viewState: UARTViewState, onEvent: (UARTViewEvent) -> 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .padding(16.dp)
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
     ) {
         ScreenSection {
             Column(

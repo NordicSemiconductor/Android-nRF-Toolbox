@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -103,7 +104,13 @@ fun LoggerIconAppBar(text: String, onClick: () -> Unit, onDisconnectClick: () ->
             }
         },
         actions = {
-            TextButton(onClick = { onDisconnectClick() }) {
+            TextButton(
+                onClick = { onDisconnectClick() },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
                 Text(stringResource(id = R.string.disconnect))
             }
             IconButton(onClick = { onLoggerClick() }) {
