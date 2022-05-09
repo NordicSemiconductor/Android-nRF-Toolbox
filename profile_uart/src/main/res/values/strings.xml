@@ -4,7 +4,7 @@
 
     <string name="uart_no_macros_info">Please define a macro to send command to the device.</string>
 
-    <string name="uart_configuration_add">Add selected configuration.</string>
+    <string name="uart_configuration_add">Add</string>
     <string name="uart_configuration_delete">Delete selected configuration.</string>
     <string name="uart_configuration_edit">Edit selected configuration.</string>
 

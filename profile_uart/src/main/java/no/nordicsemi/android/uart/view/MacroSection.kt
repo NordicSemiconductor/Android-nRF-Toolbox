@@ -2,7 +2,6 @@ package no.nordicsemi.android.uart.view
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
@@ -37,7 +36,9 @@ internal fun MacroSection(viewState: UARTViewState, onEvent: (UARTViewEvent) -> 
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(16.dp).fillMaxSize()
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxSize()
     ) {
         ScreenSection {
             Column(
@@ -46,6 +47,31 @@ internal fun MacroSection(viewState: UARTViewState, onEvent: (UARTViewEvent) -> 
                 SectionTitle(
                     resId = R.drawable.ic_macro,
                     title = stringResource(R.string.uart_macros),
+                    menu = {
+                        viewState.selectedConfiguration?.let {
+                            if (!viewState.isConfigurationEdited) {
+                                IconButton(onClick = { onEvent(OnEditConfiguration) }) {
+                                    Icon(
+                                        Icons.Default.Edit,
+                                        stringResource(id = R.string.uart_configuration_edit)
+                                    )
+                                }
+                            } else {
+                                IconButton(onClick = { onEvent(OnEditConfiguration) }) {
+                                    Icon(
+                                        painterResource(id = R.drawable.ic_pencil_off),
+                                        stringResource(id = R.string.uart_configuration_edit)
+                                    )
+                                }
+                            }
+                            IconButton(onClick = { showDeleteDialog.value = true }) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    stringResource(id = R.string.uart_configuration_delete)
+                                )
+                            }
+                        }
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -55,37 +81,10 @@ internal fun MacroSection(viewState: UARTViewState, onEvent: (UARTViewEvent) -> 
                         UARTConfigurationPicker(viewState, onEvent)
                     }
 
-                    IconButton(onClick = { showAddDialog.value = true }) {
-                        Icon(
-                            Icons.Default.Add,
-                            stringResource(id = R.string.uart_configuration_add)
-                        )
-                    }
+                    Spacer(modifier = Modifier.size(16.dp))
 
-                    viewState.selectedConfiguration?.let {
-
-                        if (!viewState.isConfigurationEdited) {
-                            IconButton(onClick = { onEvent(OnEditConfiguration) }) {
-                                Icon(
-                                    Icons.Default.Edit,
-                                    stringResource(id = R.string.uart_configuration_edit)
-                                )
-                            }
-                        } else {
-                            IconButton(onClick = { onEvent(OnEditConfiguration) }) {
-                                Icon(
-                                    painterResource(id = R.drawable.ic_pencil_off),
-                                    stringResource(id = R.string.uart_configuration_edit)
-                                )
-                            }
-                        }
-
-                        IconButton(onClick = { showDeleteDialog.value = true }) {
-                            Icon(
-                                Icons.Default.Delete,
-                                stringResource(id = R.string.uart_configuration_delete)
-                            )
-                        }
+                    Button(onClick = { showAddDialog.value = true }) {
+                        Text(stringResource(id = R.string.uart_configuration_add))
                     }
                 }
 
