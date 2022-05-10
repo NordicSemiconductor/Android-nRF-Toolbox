@@ -30,16 +30,17 @@ internal fun InputSection(onEvent: (UARTViewEvent) -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(modifier = Modifier.weight(1f)) {
 
-            TextField(
+            OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(6.dp)
+                    .height(60.dp)
                     .verticalScroll(rememberScrollState()),
                 value = text.value,
                 label = { Text(hint) },
                 onValueChange = { newValue: String ->
                     text.value = newValue
-                })
+                }
+            )
         }
 
         Spacer(modifier = Modifier.size(16.dp))
