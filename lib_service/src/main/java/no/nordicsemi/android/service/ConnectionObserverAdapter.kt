@@ -34,7 +34,7 @@ class ConnectionObserverAdapter<T> : ConnectionObserver {
 
     override fun onDeviceReady(device: BluetoothDevice) {
         Log.d(TAG, "onDeviceReady()")
-        _status.value = SuccessResult(lastValue!!)
+        _status.value = SuccessResult(device, lastValue!!)
     }
 
     override fun onDeviceDisconnecting(device: BluetoothDevice) {
@@ -53,8 +53,8 @@ class ConnectionObserverAdapter<T> : ConnectionObserver {
 
     fun setValue(value: T) {
         lastValue = value
-        if (_status.value.isRunning()) {
-            _status.value = SuccessResult(value)
+        (_status.value as? SuccessResult)?.let {
+            _status.value = SuccessResult(it.device, value)
         }
     }
 }

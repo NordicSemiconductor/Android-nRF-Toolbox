@@ -40,7 +40,7 @@ internal class UARTViewModel @Inject constructor(
             if (it is IdleResult) {
                 return@onEach
             }
-            _state.value = _state.value.copy(uartManagerState = WorkingState(repository.device!!, it))
+            _state.value = _state.value.copy(uartManagerState = WorkingState(it))
         }.launchIn(viewModelScope)
 
         dataSource.getConfigurations().onEach {

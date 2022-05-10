@@ -71,7 +71,7 @@ internal class GLSManager(
     val dataHolder = ConnectionObserverAdapter<GLSData>()
 
     init {
-        setConnectionObserver(dataHolder)
+        connectionObserver = dataHolder
 
         data.onEach {
             dataHolder.setValue(it)

@@ -56,7 +56,7 @@ internal class HTSManager internal constructor(
     val dataHolder = ConnectionObserverAdapter<HTSData>()
 
     init {
-        setConnectionObserver(dataHolder)
+        connectionObserver = dataHolder
 
         data.onEach {
             dataHolder.setValue(it)

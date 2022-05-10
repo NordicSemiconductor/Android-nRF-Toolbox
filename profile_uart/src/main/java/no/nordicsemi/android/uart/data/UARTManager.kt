@@ -69,7 +69,7 @@ internal class UARTManager(
     val dataHolder = ConnectionObserverAdapter<UARTData>()
 
     init {
-        setConnectionObserver(dataHolder)
+        connectionObserver = dataHolder
 
         data.onEach {
             dataHolder.setValue(it)

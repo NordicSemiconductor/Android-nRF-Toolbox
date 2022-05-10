@@ -9,8 +9,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.rscs.R
+import no.nordicsemi.android.rscs.data.RSCSData
 import no.nordicsemi.android.rscs.viewmodel.RSCSViewModel
 import no.nordicsemi.android.service.*
+import no.nordicsemi.android.theme.view.BackIconAppBar
 import no.nordicsemi.android.theme.view.LoggerIconAppBar
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.ui.scanner.ui.DeviceConnectingView
@@ -26,9 +28,7 @@ fun RSCSScreen() {
     Column {
         val navigateUp = { viewModel.onEvent(NavigateUpEvent) }
 
-        LoggerIconAppBar(stringResource(id = R.string.rscs_title), navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
-            viewModel.onEvent(OpenLoggerEvent)
-        }
+        AppBar(state, navigateUp, viewModel)
 
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             when (state) {
@@ -43,6 +43,21 @@ fun RSCSScreen() {
                     is SuccessResult -> RSCSContentView(state.result.data) { viewModel.onEvent(it) }
                 }
             }.exhaustive
+        }
+    }
+}
+
+@Composable
+private fun AppBar(state: RSCSViewState, navigateUp: () -> Unit, viewModel: RSCSViewModel) {
+    val toolbarName = (state as? WorkingState)?.let {
+        (it.result as? SuccessResult<RSCSData>)?.deviceName()
+    }
+
+    if (toolbarName == null) {
+        BackIconAppBar(stringResource(id = R.string.rscs_title), navigateUp)
+    } else {
+        LoggerIconAppBar(toolbarName, navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
+            viewModel.onEvent(OpenLoggerEvent)
         }
     }
 }

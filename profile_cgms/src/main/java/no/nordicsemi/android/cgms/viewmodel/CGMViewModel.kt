@@ -16,12 +16,12 @@ import no.nordicsemi.ui.scanner.ScannerDestinationId
 import javax.inject.Inject
 
 @HiltViewModel
-internal class CGMScreenViewModel @Inject constructor(
+internal class CGMViewModel @Inject constructor(
     private val repository: CGMRepository,
     private val navigationManager: NavigationManager
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<BPSViewState>(NoDeviceState)
+    private val _state = MutableStateFlow<CGMViewState>(NoDeviceState)
     val state = _state.asStateFlow()
 
     init {

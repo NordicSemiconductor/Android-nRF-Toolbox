@@ -10,8 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.prx.R
+import no.nordicsemi.android.prx.data.PRXData
 import no.nordicsemi.android.prx.viewmodel.PRXViewModel
 import no.nordicsemi.android.service.*
+import no.nordicsemi.android.theme.view.BackIconAppBar
 import no.nordicsemi.android.theme.view.LoggerIconAppBar
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.ui.scanner.ui.DeviceConnectingView
@@ -27,9 +29,7 @@ fun PRXScreen() {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         val navigateUp = { viewModel.onEvent(NavigateUpEvent) }
 
-        LoggerIconAppBar(stringResource(id = R.string.prx_title), navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
-            viewModel.onEvent(OpenLoggerEvent)
-        }
+        AppBar(state, navigateUp, viewModel)
 
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             when (state) {
@@ -44,6 +44,21 @@ fun PRXScreen() {
                     is SuccessResult -> ContentView(state.result.data) { viewModel.onEvent(it) }
                 }
             }.exhaustive
+        }
+    }
+}
+
+@Composable
+private fun AppBar(state: PRXViewState, navigateUp: () -> Unit, viewModel: PRXViewModel) {
+    val toolbarName = (state as? WorkingState)?.let {
+        (it.result as? SuccessResult<PRXData>)?.deviceName()
+    }
+
+    if (toolbarName == null) {
+        BackIconAppBar(stringResource(id = R.string.prx_title), navigateUp)
+    } else {
+        LoggerIconAppBar(toolbarName, navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
+            viewModel.onEvent(OpenLoggerEvent)
         }
     }
 }

@@ -32,8 +32,6 @@ class UARTRepository @Inject internal constructor(
     private val _data = MutableStateFlow<BleManagerResult<UARTData>>(IdleResult())
     internal val data = _data.asStateFlow()
 
-    var device: DiscoveredBluetoothDevice? = null
-
     val isRunning = data.map { it.isRunning() }
     val hasBeenDisconnected = data.map { it.hasBeenDisconnected() }
 
@@ -44,7 +42,6 @@ class UARTRepository @Inject internal constructor(
     }
 
     fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
-        this.device = device
         val createdLogger = toolboxLoggerFactory.create("UART", device.address()).also {
             logger = it
         }

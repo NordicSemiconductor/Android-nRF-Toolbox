@@ -1,6 +1,5 @@
 package no.nordicsemi.android.uart.view
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -34,44 +33,33 @@ fun UARTScreen() {
 
         AppBar(state = state, navigateUp = navigateUp) { viewModel.onEvent(it) }
 
-        Column(modifier = Modifier) {
-            when (state.uartManagerState) {
-                NoDeviceState -> NoDeviceView()
-                is WorkingState -> when (state.uartManagerState.result) {
-                    is IdleResult,
-                    is ConnectingResult -> Scroll { DeviceConnectingView { viewModel.onEvent(DisconnectEvent) } }
-                    is DisconnectedResult -> Scroll { DeviceDisconnectedView(Reason.USER, navigateUp) }
-                    is LinkLossResult -> Scroll { DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp) }
-                    is MissingServiceResult -> Scroll { DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp) }
-                    is UnknownErrorResult -> Scroll { DeviceDisconnectedView(Reason.UNKNOWN, navigateUp) }
-                    is SuccessResult -> SuccessScreen(state.uartManagerState.result.data, state, viewModel)
-                }
-            }.exhaustive
-        }
+        when (state.uartManagerState) {
+            NoDeviceState -> NoDeviceView()
+            is WorkingState -> when (state.uartManagerState.result) {
+                is IdleResult,
+                is ConnectingResult -> Scroll { DeviceConnectingView { viewModel.onEvent(DisconnectEvent) } }
+                is DisconnectedResult -> Scroll { DeviceDisconnectedView(Reason.USER, navigateUp) }
+                is LinkLossResult -> Scroll { DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp) }
+                is MissingServiceResult -> Scroll { DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp) }
+                is UnknownErrorResult -> Scroll { DeviceDisconnectedView(Reason.UNKNOWN, navigateUp) }
+                is SuccessResult -> SuccessScreen(state.uartManagerState.result.data, state, viewModel)
+            }
+        }.exhaustive
     }
 }
 
-@SuppressLint("MissingPermission")
 @Composable
 private fun AppBar(state: UARTViewState, navigateUp: () -> Unit, onEvent: (UARTViewEvent) -> Unit) {
-    Column(modifier = Modifier) {
-        when (state.uartManagerState) {
-            NoDeviceState -> BackIconAppBar(stringResource(id = R.string.uart_title), navigateUp)
-            is WorkingState -> when (state.uartManagerState.result) {
-                is IdleResult,
-                is DisconnectedResult,
-                is LinkLossResult,
-                is MissingServiceResult,
-                is UnknownErrorResult -> BackIconAppBar(stringResource(id = R.string.uart_title), navigateUp)
-                is ConnectingResult,
-                is SuccessResult -> {
-                    val text = state.uartManagerState.device.nameOrAddress()
-                    LoggerIconAppBar(text, navigateUp, { onEvent(DisconnectEvent) }) {
-                        onEvent(OpenLogger)
-                    }
-                }
-            }
-        }.exhaustive
+    val toolbarName = (state.uartManagerState as? WorkingState)?.let {
+        (it.result as? SuccessResult<UARTData>)?.deviceName()
+    }
+
+    if (toolbarName == null) {
+        BackIconAppBar(stringResource(id = R.string.uart_title), navigateUp)
+    } else {
+        LoggerIconAppBar(toolbarName, navigateUp, { onEvent(DisconnectEvent) }) {
+            onEvent(OpenLogger)
+        }
     }
 }
 

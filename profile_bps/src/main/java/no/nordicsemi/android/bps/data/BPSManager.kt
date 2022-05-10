@@ -61,7 +61,7 @@ internal class BPSManager(
     val dataHolder = ConnectionObserverAdapter<BPSData>()
 
     init {
-        setConnectionObserver(dataHolder)
+        connectionObserver = dataHolder
 
         data.onEach {
             dataHolder.setValue(it)

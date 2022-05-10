@@ -21,7 +21,7 @@ internal class GLSViewModel @Inject constructor(
     private val navigationManager: NavigationManager
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<BPSViewState>(NoDeviceState)
+    private val _state = MutableStateFlow<GLSViewState>(NoDeviceState)
     val state = _state.asStateFlow()
 
     init {

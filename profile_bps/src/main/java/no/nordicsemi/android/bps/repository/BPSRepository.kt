@@ -1,6 +1,5 @@
 package no.nordicsemi.android.bps.repository
 
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ViewModelScoped
