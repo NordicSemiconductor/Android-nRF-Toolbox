@@ -4,16 +4,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallTopAppBar
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -57,6 +51,39 @@ fun TitleAppBar(text: String) {
 }
 
 @Composable
+fun LoggerBackIconAppBar(text: String, onClick: () -> Unit) {
+    SmallTopAppBar(
+        title = { Text(text) },
+        colors = TopAppBarDefaults.smallTopAppBarColors(
+            scrolledContainerColor = MaterialTheme.colorScheme.primary,
+            containerColor = colorResource(id = R.color.appBarColor),
+            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+        ),
+        navigationIcon = {
+            IconButton(onClick = { onClick() }) {
+                Icon(
+                    Icons.Default.ArrowBack,
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    contentDescription = stringResource(id = R.string.back_screen),
+                )
+            }
+        },
+        actions = {
+            IconButton(onClick = { onClick() }) {
+                Icon(
+                    painterResource(id = R.drawable.ic_logger),
+                    contentDescription = stringResource(id = R.string.open_logger),
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+    )
+}
+
+@Composable
 fun BackIconAppBar(text: String, onClick: () -> Unit) {
     SmallTopAppBar(
         title = { Text(text) },
@@ -71,25 +98,16 @@ fun BackIconAppBar(text: String, onClick: () -> Unit) {
             IconButton(onClick = { onClick() }) {
                 Icon(
                     Icons.Default.ArrowBack,
+                    tint = MaterialTheme.colorScheme.onPrimary,
                     contentDescription = stringResource(id = R.string.back_screen),
                 )
             }
         },
-        actions = {
-            IconButton(onClick = { onClick() }) {
-                Icon(
-                    painterResource(id = R.drawable.ic_logger),
-                    contentDescription = stringResource(id = R.string.back_screen),
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        }
     )
 }
 
 @Composable
-fun LoggerIconAppBar(text: String, onClick: () -> Unit, onLoggerClick: () -> Unit) {
+fun LoggerIconAppBar(text: String, onClick: () -> Unit, onDisconnectClick: () -> Unit, onLoggerClick: () -> Unit) {
     SmallTopAppBar(
         title = { Text(text) },
         colors = TopAppBarDefaults.smallTopAppBarColors(
@@ -103,15 +121,25 @@ fun LoggerIconAppBar(text: String, onClick: () -> Unit, onLoggerClick: () -> Uni
             IconButton(onClick = { onClick() }) {
                 Icon(
                     Icons.Default.ArrowBack,
+                    tint = MaterialTheme.colorScheme.onPrimary,
                     contentDescription = stringResource(id = R.string.back_screen),
                 )
             }
         },
         actions = {
+            TextButton(
+                onClick = { onDisconnectClick() },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
+                Text(stringResource(id = R.string.disconnect))
+            }
             IconButton(onClick = { onLoggerClick() }) {
                 Icon(
                     painterResource(id = R.drawable.ic_logger),
-                    contentDescription = stringResource(id = R.string.back_screen),
+                    contentDescription = stringResource(id = R.string.open_logger),
                     tint = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(24.dp)
                 )

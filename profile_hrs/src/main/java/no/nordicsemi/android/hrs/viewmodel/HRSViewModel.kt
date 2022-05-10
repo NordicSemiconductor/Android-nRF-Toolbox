@@ -49,7 +49,7 @@ internal class HRSViewModel @Inject constructor(
     private fun handleArgs(args: DestinationResult) {
         when (args) {
             is CancelDestinationResult -> navigationManager.navigateUp()
-            is SuccessDestinationResult -> repository.launch(args.getDevice().device)
+            is SuccessDestinationResult -> repository.launch(args.getDevice())
         }.exhaustive
     }
 

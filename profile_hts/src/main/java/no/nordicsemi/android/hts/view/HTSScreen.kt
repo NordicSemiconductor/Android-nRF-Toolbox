@@ -9,14 +9,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.hts.R
+import no.nordicsemi.android.hts.data.HTSData
 import no.nordicsemi.android.hts.viewmodel.HTSViewModel
 import no.nordicsemi.android.service.*
 import no.nordicsemi.android.theme.view.BackIconAppBar
 import no.nordicsemi.android.theme.view.LoggerIconAppBar
-import no.nordicsemi.ui.scanner.ui.DeviceConnectingView
-import no.nordicsemi.ui.scanner.ui.NoDeviceView
 import no.nordicsemi.android.utils.exhaustive
+import no.nordicsemi.ui.scanner.ui.DeviceConnectingView
 import no.nordicsemi.ui.scanner.ui.DeviceDisconnectedView
+import no.nordicsemi.ui.scanner.ui.NoDeviceView
 import no.nordicsemi.ui.scanner.ui.Reason
 
 @Composable
@@ -27,14 +28,13 @@ fun HTSScreen() {
     Column {
         val navigateUp = { viewModel.onEvent(NavigateUp) }
 
-        LoggerIconAppBar(stringResource(id = R.string.hts_title), navigateUp) {
-            viewModel.onEvent(OpenLoggerEvent)
-        }
+        AppBar(state, navigateUp, viewModel)
 
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             when (state.htsManagerState) {
                 NoDeviceState -> NoDeviceView()
                 is WorkingState -> when (state.htsManagerState.result) {
+                    is IdleResult,
                     is ConnectingResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
                     is DisconnectedResult -> DeviceDisconnectedView(Reason.USER, navigateUp)
                     is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp)
@@ -46,3 +46,19 @@ fun HTSScreen() {
         }
     }
 }
+
+@Composable
+private fun AppBar(state: HTSViewState, navigateUp: () -> Unit, viewModel: HTSViewModel) {
+    val toolbarName = (state.htsManagerState as? WorkingState)?.let {
+        (it.result as? SuccessResult<HTSData>)?.deviceName()
+    }
+
+    if (toolbarName == null) {
+        BackIconAppBar(stringResource(id = R.string.hts_title), navigateUp)
+    } else {
+        LoggerIconAppBar(toolbarName, navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
+            viewModel.onEvent(OpenLoggerEvent)
+        }
+    }
+}
+

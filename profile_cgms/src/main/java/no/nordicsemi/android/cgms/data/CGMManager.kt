@@ -85,7 +85,7 @@ internal class CGMManager(
     val dataHolder = ConnectionObserverAdapter<CGMData>()
 
     init {
-        setConnectionObserver(dataHolder)
+        connectionObserver = dataHolder
 
         data.onEach {
             dataHolder.setValue(it)

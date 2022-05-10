@@ -12,6 +12,7 @@ import no.nordicsemi.android.prx.data.PRXData
 import no.nordicsemi.android.prx.data.PRXManager
 import no.nordicsemi.android.prx.data.ProximityServerManager
 import no.nordicsemi.android.service.*
+import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -34,13 +35,13 @@ class PRXRepository @Inject internal constructor(
     val isRunning = data.map { it.isRunning() }
     val hasBeenDisconnectedWithoutLinkLoss = data.map { it.hasBeenDisconnectedWithoutLinkLoss() }
 
-    fun launch(device: BluetoothDevice) {
+    fun launch(device: DiscoveredBluetoothDevice) {
         serviceManager.startService(PRXService::class.java, device)
         proximityServerManager.open()
     }
 
-    fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val createdLogger = toolboxLoggerFactory.create("PRX", device.address).also {
+    fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
+        val createdLogger = toolboxLoggerFactory.create("PRX", device.address()).also {
             logger = it
         }
         val manager = PRXManager(context, scope, createdLogger)
@@ -52,7 +53,7 @@ class PRXRepository @Inject internal constructor(
             handleLocalAlarm(it)
         }.launchIn(scope)
 
-        manager.connect(device)
+        manager.connect(device.device)
             .useAutoConnect(true)
             .retry(3, 100)
             .enqueue()

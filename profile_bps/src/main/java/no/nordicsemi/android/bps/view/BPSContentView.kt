@@ -15,7 +15,7 @@ import no.nordicsemi.android.bps.R
 import no.nordicsemi.android.bps.data.BPSData
 
 @Composable
-internal fun BPSContentView(state: BPSData, onEvent: (BPSScreenViewEvent) -> Unit) {
+internal fun BPSContentView(state: BPSData, onEvent: (BPSViewEvent) -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(16.dp)

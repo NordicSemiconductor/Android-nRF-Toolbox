@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.navigation.*
+import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.uart.data.UARTConfiguration
 import no.nordicsemi.android.uart.data.UARTMacro
 import no.nordicsemi.android.uart.data.UARTPersistentDataSource
@@ -36,6 +37,9 @@ internal class UARTViewModel @Inject constructor(
         }
 
         repository.data.onEach {
+            if (it is IdleResult) {
+                return@onEach
+            }
             _state.value = _state.value.copy(uartManagerState = WorkingState(it))
         }.launchIn(viewModelScope)
 
@@ -63,7 +67,7 @@ internal class UARTViewModel @Inject constructor(
     private fun handleArgs(args: DestinationResult) {
         when (args) {
             is CancelDestinationResult -> navigationManager.navigateUp()
-            is SuccessDestinationResult -> repository.launch(args.getDevice().device)
+            is SuccessDestinationResult -> repository.launch(args.getDevice())
         }.exhaustive
     }
 
@@ -83,7 +87,12 @@ internal class UARTViewModel @Inject constructor(
             ClearOutputItems -> repository.clearItems()
             OpenLogger -> repository.openLogger()
             is OnRunInput -> repository.sendText(event.text, event.newLineChar)
+            MacroInputSwitchClick -> onMacroInputSwitch()
         }.exhaustive
+    }
+
+    private fun onMacroInputSwitch() {
+        _state.value = _state.value.copy(isInputVisible = !state.value.isInputVisible)
     }
 
     private fun onEditConfiguration() {

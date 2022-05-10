@@ -1,5 +1,8 @@
 package no.nordicsemi.android.service
 
+import android.annotation.SuppressLint
+import android.bluetooth.BluetoothDevice
+
 sealed class BleManagerResult <T> {
 
     fun isRunning(): Boolean {
@@ -15,8 +18,13 @@ sealed class BleManagerResult <T> {
     }
 }
 
+class IdleResult<T> : BleManagerResult<T>()
 class ConnectingResult<T> : BleManagerResult<T>()
-data class SuccessResult<T>(val data: T) : BleManagerResult<T>()
+data class SuccessResult<T>(val device: BluetoothDevice, val data: T) : BleManagerResult<T>() {
+
+    @SuppressLint("MissingPermission")
+    fun deviceName(): String = device.name ?: device.address
+}
 
 class LinkLossResult<T>(val data: T) : BleManagerResult<T>()
 class DisconnectedResult<T> : BleManagerResult<T>()

@@ -13,13 +13,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.uart.data.UARTConfiguration
 import no.nordicsemi.android.uart.data.UARTMacro
 
 private val divider = 4.dp
-private val buttonSize = 80.dp
 
 @Composable
 internal fun UARTMacroView(
@@ -27,34 +27,42 @@ internal fun UARTMacroView(
     isEdited: Boolean,
     onEvent: (UARTViewEvent) -> Unit
 ) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-
-        Row {
-            Item(configuration, isEdited, 0, onEvent)
-            Spacer(modifier = Modifier.size(divider))
-            Item(configuration, isEdited, 1, onEvent)
-            Spacer(modifier = Modifier.size(divider))
-            Item(configuration, isEdited, 2, onEvent)
+    BoxWithConstraints {
+        val buttonSize = if (maxWidth < 260.dp) {
+            48.dp //Minimum touch area
+        }  else {
+            80.dp
         }
 
-        Spacer(modifier = Modifier.size(divider))
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
 
-        Row {
-            Item(configuration, isEdited, 3, onEvent)
-            Spacer(modifier = Modifier.size(divider))
-            Item(configuration, isEdited, 4, onEvent)
-            Spacer(modifier = Modifier.size(divider))
-            Item(configuration, isEdited, 5, onEvent)
-        }
+            Row {
+                Item(configuration, isEdited, 0, buttonSize, onEvent)
+                Spacer(modifier = Modifier.size(divider))
+                Item(configuration, isEdited, 1, buttonSize, onEvent)
+                Spacer(modifier = Modifier.size(divider))
+                Item(configuration, isEdited, 2, buttonSize, onEvent)
+            }
 
-        Spacer(modifier = Modifier.size(divider))
+            Spacer(modifier = Modifier.size(divider))
 
-        Row {
-            Item(configuration, isEdited, 6, onEvent)
+            Row {
+                Item(configuration, isEdited, 3, buttonSize, onEvent)
+                Spacer(modifier = Modifier.size(divider))
+                Item(configuration, isEdited, 4, buttonSize, onEvent)
+                Spacer(modifier = Modifier.size(divider))
+                Item(configuration, isEdited, 5, buttonSize, onEvent)
+            }
+
             Spacer(modifier = Modifier.size(divider))
-            Item(configuration, isEdited, 7, onEvent)
-            Spacer(modifier = Modifier.size(divider))
-            Item(configuration, isEdited, 8, onEvent)
+
+            Row {
+                Item(configuration, isEdited, 6, buttonSize, onEvent)
+                Spacer(modifier = Modifier.size(divider))
+                Item(configuration, isEdited, 7, buttonSize, onEvent)
+                Spacer(modifier = Modifier.size(divider))
+                Item(configuration, isEdited, 8, buttonSize, onEvent)
+            }
         }
     }
 }
@@ -64,14 +72,15 @@ private fun Item(
     configuration: UARTConfiguration,
     isEdited: Boolean,
     position: Int,
+    buttonSize: Dp,
     onEvent: (UARTViewEvent) -> Unit
 ) {
     val macro = configuration.macros.getOrNull(position)
 
     if (macro == null) {
-        EmptyButton(isEdited, position, onEvent)
+        EmptyButton(isEdited, position, buttonSize, onEvent)
     } else {
-        MacroButton(macro, position, isEdited, onEvent)
+        MacroButton(macro, position, isEdited, buttonSize, onEvent)
     }
 }
 
@@ -80,6 +89,7 @@ private fun MacroButton(
     macro: UARTMacro,
     position: Int,
     isEdited: Boolean,
+    buttonSize: Dp,
     onEvent: (UARTViewEvent) -> Unit
 ) {
     Image(
@@ -104,6 +114,7 @@ private fun MacroButton(
 private fun EmptyButton(
     isEdited: Boolean,
     position: Int,
+    buttonSize: Dp,
     onEvent: (UARTViewEvent) -> Unit
 ) {
     Box(

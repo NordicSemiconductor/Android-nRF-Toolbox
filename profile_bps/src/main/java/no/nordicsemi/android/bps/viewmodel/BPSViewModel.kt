@@ -43,7 +43,7 @@ internal class BPSViewModel @Inject constructor(
         }.exhaustive
     }
 
-    fun onEvent(event: BPSScreenViewEvent) {
+    fun onEvent(event: BPSViewEvent) {
         when (event) {
             DisconnectEvent -> navigationManager.navigateUp()
             OpenLoggerEvent -> repository.openLogger()
@@ -51,7 +51,7 @@ internal class BPSViewModel @Inject constructor(
     }
 
     private fun connectDevice(device: DiscoveredBluetoothDevice) {
-        repository.downloadData(device.device).onEach {
+        repository.downloadData(device).onEach {
             _state.value = WorkingState(it)
         }.launchIn(viewModelScope)
     }

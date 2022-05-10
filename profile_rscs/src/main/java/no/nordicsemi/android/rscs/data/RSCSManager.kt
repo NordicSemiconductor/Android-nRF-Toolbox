@@ -56,7 +56,7 @@ internal class RSCSManager internal constructor(
     val dataHolder = ConnectionObserverAdapter<RSCSData>()
 
     init {
-        setConnectionObserver(dataHolder)
+        connectionObserver = dataHolder
 
         data.onEach {
             dataHolder.setValue(it)

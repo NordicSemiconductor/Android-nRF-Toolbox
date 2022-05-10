@@ -1,6 +1,5 @@
 package no.nordicsemi.android.bps.repository
 
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ViewModelScoped
@@ -14,6 +13,7 @@ import no.nordicsemi.android.bps.data.BPSManager
 import no.nordicsemi.android.logger.ToolboxLogger
 import no.nordicsemi.android.logger.ToolboxLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
+import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
 
 @ViewModelScoped
@@ -25,9 +25,9 @@ internal class BPSRepository @Inject constructor(
 
     private var logger: ToolboxLogger? = null
 
-    fun downloadData(device: BluetoothDevice): Flow<BleManagerResult<BPSData>> = callbackFlow {
+    fun downloadData(device: DiscoveredBluetoothDevice): Flow<BleManagerResult<BPSData>> = callbackFlow {
         val scope = this
-        val createdLogger = toolboxLoggerFactory.create("BPS", device.address).also {
+        val createdLogger = toolboxLoggerFactory.create("BPS", device.address()).also {
             logger = it
         }
         val manager = BPSManager(context, scope, createdLogger)
@@ -36,7 +36,7 @@ internal class BPSRepository @Inject constructor(
             trySend(it)
         }.launchIn(scope)
 
-        manager.connect(device)
+        manager.connect(device.device)
             .useAutoConnect(false)
             .retry(3, 100)
             .enqueue()

@@ -59,7 +59,7 @@ internal class CSCManager(
     val dataHolder = ConnectionObserverAdapter<CSCData>()
 
     init {
-        setConnectionObserver(dataHolder)
+        connectionObserver = dataHolder
 
         data.onEach {
             dataHolder.setValue(it)

@@ -10,7 +10,8 @@ internal data class UARTViewState(
     val selectedConfigurationName: String? = null,
     val isConfigurationEdited: Boolean = false,
     val configurations: List<UARTConfiguration> = emptyList(),
-    val uartManagerState: HTSManagerState = NoDeviceState
+    val uartManagerState: HTSManagerState = NoDeviceState,
+    val isInputVisible: Boolean = true
 ) {
     val showEditDialog: Boolean = editedPosition != null
 
@@ -25,6 +26,8 @@ internal data class UARTViewState(
 
 internal sealed class HTSManagerState
 
-internal data class WorkingState(val result: BleManagerResult<UARTData>) : HTSManagerState()
+internal data class WorkingState(
+    val result: BleManagerResult<UARTData>
+) : HTSManagerState()
 
 internal object NoDeviceState : HTSManagerState()

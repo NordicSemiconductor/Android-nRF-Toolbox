@@ -61,7 +61,7 @@ internal class HRSManager(
     val dataHolder = ConnectionObserverAdapter<HRSData>()
 
     init {
-        setConnectionObserver(dataHolder)
+        connectionObserver = dataHolder
 
         data.onEach {
             dataHolder.setValue(it)

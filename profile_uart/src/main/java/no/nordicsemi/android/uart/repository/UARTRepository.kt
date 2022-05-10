@@ -10,9 +10,11 @@ import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.logger.ToolboxLogger
 import no.nordicsemi.android.logger.ToolboxLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
-import no.nordicsemi.android.service.ConnectingResult
+import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.uart.data.*
+import no.nordicsemi.android.utils.EMPTY
+import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,12 +24,12 @@ class UARTRepository @Inject internal constructor(
     private val context: Context,
     private val serviceManager: ServiceManager,
     private val configurationDataSource: ConfigurationDataSource,
-    private val toolboxLoggerFactory: ToolboxLoggerFactory
+    private val toolboxLoggerFactory: ToolboxLoggerFactory,
 ) {
     private var manager: UARTManager? = null
     private var logger: ToolboxLogger? = null
 
-    private val _data = MutableStateFlow<BleManagerResult<UARTData>>(ConnectingResult())
+    private val _data = MutableStateFlow<BleManagerResult<UARTData>>(IdleResult())
     internal val data = _data.asStateFlow()
 
     val isRunning = data.map { it.isRunning() }
@@ -35,12 +37,12 @@ class UARTRepository @Inject internal constructor(
 
     val lastConfigurationName = configurationDataSource.lastConfigurationName
 
-    fun launch(device: BluetoothDevice) {
+    fun launch(device: DiscoveredBluetoothDevice) {
         serviceManager.startService(UARTService::class.java, device)
     }
 
-    fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val createdLogger = toolboxLoggerFactory.create("UART", device.address).also {
+    fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
+        val createdLogger = toolboxLoggerFactory.create("UART", device.address()).also {
             logger = it
         }
         val manager = UARTManager(context, scope, createdLogger)
@@ -60,9 +62,8 @@ class UARTRepository @Inject internal constructor(
     }
 
     fun runMacro(macro: UARTMacro) {
-        macro.command?.parseWithNewLineChar(macro.newLineChar)?.let {
-            manager?.send(it)
-        }
+        val command = macro.command?.parseWithNewLineChar(macro.newLineChar)
+        manager?.send(command ?: String.EMPTY)
     }
 
     fun clearItems() {
@@ -77,9 +78,9 @@ class UARTRepository @Inject internal constructor(
         configurationDataSource.saveConfigurationName(name)
     }
 
-    private suspend fun UARTManager.start(device: BluetoothDevice) {
+    private suspend fun UARTManager.start(device: DiscoveredBluetoothDevice) {
         try {
-            connect(device)
+            connect(device.device)
                 .useAutoConnect(false)
                 .retry(3, 100)
                 .suspend()

@@ -68,7 +68,7 @@ internal class PRXManager(
     val dataHolder = ConnectionObserverAdapter<PRXData>()
 
     init {
-        setConnectionObserver(dataHolder)
+        connectionObserver = dataHolder
 
         data.onEach {
             dataHolder.setValue(it)
