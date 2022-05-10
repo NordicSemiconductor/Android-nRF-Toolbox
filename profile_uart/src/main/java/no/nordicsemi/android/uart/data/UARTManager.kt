@@ -150,27 +150,25 @@ internal class UARTManager(
     @SuppressLint("WrongConstant")
     fun send(text: String) {
         if (rxCharacteristic == null) return
-        if (!TextUtils.isEmpty(text)) {
-            scope.launchWithCatch {
-                val writeType = if (useLongWrite) {
-                    BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-                } else {
-                    BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
-                }
-                val request: WriteRequest =
-                    writeCharacteristic(rxCharacteristic, text.toByteArray(), writeType)
-                if (!useLongWrite) {
-                    request.split()
-                }
-                request.suspend()
-                data.value = data.value.copy(
-                    messages = data.value.messages + UARTRecord(
-                        text,
-                        UARTRecordType.INPUT
-                    )
-                )
-                log(10, "\"$text\" sent")
+        scope.launchWithCatch {
+            val writeType = if (useLongWrite) {
+                BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+            } else {
+                BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
             }
+            val request: WriteRequest =
+                writeCharacteristic(rxCharacteristic, text.toByteArray(), writeType)
+            if (!useLongWrite) {
+                request.split()
+            }
+            request.suspend()
+            data.value = data.value.copy(
+                messages = data.value.messages + UARTRecord(
+                    text,
+                    UARTRecordType.INPUT
+                )
+            )
+            log(10, "\"$text\" sent")
         }
     }
 

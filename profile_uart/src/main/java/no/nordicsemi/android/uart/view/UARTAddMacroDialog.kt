@@ -1,17 +1,12 @@
 package no.nordicsemi.android.uart.view
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -27,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.material.you.RadioButtonGroup
 import no.nordicsemi.android.material.you.RadioButtonItem
 import no.nordicsemi.android.material.you.RadioGroupViewEntity
-import no.nordicsemi.android.material.you.TextField
 import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.uart.data.MacroEol
 import no.nordicsemi.android.uart.data.MacroIcon
@@ -40,7 +34,6 @@ private const val GRID_SIZE = 5
 internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (UARTViewEvent) -> Unit) {
     val newLineChar = rememberSaveable { mutableStateOf(macro?.newLineChar ?: MacroEol.LF) }
     val command = rememberSaveable { mutableStateOf(macro?.command ?: String.EMPTY) }
-    val isError = rememberSaveable { mutableStateOf(false) }
     val selectedIcon = rememberSaveable { mutableStateOf(macro?.icon ?: MacroIcon.values()[0]) }
 
     AlertDialog(
@@ -52,11 +45,7 @@ internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (UARTViewEvent) -> U
         },
         confirmButton = {
             TextButton(onClick = {
-                if (isCommandValid(command.value)) {
-                    onEvent(OnCreateMacro(UARTMacro(selectedIcon.value, command.value, newLineChar.value)))
-                } else {
-                    isError.value = true
-                }
+                onEvent(OnCreateMacro(UARTMacro(selectedIcon.value, command.value, newLineChar.value)))
             }) {
                 Text(stringResource(id = R.string.uart_macro_dialog_confirm))
             }
@@ -81,7 +70,7 @@ internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (UARTViewEvent) -> U
                 }
 
                 item(span = { GridItemSpan(GRID_SIZE) }) {
-                    CommandInput(command, isError)
+                    CommandInput(command)
                 }
 
                 items(20) { item ->
@@ -109,26 +98,17 @@ internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (UARTViewEvent) -> U
 }
 
 @Composable
-private fun CommandInput(
-    command: MutableState<String>,
-    isError: MutableState<Boolean>
-) {
+private fun CommandInput(command: MutableState<String>) {
     Column {
-        TextField(
-            text = command.value,
-            hint = stringResource(id = R.string.uart_macro_dialog_command)
-        ) {
-            isError.value = false
-            command.value = it
-        }
-
-        if (isError.value) {
-            Text(
-                text = stringResource(id = R.string.uart_macro_error),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.error
-            )
-        }
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth(),
+            value = command.value,
+            label = { Text(stringResource(id = R.string.uart_macro_dialog_command)) },
+            onValueChange = {
+                command.value = it
+            }
+        )
 
         Spacer(modifier = Modifier.size(16.dp))
     }
@@ -152,8 +132,4 @@ private fun NewLineCharSection(checkedItem: MacroEol, onItemClick: (MacroEol) ->
             onItemClick(MacroEol.values()[i])
         }
     }
-}
-
-private fun isCommandValid(command: String): Boolean {
-    return command.isNotBlank()
 }

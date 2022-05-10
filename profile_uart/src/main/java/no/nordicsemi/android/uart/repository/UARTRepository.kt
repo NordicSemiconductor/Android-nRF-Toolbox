@@ -13,6 +13,7 @@ import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.uart.data.*
+import no.nordicsemi.android.utils.EMPTY
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -63,9 +64,8 @@ class UARTRepository @Inject internal constructor(
     }
 
     fun runMacro(macro: UARTMacro) {
-        macro.command?.parseWithNewLineChar(macro.newLineChar)?.let {
-            manager?.send(it)
-        }
+        val command = macro.command?.parseWithNewLineChar(macro.newLineChar)
+        manager?.send(command ?: String.EMPTY)
     }
 
     fun clearItems() {

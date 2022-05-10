@@ -1,16 +1,12 @@
 package no.nordicsemi.android.uart.view
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.res.stringResource
-import no.nordicsemi.android.material.you.TextField
 import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.utils.EMPTY
 
@@ -49,13 +45,16 @@ private fun NameInput(
     isError: MutableState<Boolean>
 ) {
     Column {
-        TextField(
-            text = name.value,
-            hint = stringResource(id = R.string.uart_configuration_hint)
-        ) {
-            isError.value = false
-            name.value = it
-        }
+
+        OutlinedTextField(
+            value = name.value,
+            label = { Text(stringResource(id = R.string.uart_configuration_hint)) },
+            singleLine = true,
+            onValueChange = {
+                isError.value = false
+                name.value = it
+            }
+        )
 
         val errorText = if (isError.value) {
             stringResource(id = R.string.uart_name_empty)
