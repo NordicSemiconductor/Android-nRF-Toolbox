@@ -16,3 +16,8 @@ enum class Link(val displayName: String) {
     DFU("DFU"),
     LOGGER("LOGGER");
 }
+
+enum class UARTMode(val displayName: String) {
+    MACRO("MACRO"),
+    TEXT("TEXT")
+}

@@ -33,3 +33,18 @@ const val PROFILE_PARAM_KEY = "PROFILE_NAME"
 private fun createBundle(name: String): Bundle {
     return Bundle().apply { putString(PROFILE_PARAM_KEY, name) }
 }
+
+sealed class UARTAnalyticsEvent(eventName: String, params: Bundle?) : FirebaseEvent(eventName, params)
+
+class UARTSendAnalyticsEvent(mode: UARTMode) : UARTAnalyticsEvent("UART_SEND_EVENT", createParams(mode)) {
+
+    companion object {
+        fun createParams(mode: UARTMode) = Bundle().apply {
+            putString("MODE", mode.displayName)
+        }
+    }
+}
+
+class UARTCreateConfiguration : UARTAnalyticsEvent("UART_CREATE_CONF", null)
+
+class UARTChangeConfiguration : UARTAnalyticsEvent("UART_CHANGE_CONF", null)
