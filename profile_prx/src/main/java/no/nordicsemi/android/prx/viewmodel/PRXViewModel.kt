@@ -5,10 +5,14 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.analytics.AppAnalytics
+import no.nordicsemi.android.analytics.Profile
+import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.navigation.*
 import no.nordicsemi.android.prx.data.PRX_SERVICE_UUID
 import no.nordicsemi.android.prx.repository.PRXRepository
 import no.nordicsemi.android.prx.view.*
+import no.nordicsemi.android.service.SuccessResult
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.android.utils.getDevice
 import no.nordicsemi.ui.scanner.ScannerDestinationId
@@ -17,7 +21,8 @@ import javax.inject.Inject
 @HiltViewModel
 internal class PRXViewModel @Inject constructor(
     private val repository: PRXRepository,
-    private val navigationManager: NavigationManager
+    private val navigationManager: NavigationManager,
+    private val analytics: AppAnalytics
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<PRXViewState>(NoDeviceState)
@@ -32,6 +37,10 @@ internal class PRXViewModel @Inject constructor(
 
         repository.data.onEach {
             _state.value = WorkingState(it)
+
+            (it as? SuccessResult)?.let {
+                analytics.logEvent(ProfileConnectedEvent(Profile.PRX))
+            }
         }.launchIn(viewModelScope)
     }
 

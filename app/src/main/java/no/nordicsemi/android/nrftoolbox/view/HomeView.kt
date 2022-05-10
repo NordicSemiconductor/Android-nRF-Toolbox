@@ -14,6 +14,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import no.nordicsemi.android.analytics.Link
+import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileOpenEvent
 import no.nordicsemi.android.logger.LoggerAppRunner
 import no.nordicsemi.android.nrftoolbox.BuildConfig
@@ -57,14 +59,14 @@ fun HomeScreen() {
 
                 FeatureButton(R.drawable.ic_gls, R.string.gls_module, R.string.gls_module_full) {
                     viewModel.openProfile(ProfileDestination.GLS)
-                    viewModel.logEvent(ProfileOpenEvent.GLS)
+                    viewModel.logEvent(ProfileOpenEvent(Profile.GLS))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_bps, R.string.bps_module, R.string.bps_module_full) {
                     viewModel.openProfile(ProfileDestination.BPS)
-                    viewModel.logEvent(ProfileOpenEvent.BPS)
+                    viewModel.logEvent(ProfileOpenEvent(Profile.BPS))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -79,42 +81,42 @@ fun HomeScreen() {
 
                 FeatureButton(R.drawable.ic_csc, R.string.csc_module, R.string.csc_module_full, state.isCSCModuleRunning) {
                     viewModel.openProfile(ProfileDestination.CSC)
-                    viewModel.logEvent(ProfileOpenEvent.CSC)
+                    viewModel.logEvent(ProfileOpenEvent(Profile.CSC))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_hrs, R.string.hrs_module, R.string.hrs_module_full, state.isHRSModuleRunning) {
                     viewModel.openProfile(ProfileDestination.HRS)
-                    viewModel.logEvent(ProfileOpenEvent.HRS)
+                    viewModel.logEvent(ProfileOpenEvent(Profile.HRS))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_hts, R.string.hts_module, R.string.hts_module_full, state.isHTSModuleRunning) {
                     viewModel.openProfile(ProfileDestination.HTS)
-                    viewModel.logEvent(ProfileOpenEvent.HTS)
+                    viewModel.logEvent(ProfileOpenEvent(Profile.HTS))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_rscs, R.string.rscs_module, R.string.rscs_module_full, state.isRSCSModuleRunning) {
                     viewModel.openProfile(ProfileDestination.RSCS)
-                    viewModel.logEvent(ProfileOpenEvent.RSCS)
+                    viewModel.logEvent(ProfileOpenEvent(Profile.RSCS))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_cgm, R.string.cgm_module, R.string.cgm_module_full, state.isCGMModuleRunning) {
                     viewModel.openProfile(ProfileDestination.CGMS)
-                    viewModel.logEvent(ProfileOpenEvent.CGMS)
+                    viewModel.logEvent(ProfileOpenEvent(Profile.CGMS))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_prx, R.string.prx_module, R.string.prx_module_full, state.isPRXModuleRunning) {
                     viewModel.openProfile(ProfileDestination.PRX)
-                    viewModel.logEvent(ProfileOpenEvent.PRX)
+                    viewModel.logEvent(ProfileOpenEvent(Profile.PRX))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -129,7 +131,7 @@ fun HomeScreen() {
 
                 FeatureButton(R.drawable.ic_uart, R.string.uart_module, R.string.uart_module_full, state.isUARTModuleRunning) {
                     viewModel.openProfile(ProfileDestination.UART)
-                    viewModel.logEvent(ProfileOpenEvent.UART)
+                    viewModel.logEvent(ProfileOpenEvent(Profile.UART))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -149,7 +151,7 @@ fun HomeScreen() {
                     } else {
                         uriHandler.openUri(DFU_LINK)
                     }
-                    viewModel.logEvent(ProfileOpenEvent.DFU)
+                    viewModel.logEvent(ProfileOpenEvent(Link.DFU))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -160,7 +162,7 @@ fun HomeScreen() {
 
                 FeatureButton(R.drawable.ic_logger, R.string.logger_module, R.string.logger_module_full, null, loggerDescription) {
                     viewModel.openLogger()
-                    viewModel.logEvent(ProfileOpenEvent.LOGGER)
+                    viewModel.logEvent(ProfileOpenEvent(Link.LOGGER))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))

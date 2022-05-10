@@ -5,11 +5,15 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.analytics.AppAnalytics
+import no.nordicsemi.android.analytics.Profile
+import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.cgms.data.CGMS_SERVICE_UUID
 import no.nordicsemi.android.cgms.repository.CGMRepository
 import no.nordicsemi.android.cgms.data.CGMServiceCommand
 import no.nordicsemi.android.cgms.view.*
 import no.nordicsemi.android.navigation.*
+import no.nordicsemi.android.service.SuccessResult
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.android.utils.getDevice
 import no.nordicsemi.ui.scanner.ScannerDestinationId
@@ -18,7 +22,8 @@ import javax.inject.Inject
 @HiltViewModel
 internal class CGMViewModel @Inject constructor(
     private val repository: CGMRepository,
-    private val navigationManager: NavigationManager
+    private val navigationManager: NavigationManager,
+    private val analytics: AppAnalytics
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<CGMViewState>(NoDeviceState)
@@ -33,6 +38,10 @@ internal class CGMViewModel @Inject constructor(
 
         repository.data.onEach {
             _state.value = WorkingState(it)
+
+            (it as? SuccessResult)?.let {
+                analytics.logEvent(ProfileConnectedEvent(Profile.CGMS))
+            }
         }.launchIn(viewModelScope)
     }
 

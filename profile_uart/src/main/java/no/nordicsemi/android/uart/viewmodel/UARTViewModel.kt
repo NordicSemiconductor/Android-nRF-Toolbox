@@ -6,12 +6,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.analytics.*
 import no.nordicsemi.android.navigation.*
 import no.nordicsemi.android.service.IdleResult
-import no.nordicsemi.android.uart.data.UARTConfiguration
-import no.nordicsemi.android.uart.data.UARTMacro
+import no.nordicsemi.android.service.SuccessResult
+import no.nordicsemi.android.uart.data.*
 import no.nordicsemi.android.uart.data.UARTPersistentDataSource
-import no.nordicsemi.android.uart.data.UART_SERVICE_UUID
 import no.nordicsemi.android.uart.repository.UARTRepository
 import no.nordicsemi.android.uart.view.*
 import no.nordicsemi.android.utils.exhaustive
@@ -23,7 +23,8 @@ import javax.inject.Inject
 internal class UARTViewModel @Inject constructor(
     private val repository: UARTRepository,
     private val navigationManager: NavigationManager,
-    private val dataSource: UARTPersistentDataSource
+    private val dataSource: UARTPersistentDataSource,
+    private val analytics: AppAnalytics
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UARTViewState())
@@ -41,6 +42,10 @@ internal class UARTViewModel @Inject constructor(
                 return@onEach
             }
             _state.value = _state.value.copy(uartManagerState = WorkingState(it))
+
+            (it as? SuccessResult)?.let {
+                analytics.logEvent(ProfileConnectedEvent(Profile.UART))
+            }
         }.launchIn(viewModelScope)
 
         dataSource.getConfigurations().onEach {
@@ -76,7 +81,7 @@ internal class UARTViewModel @Inject constructor(
             is OnCreateMacro -> addNewMacro(event.macro)
             OnDeleteMacro -> deleteMacro()
             DisconnectEvent -> disconnect()
-            is OnRunMacro -> repository.runMacro(event.macro)
+            is OnRunMacro -> runMacro(event.macro)
             NavigateUp -> navigationManager.navigateUp()
             is OnEditMacro -> onEditMacro(event)
             OnEditFinish -> onEditFinish()
@@ -86,9 +91,19 @@ internal class UARTViewModel @Inject constructor(
             OnEditConfiguration -> onEditConfiguration()
             ClearOutputItems -> repository.clearItems()
             OpenLogger -> repository.openLogger()
-            is OnRunInput -> repository.sendText(event.text, event.newLineChar)
+            is OnRunInput -> sendText(event.text, event.newLineChar)
             MacroInputSwitchClick -> onMacroInputSwitch()
         }.exhaustive
+    }
+
+    private fun runMacro(macro: UARTMacro) {
+        repository.runMacro(macro)
+        analytics.logEvent(UARTSendAnalyticsEvent(UARTMode.MACRO))
+    }
+
+    private fun sendText(text: String, newLineChar: MacroEol) {
+        repository.sendText(text, newLineChar)
+        analytics.logEvent(UARTSendAnalyticsEvent(UARTMode.TEXT))
     }
 
     private fun onMacroInputSwitch() {
@@ -106,6 +121,7 @@ internal class UARTViewModel @Inject constructor(
             _state.value = _state.value.copy(selectedConfigurationName = event.name)
         }
         saveLastConfigurationName(event.name)
+        analytics.logEvent(UARTCreateConfiguration())
     }
 
     private fun onEditMacro(event: OnEditMacro) {
@@ -118,6 +134,7 @@ internal class UARTViewModel @Inject constructor(
 
     private fun onConfigurationSelected(event: OnConfigurationSelected) {
         saveLastConfigurationName(event.configuration.name)
+        analytics.logEvent(UARTChangeConfiguration())
     }
 
     private fun saveLastConfigurationName(name: String) {
