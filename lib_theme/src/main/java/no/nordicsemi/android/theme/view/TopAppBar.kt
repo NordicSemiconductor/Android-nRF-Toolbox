@@ -51,7 +51,7 @@ fun TitleAppBar(text: String) {
 }
 
 @Composable
-fun BackIconAppBar(text: String, onClick: () -> Unit) {
+fun LoggerBackIconAppBar(text: String, onClick: () -> Unit) {
     SmallTopAppBar(
         title = { Text(text) },
         colors = TopAppBarDefaults.smallTopAppBarColors(
@@ -80,6 +80,29 @@ fun BackIconAppBar(text: String, onClick: () -> Unit) {
                 )
             }
         }
+    )
+}
+
+@Composable
+fun BackIconAppBar(text: String, onClick: () -> Unit) {
+    SmallTopAppBar(
+        title = { Text(text) },
+        colors = TopAppBarDefaults.smallTopAppBarColors(
+            scrolledContainerColor = MaterialTheme.colorScheme.primary,
+            containerColor = colorResource(id = R.color.appBarColor),
+            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+        ),
+        navigationIcon = {
+            IconButton(onClick = { onClick() }) {
+                Icon(
+                    Icons.Default.ArrowBack,
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    contentDescription = stringResource(id = R.string.back_screen),
+                )
+            }
+        },
     )
 }
 

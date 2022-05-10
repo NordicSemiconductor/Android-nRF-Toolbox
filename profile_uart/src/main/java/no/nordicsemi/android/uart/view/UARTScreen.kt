@@ -1,5 +1,6 @@
 package no.nordicsemi.android.uart.view
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,6 +13,7 @@ import no.nordicsemi.android.material.you.PagerView
 import no.nordicsemi.android.material.you.PagerViewEntity
 import no.nordicsemi.android.material.you.PagerViewItem
 import no.nordicsemi.android.service.*
+import no.nordicsemi.android.theme.view.BackIconAppBar
 import no.nordicsemi.android.theme.view.LoggerIconAppBar
 import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.uart.data.UARTData
@@ -22,6 +24,7 @@ import no.nordicsemi.ui.scanner.ui.DeviceDisconnectedView
 import no.nordicsemi.ui.scanner.ui.NoDeviceView
 import no.nordicsemi.ui.scanner.ui.Reason
 
+@SuppressLint("MissingPermission")
 @Composable
 fun UARTScreen() {
     val viewModel: UARTViewModel = hiltViewModel()
@@ -30,8 +33,24 @@ fun UARTScreen() {
     Column {
         val navigateUp = { viewModel.onEvent(NavigateUp) }
 
-        LoggerIconAppBar(stringResource(id = R.string.uart_title), navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
-            viewModel.onEvent(OpenLogger)
+        Column(modifier = Modifier) {
+            when (state.uartManagerState) {
+                NoDeviceState -> BackIconAppBar(stringResource(id = R.string.uart_title), navigateUp)
+                is WorkingState -> when (state.uartManagerState.result) {
+                    is IdleResult,
+                    is DisconnectedResult,
+                    is LinkLossResult,
+                    is MissingServiceResult,
+                    is UnknownErrorResult -> BackIconAppBar(stringResource(id = R.string.uart_title), navigateUp)
+                    is ConnectingResult,
+                    is SuccessResult -> {
+                        val text = state.uartManagerState.device.name ?: state.uartManagerState.device.address ?: stringResource(id = R.string.uart_title)
+                        LoggerIconAppBar(text, navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
+                            viewModel.onEvent(OpenLogger)
+                        }
+                    }
+                }
+            }.exhaustive
         }
 
         Column(modifier = Modifier) {
@@ -46,7 +65,6 @@ fun UARTScreen() {
                     is UnknownErrorResult -> Scroll { DeviceDisconnectedView(Reason.UNKNOWN, navigateUp) }
                     is SuccessResult -> SuccessScreen(state.uartManagerState.result.data, state, viewModel)
                 }
-                TutorialState -> TutorialScreen(viewModel)
             }.exhaustive
         }
     }

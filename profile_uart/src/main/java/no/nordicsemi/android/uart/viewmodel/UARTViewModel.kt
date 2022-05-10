@@ -31,9 +31,7 @@ internal class UARTViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            if (repository.showTutorial) {
-                _state.value = _state.value.copy(uartManagerState = TutorialState)
-            } else if (repository.isRunning.firstOrNull() == false) {
+            if (repository.isRunning.firstOrNull() == false) {
                 requestBluetoothDevice()
             }
         }
@@ -42,7 +40,7 @@ internal class UARTViewModel @Inject constructor(
             if (it is IdleResult) {
                 return@onEach
             }
-            _state.value = _state.value.copy(uartManagerState = WorkingState(it))
+            _state.value = _state.value.copy(uartManagerState = WorkingState(repository.device!!, it))
         }.launchIn(viewModelScope)
 
         dataSource.getConfigurations().onEach {
@@ -91,16 +89,6 @@ internal class UARTViewModel @Inject constructor(
             is OnRunInput -> repository.sendText(event.text, event.newLineChar)
             MacroInputSwitchClick -> onMacroInputSwitch()
         }.exhaustive
-    }
-
-    fun onTutorialClose() {
-        repository.showTutorial = false
-        _state.value = _state.value.copy(uartManagerState = NoDeviceState)
-        viewModelScope.launch {
-            if (repository.isRunning.firstOrNull() == false) {
-                requestBluetoothDevice()
-            }
-        }
     }
 
     private fun onMacroInputSwitch() {

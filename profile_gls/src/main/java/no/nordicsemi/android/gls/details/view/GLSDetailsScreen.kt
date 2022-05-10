@@ -6,7 +6,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.gls.R
 import no.nordicsemi.android.gls.details.viewmodel.GLSDetailsViewModel
-import no.nordicsemi.android.theme.view.BackIconAppBar
+import no.nordicsemi.android.theme.view.LoggerBackIconAppBar
 
 @Composable
 internal fun GLSDetailsScreen() {
@@ -14,7 +14,7 @@ internal fun GLSDetailsScreen() {
     val record = viewModel.record
 
     Column {
-        BackIconAppBar(stringResource(id = R.string.gls_title)) {
+        LoggerBackIconAppBar(stringResource(id = R.string.gls_title)) {
             viewModel.navigateBack()
         }
 

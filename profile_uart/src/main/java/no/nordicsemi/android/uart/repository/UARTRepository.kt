@@ -23,7 +23,6 @@ class UARTRepository @Inject internal constructor(
     private val serviceManager: ServiceManager,
     private val configurationDataSource: ConfigurationDataSource,
     private val toolboxLoggerFactory: ToolboxLoggerFactory,
-    private val sp: UARTSharedPrefs
 ) {
     private var manager: UARTManager? = null
     private var logger: ToolboxLogger? = null
@@ -31,11 +30,7 @@ class UARTRepository @Inject internal constructor(
     private val _data = MutableStateFlow<BleManagerResult<UARTData>>(IdleResult())
     internal val data = _data.asStateFlow()
 
-    var showTutorial: Boolean
-        get() = sp.showTutorial
-        set(value) {
-            sp.showTutorial = value
-        }
+    var device: BluetoothDevice? = null
 
     val isRunning = data.map { it.isRunning() }
     val hasBeenDisconnected = data.map { it.hasBeenDisconnected() }
@@ -47,6 +42,7 @@ class UARTRepository @Inject internal constructor(
     }
 
     fun start(device: BluetoothDevice, scope: CoroutineScope) {
+        this.device = device
         val createdLogger = toolboxLoggerFactory.create("UART", device.address).also {
             logger = it
         }

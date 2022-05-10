@@ -1,5 +1,6 @@
 package no.nordicsemi.android.uart.view
 
+import android.bluetooth.BluetoothDevice
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.uart.data.UARTConfiguration
 import no.nordicsemi.android.uart.data.UARTData
@@ -26,8 +27,9 @@ internal data class UARTViewState(
 
 internal sealed class HTSManagerState
 
-internal data class WorkingState(val result: BleManagerResult<UARTData>) : HTSManagerState()
+internal data class WorkingState(
+    val device: BluetoothDevice,
+    val result: BleManagerResult<UARTData>
+) : HTSManagerState()
 
 internal object NoDeviceState : HTSManagerState()
-
-internal object TutorialState : HTSManagerState()
