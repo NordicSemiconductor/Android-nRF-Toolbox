@@ -115,7 +115,7 @@ private fun DeleteConfigurationDialog(onEvent: (UARTViewEvent) -> Unit, onDismis
             Text(text = stringResource(id = R.string.uart_delete_dialog_info))
         },
         confirmButton = {
-            Button(onClick = {
+            TextButton(onClick = {
                 onDismiss()
                 onEvent(OnDeleteConfiguration)
             }) {
@@ -123,7 +123,7 @@ private fun DeleteConfigurationDialog(onEvent: (UARTViewEvent) -> Unit, onDismis
             }
         },
         dismissButton = {
-            Button(onClick = onDismiss) {
+            TextButton(onClick = onDismiss) {
                 Text(text = stringResource(id = R.string.uart_delete_dialog_cancel))
             }
         }

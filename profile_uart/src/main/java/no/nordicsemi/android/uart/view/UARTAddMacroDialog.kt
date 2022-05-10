@@ -8,8 +8,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import no.nordicsemi.android.material.you.RadioButtonGroup
 import no.nordicsemi.android.material.you.RadioButtonItem
 import no.nordicsemi.android.material.you.RadioGroupViewEntity
@@ -44,99 +43,69 @@ internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (UARTViewEvent) -> U
     val isError = rememberSaveable { mutableStateOf(false) }
     val selectedIcon = rememberSaveable { mutableStateOf(macro?.icon ?: MacroIcon.values()[0]) }
 
-    Dialog(onDismissRequest = { onEvent(OnEditFinish) }) {
-        Surface(
-            color = MaterialTheme.colorScheme.background,
-            shape = RoundedCornerShape(10.dp),
-            shadowElevation = 0.dp,
-        ) {
-            Column {
-                Text(
-                    text = stringResource(id = R.string.uart_macro_dialog_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                )
+    AlertDialog(
+        onDismissRequest = { onEvent(OnEditFinish) },
+        dismissButton = {
+            TextButton(onClick = { onEvent(OnDeleteMacro) }) {
+                Text(stringResource(id = R.string.uart_macro_dialog_delete))
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                if (isCommandValid(command.value)) {
+                    onEvent(OnCreateMacro(UARTMacro(selectedIcon.value, command.value, newLineChar.value)))
+                } else {
+                    isError.value = true
+                }
+            }) {
+                Text(stringResource(id = R.string.uart_macro_dialog_confirm))
+            }
+        },
+        title = {
+            Text(
+                text = stringResource(id = R.string.uart_macro_dialog_title),
+                style = MaterialTheme.typography.headlineSmall
+            )
+        },
+        text = {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(GRID_SIZE),
+                modifier = Modifier.wrapContentHeight()
+            ) {
+                item(span = { GridItemSpan(GRID_SIZE) }) {
+                    Column {
+                        NewLineCharSection(newLineChar.value) { newLineChar.value = it }
 
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(GRID_SIZE),
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .wrapContentHeight()
-                ) {
-                    item(span = { GridItemSpan(GRID_SIZE) }) {
-                        Column {
-                            NewLineCharSection(newLineChar.value) { newLineChar.value = it }
+                        Spacer(modifier = Modifier.size(16.dp))
+                    }
+                }
 
-                            Spacer(modifier = Modifier.size(16.dp))
-                        }
+                item(span = { GridItemSpan(GRID_SIZE) }) {
+                    CommandInput(command, isError)
+                }
+
+                items(20) { item ->
+                    val icon = MacroIcon.create(item)
+                    val background = if (selectedIcon.value == icon) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        Color.Transparent
                     }
 
-                    item(span = { GridItemSpan(GRID_SIZE) }) {
-                        CommandInput(command, isError)
-                    }
-
-                    items(20) { item ->
-                        val icon = MacroIcon.create(item)
-                        val background = if (selectedIcon.value == icon) {
-                            MaterialTheme.colorScheme.primaryContainer
-                        } else {
-                            Color.Transparent
-                        }
-
-                        Image(
-                            painter = painterResource(id = icon.toResId()),
-                            contentDescription = stringResource(id = R.string.uart_macro_icon),
-                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer),
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .clickable { selectedIcon.value = icon }
-                                .background(background)
-                        )
-                    }
-
-                    item(span = { GridItemSpan(GRID_SIZE) }) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            TextButton(onClick = { onEvent(OnEditFinish) }) {
-                                Text(stringResource(id = R.string.uart_macro_dialog_dismiss))
-                            }
-
-                            Spacer(modifier = Modifier.size(16.dp))
-
-                            TextButton(onClick = { onEvent(OnDeleteMacro) }) {
-                                Text(stringResource(id = R.string.uart_macro_dialog_delete))
-                            }
-
-                            Spacer(modifier = Modifier.size(16.dp))
-
-                            TextButton(onClick = {
-                                if (isCommandValid(command.value)) {
-                                    onEvent(
-                                        OnCreateMacro(
-                                            UARTMacro(
-                                                selectedIcon.value,
-                                                command.value,
-                                                newLineChar.value
-                                            )
-                                        )
-                                    )
-                                } else {
-                                    isError.value = true
-                                }
-                            }) {
-                                Text(stringResource(id = R.string.uart_macro_dialog_confirm))
-                            }
-                        }
-                    }
+                    Image(
+                        painter = painterResource(id = icon.toResId()),
+                        contentDescription = stringResource(id = R.string.uart_macro_icon),
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer),
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable { selectedIcon.value = icon }
+                            .background(background)
+                    )
                 }
             }
         }
-    }
+    )
 }
 
 @Composable
