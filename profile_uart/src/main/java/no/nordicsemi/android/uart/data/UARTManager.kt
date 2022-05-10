@@ -29,9 +29,9 @@ import android.content.Context
 import android.text.TextUtils
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.withContext
 import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.WriteRequest
 import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
@@ -49,7 +49,8 @@ private val UART_RX_CHARACTERISTIC_UUID = UUID.fromString("6E400002-B5A3-F393-E0
 private val UART_TX_CHARACTERISTIC_UUID = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
 
 private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
-private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
+private val BATTERY_LEVEL_CHARACTERISTIC_UUID =
+    UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
 
 internal class UARTManager(
     context: Context,
@@ -87,18 +88,25 @@ internal class UARTManager(
 
         @SuppressLint("WrongConstant")
         override fun initialize() {
-            setNotificationCallback(txCharacteristic).asFlow().onEach {
-                val text: String = it.getStringValue(0) ?: String.EMPTY
-                log(10, "\"$text\" received")
-                data.value = data.value.copy(messages = data.value.messages + UARTRecord(text, UARTRecordType.OUTPUT))
-            }.launchIn(scope)
+            setNotificationCallback(txCharacteristic).asFlow()
+                .flowOn(Dispatchers.IO)
+                .map {
+                    val text: String = it.getStringValue(0) ?: String.EMPTY
+                    log(10, "\"$text\" received")
+                    val messages = data.value.messages + UARTRecord(text, UARTRecordType.OUTPUT)
+                    messages.takeLast(50)
+                }
+                .onEach {
+                    data.value = data.value.copy(messages = it)
+                }.launchIn(scope)
 
             requestMtu(517).enqueue()
             enableNotifications(txCharacteristic).enqueue()
 
-            setNotificationCallback(batteryLevelCharacteristic).asValidResponseFlow<BatteryLevelResponse>().onEach {
-                data.value = data.value.copy(batteryLevel = it.batteryLevel)
-            }.launchIn(scope)
+            setNotificationCallback(batteryLevelCharacteristic).asValidResponseFlow<BatteryLevelResponse>()
+                .onEach {
+                    data.value = data.value.copy(batteryLevel = it.batteryLevel)
+                }.launchIn(scope)
             enableNotifications(batteryLevelCharacteristic).enqueue()
         }
 
@@ -114,7 +122,8 @@ internal class UARTManager(
             rxCharacteristic?.let {
                 val rxProperties: Int = it.properties
                 writeRequest = rxProperties and BluetoothGattCharacteristic.PROPERTY_WRITE > 0
-                writeCommand = rxProperties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE > 0
+                writeCommand =
+                    rxProperties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE > 0
 
                 // Set the WRITE REQUEST type when the characteristic supports it.
                 // This will allow to send long write (also if the characteristic support it).
@@ -148,12 +157,18 @@ internal class UARTManager(
                 } else {
                     BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
                 }
-                val request: WriteRequest = writeCharacteristic(rxCharacteristic, text.toByteArray(), writeType)
+                val request: WriteRequest =
+                    writeCharacteristic(rxCharacteristic, text.toByteArray(), writeType)
                 if (!useLongWrite) {
                     request.split()
                 }
                 request.suspend()
-                data.value = data.value.copy(messages = data.value.messages + UARTRecord(text, UARTRecordType.INPUT))
+                data.value = data.value.copy(
+                    messages = data.value.messages + UARTRecord(
+                        text,
+                        UARTRecordType.INPUT
+                    )
+                )
                 log(10, "\"$text\" sent")
             }
         }

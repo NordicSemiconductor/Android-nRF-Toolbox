@@ -5,7 +5,7 @@ internal data class UARTData(
     val batteryLevel: Int? = null,
 ) {
 
-    val displayMessages = messages.take(50)
+    val displayMessages = messages
 }
 
 internal data class UARTRecord(
