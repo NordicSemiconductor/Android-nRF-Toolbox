@@ -52,7 +52,7 @@ internal class GLSViewModel @Inject constructor(
     }
 
     private fun connectDevice(device: DiscoveredBluetoothDevice) {
-        repository.downloadData(device.device).onEach {
+        repository.downloadData(device).onEach {
             _state.value = WorkingState(it)
         }.launchIn(viewModelScope)
     }

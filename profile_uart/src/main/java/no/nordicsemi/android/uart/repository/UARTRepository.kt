@@ -14,6 +14,7 @@ import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.uart.data.*
 import no.nordicsemi.android.utils.EMPTY
+import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,20 +32,20 @@ class UARTRepository @Inject internal constructor(
     private val _data = MutableStateFlow<BleManagerResult<UARTData>>(IdleResult())
     internal val data = _data.asStateFlow()
 
-    var device: BluetoothDevice? = null
+    var device: DiscoveredBluetoothDevice? = null
 
     val isRunning = data.map { it.isRunning() }
     val hasBeenDisconnected = data.map { it.hasBeenDisconnected() }
 
     val lastConfigurationName = configurationDataSource.lastConfigurationName
 
-    fun launch(device: BluetoothDevice) {
+    fun launch(device: DiscoveredBluetoothDevice) {
         serviceManager.startService(UARTService::class.java, device)
     }
 
-    fun start(device: BluetoothDevice, scope: CoroutineScope) {
+    fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
         this.device = device
-        val createdLogger = toolboxLoggerFactory.create("UART", device.address).also {
+        val createdLogger = toolboxLoggerFactory.create("UART", device.address()).also {
             logger = it
         }
         val manager = UARTManager(context, scope, createdLogger)
@@ -80,9 +81,9 @@ class UARTRepository @Inject internal constructor(
         configurationDataSource.saveConfigurationName(name)
     }
 
-    private suspend fun UARTManager.start(device: BluetoothDevice) {
+    private suspend fun UARTManager.start(device: DiscoveredBluetoothDevice) {
         try {
-            connect(device)
+            connect(device.device)
                 .useAutoConnect(false)
                 .retry(3, 100)
                 .suspend()

@@ -15,6 +15,7 @@ import no.nordicsemi.android.logger.ToolboxLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.ConnectingResult
 import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -34,12 +35,12 @@ class CSCRepository @Inject constructor(
     val isRunning = data.map { it.isRunning() }
     val hasBeenDisconnected = data.map { it.hasBeenDisconnected() }
 
-    fun launch(device: BluetoothDevice) {
+    fun launch(device: DiscoveredBluetoothDevice) {
         serviceManager.startService(CSCService::class.java, device)
     }
 
-    fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val createdLogger = toolboxLoggerFactory.create("CSC", device.address).also {
+    fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
+        val createdLogger = toolboxLoggerFactory.create("CSC", device.address()).also {
             logger = it
         }
         val manager = CSCManager(context, scope, createdLogger)
@@ -58,9 +59,9 @@ class CSCRepository @Inject constructor(
         manager?.setWheelSize(wheelSize)
     }
 
-    private suspend fun CSCManager.start(device: BluetoothDevice) {
+    private suspend fun CSCManager.start(device: DiscoveredBluetoothDevice) {
         try {
-            connect(device)
+            connect(device.device)
                 .useAutoConnect(false)
                 .retry(3, 100)
                 .suspend()

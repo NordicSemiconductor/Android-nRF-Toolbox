@@ -24,7 +24,6 @@ import no.nordicsemi.ui.scanner.ui.DeviceDisconnectedView
 import no.nordicsemi.ui.scanner.ui.NoDeviceView
 import no.nordicsemi.ui.scanner.ui.Reason
 
-@SuppressLint("MissingPermission")
 @Composable
 fun UARTScreen() {
     val viewModel: UARTViewModel = hiltViewModel()
@@ -33,25 +32,7 @@ fun UARTScreen() {
     Column {
         val navigateUp = { viewModel.onEvent(NavigateUp) }
 
-        Column(modifier = Modifier) {
-            when (state.uartManagerState) {
-                NoDeviceState -> BackIconAppBar(stringResource(id = R.string.uart_title), navigateUp)
-                is WorkingState -> when (state.uartManagerState.result) {
-                    is IdleResult,
-                    is DisconnectedResult,
-                    is LinkLossResult,
-                    is MissingServiceResult,
-                    is UnknownErrorResult -> BackIconAppBar(stringResource(id = R.string.uart_title), navigateUp)
-                    is ConnectingResult,
-                    is SuccessResult -> {
-                        val text = state.uartManagerState.device.name ?: state.uartManagerState.device.address ?: stringResource(id = R.string.uart_title)
-                        LoggerIconAppBar(text, navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
-                            viewModel.onEvent(OpenLogger)
-                        }
-                    }
-                }
-            }.exhaustive
-        }
+        AppBar(state = state, navigateUp = navigateUp) { viewModel.onEvent(it) }
 
         Column(modifier = Modifier) {
             when (state.uartManagerState) {
@@ -67,6 +48,30 @@ fun UARTScreen() {
                 }
             }.exhaustive
         }
+    }
+}
+
+@SuppressLint("MissingPermission")
+@Composable
+private fun AppBar(state: UARTViewState, navigateUp: () -> Unit, onEvent: (UARTViewEvent) -> Unit) {
+    Column(modifier = Modifier) {
+        when (state.uartManagerState) {
+            NoDeviceState -> BackIconAppBar(stringResource(id = R.string.uart_title), navigateUp)
+            is WorkingState -> when (state.uartManagerState.result) {
+                is IdleResult,
+                is DisconnectedResult,
+                is LinkLossResult,
+                is MissingServiceResult,
+                is UnknownErrorResult -> BackIconAppBar(stringResource(id = R.string.uart_title), navigateUp)
+                is ConnectingResult,
+                is SuccessResult -> {
+                    val text = state.uartManagerState.device.nameOrAddress()
+                    LoggerIconAppBar(text, navigateUp, { onEvent(DisconnectEvent) }) {
+                        onEvent(OpenLogger)
+                    }
+                }
+            }
+        }.exhaustive
     }
 }
 

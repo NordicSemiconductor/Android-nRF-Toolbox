@@ -14,6 +14,7 @@ import no.nordicsemi.android.logger.ToolboxLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.ConnectingResult
 import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,12 +34,12 @@ class HTSRepository @Inject constructor(
     val isRunning = data.map { it.isRunning() }
     val hasBeenDisconnected = data.map { it.hasBeenDisconnected() }
 
-    fun launch(device: BluetoothDevice) {
+    fun launch(device: DiscoveredBluetoothDevice) {
         serviceManager.startService(HTSService::class.java, device)
     }
 
-    fun start(device: BluetoothDevice, scope: CoroutineScope) {
-        val createdLogger = toolboxLoggerFactory.create("HTS", device.address).also {
+    fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
+        val createdLogger = toolboxLoggerFactory.create("HTS", device.address()).also {
             logger = it
         }
         val manager = HTSManager(context, scope, createdLogger)
@@ -57,9 +58,9 @@ class HTSRepository @Inject constructor(
         logger?.openLogger()
     }
 
-    private suspend fun HTSManager.start(device: BluetoothDevice) {
+    private suspend fun HTSManager.start(device: DiscoveredBluetoothDevice) {
         try {
-            connect(device)
+            connect(device.device)
                 .useAutoConnect(false)
                 .retry(3, 100)
                 .suspend()

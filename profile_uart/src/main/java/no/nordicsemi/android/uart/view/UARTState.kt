@@ -5,6 +5,7 @@ import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.uart.data.UARTConfiguration
 import no.nordicsemi.android.uart.data.UARTData
 import no.nordicsemi.android.uart.data.UARTMacro
+import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 
 internal data class UARTViewState(
     val editedPosition: Int? = null,
@@ -28,7 +29,7 @@ internal data class UARTViewState(
 internal sealed class HTSManagerState
 
 internal data class WorkingState(
-    val device: BluetoothDevice,
+    val device: DiscoveredBluetoothDevice,
     val result: BleManagerResult<UARTData>
 ) : HTSManagerState()
 
