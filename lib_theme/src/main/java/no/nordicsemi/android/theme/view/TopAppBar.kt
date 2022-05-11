@@ -17,7 +17,7 @@ import no.nordicsemi.android.theme.R
 @Composable
 fun CloseIconAppBar(text: String, onClick: () -> Unit) {
     SmallTopAppBar(
-        title = { Text(text) },
+        title = { Text(text, maxLines = 2) },
         colors = TopAppBarDefaults.smallTopAppBarColors(
             scrolledContainerColor = MaterialTheme.colorScheme.primary,
             containerColor = colorResource(id = R.color.appBarColor),
@@ -39,7 +39,7 @@ fun CloseIconAppBar(text: String, onClick: () -> Unit) {
 @Composable
 fun TitleAppBar(text: String) {
     SmallTopAppBar(
-        title = { Text(text) },
+        title = { Text(text, maxLines = 2) },
         colors = TopAppBarDefaults.smallTopAppBarColors(
             scrolledContainerColor = MaterialTheme.colorScheme.primary,
             containerColor = colorResource(id = R.color.appBarColor),
@@ -53,7 +53,7 @@ fun TitleAppBar(text: String) {
 @Composable
 fun LoggerBackIconAppBar(text: String, onClick: () -> Unit) {
     SmallTopAppBar(
-        title = { Text(text) },
+        title = { Text(text, maxLines = 2) },
         colors = TopAppBarDefaults.smallTopAppBarColors(
             scrolledContainerColor = MaterialTheme.colorScheme.primary,
             containerColor = colorResource(id = R.color.appBarColor),
@@ -86,7 +86,7 @@ fun LoggerBackIconAppBar(text: String, onClick: () -> Unit) {
 @Composable
 fun BackIconAppBar(text: String, onClick: () -> Unit) {
     SmallTopAppBar(
-        title = { Text(text) },
+        title = { Text(text, maxLines = 2) },
         colors = TopAppBarDefaults.smallTopAppBarColors(
             scrolledContainerColor = MaterialTheme.colorScheme.primary,
             containerColor = colorResource(id = R.color.appBarColor),
@@ -109,7 +109,7 @@ fun BackIconAppBar(text: String, onClick: () -> Unit) {
 @Composable
 fun LoggerIconAppBar(text: String, onClick: () -> Unit, onDisconnectClick: () -> Unit, onLoggerClick: () -> Unit) {
     SmallTopAppBar(
-        title = { Text(text) },
+        title = { Text(text, maxLines = 2) },
         colors = TopAppBarDefaults.smallTopAppBarColors(
             scrolledContainerColor = MaterialTheme.colorScheme.primary,
             containerColor = colorResource(id = R.color.appBarColor),
