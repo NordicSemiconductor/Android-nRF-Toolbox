@@ -56,7 +56,7 @@ internal class BPSViewModel @Inject constructor(
     }
 
     private fun connectDevice(device: DiscoveredBluetoothDevice) {
-        repository.downloadData(device).onEach {
+        repository.downloadData(viewModelScope, device).onEach {
             _state.value = WorkingState(it)
 
             (it as? SuccessResult)?.let {

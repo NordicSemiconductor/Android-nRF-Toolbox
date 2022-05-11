@@ -1,9 +1,10 @@
 package no.nordicsemi.android.gls.repository
 
-import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ViewModelScoped
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -31,26 +32,20 @@ internal class GLSRepository @Inject constructor(
     private var manager: GLSManager? = null
     private var logger: ToolboxLogger? = null
 
-    fun downloadData(device: DiscoveredBluetoothDevice): Flow<BleManagerResult<GLSData>> = callbackFlow {
-        val scope = this
+    fun downloadData(scope: CoroutineScope, device: DiscoveredBluetoothDevice): Flow<BleManagerResult<GLSData>> = callbackFlow {
         val createdLogger = toolboxLoggerFactory.create("GLS", device.address()).also {
             logger = it
         }
-        val managerInstance = manager ?: GLSManager(context, scope, createdLogger).apply {
-            try {
-                connect(device.device)
-                    .useAutoConnect(false)
-                    .retry(3, 100)
-                    .suspend()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
+        val managerInstance = manager ?: GLSManager(context, scope, createdLogger)
         manager = managerInstance
 
         managerInstance.dataHolder.status.onEach {
-            trySend(it)
+            send(it)
         }.launchIn(scope)
+
+        scope.launch {
+            managerInstance.start(device)
+        }
 
         awaitClose {
             launch {
@@ -58,6 +53,17 @@ internal class GLSRepository @Inject constructor(
                 logger = null
                 manager = null
             }
+        }
+    }
+
+    private suspend fun GLSManager.start(device: DiscoveredBluetoothDevice) {
+        try {
+            connect(device.device)
+                .useAutoConnect(false)
+                .retry(3, 100)
+                .suspend()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 

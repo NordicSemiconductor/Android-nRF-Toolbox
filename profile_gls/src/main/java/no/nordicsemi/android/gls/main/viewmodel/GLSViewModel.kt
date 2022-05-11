@@ -1,5 +1,6 @@
 package no.nordicsemi.android.gls.main.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -57,7 +58,7 @@ internal class GLSViewModel @Inject constructor(
     }
 
     private fun connectDevice(device: DiscoveredBluetoothDevice) {
-        repository.downloadData(device).onEach {
+        repository.downloadData(viewModelScope, device).onEach {
             _state.value = WorkingState(it)
 
             (it as? SuccessResult)?.let {

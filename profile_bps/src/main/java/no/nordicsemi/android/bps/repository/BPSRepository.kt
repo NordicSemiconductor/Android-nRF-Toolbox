@@ -3,11 +3,14 @@ package no.nordicsemi.android.bps.repository
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ViewModelScoped
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.bps.data.BPSData
 import no.nordicsemi.android.bps.data.BPSManager
 import no.nordicsemi.android.logger.ToolboxLogger
@@ -25,8 +28,7 @@ internal class BPSRepository @Inject constructor(
 
     private var logger: ToolboxLogger? = null
 
-    fun downloadData(device: DiscoveredBluetoothDevice): Flow<BleManagerResult<BPSData>> = callbackFlow {
-        val scope = this
+    fun downloadData(scope: CoroutineScope, device: DiscoveredBluetoothDevice): Flow<BleManagerResult<BPSData>> = callbackFlow {
         val createdLogger = toolboxLoggerFactory.create("BPS", device.address()).also {
             logger = it
         }
@@ -36,14 +38,24 @@ internal class BPSRepository @Inject constructor(
             trySend(it)
         }.launchIn(scope)
 
-        manager.connect(device.device)
-            .useAutoConnect(false)
-            .retry(3, 100)
-            .enqueue()
+        scope.launch {
+            manager.start(device)
+        }
 
         awaitClose {
             manager.disconnect().enqueue()
             logger = null
+        }
+    }
+
+    private suspend fun BPSManager.start(device: DiscoveredBluetoothDevice) {
+        try {
+            connect(device.device)
+                .useAutoConnect(false)
+                .retry(3, 100)
+                .suspend()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 

@@ -1,5 +1,6 @@
 package no.nordicsemi.android.gls.main.view
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
