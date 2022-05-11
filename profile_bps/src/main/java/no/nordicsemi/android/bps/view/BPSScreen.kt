@@ -51,7 +51,7 @@ fun BPSScreen() {
 @Composable
 private fun AppBar(state: BPSViewState, navigateUp: () -> Unit, viewModel: BPSViewModel) {
     val toolbarName = (state as? WorkingState)?.let {
-        (it.result as? SuccessResult<BPSData>)?.deviceName()
+        (it.result as? DeviceHolder)?.deviceName()
     }
 
     if (toolbarName == null) {

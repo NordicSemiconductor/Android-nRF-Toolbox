@@ -29,7 +29,7 @@ class PRXRepository @Inject internal constructor(
     private var manager: PRXManager? = null
     private var logger: ToolboxLogger? = null
 
-    private val _data = MutableStateFlow<BleManagerResult<PRXData>>(ConnectingResult())
+    private val _data = MutableStateFlow<BleManagerResult<PRXData>>(IdleResult())
     internal val data = _data.asStateFlow()
 
     val isRunning = data.map { it.isRunning() }

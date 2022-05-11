@@ -51,7 +51,7 @@ fun UARTScreen() {
 @Composable
 private fun AppBar(state: UARTViewState, navigateUp: () -> Unit, onEvent: (UARTViewEvent) -> Unit) {
     val toolbarName = (state.uartManagerState as? WorkingState)?.let {
-        (it.result as? SuccessResult<UARTData>)?.deviceName()
+        (it.result as? DeviceHolder)?.deviceName()
     }
 
     if (toolbarName == null) {

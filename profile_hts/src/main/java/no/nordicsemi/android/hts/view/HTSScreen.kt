@@ -50,7 +50,7 @@ fun HTSScreen() {
 @Composable
 private fun AppBar(state: HTSViewState, navigateUp: () -> Unit, viewModel: HTSViewModel) {
     val toolbarName = (state.htsManagerState as? WorkingState)?.let {
-        (it.result as? SuccessResult<HTSData>)?.deviceName()
+        (it.result as? DeviceHolder)?.deviceName()
     }
 
     if (toolbarName == null) {

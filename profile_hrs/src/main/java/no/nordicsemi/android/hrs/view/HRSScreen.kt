@@ -50,7 +50,7 @@ fun HRSScreen() {
 @Composable
 private fun AppBar(state: HRSViewState, navigateUp: () -> Unit, viewModel: HRSViewModel) {
     val toolbarName = (state as? WorkingState)?.let {
-        (it.result as? SuccessResult<HRSData>)?.deviceName()
+        (it.result as? DeviceHolder)?.deviceName()
     }
 
     if (toolbarName == null) {

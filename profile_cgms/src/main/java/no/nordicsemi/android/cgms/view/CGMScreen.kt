@@ -50,7 +50,7 @@ fun CGMScreen() {
 @Composable
 private fun AppBar(state: CGMViewState, navigateUp: () -> Unit, viewModel: CGMViewModel) {
     val toolbarName = (state as? WorkingState)?.let {
-        (it.result as? SuccessResult<CGMData>)?.deviceName()
+        (it.result as? DeviceHolder)?.deviceName()
     }
 
     if (toolbarName == null) {

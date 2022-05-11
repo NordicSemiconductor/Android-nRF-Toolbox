@@ -51,7 +51,7 @@ fun PRXScreen() {
 @Composable
 private fun AppBar(state: PRXViewState, navigateUp: () -> Unit, viewModel: PRXViewModel) {
     val toolbarName = (state as? WorkingState)?.let {
-        (it.result as? SuccessResult<PRXData>)?.deviceName()
+        (it.result as? DeviceHolder)?.deviceName()
     }
 
     if (toolbarName == null) {

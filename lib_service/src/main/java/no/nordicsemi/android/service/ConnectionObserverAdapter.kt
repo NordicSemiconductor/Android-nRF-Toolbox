@@ -10,7 +10,7 @@ class ConnectionObserverAdapter<T> : ConnectionObserver {
 
     private val TAG = "BLE-CONNECTION"
 
-    private val _status = MutableStateFlow<BleManagerResult<T>>(ConnectingResult())
+    private val _status = MutableStateFlow<BleManagerResult<T>>(IdleResult())
     val status = _status.asStateFlow()
 
     private var lastValue: T? = null
@@ -21,6 +21,7 @@ class ConnectionObserverAdapter<T> : ConnectionObserver {
 
     override fun onDeviceConnecting(device: BluetoothDevice) {
         Log.d(TAG, "onDeviceConnecting()")
+        _status.value = ConnectingResult(device)
     }
 
     override fun onDeviceConnected(device: BluetoothDevice) {
@@ -29,7 +30,7 @@ class ConnectionObserverAdapter<T> : ConnectionObserver {
 
     override fun onDeviceFailedToConnect(device: BluetoothDevice, reason: Int) {
         Log.d(TAG, "onDeviceFailedToConnect(), reason: $reason")
-        _status.value = MissingServiceResult()
+        _status.value = MissingServiceResult(device)
     }
 
     override fun onDeviceReady(device: BluetoothDevice) {
@@ -44,10 +45,10 @@ class ConnectionObserverAdapter<T> : ConnectionObserver {
     override fun onDeviceDisconnected(device: BluetoothDevice, reason: Int) {
         Log.d(TAG, "onDeviceDisconnected(), reason: $reason")
         _status.value = when (reason) {
-            ConnectionObserver.REASON_NOT_SUPPORTED -> MissingServiceResult()
-            ConnectionObserver.REASON_LINK_LOSS -> LinkLossResult(getData()!!)
-            ConnectionObserver.REASON_SUCCESS -> DisconnectedResult()
-            else -> UnknownErrorResult()
+            ConnectionObserver.REASON_NOT_SUPPORTED -> MissingServiceResult(device)
+            ConnectionObserver.REASON_LINK_LOSS -> LinkLossResult(device, getData()!!)
+            ConnectionObserver.REASON_SUCCESS -> DisconnectedResult(device)
+            else -> UnknownErrorResult(device)
         }
     }
 

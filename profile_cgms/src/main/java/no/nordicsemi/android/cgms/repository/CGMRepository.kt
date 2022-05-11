@@ -13,6 +13,7 @@ import no.nordicsemi.android.logger.ToolboxLogger
 import no.nordicsemi.android.logger.ToolboxLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.ConnectingResult
+import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
@@ -28,7 +29,7 @@ class CGMRepository @Inject constructor(
     private var manager: CGMManager? = null
     private var logger: ToolboxLogger? = null
 
-    private val _data = MutableStateFlow<BleManagerResult<CGMData>>(ConnectingResult())
+    private val _data = MutableStateFlow<BleManagerResult<CGMData>>(IdleResult())
     internal val data = _data.asStateFlow()
 
     val isRunning = data.map { it.isRunning() }

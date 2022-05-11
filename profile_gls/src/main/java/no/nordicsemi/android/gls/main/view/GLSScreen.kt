@@ -50,7 +50,7 @@ fun GLSScreen() {
 @Composable
 private fun AppBar(state: GLSViewState, navigateUp: () -> Unit, viewModel: GLSViewModel) {
     val toolbarName = (state as? WorkingState)?.let {
-        (it.result as? SuccessResult<GLSData>)?.deviceName()
+        (it.result as? DeviceHolder)?.deviceName()
     }
 
     if (toolbarName == null) {

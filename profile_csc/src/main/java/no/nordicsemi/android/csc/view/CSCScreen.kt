@@ -50,7 +50,7 @@ fun CSCScreen() {
 @Composable
 private fun AppBar(state: CSCViewState, navigateUp: () -> Unit, viewModel: CSCViewModel) {
     val toolbarName = (state.cscManagerState as? WorkingState)?.let {
-        (it.result as? SuccessResult<CSCData>)?.deviceName()
+        (it.result as? DeviceHolder)?.deviceName()
     }
 
     if (toolbarName == null) {

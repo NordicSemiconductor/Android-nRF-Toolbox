@@ -1,6 +1,5 @@
 package no.nordicsemi.android.rscs.repository
 
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -12,7 +11,7 @@ import no.nordicsemi.android.logger.ToolboxLoggerFactory
 import no.nordicsemi.android.rscs.data.RSCSData
 import no.nordicsemi.android.rscs.data.RSCSManager
 import no.nordicsemi.android.service.BleManagerResult
-import no.nordicsemi.android.service.ConnectingResult
+import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
@@ -28,7 +27,7 @@ class RSCSRepository @Inject constructor(
     private var manager: RSCSManager? = null
     private var logger: ToolboxLogger? = null
 
-    private val _data = MutableStateFlow<BleManagerResult<RSCSData>>(ConnectingResult())
+    private val _data = MutableStateFlow<BleManagerResult<RSCSData>>(IdleResult())
     internal val data = _data.asStateFlow()
 
     val isRunning = data.map { it.isRunning() }

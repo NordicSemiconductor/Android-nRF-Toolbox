@@ -50,7 +50,7 @@ fun RSCSScreen() {
 @Composable
 private fun AppBar(state: RSCSViewState, navigateUp: () -> Unit, viewModel: RSCSViewModel) {
     val toolbarName = (state as? WorkingState)?.let {
-        (it.result as? SuccessResult<RSCSData>)?.deviceName()
+        (it.result as? DeviceHolder)?.deviceName()
     }
 
     if (toolbarName == null) {
