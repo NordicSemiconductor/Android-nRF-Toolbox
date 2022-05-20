@@ -6,12 +6,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import no.nordicsemi.android.material.you.RadioButtonGroup
 import no.nordicsemi.android.material.you.RadioButtonItem
 import no.nordicsemi.android.material.you.RadioGroupViewEntity
@@ -30,15 +32,21 @@ internal fun InputSection(onEvent: (UARTViewEvent) -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(modifier = Modifier.weight(1f)) {
 
+            val scope = rememberCoroutineScope()
+            val scrollState = rememberScrollState()
+
             OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp)
-                    .verticalScroll(rememberScrollState()),
+                    .heightIn(max = 65.dp)
+                    .verticalScroll(scrollState),
                 value = text.value,
                 label = { Text(hint) },
                 onValueChange = { newValue: String ->
                     text.value = newValue
+                    scope.launch {
+                        scrollState.scrollTo(Int.MAX_VALUE)
+                    }
                 }
             )
         }
