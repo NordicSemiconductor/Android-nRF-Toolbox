@@ -31,11 +31,6 @@ Submit a new Beta Build to Crashlytics Beta
 fastlane android deploy
 ```
 Deploy a new version to the Google Play
-### android deployNexus
-```
-fastlane android deployNexus
-```
-Deploy libraries to Nexus.
 ### android deployAlpha
 ```
 fastlane android deployAlpha

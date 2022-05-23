@@ -5,12 +5,7 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000187475">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="1: clean bundleRelease" time="90.994886849">
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000190211">
         
       </testcase>
     

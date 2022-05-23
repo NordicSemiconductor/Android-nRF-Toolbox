@@ -1,6 +1,5 @@
 package no.nordicsemi.android.cgms.repository
 
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -12,7 +11,6 @@ import no.nordicsemi.android.cgms.data.CGMManager
 import no.nordicsemi.android.logger.ToolboxLogger
 import no.nordicsemi.android.logger.ToolboxLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
-import no.nordicsemi.android.service.ConnectingResult
 import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice

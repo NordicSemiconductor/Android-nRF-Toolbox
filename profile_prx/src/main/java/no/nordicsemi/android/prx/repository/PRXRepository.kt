@@ -85,6 +85,7 @@ class PRXRepository @Inject internal constructor(
     }
 
     fun release() {
+        disableAlarm()
         manager?.disconnect()?.enqueue()
         manager = null
         logger = null
