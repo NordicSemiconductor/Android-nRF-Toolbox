@@ -6,11 +6,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.ktx.suspend
-import no.nordicsemi.android.logger.ToolboxLogger
-import no.nordicsemi.android.logger.ToolboxLoggerFactory
+import no.nordicsemi.android.logger.NordicLogger
+import no.nordicsemi.android.logger.NordicLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.android.theme.view.StringConst
 import no.nordicsemi.android.uart.data.*
 import no.nordicsemi.android.utils.EMPTY
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
@@ -23,10 +24,11 @@ class UARTRepository @Inject internal constructor(
     private val context: Context,
     private val serviceManager: ServiceManager,
     private val configurationDataSource: ConfigurationDataSource,
-    private val toolboxLoggerFactory: ToolboxLoggerFactory,
+    private val loggerFactory: NordicLoggerFactory,
+    private val stringConst: StringConst
 ) {
     private var manager: UARTManager? = null
-    private var logger: ToolboxLogger? = null
+    private var logger: NordicLogger? = null
 
     private val _data = MutableStateFlow<BleManagerResult<UARTData>>(IdleResult())
     internal val data = _data.asStateFlow()
@@ -41,7 +43,7 @@ class UARTRepository @Inject internal constructor(
     }
 
     fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
-        val createdLogger = toolboxLoggerFactory.create("UART", device.address()).also {
+        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "UART", device.address()).also {
             logger = it
         }
         val manager = UARTManager(context, scope, createdLogger)

@@ -45,7 +45,7 @@ import no.nordicsemi.android.ble.ktx.asValidResponseFlow
 import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.ble.ktx.suspendForValidResponse
 import no.nordicsemi.android.cgms.repository.toList
-import no.nordicsemi.android.logger.ToolboxLogger
+import no.nordicsemi.android.logger.NordicLogger
 import no.nordicsemi.android.service.ConnectionObserverAdapter
 import no.nordicsemi.android.utils.launchWithCatch
 import java.util.*
@@ -64,7 +64,7 @@ private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1
 internal class CGMManager(
     context: Context,
     private val scope: CoroutineScope,
-    private val logger: ToolboxLogger
+    private val logger: NordicLogger
 ) : BleManager(context) {
 
     private var cgmStatusCharacteristic: BluetoothGattCharacteristic? = null

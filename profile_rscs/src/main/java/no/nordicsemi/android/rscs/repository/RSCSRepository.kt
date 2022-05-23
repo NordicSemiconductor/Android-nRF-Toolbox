@@ -6,13 +6,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.ktx.suspend
-import no.nordicsemi.android.logger.ToolboxLogger
-import no.nordicsemi.android.logger.ToolboxLoggerFactory
+import no.nordicsemi.android.logger.NordicLogger
+import no.nordicsemi.android.logger.NordicLoggerFactory
 import no.nordicsemi.android.rscs.data.RSCSData
 import no.nordicsemi.android.rscs.data.RSCSManager
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.android.theme.view.StringConst
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,10 +23,11 @@ class RSCSRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
-    private val toolboxLoggerFactory: ToolboxLoggerFactory
+    private val loggerFactory: NordicLoggerFactory,
+    private val stringConst: StringConst
 ) {
     private var manager: RSCSManager? = null
-    private var logger: ToolboxLogger? = null
+    private var logger: NordicLogger? = null
 
     private val _data = MutableStateFlow<BleManagerResult<RSCSData>>(IdleResult())
     internal val data = _data.asStateFlow()
@@ -38,7 +40,7 @@ class RSCSRepository @Inject constructor(
     }
 
     fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
-        val createdLogger = toolboxLoggerFactory.create("RSCS", device.address()).also {
+        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "RSCS", device.address()).also {
             logger = it
         }
         val manager = RSCSManager(context, scope, createdLogger)

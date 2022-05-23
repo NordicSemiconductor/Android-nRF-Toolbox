@@ -38,7 +38,7 @@ import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
 import no.nordicsemi.android.ble.ktx.asFlow
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
 import no.nordicsemi.android.ble.ktx.suspend
-import no.nordicsemi.android.logger.ToolboxLogger
+import no.nordicsemi.android.logger.NordicLogger
 import no.nordicsemi.android.service.ConnectionObserverAdapter
 import no.nordicsemi.android.utils.EMPTY
 import no.nordicsemi.android.utils.launchWithCatch
@@ -55,7 +55,7 @@ private val BATTERY_LEVEL_CHARACTERISTIC_UUID =
 internal class UARTManager(
     context: Context,
     private val scope: CoroutineScope,
-    private val logger: ToolboxLogger
+    private val logger: NordicLogger
 ) : BleManager(context) {
 
     private var batteryLevelCharacteristic: BluetoothGattCharacteristic? = null

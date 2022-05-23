@@ -1,6 +1,5 @@
 package no.nordicsemi.android.csc.repository
 
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -10,12 +9,12 @@ import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.csc.data.CSCManager
 import no.nordicsemi.android.csc.data.WheelSize
-import no.nordicsemi.android.logger.ToolboxLogger
-import no.nordicsemi.android.logger.ToolboxLoggerFactory
+import no.nordicsemi.android.logger.NordicLogger
+import no.nordicsemi.android.logger.NordicLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
-import no.nordicsemi.android.service.ConnectingResult
 import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.android.theme.view.StringConst
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,10 +24,11 @@ class CSCRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
-    private val toolboxLoggerFactory: ToolboxLoggerFactory
+    private val loggerFactory: NordicLoggerFactory,
+    private val stringConst: StringConst
 ) {
     private var manager: CSCManager? = null
-    private var logger: ToolboxLogger? = null
+    private var logger: NordicLogger? = null
 
     private val _data = MutableStateFlow<BleManagerResult<CSCData>>(IdleResult())
     internal val data = _data.asStateFlow()
@@ -41,7 +41,7 @@ class CSCRepository @Inject constructor(
     }
 
     fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
-        val createdLogger = toolboxLoggerFactory.create("CSC", device.address()).also {
+        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "CSC", device.address()).also {
             logger = it
         }
         val manager = CSCManager(context, scope, createdLogger)

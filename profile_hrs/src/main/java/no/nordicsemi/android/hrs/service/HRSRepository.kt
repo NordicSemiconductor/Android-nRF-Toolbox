@@ -1,6 +1,5 @@
 package no.nordicsemi.android.hrs.service
 
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -9,12 +8,12 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.hrs.data.HRSData
 import no.nordicsemi.android.hrs.data.HRSManager
-import no.nordicsemi.android.logger.ToolboxLogger
-import no.nordicsemi.android.logger.ToolboxLoggerFactory
+import no.nordicsemi.android.logger.NordicLogger
+import no.nordicsemi.android.logger.NordicLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
-import no.nordicsemi.android.service.ConnectingResult
 import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.android.theme.view.StringConst
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,10 +23,11 @@ class HRSRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
-    private val toolboxLoggerFactory: ToolboxLoggerFactory
+    private val loggerFactory: NordicLoggerFactory,
+    private val stringConst: StringConst
 ) {
     private var manager: HRSManager? = null
-    private var logger: ToolboxLogger? = null
+    private var logger: NordicLogger? = null
 
     private val _data = MutableStateFlow<BleManagerResult<HRSData>>(IdleResult())
     internal val data = _data.asStateFlow()
@@ -40,7 +40,7 @@ class HRSRepository @Inject constructor(
     }
 
     fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
-        val createdLogger = toolboxLoggerFactory.create("HRS", device.address()).also {
+        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "HRS", device.address()).also {
             logger = it
         }
         val manager = HRSManager(context, scope, createdLogger)

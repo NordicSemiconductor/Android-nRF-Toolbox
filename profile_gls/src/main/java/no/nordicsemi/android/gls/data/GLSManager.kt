@@ -25,7 +25,6 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
 import android.util.Log
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -39,11 +38,10 @@ import no.nordicsemi.android.ble.common.callback.glucose.GlucoseMeasurementRespo
 import no.nordicsemi.android.ble.common.data.RecordAccessControlPointData
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
 import no.nordicsemi.android.ble.ktx.suspend
-import no.nordicsemi.android.logger.ToolboxLogger
+import no.nordicsemi.android.logger.NordicLogger
 import no.nordicsemi.android.service.ConnectionObserverAdapter
 import no.nordicsemi.android.utils.launchWithCatch
 import java.util.*
-import javax.inject.Inject
 
 val GLS_SERVICE_UUID: UUID = UUID.fromString("00001808-0000-1000-8000-00805f9b34fb")
 
@@ -59,7 +57,7 @@ private val BATTERY_LEVEL_CHARACTERISTIC_UUID =
 internal class GLSManager(
     context: Context,
     private val scope: CoroutineScope,
-    private val logger: ToolboxLogger
+    private val logger: NordicLogger
 ) : BleManager(context) {
 
     private var batteryLevelCharacteristic: BluetoothGattCharacteristic? = null

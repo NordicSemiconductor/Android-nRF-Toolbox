@@ -10,7 +10,6 @@ dependencies {
     implementation project(":lib_service")
     implementation project(":lib_theme")
     implementation project(":lib_utils")
-    implementation project(":lib_log")
 
     implementation libs.chart
 
@@ -19,6 +18,7 @@ dependencies {
     implementation libs.nordic.ble.ktx
     implementation libs.nordic.navigation
     implementation libs.nordic.ui.scanner
+    implementation libs.nordic.ui.logger
 
     implementation libs.bundles.compose
     implementation libs.androidx.core

@@ -14,9 +14,10 @@ import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.gls.data.GLSData
 import no.nordicsemi.android.gls.data.GLSManager
 import no.nordicsemi.android.gls.data.WorkingMode
-import no.nordicsemi.android.logger.ToolboxLogger
-import no.nordicsemi.android.logger.ToolboxLoggerFactory
+import no.nordicsemi.android.logger.NordicLogger
+import no.nordicsemi.android.logger.NordicLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
+import no.nordicsemi.android.theme.view.StringConst
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
@@ -25,14 +26,15 @@ import javax.inject.Inject
 internal class GLSRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val toolboxLoggerFactory: ToolboxLoggerFactory
+    private val loggerFactory: NordicLoggerFactory,
+    private val stringConst: StringConst
 ) {
 
     private var manager: GLSManager? = null
-    private var logger: ToolboxLogger? = null
+    private var logger: NordicLogger? = null
 
     fun downloadData(scope: CoroutineScope, device: DiscoveredBluetoothDevice): Flow<BleManagerResult<GLSData>> = callbackFlow {
-        val createdLogger = toolboxLoggerFactory.create("GLS", device.address()).also {
+        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "GLS", device.address()).also {
             logger = it
         }
         val managerInstance = manager ?: GLSManager(context, scope, createdLogger)

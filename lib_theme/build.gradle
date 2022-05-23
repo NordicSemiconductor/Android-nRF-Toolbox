@@ -5,7 +5,7 @@ android {
 }
 
 dependencies {
-    implementation project(":lib_log")
+    implementation libs.nordic.ui.logger
 
     implementation libs.material
 

@@ -8,11 +8,12 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.cgms.data.CGMData
 import no.nordicsemi.android.cgms.data.CGMManager
-import no.nordicsemi.android.logger.ToolboxLogger
-import no.nordicsemi.android.logger.ToolboxLoggerFactory
+import no.nordicsemi.android.logger.NordicLogger
+import no.nordicsemi.android.logger.NordicLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.android.theme.view.StringConst
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,10 +23,11 @@ class CGMRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
-    private val toolboxLoggerFactory: ToolboxLoggerFactory
+    private val loggerFactory: NordicLoggerFactory,
+    private val stringConst: StringConst
 ) {
     private var manager: CGMManager? = null
-    private var logger: ToolboxLogger? = null
+    private var logger: NordicLogger? = null
 
     private val _data = MutableStateFlow<BleManagerResult<CGMData>>(IdleResult())
     internal val data = _data.asStateFlow()
@@ -38,7 +40,7 @@ class CGMRepository @Inject constructor(
     }
 
     fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
-        val createdLogger = toolboxLoggerFactory.create("CGMS", device.address()).also {
+        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "CGMS", device.address()).also {
             logger = it
         }
         val manager = CGMManager(context, scope, createdLogger)
