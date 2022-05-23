@@ -1,6 +1,5 @@
 package no.nordicsemi.android.prx.repository
 
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -68,7 +67,8 @@ class PRXRepository @Inject internal constructor(
             }
         }
         (result as? LinkLossResult<PRXData>)?.let {
-            alarmHandler.playAlarm(it.data.linkLossAlarmLevel)
+            val alarmLevel = it.data?.linkLossAlarmLevel ?: AlarmLevel.HIGH
+            alarmHandler.playAlarm(alarmLevel)
         }
     }
 

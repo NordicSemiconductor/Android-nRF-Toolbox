@@ -46,7 +46,7 @@ class ConnectionObserverAdapter<T> : ConnectionObserver {
         Log.d(TAG, "onDeviceDisconnected(), reason: $reason")
         _status.value = when (reason) {
             ConnectionObserver.REASON_NOT_SUPPORTED -> MissingServiceResult(device)
-            ConnectionObserver.REASON_LINK_LOSS -> LinkLossResult(device, getData()!!)
+            ConnectionObserver.REASON_LINK_LOSS -> LinkLossResult(device, getData())
             ConnectionObserver.REASON_SUCCESS -> DisconnectedResult(device)
             else -> UnknownErrorResult(device)
         }
