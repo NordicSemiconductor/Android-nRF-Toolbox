@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.prx.R
-import no.nordicsemi.android.prx.data.PRXData
 import no.nordicsemi.android.prx.viewmodel.PRXViewModel
 import no.nordicsemi.android.service.*
 import no.nordicsemi.android.theme.view.BackIconAppBar
@@ -37,6 +36,7 @@ fun PRXScreen() {
                 is WorkingState -> when (state.result) {
                     is IdleResult,
                     is ConnectingResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
+                    is ConnectedResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
                     is DisconnectedResult -> DeviceDisconnectedView(Reason.USER, navigateUp)
                     is LinkLossResult -> DeviceOutOfRangeView { viewModel.onEvent(DisconnectEvent) }
                     is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp)

@@ -12,7 +12,7 @@ import no.nordicsemi.android.hts.data.HTS_SERVICE_UUID
 import no.nordicsemi.android.hts.repository.HTSRepository
 import no.nordicsemi.android.hts.view.*
 import no.nordicsemi.android.navigation.*
-import no.nordicsemi.android.service.SuccessResult
+import no.nordicsemi.android.service.ConnectedResult
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.android.utils.getDevice
 import no.nordicsemi.ui.scanner.ScannerDestinationId
@@ -38,7 +38,7 @@ internal class HTSViewModel @Inject constructor(
         repository.data.onEach {
             _state.value = _state.value.copy(htsManagerState = WorkingState(it))
 
-            (it as? SuccessResult)?.let {
+            (it as? ConnectedResult)?.let {
                 analytics.logEvent(ProfileConnectedEvent(Profile.HTS))
             }
         }.launchIn(viewModelScope)

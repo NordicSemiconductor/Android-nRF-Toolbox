@@ -14,7 +14,7 @@ import no.nordicsemi.android.bps.data.BPS_SERVICE_UUID
 import no.nordicsemi.android.bps.repository.BPSRepository
 import no.nordicsemi.android.bps.view.*
 import no.nordicsemi.android.navigation.*
-import no.nordicsemi.android.service.SuccessResult
+import no.nordicsemi.android.service.ConnectedResult
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.android.utils.getDevice
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
@@ -59,7 +59,7 @@ internal class BPSViewModel @Inject constructor(
         repository.downloadData(viewModelScope, device).onEach {
             _state.value = WorkingState(it)
 
-            (it as? SuccessResult)?.let {
+            (it as? ConnectedResult)?.let {
                 analytics.logEvent(ProfileConnectedEvent(Profile.BPS))
             }
         }.launchIn(viewModelScope)

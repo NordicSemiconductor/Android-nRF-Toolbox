@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,9 +23,8 @@ import no.nordicsemi.android.gls.data.GLSRecord
 import no.nordicsemi.android.gls.data.RequestStatus
 import no.nordicsemi.android.gls.data.WorkingMode
 import no.nordicsemi.android.gls.main.viewmodel.GLSViewModel
-import androidx.compose.material3.CircularProgressIndicator
-import no.nordicsemi.android.theme.view.BatteryLevelView
 import no.nordicsemi.android.material.you.ScreenSection
+import no.nordicsemi.android.theme.view.BatteryLevelView
 import no.nordicsemi.android.theme.view.SectionTitle
 
 @Composable

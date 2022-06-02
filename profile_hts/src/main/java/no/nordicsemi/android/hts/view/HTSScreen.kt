@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.hts.R
-import no.nordicsemi.android.hts.data.HTSData
 import no.nordicsemi.android.hts.viewmodel.HTSViewModel
 import no.nordicsemi.android.service.*
 import no.nordicsemi.android.theme.view.BackIconAppBar
@@ -36,6 +35,7 @@ fun HTSScreen() {
                 is WorkingState -> when (state.htsManagerState.result) {
                     is IdleResult,
                     is ConnectingResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
+                    is ConnectedResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
                     is DisconnectedResult -> DeviceDisconnectedView(Reason.USER, navigateUp)
                     is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp)
                     is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp)

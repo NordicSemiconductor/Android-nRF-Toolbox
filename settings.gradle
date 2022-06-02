@@ -15,10 +15,11 @@ dependencyResolutionManagement {
 
             library('nordic-log', 'no.nordicsemi.android:log:2.3.0')
 
-            version('commonlibraries', '1.0.8')
+            version('commonlibraries', '1.0.11')
             library('nordic-ui-scanner', 'no.nordicsemi.android.common', 'uiscanner').versionRef('commonlibraries')
             library('nordic-navigation', 'no.nordicsemi.android.common', 'navigation').versionRef('commonlibraries')
             library('nordic-theme', 'no.nordicsemi.android.common', 'theme').versionRef('commonlibraries')
+            library('nordic-analytics', 'no.nordicsemi.android.common', 'analytics').versionRef('commonlibraries')
             library('nordic-ui-logger', 'no.nordicsemi.android.common', 'uilogger').versionRef('commonlibraries')
 
             library('localbroadcastmanager', 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0')

@@ -12,7 +12,7 @@ import no.nordicsemi.android.navigation.*
 import no.nordicsemi.android.rscs.data.RSCS_SERVICE_UUID
 import no.nordicsemi.android.rscs.repository.RSCSRepository
 import no.nordicsemi.android.rscs.view.*
-import no.nordicsemi.android.service.SuccessResult
+import no.nordicsemi.android.service.ConnectedResult
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.android.utils.getDevice
 import no.nordicsemi.ui.scanner.ScannerDestinationId
@@ -38,7 +38,7 @@ internal class RSCSViewModel @Inject constructor(
         repository.data.onEach {
             _state.value = WorkingState(it)
 
-            (it as? SuccessResult)?.let {
+            (it as? ConnectedResult)?.let {
                 analytics.logEvent(ProfileConnectedEvent(Profile.RSCS))
             }
         }.launchIn(viewModelScope)

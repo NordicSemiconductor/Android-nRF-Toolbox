@@ -17,12 +17,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.analytics.Link
 import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileOpenEvent
-import no.nordicsemi.android.logger.LoggerAppRunner
 import no.nordicsemi.android.nrftoolbox.BuildConfig
 import no.nordicsemi.android.nrftoolbox.ProfileDestination
 import no.nordicsemi.android.nrftoolbox.R
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewModel
-import no.nordicsemi.android.theme.view.TitleAppBar
 
 private const val DFU_PACKAGE_NAME = "no.nordicsemi.android.dfu"
 private const val DFU_LINK = "https://play.google.com/store/apps/details?id=no.nordicsemi.android.dfu"

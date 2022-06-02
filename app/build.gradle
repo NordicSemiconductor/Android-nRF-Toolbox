@@ -92,6 +92,7 @@ dependencies {
     implementation libs.nordic.ui.scanner
     implementation libs.nordic.navigation
     implementation libs.nordic.ui.logger
+    implementation libs.nordic.analytics
 
     implementation libs.bundles.hilt
     kapt libs.bundles.hiltkapt
