@@ -38,6 +38,7 @@ fun UARTScreen() {
             is WorkingState -> when (state.uartManagerState.result) {
                 is IdleResult,
                 is ConnectingResult -> Scroll { DeviceConnectingView { viewModel.onEvent(DisconnectEvent) } }
+                is ConnectedResult -> Scroll { DeviceConnectingView { viewModel.onEvent(DisconnectEvent) } }
                 is DisconnectedResult -> Scroll { DeviceDisconnectedView(Reason.USER, navigateUp) }
                 is LinkLossResult -> Scroll { DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp) }
                 is MissingServiceResult -> Scroll { DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp) }

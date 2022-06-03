@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
+import no.nordicsemi.analytics.view.AnalyticsPermissionRequestDialog
 import no.nordicsemi.android.gls.GLSDestinations
 import no.nordicsemi.android.material.you.NordicActivity
 import no.nordicsemi.android.material.you.NordicTheme
@@ -32,6 +33,8 @@ class MainActivity : NordicActivity() {
                 ) {
                     NavigationView(HomeDestinations + ProfileDestinations + ScannerDestinations + GLSDestinations)
                 }
+
+                AnalyticsPermissionRequestDialog()
             }
         }
     }

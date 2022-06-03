@@ -37,20 +37,6 @@ fun CloseIconAppBar(text: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun TitleAppBar(text: String) {
-    SmallTopAppBar(
-        title = { Text(text, maxLines = 2) },
-        colors = TopAppBarDefaults.smallTopAppBarColors(
-            scrolledContainerColor = MaterialTheme.colorScheme.primary,
-            containerColor = colorResource(id = R.color.appBarColor),
-            titleContentColor = MaterialTheme.colorScheme.onPrimary,
-            actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
-            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-        )
-    )
-}
-
-@Composable
 fun LoggerBackIconAppBar(text: String, onClick: () -> Unit) {
     SmallTopAppBar(
         title = { Text(text, maxLines = 2) },

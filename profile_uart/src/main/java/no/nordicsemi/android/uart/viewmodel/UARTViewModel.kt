@@ -8,10 +8,9 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.*
 import no.nordicsemi.android.navigation.*
+import no.nordicsemi.android.service.ConnectedResult
 import no.nordicsemi.android.service.IdleResult
-import no.nordicsemi.android.service.SuccessResult
 import no.nordicsemi.android.uart.data.*
-import no.nordicsemi.android.uart.data.UARTPersistentDataSource
 import no.nordicsemi.android.uart.repository.UARTRepository
 import no.nordicsemi.android.uart.view.*
 import no.nordicsemi.android.utils.exhaustive
@@ -43,7 +42,7 @@ internal class UARTViewModel @Inject constructor(
             }
             _state.value = _state.value.copy(uartManagerState = WorkingState(it))
 
-            (it as? SuccessResult)?.let {
+            (it as? ConnectedResult)?.let {
                 analytics.logEvent(ProfileConnectedEvent(Profile.UART))
             }
         }.launchIn(viewModelScope)

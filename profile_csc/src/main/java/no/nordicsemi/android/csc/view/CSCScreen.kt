@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.csc.R
-import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.csc.viewmodel.CSCViewModel
 import no.nordicsemi.android.service.*
 import no.nordicsemi.android.theme.view.BackIconAppBar
@@ -36,6 +35,7 @@ fun CSCScreen() {
                 is WorkingState -> when (state.cscManagerState.result) {
                     is IdleResult,
                     is ConnectingResult -> DeviceConnectingView { viewModel.onEvent(OnDisconnectButtonClick) }
+                    is ConnectedResult -> DeviceConnectingView { viewModel.onEvent(OnDisconnectButtonClick) }
                     is DisconnectedResult -> DeviceDisconnectedView(Reason.USER, navigateUp)
                     is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp)
                     is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp)

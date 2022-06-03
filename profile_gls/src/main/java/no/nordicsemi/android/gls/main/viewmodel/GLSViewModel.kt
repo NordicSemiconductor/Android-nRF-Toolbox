@@ -1,19 +1,21 @@
 package no.nordicsemi.android.gls.main.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.gls.GlsDetailsDestinationId
-import no.nordicsemi.android.gls.repository.GLSRepository
 import no.nordicsemi.android.gls.data.GLS_SERVICE_UUID
 import no.nordicsemi.android.gls.main.view.*
+import no.nordicsemi.android.gls.repository.GLSRepository
 import no.nordicsemi.android.navigation.*
-import no.nordicsemi.android.service.SuccessResult
+import no.nordicsemi.android.service.ConnectedResult
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.android.utils.getDevice
 import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
@@ -61,7 +63,7 @@ internal class GLSViewModel @Inject constructor(
         repository.downloadData(viewModelScope, device).onEach {
             _state.value = WorkingState(it)
 
-            (it as? SuccessResult)?.let {
+            (it as? ConnectedResult)?.let {
                 analytics.logEvent(ProfileConnectedEvent(Profile.GLS))
             }
         }.launchIn(viewModelScope)

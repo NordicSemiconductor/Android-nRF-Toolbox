@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.HighlightOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -14,10 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.material.you.ScreenSection
 import no.nordicsemi.android.prx.R
 import no.nordicsemi.android.theme.R as themeR
-import androidx.compose.material.icons.filled.HighlightOff
-import no.nordicsemi.android.material.you.ScreenSection
 
 @Composable
 fun DeviceOutOfRangeView(navigateUp: () -> Unit) {

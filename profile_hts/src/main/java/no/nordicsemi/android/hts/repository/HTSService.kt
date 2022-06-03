@@ -1,6 +1,5 @@
 package no.nordicsemi.android.hts.repository
 
-import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint

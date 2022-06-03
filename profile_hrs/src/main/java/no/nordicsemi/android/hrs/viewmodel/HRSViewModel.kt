@@ -12,7 +12,7 @@ import no.nordicsemi.android.hrs.data.HRS_SERVICE_UUID
 import no.nordicsemi.android.hrs.service.HRSRepository
 import no.nordicsemi.android.hrs.view.*
 import no.nordicsemi.android.navigation.*
-import no.nordicsemi.android.service.SuccessResult
+import no.nordicsemi.android.service.ConnectedResult
 import no.nordicsemi.android.utils.exhaustive
 import no.nordicsemi.android.utils.getDevice
 import no.nordicsemi.ui.scanner.ScannerDestinationId
@@ -39,7 +39,7 @@ internal class HRSViewModel @Inject constructor(
             val zoomIn = (_state.value as? WorkingState)?.zoomIn ?: false
             _state.value = WorkingState(it, zoomIn)
 
-            (it as? SuccessResult)?.let {
+            (it as? ConnectedResult)?.let {
                 analytics.logEvent(ProfileConnectedEvent(Profile.HRS))
             }
         }.launchIn(viewModelScope)
