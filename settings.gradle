@@ -15,7 +15,7 @@ dependencyResolutionManagement {
 
             library('nordic-log', 'no.nordicsemi.android:log:2.3.0')
 
-            version('commonlibraries', '1.0.12')
+            version('commonlibraries', '1.0.13')
             library('nordic-ui-scanner', 'no.nordicsemi.android.common', 'uiscanner').versionRef('commonlibraries')
             library('nordic-navigation', 'no.nordicsemi.android.common', 'navigation').versionRef('commonlibraries')
             library('nordic-theme', 'no.nordicsemi.android.common', 'theme').versionRef('commonlibraries')
