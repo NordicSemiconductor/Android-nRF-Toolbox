@@ -1,7 +1,7 @@
 apply from: rootProject.file("library.gradle")
 
 android {
-    namespace 'no.nordicsemi.android.theme'
+    namespace 'no.nordicsemi.android.ui'
 }
 
 dependencies {

@@ -83,7 +83,7 @@ dependencies {
     implementation project(':profile_uart')
 
     implementation project(":lib_analytics")
-    implementation project(":lib_theme")
+    implementation project(':lib_ui')
     implementation project(":lib_utils")
     implementation project(":lib_service")
 

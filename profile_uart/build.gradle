@@ -25,7 +25,7 @@ protobuf {
 dependencies {
     implementation project(":lib_analytics")
     implementation project(":lib_service")
-    implementation project(":lib_theme")
+    implementation project(':lib_ui')
     implementation project(":lib_utils")
 
     implementation libs.room.runtime

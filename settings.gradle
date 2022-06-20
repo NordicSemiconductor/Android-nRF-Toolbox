@@ -98,7 +98,7 @@ include ':profile_uart'
 
 include ':lib_analytics'
 include ':lib_service'
-include ':lib_theme'
+include ':lib_ui'
 include ':lib_utils'
 
 if (file('../Android-Common-Libraries').exists()) {
