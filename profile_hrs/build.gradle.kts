@@ -29,19 +29,33 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.service
+plugins {
+    alias(libs.plugins.nordic.library)
+    id("kotlin-parcelize")
+}
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
+android {
+    namespace = "no.nordicsemi.android.hrs"
+}
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
-class ExampleUnitTest {
-    @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
-    }
+dependencies {
+    implementation(project(":lib_analytics"))
+    implementation(project(":lib_service"))
+    implementation(project(":lib_ui"))
+    implementation(project(":lib_utils"))
+
+    implementation(libs.chart)
+
+    implementation(libs.nordic.theme)
+    implementation(libs.nordic.ble.common)
+    implementation(libs.nordic.ble.ktx)
+    implementation(libs.nordic.navigation)
+    implementation(libs.nordic.uiscanner)
+    implementation(libs.nordic.uilogger)
+
+    implementation(libs.androidx.compose.material.iconsExtended)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.service)
 }

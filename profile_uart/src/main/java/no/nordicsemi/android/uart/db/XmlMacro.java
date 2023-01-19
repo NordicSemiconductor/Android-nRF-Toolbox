@@ -35,8 +35,9 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Text;
 
-import no.nordicsemi.android.uart.data.MacroEol;
-import no.nordicsemi.android.uart.data.MacroIcon;
+//import no.nordicsemi.android.uart.data.MacroEol;
+//import no.nordicsemi.android.uart.data.MacroIcon;
+import no.nordicsemi.android.uart.data.*;
 
 @Root
 public class XmlMacro {
