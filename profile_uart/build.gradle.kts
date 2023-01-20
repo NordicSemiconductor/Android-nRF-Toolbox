@@ -56,7 +56,7 @@ dependencies {
     implementation(libs.room.ktx)
 
 //    kapt(libs.room.compiler)
-    kapt("androidx.room:room-compiler:2.5.0")
+//    kapt("androidx.room:room-compiler:2.5.0")
 //    kapt("")
 
     implementation(libs.nordic.ble.common)
