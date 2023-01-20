@@ -31,9 +31,11 @@
 
 package no.nordicsemi.android.nrftoolbox.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -56,6 +58,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    @ApplicationContext
+    private val context: Context,
     private val navigationManager: Navigator,
     private val activitySignals: ActivitySignals,
     cgmRepository: CGMRepository,
@@ -110,8 +114,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun openLogger() {
-        NordicLogger.Companion.launch()
-        loggerAppRunner.runLogger()
+        NordicLogger.launch(context, logger = null)
     }
 
     fun logEvent(event: ProfileOpenEvent) {

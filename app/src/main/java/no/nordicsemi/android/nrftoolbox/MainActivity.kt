@@ -43,12 +43,8 @@ import no.nordicsemi.android.common.navigation.NavigationView
 import no.nordicsemi.android.common.theme.NordicActivity
 import no.nordicsemi.android.common.theme.NordicTheme
 import no.nordicsemi.android.gls.GLSDestination
-import no.nordicsemi.android.gls.GLSDestinations
-import no.nordicsemi.android.navigation.NavigationView
 import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
-import no.nordicsemi.android.theme.NordicTheme
 import no.nordicsemi.android.toolbox.scanner.ScannerDestination
-import no.nordicsemi.ui.scanner.ScannerDestinations
 import javax.inject.Inject
 
 @AndroidEntryPoint

@@ -39,11 +39,11 @@ import java.io.InputStream
 import java.io.OutputStream
 
 object MacroSerializer : Serializer<MacroSettings> {
-    override val defaultValue: MacroSettings = MacroSettings.getDefaultInstance()
+    override val defaultValue: MacroSettings = MacroSettings()
 
     override suspend fun readFrom(input: InputStream): MacroSettings {
         try {
-            return MacroSettings.parseFrom(input)
+            return  MacroSettings.ADAPTER.decode(input)
         } catch (exception: InvalidProtocolBufferException) {
             throw CorruptionException("Cannot read proto.", exception)
         }
@@ -52,5 +52,5 @@ object MacroSerializer : Serializer<MacroSettings> {
     override suspend fun writeTo(
         t: MacroSettings,
         output: OutputStream
-    ) = t.writeTo(output)
+    ) = MacroSettings.ADAPTER.encode(output, t)
 }

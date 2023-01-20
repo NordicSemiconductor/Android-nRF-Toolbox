@@ -32,19 +32,17 @@
 plugins {
     alias(libs.plugins.nordic.feature)
     alias(libs.plugins.kotlin.serialization)
-//    id("com.google.protobuf")
     alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.wire)
 }
 
 android {
     namespace = "no.nordicsemi.android.uart"
 }
-//
-//protobuf {
-//    protoc {
-//        artifact = "com.google.protobuf:protoc:3.14.0"
-//    }
-//}
+
+wire {
+    kotlin {}
+}
 
 dependencies {
     implementation(project(":lib_analytics"))

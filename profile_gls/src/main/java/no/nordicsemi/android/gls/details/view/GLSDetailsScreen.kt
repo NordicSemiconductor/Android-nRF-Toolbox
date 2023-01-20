@@ -33,6 +33,7 @@ package no.nordicsemi.android.gls.details.view
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.gls.R
@@ -42,7 +43,7 @@ import no.nordicsemi.android.ui.view.LoggerBackIconAppBar
 @Composable
 internal fun GLSDetailsScreen() {
     val viewModel: GLSDetailsViewModel = hiltViewModel()
-    val record = viewModel.record
+    val record = viewModel.record.collectAsState().value
 
     Column {
         LoggerBackIconAppBar(stringResource(id = R.string.gls_title)) {
