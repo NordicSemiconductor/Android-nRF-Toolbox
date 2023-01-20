@@ -47,7 +47,7 @@ import no.nordicsemi.android.ble.common.callback.glucose.GlucoseMeasurementRespo
 import no.nordicsemi.android.ble.common.data.RecordAccessControlPointData
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
 import no.nordicsemi.android.ble.ktx.suspend
-import no.nordicsemi.android.logger.NordicLogger
+import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.service.ConnectionObserverAdapter
 import no.nordicsemi.android.utils.launchWithCatch
 import java.util.*

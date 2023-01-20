@@ -42,15 +42,14 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.ktx.suspend
+import no.nordicsemi.android.common.logger.NordicLogger
+import no.nordicsemi.android.common.logger.NordicLoggerFactory
+import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
 import no.nordicsemi.android.gls.data.GLSData
 import no.nordicsemi.android.gls.data.GLSManager
 import no.nordicsemi.android.gls.data.WorkingMode
-import no.nordicsemi.android.logger.NordicLogger
-import no.nordicsemi.android.logger.NordicLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.ui.view.StringConst
-import no.nordicsemi.android.utils.exhaustive
-import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
 
 @ViewModelScoped
@@ -65,7 +64,7 @@ internal class GLSRepository @Inject constructor(
     private var logger: NordicLogger? = null
 
     fun downloadData(scope: CoroutineScope, device: DiscoveredBluetoothDevice): Flow<BleManagerResult<GLSData>> = callbackFlow {
-        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "GLS", device.address()).also {
+        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "GLS", device.address).also {
             logger = it
         }
         val managerInstance = manager ?: GLSManager(context, scope, createdLogger)
@@ -100,7 +99,7 @@ internal class GLSRepository @Inject constructor(
     }
 
     fun openLogger() {
-        logger?.openLogger()
+        NordicLogger.launch(context, logger)
     }
 
     fun requestMode(workingMode: WorkingMode) {
@@ -108,6 +107,6 @@ internal class GLSRepository @Inject constructor(
             WorkingMode.ALL -> manager?.requestAllRecords()
             WorkingMode.LAST -> manager?.requestLastRecord()
             WorkingMode.FIRST -> manager?.requestFirstRecord()
-        }.exhaustive
+        }
     }
 }

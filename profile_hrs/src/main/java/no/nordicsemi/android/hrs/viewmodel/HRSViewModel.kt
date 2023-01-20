@@ -31,28 +31,40 @@
 
 package no.nordicsemi.android.hrs.viewmodel
 
+import android.os.ParcelUuid
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
+import no.nordicsemi.android.common.navigation.NavigationResult
+import no.nordicsemi.android.common.navigation.Navigator
+import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
 import no.nordicsemi.android.hrs.data.HRS_SERVICE_UUID
 import no.nordicsemi.android.hrs.service.HRSRepository
-import no.nordicsemi.android.hrs.view.*
-import no.nordicsemi.android.navigation.*
+import no.nordicsemi.android.hrs.view.DisconnectEvent
+import no.nordicsemi.android.hrs.view.HRSScreenViewEvent
+import no.nordicsemi.android.hrs.view.HRSViewState
+import no.nordicsemi.android.hrs.view.NavigateUpEvent
+import no.nordicsemi.android.hrs.view.NoDeviceState
+import no.nordicsemi.android.hrs.view.OpenLoggerEvent
+import no.nordicsemi.android.hrs.view.SwitchZoomEvent
+import no.nordicsemi.android.hrs.view.WorkingState
 import no.nordicsemi.android.service.ConnectedResult
-import no.nordicsemi.android.utils.exhaustive
-import no.nordicsemi.android.utils.getDevice
-import no.nordicsemi.ui.scanner.ScannerDestinationId
+import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import javax.inject.Inject
 
 @HiltViewModel
 internal class HRSViewModel @Inject constructor(
     private val repository: HRSRepository,
-    private val navigationManager: NavigationManager,
+    private val navigationManager: Navigator,
     private val analytics: AppAnalytics
 ) : ViewModel() {
 
@@ -77,20 +89,18 @@ internal class HRSViewModel @Inject constructor(
     }
 
     private fun requestBluetoothDevice() {
-        navigationManager.navigateTo(ScannerDestinationId, UUIDArgument(HRS_SERVICE_UUID))
+        navigationManager.navigateTo(ScannerDestinationId, ParcelUuid(HRS_SERVICE_UUID))
 
-        navigationManager.recentResult.onEach {
-            if (it.destinationId == ScannerDestinationId) {
-                handleArgs(it)
-            }
-        }.launchIn(viewModelScope)
+        navigationManager.resultFrom(ScannerDestinationId)
+            .onEach { handleResult(it) }
+            .launchIn(viewModelScope)
     }
 
-    private fun handleArgs(args: DestinationResult) {
-        when (args) {
-            is CancelDestinationResult -> navigationManager.navigateUp()
-            is SuccessDestinationResult -> repository.launch(args.getDevice())
-        }.exhaustive
+    private fun handleResult(result: NavigationResult<DiscoveredBluetoothDevice>) {
+        when (result) {
+            is NavigationResult.Cancelled -> navigationManager.navigateUp()
+            is NavigationResult.Success -> repository.launch(result.value)
+        }
     }
 
     fun onEvent(event: HRSScreenViewEvent) {
@@ -99,7 +109,7 @@ internal class HRSViewModel @Inject constructor(
             NavigateUpEvent -> navigationManager.navigateUp()
             OpenLoggerEvent -> repository.openLogger()
             SwitchZoomEvent -> onZoomButtonClicked()
-        }.exhaustive
+        }
     }
 
     private fun onZoomButtonClicked() {

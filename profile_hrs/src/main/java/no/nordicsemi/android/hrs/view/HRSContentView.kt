@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -48,7 +49,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.hrs.R
 import no.nordicsemi.android.hrs.data.HRSData
-import no.nordicsemi.android.theme.ScreenSection
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.SectionTitle
 
@@ -59,7 +59,7 @@ internal fun HRSContentView(state: HRSData, zoomIn: Boolean, onEvent: (HRSScreen
         modifier = Modifier.padding(16.dp)
     ) {
 
-        ScreenSection {
+        OutlinedCard {
             SectionTitle(
                 resId = R.drawable.ic_chart_line,
                 title = stringResource(id = R.string.hrs_section_data),

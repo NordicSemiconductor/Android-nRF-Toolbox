@@ -31,10 +31,15 @@
 
 package no.nordicsemi.android.cgms.viewmodel
 
+import android.os.ParcelUuid
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.Profile
@@ -42,18 +47,25 @@ import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.cgms.data.CGMS_SERVICE_UUID
 import no.nordicsemi.android.cgms.data.CGMServiceCommand
 import no.nordicsemi.android.cgms.repository.CGMRepository
-import no.nordicsemi.android.cgms.view.*
-import no.nordicsemi.android.navigation.*
+import no.nordicsemi.android.cgms.view.CGMViewEvent
+import no.nordicsemi.android.cgms.view.CGMViewState
+import no.nordicsemi.android.cgms.view.DisconnectEvent
+import no.nordicsemi.android.cgms.view.NavigateUp
+import no.nordicsemi.android.cgms.view.NoDeviceState
+import no.nordicsemi.android.cgms.view.OnWorkingModeSelected
+import no.nordicsemi.android.cgms.view.OpenLoggerEvent
+import no.nordicsemi.android.cgms.view.WorkingState
+import no.nordicsemi.android.common.navigation.NavigationResult
+import no.nordicsemi.android.common.navigation.Navigator
+import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
 import no.nordicsemi.android.service.ConnectedResult
-import no.nordicsemi.android.utils.exhaustive
-import no.nordicsemi.android.utils.getDevice
-import no.nordicsemi.ui.scanner.ScannerDestinationId
+import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import javax.inject.Inject
 
 @HiltViewModel
 internal class CGMViewModel @Inject constructor(
     private val repository: CGMRepository,
-    private val navigationManager: NavigationManager,
+    private val navigationManager: Navigator,
     private val analytics: AppAnalytics
 ) : ViewModel() {
 
@@ -82,24 +94,22 @@ internal class CGMViewModel @Inject constructor(
             is OnWorkingModeSelected -> onCommandReceived(event.workingMode)
             NavigateUp -> navigationManager.navigateUp()
             OpenLoggerEvent -> repository.openLogger()
-        }.exhaustive
+        }
     }
 
     private fun requestBluetoothDevice() {
-        navigationManager.navigateTo(ScannerDestinationId, UUIDArgument(CGMS_SERVICE_UUID))
+        navigationManager.navigateTo(ScannerDestinationId, ParcelUuid(CGMS_SERVICE_UUID))
 
-        navigationManager.recentResult.onEach {
-            if (it.destinationId == ScannerDestinationId) {
-                handleArgs(it)
-            }
-        }.launchIn(viewModelScope)
+        navigationManager.resultFrom(ScannerDestinationId)
+            .onEach { handleResult(it) }
+            .launchIn(viewModelScope)
     }
 
-    private fun handleArgs(args: DestinationResult) {
-        when (args) {
-            is CancelDestinationResult -> navigationManager.navigateUp()
-            is SuccessDestinationResult -> repository.launch(args.getDevice())
-        }.exhaustive
+    private fun handleResult(result: NavigationResult<DiscoveredBluetoothDevice>) {
+        when (result) {
+            is NavigationResult.Cancelled -> navigationManager.navigateUp()
+            is NavigationResult.Success -> repository.launch(result.value)
+        }
     }
 
     private fun onCommandReceived(workingMode: CGMServiceCommand) {
@@ -108,7 +118,7 @@ internal class CGMViewModel @Inject constructor(
             CGMServiceCommand.REQUEST_LAST_RECORD -> repository.requestLastRecord()
             CGMServiceCommand.REQUEST_FIRST_RECORD -> repository.requestFirstRecord()
             CGMServiceCommand.DISCONNECT -> disconnect()
-        }.exhaustive
+        }
     }
 
     private fun disconnect() {

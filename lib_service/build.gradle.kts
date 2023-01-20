@@ -30,7 +30,7 @@
  */
 
 plugins {
-    alias(libs.plugins.nordic.library)
+    alias(libs.plugins.nordic.feature)
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -46,4 +46,5 @@ dependencies {
 
     implementation(libs.androidx.lifecycle.service)
     implementation(libs.androidx.localbroadcastmanager)
+    implementation(libs.androidx.core)
 }

@@ -35,7 +35,7 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import dagger.hilt.android.qualifiers.ApplicationContext
-import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
+import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
 import javax.inject.Inject
 
 const val DEVICE_DATA = "device-data"

@@ -31,28 +31,60 @@
 
 package no.nordicsemi.android.uart.viewmodel
 
+import android.os.ParcelUuid
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.analytics.*
-import no.nordicsemi.android.navigation.*
+import no.nordicsemi.android.analytics.AppAnalytics
+import no.nordicsemi.android.analytics.Profile
+import no.nordicsemi.android.analytics.ProfileConnectedEvent
+import no.nordicsemi.android.analytics.UARTChangeConfiguration
+import no.nordicsemi.android.analytics.UARTCreateConfiguration
+import no.nordicsemi.android.analytics.UARTMode
+import no.nordicsemi.android.analytics.UARTSendAnalyticsEvent
+import no.nordicsemi.android.common.navigation.NavigationResult
+import no.nordicsemi.android.common.navigation.Navigator
+import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
 import no.nordicsemi.android.service.ConnectedResult
 import no.nordicsemi.android.service.IdleResult
-import no.nordicsemi.android.uart.data.*
+import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
+import no.nordicsemi.android.uart.data.MacroEol
+import no.nordicsemi.android.uart.data.UARTConfiguration
+import no.nordicsemi.android.uart.data.UARTMacro
+import no.nordicsemi.android.uart.data.UARTPersistentDataSource
+import no.nordicsemi.android.uart.data.UART_SERVICE_UUID
 import no.nordicsemi.android.uart.repository.UARTRepository
-import no.nordicsemi.android.uart.view.*
-import no.nordicsemi.android.utils.exhaustive
-import no.nordicsemi.android.utils.getDevice
-import no.nordicsemi.ui.scanner.ScannerDestinationId
+import no.nordicsemi.android.uart.view.ClearOutputItems
+import no.nordicsemi.android.uart.view.DisconnectEvent
+import no.nordicsemi.android.uart.view.MacroInputSwitchClick
+import no.nordicsemi.android.uart.view.NavigateUp
+import no.nordicsemi.android.uart.view.OnAddConfiguration
+import no.nordicsemi.android.uart.view.OnConfigurationSelected
+import no.nordicsemi.android.uart.view.OnCreateMacro
+import no.nordicsemi.android.uart.view.OnDeleteConfiguration
+import no.nordicsemi.android.uart.view.OnDeleteMacro
+import no.nordicsemi.android.uart.view.OnEditConfiguration
+import no.nordicsemi.android.uart.view.OnEditFinish
+import no.nordicsemi.android.uart.view.OnEditMacro
+import no.nordicsemi.android.uart.view.OnRunInput
+import no.nordicsemi.android.uart.view.OnRunMacro
+import no.nordicsemi.android.uart.view.OpenLogger
+import no.nordicsemi.android.uart.view.UARTViewEvent
+import no.nordicsemi.android.uart.view.UARTViewState
+import no.nordicsemi.android.uart.view.WorkingState
 import javax.inject.Inject
 
 @HiltViewModel
 internal class UARTViewModel @Inject constructor(
     private val repository: UARTRepository,
-    private val navigationManager: NavigationManager,
+    private val navigationManager: Navigator,
     private val dataSource: UARTPersistentDataSource,
     private val analytics: AppAnalytics
 ) : ViewModel() {
@@ -90,20 +122,18 @@ internal class UARTViewModel @Inject constructor(
     }
 
     private fun requestBluetoothDevice() {
-        navigationManager.navigateTo(ScannerDestinationId, UUIDArgument(UART_SERVICE_UUID))
+        navigationManager.navigateTo(ScannerDestinationId, ParcelUuid(UART_SERVICE_UUID))
 
-        navigationManager.recentResult.onEach {
-            if (it.destinationId == ScannerDestinationId) {
-                handleArgs(it)
-            }
-        }.launchIn(viewModelScope)
+        navigationManager.resultFrom(ScannerDestinationId)
+            .onEach { handleResult(it) }
+            .launchIn(viewModelScope)
     }
 
-    private fun handleArgs(args: DestinationResult) {
-        when (args) {
-            is CancelDestinationResult -> navigationManager.navigateUp()
-            is SuccessDestinationResult -> repository.launch(args.getDevice())
-        }.exhaustive
+    private fun handleResult(result: NavigationResult<DiscoveredBluetoothDevice>) {
+        when (result) {
+            is NavigationResult.Cancelled -> navigationManager.navigateUp()
+            is NavigationResult.Success -> repository.launch(result.value)
+        }
     }
 
     fun onEvent(event: UARTViewEvent) {
@@ -123,7 +153,7 @@ internal class UARTViewModel @Inject constructor(
             OpenLogger -> repository.openLogger()
             is OnRunInput -> sendText(event.text, event.newLineChar)
             MacroInputSwitchClick -> onMacroInputSwitch()
-        }.exhaustive
+        }
     }
 
     private fun runMacro(macro: UARTMacro) {

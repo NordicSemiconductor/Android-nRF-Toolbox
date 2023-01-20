@@ -50,7 +50,6 @@ import androidx.compose.ui.res.stringResource
 import no.nordicsemi.android.ui.view.dialog.*
 import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.uart.data.UARTConfiguration
-import no.nordicsemi.android.utils.exhaustive
 
 @Composable
 internal fun UARTConfigurationPicker(state: UARTViewState, onEvent: (UARTViewEvent) -> Unit) {
@@ -68,7 +67,7 @@ internal fun UARTConfigurationPicker(state: UARTViewState, onEvent: (UARTViewEve
                     onEvent(OnConfigurationSelected(state.configurations[it.index]))
                     showDialog.value = false
                 }
-            }.exhaustive
+            }
         }
     }
 }

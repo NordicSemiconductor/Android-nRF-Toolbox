@@ -31,9 +31,9 @@
 
 package no.nordicsemi.android.csc.view
 
+import no.nordicsemi.android.common.theme.view.RadioButtonItem
+import no.nordicsemi.android.common.theme.view.RadioGroupViewEntity
 import no.nordicsemi.android.csc.data.CSCData
-import no.nordicsemi.android.theme.RadioButtonItem
-import no.nordicsemi.android.theme.RadioGroupViewEntity
 import java.util.*
 
 private const val DISPLAY_M_S = "m/s"

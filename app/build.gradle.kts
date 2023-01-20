@@ -60,6 +60,7 @@ dependencies {
     implementation(project(":lib_ui"))
     implementation(project(":lib_utils"))
     implementation(project(":lib_service"))
+    implementation(project(":lib_scanner"))
 
     implementation(libs.nordic.core)
     implementation(libs.nordic.theme)

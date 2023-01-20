@@ -49,7 +49,7 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("libs") {
-            from("no.nordicsemi.android.gradle:version-catalog:1.2.2")
+            from("no.nordicsemi.android.gradle:version-catalog:1.2.3")
         }
     }
 }
@@ -80,3 +80,4 @@ include(":lib_utils")
 //if (file('../Android-BLE-Library').exists()) {
 //    includeBuild('../Android-BLE-Library')
 //}
+include(":lib_scanner")

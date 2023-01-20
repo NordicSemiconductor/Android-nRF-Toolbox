@@ -45,6 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.ui.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CloseIconAppBar(text: String, onClick: () -> Unit) {
     SmallTopAppBar(
@@ -67,6 +68,7 @@ fun CloseIconAppBar(text: String, onClick: () -> Unit) {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoggerBackIconAppBar(text: String, onClick: () -> Unit) {
     SmallTopAppBar(
@@ -100,6 +102,7 @@ fun LoggerBackIconAppBar(text: String, onClick: () -> Unit) {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackIconAppBar(text: String, onClick: () -> Unit) {
     SmallTopAppBar(
@@ -123,6 +126,7 @@ fun BackIconAppBar(text: String, onClick: () -> Unit) {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoggerIconAppBar(text: String, onClick: () -> Unit, onDisconnectClick: () -> Unit, onLoggerClick: () -> Unit) {
     SmallTopAppBar(

@@ -37,16 +37,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.ktx.suspend
+import no.nordicsemi.android.common.logger.NordicLogger
+import no.nordicsemi.android.common.logger.NordicLoggerFactory
+import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
 import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.csc.data.CSCManager
 import no.nordicsemi.android.csc.data.WheelSize
-import no.nordicsemi.android.logger.NordicLogger
-import no.nordicsemi.android.logger.NordicLoggerFactory
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.ui.view.StringConst
-import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -72,7 +72,7 @@ class CSCRepository @Inject constructor(
     }
 
     fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
-        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "CSC", device.address()).also {
+        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "CSC", device.address).also {
             logger = it
         }
         val manager = CSCManager(context, scope, createdLogger)
@@ -103,7 +103,7 @@ class CSCRepository @Inject constructor(
     }
 
     fun openLogger() {
-        logger?.openLogger()
+        NordicLogger.launch(context, logger)
     }
 
     fun release() {

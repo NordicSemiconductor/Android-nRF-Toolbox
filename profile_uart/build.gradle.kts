@@ -30,7 +30,7 @@
  */
 
 plugins {
-    alias(libs.plugins.nordic.library)
+    alias(libs.plugins.nordic.feature)
     alias(libs.plugins.kotlin.serialization)
 //    id("com.google.protobuf")
     alias(libs.plugins.kotlin.kapt)
@@ -49,6 +49,7 @@ android {
 dependencies {
     implementation(project(":lib_analytics"))
     implementation(project(":lib_service"))
+    implementation(project(":lib_scanner"))
     implementation(project(":lib_ui"))
     implementation(project(":lib_utils"))
 
@@ -56,7 +57,7 @@ dependencies {
     implementation(libs.room.ktx)
 
 //    kapt(libs.room.compiler)
-//    kapt("androidx.room:room-compiler:2.5.0")
+    kapt(libs.room.compiler)
 //    kapt("")
 
     implementation(libs.nordic.ble.common)
@@ -67,6 +68,10 @@ dependencies {
     implementation(libs.nordic.navigation)
     implementation(libs.nordic.uilogger)
 
+    implementation(libs.androidx.dataStore.core)
+    implementation(libs.androidx.dataStore.preferences)
+
+    implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.compose.material3)

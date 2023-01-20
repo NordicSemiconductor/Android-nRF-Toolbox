@@ -84,7 +84,7 @@ internal fun BooleanField(title: String, value: Boolean) {
             Text(
                 text = stringResource(id = R.string.gls_no),
                 style = MaterialTheme.typography.bodyMedium,
-                color = colorResource(id = no.nordicsemi.android.theme.R.color.nordicGrass)
+                color = colorResource(id = R.color.nordicGrass)
             )
         }
     }

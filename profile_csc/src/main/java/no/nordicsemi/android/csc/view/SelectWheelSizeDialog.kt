@@ -35,8 +35,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import no.nordicsemi.android.common.theme.NordicTheme
 import no.nordicsemi.android.csc.R
-import no.nordicsemi.android.theme.NordicTheme
 import no.nordicsemi.android.ui.view.dialog.StringListDialog
 import no.nordicsemi.android.ui.view.dialog.StringListDialogConfig
 import no.nordicsemi.android.ui.view.dialog.StringListDialogResult

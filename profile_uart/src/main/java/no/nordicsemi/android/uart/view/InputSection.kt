@@ -45,15 +45,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.theme.RadioButtonGroup
-import no.nordicsemi.android.theme.RadioButtonItem
-import no.nordicsemi.android.theme.RadioGroupViewEntity
-import no.nordicsemi.android.theme.ScreenSection
+import no.nordicsemi.android.common.theme.view.RadioButtonGroup
+import no.nordicsemi.android.common.theme.view.RadioButtonItem
+import no.nordicsemi.android.common.theme.view.RadioGroupViewEntity
 import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.uart.data.MacroEol
 import no.nordicsemi.android.utils.EMPTY
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun InputSection(onEvent: (UARTViewEvent) -> Unit) {
     val text = rememberSaveable { mutableStateOf(String.EMPTY) }
@@ -105,7 +105,7 @@ internal fun EditInputSection(onEvent: (UARTViewEvent) -> Unit) {
     }
     val viewEntity = RadioGroupViewEntity(items)
 
-    ScreenSection {
+    OutlinedCard {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

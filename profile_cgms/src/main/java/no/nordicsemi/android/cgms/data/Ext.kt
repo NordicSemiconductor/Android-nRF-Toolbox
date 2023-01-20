@@ -29,11 +29,10 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.cgms.repository
+package no.nordicsemi.android.cgms.data
 
 import android.util.SparseArray
 import androidx.core.util.keyIterator
-import no.nordicsemi.android.cgms.data.CGMRecord
 
 internal fun SparseArray<CGMRecord>.toList(): List<CGMRecord> {
     val list = mutableListOf<CGMRecord>()

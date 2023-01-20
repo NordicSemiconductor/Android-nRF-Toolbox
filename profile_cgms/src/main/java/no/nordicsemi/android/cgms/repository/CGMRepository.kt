@@ -39,13 +39,13 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.cgms.data.CGMData
 import no.nordicsemi.android.cgms.data.CGMManager
-import no.nordicsemi.android.logger.NordicLogger
-import no.nordicsemi.android.logger.NordicLoggerFactory
+import no.nordicsemi.android.common.logger.NordicLogger
+import no.nordicsemi.android.common.logger.NordicLoggerFactory
+import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.ui.view.StringConst
-import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -71,7 +71,7 @@ class CGMRepository @Inject constructor(
     }
 
     fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
-        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "CGMS", device.address()).also {
+        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "CGMS", device.address).also {
             logger = it
         }
         val manager = CGMManager(context, scope, createdLogger)
@@ -110,7 +110,7 @@ class CGMRepository @Inject constructor(
     }
 
     fun openLogger() {
-        logger?.openLogger()
+        NordicLogger.launch(context, logger)
     }
 
     fun release() {

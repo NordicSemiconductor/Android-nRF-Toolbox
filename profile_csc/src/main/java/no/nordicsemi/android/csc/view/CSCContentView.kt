@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -48,15 +49,13 @@ import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.common.theme.view.RadioButtonGroup
 import no.nordicsemi.android.csc.R
 import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.csc.data.WheelSize
-import no.nordicsemi.android.theme.RadioButtonGroup
-import no.nordicsemi.android.theme.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.ui.view.dialog.FlowCanceled
 import no.nordicsemi.android.ui.view.dialog.ItemSelectedResult
-import no.nordicsemi.android.utils.exhaustive
 
 @Composable
 internal fun CSCContentView(state: CSCData, speedUnit: SpeedUnit, onEvent: (CSCViewEvent) -> Unit) {
@@ -74,7 +73,7 @@ internal fun CSCContentView(state: CSCData, speedUnit: SpeedUnit, onEvent: (CSCV
                         wheelEntries[it.index])))
                     showDialog.value = false
                 }
-            }.exhaustive
+            }
         }
     }
 
@@ -105,7 +104,7 @@ private fun SettingsSection(
     onEvent: (CSCViewEvent) -> Unit,
     onWheelButtonClick: () -> Unit,
 ) {
-    ScreenSection {
+    OutlinedCard {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

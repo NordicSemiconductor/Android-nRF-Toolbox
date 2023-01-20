@@ -38,12 +38,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
-import no.nordicsemi.analytics.view.AnalyticsPermissionRequestDialog
+import no.nordicsemi.android.common.analytics.view.AnalyticsPermissionRequestDialog
+import no.nordicsemi.android.common.navigation.NavigationView
+import no.nordicsemi.android.common.theme.NordicActivity
+import no.nordicsemi.android.common.theme.NordicTheme
+import no.nordicsemi.android.gls.GLSDestination
 import no.nordicsemi.android.gls.GLSDestinations
-import no.nordicsemi.android.theme.NordicActivity
-import no.nordicsemi.android.theme.NordicTheme
 import no.nordicsemi.android.navigation.NavigationView
 import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
+import no.nordicsemi.android.theme.NordicTheme
+import no.nordicsemi.android.toolbox.scanner.ScannerDestination
 import no.nordicsemi.ui.scanner.ScannerDestinations
 import javax.inject.Inject
 
@@ -62,7 +66,7 @@ class MainActivity : NordicActivity() {
                     color = MaterialTheme.colorScheme.surface,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    NavigationView(HomeDestinations + ProfileDestinations + ScannerDestinations + GLSDestinations)
+                    NavigationView(HomeDestinations + ProfileDestinations + ScannerDestination + GLSDestination)
                 }
 
                 AnalyticsPermissionRequestDialog()

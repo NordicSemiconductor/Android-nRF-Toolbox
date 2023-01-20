@@ -36,6 +36,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -45,13 +46,12 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.gls.R
 import no.nordicsemi.android.gls.data.GLSRecord
 import no.nordicsemi.android.gls.main.view.toDisplayString
-import no.nordicsemi.android.theme.ScreenSection
 
 @Composable
 internal fun GLSDetailsContentView(record: GLSRecord) {
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         Column(modifier = Modifier.padding(16.dp)) {
-            ScreenSection() {
+            OutlinedCard {
                 Field(
                     stringResource(id = R.string.gls_details_sequence_number),
                     record.sequenceNumber.toString()

@@ -31,8 +31,8 @@
 
 package no.nordicsemi.android.hts.view
 
-import no.nordicsemi.android.theme.RadioButtonItem
-import no.nordicsemi.android.theme.RadioGroupViewEntity
+import no.nordicsemi.android.common.theme.view.RadioButtonItem
+import no.nordicsemi.android.common.theme.view.RadioGroupViewEntity
 
 private const val DISPLAY_FAHRENHEIT = "°F"
 private const val DISPLAY_CELSIUS = "°C"

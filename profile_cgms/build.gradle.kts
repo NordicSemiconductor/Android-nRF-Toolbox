@@ -30,8 +30,8 @@
  */
 
 plugins {
-    alias(libs.plugins.nordic.library)
-    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.nordic.feature)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {
@@ -41,6 +41,7 @@ android {
 dependencies {
     implementation(project(":lib_analytics"))
     implementation(project(":lib_service"))
+    implementation(project(":lib_scanner"))
     implementation(project(":lib_ui"))
     implementation(project(":lib_utils"))
 
@@ -52,6 +53,7 @@ dependencies {
     implementation(libs.nordic.uiscanner)
     implementation(libs.nordic.navigation)
 
+    implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.compose.material3)

@@ -34,18 +34,27 @@ package no.nordicsemi.android.uart.repository
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.ktx.suspend
-import no.nordicsemi.android.logger.NordicLogger
-import no.nordicsemi.android.logger.NordicLoggerFactory
+import no.nordicsemi.android.common.logger.NordicLogger
+import no.nordicsemi.android.common.logger.NordicLoggerFactory
+import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.android.uart.data.ConfigurationDataSource
+import no.nordicsemi.android.uart.data.MacroEol
+import no.nordicsemi.android.uart.data.UARTData
+import no.nordicsemi.android.uart.data.UARTMacro
+import no.nordicsemi.android.uart.data.UARTManager
+import no.nordicsemi.android.uart.data.parseWithNewLineChar
 import no.nordicsemi.android.ui.view.StringConst
-import no.nordicsemi.android.uart.data.*
 import no.nordicsemi.android.utils.EMPTY
-import no.nordicsemi.ui.scanner.DiscoveredBluetoothDevice
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -74,7 +83,7 @@ class UARTRepository @Inject internal constructor(
     }
 
     fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
-        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "UART", device.address()).also {
+        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "UART", device.address).also {
             logger = it
         }
         val manager = UARTManager(context, scope, createdLogger)
@@ -103,7 +112,7 @@ class UARTRepository @Inject internal constructor(
     }
 
     fun openLogger() {
-        logger?.openLogger()
+        NordicLogger.launch(context, logger)
     }
 
     suspend fun saveConfigurationName(name: String) {

@@ -41,14 +41,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.cgms.R
 import no.nordicsemi.android.cgms.viewmodel.CGMViewModel
-import no.nordicsemi.android.service.*
+import no.nordicsemi.android.common.ui.scanner.view.DeviceConnectingView
+import no.nordicsemi.android.common.ui.scanner.view.DeviceDisconnectedView
+import no.nordicsemi.android.common.ui.scanner.view.Reason
+import no.nordicsemi.android.service.ConnectedResult
+import no.nordicsemi.android.service.ConnectingResult
+import no.nordicsemi.android.service.DeviceHolder
+import no.nordicsemi.android.service.DisconnectedResult
+import no.nordicsemi.android.service.IdleResult
+import no.nordicsemi.android.service.LinkLossResult
+import no.nordicsemi.android.service.MissingServiceResult
+import no.nordicsemi.android.service.SuccessResult
+import no.nordicsemi.android.service.UnknownErrorResult
 import no.nordicsemi.android.ui.view.BackIconAppBar
 import no.nordicsemi.android.ui.view.LoggerIconAppBar
-import no.nordicsemi.android.utils.exhaustive
-import no.nordicsemi.ui.scanner.ui.DeviceConnectingView
-import no.nordicsemi.ui.scanner.ui.DeviceDisconnectedView
-import no.nordicsemi.ui.scanner.ui.NoDeviceView
-import no.nordicsemi.ui.scanner.ui.Reason
+import no.nordicsemi.android.ui.view.NavigateUpButton
 
 @Composable
 fun CGMScreen() {
@@ -62,18 +69,18 @@ fun CGMScreen() {
 
         Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             when (state) {
-                NoDeviceState -> NoDeviceView()
+                NoDeviceState -> DeviceConnectingView()
                 is WorkingState -> when (state.result) {
                     is IdleResult,
                     is ConnectingResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
                     is ConnectedResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
-                    is DisconnectedResult -> DeviceDisconnectedView(Reason.USER, navigateUp)
-                    is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS, navigateUp)
-                    is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE, navigateUp)
-                    is UnknownErrorResult -> DeviceDisconnectedView(Reason.UNKNOWN, navigateUp)
+                    is DisconnectedResult -> DeviceDisconnectedView(Reason.USER) { NavigateUpButton(navigateUp) }
+                    is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS) { NavigateUpButton(navigateUp) }
+                    is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE) { NavigateUpButton(navigateUp) }
+                    is UnknownErrorResult -> DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) }
                     is SuccessResult -> CGMContentView(state.result.data) { viewModel.onEvent(it) }
                 }
-            }.exhaustive
+            }
         }
     }
 }

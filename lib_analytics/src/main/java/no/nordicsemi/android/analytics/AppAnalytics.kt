@@ -32,7 +32,7 @@
 package no.nordicsemi.android.analytics
 
 import android.annotation.SuppressLint
-import no.nordicsemi.analytics.NordicAnalytics
+import no.nordicsemi.android.common.analytics.NordicAnalytics
 import javax.inject.Inject
 import javax.inject.Singleton
 

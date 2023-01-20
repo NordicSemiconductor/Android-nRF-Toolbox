@@ -29,56 +29,20 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.uart.db;
+plugins {
+    alias(libs.plugins.nordic.feature)
+}
 
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.ElementArray;
-import org.simpleframework.xml.Root;
-import org.simpleframework.xml.core.PersistenceException;
-import org.simpleframework.xml.core.Validate;
+android {
+    namespace = "no.nordicsemi.android.toolbox.scanner"
+}
 
-@Root
-public class XmlConfiguration {
-	public static final int COMMANDS_COUNT = 9;
+dependencies {
+    implementation(libs.nordic.uiscanner)
+    implementation(libs.nordic.navigation)
 
-	@Attribute(required = false, empty = "Unnamed")
-	private String name;
-
-	@ElementArray
-	private XmlMacro[] commands = new XmlMacro[COMMANDS_COUNT];
-
-	/**
-	 * Returns the field name
-	 *
-	 * @return optional name
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * Sets the name to specified value
-	 * @param name the new name
-	 */
-	public void setName(final String name) {
-		this.name = name;
-	}
-
-	/**
-	 * Returns the array of commands. There is always 9 of them.
-	 * @return the commands array
-	 */
-	public XmlMacro[] getCommands() {
-		return commands;
-	}
-
-	public void setCommands(XmlMacro[] commands) {
-		this.commands = commands;
-	}
-
-	@Validate
-	private void validate() throws PersistenceException{
-		if (commands == null || commands.length != COMMANDS_COUNT)
-			throw new PersistenceException("There must be always " + COMMANDS_COUNT + " commands in a configuration.");
-	}
+    implementation(libs.androidx.compose.material.iconsExtended)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.activity.compose)
 }

@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -49,7 +50,6 @@ import no.nordicsemi.android.cgms.data.CGMData
 import no.nordicsemi.android.cgms.data.CGMRecord
 import no.nordicsemi.android.cgms.data.CGMServiceCommand
 import no.nordicsemi.android.cgms.data.RequestStatus
-import no.nordicsemi.android.theme.ScreenSection
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.SectionTitle
 
@@ -87,7 +87,7 @@ internal fun CGMContentView(state: CGMData, onEvent: (CGMViewEvent) -> Unit) {
 
 @Composable
 private fun SettingsView(state: CGMData, onEvent: (CGMViewEvent) -> Unit) {
-    ScreenSection {
+    OutlinedCard {
         SectionTitle(icon = Icons.Default.Settings, title = "Request items")
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -115,7 +115,7 @@ private fun SettingsView(state: CGMData, onEvent: (CGMViewEvent) -> Unit) {
 
 @Composable
 private fun RecordsView(state: CGMData) {
-    ScreenSection {
+    OutlinedCard {
         if (state.records.isEmpty()) {
             RecordsViewWithoutData()
         } else {

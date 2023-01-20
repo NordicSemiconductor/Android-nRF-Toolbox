@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -54,7 +55,6 @@ import no.nordicsemi.android.gls.data.GLSRecord
 import no.nordicsemi.android.gls.data.RequestStatus
 import no.nordicsemi.android.gls.data.WorkingMode
 import no.nordicsemi.android.gls.main.viewmodel.GLSViewModel
-import no.nordicsemi.android.theme.ScreenSection
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.SectionTitle
 
@@ -94,7 +94,7 @@ internal fun GLSContentView(state: GLSData, onEvent: (GLSScreenViewEvent) -> Uni
 
 @Composable
 private fun SettingsView(state: GLSData, onEvent: (GLSScreenViewEvent) -> Unit) {
-    ScreenSection {
+    OutlinedCard {
         SectionTitle(icon = Icons.Default.Settings, title = "Request items")
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -118,7 +118,7 @@ private fun SettingsView(state: GLSData, onEvent: (GLSScreenViewEvent) -> Unit) 
 
 @Composable
 private fun RecordsView(state: GLSData) {
-    ScreenSection {
+    OutlinedCard {
         if (state.records.isEmpty()) {
             RecordsViewWithoutData()
         } else {

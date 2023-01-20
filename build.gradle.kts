@@ -35,6 +35,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.kotlin.kapt) apply true
     alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.kotlin.parcelize) apply false
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.secrets) apply false
     alias(libs.plugins.protobuf) apply false
@@ -44,4 +45,6 @@ plugins {
     alias(libs.plugins.nordic.library.compose) apply false
     alias(libs.plugins.nordic.hilt) apply false
     alias(libs.plugins.nordic.feature) apply false
+    id("com.android.library") version "7.4.0" apply false
+    id("org.jetbrains.kotlin.android") version "1.7.21" apply false
 }

@@ -45,7 +45,7 @@ import no.nordicsemi.android.ble.common.callback.battery.BatteryLevelResponse
 import no.nordicsemi.android.ble.common.callback.bps.BloodPressureMeasurementResponse
 import no.nordicsemi.android.ble.common.callback.bps.IntermediateCuffPressureResponse
 import no.nordicsemi.android.ble.ktx.asValidResponseFlow
-import no.nordicsemi.android.logger.NordicLogger
+import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.service.ConnectionObserverAdapter
 import java.util.*
 

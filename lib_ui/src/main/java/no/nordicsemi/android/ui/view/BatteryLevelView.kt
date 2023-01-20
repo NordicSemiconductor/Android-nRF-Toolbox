@@ -31,14 +31,14 @@
 
 package no.nordicsemi.android.ui.view
 
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import no.nordicsemi.android.theme.ScreenSection
 import no.nordicsemi.android.ui.R
 
 @Composable
 fun BatteryLevelView(batteryLevel: Int) {
-    ScreenSection {
+    OutlinedCard {
         KeyValueField(
             stringResource(id = R.string.field_battery),
             "$batteryLevel%"

@@ -48,9 +48,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.analytics.Link
 import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileOpenEvent
+import no.nordicsemi.android.nrftoolbox.BPSDestinationId
 import no.nordicsemi.android.nrftoolbox.BuildConfig
-import no.nordicsemi.android.nrftoolbox.ProfileDestination
+import no.nordicsemi.android.nrftoolbox.CGMSDestinationId
+import no.nordicsemi.android.nrftoolbox.CSCDestinationId
+import no.nordicsemi.android.nrftoolbox.GLSDestinationId
+import no.nordicsemi.android.nrftoolbox.HRSDestinationId
+import no.nordicsemi.android.nrftoolbox.HTSDestinationId
+import no.nordicsemi.android.nrftoolbox.PRXDestinationId
 import no.nordicsemi.android.nrftoolbox.R
+import no.nordicsemi.android.nrftoolbox.RSCSDestinationId
+import no.nordicsemi.android.nrftoolbox.UARTDestinationId
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewModel
 
 private const val DFU_PACKAGE_NAME = "no.nordicsemi.android.dfu"
@@ -87,14 +95,14 @@ fun HomeScreen() {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_gls, R.string.gls_module, R.string.gls_module_full) {
-                    viewModel.openProfile(ProfileDestination.GLS)
+                    viewModel.openProfile(GLSDestinationId)
                     viewModel.logEvent(ProfileOpenEvent(Profile.GLS))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_bps, R.string.bps_module, R.string.bps_module_full) {
-                    viewModel.openProfile(ProfileDestination.BPS)
+                    viewModel.openProfile(BPSDestinationId)
                     viewModel.logEvent(ProfileOpenEvent(Profile.BPS))
                 }
 
@@ -109,42 +117,42 @@ fun HomeScreen() {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_csc, R.string.csc_module, R.string.csc_module_full, state.isCSCModuleRunning) {
-                    viewModel.openProfile(ProfileDestination.CSC)
+                    viewModel.openProfile(CSCDestinationId)
                     viewModel.logEvent(ProfileOpenEvent(Profile.CSC))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_hrs, R.string.hrs_module, R.string.hrs_module_full, state.isHRSModuleRunning) {
-                    viewModel.openProfile(ProfileDestination.HRS)
+                    viewModel.openProfile(HRSDestinationId)
                     viewModel.logEvent(ProfileOpenEvent(Profile.HRS))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_hts, R.string.hts_module, R.string.hts_module_full, state.isHTSModuleRunning) {
-                    viewModel.openProfile(ProfileDestination.HTS)
+                    viewModel.openProfile(HTSDestinationId)
                     viewModel.logEvent(ProfileOpenEvent(Profile.HTS))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_rscs, R.string.rscs_module, R.string.rscs_module_full, state.isRSCSModuleRunning) {
-                    viewModel.openProfile(ProfileDestination.RSCS)
+                    viewModel.openProfile(RSCSDestinationId)
                     viewModel.logEvent(ProfileOpenEvent(Profile.RSCS))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_cgm, R.string.cgm_module, R.string.cgm_module_full, state.isCGMModuleRunning) {
-                    viewModel.openProfile(ProfileDestination.CGMS)
+                    viewModel.openProfile(CGMSDestinationId)
                     viewModel.logEvent(ProfileOpenEvent(Profile.CGMS))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_prx, R.string.prx_module, R.string.prx_module_full, state.isPRXModuleRunning) {
-                    viewModel.openProfile(ProfileDestination.PRX)
+                    viewModel.openProfile(PRXDestinationId)
                     viewModel.logEvent(ProfileOpenEvent(Profile.PRX))
                 }
 
@@ -159,7 +167,7 @@ fun HomeScreen() {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureButton(R.drawable.ic_uart, R.string.uart_module, R.string.uart_module_full, state.isUARTModuleRunning) {
-                    viewModel.openProfile(ProfileDestination.UART)
+                    viewModel.openProfile(UARTDestinationId)
                     viewModel.logEvent(ProfileOpenEvent(Profile.UART))
                 }
 

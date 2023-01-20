@@ -39,8 +39,8 @@ internal data class GLSRecord(
     val time: Calendar? = null,
     val glucoseConcentration: Float = 0f,
     val unit: ConcentrationUnit = ConcentrationUnit.UNIT_KGPL,
-    val type: RecordType?,
-    val status: GlucoseStatus?,
+    val type: RecordType? = null,
+    val status: GlucoseStatus? = null,
     val sampleLocation: SampleLocation? = null,
     var context: MeasurementContext? = null
 )

@@ -41,12 +41,12 @@ import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.ProfileOpenEvent
 import no.nordicsemi.android.cgms.repository.CGMRepository
+import no.nordicsemi.android.common.logger.NordicLogger
+import no.nordicsemi.android.common.navigation.DestinationId
 import no.nordicsemi.android.csc.repository.CSCRepository
 import no.nordicsemi.android.hrs.service.HRSRepository
 import no.nordicsemi.android.hts.repository.HTSRepository
-import no.nordicsemi.android.logger.LoggerAppRunner
-import no.nordicsemi.android.navigation.NavigationManager
-import no.nordicsemi.android.nrftoolbox.ProfileDestination
+import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
 import no.nordicsemi.android.nrftoolbox.view.HomeViewState
 import no.nordicsemi.android.prx.repository.PRXRepository
@@ -56,7 +56,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val navigationManager: NavigationManager,
+    private val navigationManager: Navigator,
     private val activitySignals: ActivitySignals,
     cgmRepository: CGMRepository,
     cscRepository: CSCRepository,
@@ -65,7 +65,6 @@ class HomeViewModel @Inject constructor(
     prxRepository: PRXRepository,
     rscsRepository: RSCSRepository,
     uartRepository: UARTRepository,
-    private val loggerAppRunner: LoggerAppRunner,
     private val analytics: AppAnalytics
 ) : ViewModel() {
 
@@ -106,11 +105,12 @@ class HomeViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    fun openProfile(destination: ProfileDestination) {
-        navigationManager.navigateTo(destination.destination.id)
+    fun openProfile(destination: DestinationId<Unit, Unit>) {
+        navigationManager.navigateTo(destination)
     }
 
     fun openLogger() {
+        NordicLogger.Companion.launch()
         loggerAppRunner.runLogger()
     }
 

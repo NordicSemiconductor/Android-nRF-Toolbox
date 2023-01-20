@@ -38,13 +38,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.theme.ScreenSection
 import no.nordicsemi.android.prx.R
 import no.nordicsemi.android.prx.data.PRXData
 import no.nordicsemi.android.ui.view.BatteryLevelView
@@ -81,7 +81,7 @@ internal fun ContentView(state: PRXData, onEvent: (PRXScreenViewEvent) -> Unit) 
 
 @Composable
 private fun SettingsSection(state: PRXData, onEvent: (PRXScreenViewEvent) -> Unit) {
-    ScreenSection {
+    OutlinedCard {
         SectionTitle(icon = Icons.Default.Settings, title = stringResource(R.string.prx_settings))
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -114,7 +114,7 @@ private fun TurnAlarmOffButton(onEvent: (PRXScreenViewEvent) -> Unit) {
 
 @Composable
 private fun RecordsSection(state: PRXData) {
-    ScreenSection {
+    OutlinedCard {
         SectionTitle(resId = R.drawable.ic_records, title = stringResource(id = R.string.prx_records))
 
         Spacer(modifier = Modifier.height(16.dp))
