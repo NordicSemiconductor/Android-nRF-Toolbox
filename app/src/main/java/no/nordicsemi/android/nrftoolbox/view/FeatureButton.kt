@@ -66,7 +66,7 @@ fun FeatureButton(
 ) {
     OutlinedCard(modifier = Modifier.clickable { onClick() }) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {

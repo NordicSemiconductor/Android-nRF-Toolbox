@@ -69,6 +69,7 @@ include(":profile_rscs")
 include(":profile_uart")
 
 include(":lib_analytics")
+include(":lib_scanner")
 include(":lib_service")
 include(":lib_ui")
 include(":lib_utils")
@@ -80,4 +81,3 @@ include(":lib_utils")
 //if (file('../Android-BLE-Library').exists()) {
 //    includeBuild('../Android-BLE-Library')
 //}
-include(":lib_scanner")
