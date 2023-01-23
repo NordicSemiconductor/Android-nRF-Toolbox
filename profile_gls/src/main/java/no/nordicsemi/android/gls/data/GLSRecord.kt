@@ -31,7 +31,11 @@
 package no.nordicsemi.android.gls.data
 
 import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementCallback.GlucoseStatus
-import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.*
+import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Carbohydrate
+import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Health
+import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Meal
+import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Medication
+import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Tester
 import java.util.*
 
 internal data class GLSRecord(

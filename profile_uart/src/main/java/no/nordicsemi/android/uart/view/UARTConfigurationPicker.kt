@@ -47,9 +47,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import no.nordicsemi.android.ui.view.dialog.*
 import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.uart.data.UARTConfiguration
+import no.nordicsemi.android.ui.view.dialog.FlowCanceled
+import no.nordicsemi.android.ui.view.dialog.ItemSelectedResult
+import no.nordicsemi.android.ui.view.dialog.StringListDialog
+import no.nordicsemi.android.ui.view.dialog.StringListDialogConfig
+import no.nordicsemi.android.ui.view.dialog.StringListDialogResult
+import no.nordicsemi.android.ui.view.dialog.toAnnotatedString
 
 @Composable
 internal fun UARTConfigurationPicker(state: UARTViewState, onEvent: (UARTViewEvent) -> Unit) {

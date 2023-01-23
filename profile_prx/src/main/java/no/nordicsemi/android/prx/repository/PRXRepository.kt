@@ -34,7 +34,11 @@ package no.nordicsemi.android.prx.repository
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.common.logger.NordicLoggerFactory
 import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
@@ -42,7 +46,11 @@ import no.nordicsemi.android.prx.data.AlarmLevel
 import no.nordicsemi.android.prx.data.PRXData
 import no.nordicsemi.android.prx.data.PRXManager
 import no.nordicsemi.android.prx.data.ProximityServerManager
-import no.nordicsemi.android.service.*
+import no.nordicsemi.android.service.BleManagerResult
+import no.nordicsemi.android.service.IdleResult
+import no.nordicsemi.android.service.LinkLossResult
+import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.android.service.SuccessResult
 import no.nordicsemi.android.ui.view.StringConst
 import javax.inject.Inject
 import javax.inject.Singleton

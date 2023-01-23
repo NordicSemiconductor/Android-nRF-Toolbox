@@ -32,7 +32,15 @@
 package no.nordicsemi.android.uart.view
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -53,10 +61,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.uart.data.UARTRecord
 import no.nordicsemi.android.uart.data.UARTRecordType
+import no.nordicsemi.android.ui.view.SectionTitle
 import java.text.SimpleDateFormat
 import java.util.*
 

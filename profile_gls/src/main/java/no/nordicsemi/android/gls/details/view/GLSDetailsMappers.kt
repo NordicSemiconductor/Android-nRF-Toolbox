@@ -33,7 +33,11 @@ package no.nordicsemi.android.gls.details.view
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.*
+import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Carbohydrate
+import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Health
+import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Meal
+import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Medication
+import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Tester
 import no.nordicsemi.android.gls.R
 import no.nordicsemi.android.gls.data.ConcentrationUnit
 import no.nordicsemi.android.gls.data.MedicationUnit

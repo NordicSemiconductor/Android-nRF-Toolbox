@@ -47,7 +47,14 @@ import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
 import no.nordicsemi.android.gls.GlsDetailsDestinationId
 import no.nordicsemi.android.gls.data.GLS_SERVICE_UUID
-import no.nordicsemi.android.gls.main.view.*
+import no.nordicsemi.android.gls.main.view.DisconnectEvent
+import no.nordicsemi.android.gls.main.view.GLSScreenViewEvent
+import no.nordicsemi.android.gls.main.view.GLSViewState
+import no.nordicsemi.android.gls.main.view.NoDeviceState
+import no.nordicsemi.android.gls.main.view.OnGLSRecordClick
+import no.nordicsemi.android.gls.main.view.OnWorkingModeSelected
+import no.nordicsemi.android.gls.main.view.OpenLoggerEvent
+import no.nordicsemi.android.gls.main.view.WorkingState
 import no.nordicsemi.android.gls.repository.GLSRepository
 import no.nordicsemi.android.service.ConnectedResult
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId

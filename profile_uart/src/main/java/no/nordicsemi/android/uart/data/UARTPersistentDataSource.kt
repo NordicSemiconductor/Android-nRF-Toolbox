@@ -33,7 +33,11 @@ package no.nordicsemi.android.uart.data
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import no.nordicsemi.android.uart.db.*
+import no.nordicsemi.android.uart.db.CommentVisitor
+import no.nordicsemi.android.uart.db.Configuration
+import no.nordicsemi.android.uart.db.ConfigurationsDao
+import no.nordicsemi.android.uart.db.XmlConfiguration
+import no.nordicsemi.android.uart.db.XmlMacro
 import org.simpleframework.xml.Serializer
 import org.simpleframework.xml.core.Persister
 import org.simpleframework.xml.strategy.Strategy
