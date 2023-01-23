@@ -79,7 +79,6 @@ internal fun CSCContentView(state: CSCData, speedUnit: SpeedUnit, onEvent: (CSCV
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(16.dp)
     ) {
         SettingsSection(state, speedUnit, onEvent) { showDialog.value = true }
 

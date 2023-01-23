@@ -32,12 +32,16 @@
 package no.nordicsemi.android.csc.view
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.common.ui.scanner.view.DeviceConnectingView
 import no.nordicsemi.android.common.ui.scanner.view.DeviceDisconnectedView
@@ -57,17 +61,23 @@ import no.nordicsemi.android.ui.view.BackIconAppBar
 import no.nordicsemi.android.ui.view.LoggerIconAppBar
 import no.nordicsemi.android.ui.view.NavigateUpButton
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CSCScreen() {
     val viewModel: CSCViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
 
-    Column {
-        val navigateUp = { viewModel.onEvent(NavigateUp) }
+    val navigateUp = { viewModel.onEvent(NavigateUp) }
 
-        AppBar(state, navigateUp, viewModel)
-
-        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+    Scaffold(
+        topBar = { AppBar(state, navigateUp, viewModel) }
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(it)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
             when (state.cscManagerState) {
                 NoDeviceState -> DeviceConnectingView()
                 is WorkingState -> when (state.cscManagerState.result) {
@@ -76,9 +86,14 @@ fun CSCScreen() {
                     is ConnectedResult -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                     is DisconnectedResult -> DeviceDisconnectedView(Reason.USER) { NavigateUpButton(navigateUp) }
                     is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS) { NavigateUpButton(navigateUp) }
-                    is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE) { NavigateUpButton(navigateUp) }
+                    is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE) {
+                        NavigateUpButton(navigateUp)
+                    }
                     is UnknownErrorResult -> DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) }
-                    is SuccessResult ->  CSCContentView(state.cscManagerState.result.data, state.speedUnit) { viewModel.onEvent(it) }
+                    is SuccessResult -> CSCContentView(
+                        state.cscManagerState.result.data,
+                        state.speedUnit
+                    ) { viewModel.onEvent(it) }
                 }
             }
         }

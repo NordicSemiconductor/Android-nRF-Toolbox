@@ -69,13 +69,9 @@ import no.nordicsemi.android.ui.view.SectionTitle
 @Composable
 internal fun GLSContentView(state: GLSData, onEvent: (GLSScreenViewEvent) -> Unit) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
         SettingsView(state, onEvent)
 
         Spacer(modifier = Modifier.height(16.dp))
