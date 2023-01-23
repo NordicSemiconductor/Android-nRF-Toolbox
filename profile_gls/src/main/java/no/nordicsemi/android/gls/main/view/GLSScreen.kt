@@ -63,7 +63,9 @@ fun GLSScreen() {
     val state = viewModel.state.collectAsState().value
 
     Column {
-        val navigateUp = { viewModel.onEvent(DisconnectEvent) }
+        val navigateUp = {
+            viewModel.onEvent(DisconnectEvent)
+        }
 
         AppBar(state, navigateUp, viewModel)
 
@@ -72,8 +74,8 @@ fun GLSScreen() {
                 NoDeviceState -> DeviceConnectingView()
                 is WorkingState -> when (state.result) {
                     is IdleResult,
-                    is ConnectingResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
-                    is ConnectedResult -> DeviceConnectingView { viewModel.onEvent(DisconnectEvent) }
+                    is ConnectingResult -> DeviceConnectingView { NavigateUpButton(navigateUp) }
+                    is ConnectedResult -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                     is DisconnectedResult -> DeviceDisconnectedView(Reason.USER) { NavigateUpButton(navigateUp) }
                     is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS) { NavigateUpButton(navigateUp) }
                     is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE) { NavigateUpButton(navigateUp) }

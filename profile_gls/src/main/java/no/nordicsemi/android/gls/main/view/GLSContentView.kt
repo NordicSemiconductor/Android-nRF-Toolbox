@@ -56,6 +56,7 @@ import no.nordicsemi.android.gls.data.RequestStatus
 import no.nordicsemi.android.gls.data.WorkingMode
 import no.nordicsemi.android.gls.main.viewmodel.GLSViewModel
 import no.nordicsemi.android.ui.view.BatteryLevelView
+import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
@@ -94,7 +95,7 @@ internal fun GLSContentView(state: GLSData, onEvent: (GLSScreenViewEvent) -> Uni
 
 @Composable
 private fun SettingsView(state: GLSData, onEvent: (GLSScreenViewEvent) -> Unit) {
-    OutlinedCard {
+    ScreenSection {
         SectionTitle(icon = Icons.Default.Settings, title = "Request items")
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -118,7 +119,7 @@ private fun SettingsView(state: GLSData, onEvent: (GLSScreenViewEvent) -> Unit) 
 
 @Composable
 private fun RecordsView(state: GLSData) {
-    OutlinedCard {
+    ScreenSection {
         if (state.records.isEmpty()) {
             RecordsViewWithoutData()
         } else {

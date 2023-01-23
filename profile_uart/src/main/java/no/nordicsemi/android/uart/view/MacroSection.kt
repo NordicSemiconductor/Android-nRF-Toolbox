@@ -48,6 +48,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.uart.R
+import no.nordicsemi.android.ui.view.ScreenSection
 
 @Composable
 internal fun MacroSection(viewState: UARTViewState, onEvent: (UARTViewEvent) -> Unit) {
@@ -73,7 +74,7 @@ internal fun MacroSection(viewState: UARTViewState, onEvent: (UARTViewEvent) -> 
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        OutlinedCard {
+        ScreenSection {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {

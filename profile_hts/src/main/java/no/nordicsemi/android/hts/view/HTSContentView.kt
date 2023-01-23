@@ -46,6 +46,7 @@ import no.nordicsemi.android.hts.R
 import no.nordicsemi.android.hts.data.HTSData
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.KeyValueField
+import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
@@ -56,7 +57,7 @@ internal fun HTSContentView(state: HTSData, temperatureUnit: TemperatureUnit, on
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        OutlinedCard {
+        ScreenSection {
             SectionTitle(resId = R.drawable.ic_thermometer, title = "Settings")
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -68,7 +69,7 @@ internal fun HTSContentView(state: HTSData, temperatureUnit: TemperatureUnit, on
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedCard {
+        ScreenSection {
             SectionTitle(resId = R.drawable.ic_records, title = stringResource(id = R.string.hts_records_section))
 
             Spacer(modifier = Modifier.height(16.dp))

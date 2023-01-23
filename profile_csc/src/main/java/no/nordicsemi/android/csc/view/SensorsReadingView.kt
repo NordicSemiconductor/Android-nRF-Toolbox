@@ -44,11 +44,12 @@ import no.nordicsemi.android.csc.R
 import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.KeyValueField
+import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
 internal fun SensorsReadingView(state: CSCData, speedUnit: SpeedUnit) {
-    OutlinedCard {
+    ScreenSection {
         SectionTitle(resId = R.drawable.ic_records, title = "Records")
 
         Spacer(modifier = Modifier.height(16.dp))

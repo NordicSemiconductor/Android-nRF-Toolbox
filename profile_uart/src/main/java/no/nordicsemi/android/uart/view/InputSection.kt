@@ -51,6 +51,7 @@ import no.nordicsemi.android.common.theme.view.RadioGroupViewEntity
 import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.uart.data.MacroEol
+import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.utils.EMPTY
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -105,7 +106,7 @@ internal fun EditInputSection(onEvent: (UARTViewEvent) -> Unit) {
     }
     val viewEntity = RadioGroupViewEntity(items)
 
-    OutlinedCard {
+    ScreenSection {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

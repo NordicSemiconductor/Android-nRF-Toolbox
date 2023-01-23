@@ -31,12 +31,17 @@
 
 package no.nordicsemi.android.gls.details.view
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -46,12 +51,13 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.gls.R
 import no.nordicsemi.android.gls.data.GLSRecord
 import no.nordicsemi.android.gls.main.view.toDisplayString
+import no.nordicsemi.android.ui.view.ScreenSection
 
 @Composable
 internal fun GLSDetailsContentView(record: GLSRecord) {
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         Column(modifier = Modifier.padding(16.dp)) {
-            OutlinedCard {
+            ScreenSection {
                 Field(
                     stringResource(id = R.string.gls_details_sequence_number),
                     record.sequenceNumber.toString()

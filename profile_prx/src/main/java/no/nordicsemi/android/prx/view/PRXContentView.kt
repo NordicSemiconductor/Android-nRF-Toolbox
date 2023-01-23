@@ -49,6 +49,7 @@ import no.nordicsemi.android.prx.R
 import no.nordicsemi.android.prx.data.PRXData
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.KeyValueField
+import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
@@ -81,7 +82,7 @@ internal fun ContentView(state: PRXData, onEvent: (PRXScreenViewEvent) -> Unit) 
 
 @Composable
 private fun SettingsSection(state: PRXData, onEvent: (PRXScreenViewEvent) -> Unit) {
-    OutlinedCard {
+    ScreenSection {
         SectionTitle(icon = Icons.Default.Settings, title = stringResource(R.string.prx_settings))
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -114,7 +115,7 @@ private fun TurnAlarmOffButton(onEvent: (PRXScreenViewEvent) -> Unit) {
 
 @Composable
 private fun RecordsSection(state: PRXData) {
-    OutlinedCard {
+    ScreenSection {
         SectionTitle(resId = R.drawable.ic_records, title = stringResource(id = R.string.prx_records))
 
         Spacer(modifier = Modifier.height(16.dp))

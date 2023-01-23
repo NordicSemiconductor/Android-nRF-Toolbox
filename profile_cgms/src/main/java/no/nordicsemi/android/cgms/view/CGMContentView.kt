@@ -31,14 +31,21 @@
 
 package no.nordicsemi.android.cgms.view
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -51,6 +58,7 @@ import no.nordicsemi.android.cgms.data.CGMRecord
 import no.nordicsemi.android.cgms.data.CGMServiceCommand
 import no.nordicsemi.android.cgms.data.RequestStatus
 import no.nordicsemi.android.ui.view.BatteryLevelView
+import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
@@ -87,7 +95,7 @@ internal fun CGMContentView(state: CGMData, onEvent: (CGMViewEvent) -> Unit) {
 
 @Composable
 private fun SettingsView(state: CGMData, onEvent: (CGMViewEvent) -> Unit) {
-    OutlinedCard {
+    ScreenSection {
         SectionTitle(icon = Icons.Default.Settings, title = "Request items")
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -115,7 +123,7 @@ private fun SettingsView(state: CGMData, onEvent: (CGMViewEvent) -> Unit) {
 
 @Composable
 private fun RecordsView(state: CGMData) {
-    OutlinedCard {
+    ScreenSection {
         if (state.records.isEmpty()) {
             RecordsViewWithoutData()
         } else {

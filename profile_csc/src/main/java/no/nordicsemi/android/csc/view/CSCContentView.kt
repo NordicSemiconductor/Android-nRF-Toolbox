@@ -53,6 +53,7 @@ import no.nordicsemi.android.common.theme.view.RadioButtonGroup
 import no.nordicsemi.android.csc.R
 import no.nordicsemi.android.csc.data.CSCData
 import no.nordicsemi.android.csc.data.WheelSize
+import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.ui.view.dialog.FlowCanceled
 import no.nordicsemi.android.ui.view.dialog.ItemSelectedResult
@@ -104,7 +105,7 @@ private fun SettingsSection(
     onEvent: (CSCViewEvent) -> Unit,
     onWheelButtonClick: () -> Unit,
 ) {
-    OutlinedCard {
+    ScreenSection {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.hrs.R
 import no.nordicsemi.android.hrs.data.HRSData
 import no.nordicsemi.android.ui.view.BatteryLevelView
+import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
@@ -59,7 +60,7 @@ internal fun HRSContentView(state: HRSData, zoomIn: Boolean, onEvent: (HRSScreen
         modifier = Modifier.padding(16.dp)
     ) {
 
-        OutlinedCard {
+        ScreenSection {
             SectionTitle(
                 resId = R.drawable.ic_chart_line,
                 title = stringResource(id = R.string.hrs_section_data),

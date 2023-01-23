@@ -72,8 +72,8 @@ fun CSCScreen() {
                 NoDeviceState -> DeviceConnectingView()
                 is WorkingState -> when (state.cscManagerState.result) {
                     is IdleResult,
-                    is ConnectingResult -> DeviceConnectingView { viewModel.onEvent(OnDisconnectButtonClick) }
-                    is ConnectedResult -> DeviceConnectingView { viewModel.onEvent(OnDisconnectButtonClick) }
+                    is ConnectingResult -> DeviceConnectingView { NavigateUpButton(navigateUp) }
+                    is ConnectedResult -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                     is DisconnectedResult -> DeviceDisconnectedView(Reason.USER) { NavigateUpButton(navigateUp) }
                     is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS) { NavigateUpButton(navigateUp) }
                     is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE) { NavigateUpButton(navigateUp) }

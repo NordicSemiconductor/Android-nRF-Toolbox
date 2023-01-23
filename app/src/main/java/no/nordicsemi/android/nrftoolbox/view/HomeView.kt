@@ -34,7 +34,9 @@ package no.nordicsemi.android.nrftoolbox.view
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -66,16 +68,20 @@ private const val DFU_LINK = "https://play.google.com/store/apps/details?id=no.n
 
 private const val LOGGER_PACKAGE_NAME = "no.nordicsemi.android.log"
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen() {
     val viewModel: HomeViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
 
-    Column {
-        TitleAppBar(stringResource(id = R.string.app_name))
-
+    Scaffold(
+        topBar = {
+            TitleAppBar(stringResource(id = R.string.app_name))
+        }
+    ) {
         Column(
             modifier = Modifier
+                .padding(it)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
@@ -116,42 +122,72 @@ fun HomeScreen() {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                FeatureButton(R.drawable.ic_csc, R.string.csc_module, R.string.csc_module_full, state.isCSCModuleRunning) {
+                FeatureButton(
+                    R.drawable.ic_csc,
+                    R.string.csc_module,
+                    R.string.csc_module_full,
+                    state.isCSCModuleRunning
+                ) {
                     viewModel.openProfile(CSCDestinationId)
                     viewModel.logEvent(ProfileOpenEvent(Profile.CSC))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                FeatureButton(R.drawable.ic_hrs, R.string.hrs_module, R.string.hrs_module_full, state.isHRSModuleRunning) {
+                FeatureButton(
+                    R.drawable.ic_hrs,
+                    R.string.hrs_module,
+                    R.string.hrs_module_full,
+                    state.isHRSModuleRunning
+                ) {
                     viewModel.openProfile(HRSDestinationId)
                     viewModel.logEvent(ProfileOpenEvent(Profile.HRS))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                FeatureButton(R.drawable.ic_hts, R.string.hts_module, R.string.hts_module_full, state.isHTSModuleRunning) {
+                FeatureButton(
+                    R.drawable.ic_hts,
+                    R.string.hts_module,
+                    R.string.hts_module_full,
+                    state.isHTSModuleRunning
+                ) {
                     viewModel.openProfile(HTSDestinationId)
                     viewModel.logEvent(ProfileOpenEvent(Profile.HTS))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                FeatureButton(R.drawable.ic_rscs, R.string.rscs_module, R.string.rscs_module_full, state.isRSCSModuleRunning) {
+                FeatureButton(
+                    R.drawable.ic_rscs,
+                    R.string.rscs_module,
+                    R.string.rscs_module_full,
+                    state.isRSCSModuleRunning
+                ) {
                     viewModel.openProfile(RSCSDestinationId)
                     viewModel.logEvent(ProfileOpenEvent(Profile.RSCS))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                FeatureButton(R.drawable.ic_cgm, R.string.cgm_module, R.string.cgm_module_full, state.isCGMModuleRunning) {
+                FeatureButton(
+                    R.drawable.ic_cgm,
+                    R.string.cgm_module,
+                    R.string.cgm_module_full,
+                    state.isCGMModuleRunning
+                ) {
                     viewModel.openProfile(CGMSDestinationId)
                     viewModel.logEvent(ProfileOpenEvent(Profile.CGMS))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                FeatureButton(R.drawable.ic_prx, R.string.prx_module, R.string.prx_module_full, state.isPRXModuleRunning) {
+                FeatureButton(
+                    R.drawable.ic_prx,
+                    R.string.prx_module,
+                    R.string.prx_module_full,
+                    state.isPRXModuleRunning
+                ) {
                     viewModel.openProfile(PRXDestinationId)
                     viewModel.logEvent(ProfileOpenEvent(Profile.PRX))
                 }
@@ -166,7 +202,12 @@ fun HomeScreen() {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                FeatureButton(R.drawable.ic_uart, R.string.uart_module, R.string.uart_module_full, state.isUARTModuleRunning) {
+                FeatureButton(
+                    R.drawable.ic_uart,
+                    R.string.uart_module,
+                    R.string.uart_module_full,
+                    state.isUARTModuleRunning
+                ) {
                     viewModel.openProfile(UARTDestinationId)
                     viewModel.logEvent(ProfileOpenEvent(Profile.UART))
                 }
@@ -197,7 +238,13 @@ fun HomeScreen() {
                     R.string.logger_module_info
                 } ?: R.string.dfu_module_install
 
-                FeatureButton(R.drawable.ic_logger, R.string.logger_module, R.string.logger_module_full, null, loggerDescription) {
+                FeatureButton(
+                    R.drawable.ic_logger,
+                    R.string.logger_module,
+                    R.string.logger_module_full,
+                    null,
+                    loggerDescription
+                ) {
                     viewModel.openLogger()
                     viewModel.logEvent(ProfileOpenEvent(Link.LOGGER))
                 }

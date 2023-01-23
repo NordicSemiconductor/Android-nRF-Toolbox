@@ -48,6 +48,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.prx.R
+import no.nordicsemi.android.ui.view.ScreenSection
 
 @Composable
 fun DeviceOutOfRangeView(navigateUp: () -> Unit) {
@@ -57,7 +58,7 @@ fun DeviceOutOfRangeView(navigateUp: () -> Unit) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        OutlinedCard {
+        ScreenSection {
             Icon(
                 imageVector = Icons.Default.HighlightOff,
                 contentDescription = null,
