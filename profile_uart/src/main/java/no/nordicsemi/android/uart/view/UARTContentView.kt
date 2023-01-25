@@ -31,18 +31,19 @@
 
 package no.nordicsemi.android.uart.view
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.uart.data.UARTData
+import no.nordicsemi.android.ui.view.ScreenSection
 
 @Composable
 internal fun UARTContentView(
@@ -56,16 +57,11 @@ internal fun UARTContentView(
             .fillMaxSize()
     ) {
 
-        Card(
-            modifier = Modifier
-                .weight(1f)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, top = 16.dp, end = 16.dp)
-            ) {
-                OutputSection(state.displayMessages, onEvent)
+        Box(modifier = Modifier.weight(1f)) {
+            ScreenSection {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    OutputSection(state.displayMessages, onEvent)
+                }
             }
         }
 

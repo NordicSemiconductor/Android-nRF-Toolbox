@@ -54,7 +54,6 @@ import no.nordicsemi.android.ui.view.SectionTitle
 @Composable
 internal fun ContentView(state: PRXData, onEvent: (PRXScreenViewEvent) -> Unit) {
     Column(
-        modifier = Modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         SettingsSection(state, onEvent)

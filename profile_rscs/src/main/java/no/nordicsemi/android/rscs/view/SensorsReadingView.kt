@@ -42,11 +42,12 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.rscs.R
 import no.nordicsemi.android.rscs.data.RSCSData
 import no.nordicsemi.android.ui.view.KeyValueField
+import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
 internal fun SensorsReadingView(state: RSCSData) {
-    OutlinedCard {
+    ScreenSection {
         SectionTitle(resId = R.drawable.ic_records, title = "Records")
 
         Spacer(modifier = Modifier.height(16.dp))

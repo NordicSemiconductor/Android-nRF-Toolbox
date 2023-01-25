@@ -32,6 +32,8 @@
 package no.nordicsemi.android.uart.view
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -39,6 +41,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -77,10 +80,7 @@ fun UARTScreen() {
         topBar = { AppBar(state, navigateUp) { viewModel.onEvent(it) } }
     ) {
         Column(
-            modifier = Modifier
-                .padding(it)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
+            modifier = Modifier.padding(it)
         ) {
             when (state.uartManagerState) {
                 NoDeviceState -> DeviceConnectingView()
@@ -116,17 +116,23 @@ private fun AppBar(state: UARTViewState, navigateUp: () -> Unit, onEvent: (UARTV
 
 @Composable
 private fun SuccessScreen(data: UARTData, state: UARTViewState, viewModel: UARTViewModel) {
-    val viewEntity = PagerViewEntity(
+    val input = stringResource(id = R.string.uart_input)
+    val macros = stringResource(id = R.string.uart_macros)
+    val viewEntity = remember { PagerViewEntity(
         listOf(
-            PagerViewItem(stringResource(id = R.string.uart_input)) {
+            PagerViewItem(input) {
                 UARTContentView(data) { viewModel.onEvent(it) }
             },
-            PagerViewItem(stringResource(id = R.string.uart_macros)) {
+            PagerViewItem(macros) {
                 MacroSection(state) { viewModel.onEvent(it) }
             }
         )
+    ) }
+    PagerView(
+        viewEntity = viewEntity,
+        modifier = Modifier.fillMaxSize(),
+        itemSpacing = 16.dp
     )
-    PagerView(viewEntity)
 }
 
 @Composable
