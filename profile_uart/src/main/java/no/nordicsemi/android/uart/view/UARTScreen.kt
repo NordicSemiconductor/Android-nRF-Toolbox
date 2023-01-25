@@ -32,12 +32,16 @@
 package no.nordicsemi.android.uart.view
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.common.theme.view.PagerView
 import no.nordicsemi.android.common.theme.view.PagerViewEntity
@@ -61,17 +65,23 @@ import no.nordicsemi.android.ui.view.BackIconAppBar
 import no.nordicsemi.android.ui.view.LoggerIconAppBar
 import no.nordicsemi.android.ui.view.NavigateUpButton
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UARTScreen() {
     val viewModel: UARTViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
 
-    Column {
-        val navigateUp = { viewModel.onEvent(NavigateUp) }
+    val navigateUp = { viewModel.onEvent(NavigateUp) }
 
-        AppBar(state = state, navigateUp = navigateUp) { viewModel.onEvent(it) }
-
-        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+    Scaffold(
+        topBar = { AppBar(state, navigateUp) { viewModel.onEvent(it) } }
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(it)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
             when (state.uartManagerState) {
                 NoDeviceState -> DeviceConnectingView()
                 is WorkingState -> when (state.uartManagerState.result) {

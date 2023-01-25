@@ -55,9 +55,7 @@ import no.nordicsemi.android.ui.view.SectionTitle
 @Composable
 internal fun HTSContentView(state: HTSData, temperatureUnit: TemperatureUnit, onEvent: (HTSScreenViewEvent) -> Unit) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ScreenSection {

@@ -55,8 +55,7 @@ import no.nordicsemi.android.ui.view.SectionTitle
 @Composable
 internal fun HRSContentView(state: HRSData, zoomIn: Boolean, onEvent: (HRSScreenViewEvent) -> Unit) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(16.dp)
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         ScreenSection {

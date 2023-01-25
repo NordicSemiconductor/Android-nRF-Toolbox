@@ -32,6 +32,7 @@
 package no.nordicsemi.android.gls.main.viewmodel
 
 import android.os.ParcelUuid
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel

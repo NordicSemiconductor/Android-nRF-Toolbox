@@ -32,12 +32,16 @@
 package no.nordicsemi.android.cgms.view
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.cgms.R
 import no.nordicsemi.android.cgms.viewmodel.CGMViewModel
@@ -57,17 +61,23 @@ import no.nordicsemi.android.ui.view.BackIconAppBar
 import no.nordicsemi.android.ui.view.LoggerIconAppBar
 import no.nordicsemi.android.ui.view.NavigateUpButton
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CGMScreen() {
     val viewModel: CGMViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
 
-    Column {
-        val navigateUp = { viewModel.onEvent(NavigateUp) }
+    val navigateUp = { viewModel.onEvent(NavigateUp) }
 
-        AppBar(state, navigateUp, viewModel)
-
-        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+    Scaffold(
+        topBar = { AppBar(state = state, navigateUp = navigateUp, viewModel = viewModel) }
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(it)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
             when (state) {
                 NoDeviceState -> DeviceConnectingView()
                 is WorkingState -> when (state.result) {

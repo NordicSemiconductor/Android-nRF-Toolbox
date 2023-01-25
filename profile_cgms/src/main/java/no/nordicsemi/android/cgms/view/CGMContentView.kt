@@ -64,9 +64,7 @@ import no.nordicsemi.android.ui.view.SectionTitle
 @Composable
 internal fun CGMContentView(state: CGMData, onEvent: (CGMViewEvent) -> Unit) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         SettingsView(state, onEvent)
