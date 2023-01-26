@@ -31,8 +31,8 @@
 
 package no.nordicsemi.android.uart.view
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -62,7 +62,6 @@ import no.nordicsemi.android.service.MissingServiceResult
 import no.nordicsemi.android.service.SuccessResult
 import no.nordicsemi.android.service.UnknownErrorResult
 import no.nordicsemi.android.uart.R
-import no.nordicsemi.android.uart.data.UARTData
 import no.nordicsemi.android.uart.viewmodel.UARTViewModel
 import no.nordicsemi.android.ui.view.BackIconAppBar
 import no.nordicsemi.android.ui.view.LoggerIconAppBar
@@ -83,19 +82,26 @@ fun UARTScreen() {
             modifier = Modifier.padding(it)
         ) {
             when (state.uartManagerState) {
-                NoDeviceState -> DeviceConnectingView()
+                NoDeviceState -> PaddingBox { DeviceConnectingView() }
                 is WorkingState -> when (state.uartManagerState.result) {
                     is IdleResult,
-                    is ConnectingResult -> DeviceConnectingView { NavigateUpButton(navigateUp) }
-                    is ConnectedResult -> DeviceConnectingView { NavigateUpButton(navigateUp) }
-                    is DisconnectedResult -> DeviceDisconnectedView(Reason.USER) { NavigateUpButton(navigateUp) }
-                    is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS) { NavigateUpButton(navigateUp) }
-                    is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE) { NavigateUpButton(navigateUp) }
-                    is UnknownErrorResult -> DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) }
-                    is SuccessResult -> SuccessScreen(state.uartManagerState.result.data, state, viewModel)
+                    is ConnectingResult -> PaddingBox { DeviceConnectingView { NavigateUpButton(navigateUp) } }
+                    is ConnectedResult -> PaddingBox { DeviceConnectingView { NavigateUpButton(navigateUp) } }
+                    is DisconnectedResult -> PaddingBox { DeviceDisconnectedView(Reason.USER) { NavigateUpButton(navigateUp) } }
+                    is LinkLossResult -> PaddingBox { DeviceDisconnectedView(Reason.LINK_LOSS) { NavigateUpButton(navigateUp) } }
+                    is MissingServiceResult -> PaddingBox { DeviceDisconnectedView(Reason.MISSING_SERVICE) { NavigateUpButton(navigateUp) } }
+                    is UnknownErrorResult -> PaddingBox { DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) } }
+                    is SuccessResult -> SuccessScreen()
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun PaddingBox(content: @Composable () -> Unit) {
+    Box(modifier = Modifier.padding(16.dp)) {
+        content()
     }
 }
 
@@ -115,17 +121,13 @@ private fun AppBar(state: UARTViewState, navigateUp: () -> Unit, onEvent: (UARTV
 }
 
 @Composable
-private fun SuccessScreen(data: UARTData, state: UARTViewState, viewModel: UARTViewModel) {
+private fun SuccessScreen() {
     val input = stringResource(id = R.string.uart_input)
     val macros = stringResource(id = R.string.uart_macros)
     val viewEntity = remember { PagerViewEntity(
         listOf(
-            PagerViewItem(input) {
-                UARTContentView(data) { viewModel.onEvent(it) }
-            },
-            PagerViewItem(macros) {
-                MacroSection(state) { viewModel.onEvent(it) }
-            }
+            PagerViewItem(input) { KeyboardView() },
+            PagerViewItem(macros) { MacroView() }
         )
     ) }
     PagerView(
@@ -133,6 +135,28 @@ private fun SuccessScreen(data: UARTData, state: UARTViewState, viewModel: UARTV
         modifier = Modifier.fillMaxSize(),
         itemSpacing = 16.dp
     )
+}
+
+@Composable
+private fun KeyboardView() {
+    val viewModel: UARTViewModel = hiltViewModel()
+    val state = viewModel.state.collectAsState().value
+    (state.uartManagerState as? WorkingState)?.let {
+        (state.uartManagerState.result as? SuccessResult)?.let {
+            UARTContentView(it.data) { viewModel.onEvent(it) }
+        }
+    }
+}
+
+@Composable
+private fun MacroView() {
+    val viewModel: UARTViewModel = hiltViewModel()
+    val state = viewModel.state.collectAsState().value
+    (state.uartManagerState as? WorkingState)?.let {
+        (state.uartManagerState.result as? SuccessResult)?.let {
+            MacroSection(state) { viewModel.onEvent(it) }
+        }
+    }
 }
 
 @Composable
