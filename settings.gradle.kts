@@ -74,9 +74,9 @@ include(":lib_service")
 include(":lib_ui")
 include(":lib_utils")
 
-if (file("../Android-Common-Libraries").exists()) {
-    includeBuild("../Android-Common-Libraries")
-}
+//if (file("../Android-Common-Libraries").exists()) {
+//    includeBuild("../Android-Common-Libraries")
+//}
 //
 //if (file('../Android-BLE-Library').exists()) {
 //    includeBuild('../Android-BLE-Library')
