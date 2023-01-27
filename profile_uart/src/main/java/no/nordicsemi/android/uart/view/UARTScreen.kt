@@ -42,10 +42,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.accompanist.pager.ExperimentalPagerApi
 import no.nordicsemi.android.common.theme.view.PagerView
 import no.nordicsemi.android.common.theme.view.PagerViewEntity
 import no.nordicsemi.android.common.theme.view.PagerViewItem
@@ -120,6 +122,7 @@ private fun AppBar(state: UARTViewState, navigateUp: () -> Unit, onEvent: (UARTV
     }
 }
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun SuccessScreen() {
     val input = stringResource(id = R.string.uart_input)
@@ -133,7 +136,9 @@ private fun SuccessScreen() {
     PagerView(
         viewEntity = viewEntity,
         modifier = Modifier.fillMaxSize(),
-        itemSpacing = 16.dp
+        itemSpacing = 16.dp,
+        coroutineScope = rememberCoroutineScope(),
+        scrollable = false
     )
 }
 

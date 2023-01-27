@@ -53,10 +53,10 @@ dependencies {
 
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-
-//    kapt(libs.room.compiler)
     kapt(libs.room.compiler)
-//    kapt("")
+
+    implementation(libs.accompanist.pager)
+    implementation(libs.accompanist.pagerindicators)
 
     implementation(libs.nordic.ble.common)
     implementation(libs.nordic.ble.ktx)
