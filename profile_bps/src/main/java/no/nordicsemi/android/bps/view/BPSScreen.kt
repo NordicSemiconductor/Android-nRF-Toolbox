@@ -38,11 +38,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.bps.R
 import no.nordicsemi.android.bps.viewmodel.BPSViewModel
 import no.nordicsemi.android.common.ui.scanner.view.DeviceConnectingView
@@ -65,7 +65,7 @@ import no.nordicsemi.android.ui.view.NavigateUpButton
 @Composable
 fun BPSScreen() {
     val viewModel: BPSViewModel = hiltViewModel()
-    val state = viewModel.state.collectAsState().value
+    val state = viewModel.state.collectAsStateWithLifecycle().value
 
     val navigateUp = { viewModel.onEvent(DisconnectEvent) }
 

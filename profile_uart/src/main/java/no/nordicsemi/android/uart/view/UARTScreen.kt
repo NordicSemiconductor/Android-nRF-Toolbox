@@ -40,13 +40,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.pager.ExperimentalPagerApi
 import no.nordicsemi.android.common.theme.view.PagerView
 import no.nordicsemi.android.common.theme.view.PagerViewEntity
@@ -73,7 +73,7 @@ import no.nordicsemi.android.ui.view.NavigateUpButton
 @Composable
 fun UARTScreen() {
     val viewModel: UARTViewModel = hiltViewModel()
-    val state = viewModel.state.collectAsState().value
+    val state = viewModel.state.collectAsStateWithLifecycle().value
 
     val navigateUp = { viewModel.onEvent(NavigateUp) }
 
@@ -145,7 +145,7 @@ private fun SuccessScreen() {
 @Composable
 private fun KeyboardView() {
     val viewModel: UARTViewModel = hiltViewModel()
-    val state = viewModel.state.collectAsState().value
+    val state = viewModel.state.collectAsStateWithLifecycle().value
     (state.uartManagerState as? WorkingState)?.let {
         (state.uartManagerState.result as? SuccessResult)?.let {
             UARTContentView(it.data) { viewModel.onEvent(it) }
@@ -156,7 +156,7 @@ private fun KeyboardView() {
 @Composable
 private fun MacroView() {
     val viewModel: UARTViewModel = hiltViewModel()
-    val state = viewModel.state.collectAsState().value
+    val state = viewModel.state.collectAsStateWithLifecycle().value
     (state.uartManagerState as? WorkingState)?.let {
         (state.uartManagerState.result as? SuccessResult)?.let {
             MacroSection(state) { viewModel.onEvent(it) }

@@ -70,6 +70,8 @@ dependencies {
     implementation(libs.nordic.permission)
     implementation(libs.nordic.analytics)
 
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
     implementation(libs.nordic.ble.common)
     implementation(libs.nordic.ble.ktx)
 
