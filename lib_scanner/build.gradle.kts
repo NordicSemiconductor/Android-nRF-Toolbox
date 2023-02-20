@@ -38,8 +38,10 @@ android {
 }
 
 dependencies {
-    implementation(libs.nordic.uiscanner)
     implementation(libs.nordic.navigation)
+    implementation(libs.nordic.uiscanner)
+
+    implementation("no.nordicsemi.android.kotlin.ble:scanner:0.0.1")
 
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.core.ktx)
