@@ -38,6 +38,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -65,7 +66,7 @@ import no.nordicsemi.android.ui.view.NavigateUpButton
 @Composable
 fun CGMScreen() {
     val viewModel: CGMViewModel = hiltViewModel()
-    val state = viewModel.state.collectAsStateWithLifecycle().value
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     val navigateUp = { viewModel.onEvent(NavigateUp) }
 
@@ -78,9 +79,9 @@ fun CGMScreen() {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            when (state) {
+            when (val cgmState = state) {
                 NoDeviceState -> DeviceConnectingView()
-                is WorkingState -> when (state.result) {
+                is WorkingState -> when (cgmState.result) {
                     is IdleResult,
                     is ConnectingResult -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                     is ConnectedResult -> DeviceConnectingView { NavigateUpButton(navigateUp) }
@@ -88,7 +89,7 @@ fun CGMScreen() {
                     is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS) { NavigateUpButton(navigateUp) }
                     is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE) { NavigateUpButton(navigateUp) }
                     is UnknownErrorResult -> DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) }
-                    is SuccessResult -> CGMContentView(state.result.data) { viewModel.onEvent(it) }
+                    is SuccessResult -> CGMContentView(cgmState.result.data) { viewModel.onEvent(it) }
                 }
             }
         }

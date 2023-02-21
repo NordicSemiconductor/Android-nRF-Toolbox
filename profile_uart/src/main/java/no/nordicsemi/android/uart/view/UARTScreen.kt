@@ -40,6 +40,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -73,7 +74,7 @@ import no.nordicsemi.android.ui.view.NavigateUpButton
 @Composable
 fun UARTScreen() {
     val viewModel: UARTViewModel = hiltViewModel()
-    val state = viewModel.state.collectAsStateWithLifecycle().value
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     val navigateUp = { viewModel.onEvent(NavigateUp) }
 
@@ -83,9 +84,9 @@ fun UARTScreen() {
         Column(
             modifier = Modifier.padding(it)
         ) {
-            when (state.uartManagerState) {
+            when (val uartState = state.uartManagerState) {
                 NoDeviceState -> PaddingBox { DeviceConnectingView() }
-                is WorkingState -> when (state.uartManagerState.result) {
+                is WorkingState -> when (uartState.result) {
                     is IdleResult,
                     is ConnectingResult -> PaddingBox { DeviceConnectingView { NavigateUpButton(navigateUp) } }
                     is ConnectedResult -> PaddingBox { DeviceConnectingView { NavigateUpButton(navigateUp) } }
@@ -145,9 +146,9 @@ private fun SuccessScreen() {
 @Composable
 private fun KeyboardView() {
     val viewModel: UARTViewModel = hiltViewModel()
-    val state = viewModel.state.collectAsStateWithLifecycle().value
+    val state by viewModel.state.collectAsStateWithLifecycle()
     (state.uartManagerState as? WorkingState)?.let {
-        (state.uartManagerState.result as? SuccessResult)?.let {
+        (it.result as? SuccessResult)?.let {
             UARTContentView(it.data) { viewModel.onEvent(it) }
         }
     }
@@ -156,9 +157,9 @@ private fun KeyboardView() {
 @Composable
 private fun MacroView() {
     val viewModel: UARTViewModel = hiltViewModel()
-    val state = viewModel.state.collectAsStateWithLifecycle().value
+    val state by viewModel.state.collectAsStateWithLifecycle()
     (state.uartManagerState as? WorkingState)?.let {
-        (state.uartManagerState.result as? SuccessResult)?.let {
+        (it.result as? SuccessResult)?.let {
             MacroSection(state) { viewModel.onEvent(it) }
         }
     }

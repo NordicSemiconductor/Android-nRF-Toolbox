@@ -38,6 +38,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -65,7 +66,7 @@ import no.nordicsemi.android.ui.view.NavigateUpButton
 @Composable
 fun HTSScreen() {
     val viewModel: HTSViewModel = hiltViewModel()
-    val state = viewModel.state.collectAsStateWithLifecycle().value
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     val navigateUp = { viewModel.onEvent(NavigateUp) }
 
@@ -78,9 +79,9 @@ fun HTSScreen() {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            when (state.htsManagerState) {
+            when (val htsState = state.htsManagerState) {
                 NoDeviceState -> DeviceConnectingView()
-                is WorkingState -> when (state.htsManagerState.result) {
+                is WorkingState -> when (htsState.result) {
                     is IdleResult,
                     is ConnectingResult -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                     is ConnectedResult -> DeviceConnectingView { NavigateUpButton(navigateUp) }
@@ -88,7 +89,7 @@ fun HTSScreen() {
                     is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS) { NavigateUpButton(navigateUp) }
                     is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE) { NavigateUpButton(navigateUp) }
                     is UnknownErrorResult -> DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) }
-                    is SuccessResult -> HTSContentView(state.htsManagerState.result.data, state.temperatureUnit) { viewModel.onEvent(it) }
+                    is SuccessResult -> HTSContentView(htsState.result.data, state.temperatureUnit) { viewModel.onEvent(it) }
                 }
             }
         }

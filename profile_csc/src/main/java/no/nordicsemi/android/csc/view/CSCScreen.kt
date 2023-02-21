@@ -38,6 +38,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -65,7 +66,7 @@ import no.nordicsemi.android.ui.view.NavigateUpButton
 @Composable
 fun CSCScreen() {
     val viewModel: CSCViewModel = hiltViewModel()
-    val state = viewModel.state.collectAsStateWithLifecycle().value
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     val navigateUp = { viewModel.onEvent(NavigateUp) }
 
@@ -78,9 +79,9 @@ fun CSCScreen() {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            when (state.cscManagerState) {
+            when (val cscState = state.cscManagerState) {
                 NoDeviceState -> DeviceConnectingView()
-                is WorkingState -> when (state.cscManagerState.result) {
+                is WorkingState -> when (cscState.result) {
                     is IdleResult,
                     is ConnectingResult -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                     is ConnectedResult -> DeviceConnectingView { NavigateUpButton(navigateUp) }
@@ -91,7 +92,7 @@ fun CSCScreen() {
                     }
                     is UnknownErrorResult -> DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) }
                     is SuccessResult -> CSCContentView(
-                        state.cscManagerState.result.data,
+                        cscState.result.data,
                         state.speedUnit
                     ) { viewModel.onEvent(it) }
                 }
