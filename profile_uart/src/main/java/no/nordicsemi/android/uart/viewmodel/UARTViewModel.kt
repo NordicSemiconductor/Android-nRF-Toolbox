@@ -51,7 +51,7 @@ import no.nordicsemi.android.analytics.UARTMode
 import no.nordicsemi.android.analytics.UARTSendAnalyticsEvent
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.service.ConnectedResult
 import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
@@ -129,7 +129,7 @@ internal class UARTViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    private fun handleResult(result: NavigationResult<DiscoveredBluetoothDevice>) {
+    private fun handleResult(result: NavigationResult<ServerDevice>) {
         when (result) {
             is NavigationResult.Cancelled -> navigationManager.navigateUp()
             is NavigationResult.Success -> repository.launch(result.value)

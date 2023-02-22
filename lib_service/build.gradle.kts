@@ -44,6 +44,8 @@ dependencies {
     implementation(libs.nordic.ble.ktx)
     implementation(libs.nordic.uiscanner)
 
+    implementation("no.nordicsemi.android.kotlin.ble:core:0.0.1")
+
     implementation(libs.androidx.lifecycle.service)
     implementation(libs.androidx.localbroadcastmanager)
     implementation(libs.androidx.core)

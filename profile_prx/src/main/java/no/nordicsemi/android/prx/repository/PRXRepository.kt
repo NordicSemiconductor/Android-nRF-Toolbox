@@ -41,7 +41,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.common.logger.NordicLoggerFactory
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.prx.data.AlarmLevel
 import no.nordicsemi.android.prx.data.PRXData
 import no.nordicsemi.android.prx.data.PRXManager
@@ -75,12 +75,12 @@ class PRXRepository @Inject internal constructor(
     val isRunning = data.map { it.isRunning() }
     val hasBeenDisconnectedWithoutLinkLoss = data.map { it.hasBeenDisconnectedWithoutLinkLoss() }
 
-    fun launch(device: DiscoveredBluetoothDevice) {
+    fun launch(device: ServerDevice) {
         serviceManager.startService(PRXService::class.java, device)
         proximityServerManager.open()
     }
 
-    fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
+    fun start(device: ServerDevice, scope: CoroutineScope) {
         val createdLogger = loggerFactory.create(stringConst.APP_NAME, "PRX", device.address).also {
             logger = it
         }
@@ -93,10 +93,10 @@ class PRXRepository @Inject internal constructor(
             handleLocalAlarm(it)
         }.launchIn(scope)
 
-        manager.connect(device.device)
-            .useAutoConnect(true)
-            .retry(3, 100)
-            .enqueue()
+//        manager.connect(device.device)
+//            .useAutoConnect(true)
+//            .retry(3, 100)
+//            .enqueue()
     }
 
     private fun handleLocalAlarm(result: BleManagerResult<PRXData>) {

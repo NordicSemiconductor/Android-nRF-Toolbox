@@ -31,8 +31,7 @@
 
 package no.nordicsemi.android.csc.view
 
-import no.nordicsemi.android.csc.data.CSCData
-import no.nordicsemi.android.service.BleManagerResult
+import no.nordicsemi.android.csc.data.CSCServicesData
 
 internal data class CSCViewState(
     val speedUnit: SpeedUnit = SpeedUnit.M_S,
@@ -41,6 +40,6 @@ internal data class CSCViewState(
 
 internal sealed class CSCMangerState
 
-internal data class WorkingState(val result: BleManagerResult<CSCData>) : CSCMangerState()
+internal data class WorkingState(val result: CSCServicesData) : CSCMangerState()
 
 internal object NoDeviceState : CSCMangerState()

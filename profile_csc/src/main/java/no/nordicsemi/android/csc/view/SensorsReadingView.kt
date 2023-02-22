@@ -40,32 +40,33 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.csc.R
-import no.nordicsemi.android.csc.data.CSCData
+import no.nordicsemi.android.csc.data.CSCServicesData
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.KeyValueField
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
-internal fun SensorsReadingView(state: CSCData, speedUnit: SpeedUnit) {
+internal fun SensorsReadingView(state: CSCServicesData, speedUnit: SpeedUnit) {
+    val csc = state.data
     ScreenSection {
         SectionTitle(resId = R.drawable.ic_records, title = "Records")
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Column {
-            KeyValueField(stringResource(id = R.string.csc_field_speed), state.displaySpeed(speedUnit))
+            KeyValueField(stringResource(id = R.string.csc_field_speed), csc.displaySpeed(speedUnit))
             Spacer(modifier = Modifier.height(4.dp))
-            KeyValueField(stringResource(id = R.string.csc_field_cadence), state.displayCadence())
+            KeyValueField(stringResource(id = R.string.csc_field_cadence), csc.displayCadence())
             Spacer(modifier = Modifier.height(4.dp))
-            KeyValueField(stringResource(id = R.string.csc_field_distance), state.displayDistance(speedUnit))
+            KeyValueField(stringResource(id = R.string.csc_field_distance), csc.displayDistance(speedUnit))
             Spacer(modifier = Modifier.height(4.dp))
             KeyValueField(
                 stringResource(id = R.string.csc_field_total_distance),
-                state.displayTotalDistance(speedUnit)
+                csc.displayTotalDistance(speedUnit)
             )
             Spacer(modifier = Modifier.height(4.dp))
-            KeyValueField(stringResource(id = R.string.csc_field_gear_ratio), state.displayGearRatio())
+            KeyValueField(stringResource(id = R.string.csc_field_gear_ratio), csc.displayGearRatio())
         }
     }
 
@@ -79,5 +80,5 @@ internal fun SensorsReadingView(state: CSCData, speedUnit: SpeedUnit) {
 @Preview
 @Composable
 private fun Preview() {
-    SensorsReadingView(CSCData(), SpeedUnit.KM_H)
+    SensorsReadingView(CSCServicesData(), SpeedUnit.KM_H)
 }

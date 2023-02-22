@@ -40,10 +40,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.common.logger.NordicLoggerFactory
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.service.ServiceManager
@@ -78,11 +77,11 @@ class UARTRepository @Inject internal constructor(
 
     val lastConfigurationName = configurationDataSource.lastConfigurationName
 
-    fun launch(device: DiscoveredBluetoothDevice) {
+    fun launch(device: ServerDevice) {
         serviceManager.startService(UARTService::class.java, device)
     }
 
-    fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
+    fun start(device: ServerDevice, scope: CoroutineScope) {
         val createdLogger = loggerFactory.create(stringConst.APP_NAME, "UART", device.address).also {
             logger = it
         }
@@ -119,15 +118,15 @@ class UARTRepository @Inject internal constructor(
         configurationDataSource.saveConfigurationName(name)
     }
 
-    private suspend fun UARTManager.start(device: DiscoveredBluetoothDevice) {
-        try {
-            connect(device.device)
-                .useAutoConnect(false)
-                .retry(3, 100)
-                .suspend()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+    private suspend fun UARTManager.start(device: ServerDevice) {
+//        try {
+//            connect(device.device)
+//                .useAutoConnect(false)
+//                .retry(3, 100)
+//                .suspend()
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//        }
     }
 
     fun release() {

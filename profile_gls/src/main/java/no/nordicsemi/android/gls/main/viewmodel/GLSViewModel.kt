@@ -32,7 +32,6 @@
 package no.nordicsemi.android.gls.main.viewmodel
 
 import android.os.ParcelUuid
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,7 +44,6 @@ import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
 import no.nordicsemi.android.gls.GlsDetailsDestinationId
 import no.nordicsemi.android.gls.data.GLS_SERVICE_UUID
 import no.nordicsemi.android.gls.main.view.DisconnectEvent
@@ -57,6 +55,7 @@ import no.nordicsemi.android.gls.main.view.OnWorkingModeSelected
 import no.nordicsemi.android.gls.main.view.OpenLoggerEvent
 import no.nordicsemi.android.gls.main.view.WorkingState
 import no.nordicsemi.android.gls.repository.GLSRepository
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.service.ConnectedResult
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import javax.inject.Inject
@@ -79,7 +78,7 @@ internal class GLSViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    private fun handleResult(result: NavigationResult<DiscoveredBluetoothDevice>) {
+    private fun handleResult(result: NavigationResult<ServerDevice>) {
         when (result) {
             is NavigationResult.Cancelled -> navigationManager.navigateUp()
             is NavigationResult.Success -> connectDevice(result.value)
@@ -96,7 +95,7 @@ internal class GLSViewModel @Inject constructor(
         }
     }
 
-    private fun connectDevice(device: DiscoveredBluetoothDevice) {
+    private fun connectDevice(device: ServerDevice) {
         repository.downloadData(viewModelScope, device).onEach {
             _state.value = WorkingState(it)
 

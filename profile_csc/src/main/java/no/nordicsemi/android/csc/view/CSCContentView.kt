@@ -34,7 +34,6 @@ package no.nordicsemi.android.csc.view
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -50,15 +49,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.common.theme.view.RadioButtonGroup
 import no.nordicsemi.android.csc.R
-import no.nordicsemi.android.csc.data.CSCData
-import no.nordicsemi.android.csc.data.WheelSize
+import no.nordicsemi.android.csc.data.CSCServicesData
+import no.nordicsemi.android.kotlin.ble.profile.csc.CSCData
+import no.nordicsemi.android.kotlin.ble.profile.csc.WheelSize
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.ui.view.dialog.FlowCanceled
 import no.nordicsemi.android.ui.view.dialog.ItemSelectedResult
 
 @Composable
-internal fun CSCContentView(state: CSCData, speedUnit: SpeedUnit, onEvent: (CSCViewEvent) -> Unit) {
+internal fun CSCContentView(state: CSCServicesData, speedUnit: SpeedUnit, onEvent: (CSCViewEvent) -> Unit) {
     val showDialog = rememberSaveable { mutableStateOf(false) }
 
     if (showDialog.value) {
@@ -69,8 +69,7 @@ internal fun CSCContentView(state: CSCData, speedUnit: SpeedUnit, onEvent: (CSCV
             when (it) {
                 FlowCanceled -> showDialog.value = false
                 is ItemSelectedResult -> {
-                    onEvent(OnWheelSizeSelected(WheelSize(wheelValues[it.index].toInt(),
-                        wheelEntries[it.index])))
+                    onEvent(OnWheelSizeSelected(WheelSize(wheelValues[it.index].toInt(), wheelEntries[it.index])))
                     showDialog.value = false
                 }
             }
@@ -80,7 +79,7 @@ internal fun CSCContentView(state: CSCData, speedUnit: SpeedUnit, onEvent: (CSCV
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        SettingsSection(state, speedUnit, onEvent) { showDialog.value = true }
+        SettingsSection(state.data, speedUnit, onEvent) { showDialog.value = true }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -126,5 +125,5 @@ private fun SettingsSection(
 @Preview
 @Composable
 private fun ConnectedPreview() {
-    CSCContentView(CSCData(), SpeedUnit.KM_H) { }
+    CSCContentView(CSCServicesData(), SpeedUnit.KM_H) { }
 }

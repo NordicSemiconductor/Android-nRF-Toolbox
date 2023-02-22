@@ -8,9 +8,9 @@ import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewMod
 import no.nordicsemi.android.common.ui.scanner.DeviceSelected
 import no.nordicsemi.android.common.ui.scanner.ScannerScreen
 import no.nordicsemi.android.common.ui.scanner.ScanningCancelled
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 
-val ScannerDestinationId = createDestination<ParcelUuid, DiscoveredBluetoothDevice>("uiscanner-destination")
+val ScannerDestinationId = createDestination<ParcelUuid, ServerDevice>("uiscanner-destination")
 
 val ScannerDestination = defineDestination(ScannerDestinationId) {
     val navigationViewModel = hiltViewModel<SimpleNavigationViewModel>()

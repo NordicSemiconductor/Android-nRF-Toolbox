@@ -36,7 +36,7 @@ import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
 import javax.inject.Inject
@@ -50,7 +50,7 @@ internal class HRSService : NotificationService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
-        val device = intent!!.getParcelableExtra<DiscoveredBluetoothDevice>(DEVICE_DATA)!!
+        val device = intent!!.getParcelableExtra<ServerDevice>(DEVICE_DATA)!!
 
         repository.start(device, lifecycleScope)
 

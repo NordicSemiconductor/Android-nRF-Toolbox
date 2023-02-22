@@ -46,7 +46,7 @@ import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.prx.data.PRX_SERVICE_UUID
 import no.nordicsemi.android.prx.repository.PRXRepository
 import no.nordicsemi.android.prx.view.DisconnectEvent
@@ -96,7 +96,7 @@ internal class PRXViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    private fun handleResult(result: NavigationResult<DiscoveredBluetoothDevice>) {
+    private fun handleResult(result: NavigationResult<ServerDevice>) {
         when (result) {
             is NavigationResult.Cancelled -> navigationManager.navigateUp()
             is NavigationResult.Success -> repository.launch(result.value)

@@ -35,7 +35,7 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import dagger.hilt.android.qualifiers.ApplicationContext
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import javax.inject.Inject
 
 const val DEVICE_DATA = "device-data"
@@ -45,7 +45,7 @@ class ServiceManager @Inject constructor(
     private val context: Context
 ) {
 
-    fun <T> startService(service: Class<T>, device: DiscoveredBluetoothDevice) {
+    fun <T> startService(service: Class<T>, device: ServerDevice) {
         val intent = Intent(context, service).apply {
             putExtra(DEVICE_DATA, device)
         }

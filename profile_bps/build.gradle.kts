@@ -46,6 +46,7 @@ dependencies {
     implementation(project(":lib_utils"))
 
     implementation("no.nordicsemi.android.kotlin.ble:core:0.0.1")
+    implementation("no.nordicsemi.android.kotlin.ble:profile:0.0.1")
 
     implementation(libs.nordic.ble.common)
     implementation(libs.nordic.ble.ktx)

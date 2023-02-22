@@ -46,9 +46,8 @@ import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
-import no.nordicsemi.android.csc.data.CSC_SERVICE_UUID
 import no.nordicsemi.android.csc.repository.CSCRepository
+import no.nordicsemi.android.csc.repository.CSC_SERVICE_UUID
 import no.nordicsemi.android.csc.view.CSCViewEvent
 import no.nordicsemi.android.csc.view.CSCViewState
 import no.nordicsemi.android.csc.view.NavigateUp
@@ -58,6 +57,8 @@ import no.nordicsemi.android.csc.view.OnWheelSizeSelected
 import no.nordicsemi.android.csc.view.OpenLogger
 import no.nordicsemi.android.csc.view.SpeedUnit
 import no.nordicsemi.android.csc.view.WorkingState
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.service.ConnectedResult
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import javax.inject.Inject
@@ -82,7 +83,7 @@ internal class CSCViewModel @Inject constructor(
         repository.data.onEach {
             _state.value = _state.value.copy(cscManagerState = WorkingState(it))
 
-            (it as? ConnectedResult)?.let {
+            if (it.connectionState == GattConnectionState.STATE_CONNECTED) {
                 analytics.logEvent(ProfileConnectedEvent(Profile.CSC))
             }
         }.launchIn(viewModelScope)
@@ -96,7 +97,7 @@ internal class CSCViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    private fun handleResult(result: NavigationResult<DiscoveredBluetoothDevice>) {
+    private fun handleResult(result: NavigationResult<ServerDevice>) {
         when (result) {
             is NavigationResult.Cancelled -> navigationManager.navigateUp()
             is NavigationResult.Success -> repository.launch(result.value)

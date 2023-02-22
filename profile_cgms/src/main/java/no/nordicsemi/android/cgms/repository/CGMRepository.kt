@@ -45,7 +45,7 @@ import no.nordicsemi.android.cgms.data.CGMData
 import no.nordicsemi.android.cgms.data.CGMManager
 import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.common.logger.NordicLoggerFactory
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.service.ServiceManager
@@ -70,11 +70,11 @@ class CGMRepository @Inject constructor(
     val isRunning = data.map { it.isRunning() }
     val hasBeenDisconnected = data.map { it.hasBeenDisconnected() }
 
-    fun launch(device: DiscoveredBluetoothDevice) {
+    fun launch(device: ServerDevice) {
         serviceManager.startService(CGMService::class.java, device)
     }
 
-    fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
+    fun start(device: ServerDevice, scope: CoroutineScope) {
         val createdLogger = loggerFactory.create(stringConst.APP_NAME, "CGMS", device.address).also {
             logger = it
         }
@@ -90,15 +90,15 @@ class CGMRepository @Inject constructor(
         }
     }
 
-    private suspend fun CGMManager.start(device: DiscoveredBluetoothDevice) {
-        try {
-            connect(device.device)
-                .useAutoConnect(false)
-                .retry(3, 100)
-                .suspend()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+    private suspend fun CGMManager.start(device: ServerDevice) {
+//        try {
+//            connect(device.device)
+//                .useAutoConnect(false)
+//                .retry(3, 100)
+//                .suspend()
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//        }
     }
 
     fun requestAllRecords() {

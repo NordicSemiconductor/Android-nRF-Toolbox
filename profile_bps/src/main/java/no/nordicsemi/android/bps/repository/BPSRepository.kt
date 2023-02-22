@@ -41,12 +41,11 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.bps.data.BPSData
 import no.nordicsemi.android.bps.data.BPSManager
 import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.common.logger.NordicLoggerFactory
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.ui.view.StringConst
 import javax.inject.Inject
@@ -61,7 +60,7 @@ internal class BPSRepository @Inject constructor(
 
     private var logger: NordicLogger? = null
 
-    fun downloadData(scope: CoroutineScope, device: DiscoveredBluetoothDevice): Flow<BleManagerResult<BPSData>> = callbackFlow {
+    fun downloadData(scope: CoroutineScope, device: ServerDevice): Flow<BleManagerResult<BPSData>> = callbackFlow {
         val createdLogger = loggerFactory.create(stringConst.APP_NAME, "BPS", device.address).also {
             logger = it
         }
@@ -81,15 +80,15 @@ internal class BPSRepository @Inject constructor(
         }
     }
 
-    private suspend fun BPSManager.start(device: DiscoveredBluetoothDevice) {
-        try {
-            connect(device.device)
-                .useAutoConnect(false)
-                .retry(3, 100)
-                .suspend()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+    private suspend fun BPSManager.start(device: ServerDevice) {
+//        try {
+//            connect(device.device)
+//                .useAutoConnect(false)
+//                .retry(3, 100)
+//                .suspend()
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//        }
     }
 
     fun openLogger() {

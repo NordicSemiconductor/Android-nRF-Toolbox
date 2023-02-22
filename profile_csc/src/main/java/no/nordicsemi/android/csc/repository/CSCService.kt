@@ -31,16 +31,32 @@
 
 package no.nordicsemi.android.csc.repository
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
+import kotlinx.coroutines.launch
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.client.service.BleGattServices
+import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
+import no.nordicsemi.android.kotlin.ble.profile.csc.CSCDataParser
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
+import java.util.*
 import javax.inject.Inject
 
+val CSC_SERVICE_UUID: UUID = UUID.fromString("00001816-0000-1000-8000-00805f9b34fb")
+private val CSC_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A5B-0000-1000-8000-00805f9b34fb")
+
+private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
+private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
+
+@SuppressLint("MissingPermission")
 @AndroidEntryPoint
 internal class CSCService : NotificationService() {
 
@@ -50,14 +66,44 @@ internal class CSCService : NotificationService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
-        val device = intent!!.getParcelableExtra<DiscoveredBluetoothDevice>(DEVICE_DATA)!!
+        val device = intent!!.getParcelableExtra<ServerDevice>(DEVICE_DATA)!!
 
-        repository.start(device, lifecycleScope)
-
-        repository.hasBeenDisconnected.onEach {
-            if (it) stopSelf()
-        }.launchIn(lifecycleScope)
+        startGattClient(device)
 
         return START_REDELIVER_INTENT
+    }
+
+    private fun startGattClient(blinkyDevice: ServerDevice) = lifecycleScope.launch {
+        val client = blinkyDevice.connect(this@CSCService)
+
+        client.connection
+            .onEach { repository.onConnectionStateChanged(it.connectionState) }
+            .map { it.services }
+            .filterNotNull()
+            .onEach { configureGatt(it) }
+            .launchIn(lifecycleScope)
+    }
+
+    private suspend fun configureGatt(services: BleGattServices) {
+        val cscService = services.findService(CSC_SERVICE_UUID)!!
+        val cscMeasurementCharacteristic = cscService.findCharacteristic(CSC_MEASUREMENT_CHARACTERISTIC_UUID)!!
+
+        cscMeasurementCharacteristic.enableNotifications()
+
+        val cscDataParser = CSCDataParser()
+        cscMeasurementCharacteristic.notification
+            .mapNotNull { cscDataParser.parse(it, repository.wheelSize.value) }
+            .onEach { repository.onCSCDataChanged(it) }
+            .launchIn(lifecycleScope)
+
+        val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
+        val batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
+
+//        batteryLevelCharacteristic.enableNotifications()
+
+        batteryLevelCharacteristic.notification
+            .mapNotNull { BatteryLevelParser.parse(it) }
+            .onEach { repository.onBatteryLevelChanged(it) }
+            .launchIn(lifecycleScope)
     }
 }

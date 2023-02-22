@@ -40,12 +40,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.ble.ktx.suspend
 import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.common.logger.NordicLoggerFactory
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
 import no.nordicsemi.android.hts.data.HTSData
 import no.nordicsemi.android.hts.data.HTSManager
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.IdleResult
 import no.nordicsemi.android.service.ServiceManager
@@ -70,11 +69,11 @@ class HTSRepository @Inject constructor(
     val isRunning = data.map { it.isRunning() }
     val hasBeenDisconnected = data.map { it.hasBeenDisconnected() }
 
-    fun launch(device: DiscoveredBluetoothDevice) {
+    fun launch(device: ServerDevice) {
         serviceManager.startService(HTSService::class.java, device)
     }
 
-    fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
+    fun start(device: ServerDevice, scope: CoroutineScope) {
         val createdLogger = loggerFactory.create(stringConst.APP_NAME, "HTS", device.address).also {
             logger = it
         }
@@ -94,15 +93,15 @@ class HTSRepository @Inject constructor(
         NordicLogger.launch(context, logger)
     }
 
-    private suspend fun HTSManager.start(device: DiscoveredBluetoothDevice) {
-        try {
-            connect(device.device)
-                .useAutoConnect(false)
-                .retry(3, 100)
-                .suspend()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+    private suspend fun HTSManager.start(device: ServerDevice) {
+//        try {
+//            connect(device.device)
+//                .useAutoConnect(false)
+//                .retry(3, 100)
+//                .suspend()
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//        }
     }
 
     fun release() {
