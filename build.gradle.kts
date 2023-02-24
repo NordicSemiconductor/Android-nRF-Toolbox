@@ -45,6 +45,6 @@ plugins {
     alias(libs.plugins.nordic.library.compose) apply false
     alias(libs.plugins.nordic.hilt) apply false
     alias(libs.plugins.nordic.feature) apply false
-    id("com.google.gms.google-services") version "4.3.15" apply false
-    id("com.google.firebase.crashlytics") version "2.9.2" apply false
+    alias(libs.plugins.google.services) apply false
+    alias(libs.plugins.firebase.crashlytics) apply false
 }

@@ -77,7 +77,7 @@ include(":lib_utils")
 //if (file("../Android-Common-Libraries").exists()) {
 //    includeBuild("../Android-Common-Libraries")
 //}
-//
-//if (file('../Android-BLE-Library').exists()) {
-//    includeBuild('../Android-BLE-Library')
-//}
+
+if (file("../Kotlin-BLE-Library").exists()) {
+    includeBuild("../Kotlin-BLE-Library")
+}

@@ -37,7 +37,6 @@ import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -76,9 +75,11 @@ internal class CSCService : NotificationService() {
     private fun startGattClient(blinkyDevice: ServerDevice) = lifecycleScope.launch {
         val client = blinkyDevice.connect(this@CSCService)
 
-        client.connection
-            .onEach { repository.onConnectionStateChanged(it.connectionState) }
-            .map { it.services }
+        client.connectionState
+            .onEach { repository.onConnectionStateChanged(it) }
+            .launchIn(lifecycleScope)
+
+        client.services
             .filterNotNull()
             .onEach { configureGatt(it) }
             .launchIn(lifecycleScope)
@@ -87,23 +88,19 @@ internal class CSCService : NotificationService() {
     private suspend fun configureGatt(services: BleGattServices) {
         val cscService = services.findService(CSC_SERVICE_UUID)!!
         val cscMeasurementCharacteristic = cscService.findCharacteristic(CSC_MEASUREMENT_CHARACTERISTIC_UUID)!!
-
-        cscMeasurementCharacteristic.enableNotifications()
-
-        val cscDataParser = CSCDataParser()
-        cscMeasurementCharacteristic.notification
-            .mapNotNull { cscDataParser.parse(it, repository.wheelSize.value) }
-            .onEach { repository.onCSCDataChanged(it) }
-            .launchIn(lifecycleScope)
-
         val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
         val batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
-
-//        batteryLevelCharacteristic.enableNotifications()
 
         batteryLevelCharacteristic.notification
             .mapNotNull { BatteryLevelParser.parse(it) }
             .onEach { repository.onBatteryLevelChanged(it) }
+            .launchIn(lifecycleScope)
+
+        TODO("Second notification not working")
+        val cscDataParser = CSCDataParser()
+        cscMeasurementCharacteristic.notification
+            .mapNotNull { cscDataParser.parse(it, repository.wheelSize.value) }
+            .onEach { repository.onCSCDataChanged(it) }
             .launchIn(lifecycleScope)
     }
 }
