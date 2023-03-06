@@ -91,14 +91,13 @@ internal class CSCService : NotificationService() {
         val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
         val batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
 
-        batteryLevelCharacteristic.notification
+        batteryLevelCharacteristic.getNotifications()
             .mapNotNull { BatteryLevelParser.parse(it) }
             .onEach { repository.onBatteryLevelChanged(it) }
             .launchIn(lifecycleScope)
 
-        TODO("Second notification not working")
         val cscDataParser = CSCDataParser()
-        cscMeasurementCharacteristic.notification
+        cscMeasurementCharacteristic.getNotifications()
             .mapNotNull { cscDataParser.parse(it, repository.wheelSize.value) }
             .onEach { repository.onCSCDataChanged(it) }
             .launchIn(lifecycleScope)

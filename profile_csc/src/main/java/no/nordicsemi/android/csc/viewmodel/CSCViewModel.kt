@@ -59,7 +59,6 @@ import no.nordicsemi.android.csc.view.SpeedUnit
 import no.nordicsemi.android.csc.view.WorkingState
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
-import no.nordicsemi.android.service.ConnectedResult
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import javax.inject.Inject
 
