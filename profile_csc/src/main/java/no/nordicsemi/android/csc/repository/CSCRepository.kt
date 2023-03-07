@@ -37,7 +37,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.logger.NordicLogger
-import no.nordicsemi.android.common.logger.NordicLoggerFactory
 import no.nordicsemi.android.csc.data.CSCServicesData
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
@@ -45,7 +44,6 @@ import no.nordicsemi.android.kotlin.ble.profile.csc.CSCData
 import no.nordicsemi.android.kotlin.ble.profile.csc.WheelSize
 import no.nordicsemi.android.kotlin.ble.profile.csc.WheelSizes
 import no.nordicsemi.android.service.ServiceManager
-import no.nordicsemi.android.ui.view.StringConst
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -54,8 +52,6 @@ class CSCRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
-    private val loggerFactory: NordicLoggerFactory,
-    private val stringConst: StringConst
 ) {
     private var logger: NordicLogger? = null
 
@@ -66,8 +62,6 @@ class CSCRepository @Inject constructor(
     internal val data = _data.asStateFlow()
 
     val isRunning = data.map { it.connectionState == GattConnectionState.STATE_CONNECTED }
-    val hasBeenDisconnected =
-        data.map { it.connectionState != GattConnectionState.STATE_CONNECTED && it.connectionState != GattConnectionState.STATE_CONNECTING }
 
     fun launch(device: ServerDevice) {
         serviceManager.startService(CSCService::class.java, device)
