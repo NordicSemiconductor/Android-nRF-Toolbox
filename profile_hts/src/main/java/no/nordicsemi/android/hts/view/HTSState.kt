@@ -31,16 +31,16 @@
 
 package no.nordicsemi.android.hts.view
 
-import no.nordicsemi.android.hts.data.HTSData
-import no.nordicsemi.android.service.BleManagerResult
+import no.nordicsemi.android.hts.data.HTSServicesData
 
 internal data class HTSViewState(
     val temperatureUnit: TemperatureUnit = TemperatureUnit.CELSIUS,
-    val htsManagerState: HTSManagerState = NoDeviceState
+    val htsManagerState: HTSManagerState = NoDeviceState,
+    val deviceName: String? = null
 )
 
 internal sealed class HTSManagerState
 
-internal data class WorkingState(val result: BleManagerResult<HTSData>) : HTSManagerState()
+internal data class WorkingState(val result: HTSServicesData) : HTSManagerState()
 
 internal object NoDeviceState : HTSManagerState()

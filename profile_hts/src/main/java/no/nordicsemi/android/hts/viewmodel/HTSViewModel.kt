@@ -46,8 +46,8 @@ import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.hts.data.HTS_SERVICE_UUID
 import no.nordicsemi.android.hts.repository.HTSRepository
+import no.nordicsemi.android.hts.repository.HTS_SERVICE_UUID
 import no.nordicsemi.android.hts.view.DisconnectEvent
 import no.nordicsemi.android.hts.view.HTSScreenViewEvent
 import no.nordicsemi.android.hts.view.HTSViewState
@@ -56,7 +56,7 @@ import no.nordicsemi.android.hts.view.OnTemperatureUnitSelected
 import no.nordicsemi.android.hts.view.OpenLoggerEvent
 import no.nordicsemi.android.hts.view.WorkingState
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
-import no.nordicsemi.android.service.ConnectedResult
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import javax.inject.Inject
 
@@ -80,7 +80,7 @@ internal class HTSViewModel @Inject constructor(
         repository.data.onEach {
             _state.value = _state.value.copy(htsManagerState = WorkingState(it))
 
-            (it as? ConnectedResult)?.let {
+            if (it.connectionState == GattConnectionState.STATE_CONNECTED) {
                 analytics.logEvent(ProfileConnectedEvent(Profile.HTS))
             }
         }.launchIn(viewModelScope)
@@ -97,8 +97,13 @@ internal class HTSViewModel @Inject constructor(
     private fun handleResult(result: NavigationResult<ServerDevice>) {
         when (result) {
             is NavigationResult.Cancelled -> navigationManager.navigateUp()
-            is NavigationResult.Success -> repository.launch(result.value)
+            is NavigationResult.Success -> onDeviceSelected(result.value)
         }
+    }
+
+    private fun onDeviceSelected(device: ServerDevice) {
+        _state.value = _state.value.copy(deviceName = device.name)
+        repository.launch(device)
     }
 
     fun onEvent(event: HTSScreenViewEvent) {

@@ -35,7 +35,8 @@ import no.nordicsemi.android.csc.data.CSCServicesData
 
 internal data class CSCViewState(
     val speedUnit: SpeedUnit = SpeedUnit.M_S,
-    val cscManagerState: CSCMangerState = NoDeviceState
+    val cscManagerState: CSCMangerState = NoDeviceState,
+    val deviceName: String? = null
 )
 
 internal sealed class CSCMangerState

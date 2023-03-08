@@ -6,5 +6,5 @@ import no.nordicsemi.android.kotlin.ble.profile.csc.CSCData
 data class CSCServicesData(
     val data: CSCData = CSCData(),
     val batteryLevel: Int? = null,
-    val connectionState: GattConnectionState = GattConnectionState.STATE_DISCONNECTED
+    val connectionState: GattConnectionState? = null
 )

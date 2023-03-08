@@ -49,7 +49,6 @@ import no.nordicsemi.android.common.ui.scanner.view.Reason
 import no.nordicsemi.android.csc.R
 import no.nordicsemi.android.csc.viewmodel.CSCViewModel
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
-import no.nordicsemi.android.service.DeviceHolder
 import no.nordicsemi.android.ui.view.BackIconAppBar
 import no.nordicsemi.android.ui.view.LoggerIconAppBar
 import no.nordicsemi.android.ui.view.NavigateUpButton
@@ -74,6 +73,7 @@ fun CSCScreen() {
             when (state.cscManagerState) {
                 NoDeviceState -> DeviceConnectingView()
                 is WorkingState -> when (state.cscManagerState.result.connectionState) {
+                    null,
                     GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                     GattConnectionState.STATE_DISCONNECTED,
                     GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) }
@@ -86,15 +86,11 @@ fun CSCScreen() {
 
 @Composable
 private fun AppBar(state: CSCViewState, navigateUp: () -> Unit, viewModel: CSCViewModel) {
-    val toolbarName = (state.cscManagerState as? WorkingState)?.let {
-        (it.result as? DeviceHolder)?.deviceName()
-    }
-
-    if (toolbarName == null) {
-        BackIconAppBar(stringResource(id = R.string.csc_title), navigateUp)
-    } else {
-        LoggerIconAppBar(toolbarName, navigateUp, { viewModel.onEvent(OnDisconnectButtonClick) }) {
+    if (state.deviceName?.isNotBlank() == true) {
+        LoggerIconAppBar(state.deviceName, navigateUp, { viewModel.onEvent(OnDisconnectButtonClick) }) {
             viewModel.onEvent(OpenLogger)
         }
+    } else {
+        BackIconAppBar(stringResource(id = R.string.csc_title), navigateUp)
     }
 }

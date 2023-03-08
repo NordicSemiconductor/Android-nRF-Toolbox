@@ -34,8 +34,10 @@ package no.nordicsemi.android.csc.repository
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import no.nordicsemi.android.common.core.simpleSharedFlow
 import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.csc.data.CSCServicesData
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
@@ -43,6 +45,7 @@ import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.profile.csc.CSCData
 import no.nordicsemi.android.kotlin.ble.profile.csc.WheelSize
 import no.nordicsemi.android.kotlin.ble.profile.csc.WheelSizes
+import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.ServiceManager
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -61,6 +64,9 @@ class CSCRepository @Inject constructor(
     private val _data = MutableStateFlow(CSCServicesData())
     internal val data = _data.asStateFlow()
 
+    private val _stopEvent = simpleSharedFlow<DisconnectAndStopEvent>()
+    internal val stopEvent = _stopEvent.asSharedFlow()
+
     val isRunning = data.map { it.connectionState == GattConnectionState.STATE_CONNECTED }
 
     fun launch(device: ServerDevice) {
@@ -71,7 +77,7 @@ class CSCRepository @Inject constructor(
         _wheelSize.value = wheelSize
     }
 
-    fun onConnectionStateChanged(connectionState: GattConnectionState) {
+    fun onConnectionStateChanged(connectionState: GattConnectionState?) {
         _data.value = _data.value.copy(connectionState = connectionState)
     }
 
@@ -89,6 +95,6 @@ class CSCRepository @Inject constructor(
 
     fun release() {
         logger = null
-        serviceManager.stopService(CSCService::class.java)
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 }

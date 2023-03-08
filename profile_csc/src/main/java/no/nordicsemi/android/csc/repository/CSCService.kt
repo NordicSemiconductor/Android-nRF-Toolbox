@@ -41,7 +41,9 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.client.callback.BleGattClient
 import no.nordicsemi.android.kotlin.ble.core.client.service.BleGattServices
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.csc.CSCDataParser
 import no.nordicsemi.android.service.DEVICE_DATA
@@ -62,6 +64,8 @@ internal class CSCService : NotificationService() {
     @Inject
     lateinit var repository: CSCRepository
 
+    private lateinit var client: BleGattClient
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
@@ -69,14 +73,20 @@ internal class CSCService : NotificationService() {
 
         startGattClient(device)
 
+        repository.stopEvent
+            .onEach { disconnect() }
+            .launchIn(lifecycleScope)
+
         return START_REDELIVER_INTENT
     }
 
     private fun startGattClient(blinkyDevice: ServerDevice) = lifecycleScope.launch {
-        val client = blinkyDevice.connect(this@CSCService)
+        client = blinkyDevice.connect(this@CSCService)
 
         client.connectionState
             .onEach { repository.onConnectionStateChanged(it) }
+            .filterNotNull()
+            .onEach { stopIfDisconnected(it) }
             .launchIn(lifecycleScope)
 
         client.services
@@ -101,5 +111,15 @@ internal class CSCService : NotificationService() {
             .mapNotNull { cscDataParser.parse(it, repository.wheelSize.value) }
             .onEach { repository.onCSCDataChanged(it) }
             .launchIn(lifecycleScope)
+    }
+
+    private fun stopIfDisconnected(connectionState: GattConnectionState) {
+        if (connectionState == GattConnectionState.STATE_DISCONNECTED) {
+            stopSelf()
+        }
+    }
+
+    private fun disconnect() {
+        client.disconnect()
     }
 }

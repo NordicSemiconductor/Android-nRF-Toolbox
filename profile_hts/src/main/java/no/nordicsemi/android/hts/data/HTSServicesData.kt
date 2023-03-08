@@ -31,7 +31,11 @@
 
 package no.nordicsemi.android.hts.data
 
-internal data class HTSData(
-    val temperatureValue: Float = 0f,
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.profile.hts.HTSData
+
+internal data class HTSServicesData(
+    val data: HTSData = HTSData(),
     val batteryLevel: Int? = null,
+    val connectionState: GattConnectionState? = null
 )
