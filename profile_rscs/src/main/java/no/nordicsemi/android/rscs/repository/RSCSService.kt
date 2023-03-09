@@ -31,33 +31,94 @@
 
 package no.nordicsemi.android.rscs.repository
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.client.callback.BleGattClient
+import no.nordicsemi.android.kotlin.ble.core.client.service.BleGattServices
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
+import no.nordicsemi.android.kotlin.ble.profile.rscs.RSCSDataParser
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
+import java.util.*
 import javax.inject.Inject
 
+val RSCS_SERVICE_UUID: UUID = UUID.fromString("00001814-0000-1000-8000-00805F9B34FB")
+private val RSC_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A53-0000-1000-8000-00805F9B34FB")
+
+private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
+private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
+
+@SuppressLint("MissingPermission")
 @AndroidEntryPoint
 internal class RSCSService : NotificationService() {
 
     @Inject
     lateinit var repository: RSCSRepository
 
+    private lateinit var client: BleGattClient
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
         val device = intent!!.getParcelableExtra<ServerDevice>(DEVICE_DATA)!!
 
-        repository.start(device, lifecycleScope)
+        startGattClient(device)
 
-        repository.hasBeenDisconnected.onEach {
-            if (it) stopSelf()
-        }.launchIn(lifecycleScope)
+        repository.stopEvent
+            .onEach { disconnect() }
+            .launchIn(lifecycleScope)
 
         return START_REDELIVER_INTENT
+    }
+
+    private fun startGattClient(blinkyDevice: ServerDevice) = lifecycleScope.launch {
+        client = blinkyDevice.connect(this@RSCSService)
+
+        client.connectionState
+            .onEach { repository.onConnectionStateChanged(it) }
+            .filterNotNull()
+            .onEach { stopIfDisconnected(it) }
+            .launchIn(lifecycleScope)
+
+        client.services
+            .filterNotNull()
+            .onEach { configureGatt(it) }
+            .launchIn(lifecycleScope)
+    }
+
+    private suspend fun configureGatt(services: BleGattServices) {
+        val rscsService = services.findService(RSCS_SERVICE_UUID)!!
+        val rscsMeasurementCharacteristic = rscsService.findCharacteristic(RSC_MEASUREMENT_CHARACTERISTIC_UUID)!!
+        val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
+        val batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
+
+        batteryLevelCharacteristic.getNotifications()
+            .mapNotNull { BatteryLevelParser.parse(it) }
+            .onEach { repository.onBatteryLevelChanged(it) }
+            .launchIn(lifecycleScope)
+
+        rscsMeasurementCharacteristic.getNotifications()
+            .mapNotNull { RSCSDataParser.parse(it) }
+            .onEach { repository.onRSCSDataChanged(it) }
+            .launchIn(lifecycleScope)
+    }
+
+    private fun stopIfDisconnected(connectionState: GattConnectionState) {
+        if (connectionState == GattConnectionState.STATE_DISCONNECTED) {
+            stopSelf()
+        }
+    }
+
+    private fun disconnect() {
+        client.disconnect()
     }
 }

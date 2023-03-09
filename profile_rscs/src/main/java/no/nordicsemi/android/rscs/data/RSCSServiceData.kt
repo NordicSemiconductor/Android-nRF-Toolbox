@@ -31,37 +31,42 @@
 
 package no.nordicsemi.android.rscs.data
 
-internal data class RSCSData(
-    val batteryLevel: Int? = null,
-    val running: Boolean = false,
-    val instantaneousSpeed: Float = 1.0f,
-    val instantaneousCadence: Int = 0,
-    val strideLength: Int? = null,
-    val totalDistance: Long? = null
-) {
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.profile.rscs.RSCSData
+import no.nordicsemi.android.rscs.R
 
+internal data class RSCSServiceData(
+    val data: RSCSData = RSCSData(),
+    val batteryLevel: Int? = null,
+    val connectionState: GattConnectionState? = null
+) {
+    @Composable
     fun displayActivity(): String {
-        return if (running) {
-            "Running"
+        return if (data.running) {
+            stringResource(id = R.string.rscs_running)
         } else {
-            "Walking"
+            stringResource(id = R.string.rscs_walking)
         }
     }
 
+    @Composable
     fun displayPace(): String {
-        return "$instantaneousCadence min/km"
+        return stringResource(id = R.string.rscs_speed, data.instantaneousSpeed)
     }
 
-
+    @Composable
     fun displayCadence(): String {
-        return "$instantaneousCadence RPM"
+        return stringResource(id = R.string.rscs_rpm, data.instantaneousCadence)
     }
 
+    @Composable
     fun displayNumberOfSteps(): String? {
-        if (totalDistance == null || strideLength == null) {
+        if (data.totalDistance == null || data.strideLength == null) {
             return null
         }
-        val numberOfSteps = totalDistance/strideLength
-        return "Number of Steps $numberOfSteps"
+        val numberOfSteps = data.totalDistance!! / data.strideLength!!.toLong()
+        return stringResource(id = R.string.rscs_steps, numberOfSteps)
     }
 }

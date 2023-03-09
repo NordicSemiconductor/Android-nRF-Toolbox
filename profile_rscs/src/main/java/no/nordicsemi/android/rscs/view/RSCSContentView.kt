@@ -43,11 +43,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.rscs.R
-import no.nordicsemi.android.rscs.data.RSCSData
+import no.nordicsemi.android.rscs.data.RSCSServiceData
 import no.nordicsemi.android.ui.view.BatteryLevelView
 
 @Composable
-internal fun RSCSContentView(state: RSCSData, onEvent: (RSCScreenViewEvent) -> Unit) {
+internal fun RSCSContentView(state: RSCSServiceData, onEvent: (RSCScreenViewEvent) -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -74,5 +74,5 @@ internal fun RSCSContentView(state: RSCSData, onEvent: (RSCScreenViewEvent) -> U
 @Preview
 @Composable
 private fun RSCSContentViewPreview() {
-    RSCSContentView(RSCSData()) { }
+    RSCSContentView(RSCSServiceData()) { }
 }

@@ -46,17 +46,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.common.ui.scanner.view.DeviceConnectingView
 import no.nordicsemi.android.common.ui.scanner.view.DeviceDisconnectedView
 import no.nordicsemi.android.common.ui.scanner.view.Reason
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.rscs.R
 import no.nordicsemi.android.rscs.viewmodel.RSCSViewModel
-import no.nordicsemi.android.service.ConnectedResult
-import no.nordicsemi.android.service.ConnectingResult
-import no.nordicsemi.android.service.DeviceHolder
-import no.nordicsemi.android.service.DisconnectedResult
-import no.nordicsemi.android.service.IdleResult
-import no.nordicsemi.android.service.LinkLossResult
-import no.nordicsemi.android.service.MissingServiceResult
-import no.nordicsemi.android.service.SuccessResult
-import no.nordicsemi.android.service.UnknownErrorResult
 import no.nordicsemi.android.ui.view.BackIconAppBar
 import no.nordicsemi.android.ui.view.LoggerIconAppBar
 import no.nordicsemi.android.ui.view.NavigateUpButton
@@ -78,17 +70,14 @@ fun RSCSScreen() {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            when (state) {
+            when (state.rscsManagerState) {
                 NoDeviceState -> DeviceConnectingView()
-                is WorkingState -> when (state.result) {
-                    is IdleResult,
-                    is ConnectingResult -> DeviceConnectingView { NavigateUpButton(navigateUp) }
-                    is ConnectedResult -> DeviceConnectingView { NavigateUpButton(navigateUp) }
-                    is DisconnectedResult -> DeviceDisconnectedView(Reason.USER) { NavigateUpButton(navigateUp) }
-                    is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS) { NavigateUpButton(navigateUp) }
-                    is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE) { NavigateUpButton(navigateUp) }
-                    is UnknownErrorResult -> DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) }
-                    is SuccessResult -> RSCSContentView(state.result.data) { viewModel.onEvent(it) }
+                is WorkingState -> when (state.rscsManagerState.result.connectionState) {
+                    null,
+                    GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
+                    GattConnectionState.STATE_DISCONNECTED,
+                    GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) }
+                    GattConnectionState.STATE_CONNECTED -> RSCSContentView(state.rscsManagerState.result) { viewModel.onEvent(it) }
                 }
             }
         }
@@ -97,15 +86,11 @@ fun RSCSScreen() {
 
 @Composable
 private fun AppBar(state: RSCSViewState, navigateUp: () -> Unit, viewModel: RSCSViewModel) {
-    val toolbarName = (state as? WorkingState)?.let {
-        (it.result as? DeviceHolder)?.deviceName()
-    }
-
-    if (toolbarName == null) {
-        BackIconAppBar(stringResource(id = R.string.rscs_title), navigateUp)
-    } else {
-        LoggerIconAppBar(toolbarName, navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
+    if (state.deviceName?.isNotBlank() == true) {
+        LoggerIconAppBar(state.deviceName, navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
             viewModel.onEvent(OpenLoggerEvent)
         }
+    } else {
+        BackIconAppBar(stringResource(id = R.string.rscs_title), navigateUp)
     }
 }

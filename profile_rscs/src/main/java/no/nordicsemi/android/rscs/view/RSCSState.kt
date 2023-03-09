@@ -31,11 +31,15 @@
 
 package no.nordicsemi.android.rscs.view
 
-import no.nordicsemi.android.rscs.data.RSCSData
-import no.nordicsemi.android.service.BleManagerResult
+import no.nordicsemi.android.rscs.data.RSCSServiceData
 
-internal sealed class RSCSViewState
+internal data class RSCSViewState(
+    val rscsManagerState: RSCSManagerState = NoDeviceState,
+    val deviceName: String? = null
+)
 
-internal data class WorkingState(val result: BleManagerResult<RSCSData>) : RSCSViewState()
+internal sealed class RSCSManagerState
 
-internal object NoDeviceState : RSCSViewState()
+internal data class WorkingState(val result: RSCSServiceData) : RSCSManagerState()
+
+internal object NoDeviceState : RSCSManagerState()

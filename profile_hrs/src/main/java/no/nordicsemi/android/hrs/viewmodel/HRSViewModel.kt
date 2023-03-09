@@ -97,8 +97,13 @@ internal class HRSViewModel @Inject constructor(
     private fun handleResult(result: NavigationResult<ServerDevice>) {
         when (result) {
             is NavigationResult.Cancelled -> navigationManager.navigateUp()
-            is NavigationResult.Success -> repository.launch(result.value)
+            is NavigationResult.Success -> onDeviceSelected(result.value)
         }
+    }
+
+    private fun onDeviceSelected(device: ServerDevice) {
+        _state.value = _state.value.copy(deviceName = device.name)
+        repository.launch(device)
     }
 
     fun onEvent(event: HRSScreenViewEvent) {
