@@ -19,7 +19,7 @@ val ScannerDestination = defineDestination(ScannerDestinationId) {
     val arg = navigationViewModel.parameterOf(ScannerDestinationId)
 
     ScannerScreen(
-        uuid = ParcelUuid(UUID.fromString("00001816-0000-1000-8000-00805f9b34fb")),
+        uuid = arg,
         onResult = {
             when (it) {
                 is DeviceSelected -> navigationViewModel.navigateUpWithResult(ScannerDestinationId, it.device)
