@@ -49,7 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.common.theme.view.RadioButtonGroup
 import no.nordicsemi.android.csc.R
-import no.nordicsemi.android.csc.data.CSCServicesData
+import no.nordicsemi.android.csc.data.CSCServiceData
 import no.nordicsemi.android.kotlin.ble.profile.csc.CSCData
 import no.nordicsemi.android.kotlin.ble.profile.csc.WheelSize
 import no.nordicsemi.android.ui.view.ScreenSection
@@ -58,7 +58,7 @@ import no.nordicsemi.android.ui.view.dialog.FlowCanceled
 import no.nordicsemi.android.ui.view.dialog.ItemSelectedResult
 
 @Composable
-internal fun CSCContentView(state: CSCServicesData, speedUnit: SpeedUnit, onEvent: (CSCViewEvent) -> Unit) {
+internal fun CSCContentView(state: CSCServiceData, speedUnit: SpeedUnit, onEvent: (CSCViewEvent) -> Unit) {
     val showDialog = rememberSaveable { mutableStateOf(false) }
 
     if (showDialog.value) {
@@ -125,5 +125,5 @@ private fun SettingsSection(
 @Preview
 @Composable
 private fun ConnectedPreview() {
-    CSCContentView(CSCServicesData(), SpeedUnit.KM_H) { }
+    CSCContentView(CSCServiceData(), SpeedUnit.KM_H) { }
 }

@@ -39,7 +39,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.core.simpleSharedFlow
 import no.nordicsemi.android.common.logger.NordicLogger
-import no.nordicsemi.android.hts.data.HTSServicesData
+import no.nordicsemi.android.hts.data.HTSServiceData
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.profile.hts.HTSData
@@ -56,7 +56,7 @@ class HTSRepository @Inject constructor(
 ) {
     private var logger: NordicLogger? = null
 
-    private val _data = MutableStateFlow(HTSServicesData())
+    private val _data = MutableStateFlow(HTSServiceData())
     internal val data = _data.asStateFlow()
 
     private val _stopEvent = simpleSharedFlow<DisconnectAndStopEvent>()

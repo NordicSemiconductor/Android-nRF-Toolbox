@@ -39,7 +39,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.core.simpleSharedFlow
 import no.nordicsemi.android.common.logger.NordicLogger
-import no.nordicsemi.android.csc.data.CSCServicesData
+import no.nordicsemi.android.csc.data.CSCServiceData
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.profile.csc.CSCData
@@ -61,7 +61,7 @@ class CSCRepository @Inject constructor(
     private val _wheelSize = MutableStateFlow(WheelSizes.default)
     internal val wheelSize = _wheelSize.asStateFlow()
 
-    private val _data = MutableStateFlow(CSCServicesData())
+    private val _data = MutableStateFlow(CSCServiceData())
     internal val data = _data.asStateFlow()
 
     private val _stopEvent = simpleSharedFlow<DisconnectAndStopEvent>()

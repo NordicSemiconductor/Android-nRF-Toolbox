@@ -31,7 +31,7 @@
 
 package no.nordicsemi.android.hts.view
 
-import no.nordicsemi.android.hts.data.HTSServicesData
+import no.nordicsemi.android.hts.data.HTSServiceData
 
 internal data class HTSViewState(
     val temperatureUnit: TemperatureUnit = TemperatureUnit.CELSIUS,
@@ -41,6 +41,6 @@ internal data class HTSViewState(
 
 internal sealed class HTSManagerState
 
-internal data class WorkingState(val result: HTSServicesData) : HTSManagerState()
+internal data class WorkingState(val result: HTSServiceData) : HTSManagerState()
 
 internal object NoDeviceState : HTSManagerState()

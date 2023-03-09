@@ -31,14 +31,16 @@
 
 package no.nordicsemi.android.hrs.view
 
-import no.nordicsemi.android.hrs.data.HRSData
-import no.nordicsemi.android.service.BleManagerResult
+import no.nordicsemi.android.hrs.data.HRSServiceData
 
-internal sealed class HRSViewState
-
-internal data class WorkingState(
-    val result: BleManagerResult<HRSData>,
+internal data class HRSViewState(
     val zoomIn: Boolean = false,
-) : HRSViewState()
+    val hrsManagerState: HRSManagerState = NoDeviceState,
+    val deviceName: String? = null
+)
 
-internal object NoDeviceState : HRSViewState()
+internal sealed class HRSManagerState
+
+internal data class WorkingState(val result: HRSServiceData) : HRSManagerState()
+
+internal object NoDeviceState : HRSManagerState()

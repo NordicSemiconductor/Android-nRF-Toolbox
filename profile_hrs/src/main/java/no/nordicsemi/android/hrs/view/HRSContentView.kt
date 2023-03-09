@@ -46,13 +46,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.hrs.R
-import no.nordicsemi.android.hrs.data.HRSData
+import no.nordicsemi.android.hrs.data.HRSServiceData
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
-internal fun HRSContentView(state: HRSData, zoomIn: Boolean, onEvent: (HRSScreenViewEvent) -> Unit) {
+internal fun HRSContentView(state: HRSServiceData, zoomIn: Boolean, onEvent: (HRSScreenViewEvent) -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -102,5 +102,5 @@ private fun Menu(zoomIn: Boolean, onEvent: (HRSScreenViewEvent) -> Unit) {
 @Preview
 @Composable
 private fun Preview() {
-    HRSContentView(state = HRSData(), zoomIn = false) { }
+    HRSContentView(state = HRSServiceData(), zoomIn = false) { }
 }

@@ -29,10 +29,13 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.hrs.data
+package no.nordicsemi.android.hts.data
 
-internal data class HRSData(
-    val heartRates: List<Int> = emptyList(),
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.profile.hts.HTSData
+
+internal data class HTSServiceData(
+    val data: HTSData = HTSData(),
     val batteryLevel: Int? = null,
-    val sensorLocation: Int = 0,
+    val connectionState: GattConnectionState? = null
 )

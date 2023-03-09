@@ -40,14 +40,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.csc.R
-import no.nordicsemi.android.csc.data.CSCServicesData
+import no.nordicsemi.android.csc.data.CSCServiceData
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.KeyValueField
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
-internal fun SensorsReadingView(state: CSCServicesData, speedUnit: SpeedUnit) {
+internal fun SensorsReadingView(state: CSCServiceData, speedUnit: SpeedUnit) {
     val csc = state.data
     ScreenSection {
         SectionTitle(resId = R.drawable.ic_records, title = "Records")
@@ -80,5 +80,5 @@ internal fun SensorsReadingView(state: CSCServicesData, speedUnit: SpeedUnit) {
 @Preview
 @Composable
 private fun Preview() {
-    SensorsReadingView(CSCServicesData(), SpeedUnit.KM_H)
+    SensorsReadingView(CSCServiceData(), SpeedUnit.KM_H)
 }

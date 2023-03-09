@@ -33,22 +33,18 @@ package no.nordicsemi.android.hrs.service
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import no.nordicsemi.android.common.core.simpleSharedFlow
 import no.nordicsemi.android.common.logger.NordicLogger
-import no.nordicsemi.android.common.logger.NordicLoggerFactory
-import no.nordicsemi.android.hrs.data.HRSData
-import no.nordicsemi.android.hrs.data.HRSManager
+import no.nordicsemi.android.hrs.data.HRSServiceData
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
-import no.nordicsemi.android.service.BleManagerResult
-import no.nordicsemi.android.service.IdleResult
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.profile.hrs.HRSData
+import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.ServiceManager
-import no.nordicsemi.android.ui.view.StringConst
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -56,57 +52,43 @@ import javax.inject.Singleton
 class HRSRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val serviceManager: ServiceManager,
-    private val loggerFactory: NordicLoggerFactory,
-    private val stringConst: StringConst
+    private val serviceManager: ServiceManager
 ) {
-    private var manager: HRSManager? = null
     private var logger: NordicLogger? = null
 
-    private val _data = MutableStateFlow<BleManagerResult<HRSData>>(IdleResult())
+    private val _data = MutableStateFlow(HRSServiceData())
     internal val data = _data.asStateFlow()
 
-    val isRunning = data.map { it.isRunning() }
-    val hasBeenDisconnected = data.map { it.hasBeenDisconnected() }
+    private val _stopEvent = simpleSharedFlow<DisconnectAndStopEvent>()
+    internal val stopEvent = _stopEvent.asSharedFlow()
+
+    val isRunning = data.map { it.connectionState == GattConnectionState.STATE_CONNECTED }
 
     fun launch(device: ServerDevice) {
         serviceManager.startService(HRSService::class.java, device)
     }
 
-    fun start(device: ServerDevice, scope: CoroutineScope) {
-        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "HRS", device.address).also {
-            logger = it
-        }
-        val manager = HRSManager(context, scope, createdLogger)
-        this.manager = manager
+    fun onConnectionStateChanged(connectionState: GattConnectionState?) {
+        _data.value = _data.value.copy(connectionState = connectionState)
+    }
 
-        manager.dataHolder.status.onEach {
-            _data.value = it
-        }.launchIn(scope)
+    fun onHRSDataChanged(data: HRSData) {
+        _data.value = _data.value.copy(data = _data.value.data + data)
+    }
 
-        scope.launch {
-            manager.start(device)
-        }
+    fun onBodySensorLocationChanged(bodySensorLocation: Int) {
+        _data.value = _data.value.copy(bodySensorLocation = bodySensorLocation)
+    }
+
+    fun onBatteryLevelChanged(batteryLevel: Int) {
+        _data.value = _data.value.copy(batteryLevel = batteryLevel)
     }
 
     fun openLogger() {
         NordicLogger.launch(context, logger)
     }
 
-    private suspend fun HRSManager.start(device: ServerDevice) {
-//        try {
-//            connect(device.device)
-//                .useAutoConnect(false)
-//                .retry(3, 100)
-//                .suspend()
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//        }
-    }
-
     fun release() {
-        manager?.disconnect()?.enqueue()
-        logger = null
-        manager = null
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 }

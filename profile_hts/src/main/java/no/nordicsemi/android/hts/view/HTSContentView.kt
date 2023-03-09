@@ -45,14 +45,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.common.theme.view.RadioButtonGroup
 import no.nordicsemi.android.hts.R
-import no.nordicsemi.android.hts.data.HTSServicesData
+import no.nordicsemi.android.hts.data.HTSServiceData
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.KeyValueField
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
-internal fun HTSContentView(state: HTSServicesData, temperatureUnit: TemperatureUnit, onEvent: (HTSScreenViewEvent) -> Unit) {
+internal fun HTSContentView(state: HTSServiceData, temperatureUnit: TemperatureUnit, onEvent: (HTSScreenViewEvent) -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -99,5 +99,5 @@ internal fun HTSContentView(state: HTSServicesData, temperatureUnit: Temperature
 @Preview
 @Composable
 private fun Preview() {
-    HTSContentView(state = HTSServicesData(), TemperatureUnit.CELSIUS) { }
+    HTSContentView(state = HTSServiceData(), TemperatureUnit.CELSIUS) { }
 }

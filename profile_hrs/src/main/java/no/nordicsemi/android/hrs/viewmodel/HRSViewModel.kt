@@ -46,18 +46,17 @@ import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.hrs.data.HRS_SERVICE_UUID
 import no.nordicsemi.android.hrs.service.HRSRepository
+import no.nordicsemi.android.hrs.service.HRS_SERVICE_UUID
 import no.nordicsemi.android.hrs.view.DisconnectEvent
 import no.nordicsemi.android.hrs.view.HRSScreenViewEvent
 import no.nordicsemi.android.hrs.view.HRSViewState
 import no.nordicsemi.android.hrs.view.NavigateUpEvent
-import no.nordicsemi.android.hrs.view.NoDeviceState
 import no.nordicsemi.android.hrs.view.OpenLoggerEvent
 import no.nordicsemi.android.hrs.view.SwitchZoomEvent
 import no.nordicsemi.android.hrs.view.WorkingState
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
-import no.nordicsemi.android.service.ConnectedResult
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import javax.inject.Inject
 
@@ -68,7 +67,7 @@ internal class HRSViewModel @Inject constructor(
     private val analytics: AppAnalytics
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<HRSViewState>(NoDeviceState)
+    private val _state = MutableStateFlow(HRSViewState())
     val state = _state.asStateFlow()
 
     init {
@@ -79,10 +78,9 @@ internal class HRSViewModel @Inject constructor(
         }
 
         repository.data.onEach {
-            val zoomIn = (_state.value as? WorkingState)?.zoomIn ?: false
-            _state.value = WorkingState(it, zoomIn)
+            _state.value = _state.value.copy(hrsManagerState = WorkingState(it))
 
-            (it as? ConnectedResult)?.let {
+            if (it.connectionState == GattConnectionState.STATE_CONNECTED) {
                 analytics.logEvent(ProfileConnectedEvent(Profile.HRS))
             }
         }.launchIn(viewModelScope)
@@ -113,9 +111,7 @@ internal class HRSViewModel @Inject constructor(
     }
 
     private fun onZoomButtonClicked() {
-        (_state.value as? WorkingState)?.let {
-            _state.value = it.copy(zoomIn = !it.zoomIn)
-        }
+        _state.value = _state.value.copy(zoomIn = !_state.value.zoomIn)
     }
 
     private fun disconnect() {

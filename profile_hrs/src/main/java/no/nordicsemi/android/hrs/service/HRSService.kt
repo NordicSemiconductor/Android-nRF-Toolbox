@@ -31,33 +31,100 @@
 
 package no.nordicsemi.android.hrs.service
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.client.callback.BleGattClient
+import no.nordicsemi.android.kotlin.ble.core.client.service.BleGattServices
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
+import no.nordicsemi.android.kotlin.ble.profile.hrs.BodySensorLocationParser
+import no.nordicsemi.android.kotlin.ble.profile.hrs.HRSDataParser
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
+import java.util.*
 import javax.inject.Inject
 
+val HRS_SERVICE_UUID: UUID = UUID.fromString("0000180D-0000-1000-8000-00805f9b34fb")
+private val BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID = UUID.fromString("00002A38-0000-1000-8000-00805f9b34fb")
+private val HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb")
+
+private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
+private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
+
+@SuppressLint("MissingPermission")
 @AndroidEntryPoint
 internal class HRSService : NotificationService() {
 
     @Inject
     lateinit var repository: HRSRepository
 
+    private lateinit var client: BleGattClient
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
         val device = intent!!.getParcelableExtra<ServerDevice>(DEVICE_DATA)!!
 
-        repository.start(device, lifecycleScope)
+        startGattClient(device)
 
-        repository.hasBeenDisconnected.onEach {
-            if (it) stopSelf()
-        }.launchIn(lifecycleScope)
+        repository.stopEvent
+            .onEach { disconnect() }
+            .launchIn(lifecycleScope)
 
         return START_REDELIVER_INTENT
+    }
+
+    private fun startGattClient(blinkyDevice: ServerDevice) = lifecycleScope.launch {
+        client = blinkyDevice.connect(this@HRSService)
+
+        client.connectionState
+            .onEach { repository.onConnectionStateChanged(it) }
+            .filterNotNull()
+            .onEach { stopIfDisconnected(it) }
+            .launchIn(lifecycleScope)
+
+        client.services
+            .filterNotNull()
+            .onEach { configureGatt(it) }
+            .launchIn(lifecycleScope)
+    }
+
+    private suspend fun configureGatt(services: BleGattServices) {
+        val htsService = services.findService(HRS_SERVICE_UUID)!!
+        val htsMeasurementCharacteristic = htsService.findCharacteristic(HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID)!!
+        val bodySensorLocationCharacteristic = htsService.findCharacteristic(BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID)!!
+        val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
+        val batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
+
+        val bodySensorLocation = bodySensorLocationCharacteristic.read()
+        BodySensorLocationParser.parse(bodySensorLocation)?.let { repository.onBodySensorLocationChanged(it) }
+
+        batteryLevelCharacteristic.getNotifications()
+            .mapNotNull { BatteryLevelParser.parse(it) }
+            .onEach { repository.onBatteryLevelChanged(it) }
+            .launchIn(lifecycleScope)
+
+        htsMeasurementCharacteristic.getNotifications()
+            .mapNotNull { HRSDataParser.parse(it) }
+            .onEach { repository.onHRSDataChanged(it) }
+            .launchIn(lifecycleScope)
+    }
+
+    private fun stopIfDisconnected(connectionState: GattConnectionState) {
+        if (connectionState == GattConnectionState.STATE_DISCONNECTED) {
+            stopSelf()
+        }
+    }
+
+    private fun disconnect() {
+        client.disconnect()
     }
 }
