@@ -42,10 +42,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.bps.R
-import no.nordicsemi.android.bps.data.BPSData
+import no.nordicsemi.android.bps.data.BPSServiceData
 
 @Composable
-internal fun BPSContentView(state: BPSData, onEvent: (BPSViewEvent) -> Unit) {
+internal fun BPSContentView(state: BPSServiceData, onEvent: (BPSViewEvent) -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

@@ -31,13 +31,9 @@
 
 package no.nordicsemi.android.bps.view
 
-import no.nordicsemi.android.bps.data.BPSData
-import no.nordicsemi.android.service.BleManagerResult
+import no.nordicsemi.android.bps.data.BPSServiceData
 
-internal sealed class BPSViewState
-
-internal data class WorkingState(
-    val result: BleManagerResult<BPSData>
-) : BPSViewState()
-
-internal object NoDeviceState : BPSViewState()
+internal data class BPSViewState(
+    val result: BPSServiceData = BPSServiceData(),
+    val deviceName: String? = null
+)
