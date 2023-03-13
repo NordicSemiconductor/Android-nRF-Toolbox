@@ -50,8 +50,8 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.common.theme.view.RadioButtonGroup
 import no.nordicsemi.android.csc.R
 import no.nordicsemi.android.csc.data.CSCServiceData
-import no.nordicsemi.android.kotlin.ble.profile.csc.CSCData
-import no.nordicsemi.android.kotlin.ble.profile.csc.WheelSize
+import no.nordicsemi.android.kotlin.ble.profile.csc.data.CSCData
+import no.nordicsemi.android.kotlin.ble.profile.csc.data.WheelSize
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.ui.view.dialog.FlowCanceled

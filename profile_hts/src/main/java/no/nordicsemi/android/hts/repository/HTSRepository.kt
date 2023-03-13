@@ -42,7 +42,7 @@ import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.hts.data.HTSServiceData
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
-import no.nordicsemi.android.kotlin.ble.profile.hts.HTSData
+import no.nordicsemi.android.kotlin.ble.profile.hts.data.HTSData
 import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.ServiceManager
 import javax.inject.Inject

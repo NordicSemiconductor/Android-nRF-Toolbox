@@ -59,9 +59,9 @@ import no.nordicsemi.android.kotlin.ble.core.client.callback.BleGattClient
 import no.nordicsemi.android.kotlin.ble.core.client.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
-import no.nordicsemi.android.kotlin.ble.profile.bps.BloodPressureMeasurementData
+import no.nordicsemi.android.kotlin.ble.profile.bps.data.BloodPressureMeasurementData
 import no.nordicsemi.android.kotlin.ble.profile.bps.BloodPressureMeasurementParser
-import no.nordicsemi.android.kotlin.ble.profile.bps.IntermediateCuffPressureData
+import no.nordicsemi.android.kotlin.ble.profile.bps.data.IntermediateCuffPressureData
 import no.nordicsemi.android.kotlin.ble.profile.bps.IntermediateCuffPressureParser
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import java.util.*

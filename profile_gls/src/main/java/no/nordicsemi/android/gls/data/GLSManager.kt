@@ -153,8 +153,7 @@ internal class GLSManager(
         private suspend fun onNumberOfRecordsReceived(response: RecordAccessControlPointResponse) {
             if (response.numberOfRecords > 0) {
                 if (data.value.records.isNotEmpty()) {
-                    val sequenceNumber = data.value.records
-                        .last().sequenceNumber + 1
+                    val sequenceNumber = data.value.records.last().sequenceNumber + 1
                     writeCharacteristic(
                         recordAccessControlPointCharacteristic,
                         RecordAccessControlPointData.reportStoredRecordsGreaterThenOrEqualTo(

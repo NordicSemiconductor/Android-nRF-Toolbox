@@ -1,8 +1,8 @@
 package no.nordicsemi.android.bps.data
 
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
-import no.nordicsemi.android.kotlin.ble.profile.bps.BloodPressureMeasurementData
-import no.nordicsemi.android.kotlin.ble.profile.bps.IntermediateCuffPressureData
+import no.nordicsemi.android.kotlin.ble.profile.bps.data.BloodPressureMeasurementData
+import no.nordicsemi.android.kotlin.ble.profile.bps.data.IntermediateCuffPressureData
 
 data class BPSServiceData (
     val bloodPressureMeasurement: BloodPressureMeasurementData? = null,

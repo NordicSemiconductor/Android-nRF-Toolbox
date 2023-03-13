@@ -32,7 +32,7 @@
 package no.nordicsemi.android.hts.data
 
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
-import no.nordicsemi.android.kotlin.ble.profile.hts.HTSData
+import no.nordicsemi.android.kotlin.ble.profile.hts.data.HTSData
 
 internal data class HTSServiceData(
     val data: HTSData = HTSData(),

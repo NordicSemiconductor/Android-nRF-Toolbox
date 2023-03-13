@@ -1,7 +1,7 @@
 package no.nordicsemi.android.csc.data
 
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
-import no.nordicsemi.android.kotlin.ble.profile.csc.CSCData
+import no.nordicsemi.android.kotlin.ble.profile.csc.data.CSCData
 
 data class CSCServiceData(
     val data: CSCData = CSCData(),

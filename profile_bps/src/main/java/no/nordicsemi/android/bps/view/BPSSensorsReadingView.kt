@@ -43,8 +43,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.bps.R
 import no.nordicsemi.android.bps.data.BPSServiceData
-import no.nordicsemi.android.kotlin.ble.profile.bps.BloodPressureMeasurementData
-import no.nordicsemi.android.kotlin.ble.profile.bps.IntermediateCuffPressureData
+import no.nordicsemi.android.kotlin.ble.profile.bps.data.BloodPressureMeasurementData
+import no.nordicsemi.android.kotlin.ble.profile.bps.data.IntermediateCuffPressureData
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.KeyValueField
 import no.nordicsemi.android.ui.view.ScreenSection

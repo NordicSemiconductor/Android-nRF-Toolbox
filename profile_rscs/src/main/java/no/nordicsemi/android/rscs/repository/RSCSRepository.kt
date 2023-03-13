@@ -41,7 +41,7 @@ import no.nordicsemi.android.common.core.simpleSharedFlow
 import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
-import no.nordicsemi.android.kotlin.ble.profile.rscs.RSCSData
+import no.nordicsemi.android.kotlin.ble.profile.rscs.data.RSCSData
 import no.nordicsemi.android.rscs.data.RSCSServiceData
 import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.ServiceManager

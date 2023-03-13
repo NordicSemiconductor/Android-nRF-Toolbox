@@ -31,7 +31,7 @@
 
 package no.nordicsemi.android.csc.view
 
-import no.nordicsemi.android.kotlin.ble.profile.csc.WheelSize
+import no.nordicsemi.android.kotlin.ble.profile.csc.data.WheelSize
 
 internal sealed class CSCViewEvent
 

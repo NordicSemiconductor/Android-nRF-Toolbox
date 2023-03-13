@@ -42,9 +42,9 @@ import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.csc.data.CSCServiceData
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
-import no.nordicsemi.android.kotlin.ble.profile.csc.CSCData
-import no.nordicsemi.android.kotlin.ble.profile.csc.WheelSize
-import no.nordicsemi.android.kotlin.ble.profile.csc.WheelSizes
+import no.nordicsemi.android.kotlin.ble.profile.csc.data.CSCData
+import no.nordicsemi.android.kotlin.ble.profile.csc.data.WheelSize
+import no.nordicsemi.android.kotlin.ble.profile.csc.data.WheelSizes
 import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.ServiceManager
 import javax.inject.Inject
