@@ -32,7 +32,6 @@
 package no.nordicsemi.android.gls.main.viewmodel
 
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
 import android.os.ParcelUuid
 import androidx.lifecycle.ViewModel
@@ -49,12 +48,14 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
-import no.nordicsemi.android.ble.ktx.suspend
+import no.nordicsemi.android.ble.common.callback.RecordAccessControlPointDataCallback
+import no.nordicsemi.android.ble.common.callback.RecordAccessControlPointResponse
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.gls.GlsDetailsDestinationId
 import no.nordicsemi.android.gls.data.GLS_SERVICE_UUID
 import no.nordicsemi.android.gls.data.RequestStatus
+import no.nordicsemi.android.gls.data.WorkingMode
 import no.nordicsemi.android.gls.main.view.DisconnectEvent
 import no.nordicsemi.android.gls.main.view.GLSScreenViewEvent
 import no.nordicsemi.android.gls.main.view.GLSViewState
@@ -67,12 +68,15 @@ import no.nordicsemi.android.kotlin.ble.core.client.service.BleGattCharacteristi
 import no.nordicsemi.android.kotlin.ble.core.client.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
+import no.nordicsemi.android.kotlin.ble.profile.gls.GlucoseMeasurementContextParser
+import no.nordicsemi.android.kotlin.ble.profile.gls.GlucoseMeasurementParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.RecordAccessControlPointInputParser
+import no.nordicsemi.android.kotlin.ble.profile.gls.RecordAccessControlPointParser
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.NumberOfRecordsData
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.RecordAccessControlPointData
-import no.nordicsemi.android.kotlin.ble.profile.hrs.HRSDataParser
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.ResponseData
 import no.nordicsemi.android.service.ConnectedResult
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
-import no.nordicsemi.android.utils.launchWithCatch
 import java.util.*
 import javax.inject.Inject
 
@@ -134,6 +138,14 @@ internal class GLSViewModel @Inject constructor(
         startGattClient(device)
     }
 
+    private fun onEvent(event: OnWorkingModeSelected) = viewModelScope.launch {
+        when (event.workingMode) {
+            WorkingMode.ALL -> requestAllRecords()
+            WorkingMode.LAST -> requestLastRecord()
+            WorkingMode.FIRST -> requestFirstRecord()
+        }
+    }
+
     private fun connectDevice(device: ServerDevice) {
         repository.downloadData(viewModelScope, device).onEach {
             _state.value = WorkingState(it)
@@ -172,15 +184,77 @@ internal class GLSViewModel @Inject constructor(
             .onEach { repository.onBatteryLevelChanged(it) }
             .launchIn(viewModelScope)
 
-        htsMeasurementCharacteristic.getNotifications()
-            .mapNotNull { HRSDataParser.parse(it) }
-            .onEach { repository.onHRSDataChanged(it) }
+        glucoseMeasurementCharacteristic.getNotifications()
+            .mapNotNull { GlucoseMeasurementParser.parse(it) }
+            .onEach {  }
+            .launchIn(viewModelScope)
+
+        glucoseMeasurementContextCharacteristic.getNotifications()
+            .mapNotNull { GlucoseMeasurementContextParser.parse(it) }
+            .onEach {  }
+            .launchIn(viewModelScope)
+
+        recordAccessControlPointCharacteristic.getNotifications()
+            .mapNotNull { RecordAccessControlPointParser.parse(it) }
+            .onEach { onAccessControlPointDataReceived(it) }
             .launchIn(viewModelScope)
     }
 
     private fun stopIfDisconnected(connectionState: GattConnectionState) {
         if (connectionState == GattConnectionState.STATE_DISCONNECTED) {
             stopSelf()
+        }
+    }
+
+    private fun onAccessControlPointDataReceived(data: RecordAccessControlPointData) {
+        when (data) {
+            is NumberOfRecordsData -> if ()
+            is ResponseData -> TODO()
+        }
+        if (it.isOperationCompleted && it.wereRecordsFound() && it.numberOfRecords > 0) {
+            onNumberOfRecordsReceived(it)
+        } else if (it.isOperationCompleted && it.wereRecordsFound() && it.numberOfRecords == 0) {
+            onRecordAccessOperationCompletedWithNoRecordsFound(it)
+        } else if (it.isOperationCompleted && it.wereRecordsFound()) {
+            onRecordAccessOperationCompleted(it)
+        } else if (it.errorCode > 0) {
+            onRecordAccessOperationError(it)
+        }
+    }
+
+    private fun onRecordAccessOperationCompleted(response: RecordAccessControlPointResponse) {
+        val status = when (response.requestCode) {
+            RecordAccessControlPointDataCallback.RACP_OP_CODE_ABORT_OPERATION -> RequestStatus.ABORTED
+            else -> RequestStatus.SUCCESS
+        }
+        _state.value = _state.value.copyWithNewRequestStatus(status)
+    }
+
+    private fun onRecordAccessOperationCompletedWithNoRecordsFound(response: RecordAccessControlPointResponse) {
+        _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.SUCCESS)
+    }
+
+    private suspend fun onNumberOfRecordsReceived(response: RecordAccessControlPointResponse) {
+        if (response.numberOfRecords > 0) {
+            if (data.value.records.isNotEmpty()) {
+                val sequenceNumber = data.value.records.last().sequenceNumber + 1
+                recordAccessControlPointCharacteristic.write(
+                    RecordAccessControlPointInputParser.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber).value
+                )
+            } else {
+                recordAccessControlPointCharacteristic.write(
+                    RecordAccessControlPointInputParser.reportAllStoredRecords().value
+                )
+            }
+        }
+        _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.SUCCESS)
+    }
+
+    private fun onRecordAccessOperationError(response: RecordAccessControlPointResponse) {
+        if (response.errorCode == RecordAccessControlPointDataCallback.RACP_ERROR_OP_CODE_NOT_SUPPORTED) {
+            _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.NOT_SUPPORTED)
+        } else {
+            _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.FAILED)
         }
     }
 

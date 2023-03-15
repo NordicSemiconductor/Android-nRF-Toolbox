@@ -200,7 +200,7 @@ internal class GLSManager(
     }
 
     private fun clear() {
-        data.tryEmit(data.value.copy(records = emptyList()))
+        data.tryEmit(data.value.copy(records = mapOf()))
         val target = bluetoothDevice
         if (target != null) {
             data.tryEmit(data.value.copy(requestStatus = RequestStatus.SUCCESS))

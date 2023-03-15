@@ -40,7 +40,7 @@ internal data class GLSViewState(
 ) {
 
     fun copyAndClear(): GLSViewState {
-        return copy(glsServiceData = glsServiceData.copy(records = emptyList(), requestStatus = RequestStatus.IDLE))
+        return copy(glsServiceData = glsServiceData.copy(records = mapOf(), requestStatus = RequestStatus.IDLE))
     }
 
     fun copyWithNewRequestStatus(requestStatus: RequestStatus): GLSViewState {
