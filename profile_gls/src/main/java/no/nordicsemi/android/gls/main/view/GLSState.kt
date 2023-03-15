@@ -31,10 +31,19 @@
 
 package no.nordicsemi.android.gls.main.view
 
-import no.nordicsemi.android.gls.data.GLSData
-import no.nordicsemi.android.service.BleManagerResult
+import no.nordicsemi.android.gls.data.GLSServiceData
+import no.nordicsemi.android.gls.data.RequestStatus
 
-internal sealed class GLSViewState
+internal data class GLSViewState(
+    val glsServiceData: GLSServiceData = GLSServiceData(),
+    val deviceName: String? = null
+) {
 
-internal data class WorkingState(val result: BleManagerResult<GLSData>) : GLSViewState()
-internal object NoDeviceState : GLSViewState()
+    fun copyAndClear(): GLSViewState {
+        return copy(glsServiceData = glsServiceData.copy(records = emptyList(), requestStatus = RequestStatus.IDLE))
+    }
+
+    fun copyWithNewRequestStatus(requestStatus: RequestStatus): GLSViewState {
+        return copy(glsServiceData = glsServiceData.copy(requestStatus = requestStatus))
+    }
+}

@@ -60,8 +60,7 @@ private val GF_CHARACTERISTIC = UUID.fromString("00002A51-0000-1000-8000-00805f9
 private val RACP_CHARACTERISTIC = UUID.fromString("00002A52-0000-1000-8000-00805f9b34fb")
 
 private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
-private val BATTERY_LEVEL_CHARACTERISTIC_UUID =
-    UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
+private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
 
 internal class GLSManager(
     context: Context,
@@ -74,8 +73,8 @@ internal class GLSManager(
     private var glucoseMeasurementContextCharacteristic: BluetoothGattCharacteristic? = null
     private var recordAccessControlPointCharacteristic: BluetoothGattCharacteristic? = null
 
-    private val data = MutableStateFlow(GLSData())
-    val dataHolder = ConnectionObserverAdapter<GLSData>()
+    private val data = MutableStateFlow(GLSServiceData())
+    val dataHolder = ConnectionObserverAdapter<GLSServiceData>()
 
     init {
         connectionObserver = dataHolder

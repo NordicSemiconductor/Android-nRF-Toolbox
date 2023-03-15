@@ -57,7 +57,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.gls.R
-import no.nordicsemi.android.gls.data.GLSData
+import no.nordicsemi.android.gls.data.GLSServiceData
 import no.nordicsemi.android.gls.data.GLSRecord
 import no.nordicsemi.android.gls.data.RequestStatus
 import no.nordicsemi.android.gls.data.WorkingMode
@@ -67,7 +67,7 @@ import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
-internal fun GLSContentView(state: GLSData, onEvent: (GLSScreenViewEvent) -> Unit) {
+internal fun GLSContentView(state: GLSServiceData, onEvent: (GLSScreenViewEvent) -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -97,7 +97,7 @@ internal fun GLSContentView(state: GLSData, onEvent: (GLSScreenViewEvent) -> Uni
 }
 
 @Composable
-private fun SettingsView(state: GLSData, onEvent: (GLSScreenViewEvent) -> Unit) {
+private fun SettingsView(state: GLSServiceData, onEvent: (GLSScreenViewEvent) -> Unit) {
     ScreenSection {
         SectionTitle(icon = Icons.Default.Settings, title = "Request items")
 
@@ -121,7 +121,7 @@ private fun SettingsView(state: GLSData, onEvent: (GLSScreenViewEvent) -> Unit) 
 }
 
 @Composable
-private fun RecordsView(state: GLSData) {
+private fun RecordsView(state: GLSServiceData) {
     ScreenSection {
         if (state.records.isEmpty()) {
             RecordsViewWithoutData()
@@ -133,7 +133,7 @@ private fun RecordsView(state: GLSData) {
 }
 
 @Composable
-private fun RecordsViewWithData(state: GLSData) {
+private fun RecordsViewWithData(state: GLSServiceData) {
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionTitle(resId = R.drawable.ic_records, title = "Records")
 

@@ -31,8 +31,11 @@
 
 package no.nordicsemi.android.gls.data
 
-internal data class GLSData(
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+
+internal data class GLSServiceData(
     val records: List<GLSRecord> = emptyList(),
     val batteryLevel: Int? = null,
+    val connectionState: GattConnectionState? = null,
     val requestStatus: RequestStatus = RequestStatus.IDLE
 )
