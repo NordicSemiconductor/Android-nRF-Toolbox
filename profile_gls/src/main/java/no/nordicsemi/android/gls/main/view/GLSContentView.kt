@@ -58,10 +58,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.gls.R
 import no.nordicsemi.android.gls.data.GLSServiceData
-import no.nordicsemi.android.gls.data.GLSRecord
-import no.nordicsemi.android.gls.data.RequestStatus
 import no.nordicsemi.android.gls.data.WorkingMode
 import no.nordicsemi.android.gls.main.viewmodel.GLSViewModel
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSRecord
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.RequestStatus
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
@@ -139,7 +139,7 @@ private fun RecordsViewWithData(state: GLSServiceData) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        state.records.forEachIndexed { i, it ->
+        state.records.keys.forEachIndexed { i, it ->
             RecordItem(it)
 
             if (i < state.records.size - 1) {
@@ -184,13 +184,12 @@ private fun RecordItem(record: GLSRecord) {
                     style = MaterialTheme.typography.bodySmall
                 )
 
-                Text(
-                    text = glucoseConcentrationDisplayValue(
-                        record.glucoseConcentration,
-                        record.unit
-                    ),
-                    style = MaterialTheme.typography.labelLarge,
-                )
+                record.glucoseConcentration?.let { glucoseConcentration -> record.unit?.let { unit ->
+                    Text(
+                        text = glucoseConcentrationDisplayValue(glucoseConcentration, unit),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                } }
             }
         }
     }

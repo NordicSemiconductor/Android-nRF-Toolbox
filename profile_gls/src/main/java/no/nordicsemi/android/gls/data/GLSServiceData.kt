@@ -32,10 +32,12 @@
 package no.nordicsemi.android.gls.data
 
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
-import no.nordicsemi.android.kotlin.ble.profile.gls.data.GlucoseMeasurementContext
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSRecord
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSMeasurementContext
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.RequestStatus
 
 internal data class GLSServiceData(
-    val records: Map<GLSRecord, GlucoseMeasurementContext?> = mapOf(),
+    val records: Map<GLSRecord, GLSMeasurementContext?> = mapOf(),
     val batteryLevel: Int? = null,
     val connectionState: GattConnectionState? = null,
     val requestStatus: RequestStatus = RequestStatus.IDLE

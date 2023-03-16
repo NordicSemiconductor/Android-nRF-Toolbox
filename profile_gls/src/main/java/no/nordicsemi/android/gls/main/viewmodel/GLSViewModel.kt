@@ -48,13 +48,9 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
-import no.nordicsemi.android.ble.common.callback.RecordAccessControlPointDataCallback
-import no.nordicsemi.android.ble.common.callback.RecordAccessControlPointResponse
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.gls.GlsDetailsDestinationId
-import no.nordicsemi.android.gls.data.GLS_SERVICE_UUID
-import no.nordicsemi.android.gls.data.RequestStatus
 import no.nordicsemi.android.gls.data.WorkingMode
 import no.nordicsemi.android.gls.main.view.DisconnectEvent
 import no.nordicsemi.android.gls.main.view.GLSScreenViewEvent
@@ -72,10 +68,13 @@ import no.nordicsemi.android.kotlin.ble.profile.gls.GlucoseMeasurementContextPar
 import no.nordicsemi.android.kotlin.ble.profile.gls.GlucoseMeasurementParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.RecordAccessControlPointInputParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.RecordAccessControlPointParser
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSRecord
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.NumberOfRecordsData
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.RecordAccessControlPointData
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.RequestStatus
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.ResponseData
-import no.nordicsemi.android.service.ConnectedResult
+import no.nordicsemi.android.kotlin.ble.profile.racp.RACPOpCode
+import no.nordicsemi.android.kotlin.ble.profile.racp.RACPResponseCode
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import java.util.*
 import javax.inject.Inject
@@ -102,11 +101,13 @@ internal class GLSViewModel @Inject constructor(
     private lateinit var client: BleGattClient
 
     private lateinit var glucoseMeasurementCharacteristic: BleGattCharacteristic
-    private lateinit var glucoseMeasurementContextCharacteristic: BleGattCharacteristic
     private lateinit var recordAccessControlPointCharacteristic: BleGattCharacteristic
 
     private val _state = MutableStateFlow(GLSViewState())
     val state = _state.asStateFlow()
+
+    private val highestSequenceNumber
+        get() = state.value.glsServiceData.records.keys.maxByOrNull { it.sequenceNumber }?.sequenceNumber ?: -1
 
     init {
         navigationManager.navigateTo(ScannerDestinationId, ParcelUuid(GLS_SERVICE_UUID))
@@ -125,16 +126,20 @@ internal class GLSViewModel @Inject constructor(
 
     fun onEvent(event: GLSScreenViewEvent) {
         when (event) {
-            OpenLoggerEvent -> repository.openLogger()
+            OpenLoggerEvent -> TODO()
             DisconnectEvent -> navigationManager.navigateUp()
-            is OnWorkingModeSelected -> repository.requestMode(event.workingMode)
-            is OnGLSRecordClick -> navigationManager.navigateTo(GlsDetailsDestinationId, event.record)
+            is OnWorkingModeSelected -> onEvent(event)
+            is OnGLSRecordClick -> navigateToDetails(event.record)
             DisconnectEvent -> navigationManager.navigateUp()
         }
     }
 
+    private fun navigateToDetails(record: GLSRecord) {
+        val context = state.value.glsServiceData.records[record]
+        navigationManager.navigateTo(GlsDetailsDestinationId, record to context)
+    }
+
     private fun onDeviceSelected(device: ServerDevice) {
-        _state.value = _state.value.copy(deviceName = device.name)
         startGattClient(device)
     }
 
@@ -146,100 +151,98 @@ internal class GLSViewModel @Inject constructor(
         }
     }
 
-    private fun connectDevice(device: ServerDevice) {
-        repository.downloadData(viewModelScope, device).onEach {
-            _state.value = WorkingState(it)
-
-            (it as? ConnectedResult)?.let {
-                analytics.logEvent(ProfileConnectedEvent(Profile.GLS))
-            }
-        }.launchIn(viewModelScope)
-    }
-
-    private fun startGattClient(blinkyDevice: ServerDevice) = viewModelScope.launch {
-        client = blinkyDevice.connect(context)
+    private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
+        client = device.connect(context)
 
         client.connectionState
-            .onEach { _state.value = _state.value.copy() }
             .filterNotNull()
+            .onEach { _state.value = _state.value.copyWithNewConnectionState(it) }
             .onEach { stopIfDisconnected(it) }
+            .onEach { logAnalytics(it) }
             .launchIn(viewModelScope)
 
         client.services
             .filterNotNull()
-            .onEach { configureGatt(it) }
+            .onEach { configureGatt(it, device) }
             .launchIn(viewModelScope)
     }
 
-    private suspend fun configureGatt(services: BleGattServices) {
+    private fun logAnalytics(connectionState: GattConnectionState) {
+        if (connectionState == GattConnectionState.STATE_CONNECTED) {
+            analytics.logEvent(ProfileConnectedEvent(Profile.GLS))
+        }
+    }
+
+    private suspend fun configureGatt(services: BleGattServices, device: ServerDevice) {
         val glsService = services.findService(GLS_SERVICE_UUID)!!
         glucoseMeasurementCharacteristic = glsService.findCharacteristic(GM_CHARACTERISTIC)!!
-        glucoseMeasurementContextCharacteristic = glsService.findCharacteristic(GM_CONTEXT_CHARACTERISTIC)!!
         recordAccessControlPointCharacteristic = glsService.findCharacteristic(RACP_CHARACTERISTIC)!!
         val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
         val batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
 
         batteryLevelCharacteristic.getNotifications()
             .mapNotNull { BatteryLevelParser.parse(it) }
-            .onEach { repository.onBatteryLevelChanged(it) }
+            .onEach { _state.value = _state.value.copyWithNewBatteryLevel(it) }
             .launchIn(viewModelScope)
 
         glucoseMeasurementCharacteristic.getNotifications()
             .mapNotNull { GlucoseMeasurementParser.parse(it) }
-            .onEach {  }
+            .onEach { _state.value = _state.value.copyWithNewRecord(it) }
             .launchIn(viewModelScope)
 
-        glucoseMeasurementContextCharacteristic.getNotifications()
-            .mapNotNull { GlucoseMeasurementContextParser.parse(it) }
-            .onEach {  }
-            .launchIn(viewModelScope)
+        glsService.findCharacteristic(GM_CONTEXT_CHARACTERISTIC)?.getNotifications()
+            ?.mapNotNull { GlucoseMeasurementContextParser.parse(it) }
+            ?.onEach { _state.value = _state.value.copyWithNewContext(it) }
+            ?.launchIn(viewModelScope)
 
         recordAccessControlPointCharacteristic.getNotifications()
             .mapNotNull { RecordAccessControlPointParser.parse(it) }
             .onEach { onAccessControlPointDataReceived(it) }
             .launchIn(viewModelScope)
+
+        _state.value = _state.value.copy(deviceName = device.name)
     }
 
     private fun stopIfDisconnected(connectionState: GattConnectionState) {
         if (connectionState == GattConnectionState.STATE_DISCONNECTED) {
-            stopSelf()
+            navigationManager.navigateUp()
         }
     }
 
-    private fun onAccessControlPointDataReceived(data: RecordAccessControlPointData) {
+    private fun onAccessControlPointDataReceived(data: RecordAccessControlPointData) = viewModelScope.launch {
         when (data) {
-            is NumberOfRecordsData -> if ()
-            is ResponseData -> TODO()
-        }
-        if (it.isOperationCompleted && it.wereRecordsFound() && it.numberOfRecords > 0) {
-            onNumberOfRecordsReceived(it)
-        } else if (it.isOperationCompleted && it.wereRecordsFound() && it.numberOfRecords == 0) {
-            onRecordAccessOperationCompletedWithNoRecordsFound(it)
-        } else if (it.isOperationCompleted && it.wereRecordsFound()) {
-            onRecordAccessOperationCompleted(it)
-        } else if (it.errorCode > 0) {
-            onRecordAccessOperationError(it)
+            is NumberOfRecordsData -> onNumberOfRecordsReceived(data.numberOfRecords)
+            is ResponseData -> when (data.responseCode) {
+                RACPResponseCode.RACP_RESPONSE_SUCCESS -> onRecordAccessOperationCompleted(data.requestCode)
+                RACPResponseCode.RACP_ERROR_NO_RECORDS_FOUND -> onRecordAccessOperationCompletedWithNoRecordsFound()
+                RACPResponseCode.RACP_ERROR_OP_CODE_NOT_SUPPORTED,
+                RACPResponseCode.RACP_ERROR_INVALID_OPERATOR,
+                RACPResponseCode.RACP_ERROR_OPERATOR_NOT_SUPPORTED,
+                RACPResponseCode.RACP_ERROR_INVALID_OPERAND,
+                RACPResponseCode.RACP_ERROR_ABORT_UNSUCCESSFUL,
+                RACPResponseCode.RACP_ERROR_PROCEDURE_NOT_COMPLETED,
+                RACPResponseCode.RACP_ERROR_OPERAND_NOT_SUPPORTED -> onRecordAccessOperationError(data.responseCode)
+            }
         }
     }
 
-    private fun onRecordAccessOperationCompleted(response: RecordAccessControlPointResponse) {
-        val status = when (response.requestCode) {
-            RecordAccessControlPointDataCallback.RACP_OP_CODE_ABORT_OPERATION -> RequestStatus.ABORTED
+    private fun onRecordAccessOperationCompleted(requestCode: RACPOpCode) {
+        val status = when (requestCode) {
+            RACPOpCode.RACP_OP_CODE_ABORT_OPERATION -> RequestStatus.ABORTED
             else -> RequestStatus.SUCCESS
         }
         _state.value = _state.value.copyWithNewRequestStatus(status)
     }
 
-    private fun onRecordAccessOperationCompletedWithNoRecordsFound(response: RecordAccessControlPointResponse) {
+    private fun onRecordAccessOperationCompletedWithNoRecordsFound() {
         _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.SUCCESS)
     }
 
-    private suspend fun onNumberOfRecordsReceived(response: RecordAccessControlPointResponse) {
-        if (response.numberOfRecords > 0) {
-            if (data.value.records.isNotEmpty()) {
-                val sequenceNumber = data.value.records.last().sequenceNumber + 1
+    private suspend fun onNumberOfRecordsReceived(numberOfRecords: Int) {
+        if (numberOfRecords > 0) {
+            if (state.value.glsServiceData.records.isNotEmpty()) {
                 recordAccessControlPointCharacteristic.write(
-                    RecordAccessControlPointInputParser.reportStoredRecordsGreaterThenOrEqualTo(sequenceNumber).value
+                    RecordAccessControlPointInputParser.reportStoredRecordsGreaterThenOrEqualTo(highestSequenceNumber).value
                 )
             } else {
                 recordAccessControlPointCharacteristic.write(
@@ -250,8 +253,8 @@ internal class GLSViewModel @Inject constructor(
         _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.SUCCESS)
     }
 
-    private fun onRecordAccessOperationError(response: RecordAccessControlPointResponse) {
-        if (response.errorCode == RecordAccessControlPointDataCallback.RACP_ERROR_OP_CODE_NOT_SUPPORTED) {
+    private fun onRecordAccessOperationError(response: RACPResponseCode) {
+        if (response == RACPResponseCode.RACP_ERROR_OP_CODE_NOT_SUPPORTED) {
             _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.NOT_SUPPORTED)
         } else {
             _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.FAILED)
@@ -262,21 +265,21 @@ internal class GLSViewModel @Inject constructor(
         _state.value = _state.value.copyAndClear()
     }
 
-    suspend fun requestLastRecord() {
+    private suspend fun requestLastRecord() {
+        clear()
+        _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.PENDING)
         recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportLastStoredRecord().value)
-        clear()
-        _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.PENDING)
     }
 
-    suspend fun requestFirstRecord() {
+    private suspend fun requestFirstRecord() {
+        clear()
+        _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.PENDING)
         recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportFirstStoredRecord().value)
-        clear()
-        _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.PENDING)
     }
 
-    suspend fun requestAllRecords() {
-        recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords().value)
+    private suspend fun requestAllRecords() {
         clear()
         _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.PENDING)
+        recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords().value)
     }
 }

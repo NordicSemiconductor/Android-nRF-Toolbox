@@ -32,12 +32,19 @@
 package no.nordicsemi.android.gls.main.view
 
 import no.nordicsemi.android.gls.data.GLSServiceData
-import no.nordicsemi.android.gls.data.RequestStatus
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSMeasurementContext
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSRecord
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.RequestStatus
 
 internal data class GLSViewState(
     val glsServiceData: GLSServiceData = GLSServiceData(),
     val deviceName: String? = null
 ) {
+
+    fun copyWithNewConnectionState(connectionState: GattConnectionState): GLSViewState {
+        return copy(glsServiceData = glsServiceData.copy(connectionState = connectionState))
+    }
 
     fun copyAndClear(): GLSViewState {
         return copy(glsServiceData = glsServiceData.copy(records = mapOf(), requestStatus = RequestStatus.IDLE))
@@ -45,5 +52,25 @@ internal data class GLSViewState(
 
     fun copyWithNewRequestStatus(requestStatus: RequestStatus): GLSViewState {
         return copy(glsServiceData = glsServiceData.copy(requestStatus = requestStatus))
+    }
+
+    fun copyWithNewBatteryLevel(batteryLevel: Int): GLSViewState {
+        return copy(glsServiceData = glsServiceData.copy(batteryLevel = batteryLevel))
+    }
+
+    //todo optimise
+    fun copyWithNewRecord(record: GLSRecord): GLSViewState {
+        val records = glsServiceData.records.toMutableMap()
+        records[record] = null
+        return copy(glsServiceData = glsServiceData.copy(records = records.toMap()))
+    }
+
+    //todo optimise
+    fun copyWithNewContext(context: GLSMeasurementContext): GLSViewState {
+        val records = glsServiceData.records.toMutableMap()
+        return records.keys.firstOrNull { it.sequenceNumber == context.sequenceNumber }?.let {
+            records[it] = context
+            copy(glsServiceData = glsServiceData.copy(records = records.toMap()))
+        } ?: this
     }
 }

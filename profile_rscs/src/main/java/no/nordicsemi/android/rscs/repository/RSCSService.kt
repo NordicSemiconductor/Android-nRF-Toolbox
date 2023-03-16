@@ -80,8 +80,8 @@ internal class RSCSService : NotificationService() {
         return START_REDELIVER_INTENT
     }
 
-    private fun startGattClient(blinkyDevice: ServerDevice) = lifecycleScope.launch {
-        client = blinkyDevice.connect(this@RSCSService)
+    private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
+        client = device.connect(this@RSCSService)
 
         client.connectionState
             .onEach { repository.onConnectionStateChanged(it) }

@@ -49,12 +49,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.gls.R
-import no.nordicsemi.android.gls.data.GLSRecord
 import no.nordicsemi.android.gls.main.view.toDisplayString
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSRecord
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSMeasurementContext
 import no.nordicsemi.android.ui.view.ScreenSection
 
 @Composable
-internal fun GLSDetailsContentView(record: GLSRecord) {
+internal fun GLSDetailsContentView(record: GLSRecord, context: GLSMeasurementContext?) {
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         Column(modifier = Modifier.padding(16.dp)) {
             ScreenSection {
@@ -86,24 +87,28 @@ internal fun GLSDetailsContentView(record: GLSRecord) {
                     Spacer(modifier = Modifier.size(4.dp))
                 }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.gls_details_glucose_condensation_title),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.outline
-                    )
-                    Text(
-                        text = stringResource(
-                            id = R.string.gls_details_glucose_condensation_field,
-                            record.glucoseConcentration,
-                            record.unit.toDisplayString()
-                        ),
-                        style = MaterialTheme.typography.titleLarge
-                    )
+                record.glucoseConcentration?.let { glucoseConcentration ->
+                    record.unit?.let { unit ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.Bottom
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.gls_details_glucose_condensation_title),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                            Text(
+                                text = stringResource(
+                                    id = R.string.gls_details_glucose_condensation_field,
+                                    glucoseConcentration,
+                                    unit.toDisplayString()
+                                ),
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        }
+                    }
                 }
 
                 record.status?.let {
@@ -172,7 +177,7 @@ internal fun GLSDetailsContentView(record: GLSRecord) {
                     Spacer(modifier = Modifier.size(4.dp))
                 }
 
-                record.context?.let {
+                context?.let {
                     Divider(
                         color = MaterialTheme.colorScheme.secondary,
                         thickness = 1.dp,
@@ -209,32 +214,41 @@ internal fun GLSDetailsContentView(record: GLSRecord) {
                         )
                         Spacer(modifier = Modifier.size(4.dp))
                     }
-                    Field(
-                        stringResource(id = R.string.gls_context_exercise_title),
-                        stringResource(
-                            id = R.string.gls_context_exercise_field,
-                            it.exerciseDuration,
-                            it.exerciseIntensity
+                    it.exerciseDuration?.let { exerciseDuration ->
+                        it.exerciseIntensity?.let { exerciseIntensity ->
+                            Field(
+                                stringResource(id = R.string.gls_context_exercise_title),
+                                stringResource(
+                                    id = R.string.gls_context_exercise_field,
+                                    exerciseDuration,
+                                    exerciseIntensity
+                                )
+                            )
+                        }
+                    }
+
+                    it.medicationUnit?.let { medicationUnit ->
+                        Spacer(modifier = Modifier.size(4.dp))
+                        val medicationField = String.format(
+                            stringResource(id = R.string.gls_context_medication_field),
+                            it.medicationQuantity,
+                            medicationUnit.toDisplayString(),
+                            it.medication?.toDisplayString()
                         )
-                    )
-                    Spacer(modifier = Modifier.size(4.dp))
+                        Field(
+                            stringResource(id = R.string.gls_context_medication_title),
+                            medicationField
+                        )
+                    }
 
-                    val medicationField = String.format(
-                        stringResource(id = R.string.gls_context_medication_field),
-                        it.medicationQuantity,
-                        it.medicationUnit.toDisplayString(),
-                        it.medication?.toDisplayString()
-                    )
-                    Field(
-                        stringResource(id = R.string.gls_context_medication_title),
-                        medicationField
-                    )
+                    it.HbA1c?.let { hbA1c ->
+                        Spacer(modifier = Modifier.size(4.dp))
+                        Field(
+                            stringResource(id = R.string.gls_context_hba1c_title),
+                            stringResource(id = R.string.gls_context_hba1c_field, hbA1c)
+                        )
+                    }
 
-                    Spacer(modifier = Modifier.size(4.dp))
-                    Field(
-                        stringResource(id = R.string.gls_context_hba1c_title),
-                        stringResource(id = R.string.gls_context_hba1c_field, it.HbA1c)
-                    )
                     Spacer(modifier = Modifier.size(4.dp))
                 } ?: Field(
                     stringResource(id = R.string.gls_context_title),

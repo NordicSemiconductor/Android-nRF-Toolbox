@@ -33,15 +33,15 @@ package no.nordicsemi.android.gls.details.view
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Carbohydrate
-import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Health
-import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Meal
-import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Medication
-import no.nordicsemi.android.ble.common.profile.glucose.GlucoseMeasurementContextCallback.Tester
 import no.nordicsemi.android.gls.R
-import no.nordicsemi.android.gls.data.ConcentrationUnit
-import no.nordicsemi.android.gls.data.MedicationUnit
-import no.nordicsemi.android.gls.data.SampleLocation
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.Carbohydrate
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.ConcentrationUnit
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.Health
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.Meal
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.Medication
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.MedicationUnit
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.SampleLocation
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.Tester
 
 @Composable
 internal fun SampleLocation.toDisplayString(): String {
@@ -65,8 +65,8 @@ internal fun ConcentrationUnit.toDisplayString(): String {
 @Composable
 internal fun MedicationUnit.toDisplayString(): String {
     return when (this) {
-        MedicationUnit.UNIT_KG -> stringResource(id = R.string.gls_sample_location_kg)
-        MedicationUnit.UNIT_L -> stringResource(id = R.string.gls_sample_location_l)
+        MedicationUnit.UNIT_MG -> stringResource(id = R.string.gls_sample_location_kg)
+        MedicationUnit.UNIT_ML -> stringResource(id = R.string.gls_sample_location_l)
     }
 }
 

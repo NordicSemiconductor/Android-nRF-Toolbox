@@ -80,8 +80,8 @@ internal class CSCService : NotificationService() {
         return START_REDELIVER_INTENT
     }
 
-    private fun startGattClient(blinkyDevice: ServerDevice) = lifecycleScope.launch {
-        client = blinkyDevice.connect(this@CSCService)
+    private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
+        client = device.connect(this@CSCService)
 
         client.connectionState
             .onEach { repository.onConnectionStateChanged(it) }

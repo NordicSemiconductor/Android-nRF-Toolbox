@@ -31,8 +31,8 @@
 
 package no.nordicsemi.android.gls.main.view
 
-import no.nordicsemi.android.gls.data.GLSRecord
 import no.nordicsemi.android.gls.data.WorkingMode
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSRecord
 
 internal sealed class GLSScreenViewEvent
 

@@ -110,10 +110,10 @@ internal class BPSViewModel @Inject constructor(
         }
     }
 
-    private fun startGattClient(blinkyDevice: ServerDevice) = viewModelScope.launch {
-        _state.value = _state.value.copy(deviceName = blinkyDevice.name)
+    private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
+        _state.value = _state.value.copy(deviceName = device.name)
 
-        client = blinkyDevice.connect(context)
+        client = device.connect(context)
 
         client.connectionState
             .filterNotNull()
