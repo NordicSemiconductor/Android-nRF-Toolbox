@@ -33,23 +33,19 @@ package no.nordicsemi.android.cgms.repository
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import no.nordicsemi.android.ble.ktx.suspend
-import no.nordicsemi.android.cgms.data.CGMData
-import no.nordicsemi.android.cgms.data.CGMManager
-import no.nordicsemi.android.common.logger.NordicLogger
-import no.nordicsemi.android.common.logger.NordicLoggerFactory
+import no.nordicsemi.android.cgms.data.CGMRecordWithSequenceNumber
+import no.nordicsemi.android.cgms.data.CGMServiceCommand
+import no.nordicsemi.android.cgms.data.CGMServiceData
+import no.nordicsemi.android.common.core.simpleSharedFlow
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
-import no.nordicsemi.android.service.BleManagerResult
-import no.nordicsemi.android.service.IdleResult
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.RequestStatus
+import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.ServiceManager
-import no.nordicsemi.android.ui.view.StringConst
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -58,68 +54,53 @@ class CGMRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
-    private val loggerFactory: NordicLoggerFactory,
-    private val stringConst: StringConst
 ) {
-    private var manager: CGMManager? = null
-    private var logger: NordicLogger? = null
-
-    private val _data = MutableStateFlow<BleManagerResult<CGMData>>(IdleResult())
+    private val _data = MutableStateFlow(CGMServiceData())
     internal val data = _data.asStateFlow()
 
-    val isRunning = data.map { it.isRunning() }
-    val hasBeenDisconnected = data.map { it.hasBeenDisconnected() }
+    private val _stopEvent = simpleSharedFlow<DisconnectAndStopEvent>()
+    internal val stopEvent = _stopEvent.asSharedFlow()
+
+    private val _command = simpleSharedFlow<CGMServiceCommand>()
+    internal val command = _command.asSharedFlow()
+
+    val isRunning = data.map { it.connectionState == GattConnectionState.STATE_CONNECTED }
+    val hasRecords = data.value.records.isNotEmpty()
+    val highestSequenceNumber = data.value.records.maxOfOrNull { it.sequenceNumber } ?: -1
 
     fun launch(device: ServerDevice) {
         serviceManager.startService(CGMService::class.java, device)
     }
 
-    fun start(device: ServerDevice, scope: CoroutineScope) {
-        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "CGMS", device.address).also {
-            logger = it
-        }
-        val manager = CGMManager(context, scope, createdLogger)
-        this.manager = manager
-
-        manager.dataHolder.status.onEach {
-            _data.value = it
-        }.launchIn(scope)
-
-        scope.launch {
-            manager.start(device)
-        }
+    fun onDataReceived(data: List<CGMRecordWithSequenceNumber>) {
+        _data.value = _data.value.copy(records = _data.value.records + data)
     }
 
-    private suspend fun CGMManager.start(device: ServerDevice) {
-//        try {
-//            connect(device.device)
-//                .useAutoConnect(false)
-//                .retry(3, 100)
-//                .suspend()
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//        }
+    internal fun onCommand(command: CGMServiceCommand) {
+        _command.tryEmit(command)
     }
 
-    fun requestAllRecords() {
-        manager?.requestAllRecords()
+    fun onConnectionStateChanged(connectionState: GattConnectionState?) {
+        _data.value = _data.value.copy(connectionState = connectionState)
     }
 
-    fun requestLastRecord() {
-        manager?.requestLastRecord()
+    fun onBatteryLevelChanged(batteryLevel: Int) {
+        _data.value = _data.value.copy(batteryLevel = batteryLevel)
     }
 
-    fun requestFirstRecord() {
-        manager?.requestFirstRecord()
+    fun onNewRequestStatus(requestStatus: RequestStatus) {
+        _data.value = _data.value.copy(requestStatus = requestStatus)
     }
 
     fun openLogger() {
-        NordicLogger.launch(context, logger)
+        TODO()
+    }
+
+    fun clear() {
+        _data.value = _data.value.copy(records = emptyList())
     }
 
     fun release() {
-        manager?.disconnect()?.enqueue()
-        logger = null
-        manager = null
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 }

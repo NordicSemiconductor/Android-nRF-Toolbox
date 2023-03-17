@@ -52,16 +52,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.cgms.R
-import no.nordicsemi.android.cgms.data.CGMData
-import no.nordicsemi.android.cgms.data.CGMRecord
+import no.nordicsemi.android.cgms.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.cgms.data.CGMServiceCommand
-import no.nordicsemi.android.cgms.data.RequestStatus
+import no.nordicsemi.android.cgms.data.CGMServiceData
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.RequestStatus
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
-internal fun CGMContentView(state: CGMData, onEvent: (CGMViewEvent) -> Unit) {
+internal fun CGMContentView(state: CGMServiceData, onEvent: (CGMViewEvent) -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -91,7 +91,7 @@ internal fun CGMContentView(state: CGMData, onEvent: (CGMViewEvent) -> Unit) {
 }
 
 @Composable
-private fun SettingsView(state: CGMData, onEvent: (CGMViewEvent) -> Unit) {
+private fun SettingsView(state: CGMServiceData, onEvent: (CGMViewEvent) -> Unit) {
     ScreenSection {
         SectionTitle(icon = Icons.Default.Settings, title = "Request items")
 
@@ -119,7 +119,7 @@ private fun SettingsView(state: CGMData, onEvent: (CGMViewEvent) -> Unit) {
 }
 
 @Composable
-private fun RecordsView(state: CGMData) {
+private fun RecordsView(state: CGMServiceData) {
     ScreenSection {
         if (state.records.isEmpty()) {
             RecordsViewWithoutData()
@@ -131,7 +131,7 @@ private fun RecordsView(state: CGMData) {
 }
 
 @Composable
-private fun RecordsViewWithData(state: CGMData) {
+private fun RecordsViewWithData(state: CGMServiceData) {
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionTitle(resId = R.drawable.ic_records, title = "Records")
 
@@ -148,7 +148,7 @@ private fun RecordsViewWithData(state: CGMData) {
 }
 
 @Composable
-private fun RecordItem(record: CGMRecord) {
+private fun RecordItem(record: CGMRecordWithSequenceNumber) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Column(
             modifier = Modifier

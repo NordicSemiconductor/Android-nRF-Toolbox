@@ -200,7 +200,7 @@ internal class GLSViewModel @Inject constructor(
             .onEach { onAccessControlPointDataReceived(it) }
             .launchIn(viewModelScope)
 
-        _state.value = _state.value.copy(deviceName = device.name)
+        _state.value = _state.value.copy(deviceName = device.name) //prevents UI from appearing before BLE connection is set up
     }
 
     private fun stopIfDisconnected(connectionState: GattConnectionState) {
