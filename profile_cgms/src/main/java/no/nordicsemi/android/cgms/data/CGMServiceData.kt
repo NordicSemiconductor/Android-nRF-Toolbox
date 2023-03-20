@@ -8,7 +8,8 @@ internal data class CGMServiceData(
     val records: List<CGMRecordWithSequenceNumber> = emptyList(),
     val batteryLevel: Int? = null,
     val connectionState: GattConnectionState? = null,
-    val requestStatus: RequestStatus = RequestStatus.IDLE
+    val requestStatus: RequestStatus = RequestStatus.IDLE,
+    val deviceName: String? = null
 )
 
 data class CGMRecordWithSequenceNumber(

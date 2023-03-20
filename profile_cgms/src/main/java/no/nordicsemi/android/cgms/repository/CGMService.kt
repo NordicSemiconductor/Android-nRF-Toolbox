@@ -65,6 +65,7 @@ import no.nordicsemi.android.kotlin.ble.profile.racp.RACPOpCode
 import no.nordicsemi.android.kotlin.ble.profile.racp.RACPResponseCode
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
+import no.nordicsemi.android.utils.launchWithCatch
 import java.util.*
 import javax.inject.Inject
 
@@ -139,12 +140,12 @@ internal class CGMService : NotificationService() {
     }
 
     private suspend fun configureGatt(services: BleGattServices) {
-        val glsService = services.findService(CGMS_SERVICE_UUID)!!
-        val statusCharacteristic = glsService.findCharacteristic(CGM_STATUS_UUID)!!
-        val featureCharacteristic = glsService.findCharacteristic(CGM_FEATURE_UUID)!!
-        val measurementCharacteristic = glsService.findCharacteristic(CGM_MEASUREMENT_UUID)!!
-        val opsControlPointCharacteristic = glsService.findCharacteristic(CGM_OPS_CONTROL_POINT_UUID)!!
-        recordAccessControlPointCharacteristic = glsService.findCharacteristic(RACP_UUID)!!
+        val cgmService = services.findService(CGMS_SERVICE_UUID)!!
+        val statusCharacteristic = cgmService.findCharacteristic(CGM_STATUS_UUID)!!
+        val featureCharacteristic = cgmService.findCharacteristic(CGM_FEATURE_UUID)!!
+        val measurementCharacteristic = cgmService.findCharacteristic(CGM_MEASUREMENT_UUID)!!
+        val opsControlPointCharacteristic = cgmService.findCharacteristic(CGM_OPS_CONTROL_POINT_UUID)!!
+        recordAccessControlPointCharacteristic = cgmService.findCharacteristic(RACP_UUID)!!
         val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
         val batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
 
@@ -194,12 +195,16 @@ internal class CGMService : NotificationService() {
             .onEach { onAccessControlPointDataReceived(it) }
             .launchIn(lifecycleScope)
 
-        val featuresEnvelope = featureCharacteristic.read().let { CGMFeatureParser.parse(it) }!!
-        secured = featuresEnvelope.features.e2eCrcSupported
+        lifecycleScope.launchWithCatch {
+            val featuresEnvelope = featureCharacteristic.read().let { CGMFeatureParser.parse(it) }!!
+            secured = featuresEnvelope.features.e2eCrcSupported
+        }
 
-        val statusEnvelope = statusCharacteristic.read().let { CGMStatusParser.parse(it) }!!
-        if (!statusEnvelope.status.sessionStopped) {
-            sessionStartTime = System.currentTimeMillis() - statusEnvelope.timeOffset * 60000L
+        lifecycleScope.launchWithCatch {
+            val statusEnvelope = statusCharacteristic.read().let { CGMStatusParser.parse(it) }!!
+            if (!statusEnvelope.status.sessionStopped) {
+                sessionStartTime = System.currentTimeMillis() - statusEnvelope.timeOffset * 60000L
+            }
         }
 
         if (sessionStartTime == 0L) {

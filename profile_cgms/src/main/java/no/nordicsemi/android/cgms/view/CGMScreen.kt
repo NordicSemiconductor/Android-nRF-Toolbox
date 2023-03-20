@@ -44,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.cgms.R
+import no.nordicsemi.android.cgms.data.CGMServiceData
 import no.nordicsemi.android.cgms.viewmodel.CGMViewModel
 import no.nordicsemi.android.common.ui.scanner.view.DeviceConnectingView
 import no.nordicsemi.android.common.ui.scanner.view.DeviceDisconnectedView
@@ -73,12 +74,12 @@ fun CGMScreen() {
             if (state.deviceName == null) {
                 DeviceConnectingView()
             } else {
-                when (state.result?.connectionState) {
+                when (state.connectionState) {
                     null,
                     GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                     GattConnectionState.STATE_DISCONNECTED,
                     GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) }
-                    GattConnectionState.STATE_CONNECTED -> CGMContentView(state.result) { viewModel.onEvent(it) }
+                    GattConnectionState.STATE_CONNECTED -> CGMContentView(state) { viewModel.onEvent(it) }
                 }
             }
         }
@@ -86,7 +87,7 @@ fun CGMScreen() {
 }
 
 @Composable
-private fun AppBar(state: CGMViewState, navigateUp: () -> Unit, viewModel: CGMViewModel) {
+private fun AppBar(state: CGMServiceData, navigateUp: () -> Unit, viewModel: CGMViewModel) {
     if (state.deviceName?.isNotBlank() == true) {
         LoggerIconAppBar(state.deviceName, navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
             viewModel.onEvent(OpenLoggerEvent)

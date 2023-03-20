@@ -69,6 +69,7 @@ class CGMRepository @Inject constructor(
     val highestSequenceNumber = data.value.records.maxOfOrNull { it.sequenceNumber } ?: -1
 
     fun launch(device: ServerDevice) {
+        _data.value = _data.value.copy(deviceName = device.name)
         serviceManager.startService(CGMService::class.java, device)
     }
 

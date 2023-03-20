@@ -48,7 +48,6 @@ import no.nordicsemi.android.cgms.data.CGMServiceCommand
 import no.nordicsemi.android.cgms.repository.CGMRepository
 import no.nordicsemi.android.cgms.repository.CGMS_SERVICE_UUID
 import no.nordicsemi.android.cgms.view.CGMViewEvent
-import no.nordicsemi.android.cgms.view.CGMViewState
 import no.nordicsemi.android.cgms.view.DisconnectEvent
 import no.nordicsemi.android.cgms.view.NavigateUp
 import no.nordicsemi.android.cgms.view.OnWorkingModeSelected
@@ -67,8 +66,7 @@ internal class CGMViewModel @Inject constructor(
     private val analytics: AppAnalytics
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(CGMViewState())
-    val state = _state.asStateFlow()
+    val state = repository.data
 
     init {
         viewModelScope.launch {
@@ -78,8 +76,6 @@ internal class CGMViewModel @Inject constructor(
         }
 
         repository.data.onEach {
-            _state.value = _state.value.copy(result = it)
-
             if (it.connectionState == GattConnectionState.STATE_CONNECTED) {
                 analytics.logEvent(ProfileConnectedEvent(Profile.CGMS))
             }
@@ -106,8 +102,12 @@ internal class CGMViewModel @Inject constructor(
     private fun handleResult(result: NavigationResult<ServerDevice>) {
         when (result) {
             is NavigationResult.Cancelled -> navigationManager.navigateUp()
-            is NavigationResult.Success -> repository.launch(result.value)
+            is NavigationResult.Success -> onDeviceSelected(result.value)
         }
+    }
+
+    private fun onDeviceSelected(device: ServerDevice) {
+        repository.launch(device)
     }
 
     private fun onCommandReceived(workingMode: CGMServiceCommand) {
