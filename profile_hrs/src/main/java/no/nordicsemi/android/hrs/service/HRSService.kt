@@ -93,11 +93,11 @@ internal class HRSService : NotificationService() {
 
         client.services
             .filterNotNull()
-            .onEach { configureGatt(it) }
+            .onEach { configureGatt(it, device) }
             .launchIn(lifecycleScope)
     }
 
-    private suspend fun configureGatt(services: BleGattServices) {
+    private suspend fun configureGatt(services: BleGattServices, device: ServerDevice) {
         val htsService = services.findService(HRS_SERVICE_UUID)!!
         val htsMeasurementCharacteristic = htsService.findCharacteristic(HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID)!!
         val bodySensorLocationCharacteristic = htsService.findCharacteristic(BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID)!!
@@ -116,6 +116,8 @@ internal class HRSService : NotificationService() {
             .mapNotNull { HRSDataParser.parse(it) }
             .onEach { repository.onHRSDataChanged(it) }
             .launchIn(lifecycleScope)
+
+        repository.onInitComplete(device)
     }
 
     private fun stopIfDisconnected(connectionState: GattConnectionState) {

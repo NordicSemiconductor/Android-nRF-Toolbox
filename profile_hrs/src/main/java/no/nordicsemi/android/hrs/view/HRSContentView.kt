@@ -52,7 +52,7 @@ import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
-internal fun HRSContentView(state: HRSServiceData, zoomIn: Boolean, onEvent: (HRSScreenViewEvent) -> Unit) {
+internal fun HRSContentView(state: HRSServiceData, onEvent: (HRSScreenViewEvent) -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -61,12 +61,12 @@ internal fun HRSContentView(state: HRSServiceData, zoomIn: Boolean, onEvent: (HR
             SectionTitle(
                 resId = R.drawable.ic_chart_line,
                 title = stringResource(id = R.string.hrs_section_data),
-                menu = { Menu(zoomIn, onEvent) }
+                menu = { Menu(state.zoomIn, onEvent) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            LineChartView(state, zoomIn)
+            LineChartView(state, state.zoomIn)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -102,5 +102,5 @@ private fun Menu(zoomIn: Boolean, onEvent: (HRSScreenViewEvent) -> Unit) {
 @Preview
 @Composable
 private fun Preview() {
-    HRSContentView(state = HRSServiceData(), zoomIn = false) { }
+    HRSContentView(state = HRSServiceData()) { }
 }

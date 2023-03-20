@@ -68,6 +68,14 @@ class HRSRepository @Inject constructor(
         serviceManager.startService(HRSService::class.java, device)
     }
 
+    fun onInitComplete(device: ServerDevice) {
+        _data.value = _data.value.copy(deviceName = device.name)
+    }
+
+    fun switchZoomIn() {
+        _data.value = _data.value.copy(zoomIn = !_data.value.zoomIn)
+    }
+
     fun onConnectionStateChanged(connectionState: GattConnectionState?) {
         _data.value = _data.value.copy(connectionState = connectionState)
     }

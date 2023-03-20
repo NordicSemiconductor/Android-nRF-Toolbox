@@ -47,6 +47,7 @@ import no.nordicsemi.android.common.ui.scanner.view.DeviceConnectingView
 import no.nordicsemi.android.common.ui.scanner.view.DeviceDisconnectedView
 import no.nordicsemi.android.common.ui.scanner.view.Reason
 import no.nordicsemi.android.hrs.R
+import no.nordicsemi.android.hrs.data.HRSServiceData
 import no.nordicsemi.android.hrs.viewmodel.HRSViewModel
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.ui.view.BackIconAppBar
@@ -70,14 +71,15 @@ fun HRSScreen() {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            when (state.hrsManagerState) {
-                NoDeviceState -> DeviceConnectingView()
-                is WorkingState -> when (state.hrsManagerState.result.connectionState) {
+            if (state.deviceName == null) {
+                DeviceConnectingView()
+            } else {
+                when (state.connectionState) {
                     null,
                     GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                     GattConnectionState.STATE_DISCONNECTED,
                     GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) }
-                    GattConnectionState.STATE_CONNECTED -> HRSContentView(state.hrsManagerState.result, state.zoomIn) { viewModel.onEvent(it) }
+                    GattConnectionState.STATE_CONNECTED -> HRSContentView(state) { viewModel.onEvent(it) }
                 }
             }
         }
@@ -85,7 +87,7 @@ fun HRSScreen() {
 }
 
 @Composable
-private fun AppBar(state: HRSViewState, navigateUp: () -> Unit, viewModel: HRSViewModel) {
+private fun AppBar(state: HRSServiceData, navigateUp: () -> Unit, viewModel: HRSViewModel) {
     if (state.deviceName?.isNotBlank() == true) {
         LoggerIconAppBar(state.deviceName, navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
             viewModel.onEvent(OpenLoggerEvent)

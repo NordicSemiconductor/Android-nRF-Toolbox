@@ -35,8 +35,6 @@ import android.os.ParcelUuid
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -50,11 +48,9 @@ import no.nordicsemi.android.hrs.service.HRSRepository
 import no.nordicsemi.android.hrs.service.HRS_SERVICE_UUID
 import no.nordicsemi.android.hrs.view.DisconnectEvent
 import no.nordicsemi.android.hrs.view.HRSScreenViewEvent
-import no.nordicsemi.android.hrs.view.HRSViewState
 import no.nordicsemi.android.hrs.view.NavigateUpEvent
 import no.nordicsemi.android.hrs.view.OpenLoggerEvent
 import no.nordicsemi.android.hrs.view.SwitchZoomEvent
-import no.nordicsemi.android.hrs.view.WorkingState
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
@@ -67,8 +63,7 @@ internal class HRSViewModel @Inject constructor(
     private val analytics: AppAnalytics
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(HRSViewState())
-    val state = _state.asStateFlow()
+    val state = repository.data
 
     init {
         viewModelScope.launch {
@@ -78,8 +73,6 @@ internal class HRSViewModel @Inject constructor(
         }
 
         repository.data.onEach {
-            _state.value = _state.value.copy(hrsManagerState = WorkingState(it))
-
             if (it.connectionState == GattConnectionState.STATE_CONNECTED) {
                 analytics.logEvent(ProfileConnectedEvent(Profile.HRS))
             }
@@ -102,7 +95,6 @@ internal class HRSViewModel @Inject constructor(
     }
 
     private fun onDeviceSelected(device: ServerDevice) {
-        _state.value = _state.value.copy(deviceName = device.name)
         repository.launch(device)
     }
 
@@ -116,7 +108,7 @@ internal class HRSViewModel @Inject constructor(
     }
 
     private fun onZoomButtonClicked() {
-        _state.value = _state.value.copy(zoomIn = !_state.value.zoomIn)
+        repository.switchZoomIn()
     }
 
     private fun disconnect() {
