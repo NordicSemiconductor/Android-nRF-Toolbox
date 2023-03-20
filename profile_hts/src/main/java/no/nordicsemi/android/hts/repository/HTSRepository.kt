@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.core.simpleSharedFlow
 import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.hts.data.HTSServiceData
+import no.nordicsemi.android.hts.view.TemperatureUnit
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.profile.hts.data.HTSData
@@ -66,6 +67,14 @@ class HTSRepository @Inject constructor(
 
     fun launch(device: ServerDevice) {
         serviceManager.startService(HTSService::class.java, device)
+    }
+
+    fun onInitComplete(device: ServerDevice) {
+        _data.value = _data.value.copy(deviceName = device.name)
+    }
+
+    internal fun setTemperatureUnit(temperatureUnit: TemperatureUnit) {
+        _data.value = _data.value.copy(temperatureUnit = temperatureUnit)
     }
 
     fun onConnectionStateChanged(connectionState: GattConnectionState?) {

@@ -52,7 +52,7 @@ import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
-internal fun HTSContentView(state: HTSServiceData, temperatureUnit: TemperatureUnit, onEvent: (HTSScreenViewEvent) -> Unit) {
+internal fun HTSContentView(state: HTSServiceData, onEvent: (HTSScreenViewEvent) -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -62,7 +62,7 @@ internal fun HTSContentView(state: HTSServiceData, temperatureUnit: TemperatureU
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            RadioButtonGroup(viewEntity = temperatureUnit.temperatureSettingsItems()) {
+            RadioButtonGroup(viewEntity = state.temperatureUnit.temperatureSettingsItems()) {
                 onEvent(OnTemperatureUnitSelected(it.label.toTemperatureUnit()))
             }
         }
@@ -76,7 +76,7 @@ internal fun HTSContentView(state: HTSServiceData, temperatureUnit: TemperatureU
 
             KeyValueField(
                 stringResource(id = R.string.hts_temperature),
-                displayTemperature(state.data.temperature, temperatureUnit)
+                displayTemperature(state.data.temperature, state.temperatureUnit)
             )
         }
 
@@ -99,5 +99,5 @@ internal fun HTSContentView(state: HTSServiceData, temperatureUnit: TemperatureU
 @Preview
 @Composable
 private fun Preview() {
-    HTSContentView(state = HTSServiceData(), TemperatureUnit.CELSIUS) { }
+    HTSContentView(state = HTSServiceData()) { }
 }

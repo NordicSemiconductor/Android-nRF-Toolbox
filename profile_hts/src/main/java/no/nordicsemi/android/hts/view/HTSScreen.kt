@@ -47,6 +47,7 @@ import no.nordicsemi.android.common.ui.scanner.view.DeviceConnectingView
 import no.nordicsemi.android.common.ui.scanner.view.DeviceDisconnectedView
 import no.nordicsemi.android.common.ui.scanner.view.Reason
 import no.nordicsemi.android.hts.R
+import no.nordicsemi.android.hts.data.HTSServiceData
 import no.nordicsemi.android.hts.viewmodel.HTSViewModel
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.ui.view.BackIconAppBar
@@ -70,14 +71,15 @@ fun HTSScreen() {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            when (state.htsManagerState) {
-                NoDeviceState -> DeviceConnectingView()
-                is WorkingState -> when (state.htsManagerState.result.connectionState) {
+            if (state.deviceName == null) {
+                DeviceConnectingView()
+            } else {
+                when (state.connectionState) {
                     null,
                     GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                     GattConnectionState.STATE_DISCONNECTED,
                     GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) }
-                    GattConnectionState.STATE_CONNECTED -> HTSContentView(state.htsManagerState.result, state.temperatureUnit) { viewModel.onEvent(it) }
+                    GattConnectionState.STATE_CONNECTED -> HTSContentView(state) { viewModel.onEvent(it) }
                 }
             }
         }
@@ -85,7 +87,7 @@ fun HTSScreen() {
 }
 
 @Composable
-private fun AppBar(state: HTSViewState, navigateUp: () -> Unit, viewModel: HTSViewModel) {
+private fun AppBar(state: HTSServiceData, navigateUp: () -> Unit, viewModel: HTSViewModel) {
     if (state.deviceName?.isNotBlank() == true) {
         LoggerIconAppBar(state.deviceName, navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
             viewModel.onEvent(OpenLoggerEvent)

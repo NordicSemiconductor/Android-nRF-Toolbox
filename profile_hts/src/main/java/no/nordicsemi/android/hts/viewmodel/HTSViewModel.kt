@@ -35,8 +35,6 @@ import android.os.ParcelUuid
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -50,11 +48,9 @@ import no.nordicsemi.android.hts.repository.HTSRepository
 import no.nordicsemi.android.hts.repository.HTS_SERVICE_UUID
 import no.nordicsemi.android.hts.view.DisconnectEvent
 import no.nordicsemi.android.hts.view.HTSScreenViewEvent
-import no.nordicsemi.android.hts.view.HTSViewState
 import no.nordicsemi.android.hts.view.NavigateUp
 import no.nordicsemi.android.hts.view.OnTemperatureUnitSelected
 import no.nordicsemi.android.hts.view.OpenLoggerEvent
-import no.nordicsemi.android.hts.view.WorkingState
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
@@ -67,8 +63,7 @@ internal class HTSViewModel @Inject constructor(
     private val analytics: AppAnalytics
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(HTSViewState())
-    val state = _state.asStateFlow()
+    val state = repository.data
 
     init {
         viewModelScope.launch {
@@ -78,8 +73,6 @@ internal class HTSViewModel @Inject constructor(
         }
 
         repository.data.onEach {
-            _state.value = _state.value.copy(htsManagerState = WorkingState(it))
-
             if (it.connectionState == GattConnectionState.STATE_CONNECTED) {
                 analytics.logEvent(ProfileConnectedEvent(Profile.HTS))
             }
@@ -102,7 +95,6 @@ internal class HTSViewModel @Inject constructor(
     }
 
     private fun onDeviceSelected(device: ServerDevice) {
-        _state.value = _state.value.copy(deviceName = device.name)
         repository.launch(device)
     }
 
@@ -121,6 +113,6 @@ internal class HTSViewModel @Inject constructor(
     }
 
     private fun onTemperatureUnitSelected(event: OnTemperatureUnitSelected) {
-        _state.value = _state.value.copy(temperatureUnit = event.value)
+        repository.setTemperatureUnit(event.value)
     }
 }

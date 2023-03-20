@@ -91,11 +91,11 @@ internal class HTSService : NotificationService() {
 
         client.services
             .filterNotNull()
-            .onEach { configureGatt(it) }
+            .onEach { configureGatt(it, device) }
             .launchIn(lifecycleScope)
     }
 
-    private suspend fun configureGatt(services: BleGattServices) {
+    private suspend fun configureGatt(services: BleGattServices, device: ServerDevice) {
         val htsService = services.findService(HTS_SERVICE_UUID)!!
         val htsMeasurementCharacteristic = htsService.findCharacteristic(HTS_MEASUREMENT_CHARACTERISTIC_UUID)!!
         val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
@@ -110,6 +110,8 @@ internal class HTSService : NotificationService() {
             .mapNotNull { HTSDataParser.parse(it) }
             .onEach { repository.onHTSDataChanged(it) }
             .launchIn(lifecycleScope)
+
+        repository.onInitComplete(device)
     }
 
     private fun stopIfDisconnected(connectionState: GattConnectionState) {
