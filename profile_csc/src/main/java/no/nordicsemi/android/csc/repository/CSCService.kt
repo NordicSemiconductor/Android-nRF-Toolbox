@@ -91,11 +91,11 @@ internal class CSCService : NotificationService() {
 
         client.services
             .filterNotNull()
-            .onEach { configureGatt(it) }
+            .onEach { configureGatt(it, device) }
             .launchIn(lifecycleScope)
     }
 
-    private suspend fun configureGatt(services: BleGattServices) {
+    private suspend fun configureGatt(services: BleGattServices, device: ServerDevice) {
         val cscService = services.findService(CSC_SERVICE_UUID)!!
         val cscMeasurementCharacteristic = cscService.findCharacteristic(CSC_MEASUREMENT_CHARACTERISTIC_UUID)!!
         val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
@@ -111,6 +111,8 @@ internal class CSCService : NotificationService() {
             .mapNotNull { cscDataParser.parse(it, repository.wheelSize.value) }
             .onEach { repository.onCSCDataChanged(it) }
             .launchIn(lifecycleScope)
+
+        repository.onInitComplete(device)
     }
 
     private fun stopIfDisconnected(connectionState: GattConnectionState) {

@@ -29,18 +29,10 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.csc.view
+package no.nordicsemi.android.csc.data
 
-import no.nordicsemi.android.csc.data.CSCServiceData
-
-internal data class CSCViewState(
-    val speedUnit: SpeedUnit = SpeedUnit.M_S,
-    val cscManagerState: CSCMangerState = NoDeviceState,
-    val deviceName: String? = null
-)
-
-internal sealed class CSCMangerState
-
-internal data class WorkingState(val result: CSCServiceData) : CSCMangerState()
-
-internal object NoDeviceState : CSCMangerState()
+internal enum class SpeedUnit(val displayName: String) {
+    M_S("m/s"),
+    KM_H("km/h"),
+    MPH("mph")
+}

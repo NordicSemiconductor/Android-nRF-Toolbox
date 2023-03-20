@@ -35,8 +35,6 @@ import android.os.ParcelUuid
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -46,17 +44,15 @@ import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
+import no.nordicsemi.android.csc.data.SpeedUnit
 import no.nordicsemi.android.csc.repository.CSCRepository
 import no.nordicsemi.android.csc.repository.CSC_SERVICE_UUID
 import no.nordicsemi.android.csc.view.CSCViewEvent
-import no.nordicsemi.android.csc.view.CSCViewState
 import no.nordicsemi.android.csc.view.NavigateUp
 import no.nordicsemi.android.csc.view.OnDisconnectButtonClick
 import no.nordicsemi.android.csc.view.OnSelectedSpeedUnitSelected
 import no.nordicsemi.android.csc.view.OnWheelSizeSelected
 import no.nordicsemi.android.csc.view.OpenLogger
-import no.nordicsemi.android.csc.view.SpeedUnit
-import no.nordicsemi.android.csc.view.WorkingState
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
@@ -69,8 +65,7 @@ internal class CSCViewModel @Inject constructor(
     private val analytics: AppAnalytics
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(CSCViewState())
-    val state = _state.asStateFlow()
+    val state = repository.data
 
     init {
         viewModelScope.launch {
@@ -80,8 +75,6 @@ internal class CSCViewModel @Inject constructor(
         }
 
         repository.data.onEach {
-            _state.value = _state.value.copy(cscManagerState = WorkingState(it))
-
             if (it.connectionState == GattConnectionState.STATE_CONNECTED) {
                 analytics.logEvent(ProfileConnectedEvent(Profile.CSC))
             }
@@ -104,7 +97,6 @@ internal class CSCViewModel @Inject constructor(
     }
 
     private fun onDeviceSelected(device: ServerDevice) {
-        _state.value = _state.value.copy(deviceName = device.name)
         repository.launch(device)
     }
 
@@ -119,7 +111,7 @@ internal class CSCViewModel @Inject constructor(
     }
 
     private fun setSpeedUnit(speedUnit: SpeedUnit) {
-        _state.value = _state.value.copy(speedUnit = speedUnit)
+        repository.setSpeedUnit(speedUnit)
     }
 
     private fun disconnect() {

@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.core.simpleSharedFlow
 import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.csc.data.CSCServiceData
+import no.nordicsemi.android.csc.data.SpeedUnit
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.profile.csc.data.CSCData
@@ -71,6 +72,14 @@ class CSCRepository @Inject constructor(
 
     fun launch(device: ServerDevice) {
         serviceManager.startService(CSCService::class.java, device)
+    }
+
+    fun onInitComplete(device: ServerDevice) {
+        _data.value = _data.value.copy(deviceName = device.name)
+    }
+
+    internal fun setSpeedUnit(speedUnit: SpeedUnit) {
+        _data.value = _data.value.copy(speedUnit = speedUnit)
     }
 
     fun setWheelSize(wheelSize: WheelSize) {

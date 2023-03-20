@@ -33,6 +33,7 @@ package no.nordicsemi.android.csc.view
 
 import no.nordicsemi.android.common.theme.view.RadioButtonItem
 import no.nordicsemi.android.common.theme.view.RadioGroupViewEntity
+import no.nordicsemi.android.csc.data.SpeedUnit
 import no.nordicsemi.android.kotlin.ble.profile.csc.data.CSCData
 import java.util.*
 

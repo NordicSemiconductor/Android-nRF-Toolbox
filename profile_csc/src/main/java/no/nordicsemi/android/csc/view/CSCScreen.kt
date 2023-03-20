@@ -47,6 +47,7 @@ import no.nordicsemi.android.common.ui.scanner.view.DeviceConnectingView
 import no.nordicsemi.android.common.ui.scanner.view.DeviceDisconnectedView
 import no.nordicsemi.android.common.ui.scanner.view.Reason
 import no.nordicsemi.android.csc.R
+import no.nordicsemi.android.csc.data.CSCServiceData
 import no.nordicsemi.android.csc.viewmodel.CSCViewModel
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.ui.view.BackIconAppBar
@@ -70,14 +71,15 @@ fun CSCScreen() {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            when (state.cscManagerState) {
-                NoDeviceState -> DeviceConnectingView()
-                is WorkingState -> when (state.cscManagerState.result.connectionState) {
+            if (state.deviceName == null) {
+                DeviceConnectingView()
+            } else {
+                when (state.connectionState) {
                     null,
                     GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                     GattConnectionState.STATE_DISCONNECTED,
                     GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) }
-                    GattConnectionState.STATE_CONNECTED -> CSCContentView(state.cscManagerState.result, state.speedUnit) { viewModel.onEvent(it) }
+                    GattConnectionState.STATE_CONNECTED -> CSCContentView(state) { viewModel.onEvent(it) }
                 }
             }
         }
@@ -85,7 +87,7 @@ fun CSCScreen() {
 }
 
 @Composable
-private fun AppBar(state: CSCViewState, navigateUp: () -> Unit, viewModel: CSCViewModel) {
+private fun AppBar(state: CSCServiceData, navigateUp: () -> Unit, viewModel: CSCViewModel) {
     if (state.deviceName?.isNotBlank() == true) {
         LoggerIconAppBar(state.deviceName, navigateUp, { viewModel.onEvent(OnDisconnectButtonClick) }) {
             viewModel.onEvent(OpenLogger)
