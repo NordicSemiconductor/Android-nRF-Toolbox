@@ -68,6 +68,10 @@ class RSCSRepository @Inject constructor(
         serviceManager.startService(RSCSService::class.java, device)
     }
 
+    fun onInitComplete(device: ServerDevice) {
+        _data.value = _data.value.copy(deviceName = device.name)
+    }
+
     fun onConnectionStateChanged(connectionState: GattConnectionState?) {
         _data.value = _data.value.copy(connectionState = connectionState)
     }

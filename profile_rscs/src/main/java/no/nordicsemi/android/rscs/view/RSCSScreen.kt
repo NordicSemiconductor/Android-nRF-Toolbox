@@ -48,6 +48,7 @@ import no.nordicsemi.android.common.ui.scanner.view.DeviceDisconnectedView
 import no.nordicsemi.android.common.ui.scanner.view.Reason
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.rscs.R
+import no.nordicsemi.android.rscs.data.RSCSServiceData
 import no.nordicsemi.android.rscs.viewmodel.RSCSViewModel
 import no.nordicsemi.android.ui.view.BackIconAppBar
 import no.nordicsemi.android.ui.view.LoggerIconAppBar
@@ -70,14 +71,15 @@ fun RSCSScreen() {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            when (state.rscsManagerState) {
-                NoDeviceState -> DeviceConnectingView()
-                is WorkingState -> when (state.rscsManagerState.result.connectionState) {
+            if (state.deviceName == null) {
+                DeviceConnectingView()
+            } else {
+                when (state.connectionState) {
                     null,
                     GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                     GattConnectionState.STATE_DISCONNECTED,
                     GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) }
-                    GattConnectionState.STATE_CONNECTED -> RSCSContentView(state.rscsManagerState.result) { viewModel.onEvent(it) }
+                    GattConnectionState.STATE_CONNECTED -> RSCSContentView(state) { viewModel.onEvent(it) }
                 }
             }
         }
@@ -85,7 +87,7 @@ fun RSCSScreen() {
 }
 
 @Composable
-private fun AppBar(state: RSCSViewState, navigateUp: () -> Unit, viewModel: RSCSViewModel) {
+private fun AppBar(state: RSCSServiceData, navigateUp: () -> Unit, viewModel: RSCSViewModel) {
     if (state.deviceName?.isNotBlank() == true) {
         LoggerIconAppBar(state.deviceName, navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
             viewModel.onEvent(OpenLoggerEvent)

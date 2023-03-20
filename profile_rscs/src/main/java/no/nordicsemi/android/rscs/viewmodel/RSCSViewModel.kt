@@ -35,8 +35,6 @@ import android.os.ParcelUuid
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -53,9 +51,7 @@ import no.nordicsemi.android.rscs.repository.RSCS_SERVICE_UUID
 import no.nordicsemi.android.rscs.view.DisconnectEvent
 import no.nordicsemi.android.rscs.view.NavigateUpEvent
 import no.nordicsemi.android.rscs.view.OpenLoggerEvent
-import no.nordicsemi.android.rscs.view.RSCSViewState
 import no.nordicsemi.android.rscs.view.RSCScreenViewEvent
-import no.nordicsemi.android.rscs.view.WorkingState
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import javax.inject.Inject
 
@@ -66,8 +62,7 @@ internal class RSCSViewModel @Inject constructor(
     private val analytics: AppAnalytics
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(RSCSViewState())
-    val state = _state.asStateFlow()
+    val state = repository.data
 
     init {
         viewModelScope.launch {
@@ -77,8 +72,6 @@ internal class RSCSViewModel @Inject constructor(
         }
 
         repository.data.onEach {
-            _state.value = _state.value.copy(rscsManagerState = WorkingState(it))
-
             if (it.connectionState == GattConnectionState.STATE_CONNECTED) {
                 analytics.logEvent(ProfileConnectedEvent(Profile.RSCS))
             }
@@ -101,7 +94,6 @@ internal class RSCSViewModel @Inject constructor(
     }
 
     private fun onDeviceSelected(device: ServerDevice) {
-        _state.value = _state.value.copy(deviceName = device.name)
         repository.launch(device)
     }
 

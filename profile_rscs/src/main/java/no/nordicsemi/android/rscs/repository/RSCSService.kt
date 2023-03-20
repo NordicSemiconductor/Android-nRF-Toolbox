@@ -91,11 +91,11 @@ internal class RSCSService : NotificationService() {
 
         client.services
             .filterNotNull()
-            .onEach { configureGatt(it) }
+            .onEach { configureGatt(it, device) }
             .launchIn(lifecycleScope)
     }
 
-    private suspend fun configureGatt(services: BleGattServices) {
+    private suspend fun configureGatt(services: BleGattServices, device: ServerDevice) {
         val rscsService = services.findService(RSCS_SERVICE_UUID)!!
         val rscsMeasurementCharacteristic = rscsService.findCharacteristic(RSC_MEASUREMENT_CHARACTERISTIC_UUID)!!
         val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
@@ -110,6 +110,8 @@ internal class RSCSService : NotificationService() {
             .mapNotNull { RSCSDataParser.parse(it) }
             .onEach { repository.onRSCSDataChanged(it) }
             .launchIn(lifecycleScope)
+
+        repository.onInitComplete(device)
     }
 
     private fun stopIfDisconnected(connectionState: GattConnectionState) {
