@@ -33,21 +33,22 @@ package no.nordicsemi.android.prx.repository
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
+import no.nordicsemi.android.common.core.simpleSharedFlow
 import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.common.logger.NordicLoggerFactory
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
-import no.nordicsemi.android.prx.data.AlarmLevel
-import no.nordicsemi.android.prx.data.PRXData
-import no.nordicsemi.android.prx.data.PRXManager
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.profile.hrs.data.HRSData
+import no.nordicsemi.android.kotlin.ble.profile.prx.AlarmLevel
+import no.nordicsemi.android.kotlin.ble.profile.prx.PRXData
+import no.nordicsemi.android.prx.data.PRXServiceData
 import no.nordicsemi.android.prx.data.ProximityServerManager
 import no.nordicsemi.android.service.BleManagerResult
-import no.nordicsemi.android.service.IdleResult
+import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.LinkLossResult
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.service.SuccessResult
@@ -66,37 +67,24 @@ class PRXRepository @Inject internal constructor(
     private val stringConst: StringConst
 ) {
 
-    private var manager: PRXManager? = null
-    private var logger: NordicLogger? = null
-
-    private val _data = MutableStateFlow<BleManagerResult<PRXData>>(IdleResult())
+    private val _data = MutableStateFlow(PRXServiceData())
     internal val data = _data.asStateFlow()
 
-    val isRunning = data.map { it.isRunning() }
-    val hasBeenDisconnectedWithoutLinkLoss = data.map { it.hasBeenDisconnectedWithoutLinkLoss() }
+    private val _stopEvent = simpleSharedFlow<DisconnectAndStopEvent>()
+    internal val stopEvent = _stopEvent.asSharedFlow()
+
+    val isRunning = data.map { it.connectionState == GattConnectionState.STATE_CONNECTED }
 
     fun launch(device: ServerDevice) {
         serviceManager.startService(PRXService::class.java, device)
-        proximityServerManager.open()
     }
 
-    fun start(device: ServerDevice, scope: CoroutineScope) {
-        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "PRX", device.address).also {
-            logger = it
-        }
-        val manager = PRXManager(context, scope, createdLogger)
-        this.manager = manager
-        manager.useServer(proximityServerManager)
+    fun onInitComplete(device: ServerDevice) {
+        _data.value = _data.value.copy(deviceName = device.name)
+    }
 
-        manager.dataHolder.status.onEach {
-            _data.value = it
-            handleLocalAlarm(it)
-        }.launchIn(scope)
-
-//        manager.connect(device.device)
-//            .useAutoConnect(true)
-//            .retry(3, 100)
-//            .enqueue()
+    fun onConnectionStateChanged(connectionState: GattConnectionState?) {
+        _data.value = _data.value.copy(connectionState = connectionState)
     }
 
     private fun handleLocalAlarm(result: BleManagerResult<PRXData>) {
@@ -113,6 +101,10 @@ class PRXRepository @Inject internal constructor(
         }
     }
 
+    fun onBatteryLevelChanged(batteryLevel: Int) {
+        _data.value = _data.value.copy(batteryLevel = batteryLevel)
+    }
+
     fun enableAlarm() {
         manager?.writeImmediateAlert(true)
     }
@@ -127,8 +119,6 @@ class PRXRepository @Inject internal constructor(
 
     fun release() {
         disableAlarm()
-        manager?.disconnect()?.enqueue()
-        manager = null
-        logger = null
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 }

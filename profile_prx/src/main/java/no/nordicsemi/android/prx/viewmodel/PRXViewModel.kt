@@ -35,8 +35,6 @@ import android.os.ParcelUuid
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -47,18 +45,15 @@ import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.prx.data.PRX_SERVICE_UUID
 import no.nordicsemi.android.prx.repository.PRXRepository
 import no.nordicsemi.android.prx.view.DisconnectEvent
 import no.nordicsemi.android.prx.view.NavigateUpEvent
-import no.nordicsemi.android.prx.view.NoDeviceState
 import no.nordicsemi.android.prx.view.OpenLoggerEvent
 import no.nordicsemi.android.prx.view.PRXScreenViewEvent
-import no.nordicsemi.android.prx.view.PRXViewState
 import no.nordicsemi.android.prx.view.TurnOffAlert
 import no.nordicsemi.android.prx.view.TurnOnAlert
-import no.nordicsemi.android.prx.view.WorkingState
-import no.nordicsemi.android.service.ConnectedResult
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import javax.inject.Inject
 
@@ -69,8 +64,7 @@ internal class PRXViewModel @Inject constructor(
     private val analytics: AppAnalytics
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<PRXViewState>(NoDeviceState)
-    val state = _state.asStateFlow()
+    val state = repository.data
 
     init {
         viewModelScope.launch {
@@ -80,9 +74,7 @@ internal class PRXViewModel @Inject constructor(
         }
 
         repository.data.onEach {
-            _state.value = WorkingState(it)
-
-            (it as? ConnectedResult)?.let {
+            if (it.connectionState == GattConnectionState.STATE_CONNECTED) {
                 analytics.logEvent(ProfileConnectedEvent(Profile.PRX))
             }
         }.launchIn(viewModelScope)

@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.nordic.uiscanner)
     implementation(libs.nordic.navigation)
     implementation(libs.nordic.uilogger)
+    implementation(libs.nordic.core)
 
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.compose.material.iconsExtended)
