@@ -42,11 +42,9 @@ import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.common.logger.NordicLoggerFactory
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
-import no.nordicsemi.android.kotlin.ble.profile.hrs.data.HRSData
 import no.nordicsemi.android.kotlin.ble.profile.prx.AlarmLevel
 import no.nordicsemi.android.kotlin.ble.profile.prx.PRXData
 import no.nordicsemi.android.prx.data.PRXServiceData
-import no.nordicsemi.android.prx.data.ProximityServerManager
 import no.nordicsemi.android.service.BleManagerResult
 import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.LinkLossResult
@@ -61,10 +59,7 @@ class PRXRepository @Inject internal constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
-    private val proximityServerManager: ProximityServerManager,
     private val alarmHandler: AlarmHandler,
-    private val loggerFactory: NordicLoggerFactory,
-    private val stringConst: StringConst
 ) {
 
     private val _data = MutableStateFlow(PRXServiceData())
@@ -72,6 +67,9 @@ class PRXRepository @Inject internal constructor(
 
     private val _stopEvent = simpleSharedFlow<DisconnectAndStopEvent>()
     internal val stopEvent = _stopEvent.asSharedFlow()
+
+    private val _remoteAlarmLevel = simpleSharedFlow<AlarmLevel>()
+    internal val remoteAlarmLevel = _remoteAlarmLevel.asSharedFlow()
 
     val isRunning = data.map { it.connectionState == GattConnectionState.STATE_CONNECTED }
 
@@ -85,6 +83,14 @@ class PRXRepository @Inject internal constructor(
 
     fun onConnectionStateChanged(connectionState: GattConnectionState?) {
         _data.value = _data.value.copy(connectionState = connectionState)
+    }
+
+    fun setLocalAlarmLevel(alarmLevel: AlarmLevel) {
+        _data.value = _data.value.copy(localAlarmLevel = alarmLevel)
+    }
+
+    fun setLinkLossAlarmLevel(alarmLevel: AlarmLevel) {
+        _data.value = _data.value.copy(linkLossAlarmLevel = alarmLevel)
     }
 
     private fun handleLocalAlarm(result: BleManagerResult<PRXData>) {
@@ -105,20 +111,20 @@ class PRXRepository @Inject internal constructor(
         _data.value = _data.value.copy(batteryLevel = batteryLevel)
     }
 
-    fun enableAlarm() {
-        manager?.writeImmediateAlert(true)
+    fun setRemoteAlarmLevel(alarmLevel: AlarmLevel) {
+        _remoteAlarmLevel.tryEmit(alarmLevel)
     }
 
-    fun disableAlarm() {
-        manager?.writeImmediateAlert(false)
+    fun onRemoteAlarmLevelSet(alarmLevel: AlarmLevel) {
+        _data.value = _data.value.copy(isRemoteAlarm = alarmLevel != AlarmLevel.NONE)
     }
 
     fun openLogger() {
-        NordicLogger.launch(context, logger)
+        TODO()
     }
 
     fun release() {
-        disableAlarm()
+        _remoteAlarmLevel.tryEmit(AlarmLevel.NONE)
         _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 }

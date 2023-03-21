@@ -46,8 +46,9 @@ import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
-import no.nordicsemi.android.prx.data.PRX_SERVICE_UUID
+import no.nordicsemi.android.kotlin.ble.profile.prx.AlarmLevel
 import no.nordicsemi.android.prx.repository.PRXRepository
+import no.nordicsemi.android.prx.repository.PRX_SERVICE_UUID
 import no.nordicsemi.android.prx.view.DisconnectEvent
 import no.nordicsemi.android.prx.view.NavigateUpEvent
 import no.nordicsemi.android.prx.view.OpenLoggerEvent
@@ -98,8 +99,8 @@ internal class PRXViewModel @Inject constructor(
     fun onEvent(event: PRXScreenViewEvent) {
         when (event) {
             DisconnectEvent -> disconnect()
-            TurnOffAlert -> repository.disableAlarm()
-            TurnOnAlert -> repository.enableAlarm()
+            TurnOffAlert -> repository.setRemoteAlarmLevel(AlarmLevel.NONE)
+            TurnOnAlert -> repository.setRemoteAlarmLevel(AlarmLevel.HIGH)
             NavigateUpEvent -> navigationManager.navigateUp()
             OpenLoggerEvent -> repository.openLogger()
         }

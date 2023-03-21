@@ -33,6 +33,7 @@ package no.nordicsemi.android.prx.repository
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.filterNotNull
@@ -41,6 +42,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.client.BleWriteType
 import no.nordicsemi.android.kotlin.ble.core.client.callback.BleGattClient
 import no.nordicsemi.android.kotlin.ble.core.client.service.BleGattCharacteristic
 import no.nordicsemi.android.kotlin.ble.core.client.service.BleGattServices
@@ -51,8 +53,11 @@ import no.nordicsemi.android.kotlin.ble.core.server.BleGattServer
 import no.nordicsemi.android.kotlin.ble.core.server.service.service.BleGattServerServiceType
 import no.nordicsemi.android.kotlin.ble.core.server.service.service.BleServerGattCharacteristicConfig
 import no.nordicsemi.android.kotlin.ble.core.server.service.service.BleServerGattServiceConfig
+import no.nordicsemi.android.kotlin.ble.core.server.service.service.BluetoothGattServerConnection
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
-import no.nordicsemi.android.kotlin.ble.profile.hts.HTSDataParser
+import no.nordicsemi.android.kotlin.ble.profile.prx.AlarmLevel
+import no.nordicsemi.android.kotlin.ble.profile.prx.AlarmLevelParser
+import no.nordicsemi.android.kotlin.ble.profile.prx.AlertLevelInputParser
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
 import java.util.*
@@ -60,6 +65,7 @@ import javax.inject.Inject
 
 val PRX_SERVICE_UUID = UUID.fromString("00001802-0000-1000-8000-00805f9b34fb")
 private val LINK_LOSS_SERVICE_UUID = UUID.fromString("00001803-0000-1000-8000-00805f9b34fb")
+
 private val ALERT_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A06-0000-1000-8000-00805f9b34fb")
 
 private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
@@ -73,6 +79,7 @@ internal class PRXService : NotificationService() {
     lateinit var repository: PRXRepository
 
     private lateinit var client: BleGattClient
+    private lateinit var server: BleGattServer
 
     private lateinit var alertLevelCharacteristic: BleGattCharacteristic
 
@@ -81,10 +88,16 @@ internal class PRXService : NotificationService() {
 
         val device = intent!!.getParcelableExtra<ServerDevice>(DEVICE_DATA)!!
 
+        startServer()
+
         startGattClient(device)
 
         repository.stopEvent
             .onEach { disconnect() }
+            .launchIn(lifecycleScope)
+
+        repository.remoteAlarmLevel
+            .onEach { writeAlertLevel(it) }
             .launchIn(lifecycleScope)
 
         return START_REDELIVER_INTENT
@@ -92,26 +105,52 @@ internal class PRXService : NotificationService() {
 
     private fun startServer() {
         val alertLevelCharacteristic = BleServerGattCharacteristicConfig(
-            ALERT_LEVEL_CHARACTERISTIC_UUID,
-            listOf(BleGattProperty.PROPERTY_WRITE_NO_RESPONSE),
-            listOf(BleGattPermission.PERMISSION_WRITE)
+            uuid = ALERT_LEVEL_CHARACTERISTIC_UUID,
+            properties = listOf(BleGattProperty.PROPERTY_WRITE_NO_RESPONSE),
+            permissions = listOf(BleGattPermission.PERMISSION_WRITE)
+        )
+        val prxServiceConfig = BleServerGattServiceConfig(
+            uuid = PRX_SERVICE_UUID,
+            type = BleGattServerServiceType.SERVICE_TYPE_PRIMARY,
+            characteristicConfigs = listOf(alertLevelCharacteristic)
         )
 
         val linkLossCharacteristic = BleServerGattCharacteristicConfig(
-            LINK_LOSS_SERVICE_UUID,
-            listOf(BleGattProperty.PROPERTY_WRITE, BleGattProperty.PROPERTY_READ),
-            listOf(BleGattPermission.PERMISSION_WRITE, BleGattPermission.PERMISSION_READ)
+            uuid = ALERT_LEVEL_CHARACTERISTIC_UUID,
+            properties = listOf(BleGattProperty.PROPERTY_WRITE, BleGattProperty.PROPERTY_READ),
+            permissions = listOf(BleGattPermission.PERMISSION_WRITE, BleGattPermission.PERMISSION_READ),
+            initialValue = AlertLevelInputParser.parse(AlarmLevel.HIGH)
         )
 
-        val serviceConfig = BleServerGattServiceConfig(
-            PRX_SERVICE_UUID,
-            BleGattServerServiceType.SERVICE_TYPE_PRIMARY,
-            listOf(alertLevelCharacteristic, linkLossCharacteristic)
+        val linkLossServiceConfig = BleServerGattServiceConfig(
+            uuid = LINK_LOSS_SERVICE_UUID,
+            type = BleGattServerServiceType.SERVICE_TYPE_PRIMARY,
+            characteristicConfigs = listOf(linkLossCharacteristic)
         )
 
-        val server = BleGattServer.create(this@PRXService, serviceConfig)
+        server = BleGattServer.create(this@PRXService, prxServiceConfig, linkLossServiceConfig)
 
-        TODO("Initialize characteristic with value")
+        server.onNewConnection
+            .onEach { setUpServerConnection(it.second) }
+            .launchIn(lifecycleScope)
+    }
+
+    private fun setUpServerConnection(connection: BluetoothGattServerConnection) {
+        val prxService = connection.services.findService(PRX_SERVICE_UUID)!!
+        val linkLossService = connection.services.findService(LINK_LOSS_SERVICE_UUID)!!
+
+        val prxCharacteristic = prxService.findCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID)!!
+        val linkLossCharacteristic = linkLossService.findCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID)!!
+
+        prxCharacteristic.value
+            .mapNotNull { AlarmLevelParser.parse(it) }
+            .onEach { repository.setLocalAlarmLevel(it) }
+            .launchIn(lifecycleScope)
+
+        linkLossCharacteristic.value
+            .mapNotNull { AlarmLevelParser.parse(it) }
+            .onEach { repository.setLocalAlarmLevel(it) }
+            .launchIn(lifecycleScope)
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
@@ -132,7 +171,8 @@ internal class PRXService : NotificationService() {
     private suspend fun configureGatt(services: BleGattServices, device: ServerDevice) {
         val prxService = services.findService(PRX_SERVICE_UUID)!!
         alertLevelCharacteristic = prxService.findCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID)!!
-        val linkLossCharacteristic = prxService.findCharacteristic(LINK_LOSS_SERVICE_UUID)!!
+        val linkLossService = services.findService(LINK_LOSS_SERVICE_UUID)!!
+        val linkLossCharacteristic = linkLossService.findCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID)!!
         val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
         val batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
 
@@ -141,14 +181,14 @@ internal class PRXService : NotificationService() {
             .onEach { repository.onBatteryLevelChanged(it) }
             .launchIn(lifecycleScope)
 
-        linkLossCharacteristic.write(Alert)
-
-        htsMeasurementCharacteristic.getNotifications()
-            .mapNotNull { HTSDataParser.parse(it) }
-            .onEach { repository.onHTSDataChanged(it) }
-            .launchIn(lifecycleScope)
+        linkLossCharacteristic.write(AlertLevelInputParser.parse(AlarmLevel.HIGH))
 
         repository.onInitComplete(device)
+    }
+
+    private suspend fun writeAlertLevel(alarmLevel: AlarmLevel) {
+        alertLevelCharacteristic.write(AlertLevelInputParser.parse(alarmLevel), BleWriteType.NO_RESPONSE)
+        repository.onRemoteAlarmLevelSet(alarmLevel)
     }
 
     private fun stopIfDisconnected(connectionState: GattConnectionState) {
@@ -159,5 +199,6 @@ internal class PRXService : NotificationService() {
 
     private fun disconnect() {
         client.disconnect()
+        server.stopServer()
     }
 }
