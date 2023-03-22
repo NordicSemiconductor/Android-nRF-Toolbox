@@ -149,17 +149,18 @@ internal class PRXService : NotificationService() {
 
         linkLossCharacteristic.value
             .mapNotNull { AlarmLevelParser.parse(it) }
-            .onEach { repository.setLocalAlarmLevel(it) }
+            .onEach { repository.setLinkLossAlarmLevel(it) }
             .launchIn(lifecycleScope)
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
         client = device.connect(this@PRXService)
 
-        client.connectionState
+        client.connectionStateWithStatus
+            .filterNotNull()
             .onEach { repository.onConnectionStateChanged(it) }
             .filterNotNull()
-            .onEach { stopIfDisconnected(it) }
+            .onEach { stopIfDisconnected(it.first) }
             .launchIn(lifecycleScope)
 
         client.services

@@ -32,11 +32,14 @@
 package no.nordicsemi.android.prx.viewmodel
 
 import android.os.ParcelUuid
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
@@ -47,6 +50,7 @@ import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.profile.prx.AlarmLevel
+import no.nordicsemi.android.prx.repository.AlarmHandler
 import no.nordicsemi.android.prx.repository.PRXRepository
 import no.nordicsemi.android.prx.repository.PRX_SERVICE_UUID
 import no.nordicsemi.android.prx.view.DisconnectEvent
@@ -62,7 +66,8 @@ import javax.inject.Inject
 internal class PRXViewModel @Inject constructor(
     private val repository: PRXRepository,
     private val navigationManager: Navigator,
-    private val analytics: AppAnalytics
+    private val analytics: AppAnalytics,
+    private val alarmHandler: AlarmHandler
 ) : ViewModel() {
 
     val state = repository.data
@@ -75,10 +80,21 @@ internal class PRXViewModel @Inject constructor(
         }
 
         repository.data.onEach {
+            Log.d("AAATESTAAA", "Data $it")
+            if (it.isLinkLossDisconnected) {
+                alarmHandler.playAlarm(it.linkLossAlarmLevel)
+            }
+
             if (it.connectionState == GattConnectionState.STATE_CONNECTED) {
                 analytics.logEvent(ProfileConnectedEvent(Profile.PRX))
             }
         }.launchIn(viewModelScope)
+
+        repository.data
+            .map { it.localAlarmLevel }
+            .distinctUntilChanged()
+            .onEach { alarmHandler.playAlarm(it) }
+            .launchIn(viewModelScope)
     }
 
     private fun requestBluetoothDevice() {
@@ -108,6 +124,7 @@ internal class PRXViewModel @Inject constructor(
 
     private fun disconnect() {
         repository.release()
+        alarmHandler.pauseAlarm()
         navigationManager.navigateUp()
     }
 }
