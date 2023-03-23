@@ -33,7 +33,6 @@ package no.nordicsemi.android.prx.repository
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.filterNotNull
@@ -42,6 +41,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.client.BleGattConnectOptions
 import no.nordicsemi.android.kotlin.ble.core.client.BleWriteType
 import no.nordicsemi.android.kotlin.ble.core.client.callback.BleGattClient
 import no.nordicsemi.android.kotlin.ble.core.client.service.BleGattCharacteristic
@@ -154,7 +154,7 @@ internal class PRXService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        client = device.connect(this@PRXService)
+        client = device.connect(this@PRXService, BleGattConnectOptions(autoConnect = true))
 
         client.connectionStateWithStatus
             .filterNotNull()

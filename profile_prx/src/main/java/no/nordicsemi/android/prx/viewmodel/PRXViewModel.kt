@@ -32,7 +32,6 @@
 package no.nordicsemi.android.prx.viewmodel
 
 import android.os.ParcelUuid
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -80,7 +79,6 @@ internal class PRXViewModel @Inject constructor(
         }
 
         repository.data.onEach {
-            Log.d("AAATESTAAA", "Data $it")
             if (it.isLinkLossDisconnected) {
                 alarmHandler.playAlarm(it.linkLossAlarmLevel)
             }
@@ -126,5 +124,10 @@ internal class PRXViewModel @Inject constructor(
         repository.release()
         alarmHandler.pauseAlarm()
         navigationManager.navigateUp()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        alarmHandler.pauseAlarm()
     }
 }

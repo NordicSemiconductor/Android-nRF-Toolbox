@@ -78,11 +78,19 @@ fun PRXScreen() {
                     null,
                     GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                     GattConnectionState.STATE_DISCONNECTED,
-                    GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) }
+                    GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(getReason(state.isLinkLossDisconnected)) { NavigateUpButton(navigateUp) }
                     GattConnectionState.STATE_CONNECTED -> ContentView(state) { viewModel.onEvent(it) }
                 }
             }
         }
+    }
+}
+
+private fun getReason(isLinkLoss: Boolean): Reason {
+    return if (isLinkLoss) {
+        Reason.LINK_LOSS
+    } else {
+        Reason.UNKNOWN
     }
 }
 
