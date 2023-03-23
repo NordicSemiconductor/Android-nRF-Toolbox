@@ -46,6 +46,7 @@ import no.nordicsemi.android.kotlin.ble.core.client.BleWriteType
 import no.nordicsemi.android.kotlin.ble.core.client.callback.BleGattClient
 import no.nordicsemi.android.kotlin.ble.core.client.service.BleGattCharacteristic
 import no.nordicsemi.android.kotlin.ble.core.client.service.BleGattServices
+import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectionStatus
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattPermission
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattProperty
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
@@ -161,7 +162,7 @@ internal class PRXService : NotificationService() {
             .filterNotNull()
             .onEach { repository.onConnectionStateChanged(it) }
             .filterNotNull()
-            .onEach { stopIfDisconnected(it.first) }
+            .onEach { stopIfDisconnected(it.first, it.second) }
             .launchIn(lifecycleScope)
 
         client.services
@@ -193,8 +194,8 @@ internal class PRXService : NotificationService() {
         repository.onRemoteAlarmLevelSet(alarmLevel)
     }
 
-    private suspend fun stopIfDisconnected(connectionState: GattConnectionState) {
-        if (connectionState == GattConnectionState.STATE_DISCONNECTED) {
+    private fun stopIfDisconnected(connectionState: GattConnectionState, connectionStatus: BleGattConnectionStatus) {
+        if (connectionState == GattConnectionState.STATE_DISCONNECTED && !connectionStatus.isLinkLoss) {
             server.stopServer()
             stopSelf()
         }

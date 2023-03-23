@@ -14,9 +14,5 @@ data class PRXServiceData(
     val deviceName: String? = null
 ) {
 
-    val isLinkLossDisconnected = connectionState?.let {  connectionState ->
-        connectionStatus?.let { connectionStatus ->
-            connectionStatus != BleGattConnectionStatus.SUCCESS && connectionStatus != BleGattConnectionStatus.TERMINATE_PEER_USER
-        } ?: false
-    } ?: false
+    val isLinkLossDisconnected = connectionStatus?.isLinkLoss ?: false
 }
