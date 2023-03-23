@@ -88,9 +88,7 @@ internal class PRXService : NotificationService() {
 
         val device = intent!!.getParcelableExtra<ServerDevice>(DEVICE_DATA)!!
 
-        startServer()
-
-        startGattClient(device)
+        startServer(device)
 
         repository.stopEvent
             .onEach { disconnect() }
@@ -103,7 +101,7 @@ internal class PRXService : NotificationService() {
         return START_REDELIVER_INTENT
     }
 
-    private fun startServer() {
+    private fun startServer(device: ServerDevice) = lifecycleScope.launch {
         val alertLevelCharacteristic = BleServerGattCharacteristicConfig(
             uuid = ALERT_LEVEL_CHARACTERISTIC_UUID,
             properties = listOf(BleGattProperty.PROPERTY_WRITE_NO_RESPONSE),
@@ -129,6 +127,9 @@ internal class PRXService : NotificationService() {
         )
 
         server = BleGattServer.create(this@PRXService, prxServiceConfig, linkLossServiceConfig)
+
+        //Order is important. We don't want to connect before services have been added to the server.
+        startGattClient(device)
 
         server.onNewConnection
             .onEach { setUpServerConnection(it.second) }
@@ -192,8 +193,9 @@ internal class PRXService : NotificationService() {
         repository.onRemoteAlarmLevelSet(alarmLevel)
     }
 
-    private fun stopIfDisconnected(connectionState: GattConnectionState) {
+    private suspend fun stopIfDisconnected(connectionState: GattConnectionState) {
         if (connectionState == GattConnectionState.STATE_DISCONNECTED) {
+            server.stopServer()
             stopSelf()
         }
     }
