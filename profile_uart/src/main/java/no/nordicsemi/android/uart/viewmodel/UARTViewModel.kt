@@ -52,15 +52,14 @@ import no.nordicsemi.android.analytics.UARTSendAnalyticsEvent
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
-import no.nordicsemi.android.service.ConnectedResult
-import no.nordicsemi.android.service.IdleResult
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import no.nordicsemi.android.uart.data.MacroEol
 import no.nordicsemi.android.uart.data.UARTConfiguration
 import no.nordicsemi.android.uart.data.UARTMacro
 import no.nordicsemi.android.uart.data.UARTPersistentDataSource
-import no.nordicsemi.android.uart.data.UART_SERVICE_UUID
 import no.nordicsemi.android.uart.repository.UARTRepository
+import no.nordicsemi.android.uart.repository.UART_SERVICE_UUID
 import no.nordicsemi.android.uart.view.ClearOutputItems
 import no.nordicsemi.android.uart.view.DisconnectEvent
 import no.nordicsemi.android.uart.view.MacroInputSwitchClick
@@ -78,7 +77,6 @@ import no.nordicsemi.android.uart.view.OnRunMacro
 import no.nordicsemi.android.uart.view.OpenLogger
 import no.nordicsemi.android.uart.view.UARTViewEvent
 import no.nordicsemi.android.uart.view.UARTViewState
-import no.nordicsemi.android.uart.view.WorkingState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -100,12 +98,9 @@ internal class UARTViewModel @Inject constructor(
         }
 
         repository.data.onEach {
-            if (it is IdleResult) {
-                return@onEach
-            }
-            _state.value = _state.value.copy(uartManagerState = WorkingState(it))
+            _state.value = _state.value.copy(uartManagerState = it)
 
-            (it as? ConnectedResult)?.let {
+            if (it.connectionState == GattConnectionState.STATE_CONNECTED) {
                 analytics.logEvent(ProfileConnectedEvent(Profile.UART))
             }
         }.launchIn(viewModelScope)

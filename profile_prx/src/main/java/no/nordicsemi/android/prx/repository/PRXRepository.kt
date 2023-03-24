@@ -103,6 +103,7 @@ class PRXRepository @Inject internal constructor(
     }
 
     fun release() {
+        _data.value = PRXServiceData()
         _remoteAlarmLevel.tryEmit(AlarmLevel.NONE)
         _stopEvent.tryEmit(DisconnectAndStopEvent())
     }

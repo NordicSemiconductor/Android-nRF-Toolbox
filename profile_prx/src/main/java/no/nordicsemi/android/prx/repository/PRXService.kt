@@ -33,6 +33,7 @@ package no.nordicsemi.android.prx.repository
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.filterNotNull
@@ -197,6 +198,7 @@ internal class PRXService : NotificationService() {
     private fun stopIfDisconnected(connectionState: GattConnectionState, connectionStatus: BleGattConnectionStatus) {
         if (connectionState == GattConnectionState.STATE_DISCONNECTED && !connectionStatus.isLinkLoss) {
             server.stopServer()
+            repository.release()
             stopSelf()
         }
     }

@@ -33,27 +33,23 @@ package no.nordicsemi.android.uart.repository
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import no.nordicsemi.android.common.core.simpleSharedFlow
 import no.nordicsemi.android.common.logger.NordicLogger
-import no.nordicsemi.android.common.logger.NordicLoggerFactory
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
-import no.nordicsemi.android.service.BleManagerResult
-import no.nordicsemi.android.service.IdleResult
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.uart.data.ConfigurationDataSource
 import no.nordicsemi.android.uart.data.MacroEol
-import no.nordicsemi.android.uart.data.UARTData
 import no.nordicsemi.android.uart.data.UARTMacro
-import no.nordicsemi.android.uart.data.UARTManager
+import no.nordicsemi.android.uart.data.UARTRecord
+import no.nordicsemi.android.uart.data.UARTRecordType
+import no.nordicsemi.android.uart.data.UARTServiceData
 import no.nordicsemi.android.uart.data.parseWithNewLineChar
-import no.nordicsemi.android.ui.view.StringConst
-import no.nordicsemi.android.utils.EMPTY
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -62,18 +58,20 @@ class UARTRepository @Inject internal constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
-    private val configurationDataSource: ConfigurationDataSource,
-    private val loggerFactory: NordicLoggerFactory,
-    private val stringConst: StringConst
+    private val configurationDataSource: ConfigurationDataSource
 ) {
-    private var manager: UARTManager? = null
     private var logger: NordicLogger? = null
 
-    private val _data = MutableStateFlow<BleManagerResult<UARTData>>(IdleResult())
+    private val _data = MutableStateFlow(UARTServiceData())
     internal val data = _data.asStateFlow()
 
-    val isRunning = data.map { it.isRunning() }
-    val hasBeenDisconnected = data.map { it.hasBeenDisconnected() }
+    private val _stopEvent = simpleSharedFlow<DisconnectAndStopEvent>()
+    internal val stopEvent = _stopEvent.asSharedFlow()
+
+    private val _command = simpleSharedFlow<String>()
+    internal val command = _command.asSharedFlow()
+
+    val isRunning = data.map { it.connectionState == GattConnectionState.STATE_CONNECTED }
 
     val lastConfigurationName = configurationDataSource.lastConfigurationName
 
@@ -81,33 +79,39 @@ class UARTRepository @Inject internal constructor(
         serviceManager.startService(UARTService::class.java, device)
     }
 
-    fun start(device: ServerDevice, scope: CoroutineScope) {
-        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "UART", device.address).also {
-            logger = it
-        }
-        val manager = UARTManager(context, scope, createdLogger)
-        this.manager = manager
+    fun onConnectionStateChanged(connectionState: GattConnectionState) {
+        _data.value = _data.value.copy(connectionState = connectionState)
+    }
 
-        manager.dataHolder.status.onEach {
-            _data.value = it
-        }.launchIn(scope)
+    fun onBatteryLevelChanged(batteryLevel: Int) {
+        _data.value = _data.value.copy(batteryLevel = batteryLevel)
+    }
 
-        scope.launch {
-            manager.start(device)
-        }
+    fun onNewMessageReceived(value: String) {
+        _data.value = _data.value.copy(messages = _data.value.messages + UARTRecord(value, UARTRecordType.OUTPUT))
+    }
+
+    fun onNewMessageSent(value: String) {
+        _data.value = _data.value.copy(messages = _data.value.messages + UARTRecord(value, UARTRecordType.INPUT))
+    }
+
+    fun onInitComplete(device: ServerDevice) {
+        _data.value = _data.value.copy(deviceName = device.name)
     }
 
     fun sendText(text: String, newLineChar: MacroEol) {
-        manager?.send(text.parseWithNewLineChar(newLineChar))
+        _command.tryEmit(text.parseWithNewLineChar(newLineChar))
     }
 
     fun runMacro(macro: UARTMacro) {
-        val command = macro.command?.parseWithNewLineChar(macro.newLineChar)
-        manager?.send(command ?: String.EMPTY)
+        if (macro.command == null) {
+            return
+        }
+        _command.tryEmit(macro.command.parseWithNewLineChar(macro.newLineChar))
     }
 
     fun clearItems() {
-        manager?.clearItems()
+        _data.value = _data.value.copy(messages = emptyList())
     }
 
     fun openLogger() {
@@ -118,20 +122,8 @@ class UARTRepository @Inject internal constructor(
         configurationDataSource.saveConfigurationName(name)
     }
 
-    private suspend fun UARTManager.start(device: ServerDevice) {
-//        try {
-//            connect(device.device)
-//                .useAutoConnect(false)
-//                .retry(3, 100)
-//                .suspend()
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//        }
-    }
-
     fun release() {
-        manager?.disconnect()?.enqueue()
-        manager = null
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
         logger = null
     }
 }

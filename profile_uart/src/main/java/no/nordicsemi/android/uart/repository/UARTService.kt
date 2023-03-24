@@ -31,33 +31,104 @@
 
 package no.nordicsemi.android.uart.repository
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.client.callback.BleGattClient
+import no.nordicsemi.android.kotlin.ble.core.client.service.BleGattServices
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
+import no.nordicsemi.android.kotlin.ble.profile.hrs.HRSDataParser
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
+import java.util.*
 import javax.inject.Inject
 
+val UART_SERVICE_UUID: UUID = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")
+private val UART_RX_CHARACTERISTIC_UUID = UUID.fromString("6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
+private val UART_TX_CHARACTERISTIC_UUID = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
+
+private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
+private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
+
+@SuppressLint("MissingPermission")
 @AndroidEntryPoint
 internal class UARTService : NotificationService() {
 
     @Inject
     lateinit var repository: UARTRepository
 
+    private lateinit var client: BleGattClient
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
         val device = intent!!.getParcelableExtra<ServerDevice>(DEVICE_DATA)!!
 
-        repository.start(device, lifecycleScope)
+        startGattClient(device)
 
-        repository.hasBeenDisconnected.onEach {
-            if (it) stopSelf()
-        }.launchIn(lifecycleScope)
+        repository.stopEvent
+            .onEach { disconnect() }
+            .launchIn(lifecycleScope)
 
         return START_REDELIVER_INTENT
+    }
+
+    private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
+        client = device.connect(this@UARTService)
+
+        client.connectionState
+            .onEach { repository.onConnectionStateChanged(it) }
+            .filterNotNull()
+            .onEach { stopIfDisconnected(it) }
+            .launchIn(lifecycleScope)
+
+        client.services
+            .filterNotNull()
+            .onEach { configureGatt(it, device) }
+            .launchIn(lifecycleScope)
+
+        client.requestMtu(517)
+    }
+
+    private suspend fun configureGatt(services: BleGattServices, device: ServerDevice) {
+        val uartService = services.findService(UART_SERVICE_UUID)!!
+        val rxCharacteristic = uartService.findCharacteristic(UART_RX_CHARACTERISTIC_UUID)!!
+        val txCharacteristic = uartService.findCharacteristic(UART_TX_CHARACTERISTIC_UUID)!!
+
+        val batteryService = services.findService(BATTERY_SERVICE_UUID)
+
+        batteryService?.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)?.getNotifications()
+            ?.mapNotNull { BatteryLevelParser.parse(it) }
+            ?.onEach { repository.onBatteryLevelChanged(it) }
+            ?.launchIn(lifecycleScope)
+
+        txCharacteristic.getNotifications()
+            .onEach { repository.onNewMessageReceived(String(it)) }
+            .launchIn(lifecycleScope)
+
+        repository.command
+            .onEach { rxCharacteristic.write(it.toByteArray()) }
+            .onEach { repository.onNewMessageSent(it) }
+            .launchIn(lifecycleScope)
+
+        repository.onInitComplete(device)
+    }
+
+    private fun stopIfDisconnected(connectionState: GattConnectionState) {
+        if (connectionState == GattConnectionState.STATE_DISCONNECTED) {
+            stopSelf()
+        }
+    }
+
+    private fun disconnect() {
+        client.disconnect()
     }
 }
