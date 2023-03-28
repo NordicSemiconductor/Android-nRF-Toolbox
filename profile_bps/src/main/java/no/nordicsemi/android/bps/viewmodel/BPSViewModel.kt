@@ -54,9 +54,10 @@ import no.nordicsemi.android.bps.view.DisconnectEvent
 import no.nordicsemi.android.bps.view.OpenLoggerEvent
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
+import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
+import no.nordicsemi.android.kotlin.ble.client.main.connect
+import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
-import no.nordicsemi.android.kotlin.ble.core.client.callback.BleGattClient
-import no.nordicsemi.android.kotlin.ble.core.client.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.bps.data.BloodPressureMeasurementData

@@ -43,10 +43,11 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.common.data.cgm.CGMSpecificOpsControlPointData
 import no.nordicsemi.android.cgms.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.cgms.data.CGMServiceCommand
+import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
+import no.nordicsemi.android.kotlin.ble.client.main.connect
+import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattCharacteristic
+import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
-import no.nordicsemi.android.kotlin.ble.core.client.callback.BleGattClient
-import no.nordicsemi.android.kotlin.ble.core.client.service.BleGattCharacteristic
-import no.nordicsemi.android.kotlin.ble.core.client.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.cgm.CGMFeatureParser

@@ -58,10 +58,11 @@ import no.nordicsemi.android.gls.main.view.GLSViewState
 import no.nordicsemi.android.gls.main.view.OnGLSRecordClick
 import no.nordicsemi.android.gls.main.view.OnWorkingModeSelected
 import no.nordicsemi.android.gls.main.view.OpenLoggerEvent
+import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
+import no.nordicsemi.android.kotlin.ble.client.main.connect
+import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattCharacteristic
+import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
-import no.nordicsemi.android.kotlin.ble.core.client.callback.BleGattClient
-import no.nordicsemi.android.kotlin.ble.core.client.service.BleGattCharacteristic
-import no.nordicsemi.android.kotlin.ble.core.client.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.GlucoseMeasurementContextParser

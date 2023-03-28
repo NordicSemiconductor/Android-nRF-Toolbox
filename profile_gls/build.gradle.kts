@@ -45,7 +45,7 @@ dependencies {
     implementation(project(":lib_ui"))
     implementation(project(":lib_utils"))
 
-    implementation("no.nordicsemi.android.kotlin.ble:core:0.0.1")
+    implementation("no.nordicsemi.android.kotlin.ble:client:0.0.1")
     implementation("no.nordicsemi.android.kotlin.ble:profile:0.0.1")
 
     implementation(libs.chart)
