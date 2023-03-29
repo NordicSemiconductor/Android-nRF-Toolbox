@@ -76,7 +76,7 @@ fun UARTScreen() {
             modifier = Modifier.padding(it)
         ) {
             if (state.uartManagerState.deviceName == null) {
-                DeviceConnectingView()
+                PaddingBox { DeviceConnectingView() }
             } else {
                 when (state.uartManagerState.connectionState) {
                     GattConnectionState.STATE_CONNECTING -> PaddingBox { DeviceConnectingView { NavigateUpButton(navigateUp) } }
