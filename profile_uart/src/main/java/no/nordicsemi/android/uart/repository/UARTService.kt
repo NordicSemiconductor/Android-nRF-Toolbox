@@ -97,8 +97,6 @@ internal class UARTService : NotificationService() {
             .filterNotNull()
             .onEach { configureGatt(it, device) }
             .launchIn(lifecycleScope)
-
-        client.requestMtu(517)
     }
 
     private suspend fun configureGatt(services: BleGattServices, device: ServerDevice) {
@@ -118,7 +116,7 @@ internal class UARTService : NotificationService() {
             .launchIn(lifecycleScope)
 
         repository.command
-            .onEach { rxCharacteristic.write(it.toByteArray(), getWriteType(rxCharacteristic)) }
+            .onEach { rxCharacteristic.splitWrite(it.toByteArray(), getWriteType(rxCharacteristic)) }
             .onEach { repository.onNewMessageSent(it) }
             .launchIn(lifecycleScope)
 

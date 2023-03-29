@@ -81,7 +81,7 @@ fun UARTScreen() {
                 when (state.uartManagerState.connectionState) {
                     GattConnectionState.STATE_CONNECTING -> PaddingBox { DeviceConnectingView { NavigateUpButton(navigateUp) } }
                     GattConnectionState.STATE_DISCONNECTED,
-                    GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) }
+                    GattConnectionState.STATE_DISCONNECTING -> PaddingBox { DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) } }
                     GattConnectionState.STATE_CONNECTED -> SuccessScreen()
                 }
             }
