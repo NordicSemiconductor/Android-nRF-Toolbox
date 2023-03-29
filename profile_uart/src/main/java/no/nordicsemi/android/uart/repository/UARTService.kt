@@ -42,8 +42,11 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
 import no.nordicsemi.android.kotlin.ble.client.main.connect
+import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattCharacteristic
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.data.BleGattProperty
+import no.nordicsemi.android.kotlin.ble.core.data.BleWriteType
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.service.DEVICE_DATA
@@ -115,11 +118,19 @@ internal class UARTService : NotificationService() {
             .launchIn(lifecycleScope)
 
         repository.command
-            .onEach { rxCharacteristic.write(it.toByteArray()) }
+            .onEach { rxCharacteristic.write(it.toByteArray(), getWriteType(rxCharacteristic)) }
             .onEach { repository.onNewMessageSent(it) }
             .launchIn(lifecycleScope)
 
         repository.onInitComplete(device)
+    }
+
+    private fun getWriteType(characteristic: BleGattCharacteristic): BleWriteType {
+        return if (characteristic.properties.contains(BleGattProperty.PROPERTY_WRITE)) {
+            BleWriteType.DEFAULT
+        } else {
+            BleWriteType.NO_RESPONSE
+        }
     }
 
     private fun stopIfDisconnected(connectionState: GattConnectionState) {
