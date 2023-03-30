@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
 import no.nordicsemi.android.kotlin.ble.client.main.connect
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
@@ -50,6 +51,7 @@ import no.nordicsemi.android.kotlin.ble.profile.hrs.BodySensorLocationParser
 import no.nordicsemi.android.kotlin.ble.profile.hrs.HRSDataParser
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
+import no.nordicsemi.android.ui.view.StringConst
 import java.util.*
 import javax.inject.Inject
 
@@ -66,6 +68,9 @@ internal class HRSService : NotificationService() {
 
     @Inject
     lateinit var repository: HRSRepository
+
+    @Inject
+    lateinit var stringConst: StringConst
 
     private lateinit var client: BleGattClient
 
@@ -84,7 +89,9 @@ internal class HRSService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        client = device.connect(this@HRSService)
+        val logger = NordicLogger(this@HRSService, stringConst.APP_NAME, "CSC", device.address)
+
+        client = device.connect(this@HRSService, logger = logger)
 
         client.connectionState
             .onEach { repository.onConnectionStateChanged(it) }

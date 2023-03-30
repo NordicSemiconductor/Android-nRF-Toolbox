@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
 import no.nordicsemi.android.kotlin.ble.client.main.connect
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattCharacteristic
@@ -62,6 +63,7 @@ import no.nordicsemi.android.kotlin.ble.server.main.service.BleServerGattService
 import no.nordicsemi.android.kotlin.ble.server.main.service.BluetoothGattServerConnection
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
+import no.nordicsemi.android.ui.view.StringConst
 import java.util.*
 import javax.inject.Inject
 
@@ -79,6 +81,9 @@ internal class PRXService : NotificationService() {
 
     @Inject
     lateinit var repository: PRXRepository
+
+    @Inject
+    lateinit var stringConst: StringConst
 
     private lateinit var client: BleGattClient
     private lateinit var server: BleGattServer
@@ -157,7 +162,9 @@ internal class PRXService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        client = device.connect(this@PRXService, BleGattConnectOptions(autoConnect = true))
+        val logger = NordicLogger(this@PRXService, stringConst.APP_NAME, "PRX", device.address)
+
+        client = device.connect(this@PRXService, logger = logger)
 
         client.connectionStateWithStatus
             .filterNotNull()

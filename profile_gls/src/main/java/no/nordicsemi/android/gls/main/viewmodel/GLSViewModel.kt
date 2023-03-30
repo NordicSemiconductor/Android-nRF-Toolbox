@@ -48,6 +48,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
+import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.gls.GlsDetailsDestinationId
@@ -77,6 +78,7 @@ import no.nordicsemi.android.kotlin.ble.profile.gls.data.ResponseData
 import no.nordicsemi.android.kotlin.ble.profile.racp.RACPOpCode
 import no.nordicsemi.android.kotlin.ble.profile.racp.RACPResponseCode
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
+import no.nordicsemi.android.ui.view.StringConst
 import java.util.*
 import javax.inject.Inject
 
@@ -96,7 +98,8 @@ internal class GLSViewModel @Inject constructor(
     @ApplicationContext
     private val context: Context,
     private val navigationManager: Navigator,
-    private val analytics: AppAnalytics
+    private val analytics: AppAnalytics,
+    private val stringConst: StringConst
 ) : ViewModel() {
 
     private lateinit var client: BleGattClient
@@ -153,7 +156,9 @@ internal class GLSViewModel @Inject constructor(
     }
 
     private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
-        client = device.connect(context)
+        val logger = NordicLogger(context, stringConst.APP_NAME, "BPS", device.address)
+
+        client = device.connect(context, logger = logger)
 
         client.connectionState
             .filterNotNull()

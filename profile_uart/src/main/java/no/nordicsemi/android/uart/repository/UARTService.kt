@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
 import no.nordicsemi.android.kotlin.ble.client.main.connect
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattCharacteristic
@@ -51,6 +52,7 @@ import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
+import no.nordicsemi.android.ui.view.StringConst
 import java.util.*
 import javax.inject.Inject
 
@@ -67,6 +69,9 @@ internal class UARTService : NotificationService() {
 
     @Inject
     lateinit var repository: UARTRepository
+
+    @Inject
+    lateinit var stringConst: StringConst
 
     private lateinit var client: BleGattClient
 
@@ -85,7 +90,9 @@ internal class UARTService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        client = device.connect(this@UARTService)
+        val logger = NordicLogger(this@UARTService, stringConst.APP_NAME, "UART", device.address)
+
+        client = device.connect(this@UARTService, logger = logger)
 
         client.connectionState
             .onEach { repository.onConnectionStateChanged(it) }

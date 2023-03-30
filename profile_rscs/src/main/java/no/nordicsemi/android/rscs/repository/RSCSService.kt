@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
 import no.nordicsemi.android.kotlin.ble.client.main.connect
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
@@ -49,6 +50,7 @@ import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.rscs.RSCSDataParser
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
+import no.nordicsemi.android.ui.view.StringConst
 import java.util.*
 import javax.inject.Inject
 
@@ -64,6 +66,9 @@ internal class RSCSService : NotificationService() {
 
     @Inject
     lateinit var repository: RSCSRepository
+
+    @Inject
+    lateinit var stringConst: StringConst
 
     private lateinit var client: BleGattClient
 
@@ -82,7 +87,9 @@ internal class RSCSService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        client = device.connect(this@RSCSService)
+        val logger = NordicLogger(this@RSCSService, stringConst.APP_NAME, "RSCS", device.address)
+
+        client = device.connect(this@RSCSService, logger = logger)
 
         client.connectionState
             .onEach { repository.onConnectionStateChanged(it) }

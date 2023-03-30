@@ -52,6 +52,7 @@ import no.nordicsemi.android.bps.view.BPSViewEvent
 import no.nordicsemi.android.bps.view.BPSViewState
 import no.nordicsemi.android.bps.view.DisconnectEvent
 import no.nordicsemi.android.bps.view.OpenLoggerEvent
+import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
@@ -65,6 +66,7 @@ import no.nordicsemi.android.kotlin.ble.profile.bps.BloodPressureMeasurementPars
 import no.nordicsemi.android.kotlin.ble.profile.bps.data.IntermediateCuffPressureData
 import no.nordicsemi.android.kotlin.ble.profile.bps.IntermediateCuffPressureParser
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
+import no.nordicsemi.android.ui.view.StringConst
 import java.util.*
 import javax.inject.Inject
 
@@ -81,7 +83,8 @@ internal class BPSViewModel @Inject constructor(
     @ApplicationContext
     private val context: Context,
     private val navigationManager: Navigator,
-    private val analytics: AppAnalytics
+    private val analytics: AppAnalytics,
+    private val stringConst: StringConst
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(BPSViewState())
@@ -114,7 +117,9 @@ internal class BPSViewModel @Inject constructor(
     private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
         _state.value = _state.value.copy(deviceName = device.name)
 
-        client = device.connect(context)
+        val logger = NordicLogger(context, stringConst.APP_NAME, "BPS", device.address)
+
+        client = device.connect(context, logger = logger)
 
         client.connectionState
             .filterNotNull()
