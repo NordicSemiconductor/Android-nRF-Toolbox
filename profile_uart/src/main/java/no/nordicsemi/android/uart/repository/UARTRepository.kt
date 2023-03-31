@@ -38,10 +38,11 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.core.simpleSharedFlow
-import no.nordicsemi.android.common.logger.NordicLogger
+import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.service.DisconnectAndStopEvent
+import no.nordicsemi.android.service.OpenLoggerEvent
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.uart.data.ConfigurationDataSource
 import no.nordicsemi.android.uart.data.MacroEol
@@ -60,8 +61,6 @@ class UARTRepository @Inject internal constructor(
     private val serviceManager: ServiceManager,
     private val configurationDataSource: ConfigurationDataSource
 ) {
-    private var logger: NordicLogger? = null
-
     private val _data = MutableStateFlow(UARTServiceData())
     internal val data = _data.asStateFlow()
 
@@ -70,6 +69,9 @@ class UARTRepository @Inject internal constructor(
 
     private val _command = simpleSharedFlow<String>()
     internal val command = _command.asSharedFlow()
+
+    private val _loggerEvent = simpleSharedFlow<OpenLoggerEvent>()
+    internal val loggerEvent = _loggerEvent.asSharedFlow()
 
     val isRunning = data.map { it.connectionState == GattConnectionState.STATE_CONNECTED }
 
@@ -115,7 +117,7 @@ class UARTRepository @Inject internal constructor(
     }
 
     fun openLogger() {
-        NordicLogger.launch(context, logger)
+        _loggerEvent.tryEmit(OpenLoggerEvent())
     }
 
     suspend fun saveConfigurationName(name: String) {
@@ -124,6 +126,5 @@ class UARTRepository @Inject internal constructor(
 
     fun release() {
         _stopEvent.tryEmit(DisconnectAndStopEvent())
-        logger = null
     }
 }

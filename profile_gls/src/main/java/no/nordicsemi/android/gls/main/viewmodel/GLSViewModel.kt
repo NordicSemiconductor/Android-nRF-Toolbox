@@ -48,7 +48,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
-import no.nordicsemi.android.common.logger.NordicLogger
+import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.gls.GlsDetailsDestinationId
@@ -103,6 +103,7 @@ internal class GLSViewModel @Inject constructor(
 ) : ViewModel() {
 
     private lateinit var client: BleGattClient
+    private lateinit var logger: NordicBlekLogger
 
     private lateinit var glucoseMeasurementCharacteristic: BleGattCharacteristic
     private lateinit var recordAccessControlPointCharacteristic: BleGattCharacteristic
@@ -130,7 +131,7 @@ internal class GLSViewModel @Inject constructor(
 
     fun onEvent(event: GLSScreenViewEvent) {
         when (event) {
-            OpenLoggerEvent -> TODO()
+            OpenLoggerEvent -> logger.launch()
             DisconnectEvent -> navigationManager.navigateUp()
             is OnWorkingModeSelected -> onEvent(event)
             is OnGLSRecordClick -> navigateToDetails(event.record)
@@ -156,7 +157,7 @@ internal class GLSViewModel @Inject constructor(
     }
 
     private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
-        val logger = NordicLogger(context, stringConst.APP_NAME, "BPS", device.address)
+        logger = NordicBlekLogger(context, stringConst.APP_NAME, "BPS", device.address)
 
         client = device.connect(context, logger = logger)
 

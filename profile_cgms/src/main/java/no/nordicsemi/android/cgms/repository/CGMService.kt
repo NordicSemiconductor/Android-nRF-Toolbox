@@ -43,7 +43,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.ble.common.data.cgm.CGMSpecificOpsControlPointData
 import no.nordicsemi.android.cgms.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.cgms.data.CGMServiceCommand
-import no.nordicsemi.android.common.logger.NordicLogger
+import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
 import no.nordicsemi.android.kotlin.ble.client.main.connect
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattCharacteristic
@@ -131,9 +131,13 @@ internal class CGMService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        val logger = NordicLogger(this@CGMService, stringConst.APP_NAME, "CGM", device.address)
+        val logger = NordicBlekLogger(this@CGMService, stringConst.APP_NAME, "CGM", device.address)
 
         client = device.connect(this@CGMService, logger = logger)
+
+        repository.loggerEvent
+            .onEach { logger.launch() }
+            .launchIn(lifecycleScope)
 
         client.connectionState
             .onEach { repository.onConnectionStateChanged(it) }

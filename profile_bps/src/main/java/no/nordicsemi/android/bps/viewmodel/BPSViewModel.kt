@@ -52,7 +52,7 @@ import no.nordicsemi.android.bps.view.BPSViewEvent
 import no.nordicsemi.android.bps.view.BPSViewState
 import no.nordicsemi.android.bps.view.DisconnectEvent
 import no.nordicsemi.android.bps.view.OpenLoggerEvent
-import no.nordicsemi.android.common.logger.NordicLogger
+import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
@@ -61,10 +61,10 @@ import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
-import no.nordicsemi.android.kotlin.ble.profile.bps.data.BloodPressureMeasurementData
 import no.nordicsemi.android.kotlin.ble.profile.bps.BloodPressureMeasurementParser
-import no.nordicsemi.android.kotlin.ble.profile.bps.data.IntermediateCuffPressureData
 import no.nordicsemi.android.kotlin.ble.profile.bps.IntermediateCuffPressureParser
+import no.nordicsemi.android.kotlin.ble.profile.bps.data.BloodPressureMeasurementData
+import no.nordicsemi.android.kotlin.ble.profile.bps.data.IntermediateCuffPressureData
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import no.nordicsemi.android.ui.view.StringConst
 import java.util.*
@@ -91,6 +91,7 @@ internal class BPSViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     private lateinit var client: BleGattClient
+    private lateinit var logger: NordicBlekLogger
 
     init {
         navigationManager.navigateTo(ScannerDestinationId, ParcelUuid(BPS_SERVICE_UUID))
@@ -110,14 +111,14 @@ internal class BPSViewModel @Inject constructor(
     fun onEvent(event: BPSViewEvent) {
         when (event) {
             DisconnectEvent -> navigationManager.navigateUp()
-            OpenLoggerEvent -> TODO()
+            OpenLoggerEvent -> logger.launch()
         }
     }
 
     private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
         _state.value = _state.value.copy(deviceName = device.name)
 
-        val logger = NordicLogger(context, stringConst.APP_NAME, "BPS", device.address)
+        logger = NordicBlekLogger(context, stringConst.APP_NAME, "BPS", device.address)
 
         client = device.connect(context, logger = logger)
 

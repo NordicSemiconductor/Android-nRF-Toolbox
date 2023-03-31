@@ -38,12 +38,13 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.core.simpleSharedFlow
-import no.nordicsemi.android.common.logger.NordicLogger
+import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.profile.rscs.data.RSCSData
 import no.nordicsemi.android.rscs.data.RSCSServiceData
 import no.nordicsemi.android.service.DisconnectAndStopEvent
+import no.nordicsemi.android.service.OpenLoggerEvent
 import no.nordicsemi.android.service.ServiceManager
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -54,13 +55,16 @@ class RSCSRepository @Inject constructor(
     private val context: Context,
     private val serviceManager: ServiceManager
 ) {
-    private var logger: NordicLogger? = null
+    private var logger: NordicBlekLogger? = null
 
     private val _data = MutableStateFlow(RSCSServiceData())
     internal val data = _data.asStateFlow()
 
     private val _stopEvent = simpleSharedFlow<DisconnectAndStopEvent>()
     internal val stopEvent = _stopEvent.asSharedFlow()
+
+    private val _loggerEvent = simpleSharedFlow<OpenLoggerEvent>()
+    internal val loggerEvent = _loggerEvent.asSharedFlow()
 
     val isRunning = data.map { it.connectionState == GattConnectionState.STATE_CONNECTED }
 
@@ -85,7 +89,7 @@ class RSCSRepository @Inject constructor(
     }
 
     fun openLogger() {
-        NordicLogger.launch(context, logger)
+        _loggerEvent.tryEmit(OpenLoggerEvent())
     }
 
     fun release() {

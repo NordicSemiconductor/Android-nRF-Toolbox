@@ -45,6 +45,7 @@ import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.RequestStatus
 import no.nordicsemi.android.service.DisconnectAndStopEvent
+import no.nordicsemi.android.service.OpenLoggerEvent
 import no.nordicsemi.android.service.ServiceManager
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -63,6 +64,9 @@ class CGMRepository @Inject constructor(
 
     private val _command = simpleSharedFlow<CGMServiceCommand>()
     internal val command = _command.asSharedFlow()
+
+    private val _loggerEvent = simpleSharedFlow<OpenLoggerEvent>()
+    internal val loggerEvent = _loggerEvent.asSharedFlow()
 
     val isRunning = data.map { it.connectionState == GattConnectionState.STATE_CONNECTED }
     val hasRecords = data.value.records.isNotEmpty()
@@ -94,7 +98,7 @@ class CGMRepository @Inject constructor(
     }
 
     fun openLogger() {
-        TODO()
+        _loggerEvent.tryEmit(OpenLoggerEvent())
     }
 
     fun clear() {

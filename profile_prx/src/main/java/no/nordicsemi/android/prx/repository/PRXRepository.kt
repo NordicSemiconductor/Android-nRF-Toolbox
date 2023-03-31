@@ -44,6 +44,7 @@ import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.profile.prx.AlarmLevel
 import no.nordicsemi.android.prx.data.PRXServiceData
 import no.nordicsemi.android.service.DisconnectAndStopEvent
+import no.nordicsemi.android.service.OpenLoggerEvent
 import no.nordicsemi.android.service.ServiceManager
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -60,6 +61,9 @@ class PRXRepository @Inject internal constructor(
 
     private val _stopEvent = simpleSharedFlow<DisconnectAndStopEvent>()
     internal val stopEvent = _stopEvent.asSharedFlow()
+
+    private val _loggerEvent = simpleSharedFlow<OpenLoggerEvent>()
+    internal val loggerEvent = _loggerEvent.asSharedFlow()
 
     private val _remoteAlarmLevel = simpleSharedFlow<AlarmLevel>()
     internal val remoteAlarmLevel = _remoteAlarmLevel.asSharedFlow()
@@ -99,7 +103,7 @@ class PRXRepository @Inject internal constructor(
     }
 
     fun openLogger() {
-        TODO()
+        _loggerEvent.tryEmit(OpenLoggerEvent())
     }
 
     fun release() {
