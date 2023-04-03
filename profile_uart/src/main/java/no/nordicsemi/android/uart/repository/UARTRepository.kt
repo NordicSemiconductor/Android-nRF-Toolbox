@@ -38,7 +38,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.core.simpleSharedFlow
-import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.service.DisconnectAndStopEvent

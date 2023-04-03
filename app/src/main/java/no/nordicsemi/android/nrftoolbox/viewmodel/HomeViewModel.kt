@@ -43,7 +43,6 @@ import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.ProfileOpenEvent
 import no.nordicsemi.android.cgms.repository.CGMRepository
-import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.common.logger.NordicLogger
 import no.nordicsemi.android.common.navigation.DestinationId
 import no.nordicsemi.android.common.navigation.Navigator

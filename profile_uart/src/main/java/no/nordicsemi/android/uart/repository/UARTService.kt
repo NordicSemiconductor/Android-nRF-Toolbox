@@ -33,6 +33,7 @@ package no.nordicsemi.android.uart.repository
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.filterNotNull
@@ -49,6 +50,7 @@ import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattProperty
 import no.nordicsemi.android.kotlin.ble.core.data.BleWriteType
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.Mtu
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
@@ -106,11 +108,11 @@ internal class UARTService : NotificationService() {
 
         client.services
             .filterNotNull()
-            .onEach { configureGatt(it, device) }
+            .onEach { configureGatt(it, device, logger) }
             .launchIn(lifecycleScope)
     }
 
-    private suspend fun configureGatt(services: BleGattServices, device: ServerDevice) {
+    private suspend fun configureGatt(services: BleGattServices, device: ServerDevice, logger: NordicBlekLogger) {
         val uartService = services.findService(UART_SERVICE_UUID)!!
         val rxCharacteristic = uartService.findCharacteristic(UART_RX_CHARACTERISTIC_UUID)!!
         val txCharacteristic = uartService.findCharacteristic(UART_TX_CHARACTERISTIC_UUID)!!
@@ -124,12 +126,16 @@ internal class UARTService : NotificationService() {
 
         txCharacteristic.getNotifications()
             .onEach { repository.onNewMessageReceived(String(it)) }
+            .onEach { logger.log(10, "Received: ${String(it)}") }
             .launchIn(lifecycleScope)
 
         repository.command
             .onEach { rxCharacteristic.splitWrite(it.toByteArray(), getWriteType(rxCharacteristic)) }
             .onEach { repository.onNewMessageSent(it) }
+            .onEach { logger.log(10, "Sent: $it") }
             .launchIn(lifecycleScope)
+
+        client.requestMtu(Mtu.max)
 
         repository.onInitComplete(device)
     }
