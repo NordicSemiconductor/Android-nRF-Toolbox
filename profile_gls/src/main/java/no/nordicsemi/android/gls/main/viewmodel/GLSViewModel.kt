@@ -132,7 +132,6 @@ internal class GLSViewModel @Inject constructor(
     fun onEvent(event: GLSScreenViewEvent) {
         when (event) {
             OpenLoggerEvent -> logger.launch()
-            DisconnectEvent -> navigationManager.navigateUp()
             is OnWorkingModeSelected -> onEvent(event)
             is OnGLSRecordClick -> navigateToDetails(event.record)
             DisconnectEvent -> navigationManager.navigateUp()
