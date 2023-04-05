@@ -53,8 +53,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -90,9 +88,6 @@ internal fun OutputSection(records: List<UARTRecord>, onEvent: (UARTViewEvent) -
         Spacer(modifier = Modifier.size(16.dp))
 
         val scrollState = rememberLazyListState()
-        val scrollDown = remember {
-            derivedStateOf { scrollState.isScrolledToTheEnd() }
-        }
 
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
@@ -114,8 +109,8 @@ internal fun OutputSection(records: List<UARTRecord>, onEvent: (UARTViewEvent) -
             }
         }
 
-        LaunchedEffect(records, scrollDown.value) {
-            if (!scrollDown.value || records.isEmpty()) {
+        LaunchedEffect(records) {
+            if (scrollState.isScrolledToTheEnd() || records.isEmpty()) {
                 return@LaunchedEffect
             }
             launch {
