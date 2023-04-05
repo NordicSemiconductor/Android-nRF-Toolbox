@@ -51,6 +51,7 @@ import no.nordicsemi.android.common.ui.scanner.view.DeviceDisconnectedView
 import no.nordicsemi.android.common.ui.scanner.view.Reason
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.ui.view.BackIconAppBar
+import no.nordicsemi.android.ui.view.LoggerBackIconAppBar
 import no.nordicsemi.android.ui.view.LoggerIconAppBar
 import no.nordicsemi.android.ui.view.NavigateUpButton
 
@@ -87,8 +88,12 @@ fun CGMScreen() {
 @Composable
 private fun AppBar(state: CGMServiceData, navigateUp: () -> Unit, viewModel: CGMViewModel) {
     if (state.deviceName?.isNotBlank() == true) {
-        LoggerIconAppBar(state.deviceName, navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
-            viewModel.onEvent(OpenLoggerEvent)
+        if (state.connectionState == GattConnectionState.STATE_DISCONNECTING || state.connectionState == GattConnectionState.STATE_DISCONNECTED) {
+            LoggerBackIconAppBar(state.deviceName) { viewModel.onEvent(OpenLoggerEvent) }
+        } else {
+            LoggerIconAppBar(state.deviceName, navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
+                viewModel.onEvent(OpenLoggerEvent)
+            }
         }
     } else {
         BackIconAppBar(stringResource(id = R.string.cgms_title), navigateUp)
