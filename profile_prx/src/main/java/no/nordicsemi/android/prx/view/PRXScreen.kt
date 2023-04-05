@@ -71,11 +71,11 @@ fun PRXScreen() {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            when (state.connectionState) {
+            when (state.connectionState?.state) {
                 null,
                 GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                 GattConnectionState.STATE_DISCONNECTED,
-                GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(getReason(state.isLinkLossDisconnected)) {
+                GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(state.connectionState.status) {
                     NavigateUpButton(navigateUp)
                 }
                 GattConnectionState.STATE_CONNECTED -> ContentView(state) { viewModel.onEvent(it) }

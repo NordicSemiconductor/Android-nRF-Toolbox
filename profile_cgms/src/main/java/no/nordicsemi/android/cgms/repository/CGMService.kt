@@ -50,6 +50,7 @@ import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattCharacteristi
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.cgm.CGMFeatureParser
 import no.nordicsemi.android.kotlin.ble.profile.cgm.CGMMeasurementParser
@@ -139,7 +140,7 @@ internal class CGMService : NotificationService() {
             .onEach { logger.launch() }
             .launchIn(lifecycleScope)
 
-        client.connectionState
+        client.connectionStateWithStatus
             .onEach { repository.onConnectionStateChanged(it) }
             .filterNotNull()
             .onEach { stopIfDisconnected(it) }
@@ -187,10 +188,10 @@ internal class CGMService : NotificationService() {
             .mapNotNull { CGMSpecificOpsControlPointParser.parse(it) }
             .onEach {
                 if (it.isOperationCompleted) {
-                    if (it.requestCode == CGMOpCode.CGM_OP_CODE_START_SESSION) {
-                        sessionStartTime = System.currentTimeMillis()
+                    sessionStartTime = if (it.requestCode == CGMOpCode.CGM_OP_CODE_START_SESSION) {
+                        System.currentTimeMillis()
                     } else {
-                        sessionStartTime = 0
+                        0
                     }
                 } else {
                     if (it.requestCode == CGMOpCode.CGM_OP_CODE_START_SESSION && it.errorCode == CGMErrorCode.CGM_ERROR_PROCEDURE_NOT_COMPLETED) {
@@ -298,8 +299,8 @@ internal class CGMService : NotificationService() {
         recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords().value)
     }
 
-    private fun stopIfDisconnected(connectionState: GattConnectionState) {
-        if (connectionState == GattConnectionState.STATE_DISCONNECTED) {
+    private fun stopIfDisconnected(connectionState: GattConnectionStateWithStatus) {
+        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED) {
             stopSelf()
         }
     }

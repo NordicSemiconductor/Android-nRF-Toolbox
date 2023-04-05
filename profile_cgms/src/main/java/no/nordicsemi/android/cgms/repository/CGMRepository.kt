@@ -43,6 +43,7 @@ import no.nordicsemi.android.cgms.data.CGMServiceData
 import no.nordicsemi.android.common.core.simpleSharedFlow
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.RequestStatus
 import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.OpenLoggerEvent
@@ -68,7 +69,7 @@ class CGMRepository @Inject constructor(
     private val _loggerEvent = simpleSharedFlow<OpenLoggerEvent>()
     internal val loggerEvent = _loggerEvent.asSharedFlow()
 
-    val isRunning = data.map { it.connectionState == GattConnectionState.STATE_CONNECTED }
+    val isRunning = data.map { it.connectionState?.state == GattConnectionState.STATE_CONNECTED }
     val hasRecords = data.value.records.isNotEmpty()
     val highestSequenceNumber = data.value.records.maxOfOrNull { it.sequenceNumber } ?: -1
 
@@ -85,7 +86,7 @@ class CGMRepository @Inject constructor(
         _command.tryEmit(command)
     }
 
-    fun onConnectionStateChanged(connectionState: GattConnectionState?) {
+    fun onConnectionStateChanged(connectionState: GattConnectionStateWithStatus?) {
         _data.value = _data.value.copy(connectionState = connectionState)
     }
 

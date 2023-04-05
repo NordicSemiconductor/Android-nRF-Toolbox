@@ -72,11 +72,11 @@ fun CGMScreen() {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            when (state.connectionState) {
+            when (state.connectionState?.state) {
                 null,
                 GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                 GattConnectionState.STATE_DISCONNECTED,
-                GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(Reason.UNKNOWN) {
+                GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(state.connectionState.status) {
                     NavigateUpButton(navigateUp)
                 }
                 GattConnectionState.STATE_CONNECTED -> CGMContentView(state) { viewModel.onEvent(it) }
@@ -88,7 +88,7 @@ fun CGMScreen() {
 @Composable
 private fun AppBar(state: CGMServiceData, navigateUp: () -> Unit, viewModel: CGMViewModel) {
     if (state.deviceName?.isNotBlank() == true) {
-        if (state.connectionState == GattConnectionState.STATE_DISCONNECTING || state.connectionState == GattConnectionState.STATE_DISCONNECTED) {
+        if (state.connectionState?.state == GattConnectionState.STATE_DISCONNECTING || state.connectionState?.state == GattConnectionState.STATE_DISCONNECTED) {
             LoggerBackIconAppBar(state.deviceName) { viewModel.onEvent(OpenLoggerEvent) }
         } else {
             LoggerIconAppBar(state.deviceName, navigateUp, { viewModel.onEvent(DisconnectEvent) }) {

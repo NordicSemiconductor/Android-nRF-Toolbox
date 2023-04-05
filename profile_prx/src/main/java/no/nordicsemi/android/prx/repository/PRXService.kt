@@ -173,7 +173,7 @@ internal class PRXService : NotificationService() {
             .filterNotNull()
             .onEach { repository.onConnectionStateChanged(it) }
             .filterNotNull()
-            .onEach { stopIfDisconnected(it.first, it.second) }
+            .onEach { stopIfDisconnected(it.state, it.status) }
             .launchIn(lifecycleScope)
 
         client.services

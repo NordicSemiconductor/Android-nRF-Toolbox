@@ -35,8 +35,6 @@ import android.os.ParcelUuid
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -76,7 +74,7 @@ internal class CGMViewModel @Inject constructor(
         }
 
         repository.data.onEach {
-            if (it.connectionState == GattConnectionState.STATE_CONNECTED) {
+            if (it.connectionState?.state == GattConnectionState.STATE_CONNECTED) {
                 analytics.logEvent(ProfileConnectedEvent(Profile.CGMS))
             }
         }.launchIn(viewModelScope)

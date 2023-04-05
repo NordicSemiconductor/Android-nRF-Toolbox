@@ -83,7 +83,7 @@ internal class PRXViewModel @Inject constructor(
                 alarmHandler.playAlarm(it.linkLossAlarmLevel)
             }
 
-            if (it.connectionState == GattConnectionState.STATE_CONNECTED) {
+            if (it.connectionState?.state == GattConnectionState.STATE_CONNECTED) {
                 analytics.logEvent(ProfileConnectedEvent(Profile.PRX))
             }
         }.launchIn(viewModelScope)

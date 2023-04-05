@@ -41,6 +41,7 @@ import no.nordicsemi.android.common.core.simpleSharedFlow
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectionStatus
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.prx.AlarmLevel
 import no.nordicsemi.android.prx.data.PRXServiceData
 import no.nordicsemi.android.service.DisconnectAndStopEvent
@@ -68,7 +69,7 @@ class PRXRepository @Inject internal constructor(
     private val _remoteAlarmLevel = simpleSharedFlow<AlarmLevel>()
     internal val remoteAlarmLevel = _remoteAlarmLevel.asSharedFlow()
 
-    val isRunning = data.map { it.connectionState == GattConnectionState.STATE_CONNECTED }
+    val isRunning = data.map { it.connectionState?.state == GattConnectionState.STATE_CONNECTED }
 
     fun launch(device: ServerDevice) {
         serviceManager.startService(PRXService::class.java, device)
@@ -78,8 +79,8 @@ class PRXRepository @Inject internal constructor(
         _data.value = _data.value.copy(deviceName = device.name)
     }
 
-    fun onConnectionStateChanged(connection: Pair<GattConnectionState, BleGattConnectionStatus>) {
-        _data.value = _data.value.copy(connectionState = connection.first, connectionStatus = connection.second)
+    fun onConnectionStateChanged(connection: GattConnectionStateWithStatus) {
+        _data.value = _data.value.copy(connectionState = connection)
     }
 
     fun setLocalAlarmLevel(alarmLevel: AlarmLevel) {
