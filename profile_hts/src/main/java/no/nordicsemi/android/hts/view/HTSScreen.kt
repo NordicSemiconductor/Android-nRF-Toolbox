@@ -71,16 +71,14 @@ fun HTSScreen() {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            if (state.deviceName == null) {
-                DeviceConnectingView()
-            } else {
-                when (state.connectionState) {
-                    null,
-                    GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
-                    GattConnectionState.STATE_DISCONNECTED,
-                    GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) }
-                    GattConnectionState.STATE_CONNECTED -> HTSContentView(state) { viewModel.onEvent(it) }
+            when (state.connectionState) {
+                null,
+                GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
+                GattConnectionState.STATE_DISCONNECTED,
+                GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(Reason.UNKNOWN) {
+                    NavigateUpButton(navigateUp)
                 }
+                GattConnectionState.STATE_CONNECTED -> HTSContentView(state) { viewModel.onEvent(it) }
             }
         }
     }

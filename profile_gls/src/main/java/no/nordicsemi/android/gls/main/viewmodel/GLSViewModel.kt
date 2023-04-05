@@ -34,6 +34,7 @@ package no.nordicsemi.android.gls.main.viewmodel
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.ParcelUuid
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -163,7 +164,6 @@ internal class GLSViewModel @Inject constructor(
         client.connectionState
             .filterNotNull()
             .onEach { _state.value = _state.value.copyWithNewConnectionState(it) }
-            .onEach { stopIfDisconnected(it) }
             .onEach { logAnalytics(it) }
             .launchIn(viewModelScope)
 
@@ -207,12 +207,6 @@ internal class GLSViewModel @Inject constructor(
             .launchIn(viewModelScope)
 
         _state.value = _state.value.copy(deviceName = device.name) //prevents UI from appearing before BLE connection is set up
-    }
-
-    private fun stopIfDisconnected(connectionState: GattConnectionState) {
-        if (connectionState == GattConnectionState.STATE_DISCONNECTED) {
-            navigationManager.navigateUp()
-        }
     }
 
     private fun onAccessControlPointDataReceived(data: RecordAccessControlPointData) = viewModelScope.launch {

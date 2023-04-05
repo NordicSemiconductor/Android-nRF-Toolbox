@@ -75,15 +75,14 @@ fun UARTScreen() {
         Column(
             modifier = Modifier.padding(it)
         ) {
-            if (state.uartManagerState.deviceName == null) {
-                PaddingBox { DeviceConnectingView() }
-            } else {
-                when (state.uartManagerState.connectionState) {
-                    GattConnectionState.STATE_CONNECTING -> PaddingBox { DeviceConnectingView { NavigateUpButton(navigateUp) } }
-                    GattConnectionState.STATE_DISCONNECTED,
-                    GattConnectionState.STATE_DISCONNECTING -> PaddingBox { DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) } }
-                    GattConnectionState.STATE_CONNECTED -> SuccessScreen()
+            when (state.uartManagerState.connectionState) {
+                null,
+                GattConnectionState.STATE_CONNECTING -> PaddingBox { DeviceConnectingView { NavigateUpButton(navigateUp) } }
+                GattConnectionState.STATE_DISCONNECTED,
+                GattConnectionState.STATE_DISCONNECTING -> PaddingBox {
+                    DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) }
                 }
+                GattConnectionState.STATE_CONNECTED -> SuccessScreen()
             }
         }
     }
@@ -112,12 +111,14 @@ private fun AppBar(state: UARTViewState, navigateUp: () -> Unit, viewModel: UART
 private fun SuccessScreen() {
     val input = stringResource(id = R.string.uart_input)
     val macros = stringResource(id = R.string.uart_macros)
-    val viewEntity = remember { PagerViewEntity(
-        listOf(
-            PagerViewItem(input) { KeyboardView() },
-            PagerViewItem(macros) { MacroView() }
+    val viewEntity = remember {
+        PagerViewEntity(
+            listOf(
+                PagerViewItem(input) { KeyboardView() },
+                PagerViewItem(macros) { MacroView() }
+            )
         )
-    ) }
+    }
     PagerView(
         viewEntity = viewEntity,
         modifier = Modifier.fillMaxSize(),
