@@ -40,19 +40,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.common.ui.scanner.view.DeviceConnectingView
 import no.nordicsemi.android.common.ui.scanner.view.DeviceDisconnectedView
 import no.nordicsemi.android.common.ui.scanner.view.Reason
 import no.nordicsemi.android.hrs.R
-import no.nordicsemi.android.hrs.data.HRSServiceData
 import no.nordicsemi.android.hrs.viewmodel.HRSViewModel
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
-import no.nordicsemi.android.ui.view.BackIconAppBar
-import no.nordicsemi.android.ui.view.LoggerIconAppBar
 import no.nordicsemi.android.ui.view.NavigateUpButton
+import no.nordicsemi.android.ui.view.ProfileAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,7 +60,16 @@ fun HRSScreen() {
     val navigateUp = { viewModel.onEvent(NavigateUpEvent) }
 
     Scaffold(
-        topBar = { AppBar(state, navigateUp, viewModel) }
+        topBar = {
+            ProfileAppBar(
+                deviceName = state.deviceName,
+                connectionState = state.connectionState,
+                title = R.string.hrs_title,
+                navigateUp = navigateUp,
+                disconnect = { viewModel.onEvent(DisconnectEvent) },
+                openLogger = { viewModel.onEvent(OpenLoggerEvent) }
+            )
+        }
     ) {
         Column(
             modifier = Modifier
@@ -71,7 +77,7 @@ fun HRSScreen() {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            when (state.connectionState) {
+            when (state.connectionState?.state) {
                 null,
                 GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                 GattConnectionState.STATE_DISCONNECTED,
@@ -81,16 +87,5 @@ fun HRSScreen() {
                 GattConnectionState.STATE_CONNECTED -> HRSContentView(state) { viewModel.onEvent(it) }
             }
         }
-    }
-}
-
-@Composable
-private fun AppBar(state: HRSServiceData, navigateUp: () -> Unit, viewModel: HRSViewModel) {
-    if (state.deviceName?.isNotBlank() == true) {
-        LoggerIconAppBar(state.deviceName, navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
-            viewModel.onEvent(OpenLoggerEvent)
-        }
-    } else {
-        BackIconAppBar(stringResource(id = R.string.hrs_title), navigateUp)
     }
 }

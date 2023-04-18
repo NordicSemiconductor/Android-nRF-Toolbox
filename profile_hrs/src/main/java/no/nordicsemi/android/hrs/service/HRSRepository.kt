@@ -42,6 +42,7 @@ import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.hrs.data.HRSServiceData
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.hrs.data.HRSData
 import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.OpenLoggerEvent
@@ -66,7 +67,7 @@ class HRSRepository @Inject constructor(
     private val _loggerEvent = simpleSharedFlow<OpenLoggerEvent>()
     internal val loggerEvent = _loggerEvent.asSharedFlow()
 
-    val isRunning = data.map { it.connectionState == GattConnectionState.STATE_CONNECTED }
+    val isRunning = data.map { it.connectionState?.state == GattConnectionState.STATE_CONNECTED }
 
     fun launch(device: ServerDevice) {
         serviceManager.startService(HRSService::class.java, device)
@@ -80,7 +81,7 @@ class HRSRepository @Inject constructor(
         _data.value = _data.value.copy(zoomIn = !_data.value.zoomIn)
     }
 
-    fun onConnectionStateChanged(connectionState: GattConnectionState?) {
+    fun onConnectionStateChanged(connectionState: GattConnectionStateWithStatus?) {
         _data.value = _data.value.copy(connectionState = connectionState)
     }
 

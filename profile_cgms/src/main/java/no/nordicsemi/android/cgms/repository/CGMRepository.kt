@@ -32,6 +32,7 @@
 package no.nordicsemi.android.cgms.repository
 
 import android.content.Context
+import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -87,6 +88,7 @@ class CGMRepository @Inject constructor(
     }
 
     fun onConnectionStateChanged(connectionState: GattConnectionStateWithStatus?) {
+        Log.i("AAATESTAAA", "Connection state: $connectionState")
         _data.value = _data.value.copy(connectionState = connectionState)
     }
 

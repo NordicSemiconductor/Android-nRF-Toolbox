@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.core.simpleSharedFlow
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.OpenLoggerEvent
 import no.nordicsemi.android.service.ServiceManager
@@ -72,7 +73,7 @@ class UARTRepository @Inject internal constructor(
     private val _loggerEvent = simpleSharedFlow<OpenLoggerEvent>()
     internal val loggerEvent = _loggerEvent.asSharedFlow()
 
-    val isRunning = data.map { it.connectionState == GattConnectionState.STATE_CONNECTED }
+    val isRunning = data.map { it.connectionState?.state == GattConnectionState.STATE_CONNECTED }
 
     val lastConfigurationName = configurationDataSource.lastConfigurationName
 
@@ -80,7 +81,7 @@ class UARTRepository @Inject internal constructor(
         serviceManager.startService(UARTService::class.java, device)
     }
 
-    fun onConnectionStateChanged(connectionState: GattConnectionState) {
+    fun onConnectionStateChanged(connectionState: GattConnectionStateWithStatus?) {
         _data.value = _data.value.copy(connectionState = connectionState)
     }
 

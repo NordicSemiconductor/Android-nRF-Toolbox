@@ -46,4 +46,5 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
+    implementation("no.nordicsemi.android.kotlin.ble:client:0.0.1")
 }

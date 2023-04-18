@@ -34,13 +34,14 @@ package no.nordicsemi.android.rscs.data
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.rscs.data.RSCSData
 import no.nordicsemi.android.rscs.R
 
 internal data class RSCSServiceData(
     val data: RSCSData = RSCSData(),
     val batteryLevel: Int? = null,
-    val connectionState: GattConnectionState? = null,
+    val connectionState: GattConnectionStateWithStatus? = null,
     val deviceName: String? = null
 ) {
     @Composable

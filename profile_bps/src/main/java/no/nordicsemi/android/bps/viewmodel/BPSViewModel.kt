@@ -60,6 +60,7 @@ import no.nordicsemi.android.kotlin.ble.client.main.connect
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.bps.BloodPressureMeasurementParser
 import no.nordicsemi.android.kotlin.ble.profile.bps.IntermediateCuffPressureParser
@@ -122,11 +123,11 @@ internal class BPSViewModel @Inject constructor(
 
         client = device.connect(context, logger = logger)
 
-        client.connectionState
+        client.connectionStateWithStatus
             .filterNotNull()
             .onEach { onDataUpdate(it) }
-            .onEach { stopIfDisconnected(it) }
-            .onEach { logAnalytics(it) }
+            .onEach { stopIfDisconnected(it.state) }
+            .onEach { logAnalytics(it.state) }
             .launchIn(viewModelScope)
 
         client.services
@@ -158,7 +159,7 @@ internal class BPSViewModel @Inject constructor(
             ?.launchIn(viewModelScope)
     }
 
-    private fun onDataUpdate(connectionState: GattConnectionState) {
+    private fun onDataUpdate(connectionState: GattConnectionStateWithStatus) {
         val newResult = _state.value.result.copy(connectionState = connectionState)
         _state.value = _state.value.copy(result = newResult)
     }

@@ -32,13 +32,14 @@
 package no.nordicsemi.android.hrs.data
 
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.hrs.data.HRSData
 
 internal data class HRSServiceData(
     val data: List<HRSData> = emptyList(),
     val bodySensorLocation: Int? = null,
     val batteryLevel: Int? = null,
-    val connectionState: GattConnectionState? = null,
+    val connectionState: GattConnectionStateWithStatus? = null,
     val zoomIn: Boolean = false,
     val deviceName: String? = null
 ) {

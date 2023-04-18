@@ -48,12 +48,12 @@ import no.nordicsemi.android.cgms.data.CGMServiceData
 import no.nordicsemi.android.cgms.viewmodel.CGMViewModel
 import no.nordicsemi.android.common.ui.scanner.view.DeviceConnectingView
 import no.nordicsemi.android.common.ui.scanner.view.DeviceDisconnectedView
-import no.nordicsemi.android.common.ui.scanner.view.Reason
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.ui.view.BackIconAppBar
 import no.nordicsemi.android.ui.view.LoggerBackIconAppBar
 import no.nordicsemi.android.ui.view.LoggerIconAppBar
 import no.nordicsemi.android.ui.view.NavigateUpButton
+import no.nordicsemi.android.ui.view.ProfileAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,7 +64,16 @@ fun CGMScreen() {
     val navigateUp = { viewModel.onEvent(NavigateUp) }
 
     Scaffold(
-        topBar = { AppBar(state = state, navigateUp = navigateUp, viewModel = viewModel) }
+        topBar = {
+            ProfileAppBar(
+                deviceName = state.deviceName,
+                connectionState = state.connectionState,
+                title = R.string.cgms_title,
+                navigateUp = navigateUp,
+                disconnect = { viewModel.onEvent(DisconnectEvent) },
+                openLogger = { viewModel.onEvent(OpenLoggerEvent) }
+            )
+        }
     ) {
         Column(
             modifier = Modifier
@@ -75,27 +84,14 @@ fun CGMScreen() {
             when (state.connectionState?.state) {
                 null,
                 GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
+
                 GattConnectionState.STATE_DISCONNECTED,
                 GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(state.connectionState.status) {
                     NavigateUpButton(navigateUp)
                 }
+
                 GattConnectionState.STATE_CONNECTED -> CGMContentView(state) { viewModel.onEvent(it) }
             }
         }
-    }
-}
-
-@Composable
-private fun AppBar(state: CGMServiceData, navigateUp: () -> Unit, viewModel: CGMViewModel) {
-    if (state.deviceName?.isNotBlank() == true) {
-        if (state.connectionState?.state == GattConnectionState.STATE_DISCONNECTING || state.connectionState?.state == GattConnectionState.STATE_DISCONNECTED) {
-            LoggerBackIconAppBar(state.deviceName) { viewModel.onEvent(OpenLoggerEvent) }
-        } else {
-            LoggerIconAppBar(state.deviceName, navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
-                viewModel.onEvent(OpenLoggerEvent)
-            }
-        }
-    } else {
-        BackIconAppBar(stringResource(id = R.string.cgms_title), navigateUp)
     }
 }

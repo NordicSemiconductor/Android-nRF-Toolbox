@@ -121,9 +121,9 @@ internal class PRXViewModel @Inject constructor(
     }
 
     private fun disconnect() {
-        repository.release()
         alarmHandler.pauseAlarm()
         navigationManager.navigateUp()
+        repository.release()
     }
 
     override fun onCleared() {

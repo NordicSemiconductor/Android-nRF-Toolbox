@@ -43,6 +43,7 @@ import no.nordicsemi.android.hts.data.HTSServiceData
 import no.nordicsemi.android.hts.view.TemperatureUnit
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.hts.data.HTSData
 import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.OpenLoggerEvent
@@ -67,7 +68,7 @@ class HTSRepository @Inject constructor(
     private val _loggerEvent = simpleSharedFlow<OpenLoggerEvent>()
     internal val loggerEvent = _loggerEvent.asSharedFlow()
 
-    val isRunning = data.map { it.connectionState == GattConnectionState.STATE_CONNECTED }
+    val isRunning = data.map { it.connectionState?.state == GattConnectionState.STATE_CONNECTED }
 
     fun launch(device: ServerDevice) {
         serviceManager.startService(HTSService::class.java, device)
@@ -81,7 +82,7 @@ class HTSRepository @Inject constructor(
         _data.value = _data.value.copy(temperatureUnit = temperatureUnit)
     }
 
-    fun onConnectionStateChanged(connectionState: GattConnectionState?) {
+    fun onConnectionStateChanged(connectionState: GattConnectionStateWithStatus?) {
         _data.value = _data.value.copy(connectionState = connectionState)
     }
 

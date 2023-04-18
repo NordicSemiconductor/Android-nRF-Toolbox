@@ -33,6 +33,7 @@ package no.nordicsemi.android.gls.main.view
 
 import no.nordicsemi.android.gls.data.GLSServiceData
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSMeasurementContext
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSRecord
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.RequestStatus
@@ -42,7 +43,7 @@ internal data class GLSViewState(
     val deviceName: String? = null
 ) {
 
-    fun copyWithNewConnectionState(connectionState: GattConnectionState): GLSViewState {
+    fun copyWithNewConnectionState(connectionState: GattConnectionStateWithStatus): GLSViewState {
         return copy(glsServiceData = glsServiceData.copy(connectionState = connectionState))
     }
 

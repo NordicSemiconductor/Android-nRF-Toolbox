@@ -46,6 +46,7 @@ import no.nordicsemi.android.kotlin.ble.client.main.connect
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.hts.HTSDataParser
 import no.nordicsemi.android.service.DEVICE_DATA
@@ -95,7 +96,7 @@ internal class HTSService : NotificationService() {
             .onEach { logger.launch() }
             .launchIn(lifecycleScope)
 
-        client.connectionState
+        client.connectionStateWithStatus
             .onEach { repository.onConnectionStateChanged(it) }
             .filterNotNull()
             .onEach { stopIfDisconnected(it) }
@@ -126,8 +127,8 @@ internal class HTSService : NotificationService() {
         repository.onInitComplete(device)
     }
 
-    private fun stopIfDisconnected(connectionState: GattConnectionState) {
-        if (connectionState == GattConnectionState.STATE_DISCONNECTED) {
+    private fun stopIfDisconnected(connectionState: GattConnectionStateWithStatus) {
+        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED) {
             stopSelf()
         }
     }

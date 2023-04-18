@@ -31,6 +31,7 @@
 
 package no.nordicsemi.android.ui.view
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -43,6 +44,8 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.ui.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -167,4 +170,25 @@ fun LoggerIconAppBar(text: String, onClick: () -> Unit, onDisconnectClick: () ->
             }
         }
     )
+}
+
+@Composable
+fun ProfileAppBar(
+    deviceName: String?,
+    connectionState: GattConnectionStateWithStatus?,
+    @StringRes
+    title: Int,
+    navigateUp: () -> Unit,
+    disconnect: () -> Unit,
+    openLogger: () -> Unit
+) {
+    if (deviceName?.isNotBlank() == true) {
+        if (connectionState?.state == GattConnectionState.STATE_DISCONNECTING || connectionState?.state == GattConnectionState.STATE_DISCONNECTED) {
+            LoggerBackIconAppBar(deviceName, openLogger)
+        } else {
+            LoggerIconAppBar(deviceName, navigateUp, disconnect, openLogger)
+        }
+    } else {
+        BackIconAppBar(stringResource(id = title), navigateUp)
+    }
 }

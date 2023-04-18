@@ -40,7 +40,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.common.ui.scanner.view.DeviceConnectingView
@@ -49,9 +48,8 @@ import no.nordicsemi.android.common.ui.scanner.view.Reason
 import no.nordicsemi.android.gls.R
 import no.nordicsemi.android.gls.main.viewmodel.GLSViewModel
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
-import no.nordicsemi.android.ui.view.BackIconAppBar
-import no.nordicsemi.android.ui.view.LoggerIconAppBar
 import no.nordicsemi.android.ui.view.NavigateUpButton
+import no.nordicsemi.android.ui.view.ProfileAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,7 +60,16 @@ fun GLSScreen() {
     val navigateUp = { viewModel.onEvent(DisconnectEvent) }
 
     Scaffold(
-        topBar = { AppBar(state, navigateUp, viewModel) }
+        topBar = {
+            ProfileAppBar(
+                deviceName = state.deviceName,
+                connectionState = state.glsServiceData.connectionState,
+                title = R.string.gls_title,
+                navigateUp = navigateUp,
+                disconnect = { viewModel.onEvent(DisconnectEvent) },
+                openLogger = { viewModel.onEvent(OpenLoggerEvent) }
+            )
+        }
     ) {
         Column(
             modifier = Modifier
@@ -70,7 +77,7 @@ fun GLSScreen() {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            when (state.glsServiceData.connectionState) {
+            when (state.glsServiceData.connectionState?.state) {
                 null,
                 GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                 GattConnectionState.STATE_DISCONNECTED,
@@ -79,19 +86,6 @@ fun GLSScreen() {
                 }
                 GattConnectionState.STATE_CONNECTED -> GLSContentView(state.glsServiceData) { viewModel.onEvent(it) }
             }
-        }
-    }
-}
-
-@Composable
-private fun AppBar(state: GLSViewState, navigateUp: () -> Unit, viewModel: GLSViewModel) {
-    if (state.deviceName == null) {
-        BackIconAppBar(stringResource(id = R.string.gls_title), navigateUp)
-    } else {
-        LoggerIconAppBar(state.deviceName, {
-            viewModel.onEvent(DisconnectEvent)
-        }, { viewModel.onEvent(DisconnectEvent) }) {
-            viewModel.onEvent(OpenLoggerEvent)
         }
     }
 }

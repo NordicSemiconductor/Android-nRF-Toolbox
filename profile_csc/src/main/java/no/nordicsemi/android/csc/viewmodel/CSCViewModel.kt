@@ -75,7 +75,7 @@ internal class CSCViewModel @Inject constructor(
         }
 
         repository.data.onEach {
-            if (it.connectionState == GattConnectionState.STATE_CONNECTED) {
+            if (it.connectionState?.state == GattConnectionState.STATE_CONNECTED) {
                 analytics.logEvent(ProfileConnectedEvent(Profile.CSC))
             }
         }.launchIn(viewModelScope)

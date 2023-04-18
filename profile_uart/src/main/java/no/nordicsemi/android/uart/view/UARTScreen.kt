@@ -60,6 +60,7 @@ import no.nordicsemi.android.uart.viewmodel.UARTViewModel
 import no.nordicsemi.android.ui.view.BackIconAppBar
 import no.nordicsemi.android.ui.view.LoggerIconAppBar
 import no.nordicsemi.android.ui.view.NavigateUpButton
+import no.nordicsemi.android.ui.view.ProfileAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,12 +71,21 @@ fun UARTScreen() {
     val navigateUp = { viewModel.onEvent(NavigateUp) }
 
     Scaffold(
-        topBar = { AppBar(state, navigateUp, viewModel) }
+        topBar = {
+            ProfileAppBar(
+                deviceName = state.uartManagerState.deviceName,
+                connectionState = state.uartManagerState.connectionState,
+                title = R.string.uart_title,
+                navigateUp = navigateUp,
+                disconnect = { viewModel.onEvent(DisconnectEvent) },
+                openLogger = { viewModel.onEvent(OpenLogger) }
+            )
+        }
     ) {
         Column(
             modifier = Modifier.padding(it)
         ) {
-            when (state.uartManagerState.connectionState) {
+            when (state.uartManagerState.connectionState?.state) {
                 null,
                 GattConnectionState.STATE_CONNECTING -> PaddingBox { DeviceConnectingView { NavigateUpButton(navigateUp) } }
                 GattConnectionState.STATE_DISCONNECTED,
@@ -95,18 +105,6 @@ private fun PaddingBox(content: @Composable () -> Unit) {
     }
 }
 
-@Composable
-private fun AppBar(state: UARTViewState, navigateUp: () -> Unit, viewModel: UARTViewModel) {
-    if (state.uartManagerState.deviceName?.isNotBlank() == true) {
-        LoggerIconAppBar(state.uartManagerState.deviceName, navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
-            viewModel.onEvent(OpenLogger)
-        }
-    } else {
-        BackIconAppBar(stringResource(id = R.string.uart_title), navigateUp)
-    }
-}
-
-@OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun SuccessScreen() {
     val input = stringResource(id = R.string.uart_input)
@@ -140,11 +138,4 @@ private fun MacroView() {
     val viewModel: UARTViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
     MacroSection(state) { viewModel.onEvent(it) }
-}
-
-@Composable
-fun Scroll(content: @Composable () -> Unit) {
-    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-        content()
-    }
 }

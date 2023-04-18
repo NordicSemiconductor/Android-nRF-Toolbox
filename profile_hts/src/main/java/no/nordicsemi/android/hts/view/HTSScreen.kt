@@ -53,6 +53,7 @@ import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.ui.view.BackIconAppBar
 import no.nordicsemi.android.ui.view.LoggerIconAppBar
 import no.nordicsemi.android.ui.view.NavigateUpButton
+import no.nordicsemi.android.ui.view.ProfileAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,7 +64,16 @@ fun HTSScreen() {
     val navigateUp = { viewModel.onEvent(NavigateUp) }
 
     Scaffold(
-        topBar = { AppBar(state, navigateUp, viewModel) }
+        topBar = {
+            ProfileAppBar(
+                deviceName = state.deviceName,
+                connectionState = state.connectionState,
+                title = R.string.hts_title,
+                navigateUp = navigateUp,
+                disconnect = { viewModel.onEvent(DisconnectEvent) },
+                openLogger = { viewModel.onEvent(OpenLoggerEvent) }
+            )
+        }
     ) {
         Column(
             modifier = Modifier
@@ -71,7 +81,7 @@ fun HTSScreen() {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            when (state.connectionState) {
+            when (state.connectionState?.state) {
                 null,
                 GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                 GattConnectionState.STATE_DISCONNECTED,
@@ -81,16 +91,5 @@ fun HTSScreen() {
                 GattConnectionState.STATE_CONNECTED -> HTSContentView(state) { viewModel.onEvent(it) }
             }
         }
-    }
-}
-
-@Composable
-private fun AppBar(state: HTSServiceData, navigateUp: () -> Unit, viewModel: HTSViewModel) {
-    if (state.deviceName?.isNotBlank() == true) {
-        LoggerIconAppBar(state.deviceName, navigateUp, { viewModel.onEvent(DisconnectEvent) }) {
-            viewModel.onEvent(OpenLoggerEvent)
-        }
-    } else {
-        BackIconAppBar(stringResource(id = R.string.hts_title), navigateUp)
     }
 }

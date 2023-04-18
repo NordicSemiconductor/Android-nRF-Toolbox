@@ -41,6 +41,7 @@ import no.nordicsemi.android.common.core.simpleSharedFlow
 import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.rscs.data.RSCSData
 import no.nordicsemi.android.rscs.data.RSCSServiceData
 import no.nordicsemi.android.service.DisconnectAndStopEvent
@@ -66,7 +67,7 @@ class RSCSRepository @Inject constructor(
     private val _loggerEvent = simpleSharedFlow<OpenLoggerEvent>()
     internal val loggerEvent = _loggerEvent.asSharedFlow()
 
-    val isRunning = data.map { it.connectionState == GattConnectionState.STATE_CONNECTED }
+    val isRunning = data.map { it.connectionState?.state == GattConnectionState.STATE_CONNECTED }
 
     fun launch(device: ServerDevice) {
         serviceManager.startService(RSCSService::class.java, device)
@@ -76,7 +77,7 @@ class RSCSRepository @Inject constructor(
         _data.value = _data.value.copy(deviceName = device.name)
     }
 
-    fun onConnectionStateChanged(connectionState: GattConnectionState?) {
+    fun onConnectionStateChanged(connectionState: GattConnectionStateWithStatus?) {
         _data.value = _data.value.copy(connectionState = connectionState)
     }
 

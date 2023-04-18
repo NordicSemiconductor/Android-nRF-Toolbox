@@ -100,7 +100,7 @@ internal class UARTViewModel @Inject constructor(
         repository.data.onEach {
             _state.value = _state.value.copy(uartManagerState = it)
 
-            if (it.connectionState == GattConnectionState.STATE_CONNECTED) {
+            if (it.connectionState?.state == GattConnectionState.STATE_CONNECTED) {
                 analytics.logEvent(ProfileConnectedEvent(Profile.UART))
             }
         }.launchIn(viewModelScope)

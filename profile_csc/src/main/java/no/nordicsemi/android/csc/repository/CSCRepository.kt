@@ -43,6 +43,7 @@ import no.nordicsemi.android.csc.data.CSCServiceData
 import no.nordicsemi.android.csc.data.SpeedUnit
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.csc.data.CSCData
 import no.nordicsemi.android.kotlin.ble.profile.csc.data.WheelSize
 import no.nordicsemi.android.kotlin.ble.profile.csc.data.WheelSizes
@@ -70,7 +71,7 @@ class CSCRepository @Inject constructor(
     private val _loggerEvent = simpleSharedFlow<OpenLoggerEvent>()
     internal val loggerEvent = _loggerEvent.asSharedFlow()
 
-    val isRunning = data.map { it.connectionState == GattConnectionState.STATE_CONNECTED }
+    val isRunning = data.map { it.connectionState?.state == GattConnectionState.STATE_CONNECTED }
 
     fun launch(device: ServerDevice) {
         serviceManager.startService(CSCService::class.java, device)
@@ -88,7 +89,7 @@ class CSCRepository @Inject constructor(
         _wheelSize.value = wheelSize
     }
 
-    fun onConnectionStateChanged(connectionState: GattConnectionState?) {
+    fun onConnectionStateChanged(connectionState: GattConnectionStateWithStatus?) {
         _data.value = _data.value.copy(connectionState = connectionState)
     }
 

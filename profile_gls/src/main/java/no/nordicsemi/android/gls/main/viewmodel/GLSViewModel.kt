@@ -66,6 +66,7 @@ import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattCharacteristi
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.GlucoseMeasurementContextParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.GlucoseMeasurementParser
@@ -161,7 +162,7 @@ internal class GLSViewModel @Inject constructor(
 
         client = device.connect(context, logger = logger)
 
-        client.connectionState
+        client.connectionStateWithStatus
             .filterNotNull()
             .onEach { _state.value = _state.value.copyWithNewConnectionState(it) }
             .onEach { logAnalytics(it) }
@@ -173,8 +174,8 @@ internal class GLSViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    private fun logAnalytics(connectionState: GattConnectionState) {
-        if (connectionState == GattConnectionState.STATE_CONNECTED) {
+    private fun logAnalytics(connectionState: GattConnectionStateWithStatus) {
+        if (connectionState.state == GattConnectionState.STATE_CONNECTED) {
             analytics.logEvent(ProfileConnectedEvent(Profile.GLS))
         }
     }
