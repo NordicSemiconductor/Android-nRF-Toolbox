@@ -100,10 +100,6 @@ internal class PRXService : NotificationService() {
             .onEach { disconnect() }
             .launchIn(lifecycleScope)
 
-        repository.remoteAlarmLevel
-            .onEach { writeAlertLevel(it) }
-            .launchIn(lifecycleScope)
-
         return START_REDELIVER_INTENT
     }
 
@@ -179,6 +175,10 @@ internal class PRXService : NotificationService() {
         client.services
             .filterNotNull()
             .onEach { configureGatt(it, device) }
+            .launchIn(lifecycleScope)
+
+        repository.remoteAlarmLevel
+            .onEach { writeAlertLevel(it) }
             .launchIn(lifecycleScope)
     }
 
