@@ -130,6 +130,11 @@ internal class BPSViewModel @Inject constructor(
             .onEach { logAnalytics(it.state) }
             .launchIn(viewModelScope)
 
+        if (!client.isConnected) {
+            _state.value = _state.value.copy(deviceName = device.name)
+            return@launch
+        }
+
         client.discoverServices()
             .filterNotNull()
             .onEach { configureGatt(it) }

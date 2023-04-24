@@ -172,6 +172,11 @@ internal class PRXService : NotificationService() {
             .onEach { stopIfDisconnected(it.state, it.status) }
             .launchIn(lifecycleScope)
 
+        if (!client.isConnected) {
+            repository.onInitComplete(device)
+            return@launch
+        }
+
         client.discoverServices()
             .filterNotNull()
             .onEach { configureGatt(it, device) }

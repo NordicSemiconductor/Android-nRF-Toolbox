@@ -158,7 +158,7 @@ internal class GLSViewModel @Inject constructor(
     }
 
     private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
-        logger = NordicBlekLogger(context, stringConst.APP_NAME, "BPS", device.address)
+        logger = NordicBlekLogger(context, stringConst.APP_NAME, "GLS", device.address)
 
         client = device.connect(context, logger = logger)
 
@@ -167,6 +167,11 @@ internal class GLSViewModel @Inject constructor(
             .onEach { _state.value = _state.value.copyWithNewConnectionState(it) }
             .onEach { logAnalytics(it) }
             .launchIn(viewModelScope)
+
+        if (!client.isConnected) {
+            _state.value = _state.value.copy(deviceName = device.name)
+            return@launch
+        }
 
         client.discoverServices()
             .filterNotNull()

@@ -77,7 +77,9 @@ fun GLSScreen() {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            when (state.glsServiceData.connectionState?.state) {
+            if (state.deviceName == null) {
+                DeviceConnectingView { NavigateUpButton(navigateUp) }
+            } else when (state.glsServiceData.connectionState?.state) {
                 null,
                 GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                 GattConnectionState.STATE_DISCONNECTED,

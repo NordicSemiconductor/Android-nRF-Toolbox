@@ -75,7 +75,6 @@ class CGMRepository @Inject constructor(
     val highestSequenceNumber = data.value.records.maxOfOrNull { it.sequenceNumber } ?: -1
 
     fun launch(device: ServerDevice) {
-        _data.value = _data.value.copy(deviceName = device.name)
         serviceManager.startService(CGMService::class.java, device)
     }
 
@@ -88,7 +87,6 @@ class CGMRepository @Inject constructor(
     }
 
     fun onConnectionStateChanged(connectionState: GattConnectionStateWithStatus?) {
-        Log.i("AAATESTAAA", "Connection state: $connectionState")
         _data.value = _data.value.copy(connectionState = connectionState)
     }
 
@@ -102,6 +100,10 @@ class CGMRepository @Inject constructor(
 
     fun openLogger() {
         _loggerEvent.tryEmit(OpenLoggerEvent())
+    }
+
+    fun onInitComplete(device: ServerDevice) {
+        _data.value = _data.value.copy(deviceName = device.name)
     }
 
     fun clear() {

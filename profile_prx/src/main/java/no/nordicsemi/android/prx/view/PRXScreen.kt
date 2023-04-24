@@ -77,8 +77,9 @@ fun PRXScreen() {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Log.i("AAATESTAAA", "State: ${state.connectionState?.state}")
-            when (state.connectionState?.state) {
+            if (state.deviceName == null) {
+                DeviceConnectingView { NavigateUpButton(navigateUp) }
+            } else when (state.connectionState?.state) {
                 null,
                 GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                 GattConnectionState.STATE_DISCONNECTED,

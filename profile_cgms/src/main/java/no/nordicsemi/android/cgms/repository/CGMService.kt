@@ -146,13 +146,18 @@ internal class CGMService : NotificationService() {
             .onEach { stopIfDisconnected(it) }
             .launchIn(lifecycleScope)
 
+        if (!client.isConnected) {
+            repository.onInitComplete(device)
+            return@launch
+        }
+
         client.discoverServices()
             .filterNotNull()
-            .onEach { configureGatt(it) }
+            .onEach { configureGatt(it, device) }
             .launchIn(lifecycleScope)
     }
 
-    private suspend fun configureGatt(services: BleGattServices) {
+    private suspend fun configureGatt(services: BleGattServices, device: ServerDevice) {
         val cgmService = services.findService(CGMS_SERVICE_UUID)!!
         val statusCharacteristic = cgmService.findCharacteristic(CGM_STATUS_UUID)!!
         val featureCharacteristic = cgmService.findCharacteristic(CGM_FEATURE_UUID)!!
@@ -223,6 +228,8 @@ internal class CGMService : NotificationService() {
         if (sessionStartTime == 0L) {
             opsControlPointCharacteristic.write(CGMSpecificOpsControlPointData.startSession(secured).value!!)
         }
+
+        repository.onInitComplete(device)
     }
 
     private fun onAccessControlPointDataReceived(data: RecordAccessControlPointData) = lifecycleScope.launch {

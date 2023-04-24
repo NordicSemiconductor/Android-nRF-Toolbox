@@ -97,8 +97,6 @@ internal class UARTService : NotificationService() {
 
         client = device.connect(this@UARTService, logger = logger)
 
-        Log.d("AAATESTAAA","connect finish")
-
         client.requestMtu(Mtu.max)
 
         repository.loggerEvent
@@ -110,6 +108,11 @@ internal class UARTService : NotificationService() {
             .filterNotNull()
             .onEach { stopIfDisconnected(it) }
             .launchIn(lifecycleScope)
+
+        if (!client.isConnected) {
+            repository.onInitComplete(device)
+            return@launch
+        }
 
         client.discoverServices()
             .filterNotNull()
@@ -139,8 +142,6 @@ internal class UARTService : NotificationService() {
             .onEach { repository.onNewMessageSent(it) }
             .onEach { logger.log(10, "Sent: $it") }
             .launchIn(lifecycleScope)
-
-
 
         repository.onInitComplete(device)
     }

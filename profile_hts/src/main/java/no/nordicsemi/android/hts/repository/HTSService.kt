@@ -102,6 +102,11 @@ internal class HTSService : NotificationService() {
             .onEach { stopIfDisconnected(it) }
             .launchIn(lifecycleScope)
 
+        if (!client.isConnected) {
+            repository.onInitComplete(device)
+            return@launch
+        }
+
         client.discoverServices()
             .filterNotNull()
             .onEach { configureGatt(it, device) }
