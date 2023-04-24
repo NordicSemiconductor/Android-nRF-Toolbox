@@ -130,7 +130,7 @@ internal class BPSViewModel @Inject constructor(
             .onEach { logAnalytics(it.state) }
             .launchIn(viewModelScope)
 
-        client.services
+        client.discoverServices()
             .filterNotNull()
             .onEach { configureGatt(it) }
             .launchIn(viewModelScope)

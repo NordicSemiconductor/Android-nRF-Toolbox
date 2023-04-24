@@ -172,7 +172,7 @@ internal class PRXService : NotificationService() {
             .onEach { stopIfDisconnected(it.state, it.status) }
             .launchIn(lifecycleScope)
 
-        client.services
+        client.discoverServices()
             .filterNotNull()
             .onEach { configureGatt(it, device) }
             .launchIn(lifecycleScope)

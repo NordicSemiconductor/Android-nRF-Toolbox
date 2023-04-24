@@ -168,7 +168,7 @@ internal class GLSViewModel @Inject constructor(
             .onEach { logAnalytics(it) }
             .launchIn(viewModelScope)
 
-        client.services
+        client.discoverServices()
             .filterNotNull()
             .onEach { configureGatt(it, device) }
             .launchIn(viewModelScope)

@@ -146,7 +146,7 @@ internal class CGMService : NotificationService() {
             .onEach { stopIfDisconnected(it) }
             .launchIn(lifecycleScope)
 
-        client.services
+        client.discoverServices()
             .filterNotNull()
             .onEach { configureGatt(it) }
             .launchIn(lifecycleScope)

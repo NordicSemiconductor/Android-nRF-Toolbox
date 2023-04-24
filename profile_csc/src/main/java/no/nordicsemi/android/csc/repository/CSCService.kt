@@ -102,7 +102,7 @@ internal class CSCService : NotificationService() {
             .onEach { stopIfDisconnected(it) }
             .launchIn(lifecycleScope)
 
-        client.services
+        client.discoverServices()
             .filterNotNull()
             .onEach { configureGatt(it, device) }
             .launchIn(lifecycleScope)
