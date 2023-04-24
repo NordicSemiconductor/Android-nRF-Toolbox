@@ -166,6 +166,7 @@ internal class GLSViewModel @Inject constructor(
             .filterNotNull()
             .onEach { _state.value = _state.value.copyWithNewConnectionState(it) }
             .onEach { logAnalytics(it) }
+            .onEach { unlockUiIfDisconnected(it, device) }
             .launchIn(viewModelScope)
 
         if (!client.isConnected) {
@@ -182,6 +183,12 @@ internal class GLSViewModel @Inject constructor(
     private fun logAnalytics(connectionState: GattConnectionStateWithStatus) {
         if (connectionState.state == GattConnectionState.STATE_CONNECTED) {
             analytics.logEvent(ProfileConnectedEvent(Profile.GLS))
+        }
+    }
+
+    private fun unlockUiIfDisconnected(connectionState: GattConnectionStateWithStatus, device: ServerDevice) {
+        if (connectionState.state == GattConnectionState.STATE_CONNECTED) {
+            _state.value = _state.value.copy(deviceName = device.name)
         }
     }
 
