@@ -100,6 +100,7 @@ internal class RSCSService : NotificationService() {
             .onEach { repository.onConnectionStateChanged(it) }
             .filterNotNull()
             .onEach { stopIfDisconnected(it) }
+            .onEach { unlockUiIfDisconnected(it, device) }
             .launchIn(lifecycleScope)
 
         if (!client.isConnected) {
@@ -135,6 +136,12 @@ internal class RSCSService : NotificationService() {
     private fun stopIfDisconnected(connectionState: GattConnectionStateWithStatus) {
         if (connectionState.state == GattConnectionState.STATE_DISCONNECTED) {
             stopSelf()
+        }
+    }
+
+    private fun unlockUiIfDisconnected(connectionState: GattConnectionStateWithStatus, device: ServerDevice) {
+        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED) {
+            repository.onInitComplete(device)
         }
     }
 
