@@ -128,6 +128,7 @@ internal class BPSViewModel @Inject constructor(
             .onEach { onDataUpdate(it) }
             .onEach { stopIfDisconnected(it.state) }
             .onEach { logAnalytics(it.state) }
+            .onEach { unlockUiIfDisconnected(it, device) }
             .launchIn(viewModelScope)
 
         if (!client.isConnected) {
@@ -139,6 +140,12 @@ internal class BPSViewModel @Inject constructor(
             .filterNotNull()
             .onEach { configureGatt(it) }
             .launchIn(viewModelScope)
+    }
+
+    private fun unlockUiIfDisconnected(connectionState: GattConnectionStateWithStatus, device: ServerDevice) {
+        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED) {
+            _state.value = _state.value.copy(deviceName = device.name)
+        }
     }
 
     private suspend fun configureGatt(services: BleGattServices) {
