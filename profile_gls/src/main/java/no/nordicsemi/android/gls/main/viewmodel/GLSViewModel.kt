@@ -39,6 +39,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -174,6 +175,8 @@ internal class GLSViewModel @Inject constructor(
             return@launch
         }
 
+        client.waitForBonding()
+
         client.discoverServices()
             .filterNotNull()
             .onEach { configureGatt(it, device) }
@@ -187,7 +190,7 @@ internal class GLSViewModel @Inject constructor(
     }
 
     private fun unlockUiIfDisconnected(connectionState: GattConnectionStateWithStatus, device: ServerDevice) {
-        if (connectionState.state == GattConnectionState.STATE_CONNECTED) {
+        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED) {
             _state.value = _state.value.copy(deviceName = device.name)
         }
     }
