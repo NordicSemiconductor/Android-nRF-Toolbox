@@ -125,7 +125,6 @@ class UARTRepository @Inject internal constructor(
     }
 
     fun release() {
-        _data.value = UARTServiceData()
         _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 }

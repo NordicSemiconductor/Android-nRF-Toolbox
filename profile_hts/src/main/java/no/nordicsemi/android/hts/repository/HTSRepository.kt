@@ -100,7 +100,6 @@ class HTSRepository @Inject constructor(
 
     fun release() {
         logger = null
-        _data.value = HTSServiceData()
         _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 }

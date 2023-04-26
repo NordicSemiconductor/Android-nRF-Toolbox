@@ -111,7 +111,6 @@ class CGMRepository @Inject constructor(
     }
 
     fun release() {
-        _data.value = CGMServiceData()
         _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 }
