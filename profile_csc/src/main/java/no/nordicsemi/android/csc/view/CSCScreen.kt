@@ -31,6 +31,7 @@
 
 package no.nordicsemi.android.csc.view
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -56,6 +57,8 @@ import no.nordicsemi.android.ui.view.ProfileAppBar
 fun CSCScreen() {
     val viewModel: CSCViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
+
+    Log.d("AAATESTAAA", "State: ${state}")
 
     val navigateUp = { viewModel.onEvent(NavigateUp) }
 

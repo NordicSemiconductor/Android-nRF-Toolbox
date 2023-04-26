@@ -75,6 +75,8 @@ internal class HRSService : NotificationService() {
 
     private lateinit var client: BleGattClient
 
+    private var hasBeenInitialized: Boolean = false
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
@@ -106,6 +108,7 @@ internal class HRSService : NotificationService() {
             .launchIn(lifecycleScope)
 
         if (!client.isConnected) {
+            hasBeenInitialized = true
             repository.onInitComplete(device)
             return@launch
         }
@@ -136,6 +139,7 @@ internal class HRSService : NotificationService() {
             .onEach { repository.onHRSDataChanged(it) }
             .launchIn(lifecycleScope)
 
+        hasBeenInitialized = true
         repository.onInitComplete(device)
     }
 
@@ -146,7 +150,7 @@ internal class HRSService : NotificationService() {
     }
 
     private fun unlockUiIfDisconnected(connectionState: GattConnectionStateWithStatus, device: ServerDevice) {
-        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED) {
+        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED && !hasBeenInitialized) {
             repository.onInitComplete(device)
         }
     }

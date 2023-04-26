@@ -73,6 +73,8 @@ internal class RSCSService : NotificationService() {
 
     private lateinit var client: BleGattClient
 
+    private var hasBeenInitialized: Boolean = false
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
@@ -104,6 +106,7 @@ internal class RSCSService : NotificationService() {
             .launchIn(lifecycleScope)
 
         if (!client.isConnected) {
+            hasBeenInitialized = true
             repository.onInitComplete(device)
             return@launch
         }
@@ -130,6 +133,7 @@ internal class RSCSService : NotificationService() {
             .onEach { repository.onRSCSDataChanged(it) }
             .launchIn(lifecycleScope)
 
+        hasBeenInitialized = true
         repository.onInitComplete(device)
     }
 
@@ -140,7 +144,7 @@ internal class RSCSService : NotificationService() {
     }
 
     private fun unlockUiIfDisconnected(connectionState: GattConnectionStateWithStatus, device: ServerDevice) {
-        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED) {
+        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED && !hasBeenInitialized) {
             repository.onInitComplete(device)
         }
     }

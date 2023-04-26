@@ -104,6 +104,8 @@ internal class CGMService : NotificationService() {
 
     private lateinit var recordAccessControlPointCharacteristic: BleGattCharacteristic
 
+    private var hasBeenInitialized: Boolean = false
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
@@ -148,6 +150,7 @@ internal class CGMService : NotificationService() {
             .launchIn(lifecycleScope)
 
         if (!client.isConnected) {
+            hasBeenInitialized = true
             repository.onInitComplete(device)
             return@launch
         }
@@ -230,6 +233,7 @@ internal class CGMService : NotificationService() {
             opsControlPointCharacteristic.write(CGMSpecificOpsControlPointData.startSession(secured).value!!)
         }
 
+        hasBeenInitialized = true
         repository.onInitComplete(device)
     }
 
@@ -314,7 +318,7 @@ internal class CGMService : NotificationService() {
     }
 
     private fun unlockUiIfDisconnected(connectionState: GattConnectionStateWithStatus, device: ServerDevice) {
-        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED) {
+        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED && !hasBeenInitialized) {
             repository.onInitComplete(device)
         }
     }

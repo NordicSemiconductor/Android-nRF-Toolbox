@@ -73,6 +73,8 @@ internal class CSCService : NotificationService() {
 
     private lateinit var client: BleGattClient
 
+    private var hasBeenInitialized: Boolean = false
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
@@ -104,6 +106,7 @@ internal class CSCService : NotificationService() {
             .launchIn(lifecycleScope)
 
         if (!client.isConnected) {
+            hasBeenInitialized = true
             repository.onInitComplete(device)
             return@launch
         }
@@ -131,6 +134,7 @@ internal class CSCService : NotificationService() {
             .onEach { repository.onCSCDataChanged(it) }
             .launchIn(lifecycleScope)
 
+        hasBeenInitialized = true
         repository.onInitComplete(device)
     }
 
@@ -141,7 +145,8 @@ internal class CSCService : NotificationService() {
     }
 
     private fun unlockUiIfDisconnected(connectionState: GattConnectionStateWithStatus, device: ServerDevice) {
-        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED) {
+        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED && !hasBeenInitialized) {
+            hasBeenInitialized = true
             repository.onInitComplete(device)
         }
     }

@@ -89,6 +89,8 @@ internal class PRXService : NotificationService() {
 
     private lateinit var alertLevelCharacteristic: BleGattCharacteristic
 
+    private var hasBeenInitialized: Boolean = false
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
@@ -173,6 +175,7 @@ internal class PRXService : NotificationService() {
             .launchIn(lifecycleScope)
 
         if (!client.isConnected) {
+            hasBeenInitialized = true
             repository.onInitComplete(device)
             return@launch
         }
@@ -202,6 +205,7 @@ internal class PRXService : NotificationService() {
 
         linkLossCharacteristic.write(AlertLevelInputParser.parse(AlarmLevel.HIGH))
 
+        hasBeenInitialized = true
         repository.onInitComplete(device)
     }
 

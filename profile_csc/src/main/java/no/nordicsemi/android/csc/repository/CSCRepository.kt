@@ -32,13 +32,13 @@
 package no.nordicsemi.android.csc.repository
 
 import android.content.Context
+import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.core.simpleSharedFlow
-import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.csc.data.CSCServiceData
 import no.nordicsemi.android.csc.data.SpeedUnit
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
@@ -78,7 +78,11 @@ class CSCRepository @Inject constructor(
     }
 
     fun onInitComplete(device: ServerDevice) {
-        _data.value = _data.value.copy(deviceName = device.name)
+        Log.d("AAATESTAAA", "onInitComplete: ${data.value}")
+        if (_data.value.deviceName == null) {
+            Log.d("AAATESTAAA", "AAA")
+            _data.value = _data.value.copy(deviceName = device.name)
+        }
     }
 
     internal fun setSpeedUnit(speedUnit: SpeedUnit) {
@@ -106,6 +110,7 @@ class CSCRepository @Inject constructor(
     }
 
     fun release() {
+        Log.d("AAATESTAAA", "release: ${data.value}")
         _data.value = CSCServiceData()
         _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
