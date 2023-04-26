@@ -107,6 +107,8 @@ internal class HRSService : NotificationService() {
             .onEach { unlockUiIfDisconnected(it, device) }
             .launchIn(lifecycleScope)
 
+        client.waitForBonding()
+
         if (!client.isConnected) {
             hasBeenInitialized = true
             repository.onInitComplete(device)

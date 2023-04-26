@@ -170,12 +170,12 @@ internal class GLSViewModel @Inject constructor(
             .onEach { unlockUiIfDisconnected(it, device) }
             .launchIn(viewModelScope)
 
+        client.waitForBonding()
+
         if (!client.isConnected) {
             _state.value = _state.value.copy(deviceName = device.name)
             return@launch
         }
-
-        client.waitForBonding()
 
         client.discoverServices()
             .filterNotNull()
