@@ -106,6 +106,7 @@ class CSCRepository @Inject constructor(
     }
 
     fun release() {
+        _data.value = CSCServiceData()
         _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 }
