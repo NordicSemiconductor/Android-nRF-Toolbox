@@ -286,7 +286,7 @@ internal class CGMService : NotificationService() {
     }
 
     private fun clear() {
-        repository.clear()
+        repository.clearRecords()
     }
 
     private suspend fun requestLastRecord() {

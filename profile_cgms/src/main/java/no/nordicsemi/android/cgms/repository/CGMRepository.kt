@@ -32,7 +32,6 @@
 package no.nordicsemi.android.cgms.repository
 
 import android.content.Context
-import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -106,12 +105,15 @@ class CGMRepository @Inject constructor(
         _data.value = _data.value.copy(deviceName = device.name)
     }
 
-    fun clear() {
+    fun clearRecords() {
         _data.value = _data.value.copy(records = emptyList())
     }
 
-    fun release() {
-        _data.value = CGMServiceData()
+    fun stop() {
         _stopEvent.tryEmit(DisconnectAndStopEvent())
+    }
+
+    fun clear() {
+        _data.value = CGMServiceData()
     }
 }

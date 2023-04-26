@@ -72,6 +72,8 @@ internal class PRXViewModel @Inject constructor(
     val state = repository.data
 
     init {
+        repository.clear()
+
         viewModelScope.launch {
             if (repository.isRunning.firstOrNull() == false) {
                 requestBluetoothDevice()
@@ -123,7 +125,7 @@ internal class PRXViewModel @Inject constructor(
     private fun disconnect() {
         alarmHandler.pauseAlarm()
         navigationManager.navigateUp()
-        repository.release()
+        repository.stop()
     }
 
     override fun onCleared() {

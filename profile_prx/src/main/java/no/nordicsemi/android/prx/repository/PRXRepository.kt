@@ -106,9 +106,12 @@ class PRXRepository @Inject internal constructor(
         _loggerEvent.tryEmit(OpenLoggerEvent())
     }
 
-    fun release() {
-        _data.value = PRXServiceData()
+    fun stop() {
         _remoteAlarmLevel.tryEmit(AlarmLevel.NONE)
         _stopEvent.tryEmit(DisconnectAndStopEvent())
+    }
+
+    fun clear() {
+        _data.value = PRXServiceData()
     }
 }

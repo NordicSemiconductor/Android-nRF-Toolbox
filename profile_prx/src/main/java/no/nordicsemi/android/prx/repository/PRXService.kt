@@ -213,7 +213,7 @@ internal class PRXService : NotificationService() {
     private fun stopIfDisconnected(connectionState: GattConnectionState, connectionStatus: BleGattConnectionStatus) {
         if (connectionState == GattConnectionState.STATE_DISCONNECTED && !connectionStatus.isLinkLoss) {
             server.stopServer()
-            repository.release()
+            repository.stop()
             stopSelf()
         }
     }

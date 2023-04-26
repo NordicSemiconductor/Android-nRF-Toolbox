@@ -38,7 +38,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.core.simpleSharedFlow
-import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.csc.data.CSCServiceData
 import no.nordicsemi.android.csc.data.SpeedUnit
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
@@ -105,8 +104,12 @@ class CSCRepository @Inject constructor(
         _loggerEvent.tryEmit(OpenLoggerEvent())
     }
 
-    fun release() {
-        _data.value = CSCServiceData()
+    fun stop() {
         _stopEvent.tryEmit(DisconnectAndStopEvent())
+    }
+
+    fun clear() {
+        _wheelSize.value = WheelSizes.default
+        _data.value = CSCServiceData()
     }
 }
