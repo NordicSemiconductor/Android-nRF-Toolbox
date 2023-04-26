@@ -93,12 +93,9 @@ class RSCSRepository @Inject constructor(
         _loggerEvent.tryEmit(OpenLoggerEvent())
     }
 
-    fun stop() {
+    fun release() {
         logger = null
-        _stopEvent.tryEmit(DisconnectAndStopEvent())
-    }
-
-    fun clear() {
         _data.value = RSCSServiceData()
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 }

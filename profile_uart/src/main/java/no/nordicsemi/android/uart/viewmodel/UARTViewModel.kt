@@ -91,8 +91,6 @@ internal class UARTViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     init {
-        repository.clear()
-
         viewModelScope.launch {
             if (repository.isRunning.firstOrNull() == false) {
                 requestBluetoothDevice()
@@ -235,7 +233,7 @@ internal class UARTViewModel @Inject constructor(
     }
 
     private fun disconnect() {
-        repository.stop()
+        repository.release()
         navigationManager.navigateUp()
     }
 }

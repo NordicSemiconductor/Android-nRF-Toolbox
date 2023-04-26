@@ -66,8 +66,6 @@ internal class HRSViewModel @Inject constructor(
     val state = repository.data
 
     init {
-        repository.clear()
-
         viewModelScope.launch {
             if (repository.isRunning.firstOrNull() == false) {
                 requestBluetoothDevice()
@@ -114,7 +112,7 @@ internal class HRSViewModel @Inject constructor(
     }
 
     private fun disconnect() {
-        repository.stop()
+        repository.release()
         navigationManager.navigateUp()
     }
 }

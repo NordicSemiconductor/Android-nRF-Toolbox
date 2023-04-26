@@ -101,11 +101,8 @@ class HRSRepository @Inject constructor(
         _loggerEvent.tryEmit(OpenLoggerEvent())
     }
 
-    fun stop() {
-        _stopEvent.tryEmit(DisconnectAndStopEvent())
-    }
-
-    fun clear() {
+    fun release() {
         _data.value = HRSServiceData()
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 }

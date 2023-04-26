@@ -124,11 +124,8 @@ class UARTRepository @Inject internal constructor(
         configurationDataSource.saveConfigurationName(name)
     }
 
-    fun stop() {
-        _stopEvent.tryEmit(DisconnectAndStopEvent())
-    }
-
-    fun clear() {
+    fun release() {
         _data.value = UARTServiceData()
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 }

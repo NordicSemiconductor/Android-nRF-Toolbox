@@ -67,8 +67,6 @@ internal class CGMViewModel @Inject constructor(
     val state = repository.data
 
     init {
-        repository.clear()
-
         viewModelScope.launch {
             if (repository.isRunning.firstOrNull() == false) {
                 requestBluetoothDevice()
@@ -115,6 +113,6 @@ internal class CGMViewModel @Inject constructor(
     }
 
     private fun disconnect() {
-        repository.stop()
+        repository.release()
     }
 }
