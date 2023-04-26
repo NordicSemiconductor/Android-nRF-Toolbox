@@ -75,8 +75,8 @@ fun GLSScreen() {
         Column(
             modifier = Modifier
                 .padding(it)
-                .padding(16.dp)
                 .verticalScroll(rememberScrollState())
+                .padding(16.dp)
         ) {
             if (state.deviceName == null) {
                 DeviceConnectingView { NavigateUpButton(navigateUp) }
