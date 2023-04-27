@@ -74,10 +74,6 @@ class HTSRepository @Inject constructor(
         serviceManager.startService(HTSService::class.java, device)
     }
 
-    fun onInitComplete(device: ServerDevice) {
-        _data.value = _data.value.copy(deviceName = device.name)
-    }
-
     internal fun setTemperatureUnit(temperatureUnit: TemperatureUnit) {
         _data.value = _data.value.copy(temperatureUnit = temperatureUnit)
     }

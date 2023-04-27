@@ -40,18 +40,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.common.ui.scanner.view.DeviceConnectingView
 import no.nordicsemi.android.common.ui.scanner.view.DeviceDisconnectedView
 import no.nordicsemi.android.common.ui.scanner.view.Reason
 import no.nordicsemi.android.hts.R
-import no.nordicsemi.android.hts.data.HTSServiceData
 import no.nordicsemi.android.hts.viewmodel.HTSViewModel
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
-import no.nordicsemi.android.ui.view.BackIconAppBar
-import no.nordicsemi.android.ui.view.LoggerIconAppBar
 import no.nordicsemi.android.ui.view.NavigateUpButton
 import no.nordicsemi.android.ui.view.ProfileAppBar
 
@@ -60,13 +56,14 @@ import no.nordicsemi.android.ui.view.ProfileAppBar
 fun HTSScreen() {
     val viewModel: HTSViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
+    val deviceName = viewModel.deviceName.collectAsState().value
 
     val navigateUp = { viewModel.onEvent(NavigateUp) }
 
     Scaffold(
         topBar = {
             ProfileAppBar(
-                deviceName = state.deviceName,
+                deviceName = deviceName,
                 connectionState = state.connectionState,
                 title = R.string.hts_title,
                 navigateUp = navigateUp,
@@ -81,7 +78,7 @@ fun HTSScreen() {
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            if (state.deviceName == null) {
+            if (deviceName == null) {
                 DeviceConnectingView { NavigateUpButton(navigateUp) }
             } else when (state.connectionState?.state) {
                 null,

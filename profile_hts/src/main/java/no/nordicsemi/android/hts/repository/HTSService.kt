@@ -33,6 +33,7 @@ package no.nordicsemi.android.hts.repository
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.filterNotNull
@@ -94,20 +95,20 @@ internal class HTSService : NotificationService() {
 
         client = device.connect(this@HTSService, logger = logger)
 
+        client.waitForBonding()
+
         repository.loggerEvent
             .onEach { logger.launch() }
             .launchIn(lifecycleScope)
 
         client.connectionStateWithStatus
+            .onEach { Log.d("AAATESTAAA", "Connection state: $it") }
             .onEach { repository.onConnectionStateChanged(it) }
             .filterNotNull()
             .onEach { stopIfDisconnected(it) }
-            .onEach { unlockUiIfDisconnected(it, device) }
             .launchIn(lifecycleScope)
 
         if (!client.isConnected) {
-            hasBeenInitialized = true
-            repository.onInitComplete(device)
             return@launch
         }
 
@@ -132,20 +133,11 @@ internal class HTSService : NotificationService() {
             .mapNotNull { HTSDataParser.parse(it) }
             .onEach { repository.onHTSDataChanged(it) }
             .launchIn(lifecycleScope)
-
-        hasBeenInitialized = true
-        repository.onInitComplete(device)
     }
 
     private fun stopIfDisconnected(connectionState: GattConnectionStateWithStatus) {
         if (connectionState.state == GattConnectionState.STATE_DISCONNECTED) {
             stopSelf()
-        }
-    }
-
-    private fun unlockUiIfDisconnected(connectionState: GattConnectionStateWithStatus, device: ServerDevice) {
-        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED && !hasBeenInitialized) {
-            repository.onInitComplete(device)
         }
     }
 
