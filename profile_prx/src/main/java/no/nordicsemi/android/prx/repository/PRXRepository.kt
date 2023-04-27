@@ -89,6 +89,7 @@ class PRXRepository @Inject internal constructor(
 
 
     fun launch(device: ServerDevice) {
+        _data.value = _data.value.copy(deviceName = device.name)
         serviceManager.startService(PRXService::class.java, device)
     }
 

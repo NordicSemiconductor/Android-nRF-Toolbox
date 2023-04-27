@@ -68,7 +68,7 @@ fun UARTScreen() {
     Scaffold(
         topBar = {
             ProfileAppBar(
-                deviceName = state.deviceName,
+                deviceName = state.uartManagerState.deviceName,
                 connectionState = state.uartManagerState.connectionState,
                 title = R.string.uart_title,
                 navigateUp = navigateUp,

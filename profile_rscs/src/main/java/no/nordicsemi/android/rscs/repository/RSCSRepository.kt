@@ -87,6 +87,7 @@ class RSCSRepository @Inject constructor(
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
     fun launch(device: ServerDevice) {
+        _data.value = _data.value.copy(deviceName = device.name)
         serviceManager.startService(RSCSService::class.java, device)
     }
 

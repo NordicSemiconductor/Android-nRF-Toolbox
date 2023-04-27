@@ -73,6 +73,7 @@ class CSCRepository @Inject constructor(
     val isRunning = data.map { it.connectionState?.state == GattConnectionState.STATE_CONNECTED }
 
     fun launch(device: ServerDevice) {
+        _data.value = _data.value.copy(deviceName = device.name)
         serviceManager.startService(CSCService::class.java, device)
     }
 

@@ -55,14 +55,13 @@ import no.nordicsemi.android.ui.view.ProfileAppBar
 fun PRXScreen() {
     val viewModel: PRXViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
-    val deviceName = viewModel.deviceName.collectAsState().value
 
     val navigateUp = { viewModel.onEvent(NavigateUpEvent) }
 
     Scaffold(
         topBar = {
             ProfileAppBar(
-                deviceName = deviceName,
+                deviceName = state.deviceName,
                 connectionState = state.connectionState,
                 title = R.string.prx_title,
                 navigateUp = navigateUp,

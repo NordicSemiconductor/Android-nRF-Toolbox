@@ -87,6 +87,7 @@ class HRSRepository @Inject constructor(
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
     fun launch(device: ServerDevice) {
+        _data.value = _data.value.copy(deviceName = device.name)
         serviceManager.startService(HRSService::class.java, device)
     }
 

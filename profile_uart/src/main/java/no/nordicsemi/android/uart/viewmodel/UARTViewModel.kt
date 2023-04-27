@@ -134,7 +134,6 @@ internal class UARTViewModel @Inject constructor(
     }
 
     private fun onDeviceSelected(device: ServerDevice) {
-        _state.value = _state.value.copy(deviceName = device.name)
         repository.launch(device)
     }
 

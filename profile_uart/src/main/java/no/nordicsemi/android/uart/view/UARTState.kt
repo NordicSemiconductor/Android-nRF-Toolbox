@@ -41,8 +41,7 @@ internal data class UARTViewState(
     val isConfigurationEdited: Boolean = false,
     val configurations: List<UARTConfiguration> = emptyList(),
     val uartManagerState: UARTServiceData = UARTServiceData(),
-    val isInputVisible: Boolean = true,
-    val deviceName: String? = null
+    val isInputVisible: Boolean = true
 ) {
     val showEditDialog: Boolean = editedPosition != null
 

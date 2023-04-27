@@ -39,5 +39,6 @@ internal data class HTSServiceData(
     val data: HTSData = HTSData(),
     val batteryLevel: Int? = null,
     val connectionState: GattConnectionStateWithStatus? = null,
-    val temperatureUnit: TemperatureUnit = TemperatureUnit.CELSIUS
+    val temperatureUnit: TemperatureUnit = TemperatureUnit.CELSIUS,
+    val deviceName: String? = null
 )

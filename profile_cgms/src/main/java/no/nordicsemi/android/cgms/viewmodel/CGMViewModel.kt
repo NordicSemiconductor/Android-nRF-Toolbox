@@ -35,8 +35,6 @@ import android.os.ParcelUuid
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -67,9 +65,6 @@ internal class CGMViewModel @Inject constructor(
 ) : ViewModel() {
 
     val state = repository.data
-
-    private val _deviceName = MutableStateFlow<String?>(null)
-    val deviceName = _deviceName.asStateFlow()
 
     init {
         repository.setOnScreen(true)
@@ -112,7 +107,6 @@ internal class CGMViewModel @Inject constructor(
     }
 
     private fun onDeviceSelected(device: ServerDevice) {
-        _deviceName.value = device.name
         repository.launch(device)
     }
 

@@ -95,6 +95,7 @@ class UARTRepository @Inject internal constructor(
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
     fun launch(device: ServerDevice) {
+        _data.value = _data.value.copy(deviceName = device.name)
         serviceManager.startService(UARTService::class.java, device)
     }
 

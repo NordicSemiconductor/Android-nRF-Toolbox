@@ -31,7 +31,6 @@
 
 package no.nordicsemi.android.hts.view
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -56,14 +55,13 @@ import no.nordicsemi.android.ui.view.ProfileAppBar
 fun HTSScreen() {
     val viewModel: HTSViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
-    val deviceName = viewModel.deviceName.collectAsState().value
 
     val navigateUp = { viewModel.onEvent(NavigateUp) }
 
     Scaffold(
         topBar = {
             ProfileAppBar(
-                deviceName = deviceName,
+                deviceName = state.deviceName,
                 connectionState = state.connectionState,
                 title = R.string.hts_title,
                 navigateUp = navigateUp,
