@@ -114,7 +114,7 @@ internal class HTSViewModel @Inject constructor(
     }
 
     private fun disconnect() {
-        repository.release()
+        repository.disconnect()
         navigationManager.navigateUp()
     }
 

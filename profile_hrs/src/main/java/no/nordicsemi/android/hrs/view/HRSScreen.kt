@@ -83,7 +83,7 @@ fun HRSScreen() {
                 null,
                 GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                 GattConnectionState.STATE_DISCONNECTED,
-                GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(Reason.UNKNOWN) {
+                GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(state.connectionState.status) {
                     NavigateUpButton(navigateUp)
                 }
                 GattConnectionState.STATE_CONNECTED -> HRSContentView(state) { viewModel.onEvent(it) }

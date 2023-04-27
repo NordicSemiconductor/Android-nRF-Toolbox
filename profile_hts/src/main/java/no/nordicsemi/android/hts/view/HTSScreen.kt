@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.common.ui.scanner.view.DeviceConnectingView
 import no.nordicsemi.android.common.ui.scanner.view.DeviceDisconnectedView
-import no.nordicsemi.android.common.ui.scanner.view.Reason
 import no.nordicsemi.android.hts.R
 import no.nordicsemi.android.hts.viewmodel.HTSViewModel
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
@@ -84,7 +83,7 @@ fun HTSScreen() {
                 null,
                 GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                 GattConnectionState.STATE_DISCONNECTED,
-                GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(Reason.UNKNOWN) {
+                GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(state.connectionState.status) {
                     NavigateUpButton(navigateUp)
                 }
                 GattConnectionState.STATE_CONNECTED -> HTSContentView(state) { viewModel.onEvent(it) }

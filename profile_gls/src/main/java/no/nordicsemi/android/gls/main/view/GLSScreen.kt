@@ -84,7 +84,7 @@ fun GLSScreen() {
                 null,
                 GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                 GattConnectionState.STATE_DISCONNECTED,
-                GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(Reason.UNKNOWN) {
+                GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(state.glsServiceData.connectionState.status) {
                     NavigateUpButton(navigateUp)
                 }
                 GattConnectionState.STATE_CONNECTED -> GLSContentView(state.glsServiceData) { viewModel.onEvent(it) }

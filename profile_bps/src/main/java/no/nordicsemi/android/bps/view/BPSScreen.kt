@@ -83,7 +83,7 @@ fun BPSScreen() {
                 null,
                 GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                 GattConnectionState.STATE_DISCONNECTED,
-                GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(Reason.UNKNOWN) {
+                GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(state.result.connectionState.status) {
                     NavigateUpButton(navigateUp)
                 }
                 GattConnectionState.STATE_CONNECTED -> BPSContentView(state.result) { viewModel.onEvent(it) }

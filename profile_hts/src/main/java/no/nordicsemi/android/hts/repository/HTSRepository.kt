@@ -94,9 +94,12 @@ class HTSRepository @Inject constructor(
         _loggerEvent.tryEmit(OpenLoggerEvent())
     }
 
-    fun release() {
+    fun disconnect() {
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
+    }
+
+    fun clear() {
         logger = null
         _data.value = HTSServiceData()
-        _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 }

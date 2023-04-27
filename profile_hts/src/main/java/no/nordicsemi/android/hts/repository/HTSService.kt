@@ -144,4 +144,9 @@ internal class HTSService : NotificationService() {
     private fun disconnect() {
         client.disconnect()
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        repository.clear()
+    }
 }
