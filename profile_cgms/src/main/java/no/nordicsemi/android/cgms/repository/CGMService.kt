@@ -104,10 +104,10 @@ internal class CGMService : NotificationService() {
 
     private lateinit var recordAccessControlPointCharacteristic: BleGattCharacteristic
 
-    private var hasBeenInitialized: Boolean = false
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
+
+        repository.setServiceRunning(true)
 
         val device = intent!!.getParcelableExtra<ServerDevice>(DEVICE_DATA)!!
 
@@ -146,22 +146,19 @@ internal class CGMService : NotificationService() {
             .onEach { repository.onConnectionStateChanged(it) }
             .filterNotNull()
             .onEach { stopIfDisconnected(it) }
-            .onEach { unlockUiIfDisconnected(it, device) }
             .launchIn(lifecycleScope)
 
         if (!client.isConnected) {
-            hasBeenInitialized = true
-            repository.onInitComplete(device)
             return@launch
         }
 
         client.discoverServices()
             .filterNotNull()
-            .onEach { configureGatt(it, device) }
+            .onEach { configureGatt(it) }
             .launchIn(lifecycleScope)
     }
 
-    private suspend fun configureGatt(services: BleGattServices, device: ServerDevice) {
+    private suspend fun configureGatt(services: BleGattServices) {
         val cgmService = services.findService(CGMS_SERVICE_UUID)!!
         val statusCharacteristic = cgmService.findCharacteristic(CGM_STATUS_UUID)!!
         val featureCharacteristic = cgmService.findCharacteristic(CGM_FEATURE_UUID)!!
@@ -232,9 +229,6 @@ internal class CGMService : NotificationService() {
         if (sessionStartTime == 0L) {
             opsControlPointCharacteristic.write(CGMSpecificOpsControlPointData.startSession(secured).value!!)
         }
-
-        hasBeenInitialized = true
-        repository.onInitComplete(device)
     }
 
     private fun onAccessControlPointDataReceived(data: RecordAccessControlPointData) = lifecycleScope.launch {
@@ -317,13 +311,12 @@ internal class CGMService : NotificationService() {
         }
     }
 
-    private fun unlockUiIfDisconnected(connectionState: GattConnectionStateWithStatus, device: ServerDevice) {
-        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED && !hasBeenInitialized) {
-            repository.onInitComplete(device)
-        }
-    }
-
     private fun disconnect() {
         client.disconnect()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        repository.setServiceRunning(false)
     }
 }

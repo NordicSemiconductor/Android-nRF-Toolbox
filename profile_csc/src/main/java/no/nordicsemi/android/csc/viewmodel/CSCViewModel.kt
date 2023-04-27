@@ -115,7 +115,7 @@ internal class CSCViewModel @Inject constructor(
     }
 
     private fun disconnect() {
-        repository.release()
+        repository.disconnect()
         navigationManager.navigateUp()
     }
 }

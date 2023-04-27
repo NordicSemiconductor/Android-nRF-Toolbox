@@ -69,12 +69,25 @@ class HRSRepository @Inject constructor(
 
     val isRunning = data.map { it.connectionState?.state == GattConnectionState.STATE_CONNECTED }
 
-    fun launch(device: ServerDevice) {
-        serviceManager.startService(HRSService::class.java, device)
+    private var isOnScreen = false
+    private var isServiceRunning = false
+
+    fun setOnScreen(isOnScreen: Boolean) {
+        this.isOnScreen = isOnScreen
+
+        if (shouldClean()) clean()
     }
 
-    fun onInitComplete(device: ServerDevice) {
-        _data.value = _data.value.copy(deviceName = device.name)
+    fun setServiceRunning(serviceRunning: Boolean) {
+        this.isServiceRunning = serviceRunning
+
+        if (shouldClean()) clean()
+    }
+
+    private fun shouldClean() = !isOnScreen && !isServiceRunning
+
+    fun launch(device: ServerDevice) {
+        serviceManager.startService(HRSService::class.java, device)
     }
 
     fun switchZoomIn() {
@@ -101,8 +114,11 @@ class HRSRepository @Inject constructor(
         _loggerEvent.tryEmit(OpenLoggerEvent())
     }
 
-    fun release() {
-        _data.value = HRSServiceData()
+    fun disconnect() {
         _stopEvent.tryEmit(DisconnectAndStopEvent())
+    }
+
+    private fun clean() {
+        _data.value = HRSServiceData()
     }
 }

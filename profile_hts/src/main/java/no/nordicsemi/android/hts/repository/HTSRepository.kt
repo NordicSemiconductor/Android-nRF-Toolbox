@@ -73,10 +73,6 @@ class HTSRepository @Inject constructor(
     private var isOnScreen = false
     private var isServiceRunning = false
 
-    fun launch(device: ServerDevice) {
-        serviceManager.startService(HTSService::class.java, device)
-    }
-
     fun setOnScreen(isOnScreen: Boolean) {
         this.isOnScreen = isOnScreen
 
@@ -90,6 +86,10 @@ class HTSRepository @Inject constructor(
     }
 
     private fun shouldClean() = !isOnScreen && !isServiceRunning
+
+    fun launch(device: ServerDevice) {
+        serviceManager.startService(HTSService::class.java, device)
+    }
 
     internal fun setTemperatureUnit(temperatureUnit: TemperatureUnit) {
         _data.value = _data.value.copy(temperatureUnit = temperatureUnit)

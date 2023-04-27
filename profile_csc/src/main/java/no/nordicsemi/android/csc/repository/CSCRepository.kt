@@ -77,14 +77,6 @@ class CSCRepository @Inject constructor(
         serviceManager.startService(CSCService::class.java, device)
     }
 
-    fun onInitComplete(device: ServerDevice) {
-        Log.d("AAATESTAAA", "onInitComplete: ${data.value}")
-        if (_data.value.deviceName == null) {
-            Log.d("AAATESTAAA", "AAA")
-            _data.value = _data.value.copy(deviceName = device.name)
-        }
-    }
-
     internal fun setSpeedUnit(speedUnit: SpeedUnit) {
         _data.value = _data.value.copy(speedUnit = speedUnit)
     }
@@ -109,8 +101,7 @@ class CSCRepository @Inject constructor(
         _loggerEvent.tryEmit(OpenLoggerEvent())
     }
 
-    fun release() {
-        Log.d("AAATESTAAA", "release: ${data.value}")
+    fun disconnect() {
         _data.value = CSCServiceData()
         _stopEvent.tryEmit(DisconnectAndStopEvent())
     }

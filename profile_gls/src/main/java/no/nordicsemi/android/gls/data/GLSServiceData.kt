@@ -31,10 +31,9 @@
 
 package no.nordicsemi.android.gls.data
 
-import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
-import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSRecord
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSMeasurementContext
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSRecord
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.RequestStatus
 
 internal data class GLSServiceData(

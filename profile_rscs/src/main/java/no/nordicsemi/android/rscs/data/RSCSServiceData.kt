@@ -41,8 +41,7 @@ import no.nordicsemi.android.rscs.R
 internal data class RSCSServiceData(
     val data: RSCSData = RSCSData(),
     val batteryLevel: Int? = null,
-    val connectionState: GattConnectionStateWithStatus? = null,
-    val deviceName: String? = null
+    val connectionState: GattConnectionStateWithStatus? = null
 ) {
     @Composable
     fun displayActivity(): String {

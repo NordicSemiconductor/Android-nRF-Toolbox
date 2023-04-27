@@ -70,12 +70,26 @@ class PRXRepository @Inject internal constructor(
 
     val isRunning = data.map { it.connectionState?.state == GattConnectionState.STATE_CONNECTED }
 
-    fun launch(device: ServerDevice) {
-        serviceManager.startService(PRXService::class.java, device)
+    private var isOnScreen = false
+    private var isServiceRunning = false
+
+    fun setOnScreen(isOnScreen: Boolean) {
+        this.isOnScreen = isOnScreen
+
+        if (shouldClean()) clean()
     }
 
-    fun onInitComplete(device: ServerDevice) {
-        _data.value = _data.value.copy(deviceName = device.name)
+    fun setServiceRunning(serviceRunning: Boolean) {
+        this.isServiceRunning = serviceRunning
+
+        if (shouldClean()) clean()
+    }
+
+    private fun shouldClean() = !isOnScreen && !isServiceRunning
+
+
+    fun launch(device: ServerDevice) {
+        serviceManager.startService(PRXService::class.java, device)
     }
 
     fun onConnectionStateChanged(connection: GattConnectionStateWithStatus) {
@@ -106,9 +120,12 @@ class PRXRepository @Inject internal constructor(
         _loggerEvent.tryEmit(OpenLoggerEvent())
     }
 
-    fun release() {
-        _data.value = PRXServiceData()
+    fun disconnect() {
         _remoteAlarmLevel.tryEmit(AlarmLevel.NONE)
         _stopEvent.tryEmit(DisconnectAndStopEvent())
+    }
+
+    private fun clean() {
+        _data.value = PRXServiceData()
     }
 }

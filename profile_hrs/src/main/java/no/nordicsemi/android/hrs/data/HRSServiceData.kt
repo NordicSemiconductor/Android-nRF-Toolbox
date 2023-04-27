@@ -40,8 +40,7 @@ internal data class HRSServiceData(
     val bodySensorLocation: Int? = null,
     val batteryLevel: Int? = null,
     val connectionState: GattConnectionStateWithStatus? = null,
-    val zoomIn: Boolean = false,
-    val deviceName: String? = null
+    val zoomIn: Boolean = false
 ) {
     val heartRates = data.map { it.heartRate }
 }

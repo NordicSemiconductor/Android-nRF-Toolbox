@@ -74,8 +74,6 @@ internal class HTSService : NotificationService() {
 
     private lateinit var client: BleGattClient
 
-    private var hasBeenInitialized: Boolean = false
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
@@ -104,7 +102,6 @@ internal class HTSService : NotificationService() {
             .launchIn(lifecycleScope)
 
         client.connectionStateWithStatus
-            .onEach { Log.d("AAATESTAAA", "Connection state: $it") }
             .onEach { repository.onConnectionStateChanged(it) }
             .filterNotNull()
             .onEach { stopIfDisconnected(it) }
@@ -116,11 +113,11 @@ internal class HTSService : NotificationService() {
 
         client.discoverServices()
             .filterNotNull()
-            .onEach { configureGatt(it, device) }
+            .onEach { configureGatt(it) }
             .launchIn(lifecycleScope)
     }
 
-    private suspend fun configureGatt(services: BleGattServices, device: ServerDevice) {
+    private suspend fun configureGatt(services: BleGattServices) {
         val htsService = services.findService(HTS_SERVICE_UUID)!!
         val htsMeasurementCharacteristic = htsService.findCharacteristic(HTS_MEASUREMENT_CHARACTERISTIC_UUID)!!
         val batteryService = services.findService(BATTERY_SERVICE_UUID)!!

@@ -32,7 +32,6 @@
 package no.nordicsemi.android.cgms.repository
 
 import android.content.Context
-import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -74,6 +73,23 @@ class CGMRepository @Inject constructor(
     val hasRecords = data.value.records.isNotEmpty()
     val highestSequenceNumber = data.value.records.maxOfOrNull { it.sequenceNumber } ?: -1
 
+    private var isOnScreen = false
+    private var isServiceRunning = false
+
+    fun setOnScreen(isOnScreen: Boolean) {
+        this.isOnScreen = isOnScreen
+
+        if (shouldClean()) clean()
+    }
+
+    fun setServiceRunning(serviceRunning: Boolean) {
+        this.isServiceRunning = serviceRunning
+
+        if (shouldClean()) clean()
+    }
+
+    private fun shouldClean() = !isOnScreen && !isServiceRunning
+
     fun launch(device: ServerDevice) {
         serviceManager.startService(CGMService::class.java, device)
     }
@@ -102,16 +118,15 @@ class CGMRepository @Inject constructor(
         _loggerEvent.tryEmit(OpenLoggerEvent())
     }
 
-    fun onInitComplete(device: ServerDevice) {
-        _data.value = _data.value.copy(deviceName = device.name)
-    }
-
     fun clear() {
         _data.value = _data.value.copy(records = emptyList())
     }
 
-    fun release() {
-        _data.value = CGMServiceData()
+    fun disconnect() {
         _stopEvent.tryEmit(DisconnectAndStopEvent())
+    }
+
+    fun clean() {
+        _data.value = CGMServiceData()
     }
 }

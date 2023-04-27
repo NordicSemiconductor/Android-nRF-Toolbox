@@ -73,8 +73,6 @@ internal class CSCService : NotificationService() {
 
     private lateinit var client: BleGattClient
 
-    private var hasBeenInitialized: Boolean = false
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
@@ -102,22 +100,19 @@ internal class CSCService : NotificationService() {
             .onEach { repository.onConnectionStateChanged(it) }
             .filterNotNull()
             .onEach { stopIfDisconnected(it) }
-            .onEach { unlockUiIfDisconnected(it, device) }
             .launchIn(lifecycleScope)
 
         if (!client.isConnected) {
-            hasBeenInitialized = true
-            repository.onInitComplete(device)
             return@launch
         }
 
         client.discoverServices()
             .filterNotNull()
-            .onEach { configureGatt(it, device) }
+            .onEach { configureGatt(it) }
             .launchIn(lifecycleScope)
     }
 
-    private suspend fun configureGatt(services: BleGattServices, device: ServerDevice) {
+    private suspend fun configureGatt(services: BleGattServices) {
         val cscService = services.findService(CSC_SERVICE_UUID)!!
         val cscMeasurementCharacteristic = cscService.findCharacteristic(CSC_MEASUREMENT_CHARACTERISTIC_UUID)!!
         val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
@@ -133,21 +128,11 @@ internal class CSCService : NotificationService() {
             .mapNotNull { cscDataParser.parse(it, repository.wheelSize.value) }
             .onEach { repository.onCSCDataChanged(it) }
             .launchIn(lifecycleScope)
-
-        hasBeenInitialized = true
-        repository.onInitComplete(device)
     }
 
     private fun stopIfDisconnected(connectionState: GattConnectionStateWithStatus) {
         if (connectionState.state == GattConnectionState.STATE_DISCONNECTED) {
             stopSelf()
-        }
-    }
-
-    private fun unlockUiIfDisconnected(connectionState: GattConnectionStateWithStatus, device: ServerDevice) {
-        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED && !hasBeenInitialized) {
-            hasBeenInitialized = true
-            repository.onInitComplete(device)
         }
     }
 

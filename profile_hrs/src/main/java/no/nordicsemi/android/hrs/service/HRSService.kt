@@ -75,10 +75,10 @@ internal class HRSService : NotificationService() {
 
     private lateinit var client: BleGattClient
 
-    private var hasBeenInitialized: Boolean = false
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
+
+        repository.setServiceRunning(true)
 
         val device = intent!!.getParcelableExtra<ServerDevice>(DEVICE_DATA)!!
 
@@ -104,14 +104,11 @@ internal class HRSService : NotificationService() {
             .onEach { repository.onConnectionStateChanged(it) }
             .filterNotNull()
             .onEach { stopIfDisconnected(it) }
-            .onEach { unlockUiIfDisconnected(it, device) }
             .launchIn(lifecycleScope)
 
         client.waitForBonding()
 
         if (!client.isConnected) {
-            hasBeenInitialized = true
-            repository.onInitComplete(device)
             return@launch
         }
 
@@ -140,9 +137,6 @@ internal class HRSService : NotificationService() {
             .mapNotNull { HRSDataParser.parse(it) }
             .onEach { repository.onHRSDataChanged(it) }
             .launchIn(lifecycleScope)
-
-        hasBeenInitialized = true
-        repository.onInitComplete(device)
     }
 
     private fun stopIfDisconnected(connectionState: GattConnectionStateWithStatus) {
@@ -151,13 +145,12 @@ internal class HRSService : NotificationService() {
         }
     }
 
-    private fun unlockUiIfDisconnected(connectionState: GattConnectionStateWithStatus, device: ServerDevice) {
-        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED && !hasBeenInitialized) {
-            repository.onInitComplete(device)
-        }
-    }
-
     private fun disconnect() {
         client.disconnect()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        repository.setServiceRunning(false)
     }
 }

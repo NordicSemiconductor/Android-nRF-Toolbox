@@ -69,12 +69,25 @@ class RSCSRepository @Inject constructor(
 
     val isRunning = data.map { it.connectionState?.state == GattConnectionState.STATE_CONNECTED }
 
-    fun launch(device: ServerDevice) {
-        serviceManager.startService(RSCSService::class.java, device)
+    private var isOnScreen = false
+    private var isServiceRunning = false
+
+    fun setOnScreen(isOnScreen: Boolean) {
+        this.isOnScreen = isOnScreen
+
+        if (shouldClean()) clean()
     }
 
-    fun onInitComplete(device: ServerDevice) {
-        _data.value = _data.value.copy(deviceName = device.name)
+    fun setServiceRunning(serviceRunning: Boolean) {
+        this.isServiceRunning = serviceRunning
+
+        if (shouldClean()) clean()
+    }
+
+    private fun shouldClean() = !isOnScreen && !isServiceRunning
+
+    fun launch(device: ServerDevice) {
+        serviceManager.startService(RSCSService::class.java, device)
     }
 
     fun onConnectionStateChanged(connectionState: GattConnectionStateWithStatus?) {
@@ -93,9 +106,12 @@ class RSCSRepository @Inject constructor(
         _loggerEvent.tryEmit(OpenLoggerEvent())
     }
 
-    fun release() {
+    fun disconnect() {
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
+    }
+
+    private fun clean() {
         logger = null
         _data.value = RSCSServiceData()
-        _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 }

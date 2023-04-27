@@ -163,17 +163,15 @@ internal class GLSViewModel @Inject constructor(
 
         client = device.connect(context, logger = logger)
 
+        client.waitForBonding()
+
         client.connectionStateWithStatus
             .filterNotNull()
             .onEach { _state.value = _state.value.copyWithNewConnectionState(it) }
             .onEach { logAnalytics(it) }
-            .onEach { unlockUiIfDisconnected(it, device) }
             .launchIn(viewModelScope)
 
-        client.waitForBonding()
-
         if (!client.isConnected) {
-            _state.value = _state.value.copy(deviceName = device.name)
             return@launch
         }
 
@@ -186,12 +184,6 @@ internal class GLSViewModel @Inject constructor(
     private fun logAnalytics(connectionState: GattConnectionStateWithStatus) {
         if (connectionState.state == GattConnectionState.STATE_CONNECTED) {
             analytics.logEvent(ProfileConnectedEvent(Profile.GLS))
-        }
-    }
-
-    private fun unlockUiIfDisconnected(connectionState: GattConnectionStateWithStatus, device: ServerDevice) {
-        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED) {
-            _state.value = _state.value.copy(deviceName = device.name)
         }
     }
 
@@ -221,8 +213,6 @@ internal class GLSViewModel @Inject constructor(
             .mapNotNull { RecordAccessControlPointParser.parse(it) }
             .onEach { onAccessControlPointDataReceived(it) }
             .launchIn(viewModelScope)
-
-        _state.value = _state.value.copy(deviceName = device.name) //prevents UI from appearing before BLE connection is set up
     }
 
     private fun onAccessControlPointDataReceived(data: RecordAccessControlPointData) = viewModelScope.launch {

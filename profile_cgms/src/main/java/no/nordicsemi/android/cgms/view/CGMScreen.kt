@@ -55,13 +55,14 @@ import no.nordicsemi.android.ui.view.ProfileAppBar
 fun CGMScreen() {
     val viewModel: CGMViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
+    val deviceName = viewModel.deviceName.collectAsState().value
 
     val navigateUp = { viewModel.onEvent(NavigateUp) }
 
     Scaffold(
         topBar = {
             ProfileAppBar(
-                deviceName = state.deviceName,
+                deviceName = deviceName,
                 connectionState = state.connectionState,
                 title = R.string.cgms_title,
                 navigateUp = navigateUp,
@@ -76,9 +77,7 @@ fun CGMScreen() {
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            if (state.deviceName == null) {
-                DeviceConnectingView { NavigateUpButton(navigateUp) }
-            } else when (state.connectionState?.state) {
+            when (state.connectionState?.state) {
                 null,
                 GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
 

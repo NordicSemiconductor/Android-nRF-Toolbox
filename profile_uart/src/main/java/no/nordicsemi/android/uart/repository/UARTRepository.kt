@@ -77,6 +77,23 @@ class UARTRepository @Inject internal constructor(
 
     val lastConfigurationName = configurationDataSource.lastConfigurationName
 
+    private var isOnScreen = false
+    private var isServiceRunning = false
+
+    fun setOnScreen(isOnScreen: Boolean) {
+        this.isOnScreen = isOnScreen
+
+        if (shouldClean()) clean()
+    }
+
+    fun setServiceRunning(serviceRunning: Boolean) {
+        this.isServiceRunning = serviceRunning
+
+        if (shouldClean()) clean()
+    }
+
+    private fun shouldClean() = !isOnScreen && !isServiceRunning
+
     fun launch(device: ServerDevice) {
         serviceManager.startService(UARTService::class.java, device)
     }
@@ -95,10 +112,6 @@ class UARTRepository @Inject internal constructor(
 
     fun onNewMessageSent(value: String) {
         _data.value = _data.value.copy(messages = _data.value.messages + UARTRecord(value, UARTRecordType.INPUT))
-    }
-
-    fun onInitComplete(device: ServerDevice) {
-        _data.value = _data.value.copy(deviceName = device.name)
     }
 
     fun sendText(text: String, newLineChar: MacroEol) {
@@ -124,8 +137,11 @@ class UARTRepository @Inject internal constructor(
         configurationDataSource.saveConfigurationName(name)
     }
 
-    fun release() {
-        _data.value = UARTServiceData()
+    fun disconnect() {
         _stopEvent.tryEmit(DisconnectAndStopEvent())
+    }
+
+    private fun clean() {
+        _data.value = UARTServiceData()
     }
 }

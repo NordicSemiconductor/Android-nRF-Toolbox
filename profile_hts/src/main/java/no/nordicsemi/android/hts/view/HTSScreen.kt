@@ -58,8 +58,6 @@ fun HTSScreen() {
     val state = viewModel.state.collectAsState().value
     val deviceName = viewModel.deviceName.collectAsState().value
 
-    Log.d("AAATESTAAA", "State: $state")
-
     val navigateUp = { viewModel.onEvent(NavigateUp) }
 
     Scaffold(

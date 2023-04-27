@@ -56,13 +56,14 @@ import no.nordicsemi.android.ui.view.ProfileAppBar
 fun HRSScreen() {
     val viewModel: HRSViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
+    val deviceName = viewModel.deviceName.collectAsState().value
 
     val navigateUp = { viewModel.onEvent(NavigateUpEvent) }
 
     Scaffold(
         topBar = {
             ProfileAppBar(
-                deviceName = state.deviceName,
+                deviceName = deviceName,
                 connectionState = state.connectionState,
                 title = R.string.hrs_title,
                 navigateUp = navigateUp,
@@ -77,9 +78,7 @@ fun HRSScreen() {
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            if (state.deviceName == null) {
-                DeviceConnectingView { NavigateUpButton(navigateUp) }
-            } else when (state.connectionState?.state) {
+            when (state.connectionState?.state) {
                 null,
                 GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                 GattConnectionState.STATE_DISCONNECTED,

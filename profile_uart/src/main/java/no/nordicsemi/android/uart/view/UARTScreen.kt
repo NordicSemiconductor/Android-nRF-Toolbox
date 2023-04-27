@@ -68,7 +68,7 @@ fun UARTScreen() {
     Scaffold(
         topBar = {
             ProfileAppBar(
-                deviceName = state.uartManagerState.deviceName,
+                deviceName = state.deviceName,
                 connectionState = state.uartManagerState.connectionState,
                 title = R.string.uart_title,
                 navigateUp = navigateUp,
@@ -80,9 +80,7 @@ fun UARTScreen() {
         Column(
             modifier = Modifier.padding(it)
         ) {
-            if (state.uartManagerState.deviceName == null) {
-                DeviceConnectingView { NavigateUpButton(navigateUp) }
-            } else when (state.uartManagerState.connectionState?.state) {
+            when (state.uartManagerState.connectionState?.state) {
                 null,
                 GattConnectionState.STATE_CONNECTING -> PaddingBox { DeviceConnectingView { NavigateUpButton(navigateUp) } }
                 GattConnectionState.STATE_DISCONNECTED,

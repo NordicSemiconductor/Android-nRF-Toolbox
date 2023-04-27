@@ -77,9 +77,7 @@ fun BPSScreen() {
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            if (state.deviceName == null) {
-                DeviceConnectingView { NavigateUpButton(navigateUp) }
-            } else when (state.result.connectionState?.state) {
+            when (state.result.connectionState?.state) {
                 null,
                 GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                 GattConnectionState.STATE_DISCONNECTED,

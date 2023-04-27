@@ -37,8 +37,7 @@ import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 internal data class UARTServiceData(
     val messages: List<UARTRecord> = emptyList(),
     val connectionState: GattConnectionStateWithStatus? = null,
-    val batteryLevel: Int? = null,
-    val deviceName: String? = null
+    val batteryLevel: Int? = null
 ) {
 
     val displayMessages = messages

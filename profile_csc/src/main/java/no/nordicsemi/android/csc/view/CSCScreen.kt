@@ -58,8 +58,6 @@ fun CSCScreen() {
     val viewModel: CSCViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
 
-    Log.d("AAATESTAAA", "State: ${state}")
-
     val navigateUp = { viewModel.onEvent(NavigateUp) }
 
     Scaffold(
