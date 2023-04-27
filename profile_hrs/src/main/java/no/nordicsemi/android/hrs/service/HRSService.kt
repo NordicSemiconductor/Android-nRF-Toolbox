@@ -92,7 +92,7 @@ internal class HRSService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        val logger = NordicBlekLogger(this@HRSService, stringConst.APP_NAME, "CSC", device.address)
+        val logger = NordicBlekLogger(this@HRSService, stringConst.APP_NAME, "HRS", device.address)
 
         client = device.connect(this@HRSService, logger = logger)
 
