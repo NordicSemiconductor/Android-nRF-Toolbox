@@ -31,6 +31,7 @@
 
 package no.nordicsemi.android.hts.view
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -56,6 +57,8 @@ fun HTSScreen() {
     val viewModel: HTSViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState().value
     val deviceName = viewModel.deviceName.collectAsState().value
+
+    Log.d("AAATESTAAA", "State: $state")
 
     val navigateUp = { viewModel.onEvent(NavigateUp) }
 

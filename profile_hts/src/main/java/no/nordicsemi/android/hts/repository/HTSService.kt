@@ -79,6 +79,8 @@ internal class HTSService : NotificationService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
+        repository.setServiceRunning(true)
+
         val device = intent!!.getParcelableExtra<ServerDevice>(DEVICE_DATA)!!
 
         startGattClient(device)
@@ -147,6 +149,6 @@ internal class HTSService : NotificationService() {
 
     override fun onDestroy() {
         super.onDestroy()
-        repository.clear()
+        repository.setServiceRunning(false)
     }
 }

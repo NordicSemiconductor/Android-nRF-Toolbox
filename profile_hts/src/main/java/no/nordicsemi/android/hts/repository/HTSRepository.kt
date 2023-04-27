@@ -70,9 +70,26 @@ class HTSRepository @Inject constructor(
 
     val isRunning = data.map { it.connectionState?.state == GattConnectionState.STATE_CONNECTED }
 
+    private var isOnScreen = false
+    private var isServiceRunning = false
+
     fun launch(device: ServerDevice) {
         serviceManager.startService(HTSService::class.java, device)
     }
+
+    fun setOnScreen(isOnScreen: Boolean) {
+        this.isOnScreen = isOnScreen
+
+        if (shouldClean()) clean()
+    }
+
+    fun setServiceRunning(serviceRunning: Boolean) {
+        this.isServiceRunning = serviceRunning
+
+        if (shouldClean()) clean()
+    }
+
+    private fun shouldClean() = !isOnScreen && !isServiceRunning
 
     internal fun setTemperatureUnit(temperatureUnit: TemperatureUnit) {
         _data.value = _data.value.copy(temperatureUnit = temperatureUnit)
@@ -98,7 +115,7 @@ class HTSRepository @Inject constructor(
         _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 
-    fun clear() {
+    private fun clean() {
         logger = null
         _data.value = HTSServiceData()
     }

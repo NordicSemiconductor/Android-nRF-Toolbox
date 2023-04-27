@@ -71,6 +71,8 @@ internal class HTSViewModel @Inject constructor(
     val deviceName = _deviceName.asStateFlow()
 
     init {
+        repository.setOnScreen(true)
+
         viewModelScope.launch {
             if (repository.isRunning.firstOrNull() == false) {
                 requestBluetoothDevice()
@@ -120,5 +122,10 @@ internal class HTSViewModel @Inject constructor(
 
     private fun onTemperatureUnitSelected(event: OnTemperatureUnitSelected) {
         repository.setTemperatureUnit(event.value)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        repository.setOnScreen(false)
     }
 }
