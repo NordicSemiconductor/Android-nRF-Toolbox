@@ -31,6 +31,7 @@
 
 package no.nordicsemi.android.hts.view
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -77,9 +78,7 @@ fun HTSScreen() {
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            if (deviceName == null) {
-                DeviceConnectingView { NavigateUpButton(navigateUp) }
-            } else when (state.connectionState?.state) {
+            when (state.connectionState?.state) {
                 null,
                 GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
                 GattConnectionState.STATE_DISCONNECTED,
