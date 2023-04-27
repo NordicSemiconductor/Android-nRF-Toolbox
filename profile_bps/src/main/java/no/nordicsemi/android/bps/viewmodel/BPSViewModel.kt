@@ -68,7 +68,7 @@ import no.nordicsemi.android.kotlin.ble.profile.bps.data.BloodPressureMeasuremen
 import no.nordicsemi.android.kotlin.ble.profile.bps.data.IntermediateCuffPressureData
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import no.nordicsemi.android.ui.view.StringConst
-import java.util.*
+import java.util.UUID
 import javax.inject.Inject
 
 val BPS_SERVICE_UUID: UUID = UUID.fromString("00001810-0000-1000-8000-00805f9b34fb")

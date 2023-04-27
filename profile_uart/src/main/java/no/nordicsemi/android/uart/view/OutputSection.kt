@@ -64,7 +64,7 @@ import no.nordicsemi.android.uart.data.UARTRecord
 import no.nordicsemi.android.uart.data.UARTRecordType
 import no.nordicsemi.android.ui.view.SectionTitle
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 
 @Composable
 internal fun OutputSection(records: List<UARTRecord>, onEvent: (UARTViewEvent) -> Unit) {

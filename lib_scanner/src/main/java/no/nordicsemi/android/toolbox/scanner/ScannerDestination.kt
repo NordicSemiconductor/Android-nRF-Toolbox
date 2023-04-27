@@ -9,7 +9,6 @@ import no.nordicsemi.android.common.ui.scanner.DeviceSelected
 import no.nordicsemi.android.common.ui.scanner.ScannerScreen
 import no.nordicsemi.android.common.ui.scanner.ScanningCancelled
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
-import java.util.*
 
 val ScannerDestinationId = createDestination<ParcelUuid, ServerDevice>("uiscanner-destination")
 

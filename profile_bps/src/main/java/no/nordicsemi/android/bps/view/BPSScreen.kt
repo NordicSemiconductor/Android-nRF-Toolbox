@@ -46,7 +46,6 @@ import no.nordicsemi.android.bps.R
 import no.nordicsemi.android.bps.viewmodel.BPSViewModel
 import no.nordicsemi.android.common.ui.scanner.view.DeviceConnectingView
 import no.nordicsemi.android.common.ui.scanner.view.DeviceDisconnectedView
-import no.nordicsemi.android.common.ui.scanner.view.Reason
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.ui.view.NavigateUpButton
 import no.nordicsemi.android.ui.view.ProfileAppBar

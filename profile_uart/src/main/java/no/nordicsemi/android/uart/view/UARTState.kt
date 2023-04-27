@@ -32,8 +32,8 @@
 package no.nordicsemi.android.uart.view
 
 import no.nordicsemi.android.uart.data.UARTConfiguration
-import no.nordicsemi.android.uart.data.UARTServiceData
 import no.nordicsemi.android.uart.data.UARTMacro
+import no.nordicsemi.android.uart.data.UARTServiceData
 
 internal data class UARTViewState(
     val editedPosition: Int? = null,

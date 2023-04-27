@@ -1,7 +1,6 @@
 package no.nordicsemi.android.prx.data
 
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectionStatus
-import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.prx.AlarmLevel
 

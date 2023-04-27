@@ -35,9 +35,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import no.nordicsemi.android.cgms.R
 import no.nordicsemi.android.cgms.data.CGMRecordWithSequenceNumber
-import no.nordicsemi.android.kotlin.ble.profile.cgm.data.CGMRecord
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 internal fun CGMRecordWithSequenceNumber.formattedTime(): String {
     val timeFormat = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.US)

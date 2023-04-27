@@ -32,7 +32,6 @@
 package no.nordicsemi.android.hts.data
 
 import no.nordicsemi.android.hts.view.TemperatureUnit
-import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.hts.data.HTSData
 

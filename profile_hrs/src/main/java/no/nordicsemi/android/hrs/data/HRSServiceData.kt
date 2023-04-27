@@ -31,7 +31,6 @@
 
 package no.nordicsemi.android.hrs.data
 
-import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.hrs.data.HRSData
 

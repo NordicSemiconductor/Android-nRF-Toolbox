@@ -33,7 +33,6 @@ package no.nordicsemi.android.hts.repository
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.filterNotNull

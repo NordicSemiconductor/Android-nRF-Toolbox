@@ -34,8 +34,8 @@ package no.nordicsemi.android.gls
 import no.nordicsemi.android.common.navigation.createDestination
 import no.nordicsemi.android.common.navigation.defineDestination
 import no.nordicsemi.android.gls.details.view.GLSDetailsScreen
-import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSRecord
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSMeasurementContext
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSRecord
 
 internal val GlsDetailsDestinationId = createDestination<Pair<GLSRecord, GLSMeasurementContext?>, Unit>("gls-details-screen")
 

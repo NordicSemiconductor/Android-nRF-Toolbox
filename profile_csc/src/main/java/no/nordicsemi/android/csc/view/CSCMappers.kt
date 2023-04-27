@@ -35,7 +35,7 @@ import no.nordicsemi.android.common.theme.view.RadioButtonItem
 import no.nordicsemi.android.common.theme.view.RadioGroupViewEntity
 import no.nordicsemi.android.csc.data.SpeedUnit
 import no.nordicsemi.android.kotlin.ble.profile.csc.data.CSCData
-import java.util.*
+import java.util.Locale
 
 private const val DISPLAY_M_S = "m/s"
 private const val DISPLAY_KM_H = "km/h"

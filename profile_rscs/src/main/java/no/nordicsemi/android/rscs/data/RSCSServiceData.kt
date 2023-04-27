@@ -33,7 +33,6 @@ package no.nordicsemi.android.rscs.data
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.rscs.data.RSCSData
 import no.nordicsemi.android.rscs.R

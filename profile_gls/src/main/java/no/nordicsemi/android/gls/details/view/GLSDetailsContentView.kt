@@ -50,8 +50,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.gls.R
 import no.nordicsemi.android.gls.main.view.toDisplayString
-import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSRecord
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSMeasurementContext
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.GLSRecord
 import no.nordicsemi.android.ui.view.ScreenSection
 
 @Composable
