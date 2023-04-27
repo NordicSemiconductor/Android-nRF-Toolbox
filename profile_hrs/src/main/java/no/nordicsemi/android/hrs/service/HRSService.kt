@@ -122,9 +122,9 @@ internal class HRSService : NotificationService() {
     }
 
     private suspend fun configureGatt(services: BleGattServices, device: ServerDevice) {
-        val htsService = services.findService(HRS_SERVICE_UUID)!!
-        val htsMeasurementCharacteristic = htsService.findCharacteristic(HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID)!!
-        val bodySensorLocationCharacteristic = htsService.findCharacteristic(BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID)!!
+        val hrsService = services.findService(HRS_SERVICE_UUID)!!
+        val hrsMeasurementCharacteristic = hrsService.findCharacteristic(HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID)!!
+        val bodySensorLocationCharacteristic = hrsService.findCharacteristic(BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID)!!
         val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
         val batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
 
@@ -136,7 +136,7 @@ internal class HRSService : NotificationService() {
             .onEach { repository.onBatteryLevelChanged(it) }
             .launchIn(lifecycleScope)
 
-        htsMeasurementCharacteristic.getNotifications()
+        hrsMeasurementCharacteristic.getNotifications()
             .mapNotNull { HRSDataParser.parse(it) }
             .onEach { repository.onHRSDataChanged(it) }
             .launchIn(lifecycleScope)
