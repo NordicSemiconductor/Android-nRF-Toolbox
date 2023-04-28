@@ -76,6 +76,8 @@ internal class CSCService : NotificationService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
+        repository.setServiceRunning(true)
+
         val device = intent!!.getParcelableExtra<ServerDevice>(DEVICE_DATA)!!
 
         startGattClient(device)
@@ -138,5 +140,11 @@ internal class CSCService : NotificationService() {
 
     private fun disconnect() {
         client.disconnect()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        repository.setServiceRunning(false)
     }
 }

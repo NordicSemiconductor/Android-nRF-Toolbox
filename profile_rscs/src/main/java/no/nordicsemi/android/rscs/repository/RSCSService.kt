@@ -110,11 +110,11 @@ internal class RSCSService : NotificationService() {
 
         client.discoverServices()
             .filterNotNull()
-            .onEach { configureGatt(it, device) }
+            .onEach { configureGatt(it) }
             .launchIn(lifecycleScope)
     }
 
-    private suspend fun configureGatt(services: BleGattServices, device: ServerDevice) {
+    private suspend fun configureGatt(services: BleGattServices) {
         val rscsService = services.findService(RSCS_SERVICE_UUID)!!
         val rscsMeasurementCharacteristic = rscsService.findCharacteristic(RSC_MEASUREMENT_CHARACTERISTIC_UUID)!!
         val batteryService = services.findService(BATTERY_SERVICE_UUID)!!

@@ -46,6 +46,7 @@ import no.nordicsemi.android.kotlin.ble.client.main.connect
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattCharacteristic
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectOptions
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectionStatus
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattPermission
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattProperty
@@ -161,7 +162,9 @@ internal class PRXService : NotificationService() {
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
         val logger = NordicBlekLogger(this@PRXService, stringConst.APP_NAME, "PRX", device.address)
 
-        client = device.connect(this@PRXService, logger = logger)
+        client = device.connect(this@PRXService, logger = logger, options = BleGattConnectOptions(autoConnect = true))
+
+        client.waitForBonding()
 
         repository.loggerEvent
             .onEach { logger.launch() }
@@ -180,7 +183,7 @@ internal class PRXService : NotificationService() {
 
         client.discoverServices()
             .filterNotNull()
-            .onEach { configureGatt(it, device) }
+            .onEach { configureGatt(it) }
             .launchIn(lifecycleScope)
 
         repository.remoteAlarmLevel
@@ -188,7 +191,7 @@ internal class PRXService : NotificationService() {
             .launchIn(lifecycleScope)
     }
 
-    private suspend fun configureGatt(services: BleGattServices, device: ServerDevice) {
+    private suspend fun configureGatt(services: BleGattServices) {
         val prxService = services.findService(PRX_SERVICE_UUID)!!
         alertLevelCharacteristic = prxService.findCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID)!!
         val linkLossService = services.findService(LINK_LOSS_SERVICE_UUID)!!

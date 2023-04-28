@@ -72,6 +72,23 @@ class CSCRepository @Inject constructor(
 
     val isRunning = data.map { it.connectionState?.state == GattConnectionState.STATE_CONNECTED }
 
+    private var isOnScreen = false
+    private var isServiceRunning = false
+
+    fun setOnScreen(isOnScreen: Boolean) {
+        this.isOnScreen = isOnScreen
+
+        if (shouldClean()) clean()
+    }
+
+    fun setServiceRunning(serviceRunning: Boolean) {
+        this.isServiceRunning = serviceRunning
+
+        if (shouldClean()) clean()
+    }
+
+    private fun shouldClean() = !isOnScreen && !isServiceRunning
+
     fun launch(device: ServerDevice) {
         _data.value = _data.value.copy(deviceName = device.name)
         serviceManager.startService(CSCService::class.java, device)
@@ -102,7 +119,10 @@ class CSCRepository @Inject constructor(
     }
 
     fun disconnect() {
-        _data.value = CSCServiceData()
         _stopEvent.tryEmit(DisconnectAndStopEvent())
+    }
+
+    private fun clean() {
+        _data.value = CSCServiceData()
     }
 }

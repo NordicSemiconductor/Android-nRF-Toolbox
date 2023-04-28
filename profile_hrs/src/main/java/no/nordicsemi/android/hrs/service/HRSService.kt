@@ -114,11 +114,11 @@ internal class HRSService : NotificationService() {
 
         client.discoverServices()
             .filterNotNull()
-            .onEach { configureGatt(it, device) }
+            .onEach { configureGatt(it) }
             .launchIn(lifecycleScope)
     }
 
-    private suspend fun configureGatt(services: BleGattServices, device: ServerDevice) {
+    private suspend fun configureGatt(services: BleGattServices) {
         val hrsService = services.findService(HRS_SERVICE_UUID)!!
         val hrsMeasurementCharacteristic = hrsService.findCharacteristic(HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID)!!
         val bodySensorLocationCharacteristic = hrsService.findCharacteristic(BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID)!!

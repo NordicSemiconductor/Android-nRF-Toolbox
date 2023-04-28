@@ -68,6 +68,8 @@ internal class CSCViewModel @Inject constructor(
     val state = repository.data
 
     init {
+        repository.setOnScreen(true)
+
         viewModelScope.launch {
             if (repository.isRunning.firstOrNull() == false) {
                 requestBluetoothDevice()
@@ -117,5 +119,10 @@ internal class CSCViewModel @Inject constructor(
     private fun disconnect() {
         repository.disconnect()
         navigationManager.navigateUp()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        repository.setOnScreen(false)
     }
 }

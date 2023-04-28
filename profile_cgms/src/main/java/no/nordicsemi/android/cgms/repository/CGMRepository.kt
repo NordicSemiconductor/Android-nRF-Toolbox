@@ -127,7 +127,7 @@ class CGMRepository @Inject constructor(
         _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 
-    fun clean() {
+    private fun clean() {
         _data.value = CGMServiceData()
     }
 }

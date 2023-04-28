@@ -116,11 +116,11 @@ internal class UARTService : NotificationService() {
 
         client.discoverServices()
             .filterNotNull()
-            .onEach { configureGatt(it, device, logger) }
+            .onEach { configureGatt(it, logger) }
             .launchIn(lifecycleScope)
     }
 
-    private suspend fun configureGatt(services: BleGattServices, device: ServerDevice, logger: NordicBlekLogger) {
+    private suspend fun configureGatt(services: BleGattServices, logger: NordicBlekLogger) {
         val uartService = services.findService(UART_SERVICE_UUID)!!
         val rxCharacteristic = uartService.findCharacteristic(UART_RX_CHARACTERISTIC_UUID)!!
         val txCharacteristic = uartService.findCharacteristic(UART_TX_CHARACTERISTIC_UUID)!!

@@ -157,6 +157,8 @@ internal class GLSViewModel @Inject constructor(
     }
 
     private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
+        _state.value = _state.value.copy(deviceName = device.name)
+
         logger = NordicBlekLogger(context, stringConst.APP_NAME, "GLS", device.address)
 
         client = device.connect(context, logger = logger)
@@ -175,7 +177,7 @@ internal class GLSViewModel @Inject constructor(
 
         client.discoverServices()
             .filterNotNull()
-            .onEach { configureGatt(it, device) }
+            .onEach { configureGatt(it) }
             .launchIn(viewModelScope)
     }
 
@@ -185,7 +187,7 @@ internal class GLSViewModel @Inject constructor(
         }
     }
 
-    private suspend fun configureGatt(services: BleGattServices, device: ServerDevice) {
+    private suspend fun configureGatt(services: BleGattServices) {
         val glsService = services.findService(GLS_SERVICE_UUID)!!
         glucoseMeasurementCharacteristic = glsService.findCharacteristic(GM_CHARACTERISTIC)!!
         recordAccessControlPointCharacteristic = glsService.findCharacteristic(RACP_CHARACTERISTIC)!!
