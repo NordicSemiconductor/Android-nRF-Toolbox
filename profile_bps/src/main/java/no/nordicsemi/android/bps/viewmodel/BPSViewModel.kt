@@ -40,6 +40,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
@@ -128,7 +129,6 @@ internal class BPSViewModel @Inject constructor(
         client.connectionStateWithStatus
             .filterNotNull()
             .onEach { onDataUpdate(it) }
-            .onEach { stopIfDisconnected(it.state) }
             .onEach { logAnalytics(it.state) }
             .launchIn(viewModelScope)
 
@@ -152,16 +152,19 @@ internal class BPSViewModel @Inject constructor(
         batteryLevelCharacteristic.getNotifications()
             .mapNotNull { BatteryLevelParser.parse(it) }
             .onEach { onDataUpdate(it) }
+            .catch { it.printStackTrace() }
             .launchIn(viewModelScope)
 
         bpmCharacteristic.getNotifications()
             .mapNotNull { BloodPressureMeasurementParser.parse(it) }
             .onEach { onDataUpdate(it) }
+            .catch { it.printStackTrace() }
             .launchIn(viewModelScope)
 
         icpCharacteristic?.getNotifications()
             ?.mapNotNull { IntermediateCuffPressureParser.parse(it) }
             ?.onEach { onDataUpdate(it) }
+            ?.catch { it.printStackTrace() }
             ?.launchIn(viewModelScope)
     }
 
@@ -183,12 +186,6 @@ internal class BPSViewModel @Inject constructor(
     private fun onDataUpdate(data: IntermediateCuffPressureData) {
         val newResult = _state.value.result.copy(intermediateCuffPressure = data)
         _state.value = _state.value.copy(result = newResult)
-    }
-
-    private fun stopIfDisconnected(connectionState: GattConnectionState) {
-        if (connectionState == GattConnectionState.STATE_DISCONNECTED) {
-            navigationManager.navigateUp()
-        }
     }
 
     private fun logAnalytics(connectionState: GattConnectionState) {

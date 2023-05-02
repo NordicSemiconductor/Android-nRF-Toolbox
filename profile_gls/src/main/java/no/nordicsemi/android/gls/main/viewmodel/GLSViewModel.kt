@@ -40,6 +40,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
@@ -61,6 +62,7 @@ import no.nordicsemi.android.gls.main.view.OnWorkingModeSelected
 import no.nordicsemi.android.gls.main.view.OpenLoggerEvent
 import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
 import no.nordicsemi.android.kotlin.ble.client.main.connect
+import no.nordicsemi.android.kotlin.ble.client.main.errors.GattOperationException
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattCharacteristic
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
@@ -178,6 +180,7 @@ internal class GLSViewModel @Inject constructor(
         client.discoverServices()
             .filterNotNull()
             .onEach { configureGatt(it) }
+            .catch { it.printStackTrace() }
             .launchIn(viewModelScope)
     }
 
@@ -197,21 +200,25 @@ internal class GLSViewModel @Inject constructor(
         batteryLevelCharacteristic.getNotifications()
             .mapNotNull { BatteryLevelParser.parse(it) }
             .onEach { _state.value = _state.value.copyWithNewBatteryLevel(it) }
+            .catch { it.printStackTrace() }
             .launchIn(viewModelScope)
 
         glucoseMeasurementCharacteristic.getNotifications()
             .mapNotNull { GlucoseMeasurementParser.parse(it) }
             .onEach { _state.value = _state.value.copyWithNewRecord(it) }
+            .catch { it.printStackTrace() }
             .launchIn(viewModelScope)
 
         glsService.findCharacteristic(GM_CONTEXT_CHARACTERISTIC)?.getNotifications()
             ?.mapNotNull { GlucoseMeasurementContextParser.parse(it) }
             ?.onEach { _state.value = _state.value.copyWithNewContext(it) }
+            ?.catch { it.printStackTrace() }
             ?.launchIn(viewModelScope)
 
         recordAccessControlPointCharacteristic.getNotifications()
             .mapNotNull { RecordAccessControlPointParser.parse(it) }
             .onEach { onAccessControlPointDataReceived(it) }
+            .catch { it.printStackTrace() }
             .launchIn(viewModelScope)
     }
 
@@ -246,14 +253,18 @@ internal class GLSViewModel @Inject constructor(
 
     private suspend fun onNumberOfRecordsReceived(numberOfRecords: Int) {
         if (numberOfRecords > 0) {
-            if (state.value.glsServiceData.records.isNotEmpty()) {
-                recordAccessControlPointCharacteristic.write(
-                    RecordAccessControlPointInputParser.reportStoredRecordsGreaterThenOrEqualTo(highestSequenceNumber).value
-                )
-            } else {
-                recordAccessControlPointCharacteristic.write(
-                    RecordAccessControlPointInputParser.reportAllStoredRecords().value
-                )
+            try {
+                if (state.value.glsServiceData.records.isNotEmpty()) {
+                    recordAccessControlPointCharacteristic.write(
+                        RecordAccessControlPointInputParser.reportStoredRecordsGreaterThenOrEqualTo(highestSequenceNumber).value
+                    )
+                } else {
+                    recordAccessControlPointCharacteristic.write(
+                        RecordAccessControlPointInputParser.reportAllStoredRecords().value
+                    )
+                }
+            } catch (e: GattOperationException) {
+                e.printStackTrace()
             }
         }
         _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.SUCCESS)
@@ -274,18 +285,30 @@ internal class GLSViewModel @Inject constructor(
     private suspend fun requestLastRecord() {
         clear()
         _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.PENDING)
-        recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportLastStoredRecord().value)
+        try {
+            recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportLastStoredRecord().value)
+        } catch (e: Exception) {
+            _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.FAILED)
+        }
     }
 
     private suspend fun requestFirstRecord() {
         clear()
         _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.PENDING)
-        recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportFirstStoredRecord().value)
+        try {
+            recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportFirstStoredRecord().value)
+        } catch (e: Exception) {
+            _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.FAILED)
+        }
     }
 
     private suspend fun requestAllRecords() {
         clear()
         _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.PENDING)
-        recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords().value)
+        try {
+            recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords().value)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }
