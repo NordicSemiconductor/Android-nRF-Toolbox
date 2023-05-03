@@ -97,6 +97,8 @@ internal class HRSService : NotificationService() {
 
         client = device.connect(this@HRSService, logger = logger)
 
+        client.waitForBonding()
+
         repository.loggerEvent
             .onEach { logger.launch() }
             .launchIn(lifecycleScope)
@@ -106,8 +108,6 @@ internal class HRSService : NotificationService() {
             .filterNotNull()
             .onEach { stopIfDisconnected(it) }
             .launchIn(lifecycleScope)
-
-        client.waitForBonding()
 
         if (!client.isConnected) {
             return@launch
