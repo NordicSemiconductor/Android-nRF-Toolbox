@@ -125,12 +125,14 @@ internal class CSCService : NotificationService() {
         batteryLevelCharacteristic.getNotifications()
             .mapNotNull { BatteryLevelParser.parse(it) }
             .onEach { repository.onBatteryLevelChanged(it) }
+            .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
 
         val cscDataParser = CSCDataParser()
         cscMeasurementCharacteristic.getNotifications()
             .mapNotNull { cscDataParser.parse(it, repository.wheelSize.value) }
             .onEach { repository.onCSCDataChanged(it) }
+            .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
     }
 

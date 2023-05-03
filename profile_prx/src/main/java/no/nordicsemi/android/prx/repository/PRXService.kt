@@ -44,6 +44,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
 import no.nordicsemi.android.kotlin.ble.client.main.connect
+import no.nordicsemi.android.kotlin.ble.client.main.errors.GattOperationException
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattCharacteristic
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
@@ -174,7 +175,6 @@ internal class PRXService : NotificationService() {
         client.connectionStateWithStatus
             .filterNotNull()
             .onEach { repository.onConnectionStateChanged(it) }
-            .filterNotNull()
             .onEach { stopIfDisconnected(it.state, it.status) }
             .launchIn(lifecycleScope)
 
@@ -204,14 +204,19 @@ internal class PRXService : NotificationService() {
         batteryLevelCharacteristic.getNotifications()
             .mapNotNull { BatteryLevelParser.parse(it) }
             .onEach { repository.onBatteryLevelChanged(it) }
+            .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
 
         linkLossCharacteristic.write(AlertLevelInputParser.parse(AlarmLevel.HIGH))
     }
 
     private suspend fun writeAlertLevel(alarmLevel: AlarmLevel) {
-        alertLevelCharacteristic.write(AlertLevelInputParser.parse(alarmLevel), BleWriteType.NO_RESPONSE)
-        repository.onRemoteAlarmLevelSet(alarmLevel)
+        try {
+            alertLevelCharacteristic.write(AlertLevelInputParser.parse(alarmLevel), BleWriteType.NO_RESPONSE)
+            repository.onRemoteAlarmLevelSet(alarmLevel)
+        } catch (e: GattOperationException) {
+            e.printStackTrace()
+        }
     }
 
     private fun stopIfDisconnected(connectionState: GattConnectionState, connectionStatus: BleGattConnectionStatus) {

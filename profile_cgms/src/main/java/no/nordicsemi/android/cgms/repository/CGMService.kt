@@ -47,6 +47,7 @@ import no.nordicsemi.android.cgms.data.CGMServiceCommand
 import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
 import no.nordicsemi.android.kotlin.ble.client.main.connect
+import no.nordicsemi.android.kotlin.ble.client.main.errors.GattOperationException
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattCharacteristic
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
@@ -173,6 +174,7 @@ internal class CGMService : NotificationService() {
         batteryLevelCharacteristic.getNotifications()
             .mapNotNull { BatteryLevelParser.parse(it) }
             .onEach { repository.onBatteryLevelChanged(it) }
+            .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
 
         measurementCharacteristic.getNotifications()
@@ -190,6 +192,7 @@ internal class CGMService : NotificationService() {
 
                 repository.onDataReceived(result)
             }
+            .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
 
         opsControlPointCharacteristic.getNotifications()
@@ -209,11 +212,13 @@ internal class CGMService : NotificationService() {
                     }
                 }
             }
+            .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
 
         recordAccessControlPointCharacteristic.getNotifications()
             .mapNotNull { RecordAccessControlPointParser.parse(it) }
             .onEach { onAccessControlPointDataReceived(it) }
+            .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
 
         lifecycleScope.launchWithCatch {
@@ -292,19 +297,34 @@ internal class CGMService : NotificationService() {
     private suspend fun requestLastRecord() {
         clear()
         repository.onNewRequestStatus(RequestStatus.PENDING)
-        recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportLastStoredRecord().value)
+        try {
+            recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportLastStoredRecord().value)
+        } catch (e: GattOperationException) {
+            e.printStackTrace()
+            repository.onNewRequestStatus(RequestStatus.FAILED)
+        }
     }
 
     private suspend fun requestFirstRecord() {
         clear()
         repository.onNewRequestStatus(RequestStatus.PENDING)
-        recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportFirstStoredRecord().value)
+        try {
+            recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportFirstStoredRecord().value)
+        } catch (e: GattOperationException) {
+            e.printStackTrace()
+            repository.onNewRequestStatus(RequestStatus.FAILED)
+        }
     }
 
     private suspend fun requestAllRecords() {
         clear()
         repository.onNewRequestStatus(RequestStatus.PENDING)
-        recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords().value)
+        try {
+            recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords().value)
+        } catch (e: GattOperationException) {
+            e.printStackTrace()
+            repository.onNewRequestStatus(RequestStatus.FAILED)
+        }
     }
 
     private fun stopIfDisconnected(connectionState: GattConnectionStateWithStatus) {

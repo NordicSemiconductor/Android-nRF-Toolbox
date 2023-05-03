@@ -127,11 +127,13 @@ internal class HTSService : NotificationService() {
         batteryLevelCharacteristic.getNotifications()
             .mapNotNull { BatteryLevelParser.parse(it) }
             .onEach { repository.onBatteryLevelChanged(it) }
+            .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
 
         htsMeasurementCharacteristic.getNotifications()
             .mapNotNull { HTSDataParser.parse(it) }
             .onEach { repository.onHTSDataChanged(it) }
+            .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
     }
 

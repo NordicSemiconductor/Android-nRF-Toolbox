@@ -133,11 +133,13 @@ internal class HRSService : NotificationService() {
         batteryLevelCharacteristic.getNotifications()
             .mapNotNull { BatteryLevelParser.parse(it) }
             .onEach { repository.onBatteryLevelChanged(it) }
+            .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
 
         hrsMeasurementCharacteristic.getNotifications()
             .mapNotNull { HRSDataParser.parse(it) }
             .onEach { repository.onHRSDataChanged(it) }
+            .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
     }
 

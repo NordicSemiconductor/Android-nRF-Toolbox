@@ -132,11 +132,13 @@ internal class UARTService : NotificationService() {
         batteryService?.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)?.getNotifications()
             ?.mapNotNull { BatteryLevelParser.parse(it) }
             ?.onEach { repository.onBatteryLevelChanged(it) }
+            ?.catch { it.printStackTrace() }
             ?.launchIn(lifecycleScope)
 
         txCharacteristic.getNotifications()
             .onEach { repository.onNewMessageReceived(String(it)) }
             .onEach { logger.log(10, "Received: ${String(it)}") }
+            .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
 
         repository.command
