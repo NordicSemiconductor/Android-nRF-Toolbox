@@ -139,6 +139,7 @@ internal class BPSViewModel @Inject constructor(
         client.discoverServices()
             .filterNotNull()
             .onEach { configureGatt(it) }
+            .catch { it.printStackTrace() }
             .launchIn(viewModelScope)
     }
 

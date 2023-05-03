@@ -35,6 +35,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
@@ -117,6 +118,7 @@ internal class UARTService : NotificationService() {
         client.discoverServices()
             .filterNotNull()
             .onEach { configureGatt(it, logger) }
+            .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
     }
 
