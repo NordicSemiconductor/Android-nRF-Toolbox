@@ -47,6 +47,7 @@ import no.nordicsemi.android.kotlin.ble.profile.hrs.data.HRSData
 import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.OpenLoggerEvent
 import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.android.ui.view.StringConst
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -54,7 +55,8 @@ import javax.inject.Singleton
 class HRSRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val serviceManager: ServiceManager
+    private val serviceManager: ServiceManager,
+    private val stringConst: StringConst
 ) {
     private var logger: NordicBlekLogger? = null
 
@@ -63,9 +65,6 @@ class HRSRepository @Inject constructor(
 
     private val _stopEvent = simpleSharedFlow<DisconnectAndStopEvent>()
     internal val stopEvent = _stopEvent.asSharedFlow()
-
-    private val _loggerEvent = simpleSharedFlow<OpenLoggerEvent>()
-    internal val loggerEvent = _loggerEvent.asSharedFlow()
 
     val isRunning = data.map { it.connectionState?.state == GattConnectionState.STATE_CONNECTED }
 
@@ -87,6 +86,7 @@ class HRSRepository @Inject constructor(
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
     fun launch(device: ServerDevice) {
+        logger = NordicBlekLogger(context, stringConst.APP_NAME, "HRS", device.address)
         _data.value = _data.value.copy(deviceName = device.name)
         serviceManager.startService(HRSService::class.java, device)
     }
@@ -117,7 +117,11 @@ class HRSRepository @Inject constructor(
     }
 
     fun openLogger() {
-        _loggerEvent.tryEmit(OpenLoggerEvent())
+        logger?.launch()
+    }
+
+    fun log(priority: Int, message: String) {
+        logger?.log(priority, message)
     }
 
     fun disconnect() {
@@ -125,6 +129,7 @@ class HRSRepository @Inject constructor(
     }
 
     private fun clean() {
+        logger = null
         _data.value = HRSServiceData()
     }
 }

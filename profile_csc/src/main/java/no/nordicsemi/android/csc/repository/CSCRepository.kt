@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.core.simpleSharedFlow
+import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.csc.data.CSCServiceData
 import no.nordicsemi.android.csc.data.SpeedUnit
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
@@ -49,6 +50,7 @@ import no.nordicsemi.android.kotlin.ble.profile.csc.data.WheelSizes
 import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.OpenLoggerEvent
 import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.android.ui.view.StringConst
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -57,7 +59,10 @@ class CSCRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
+    private val stringConst: StringConst
 ) {
+    private var logger: NordicBlekLogger? = null
+
     private val _wheelSize = MutableStateFlow(WheelSizes.default)
     internal val wheelSize = _wheelSize.asStateFlow()
 
@@ -66,9 +71,6 @@ class CSCRepository @Inject constructor(
 
     private val _stopEvent = simpleSharedFlow<DisconnectAndStopEvent>()
     internal val stopEvent = _stopEvent.asSharedFlow()
-
-    private val _loggerEvent = simpleSharedFlow<OpenLoggerEvent>()
-    internal val loggerEvent = _loggerEvent.asSharedFlow()
 
     val isRunning = data.map { it.connectionState?.state == GattConnectionState.STATE_CONNECTED }
 
@@ -90,6 +92,7 @@ class CSCRepository @Inject constructor(
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
     fun launch(device: ServerDevice) {
+        logger = NordicBlekLogger(context, stringConst.APP_NAME, "CSC", device.address)
         _data.value = _data.value.copy(deviceName = device.name)
         serviceManager.startService(CSCService::class.java, device)
     }
@@ -120,7 +123,11 @@ class CSCRepository @Inject constructor(
     }
 
     fun openLogger() {
-        _loggerEvent.tryEmit(OpenLoggerEvent())
+        logger?.launch()
+    }
+
+    fun log(priority: Int, message: String) {
+        logger?.log(priority, message)
     }
 
     fun disconnect() {
@@ -128,6 +135,7 @@ class CSCRepository @Inject constructor(
     }
 
     private fun clean() {
+        logger = null
         _data.value = CSCServiceData()
     }
 }

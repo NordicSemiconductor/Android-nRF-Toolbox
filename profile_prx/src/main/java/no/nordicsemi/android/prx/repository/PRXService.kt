@@ -84,9 +84,6 @@ internal class PRXService : NotificationService() {
     @Inject
     lateinit var repository: PRXRepository
 
-    @Inject
-    lateinit var stringConst: StringConst
-
     private lateinit var client: BleGattClient
     private lateinit var server: BleGattServer
 
@@ -162,15 +159,13 @@ internal class PRXService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        val logger = NordicBlekLogger(this@PRXService, stringConst.APP_NAME, "PRX", device.address)
-
-        client = device.connect(this@PRXService, logger = logger, options = BleGattConnectOptions(autoConnect = true))
+        client = device.connect(
+            this@PRXService,
+            logger = { p, s -> repository.log(p, s) },
+            options = BleGattConnectOptions(autoConnect = true)
+        )
 
         client.waitForBonding()
-
-        repository.loggerEvent
-            .onEach { logger.launch() }
-            .launchIn(lifecycleScope)
 
         client.connectionStateWithStatus
             .filterNotNull()

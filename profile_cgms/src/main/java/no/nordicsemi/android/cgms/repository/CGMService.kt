@@ -93,9 +93,6 @@ internal class CGMService : NotificationService() {
     @Inject
     lateinit var repository: CGMRepository
 
-    @Inject
-    lateinit var stringConst: StringConst
-
     private lateinit var client: BleGattClient
 
     private var secured = false
@@ -136,13 +133,7 @@ internal class CGMService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        val logger = NordicBlekLogger(this@CGMService, stringConst.APP_NAME, "CGM", device.address)
-
-        client = device.connect(this@CGMService, logger = logger)
-
-        repository.loggerEvent
-            .onEach { logger.launch() }
-            .launchIn(lifecycleScope)
+        client = device.connect(this@CGMService, logger = { p, s -> repository.log(p, s) })
 
         client.connectionStateWithStatus
             .onEach { repository.onConnectionStateChanged(it) }

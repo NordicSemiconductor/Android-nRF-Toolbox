@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.core.simpleSharedFlow
+import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
@@ -51,6 +52,7 @@ import no.nordicsemi.android.uart.data.UARTRecord
 import no.nordicsemi.android.uart.data.UARTRecordType
 import no.nordicsemi.android.uart.data.UARTServiceData
 import no.nordicsemi.android.uart.data.parseWithNewLineChar
+import no.nordicsemi.android.ui.view.StringConst
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -59,8 +61,11 @@ class UARTRepository @Inject internal constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
-    private val configurationDataSource: ConfigurationDataSource
+    private val configurationDataSource: ConfigurationDataSource,
+    private val stringConst: StringConst
 ) {
+    private var logger: NordicBlekLogger? = null
+
     private val _data = MutableStateFlow(UARTServiceData())
     internal val data = _data.asStateFlow()
 
@@ -69,9 +74,6 @@ class UARTRepository @Inject internal constructor(
 
     private val _command = simpleSharedFlow<String>()
     internal val command = _command.asSharedFlow()
-
-    private val _loggerEvent = simpleSharedFlow<OpenLoggerEvent>()
-    internal val loggerEvent = _loggerEvent.asSharedFlow()
 
     val isRunning = data.map { it.connectionState?.state == GattConnectionState.STATE_CONNECTED }
 
@@ -95,6 +97,7 @@ class UARTRepository @Inject internal constructor(
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
     fun launch(device: ServerDevice) {
+        logger = NordicBlekLogger(context, stringConst.APP_NAME, "UART", device.address)
         _data.value = _data.value.copy(deviceName = device.name)
         serviceManager.startService(UARTService::class.java, device)
     }
@@ -131,7 +134,11 @@ class UARTRepository @Inject internal constructor(
     }
 
     fun openLogger() {
-        _loggerEvent.tryEmit(OpenLoggerEvent())
+        logger?.launch()
+    }
+
+    fun log(priority: Int, message: String) {
+        logger?.log(priority, message)
     }
 
     fun onMissingServices() {
@@ -148,6 +155,7 @@ class UARTRepository @Inject internal constructor(
     }
 
     private fun clean() {
+        logger = null
         _data.value = UARTServiceData()
     }
 }

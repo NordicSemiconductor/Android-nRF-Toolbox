@@ -69,9 +69,6 @@ internal class RSCSService : NotificationService() {
     @Inject
     lateinit var repository: RSCSRepository
 
-    @Inject
-    lateinit var stringConst: StringConst
-
     private lateinit var client: BleGattClient
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -91,13 +88,7 @@ internal class RSCSService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        val logger = NordicBlekLogger(this@RSCSService, stringConst.APP_NAME, "RSCS", device.address)
-
-        client = device.connect(this@RSCSService, logger = logger)
-
-        repository.loggerEvent
-            .onEach { logger.launch() }
-            .launchIn(lifecycleScope)
+        client = device.connect(this@RSCSService, logger = { p, s -> repository.log(p, s) })
 
         client.connectionStateWithStatus
             .onEach { repository.onConnectionStateChanged(it) }

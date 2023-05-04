@@ -38,14 +38,15 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.core.simpleSharedFlow
+import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.prx.AlarmLevel
 import no.nordicsemi.android.prx.data.PRXServiceData
 import no.nordicsemi.android.service.DisconnectAndStopEvent
-import no.nordicsemi.android.service.OpenLoggerEvent
 import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.android.ui.view.StringConst
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -53,17 +54,16 @@ import javax.inject.Singleton
 class PRXRepository @Inject internal constructor(
     @ApplicationContext
     private val context: Context,
-    private val serviceManager: ServiceManager
+    private val serviceManager: ServiceManager,
+    private val stringConst: StringConst
 ) {
+    private var logger: NordicBlekLogger? = null
 
     private val _data = MutableStateFlow(PRXServiceData())
     internal val data = _data.asStateFlow()
 
     private val _stopEvent = simpleSharedFlow<DisconnectAndStopEvent>()
     internal val stopEvent = _stopEvent.asSharedFlow()
-
-    private val _loggerEvent = simpleSharedFlow<OpenLoggerEvent>()
-    internal val loggerEvent = _loggerEvent.asSharedFlow()
 
     private val _remoteAlarmLevel = simpleSharedFlow<AlarmLevel>()
     internal val remoteAlarmLevel = _remoteAlarmLevel.asSharedFlow()
@@ -87,8 +87,8 @@ class PRXRepository @Inject internal constructor(
 
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
-
     fun launch(device: ServerDevice) {
+        logger = NordicBlekLogger(context, stringConst.APP_NAME, "PRX", device.address)
         _data.value = _data.value.copy(deviceName = device.name)
         serviceManager.startService(PRXService::class.java, device)
     }
@@ -118,7 +118,11 @@ class PRXRepository @Inject internal constructor(
     }
 
     fun openLogger() {
-        _loggerEvent.tryEmit(OpenLoggerEvent())
+        logger?.launch()
+    }
+
+    fun log(priority: Int, message: String) {
+        logger?.log(priority, message)
     }
 
     fun onMissingServices() {
@@ -132,6 +136,7 @@ class PRXRepository @Inject internal constructor(
     }
 
     private fun clean() {
+        logger = null
         _data.value = PRXServiceData()
     }
 }

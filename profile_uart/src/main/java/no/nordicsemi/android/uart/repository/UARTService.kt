@@ -41,7 +41,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
 import no.nordicsemi.android.kotlin.ble.client.main.connect
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattCharacteristic
@@ -53,7 +52,6 @@ import no.nordicsemi.android.kotlin.ble.core.data.Mtu
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
-import no.nordicsemi.android.ui.view.StringConst
 import java.util.*
 import javax.inject.Inject
 
@@ -70,9 +68,6 @@ internal class UARTService : NotificationService() {
 
     @Inject
     lateinit var repository: UARTRepository
-
-    @Inject
-    lateinit var stringConst: StringConst
 
     private lateinit var client: BleGattClient
 
@@ -93,15 +88,9 @@ internal class UARTService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        val logger = NordicBlekLogger(this@UARTService, stringConst.APP_NAME, "UART", device.address)
-
-        client = device.connect(this@UARTService, logger = logger)
+        client = device.connect(this@UARTService, logger = { p, s -> repository.log(p, s) })
 
         client.requestMtu(Mtu.max)
-
-        repository.loggerEvent
-            .onEach { logger.launch() }
-            .launchIn(lifecycleScope)
 
         client.connectionStateWithStatus
             .onEach { repository.onConnectionStateChanged(it) }
@@ -114,12 +103,12 @@ internal class UARTService : NotificationService() {
 
         client.discoverServices()
             .filterNotNull()
-            .onEach { configureGatt(it, logger) }
+            .onEach { configureGatt(it) }
             .catch { repository.onMissingServices() }
             .launchIn(lifecycleScope)
     }
 
-    private suspend fun configureGatt(services: BleGattServices, logger: NordicBlekLogger) {
+    private suspend fun configureGatt(services: BleGattServices) {
         val uartService = services.findService(UART_SERVICE_UUID)!!
         val rxCharacteristic = uartService.findCharacteristic(UART_RX_CHARACTERISTIC_UUID)!!
         val txCharacteristic = uartService.findCharacteristic(UART_TX_CHARACTERISTIC_UUID)!!
@@ -134,14 +123,14 @@ internal class UARTService : NotificationService() {
 
         txCharacteristic.getNotifications()
             .onEach { repository.onNewMessageReceived(String(it)) }
-            .onEach { logger.log(10, "Received: ${String(it)}") }
+            .onEach { repository.log(10, "Received: ${String(it)}") }
             .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
 
         repository.command
             .onEach { rxCharacteristic.splitWrite(it.toByteArray(), getWriteType(rxCharacteristic)) }
             .onEach { repository.onNewMessageSent(it) }
-            .onEach { logger.log(10, "Sent: $it") }
+            .onEach { repository.log(10, "Sent: $it") }
             .launchIn(lifecycleScope)
     }
 
