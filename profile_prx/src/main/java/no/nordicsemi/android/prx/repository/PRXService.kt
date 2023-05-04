@@ -90,7 +90,7 @@ internal class PRXService : NotificationService() {
     private lateinit var client: BleGattClient
     private lateinit var server: BleGattServer
 
-    private lateinit var alertLevelCharacteristic: BleGattCharacteristic
+    private var alertLevelCharacteristic: BleGattCharacteristic? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
@@ -185,7 +185,7 @@ internal class PRXService : NotificationService() {
         client.discoverServices()
             .filterNotNull()
             .onEach { configureGatt(it) }
-            .catch { it.printStackTrace() }
+            .catch { repository.onMissingServices() }
             .launchIn(lifecycleScope)
 
         repository.remoteAlarmLevel
@@ -212,9 +212,11 @@ internal class PRXService : NotificationService() {
 
     private suspend fun writeAlertLevel(alarmLevel: AlarmLevel) {
         try {
-            alertLevelCharacteristic.write(AlertLevelInputParser.parse(alarmLevel), BleWriteType.NO_RESPONSE)
-            repository.onRemoteAlarmLevelSet(alarmLevel)
-        } catch (e: GattOperationException) {
+            alertLevelCharacteristic?.run {
+                write(AlertLevelInputParser.parse(alarmLevel), BleWriteType.NO_RESPONSE)
+                repository.onRemoteAlarmLevelSet(alarmLevel)
+            }
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }

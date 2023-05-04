@@ -103,6 +103,11 @@ class RSCSRepository @Inject constructor(
         _data.value = _data.value.copy(batteryLevel = batteryLevel)
     }
 
+    fun onMissingServices() {
+        _data.value = _data.value.copy(missingServices = true)
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
+    }
+
     fun openLogger() {
         _loggerEvent.tryEmit(OpenLoggerEvent())
     }

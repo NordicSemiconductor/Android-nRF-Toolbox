@@ -121,6 +121,11 @@ class PRXRepository @Inject internal constructor(
         _loggerEvent.tryEmit(OpenLoggerEvent())
     }
 
+    fun onMissingServices() {
+        _data.value = _data.value.copy(missingServices = true)
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
+    }
+
     fun disconnect() {
         _remoteAlarmLevel.tryEmit(AlarmLevel.NONE)
         _stopEvent.tryEmit(DisconnectAndStopEvent())

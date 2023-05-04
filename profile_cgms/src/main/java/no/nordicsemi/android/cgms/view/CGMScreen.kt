@@ -81,7 +81,7 @@ fun CGMScreen() {
                 GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
 
                 GattConnectionState.STATE_DISCONNECTED,
-                GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(state.connectionState.status) {
+                GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(state.disconnectStatus) {
                     NavigateUpButton(navigateUp)
                 }
 

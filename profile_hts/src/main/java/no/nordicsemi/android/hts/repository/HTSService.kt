@@ -41,7 +41,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
 import no.nordicsemi.android.kotlin.ble.client.main.connect
 import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
@@ -52,7 +51,6 @@ import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.hts.HTSDataParser
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
-import no.nordicsemi.android.ui.view.StringConst
 import java.util.*
 import javax.inject.Inject
 
@@ -68,9 +66,6 @@ internal class HTSService : NotificationService() {
 
     @Inject
     lateinit var repository: HTSRepository
-
-    @Inject
-    lateinit var stringConst: StringConst
 
     private lateinit var client: BleGattClient
 
@@ -91,15 +86,9 @@ internal class HTSService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        val logger = NordicBlekLogger(this@HTSService, stringConst.APP_NAME, "HTS", device.address)
-
-        client = device.connect(this@HTSService, logger = logger)
+        client = device.connect(this@HTSService, logger = { p, s -> repository.log(p, s) })
 
         client.waitForBonding()
-
-        repository.loggerEvent
-            .onEach { logger.launch() }
-            .launchIn(lifecycleScope)
 
         client.connectionStateWithStatus
             .onEach { repository.onConnectionStateChanged(it) }
@@ -114,7 +103,7 @@ internal class HTSService : NotificationService() {
         client.discoverServices()
             .filterNotNull()
             .onEach { configureGatt(it) }
-            .catch { it.printStackTrace() }
+            .catch { repository.onMissingServices() }
             .launchIn(lifecycleScope)
     }
 

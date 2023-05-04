@@ -134,6 +134,11 @@ class UARTRepository @Inject internal constructor(
         _loggerEvent.tryEmit(OpenLoggerEvent())
     }
 
+    fun onMissingServices() {
+        _data.value = _data.value.copy(missingServices = true)
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
+    }
+
     suspend fun saveConfigurationName(name: String) {
         configurationDataSource.saveConfigurationName(name)
     }

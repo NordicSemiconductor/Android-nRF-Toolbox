@@ -31,14 +31,22 @@
 
 package no.nordicsemi.android.uart.data
 
+import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectionStatus
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 
 internal data class UARTServiceData(
     val messages: List<UARTRecord> = emptyList(),
     val connectionState: GattConnectionStateWithStatus? = null,
     val batteryLevel: Int? = null,
-    val deviceName: String? = null
+    val deviceName: String? = null,
+    val missingServices: Boolean = false
 ) {
+
+    val disconnectStatus = if (missingServices) {
+        BleGattConnectionStatus.NOT_SUPPORTED
+    } else {
+        connectionState?.status ?: BleGattConnectionStatus.UNKNOWN
+    }
 
     val displayMessages = messages
 }

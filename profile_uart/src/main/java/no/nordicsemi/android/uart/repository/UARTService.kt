@@ -49,8 +49,6 @@ import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattProperty
 import no.nordicsemi.android.kotlin.ble.core.data.BleWriteType
-import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
-import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.core.data.Mtu
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.service.DEVICE_DATA
@@ -108,7 +106,6 @@ internal class UARTService : NotificationService() {
         client.connectionStateWithStatus
             .onEach { repository.onConnectionStateChanged(it) }
             .filterNotNull()
-            .onEach { stopIfDisconnected(it) }
             .launchIn(lifecycleScope)
 
         if (!client.isConnected) {
@@ -118,7 +115,7 @@ internal class UARTService : NotificationService() {
         client.discoverServices()
             .filterNotNull()
             .onEach { configureGatt(it, logger) }
-            .catch { it.printStackTrace() }
+            .catch { repository.onMissingServices() }
             .launchIn(lifecycleScope)
     }
 
@@ -153,12 +150,6 @@ internal class UARTService : NotificationService() {
             BleWriteType.DEFAULT
         } else {
             BleWriteType.NO_RESPONSE
-        }
-    }
-
-    private fun stopIfDisconnected(connectionState: GattConnectionStateWithStatus) {
-        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED) {
-            stopSelf()
         }
     }
 

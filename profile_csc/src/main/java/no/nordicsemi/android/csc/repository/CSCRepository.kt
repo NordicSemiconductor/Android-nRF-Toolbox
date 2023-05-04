@@ -114,6 +114,11 @@ class CSCRepository @Inject constructor(
         _data.value = _data.value.copy(data = cscData)
     }
 
+    fun onMissingServices() {
+        _data.value = _data.value.copy(missingServices = true)
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
+    }
+
     fun openLogger() {
         _loggerEvent.tryEmit(OpenLoggerEvent())
     }

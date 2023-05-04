@@ -115,6 +115,11 @@ class CGMRepository @Inject constructor(
         _data.value = _data.value.copy(requestStatus = requestStatus)
     }
 
+    fun onMissingServices() {
+        _data.value = _data.value.copy(missingServices = true)
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
+    }
+
     fun openLogger() {
         _loggerEvent.tryEmit(OpenLoggerEvent())
     }

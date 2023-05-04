@@ -137,8 +137,13 @@ internal class GLSViewModel @Inject constructor(
             OpenLoggerEvent -> logger.launch()
             is OnWorkingModeSelected -> onEvent(event)
             is OnGLSRecordClick -> navigateToDetails(event.record)
-            DisconnectEvent -> navigationManager.navigateUp()
+            DisconnectEvent -> onDisconnectEvent()
         }
+    }
+
+    private fun onDisconnectEvent() {
+        client.disconnect()
+        navigationManager.navigateUp()
     }
 
     private fun navigateToDetails(record: GLSRecord) {
@@ -180,8 +185,13 @@ internal class GLSViewModel @Inject constructor(
         client.discoverServices()
             .filterNotNull()
             .onEach { configureGatt(it) }
-            .catch { it.printStackTrace() }
+            .catch { onMissingServices() }
             .launchIn(viewModelScope)
+    }
+
+    private fun onMissingServices() {
+        _state.value = state.value.copy(missingServices = true)
+        client.disconnect()
     }
 
     private fun logAnalytics(connectionState: GattConnectionStateWithStatus) {

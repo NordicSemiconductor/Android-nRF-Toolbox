@@ -32,8 +32,17 @@
 package no.nordicsemi.android.bps.view
 
 import no.nordicsemi.android.bps.data.BPSServiceData
+import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectionStatus
 
 internal data class BPSViewState(
     val result: BPSServiceData = BPSServiceData(),
-    val deviceName: String? = null
-)
+    val deviceName: String? = null,
+    val missingServices: Boolean = false
+) {
+
+    val disconnectStatus = if (missingServices) {
+        BleGattConnectionStatus.NOT_SUPPORTED
+    } else {
+        result.connectionState?.status ?: BleGattConnectionStatus.UNKNOWN
+    }
+}

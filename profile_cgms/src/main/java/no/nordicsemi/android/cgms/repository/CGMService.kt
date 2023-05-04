@@ -157,7 +157,7 @@ internal class CGMService : NotificationService() {
         client.discoverServices()
             .filterNotNull()
             .onEach { configureGatt(it) }
-            .catch { it.printStackTrace() }
+            .catch { repository.onMissingServices() }
             .launchIn(lifecycleScope)
     }
 

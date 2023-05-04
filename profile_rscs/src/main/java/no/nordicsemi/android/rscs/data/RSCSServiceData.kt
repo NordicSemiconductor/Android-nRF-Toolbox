@@ -33,6 +33,7 @@ package no.nordicsemi.android.rscs.data
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectionStatus
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.rscs.data.RSCSData
 import no.nordicsemi.android.rscs.R
@@ -41,8 +42,16 @@ internal data class RSCSServiceData(
     val data: RSCSData = RSCSData(),
     val batteryLevel: Int? = null,
     val connectionState: GattConnectionStateWithStatus? = null,
-    val deviceName: String? = null
+    val deviceName: String? = null,
+    val missingServices: Boolean = false
 ) {
+
+    val disconnectStatus = if (missingServices) {
+        BleGattConnectionStatus.NOT_SUPPORTED
+    } else {
+        connectionState?.status ?: BleGattConnectionStatus.UNKNOWN
+    }
+
     @Composable
     fun displayActivity(): String {
         return if (data.running) {

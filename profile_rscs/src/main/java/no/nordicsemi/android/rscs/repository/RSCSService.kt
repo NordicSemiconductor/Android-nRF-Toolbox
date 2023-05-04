@@ -112,7 +112,7 @@ internal class RSCSService : NotificationService() {
         client.discoverServices()
             .filterNotNull()
             .onEach { configureGatt(it) }
-            .catch { it.printStackTrace() }
+            .catch { repository.onMissingServices() }
             .launchIn(lifecycleScope)
     }
 

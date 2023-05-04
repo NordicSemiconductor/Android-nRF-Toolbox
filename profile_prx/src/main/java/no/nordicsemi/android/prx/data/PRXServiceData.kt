@@ -11,8 +11,15 @@ data class PRXServiceData(
     val connectionState: GattConnectionStateWithStatus? = null,
     val connectionStatus: BleGattConnectionStatus? = null,
     val isRemoteAlarm: Boolean = false,
-    val deviceName: String? = null
+    val deviceName: String? = null,
+    val missingServices: Boolean = false
 ) {
+
+    val disconnectStatus = if (missingServices) {
+        BleGattConnectionStatus.NOT_SUPPORTED
+    } else {
+        connectionState?.status ?: BleGattConnectionStatus.UNKNOWN
+    }
 
     val isLinkLossDisconnected = connectionStatus?.isLinkLoss ?: false
 }

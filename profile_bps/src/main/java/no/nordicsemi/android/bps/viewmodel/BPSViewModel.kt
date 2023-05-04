@@ -112,9 +112,14 @@ internal class BPSViewModel @Inject constructor(
 
     fun onEvent(event: BPSViewEvent) {
         when (event) {
-            DisconnectEvent -> navigationManager.navigateUp()
+            DisconnectEvent -> onDisconnectEvent()
             OpenLoggerEvent -> logger.launch()
         }
+    }
+
+    private fun onDisconnectEvent() {
+        client.disconnect()
+        navigationManager.navigateUp()
     }
 
     private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
@@ -139,7 +144,7 @@ internal class BPSViewModel @Inject constructor(
         client.discoverServices()
             .filterNotNull()
             .onEach { configureGatt(it) }
-            .catch { it.printStackTrace() }
+            .catch { onMissingServices() }
             .launchIn(viewModelScope)
     }
 
@@ -167,6 +172,11 @@ internal class BPSViewModel @Inject constructor(
             ?.onEach { onDataUpdate(it) }
             ?.catch { it.printStackTrace() }
             ?.launchIn(viewModelScope)
+    }
+
+    private fun onMissingServices() {
+        _state.value = _state.value.copy(missingServices = true)
+        client.disconnect()
     }
 
     private fun onDataUpdate(connectionState: GattConnectionStateWithStatus) {

@@ -46,8 +46,8 @@ import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.hts.data.HTSData
 import no.nordicsemi.android.service.DisconnectAndStopEvent
-import no.nordicsemi.android.service.OpenLoggerEvent
 import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.android.ui.view.StringConst
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -55,7 +55,8 @@ import javax.inject.Singleton
 class HTSRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
-    private val serviceManager: ServiceManager
+    private val serviceManager: ServiceManager,
+    private val stringConst: StringConst
 ) {
     private var logger: NordicBlekLogger? = null
 
@@ -64,9 +65,6 @@ class HTSRepository @Inject constructor(
 
     private val _stopEvent = simpleSharedFlow<DisconnectAndStopEvent>()
     internal val stopEvent = _stopEvent.asSharedFlow()
-
-    private val _loggerEvent = simpleSharedFlow<OpenLoggerEvent>()
-    internal val loggerEvent = _loggerEvent.asSharedFlow()
 
     val isRunning = data.map { it.connectionState?.state == GattConnectionState.STATE_CONNECTED }
 
@@ -89,6 +87,7 @@ class HTSRepository @Inject constructor(
 
     fun launch(device: ServerDevice) {
         _data.value = _data.value.copy(deviceName = device.name)
+        logger = NordicBlekLogger(context, stringConst.APP_NAME, "HTS", device.address)
         serviceManager.startService(HTSService::class.java, device)
     }
 
@@ -109,10 +108,19 @@ class HTSRepository @Inject constructor(
     }
 
     fun openLogger() {
-        _loggerEvent.tryEmit(OpenLoggerEvent())
+        logger?.launch()
+    }
+
+    fun log(priority: Int, message: String) {
+        logger?.log(priority, message)
     }
 
     fun disconnect() {
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
+    }
+
+    fun onMissingServices() {
+        _data.value = _data.value.copy(missingServices = true)
         _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 
