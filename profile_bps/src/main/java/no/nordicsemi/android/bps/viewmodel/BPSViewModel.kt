@@ -129,8 +129,6 @@ internal class BPSViewModel @Inject constructor(
 
         client = device.connect(context, logger = logger)
 
-        client.waitForBonding()
-
         client.connectionStateWithStatus
             .filterNotNull()
             .onEach { onDataUpdate(it) }
