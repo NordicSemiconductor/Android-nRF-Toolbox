@@ -45,9 +45,9 @@ dependencies {
     implementation(project(":lib_ui"))
     implementation(project(":lib_utils"))
 
-    implementation("no.nordicsemi.android.kotlin.ble:client:0.0.1")
-    implementation("no.nordicsemi.android.kotlin.ble:server:0.0.1")
-    implementation("no.nordicsemi.android.kotlin.ble:profile:0.0.1")
+    implementation(libs.nordic.blek.client)
+    implementation(libs.nordic.blek.profile)
+    implementation(libs.nordic.blek.server)
 
     implementation(libs.nordic.ble.common)
     implementation(libs.nordic.ble.ktx)
