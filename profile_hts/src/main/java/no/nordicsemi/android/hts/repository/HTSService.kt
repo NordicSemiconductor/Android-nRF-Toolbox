@@ -88,8 +88,6 @@ internal class HTSService : NotificationService() {
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
         client = device.connect(this@HTSService, logger = { p, s -> repository.log(p, s) })
 
-        client.waitForBonding()
-
         client.connectionStateWithStatus
             .onEach { repository.onConnectionStateChanged(it) }
             .filterNotNull()
