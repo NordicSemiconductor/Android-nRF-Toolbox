@@ -21,7 +21,7 @@ val ScannerDestination = defineDestination(ScannerDestinationId) {
         uuid = arg,
         onResult = {
             when (it) {
-                is DeviceSelected -> navigationViewModel.navigateUpWithResult(ScannerDestinationId, it.device)
+                is DeviceSelected -> navigationViewModel.navigateUpWithResult(ScannerDestinationId, it.scanResults.device)
                 ScanningCancelled -> navigationViewModel.navigateUp()
             }
         }

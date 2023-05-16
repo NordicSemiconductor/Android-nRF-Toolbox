@@ -87,13 +87,13 @@ import javax.inject.Inject
 
 val GLS_SERVICE_UUID: UUID = UUID.fromString("00001808-0000-1000-8000-00805f9b34fb")
 
-private val GM_CHARACTERISTIC = UUID.fromString("00002A18-0000-1000-8000-00805f9b34fb")
-private val GM_CONTEXT_CHARACTERISTIC = UUID.fromString("00002A34-0000-1000-8000-00805f9b34fb")
-private val GF_CHARACTERISTIC = UUID.fromString("00002A51-0000-1000-8000-00805f9b34fb")
-private val RACP_CHARACTERISTIC = UUID.fromString("00002A52-0000-1000-8000-00805f9b34fb")
+val GLUCOSE_MEASUREMENT_CHARACTERISTIC = UUID.fromString("00002A18-0000-1000-8000-00805f9b34fb")
+val GLUCOSE_MEASUREMENT_CONTEXT_CHARACTERISTIC = UUID.fromString("00002A34-0000-1000-8000-00805f9b34fb")
+val GLUCOSE_FEATURE_CHARACTERISTIC = UUID.fromString("00002A51-0000-1000-8000-00805f9b34fb")
+val RACP_CHARACTERISTIC = UUID.fromString("00002A52-0000-1000-8000-00805f9b34fb")
 
-private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
-private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
+val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
+val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
 
 @SuppressLint("MissingPermission")
 @HiltViewModel
@@ -202,7 +202,7 @@ internal class GLSViewModel @Inject constructor(
 
     private suspend fun configureGatt(services: BleGattServices) {
         val glsService = services.findService(GLS_SERVICE_UUID)!!
-        glucoseMeasurementCharacteristic = glsService.findCharacteristic(GM_CHARACTERISTIC)!!
+        glucoseMeasurementCharacteristic = glsService.findCharacteristic(GLUCOSE_MEASUREMENT_CHARACTERISTIC)!!
         recordAccessControlPointCharacteristic = glsService.findCharacteristic(RACP_CHARACTERISTIC)!!
         val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
         val batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
@@ -219,7 +219,7 @@ internal class GLSViewModel @Inject constructor(
             .catch { it.printStackTrace() }
             .launchIn(viewModelScope)
 
-        glsService.findCharacteristic(GM_CONTEXT_CHARACTERISTIC)?.getNotifications()
+        glsService.findCharacteristic(GLUCOSE_MEASUREMENT_CONTEXT_CHARACTERISTIC)?.getNotifications()
             ?.mapNotNull { GlucoseMeasurementContextParser.parse(it) }
             ?.onEach { _state.value = _state.value.copyWithNewContext(it) }
             ?.catch { it.printStackTrace() }

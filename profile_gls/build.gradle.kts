@@ -47,6 +47,7 @@ dependencies {
 
     implementation(libs.nordic.blek.client)
     implementation(libs.nordic.blek.profile)
+    implementation(libs.nordic.blek.server)
 
     implementation(libs.chart)
 
@@ -63,4 +64,6 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.service)
+
+    testImplementation(libs.junit4)
 }
