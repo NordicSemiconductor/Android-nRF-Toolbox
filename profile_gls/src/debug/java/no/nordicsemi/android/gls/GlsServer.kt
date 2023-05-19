@@ -4,10 +4,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -39,91 +39,11 @@ class GlsServer @Inject constructor(
 ) {
 
     private val records = listOf(
-        byteArrayOf(
-            0x07,
-            0x00,
-            0x00,
-            0xDC.toByte(),
-            0x07,
-            0x01,
-            0x01,
-            0x0C,
-            0x1E,
-            0x05,
-            0x00,
-            0x00,
-            0x26,
-            0xD2.toByte(),
-            0x11
-        ),
-        byteArrayOf(
-            0x07,
-            0x01,
-            0x00,
-            0xDC.toByte(),
-            0x07,
-            0x01,
-            0x01,
-            0x0C,
-            0x1E,
-            0x08,
-            0x00,
-            0x00,
-            0x3D,
-            0xD2.toByte(),
-            0x11
-        ),
-        byteArrayOf(
-            0x07,
-            0x02,
-            0x00,
-            0xDC.toByte(),
-            0x07,
-            0x01,
-            0x01,
-            0x0C,
-            0x1E,
-            0x0B,
-            0x00,
-            0x00,
-            0x54,
-            0xD2.toByte(),
-            0x11
-        ),
-        byteArrayOf(
-            0x07,
-            0x03,
-            0x00,
-            0xDC.toByte(),
-            0x07,
-            0x01,
-            0x01,
-            0x0C,
-            0x1E,
-            0x0E,
-            0x00,
-            0x00,
-            0x6B,
-            0xD2.toByte(),
-            0x11
-        ),
-        byteArrayOf(
-            0x07,
-            0x04,
-            0x00,
-            0xDC.toByte(),
-            0x07,
-            0x01,
-            0x01,
-            0x0C,
-            0x1E,
-            0x11,
-            0x00,
-            0x00,
-            0x82.toByte(),
-            0xD2.toByte(),
-            0x11
-        )
+        byteArrayOf(0x07, 0x00, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x05, 0x00, 0x00, 0x26, 0xD2.toByte(), 0x11),
+        byteArrayOf(0x07, 0x01, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x08, 0x00, 0x00, 0x3D, 0xD2.toByte(), 0x11),
+        byteArrayOf(0x07, 0x02, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x0B, 0x00, 0x00, 0x54, 0xD2.toByte(), 0x11),
+        byteArrayOf(0x07, 0x03, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x0E, 0x00, 0x00, 0x6B, 0xD2.toByte(), 0x11),
+        byteArrayOf(0x07, 0x04, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x11, 0x00, 0x00, 0x82.toByte(), 0xD2.toByte(), 0x11)
     )
 
     private val racp = byteArrayOf(0x06, 0x00, 0x01, 0x01)
@@ -192,7 +112,7 @@ class GlsServer @Inject constructor(
         racpCharacteristic.value
             .filter { it.isNotEmpty() }
             .onEach {
-                if (it.contentEquals(RecordAccessControlPointInputParser.reportAllStoredRecords().value)) {
+                if (it.contentEquals(RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords().value)) {
                     sendAll(glsCharacteristic)
                     racpCharacteristic.setValue(racp)
                 } else if (it.contentEquals(RecordAccessControlPointInputParser.reportLastStoredRecord().value)) {
@@ -201,8 +121,6 @@ class GlsServer @Inject constructor(
                 } else if (it.contentEquals(RecordAccessControlPointInputParser.reportFirstStoredRecord().value)) {
                     sendFirst(glsCharacteristic)
                     racpCharacteristic.setValue(racp)
-                } else {
-                    throw IllegalArgumentException("Unknown value")
                 }
             }
             .launchIn(scope)
@@ -219,7 +137,7 @@ class GlsServer @Inject constructor(
     private fun sendAll(characteristics: BleServerGattCharacteristic) = scope.launch {
         records.forEach {
             characteristics.setValue(it)
-            delay(STANDARD_DELAY)
+            delay(100)
         }
     }
 
