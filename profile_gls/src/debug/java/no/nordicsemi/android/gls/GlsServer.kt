@@ -152,6 +152,7 @@ class GlsServer @Inject constructor(
                 batteryLevelCharacteristic.setValue(byteArrayOf(0x60))
                 delay(STANDARD_DELAY)
                 batteryLevelCharacteristic.setValue(byteArrayOf(0x5F))
+                delay(STANDARD_DELAY)
             }
         }
     }
