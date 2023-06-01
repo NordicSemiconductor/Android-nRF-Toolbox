@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.nordic.blek.client)
     implementation(libs.nordic.blek.profile)
     implementation(libs.nordic.blek.server)
+    implementation(libs.nordic.blek.advertiser)
 
     implementation(libs.chart)
 

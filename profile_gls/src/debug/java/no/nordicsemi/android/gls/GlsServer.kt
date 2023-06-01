@@ -2,12 +2,10 @@ package no.nordicsemi.android.gls
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -17,9 +15,11 @@ import no.nordicsemi.android.gls.main.viewmodel.GLS_SERVICE_UUID
 import no.nordicsemi.android.gls.main.viewmodel.GLUCOSE_MEASUREMENT_CHARACTERISTIC
 import no.nordicsemi.android.gls.main.viewmodel.GLUCOSE_MEASUREMENT_CONTEXT_CHARACTERISTIC
 import no.nordicsemi.android.gls.main.viewmodel.RACP_CHARACTERISTIC
+import no.nordicsemi.android.kotlin.ble.advertiser.BleAdvertiser
+import no.nordicsemi.android.kotlin.ble.core.advertiser.BleAdvertiseConfig
+import no.nordicsemi.android.kotlin.ble.core.MockServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattPermission
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattProperty
-import no.nordicsemi.android.kotlin.ble.core.ext.toDisplayString
 import no.nordicsemi.android.kotlin.ble.profile.gls.RecordAccessControlPointInputParser
 import no.nordicsemi.android.kotlin.ble.server.main.BleGattServer
 import no.nordicsemi.android.kotlin.ble.server.main.service.BleGattServerServiceType
@@ -85,11 +85,19 @@ class GlsServer @Inject constructor(
             listOf(batteryLevelCharacteristic)
         )
 
+        val device = MockServerDevice(
+            name = "GLS Server",
+            address = "55:44:33:22:11"
+        )
+
         val server = BleGattServer.create(
             context = context,
             config = arrayOf(serviceConfig, batteryService),
-            mock = true
+            mock = device
         )
+
+        val advertiser = BleAdvertiser.create(context)
+        advertiser.advertise(config = BleAdvertiseConfig(), mock = device).launchIn(scope)
 
         launch {
             server.connections
