@@ -88,7 +88,7 @@ class PRXRepository @Inject internal constructor(
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
     fun launch(device: ServerDevice) {
-        logger = NordicBlekLogger(context, stringConst.APP_NAME, "PRX", device.address)
+        logger = NordicBlekLogger.create(context, stringConst.APP_NAME, "PRX", device.address)
         _data.value = _data.value.copy(deviceName = device.name)
         serviceManager.startService(PRXService::class.java, device)
     }

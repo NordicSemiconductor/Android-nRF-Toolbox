@@ -87,7 +87,7 @@ class HTSRepository @Inject constructor(
 
     fun launch(device: ServerDevice) {
         _data.value = _data.value.copy(deviceName = device.name)
-        logger = NordicBlekLogger(context, stringConst.APP_NAME, "HTS", device.address)
+        logger = NordicBlekLogger.create(context, stringConst.APP_NAME, "HTS", device.address)
         serviceManager.startService(HTSService::class.java, device)
     }
 

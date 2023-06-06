@@ -125,7 +125,7 @@ internal class BPSViewModel @Inject constructor(
     private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
         _state.value = _state.value.copy(deviceName = device.name)
 
-        logger = NordicBlekLogger(context, stringConst.APP_NAME, "BPS", device.address)
+        logger = NordicBlekLogger.create(context, stringConst.APP_NAME, "BPS", device.address)
 
         client = device.connect(context, logger = logger)
 

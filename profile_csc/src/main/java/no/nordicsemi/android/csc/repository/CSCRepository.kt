@@ -92,7 +92,7 @@ class CSCRepository @Inject constructor(
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
     fun launch(device: ServerDevice) {
-        logger = NordicBlekLogger(context, stringConst.APP_NAME, "CSC", device.address)
+        logger = NordicBlekLogger.create(context, stringConst.APP_NAME, "CSC", device.address)
         _data.value = _data.value.copy(deviceName = device.name)
         serviceManager.startService(CSCService::class.java, device)
     }

@@ -105,17 +105,19 @@ internal class GLSViewModel @Inject constructor(
     private val stringConst: StringConst
 ) : ViewModel() {
 
-    private lateinit var client: BleGattClient
+    internal lateinit var client: BleGattClient
     private lateinit var logger: NordicBlekLogger
 
-    private lateinit var glucoseMeasurementCharacteristic: BleGattCharacteristic
-    private lateinit var recordAccessControlPointCharacteristic: BleGattCharacteristic
+    internal lateinit var glucoseMeasurementCharacteristic: BleGattCharacteristic
+    internal lateinit var recordAccessControlPointCharacteristic: BleGattCharacteristic
 
     private val _state = MutableStateFlow(GLSViewState())
     val state = _state.asStateFlow()
 
     private val highestSequenceNumber
         get() = state.value.glsServiceData.records.keys.maxByOrNull { it.sequenceNumber }?.sequenceNumber ?: -1
+
+    fun test() = 2
 
     init {
         navigationManager.navigateTo(ScannerDestinationId, ParcelUuid(GLS_SERVICE_UUID))
@@ -125,7 +127,7 @@ internal class GLSViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    private fun handleResult(result: NavigationResult<ServerDevice>) {
+    internal fun handleResult(result: NavigationResult<ServerDevice>) {
         when (result) {
             is NavigationResult.Cancelled -> navigationManager.navigateUp()
             is NavigationResult.Success -> onDeviceSelected(result.value)
@@ -166,7 +168,7 @@ internal class GLSViewModel @Inject constructor(
     private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
         _state.value = _state.value.copy(deviceName = device.name)
 
-        logger = NordicBlekLogger(context, stringConst.APP_NAME, "GLS", device.address)
+        logger = NordicBlekLogger.create(context, stringConst.APP_NAME, "GLS", device.address)
 
         client = device.connect(context, logger = logger)
 
@@ -194,7 +196,7 @@ internal class GLSViewModel @Inject constructor(
         client.disconnect()
     }
 
-    private fun logAnalytics(connectionState: GattConnectionStateWithStatus) {
+    internal fun logAnalytics(connectionState: GattConnectionStateWithStatus) {
         if (connectionState.state == GattConnectionState.STATE_CONNECTED) {
             analytics.logEvent(ProfileConnectedEvent(Profile.GLS))
         }
@@ -318,7 +320,7 @@ internal class GLSViewModel @Inject constructor(
         try {
             recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords().value)
         } catch (e: Exception) {
-            e.printStackTrace()
+            _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.FAILED)
         }
     }
 }

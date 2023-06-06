@@ -86,7 +86,7 @@ class HRSRepository @Inject constructor(
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
     fun launch(device: ServerDevice) {
-        logger = NordicBlekLogger(context, stringConst.APP_NAME, "HRS", device.address)
+        logger = NordicBlekLogger.create(context, stringConst.APP_NAME, "HRS", device.address)
         _data.value = _data.value.copy(deviceName = device.name)
         serviceManager.startService(HRSService::class.java, device)
     }

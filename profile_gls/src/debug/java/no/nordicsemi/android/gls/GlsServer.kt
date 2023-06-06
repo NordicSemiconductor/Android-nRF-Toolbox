@@ -38,6 +38,11 @@ class GlsServer @Inject constructor(
     private val scope: CoroutineScope
 ) {
 
+    lateinit var glsCharacteristic: BleServerGattCharacteristic
+    lateinit var glsContextCharacteristic: BleServerGattCharacteristic
+    lateinit var racpCharacteristic: BleServerGattCharacteristic
+    lateinit var batteryLevelCharacteristic: BleServerGattCharacteristic
+
     private val records = listOf(
         byteArrayOf(0x07, 0x00, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x05, 0x00, 0x00, 0x26, 0xD2.toByte(), 0x11),
         byteArrayOf(0x07, 0x01, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x08, 0x00, 0x00, 0x3D, 0xD2.toByte(), 0x11),
@@ -48,7 +53,13 @@ class GlsServer @Inject constructor(
 
     private val racp = byteArrayOf(0x06, 0x00, 0x01, 0x01)
 
-    fun start(context: Context) = scope.launch {
+    fun start(
+        context: Context,
+        device: MockServerDevice = MockServerDevice(
+            name = "GLS Server",
+            address = "55:44:33:22:11"
+        ),
+    ) = scope.launch {
         val gmCharacteristic = BleServerGattCharacteristicConfig(
             GLUCOSE_MEASUREMENT_CHARACTERISTIC,
             listOf(BleGattProperty.PROPERTY_NOTIFY),
@@ -85,11 +96,6 @@ class GlsServer @Inject constructor(
             listOf(batteryLevelCharacteristic)
         )
 
-        val device = MockServerDevice(
-            name = "GLS Server",
-            address = "55:44:33:22:11"
-        )
-
         val server = BleGattServer.create(
             context = context,
             config = arrayOf(serviceConfig, batteryService),
@@ -107,16 +113,20 @@ class GlsServer @Inject constructor(
     }
 
     private fun setUpConnection(connection: BluetoothGattServerConnection) {
+        val glsService = connection.services.findService(GLS_SERVICE_UUID)!!
+        glsCharacteristic = glsService.findCharacteristic(GLUCOSE_MEASUREMENT_CHARACTERISTIC)!!
+        glsContextCharacteristic = glsService.findCharacteristic(GLUCOSE_MEASUREMENT_CONTEXT_CHARACTERISTIC)!!
+        racpCharacteristic = glsService.findCharacteristic(RACP_CHARACTERISTIC)!!
+
+        val batteryService = connection.services.findService(BATTERY_SERVICE_UUID)!!
+        batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
+
+
         startGlsService(connection)
-        startBatteryService(connection)
+//        startBatteryService(connection)
     }
 
     private fun startGlsService(connection: BluetoothGattServerConnection) {
-        val glsService = connection.services.findService(GLS_SERVICE_UUID)!!
-        val glsCharacteristic = glsService.findCharacteristic(GLUCOSE_MEASUREMENT_CHARACTERISTIC)!!
-        val glsContextCharacteristic = glsService.findCharacteristic(GLUCOSE_MEASUREMENT_CONTEXT_CHARACTERISTIC)!!
-        val racpCharacteristic = glsService.findCharacteristic(RACP_CHARACTERISTIC)!!
-
         racpCharacteristic.value
             .filter { it.isNotEmpty() }
             .onEach {
@@ -150,9 +160,6 @@ class GlsServer @Inject constructor(
     }
 
     private fun startBatteryService(connection: BluetoothGattServerConnection) {
-        val batteryService = connection.services.findService(BATTERY_SERVICE_UUID)!!
-        val batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
-
         scope.launch {
             repeat(100) {
                 batteryLevelCharacteristic.setValue(byteArrayOf(0x61))

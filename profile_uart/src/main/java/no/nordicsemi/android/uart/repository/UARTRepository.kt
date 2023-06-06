@@ -97,7 +97,7 @@ class UARTRepository @Inject internal constructor(
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
     fun launch(device: ServerDevice) {
-        logger = NordicBlekLogger(context, stringConst.APP_NAME, "UART", device.address)
+        logger = NordicBlekLogger.create(context, stringConst.APP_NAME, "UART", device.address)
         _data.value = _data.value.copy(deviceName = device.name)
         serviceManager.startService(UARTService::class.java, device)
     }
