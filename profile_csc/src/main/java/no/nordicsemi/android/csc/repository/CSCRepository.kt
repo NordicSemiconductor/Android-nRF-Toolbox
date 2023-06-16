@@ -48,7 +48,6 @@ import no.nordicsemi.android.kotlin.ble.profile.csc.data.CSCData
 import no.nordicsemi.android.kotlin.ble.profile.csc.data.WheelSize
 import no.nordicsemi.android.kotlin.ble.profile.csc.data.WheelSizes
 import no.nordicsemi.android.service.DisconnectAndStopEvent
-import no.nordicsemi.android.service.OpenLoggerEvent
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.ui.view.StringConst
 import javax.inject.Inject

@@ -43,7 +43,7 @@ import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.ProfileOpenEvent
 import no.nordicsemi.android.cgms.repository.CGMRepository
-import no.nordicsemi.android.common.logger.NordicLogger
+import no.nordicsemi.android.common.logger.LoggerLauncher
 import no.nordicsemi.android.common.navigation.DestinationId
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.csc.repository.CSCRepository
@@ -114,7 +114,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun openLogger() {
-        NordicLogger.launch(context, logger = null)
+        LoggerLauncher.launch(context)
     }
 
     fun logEvent(event: ProfileOpenEvent) {

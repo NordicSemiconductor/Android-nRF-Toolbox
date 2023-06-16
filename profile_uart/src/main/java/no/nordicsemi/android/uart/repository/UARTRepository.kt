@@ -43,7 +43,6 @@ import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.service.DisconnectAndStopEvent
-import no.nordicsemi.android.service.OpenLoggerEvent
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.uart.data.ConfigurationDataSource
 import no.nordicsemi.android.uart.data.MacroEol

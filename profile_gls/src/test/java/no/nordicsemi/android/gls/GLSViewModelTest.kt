@@ -33,6 +33,7 @@ import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectionStatus
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.RequestStatus
+import no.nordicsemi.android.ui.view.NordicLoggerFactory
 import no.nordicsemi.android.ui.view.StringConst
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -41,7 +42,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.shadows.ShadowBluetoothGatt
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -94,7 +94,18 @@ internal class GLSViewModelTest {
     @Before
     fun before() {
         runBlocking {
-            viewModel = spyk(GLSViewModel(context, navigator, analytics, stringConst))
+            viewModel = spyk(GLSViewModel(context, navigator, analytics, stringConst, object :
+                NordicLoggerFactory {
+                override fun createNordicLogger(
+                    context: Context,
+                    profile: String?,
+                    key: String,
+                    name: String?,
+                ): NordicBlekLogger {
+                    return logger
+                }
+
+            }))
             glsServer = GlsServer(CoroutineScope(UnconfinedTestDispatcher()))
             glsServer.start(spyk(), device)
         }

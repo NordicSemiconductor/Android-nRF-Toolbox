@@ -45,7 +45,6 @@ import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.hrs.data.HRSData
 import no.nordicsemi.android.service.DisconnectAndStopEvent
-import no.nordicsemi.android.service.OpenLoggerEvent
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.ui.view.StringConst
 import javax.inject.Inject

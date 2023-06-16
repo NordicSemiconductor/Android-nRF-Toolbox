@@ -49,7 +49,6 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
-import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.gls.GlsDetailsDestinationId
@@ -68,6 +67,8 @@ import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
+import no.nordicsemi.android.common.logger.BlekLogger
+import no.nordicsemi.android.common.logger.BlekLoggerAndLauncher
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.GlucoseMeasurementContextParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.GlucoseMeasurementParser
@@ -81,6 +82,7 @@ import no.nordicsemi.android.kotlin.ble.profile.gls.data.ResponseData
 import no.nordicsemi.android.kotlin.ble.profile.racp.RACPOpCode
 import no.nordicsemi.android.kotlin.ble.profile.racp.RACPResponseCode
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
+import no.nordicsemi.android.ui.view.NordicLoggerFactory
 import no.nordicsemi.android.ui.view.StringConst
 import java.util.*
 import javax.inject.Inject
@@ -102,11 +104,12 @@ internal class GLSViewModel @Inject constructor(
     private val context: Context,
     private val navigationManager: Navigator,
     private val analytics: AppAnalytics,
-    private val stringConst: StringConst
+    private val stringConst: StringConst,
+    private val loggerFactory: NordicLoggerFactory
 ) : ViewModel() {
 
     internal lateinit var client: BleGattClient
-    private lateinit var logger: NordicBlekLogger
+    private lateinit var logger: BlekLoggerAndLauncher
 
     internal lateinit var glucoseMeasurementCharacteristic: BleGattCharacteristic
     internal lateinit var recordAccessControlPointCharacteristic: BleGattCharacteristic
@@ -168,7 +171,7 @@ internal class GLSViewModel @Inject constructor(
     private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
         _state.value = _state.value.copy(deviceName = device.name)
 
-        logger = NordicBlekLogger.create(context, stringConst.APP_NAME, "GLS", device.address)
+        logger = loggerFactory.createNordicLogger(context, stringConst.APP_NAME, "GLS", device.address)
 
         client = device.connect(context, logger = logger)
 
