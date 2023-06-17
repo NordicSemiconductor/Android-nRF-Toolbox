@@ -53,6 +53,7 @@ import no.nordicsemi.android.bps.view.BPSViewEvent
 import no.nordicsemi.android.bps.view.BPSViewState
 import no.nordicsemi.android.bps.view.DisconnectEvent
 import no.nordicsemi.android.bps.view.OpenLoggerEvent
+import no.nordicsemi.android.common.logger.BlekLoggerAndLauncher
 import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
@@ -93,7 +94,7 @@ internal class BPSViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     private lateinit var client: BleGattClient
-    private lateinit var logger: NordicBlekLogger
+    private lateinit var logger: BlekLoggerAndLauncher
 
     init {
         navigationManager.navigateTo(ScannerDestinationId, ParcelUuid(BPS_SERVICE_UUID))

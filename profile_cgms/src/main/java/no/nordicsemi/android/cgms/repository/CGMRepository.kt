@@ -41,6 +41,7 @@ import no.nordicsemi.android.cgms.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.cgms.data.CGMServiceCommand
 import no.nordicsemi.android.cgms.data.CGMServiceData
 import no.nordicsemi.android.common.core.simpleSharedFlow
+import no.nordicsemi.android.common.logger.BlekLoggerAndLauncher
 import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
@@ -59,7 +60,7 @@ class CGMRepository @Inject constructor(
     private val serviceManager: ServiceManager,
     private val stringConst: StringConst
 ) {
-    private var logger: NordicBlekLogger? = null
+    private var logger: BlekLoggerAndLauncher? = null
 
     private val _data = MutableStateFlow(CGMServiceData())
     internal val data = _data.asStateFlow()

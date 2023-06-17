@@ -31,6 +31,7 @@
 
 package no.nordicsemi.android.gls.main.view
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState

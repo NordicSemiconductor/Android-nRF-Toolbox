@@ -70,8 +70,8 @@ dependencies {
     testImplementation(libs.junit4)
 
     testImplementation("io.mockk:mockk:1.13.5")
-    implementation("androidx.test.ext:junit-ktx:1.1.5")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1")
+    testImplementation(libs.androidx.test.ext)
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation("org.slf4j:slf4j-simple:2.0.5")
     testImplementation("org.robolectric:robolectric:4.10.3")
 }

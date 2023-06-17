@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.core.simpleSharedFlow
+import no.nordicsemi.android.common.logger.BlekLoggerAndLauncher
 import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.hts.data.HTSServiceData
 import no.nordicsemi.android.hts.view.TemperatureUnit
@@ -58,7 +59,7 @@ class HTSRepository @Inject constructor(
     private val serviceManager: ServiceManager,
     private val stringConst: StringConst
 ) {
-    private var logger: NordicBlekLogger? = null
+    private var logger: BlekLoggerAndLauncher? = null
 
     private val _data = MutableStateFlow(HTSServiceData())
     internal val data = _data.asStateFlow()

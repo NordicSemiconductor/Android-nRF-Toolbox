@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.core.simpleSharedFlow
+import no.nordicsemi.android.common.logger.BlekLoggerAndLauncher
 import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.csc.data.CSCServiceData
 import no.nordicsemi.android.csc.data.SpeedUnit
@@ -60,7 +61,7 @@ class CSCRepository @Inject constructor(
     private val serviceManager: ServiceManager,
     private val stringConst: StringConst
 ) {
-    private var logger: NordicBlekLogger? = null
+    private var logger: BlekLoggerAndLauncher? = null
 
     private val _wheelSize = MutableStateFlow(WheelSizes.default)
     internal val wheelSize = _wheelSize.asStateFlow()

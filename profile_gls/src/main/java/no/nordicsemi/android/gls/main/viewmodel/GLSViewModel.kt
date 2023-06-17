@@ -69,6 +69,7 @@ import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.common.logger.BlekLogger
 import no.nordicsemi.android.common.logger.BlekLoggerAndLauncher
+import no.nordicsemi.android.kotlin.ble.core.ext.toDisplayString
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.GlucoseMeasurementContextParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.GlucoseMeasurementParser
@@ -111,8 +112,8 @@ internal class GLSViewModel @Inject constructor(
     internal lateinit var client: BleGattClient
     private lateinit var logger: BlekLoggerAndLauncher
 
-    internal lateinit var glucoseMeasurementCharacteristic: BleGattCharacteristic
-    internal lateinit var recordAccessControlPointCharacteristic: BleGattCharacteristic
+    private lateinit var glucoseMeasurementCharacteristic: BleGattCharacteristic
+    private lateinit var recordAccessControlPointCharacteristic: BleGattCharacteristic
 
     private val _state = MutableStateFlow(GLSViewState())
     val state = _state.asStateFlow()
@@ -238,6 +239,7 @@ internal class GLSViewModel @Inject constructor(
     }
 
     private fun onAccessControlPointDataReceived(data: RecordAccessControlPointData) = viewModelScope.launch {
+        println("AAA: Response code: ${data}")
         when (data) {
             is NumberOfRecordsData -> onNumberOfRecordsReceived(data.numberOfRecords)
             is ResponseData -> when (data.responseCode) {
@@ -303,6 +305,7 @@ internal class GLSViewModel @Inject constructor(
         try {
             recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportLastStoredRecord().value)
         } catch (e: Exception) {
+            e.printStackTrace()
             _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.FAILED)
         }
     }
@@ -313,6 +316,7 @@ internal class GLSViewModel @Inject constructor(
         try {
             recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportFirstStoredRecord().value)
         } catch (e: Exception) {
+            e.printStackTrace()
             _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.FAILED)
         }
     }
@@ -323,6 +327,7 @@ internal class GLSViewModel @Inject constructor(
         try {
             recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords().value)
         } catch (e: Exception) {
+            e.printStackTrace()
             _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.FAILED)
         }
     }

@@ -7,10 +7,11 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import no.nordicsemi.android.common.logger.NordicBlekLogger
 import no.nordicsemi.android.common.logger.BlekLogger
+import no.nordicsemi.android.common.logger.BlekLoggerAndLauncher
 
 @Module
 @InstallIn(SingletonComponent::class)
-class UiModule {
+class HiltModule {
 
     @Provides
     fun createLogger(): NordicLoggerFactory {
@@ -20,7 +21,7 @@ class UiModule {
                 profile: String?,
                 key: String,
                 name: String?,
-            ): BlekLogger {
+            ): BlekLoggerAndLauncher {
                 return NordicBlekLogger.create(context, profile, key, name)
             }
         }
