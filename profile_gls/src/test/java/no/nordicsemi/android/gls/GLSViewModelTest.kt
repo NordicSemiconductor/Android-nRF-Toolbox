@@ -12,7 +12,6 @@ import io.mockk.mockkStatic
 import io.mockk.spyk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -28,19 +27,21 @@ import no.nordicsemi.android.gls.main.view.OnWorkingModeSelected
 import no.nordicsemi.android.gls.main.viewmodel.GLSViewModel
 import no.nordicsemi.android.kotlin.ble.client.main.ClientScope
 import no.nordicsemi.android.kotlin.ble.core.MockServerDevice
-import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectionStatus
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
+import no.nordicsemi.android.kotlin.ble.profile.gls.GlucoseMeasurementParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.RequestStatus
 import no.nordicsemi.android.kotlin.ble.server.main.ServerScope
 import no.nordicsemi.android.ui.view.NordicLoggerFactory
 import no.nordicsemi.android.ui.view.StringConst
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import kotlin.test.assertContentEquals
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -93,6 +94,7 @@ internal class GLSViewModelTest {
             every { ClientScope } returns CoroutineScope(UnconfinedTestDispatcher())
             mockkStatic("no.nordicsemi.android.kotlin.ble.server.main.ServerScopeKt")
             every { ServerScope } returns CoroutineScope(UnconfinedTestDispatcher())
+            every { stringConst.APP_NAME } returns "Test"
 
             viewModel = spyk(GLSViewModel(context, navigator, analytics, stringConst, object :
                 NordicLoggerFactory {
@@ -106,6 +108,8 @@ internal class GLSViewModelTest {
                 }
 
             }))
+            justRun { viewModel.logAnalytics(any()) }
+
             glsServer = GlsServer(CoroutineScope(UnconfinedTestDispatcher()))
             glsServer.start(spyk(), device)
         }
@@ -123,54 +127,71 @@ internal class GLSViewModelTest {
     }
 
     @Test
-    fun checkOnClick() = runTest {
-//        every { viewModel.recordAccessControlPointCharacteristic } returns characteristic
-//        coJustRun { characteristic.write(any(), any()) }
-
-        viewModel.onEvent(OnWorkingModeSelected(WorkingMode.FIRST))
-
-        advanceUntilIdle()
-        assertEquals(RequestStatus.PENDING, viewModel.state.value.glsServiceData.requestStatus)
-    }
-
-    @Test
-    fun `when connection fails return disconnected`() {
-        val serverDevice = mockk<ServerDevice>()
+    fun `when connection fails return disconnected`() = runTest {
         val disconnectedState = GattConnectionStateWithStatus(
             GattConnectionState.STATE_DISCONNECTED,
             BleGattConnectionStatus.SUCCESS
         )
-//        every { viewModel.recordAccessControlPointCharacteristic } returns characteristic
-//        coJustRun { characteristic.write(any(), any()) }
-        mockkStatic("no.nordicsemi.android.kotlin.ble.client.main.ClientDeviceExtKt")
-        every { serverDevice.name } returns "Test"
-        every { serverDevice.address } returns "11:22:33:44:55"
-        every { stringConst.APP_NAME } returns "Test"
+        viewModel.handleResult(NavigationResult.Success(device))
+        glsServer.stopServer()
 
-        viewModel.handleResult(NavigationResult.Success(serverDevice))
+        advanceUntilIdle()
 
         assertEquals(disconnectedState, viewModel.state.value.glsServiceData.connectionState)
     }
 
     @Test
-    fun checkOnClick2() = runTest {
-        every { stringConst.APP_NAME } returns "Test"
-        justRun { viewModel.logAnalytics(any()) }
-
+    fun `when request first record then change status and get 1 record`() = runTest {
         viewModel.handleResult(NavigationResult.Success(device))
+        advanceUntilIdle() //Needed because of delay() in waitForBonding()
+        assertEquals(RequestStatus.IDLE, viewModel.state.value.glsServiceData.requestStatus)
 
-        advanceUntilIdle()
-        delay(1000)
         viewModel.onEvent(OnWorkingModeSelected(WorkingMode.FIRST))
+        assertEquals(RequestStatus.PENDING, viewModel.state.value.glsServiceData.requestStatus)
 
-//        advanceUntilIdle()
-//        assertEquals(RequestStatus.PENDING, viewModel.state.value.glsServiceData.requestStatus)
-//
-////        glsServer.glsCharacteristic.setValue(glsServer.records.first())
-//        glsServer.racpCharacteristic.setValue(glsServer.racp)
-//
-//        advanceUntilIdle()
-//
-//        assertEquals(RequestStatus.SUCCESS, viewModel.state.value.glsServiceData.requestStatus)
+        glsServer.continueWithResponse() //continue server breakpoint
+
+        assertEquals(RequestStatus.SUCCESS, viewModel.state.value.glsServiceData.requestStatus)
+        assertEquals(1, viewModel.state.value.glsServiceData.records.size)
+
+        val parsedResponse = GlucoseMeasurementParser.parse(glsServer.YOUNGEST_RECORD)
+        assertEquals(parsedResponse, viewModel.state.value.glsServiceData.records.keys.first())
+    }
+
+    @Test
+    fun `when request last record then change status and get 1 record`() = runTest {
+        viewModel.handleResult(NavigationResult.Success(device))
+        advanceUntilIdle() //Needed because of delay() in waitForBonding()
+        assertEquals(RequestStatus.IDLE, viewModel.state.value.glsServiceData.requestStatus)
+
+        viewModel.onEvent(OnWorkingModeSelected(WorkingMode.LAST))
+        assertEquals(RequestStatus.PENDING, viewModel.state.value.glsServiceData.requestStatus)
+
+        glsServer.continueWithResponse() //continue server breakpoint
+
+        assertEquals(RequestStatus.SUCCESS, viewModel.state.value.glsServiceData.requestStatus)
+        assertEquals(1, viewModel.state.value.glsServiceData.records.size)
+
+        val parsedResponse = GlucoseMeasurementParser.parse(glsServer.OLDEST_RECORD)
+        assertEquals(parsedResponse, viewModel.state.value.glsServiceData.records.keys.first())
+    }
+
+    @Test
+    fun `when request all record then change status and get 5 records`() = runTest {
+        viewModel.handleResult(NavigationResult.Success(device))
+        advanceUntilIdle() //Needed because of delay() in waitForBonding()
+        assertEquals(RequestStatus.IDLE, viewModel.state.value.glsServiceData.requestStatus)
+
+        viewModel.onEvent(OnWorkingModeSelected(WorkingMode.ALL))
+        assertEquals(RequestStatus.PENDING, viewModel.state.value.glsServiceData.requestStatus)
+
+        glsServer.continueWithResponse() //continue server breakpoint
+        advanceUntilIdle() //We have to use because of delay() in sendAll()
+
+        assertEquals(RequestStatus.SUCCESS, viewModel.state.value.glsServiceData.requestStatus)
+        assertEquals(5, viewModel.state.value.glsServiceData.records.size)
+
+        val expectedRecords = glsServer.records.map { GlucoseMeasurementParser.parse(it) }
+        assertContentEquals(expectedRecords, viewModel.state.value.glsServiceData.records.keys)
     }
 }

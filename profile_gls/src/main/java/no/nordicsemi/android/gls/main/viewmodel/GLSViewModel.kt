@@ -49,6 +49,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
+import no.nordicsemi.android.common.logger.BlekLoggerAndLauncher
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.gls.GlsDetailsDestinationId
@@ -67,9 +68,6 @@ import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
-import no.nordicsemi.android.common.logger.BlekLogger
-import no.nordicsemi.android.common.logger.BlekLoggerAndLauncher
-import no.nordicsemi.android.kotlin.ble.core.ext.toDisplayString
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.GlucoseMeasurementContextParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.GlucoseMeasurementParser
@@ -239,7 +237,6 @@ internal class GLSViewModel @Inject constructor(
     }
 
     private fun onAccessControlPointDataReceived(data: RecordAccessControlPointData) = viewModelScope.launch {
-        println("AAA: Response code: ${data}")
         when (data) {
             is NumberOfRecordsData -> onNumberOfRecordsReceived(data.numberOfRecords)
             is ResponseData -> when (data.responseCode) {

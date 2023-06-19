@@ -66,12 +66,11 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.service)
 
-
     testImplementation(libs.junit4)
-
-    testImplementation("io.mockk:mockk:1.13.5")
+    testImplementation(libs.test.mockk)
     testImplementation(libs.androidx.test.ext)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation("org.slf4j:slf4j-simple:2.0.5")
-    testImplementation("org.robolectric:robolectric:4.10.3")
+    testImplementation(libs.test.slf4j.simple)
+    testImplementation(libs.test.robolectric)
+    testImplementation(libs.kotlin.junit)
 }

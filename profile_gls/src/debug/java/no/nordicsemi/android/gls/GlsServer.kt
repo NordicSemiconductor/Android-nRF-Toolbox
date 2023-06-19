@@ -38,17 +38,24 @@ class GlsServer @Inject constructor(
     private val scope: CoroutineScope
 ) {
 
+    lateinit var server: BleGattServer
+
     lateinit var glsCharacteristic: BleServerGattCharacteristic
     lateinit var glsContextCharacteristic: BleServerGattCharacteristic
     lateinit var racpCharacteristic: BleServerGattCharacteristic
     lateinit var batteryLevelCharacteristic: BleServerGattCharacteristic
 
+    private var lastRequest = byteArrayOf()
+
+    val YOUNGEST_RECORD = byteArrayOf(0x07, 0x00, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x05, 0x00, 0x00, 0x26, 0xD2.toByte(), 0x11)
+    val OLDEST_RECORD = byteArrayOf(0x07, 0x04, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x11, 0x00, 0x00, 0x82.toByte(), 0xD2.toByte(), 0x11)
+
     val records = listOf(
-        byteArrayOf(0x07, 0x00, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x05, 0x00, 0x00, 0x26, 0xD2.toByte(), 0x11),
+        YOUNGEST_RECORD,
         byteArrayOf(0x07, 0x01, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x08, 0x00, 0x00, 0x3D, 0xD2.toByte(), 0x11),
         byteArrayOf(0x07, 0x02, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x0B, 0x00, 0x00, 0x54, 0xD2.toByte(), 0x11),
         byteArrayOf(0x07, 0x03, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x0E, 0x00, 0x00, 0x6B, 0xD2.toByte(), 0x11),
-        byteArrayOf(0x07, 0x04, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x11, 0x00, 0x00, 0x82.toByte(), 0xD2.toByte(), 0x11)
+        OLDEST_RECORD
     )
 
     val racp = byteArrayOf(0x06, 0x00, 0x01, 0x01)
@@ -96,7 +103,7 @@ class GlsServer @Inject constructor(
             listOf(batteryLevelCharacteristic)
         )
 
-        val server = BleGattServer.create(
+        server = BleGattServer.create(
             context = context,
             config = arrayOf(serviceConfig, batteryService),
             mock = device
@@ -112,6 +119,10 @@ class GlsServer @Inject constructor(
         }
     }
 
+    internal fun stopServer() {
+        server.stopServer()
+    }
+
     private fun setUpConnection(connection: BluetoothGattServerConnection) {
         val glsService = connection.services.findService(GLS_SERVICE_UUID)!!
         glsCharacteristic = glsService.findCharacteristic(GLUCOSE_MEASUREMENT_CHARACTERISTIC)!!
@@ -123,25 +134,31 @@ class GlsServer @Inject constructor(
 
 
         startGlsService(connection)
-        startBatteryService(connection)
+//        startBatteryService(connection)
     }
 
     private fun startGlsService(connection: BluetoothGattServerConnection) {
         racpCharacteristic.value
             .filter { it.isNotEmpty() }
-            .onEach {
-                if (it.contentEquals(RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords().value)) {
-                    sendAll(glsCharacteristic)
-                    racpCharacteristic.setValue(racp)
-                } else if (it.contentEquals(RecordAccessControlPointInputParser.reportLastStoredRecord().value)) {
-                    sendLast(glsCharacteristic)
-                    racpCharacteristic.setValue(racp)
-                } else if (it.contentEquals(RecordAccessControlPointInputParser.reportFirstStoredRecord().value)) {
-                    sendFirst(glsCharacteristic)
-                    racpCharacteristic.setValue(racp)
-                }
-            }
+            .onEach { lastRequest = it }
             .launchIn(scope)
+    }
+
+    internal fun continueWithResponse() {
+        sendResponse(lastRequest)
+    }
+
+    private fun sendResponse(request: ByteArray) {
+        if (request.contentEquals(RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords().value)) {
+            sendAll(glsCharacteristic)
+            racpCharacteristic.setValue(racp)
+        } else if (request.contentEquals(RecordAccessControlPointInputParser.reportLastStoredRecord().value)) {
+            sendLast(glsCharacteristic)
+            racpCharacteristic.setValue(racp)
+        } else if (request.contentEquals(RecordAccessControlPointInputParser.reportFirstStoredRecord().value)) {
+            sendFirst(glsCharacteristic)
+            racpCharacteristic.setValue(racp)
+        }
     }
 
     private fun sendFirst(characteristics: BleServerGattCharacteristic) {

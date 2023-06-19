@@ -50,7 +50,7 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("libs") {
-            from("no.nordicsemi.android.gradle:version-catalog:1.5.5")
+            from("no.nordicsemi.android.gradle:version-catalog:1.5.8")
         }
     }
 }
