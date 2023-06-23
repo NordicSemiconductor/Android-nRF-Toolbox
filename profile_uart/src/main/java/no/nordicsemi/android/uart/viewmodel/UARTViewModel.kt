@@ -77,6 +77,7 @@ import no.nordicsemi.android.uart.view.OnRunMacro
 import no.nordicsemi.android.uart.view.OpenLogger
 import no.nordicsemi.android.uart.view.UARTViewEvent
 import no.nordicsemi.android.uart.view.UARTViewState
+import no.nordicsemi.android.ui.view.NordicLoggerFactory
 import javax.inject.Inject
 
 @HiltViewModel
@@ -84,7 +85,8 @@ internal class UARTViewModel @Inject constructor(
     private val repository: UARTRepository,
     private val navigationManager: Navigator,
     private val dataSource: UARTPersistentDataSource,
-    private val analytics: AppAnalytics
+    private val analytics: AppAnalytics,
+    private val loggerFactory: NordicLoggerFactory
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UARTViewState())
@@ -126,7 +128,7 @@ internal class UARTViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    private fun handleResult(result: NavigationResult<ServerDevice>) {
+    internal fun handleResult(result: NavigationResult<ServerDevice>) {
         when (result) {
             is NavigationResult.Cancelled -> navigationManager.navigateUp()
             is NavigationResult.Success -> onDeviceSelected(result.value)

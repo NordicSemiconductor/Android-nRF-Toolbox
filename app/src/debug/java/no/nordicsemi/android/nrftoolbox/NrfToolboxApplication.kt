@@ -35,7 +35,7 @@ import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.AppOpenEvent
-import no.nordicsemi.android.gls.GlsServer
+import no.nordicsemi.android.gls.UartServer
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -45,13 +45,16 @@ class NrfToolboxApplication : Application() {
     lateinit var analytics: AppAnalytics
 
     @Inject
-    lateinit var glsServer: GlsServer
+    lateinit var glsServer: UartServer
+
+    @Inject
+    lateinit var uartServer: UartServer
 
     override fun onCreate() {
         super.onCreate()
 
         analytics.logEvent(AppOpenEvent)
 
-        glsServer.start(this)
+        uartServer.start(this)
     }
 }

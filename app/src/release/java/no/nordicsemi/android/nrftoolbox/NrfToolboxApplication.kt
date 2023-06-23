@@ -29,37 +29,23 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.uart
+package no.nordicsemi.android.nrftoolbox
 
-import android.content.Context
-import androidx.room.Room
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
-import no.nordicsemi.android.uart.db.ConfigurationsDao
-import no.nordicsemi.android.uart.db.ConfigurationsDatabase
-import no.nordicsemi.android.uart.db.MIGRATION_1_2
-import javax.inject.Singleton
+import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
+import no.nordicsemi.android.analytics.AppAnalytics
+import no.nordicsemi.android.analytics.AppOpenEvent
+import javax.inject.Inject
 
-@Module
-@InstallIn(SingletonComponent::class)
-class HiltModule {
+@HiltAndroidApp
+class NrfToolboxApplication : Application() {
 
-    @Provides
-    @Singleton
-    internal fun provideDB(@ApplicationContext context: Context): ConfigurationsDatabase {
-        return Room.databaseBuilder(
-            context,
-            ConfigurationsDatabase::class.java, "toolbox_uart.db"
-        ).addMigrations(MIGRATION_1_2).build()
+    @Inject
+    lateinit var analytics: AppAnalytics
+
+    override fun onCreate() {
+        super.onCreate()
+
+        analytics.logEvent(AppOpenEvent)
     }
-
-    @Provides
-    @Singleton
-    internal fun provideDao(db: ConfigurationsDatabase): ConfigurationsDao {
-        return db.dao()
-    }
-
 }

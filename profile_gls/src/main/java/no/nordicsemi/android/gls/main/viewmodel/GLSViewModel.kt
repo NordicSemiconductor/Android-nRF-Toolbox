@@ -119,8 +119,6 @@ internal class GLSViewModel @Inject constructor(
     private val highestSequenceNumber
         get() = state.value.glsServiceData.records.keys.maxByOrNull { it.sequenceNumber }?.sequenceNumber ?: -1
 
-    fun test() = 2
-
     init {
         navigationManager.navigateTo(ScannerDestinationId, ParcelUuid(GLS_SERVICE_UUID))
 

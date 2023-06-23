@@ -6,12 +6,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import no.nordicsemi.android.common.logger.NordicBlekLogger
-import no.nordicsemi.android.common.logger.BlekLogger
 import no.nordicsemi.android.common.logger.BlekLoggerAndLauncher
 
 @Module
 @InstallIn(SingletonComponent::class)
-class HiltModule {
+class NordicLoggerFactoryHiltModule {
 
     @Provides
     fun createLogger(): NordicLoggerFactory {

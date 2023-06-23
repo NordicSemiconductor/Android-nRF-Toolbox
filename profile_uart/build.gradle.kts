@@ -38,6 +38,10 @@ plugins {
 
 android {
     namespace = "no.nordicsemi.android.uart"
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 wire {
@@ -54,6 +58,8 @@ dependencies {
     implementation(libs.nordic.blek.client)
     implementation(libs.nordic.blek.profile)
     implementation(libs.nordic.blek.core)
+    implementation(libs.nordic.blek.server)
+    implementation(libs.nordic.blek.advertiser)
 
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
@@ -80,6 +86,21 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.service)
+
+    // For Robolectric tests.
+    testImplementation("com.google.dagger:hilt-android-testing:2.44")
+    // ...with Kotlin.
+    kaptTest("com.google.dagger:hilt-android-compiler:2.46.1")
+
+    testImplementation("androidx.test:rules:1.5.0")
+
+    testImplementation(libs.junit4)
+    testImplementation(libs.test.mockk)
+    testImplementation(libs.androidx.test.ext)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.test.slf4j.simple)
+    testImplementation(libs.test.robolectric)
+    testImplementation(libs.kotlin.junit)
 
     implementation("org.simpleframework:simple-xml:2.7.1") {
         exclude(group = "stax", module = "stax-api")

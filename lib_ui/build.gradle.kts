@@ -35,6 +35,10 @@ plugins {
 
 android {
     namespace = "no.nordicsemi.android.ui"
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 dependencies {

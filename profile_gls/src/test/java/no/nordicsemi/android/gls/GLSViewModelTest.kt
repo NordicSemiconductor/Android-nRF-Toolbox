@@ -37,7 +37,6 @@ import no.nordicsemi.android.ui.view.NordicLoggerFactory
 import no.nordicsemi.android.ui.view.StringConst
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -119,11 +118,6 @@ internal class GLSViewModelTest {
     fun prepareLogger() {
         mockkObject(NordicBlekLogger.Companion)
         every { NordicBlekLogger.create(any(), any(), any(), any()) } returns mockk()
-    }
-
-    @Test
-    fun addition_isCorrect() {
-        assertEquals(2, viewModel.test())
     }
 
     @Test
