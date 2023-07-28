@@ -65,9 +65,9 @@ dependencies {
     implementation(libs.nordic.core)
     implementation(libs.nordic.theme)
     implementation(libs.nordic.navigation)
-    implementation(libs.nordic.uiscanner)
+    implementation(libs.nordic.blek.uiscanner)
     implementation(libs.nordic.uilogger)
-    implementation(libs.nordic.permission)
+    implementation(libs.nordic.permissions.ble)
     implementation(libs.nordic.analytics)
 
     implementation(libs.nordic.ble.common)

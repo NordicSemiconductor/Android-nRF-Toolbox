@@ -41,9 +41,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
-import no.nordicsemi.android.kotlin.ble.client.main.connect
-import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
+import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
+import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
@@ -51,7 +50,6 @@ import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.csc.CSCDataParser
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
-import no.nordicsemi.android.ui.view.NordicLoggerFactory
 import java.util.*
 import javax.inject.Inject
 
@@ -68,7 +66,7 @@ internal class CSCService : NotificationService() {
     @Inject
     lateinit var repository: CSCRepository
 
-    private lateinit var client: BleGattClient
+    private lateinit var client: ClientBleGatt
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
@@ -87,7 +85,7 @@ internal class CSCService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        client = device.connect(this@CSCService, logger = { p, s -> repository.log(p, s) })
+        client = ClientBleGatt.connect(this@CSCService, device, logger = { p, s -> repository.log(p, s) })
 
         client.connectionStateWithStatus
             .onEach { repository.onConnectionStateChanged(it) }
@@ -99,14 +97,15 @@ internal class CSCService : NotificationService() {
             return@launch
         }
 
-        client.discoverServices()
-            .filterNotNull()
-            .onEach { configureGatt(it) }
-            .catch { repository.onMissingServices() }
-            .launchIn(lifecycleScope)
+        try {
+            val services = client.discoverServices()
+            configureGatt(services)
+        } catch (e: Exception) {
+            repository.onMissingServices()
+        }
     }
 
-    private suspend fun configureGatt(services: BleGattServices) {
+    private suspend fun configureGatt(services: ClientBleGattServices) {
         val cscService = services.findService(CSC_SERVICE_UUID)!!
         val cscMeasurementCharacteristic = cscService.findCharacteristic(CSC_MEASUREMENT_CHARACTERISTIC_UUID)!!
         val batteryService = services.findService(BATTERY_SERVICE_UUID)!!

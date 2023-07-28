@@ -41,12 +41,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.common.logger.NordicBlekLogger
-import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
-import no.nordicsemi.android.kotlin.ble.client.main.connect
-import no.nordicsemi.android.kotlin.ble.client.main.errors.GattOperationException
-import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattCharacteristic
-import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
+import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
+import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattCharacteristic
+import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectOptions
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectionStatus
@@ -58,14 +55,13 @@ import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.prx.AlarmLevel
 import no.nordicsemi.android.kotlin.ble.profile.prx.AlarmLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.prx.AlertLevelInputParser
-import no.nordicsemi.android.kotlin.ble.server.main.BleGattServer
-import no.nordicsemi.android.kotlin.ble.server.main.service.BleGattServerServiceType
-import no.nordicsemi.android.kotlin.ble.server.main.service.BleServerGattCharacteristicConfig
-import no.nordicsemi.android.kotlin.ble.server.main.service.BleServerGattServiceConfig
-import no.nordicsemi.android.kotlin.ble.server.main.service.BluetoothGattServerConnection
+import no.nordicsemi.android.kotlin.ble.server.main.ServerBleGatt
+import no.nordicsemi.android.kotlin.ble.server.main.service.ServerBleGattCharacteristicConfig
+import no.nordicsemi.android.kotlin.ble.server.main.service.ServerBleGattServiceConfig
+import no.nordicsemi.android.kotlin.ble.server.main.service.ServerBleGattServiceType
+import no.nordicsemi.android.kotlin.ble.server.main.service.ServerBluetoothGattConnection
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
-import no.nordicsemi.android.ui.view.StringConst
 import java.util.*
 import javax.inject.Inject
 
@@ -84,10 +80,10 @@ internal class PRXService : NotificationService() {
     @Inject
     lateinit var repository: PRXRepository
 
-    private lateinit var client: BleGattClient
-    private lateinit var server: BleGattServer
+    private lateinit var client: ClientBleGatt
+    private lateinit var server: ServerBleGatt
 
-    private var alertLevelCharacteristic: BleGattCharacteristic? = null
+    private var alertLevelCharacteristic: ClientBleGattCharacteristic? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
@@ -106,41 +102,41 @@ internal class PRXService : NotificationService() {
     }
 
     private fun startServer(device: ServerDevice) = lifecycleScope.launch {
-        val alertLevelCharacteristic = BleServerGattCharacteristicConfig(
+        val alertLevelCharacteristic = ServerBleGattCharacteristicConfig(
             uuid = ALERT_LEVEL_CHARACTERISTIC_UUID,
             properties = listOf(BleGattProperty.PROPERTY_WRITE_NO_RESPONSE),
             permissions = listOf(BleGattPermission.PERMISSION_WRITE)
         )
-        val prxServiceConfig = BleServerGattServiceConfig(
+        val prxServiceConfig = ServerBleGattServiceConfig(
             uuid = PRX_SERVICE_UUID,
-            type = BleGattServerServiceType.SERVICE_TYPE_PRIMARY,
+            type = ServerBleGattServiceType.SERVICE_TYPE_PRIMARY,
             characteristicConfigs = listOf(alertLevelCharacteristic)
         )
 
-        val linkLossCharacteristic = BleServerGattCharacteristicConfig(
+        val linkLossCharacteristic = ServerBleGattCharacteristicConfig(
             uuid = ALERT_LEVEL_CHARACTERISTIC_UUID,
             properties = listOf(BleGattProperty.PROPERTY_WRITE, BleGattProperty.PROPERTY_READ),
             permissions = listOf(BleGattPermission.PERMISSION_WRITE, BleGattPermission.PERMISSION_READ),
             initialValue = AlertLevelInputParser.parse(AlarmLevel.HIGH)
         )
 
-        val linkLossServiceConfig = BleServerGattServiceConfig(
+        val linkLossServiceConfig = ServerBleGattServiceConfig(
             uuid = LINK_LOSS_SERVICE_UUID,
-            type = BleGattServerServiceType.SERVICE_TYPE_PRIMARY,
+            type =ServerBleGattServiceType.SERVICE_TYPE_PRIMARY,
             characteristicConfigs = listOf(linkLossCharacteristic)
         )
 
-        server = BleGattServer.create(this@PRXService, prxServiceConfig, linkLossServiceConfig)
+        server = ServerBleGatt.create(this@PRXService, prxServiceConfig, linkLossServiceConfig)
 
         //Order is important. We don't want to connect before services have been added to the server.
         startGattClient(device)
 
         server.onNewConnection
-            .onEach { setUpServerConnection(it.second) }
+            .onEach { setUpServerConnection(it) }
             .launchIn(lifecycleScope)
     }
 
-    private fun setUpServerConnection(connection: BluetoothGattServerConnection) {
+    private fun setUpServerConnection(connection: ServerBluetoothGattConnection) {
         val prxService = connection.services.findService(PRX_SERVICE_UUID)!!
         val linkLossService = connection.services.findService(LINK_LOSS_SERVICE_UUID)!!
 
@@ -159,8 +155,9 @@ internal class PRXService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        client = device.connect(
+        client = ClientBleGatt.connect(
             this@PRXService,
+            device,
             logger = { p, s -> repository.log(p, s) },
             options = BleGattConnectOptions(autoConnect = true)
         )
@@ -177,18 +174,19 @@ internal class PRXService : NotificationService() {
             return@launch
         }
 
-        client.discoverServices()
-            .filterNotNull()
-            .onEach { configureGatt(it) }
-            .catch { repository.onMissingServices() }
-            .launchIn(lifecycleScope)
+        try {
+            val services = client.discoverServices()
+            configureGatt(services)
+        } catch (e: Exception) {
+            repository.onMissingServices()
+        }
 
         repository.remoteAlarmLevel
             .onEach { writeAlertLevel(it) }
             .launchIn(lifecycleScope)
     }
 
-    private suspend fun configureGatt(services: BleGattServices) {
+    private suspend fun configureGatt(services: ClientBleGattServices) {
         val prxService = services.findService(PRX_SERVICE_UUID)!!
         alertLevelCharacteristic = prxService.findCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID)!!
         val linkLossService = services.findService(LINK_LOSS_SERVICE_UUID)!!

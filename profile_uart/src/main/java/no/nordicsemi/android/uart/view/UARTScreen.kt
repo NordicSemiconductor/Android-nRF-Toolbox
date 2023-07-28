@@ -48,16 +48,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.common.theme.view.PagerView
 import no.nordicsemi.android.common.theme.view.PagerViewEntity
 import no.nordicsemi.android.common.theme.view.PagerViewItem
-import no.nordicsemi.android.common.ui.scanner.view.DeviceConnectingView
-import no.nordicsemi.android.common.ui.scanner.view.DeviceDisconnectedView
-import no.nordicsemi.android.common.ui.scanner.view.Reason
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.uart.viewmodel.UARTViewModel
 import no.nordicsemi.android.ui.view.NavigateUpButton
 import no.nordicsemi.android.ui.view.ProfileAppBar
+import no.nordicsemi.android.kotlin.ble.ui.scanner.view.DeviceConnectingView
+import no.nordicsemi.android.kotlin.ble.ui.scanner.view.DeviceDisconnectedView
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UARTScreen() {
     val viewModel: UARTViewModel = hiltViewModel()

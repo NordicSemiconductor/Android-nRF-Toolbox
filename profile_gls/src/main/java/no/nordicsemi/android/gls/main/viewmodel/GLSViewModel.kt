@@ -49,7 +49,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
-import no.nordicsemi.android.common.logger.BlekLoggerAndLauncher
+import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.gls.GlsDetailsDestinationId
@@ -60,11 +60,10 @@ import no.nordicsemi.android.gls.main.view.GLSViewState
 import no.nordicsemi.android.gls.main.view.OnGLSRecordClick
 import no.nordicsemi.android.gls.main.view.OnWorkingModeSelected
 import no.nordicsemi.android.gls.main.view.OpenLoggerEvent
-import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
-import no.nordicsemi.android.kotlin.ble.client.main.connect
+import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
 import no.nordicsemi.android.kotlin.ble.client.main.errors.GattOperationException
-import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattCharacteristic
-import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
+import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattCharacteristic
+import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
@@ -107,11 +106,11 @@ internal class GLSViewModel @Inject constructor(
     private val loggerFactory: NordicLoggerFactory
 ) : ViewModel() {
 
-    internal lateinit var client: BleGattClient
-    private lateinit var logger: BlekLoggerAndLauncher
+    internal lateinit var client: ClientBleGatt
+    private lateinit var logger: BleLoggerAndLauncher
 
-    private lateinit var glucoseMeasurementCharacteristic: BleGattCharacteristic
-    private lateinit var recordAccessControlPointCharacteristic: BleGattCharacteristic
+    private lateinit var glucoseMeasurementCharacteristic: ClientBleGattCharacteristic
+    private lateinit var recordAccessControlPointCharacteristic: ClientBleGattCharacteristic
 
     private val _state = MutableStateFlow(GLSViewState())
     val state = _state.asStateFlow()
@@ -170,7 +169,7 @@ internal class GLSViewModel @Inject constructor(
 
         logger = loggerFactory.createNordicLogger(context, stringConst.APP_NAME, "GLS", device.address)
 
-        client = device.connect(context, logger = logger)
+        client = ClientBleGatt.connect(context, device, logger = logger)
 
         client.waitForBonding()
 
@@ -184,11 +183,12 @@ internal class GLSViewModel @Inject constructor(
             return@launch
         }
 
-        client.discoverServices()
-            .filterNotNull()
-            .onEach { configureGatt(it) }
-            .catch { onMissingServices() }
-            .launchIn(viewModelScope)
+        try {
+            val services = client.discoverServices()
+            configureGatt(services)
+        } catch (e: Exception) {
+            onMissingServices()
+        }
     }
 
     private fun onMissingServices() {
@@ -202,7 +202,7 @@ internal class GLSViewModel @Inject constructor(
         }
     }
 
-    private suspend fun configureGatt(services: BleGattServices) {
+    private suspend fun configureGatt(services: ClientBleGattServices) {
         val glsService = services.findService(GLS_SERVICE_UUID)!!
         glucoseMeasurementCharacteristic = glsService.findCharacteristic(GLUCOSE_MEASUREMENT_CHARACTERISTIC)!!
         recordAccessControlPointCharacteristic = glsService.findCharacteristic(RACP_CHARACTERISTIC)!!
@@ -268,11 +268,11 @@ internal class GLSViewModel @Inject constructor(
             try {
                 if (state.value.glsServiceData.records.isNotEmpty()) {
                     recordAccessControlPointCharacteristic.write(
-                        RecordAccessControlPointInputParser.reportStoredRecordsGreaterThenOrEqualTo(highestSequenceNumber).value
+                        RecordAccessControlPointInputParser.reportStoredRecordsGreaterThenOrEqualTo(highestSequenceNumber)
                     )
                 } else {
                     recordAccessControlPointCharacteristic.write(
-                        RecordAccessControlPointInputParser.reportAllStoredRecords().value
+                        RecordAccessControlPointInputParser.reportAllStoredRecords()
                     )
                 }
             } catch (e: GattOperationException) {
@@ -298,7 +298,7 @@ internal class GLSViewModel @Inject constructor(
         clear()
         _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.PENDING)
         try {
-            recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportLastStoredRecord().value)
+            recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportLastStoredRecord())
         } catch (e: Exception) {
             e.printStackTrace()
             _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.FAILED)
@@ -309,7 +309,7 @@ internal class GLSViewModel @Inject constructor(
         clear()
         _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.PENDING)
         try {
-            recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportFirstStoredRecord().value)
+            recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportFirstStoredRecord())
         } catch (e: Exception) {
             e.printStackTrace()
             _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.FAILED)
@@ -320,7 +320,7 @@ internal class GLSViewModel @Inject constructor(
         clear()
         _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.PENDING)
         try {
-            recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords().value)
+            recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords())
         } catch (e: Exception) {
             e.printStackTrace()
             _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.FAILED)

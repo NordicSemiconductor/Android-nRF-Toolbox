@@ -5,7 +5,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.components.SingletonComponent
 import dagger.hilt.testing.TestInstallIn
-import no.nordicsemi.android.common.logger.BlekLoggerAndLauncher
+import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
 import no.nordicsemi.android.ui.view.NordicLoggerFactory
 import no.nordicsemi.android.ui.view.NordicLoggerFactoryHiltModule
 
@@ -24,8 +24,8 @@ class NordicLoggerFactoryTestModule {
                 profile: String?,
                 key: String,
                 name: String?,
-            ): BlekLoggerAndLauncher {
-                return object : BlekLoggerAndLauncher {
+            ): BleLoggerAndLauncher {
+                return object : BleLoggerAndLauncher {
                     override fun launch() {
 
                     }

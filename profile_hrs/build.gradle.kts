@@ -54,7 +54,7 @@ dependencies {
     implementation(libs.nordic.ble.common)
     implementation(libs.nordic.ble.ktx)
     implementation(libs.nordic.navigation)
-    implementation(libs.nordic.uiscanner)
+    implementation(libs.nordic.blek.uiscanner)
     implementation(libs.nordic.uilogger)
     implementation(libs.nordic.core)
 

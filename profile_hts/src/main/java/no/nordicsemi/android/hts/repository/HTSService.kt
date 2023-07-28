@@ -41,9 +41,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
-import no.nordicsemi.android.kotlin.ble.client.main.connect
-import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
+import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
+import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
@@ -67,7 +66,7 @@ internal class HTSService : NotificationService() {
     @Inject
     lateinit var repository: HTSRepository
 
-    private lateinit var client: BleGattClient
+    private lateinit var client: ClientBleGatt
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
@@ -86,7 +85,7 @@ internal class HTSService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        client = device.connect(this@HTSService, logger = { p, s -> repository.log(p, s) })
+        client = ClientBleGatt.connect(this@HTSService, device, logger = { p, s -> repository.log(p, s) })
 
         client.connectionStateWithStatus
             .onEach { repository.onConnectionStateChanged(it) }
@@ -98,14 +97,15 @@ internal class HTSService : NotificationService() {
             return@launch
         }
 
-        client.discoverServices()
-            .filterNotNull()
-            .onEach { configureGatt(it) }
-            .catch { repository.onMissingServices() }
-            .launchIn(lifecycleScope)
+        try {
+            val services = client.discoverServices()
+            configureGatt(services)
+        } catch (e: Exception) {
+            repository.onMissingServices()
+        }
     }
 
-    private suspend fun configureGatt(services: BleGattServices) {
+    private suspend fun configureGatt(services: ClientBleGattServices) {
         val htsService = services.findService(HTS_SERVICE_UUID)!!
         val htsMeasurementCharacteristic = htsService.findCharacteristic(HTS_MEASUREMENT_CHARACTERISTIC_UUID)!!
         val batteryService = services.findService(BATTERY_SERVICE_UUID)!!

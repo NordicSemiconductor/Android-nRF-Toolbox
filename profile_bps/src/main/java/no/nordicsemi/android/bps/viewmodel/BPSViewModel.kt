@@ -53,13 +53,12 @@ import no.nordicsemi.android.bps.view.BPSViewEvent
 import no.nordicsemi.android.bps.view.BPSViewState
 import no.nordicsemi.android.bps.view.DisconnectEvent
 import no.nordicsemi.android.bps.view.OpenLoggerEvent
-import no.nordicsemi.android.common.logger.BlekLoggerAndLauncher
-import no.nordicsemi.android.common.logger.NordicBlekLogger
+import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
+import no.nordicsemi.android.common.logger.DefaultBleLogger
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
-import no.nordicsemi.android.kotlin.ble.client.main.connect
-import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
+import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
+import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
@@ -93,8 +92,8 @@ internal class BPSViewModel @Inject constructor(
     private val _state = MutableStateFlow(BPSViewState())
     val state = _state.asStateFlow()
 
-    private lateinit var client: BleGattClient
-    private lateinit var logger: BlekLoggerAndLauncher
+    private lateinit var client: ClientBleGatt
+    private lateinit var logger: BleLoggerAndLauncher
 
     init {
         navigationManager.navigateTo(ScannerDestinationId, ParcelUuid(BPS_SERVICE_UUID))
@@ -126,9 +125,9 @@ internal class BPSViewModel @Inject constructor(
     private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
         _state.value = _state.value.copy(deviceName = device.name)
 
-        logger = NordicBlekLogger.create(context, stringConst.APP_NAME, "BPS", device.address)
+        logger = DefaultBleLogger.create(context, stringConst.APP_NAME, "BPS", device.address)
 
-        client = device.connect(context, logger = logger)
+        client = ClientBleGatt.connect(context, device, logger = logger)
 
         client.connectionStateWithStatus
             .filterNotNull()
@@ -140,14 +139,15 @@ internal class BPSViewModel @Inject constructor(
             return@launch
         }
 
-        client.discoverServices()
-            .filterNotNull()
-            .onEach { configureGatt(it) }
-            .catch { onMissingServices() }
-            .launchIn(viewModelScope)
+        try {
+            val services = client.discoverServices()
+            configureGatt(services)
+        } catch (e: Exception) {
+            onMissingServices()
+        }
     }
 
-    private suspend fun configureGatt(services: BleGattServices) {
+    private suspend fun configureGatt(services: ClientBleGattServices) {
         val bpsService = services.findService(BPS_SERVICE_UUID)!!
         val bpmCharacteristic = bpsService.findCharacteristic(BPM_CHARACTERISTIC_UUID)!!
         val icpCharacteristic = bpsService.findCharacteristic(ICP_CHARACTERISTIC_UUID)

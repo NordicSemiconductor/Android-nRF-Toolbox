@@ -72,10 +72,10 @@ dependencies {
     implementation(libs.nordic.ble.ktx)
 
     implementation(libs.nordic.theme)
-    implementation(libs.nordic.uiscanner)
     implementation(libs.nordic.navigation)
     implementation(libs.nordic.uilogger)
     implementation(libs.nordic.core)
+    implementation(libs.nordic.blek.uiscanner)
 
     implementation(libs.androidx.dataStore.core)
     implementation(libs.androidx.dataStore.preferences)
@@ -86,6 +86,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.service)
+    implementation(libs.okio)
 
     // For Robolectric tests.
     testImplementation("com.google.dagger:hilt-android-testing:2.44")

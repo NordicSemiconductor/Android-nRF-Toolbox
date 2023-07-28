@@ -41,9 +41,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
-import no.nordicsemi.android.kotlin.ble.client.main.connect
-import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
+import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
+import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
@@ -69,7 +68,7 @@ internal class HRSService : NotificationService() {
     @Inject
     lateinit var repository: HRSRepository
 
-    private lateinit var client: BleGattClient
+    private lateinit var client: ClientBleGatt
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
@@ -88,7 +87,7 @@ internal class HRSService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        client = device.connect(this@HRSService, logger = { p, s -> repository.log(p, s) })
+        client = ClientBleGatt.connect(this@HRSService, device, logger = { p, s -> repository.log(p, s) })
 
         client.waitForBonding()
 
@@ -102,14 +101,15 @@ internal class HRSService : NotificationService() {
             return@launch
         }
 
-        client.discoverServices()
-            .filterNotNull()
-            .onEach { configureGatt(it) }
-            .catch { repository.onMissingServices() }
-            .launchIn(lifecycleScope)
+        try {
+            val services = client.discoverServices()
+            configureGatt(services)
+        } catch (e: Exception) {
+            repository.onMissingServices()
+        }
     }
 
-    private suspend fun configureGatt(services: BleGattServices) {
+    private suspend fun configureGatt(services: ClientBleGattServices) {
         val hrsService = services.findService(HRS_SERVICE_UUID)!!
         val hrsMeasurementCharacteristic = hrsService.findCharacteristic(HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID)!!
         val bodySensorLocationCharacteristic = hrsService.findCharacteristic(BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID)!!

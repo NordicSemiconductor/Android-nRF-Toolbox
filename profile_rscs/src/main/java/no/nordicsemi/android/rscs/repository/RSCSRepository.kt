@@ -38,8 +38,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.core.simpleSharedFlow
-import no.nordicsemi.android.common.logger.BlekLoggerAndLauncher
-import no.nordicsemi.android.common.logger.NordicBlekLogger
+import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
+import no.nordicsemi.android.common.logger.DefaultBleLogger
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
@@ -58,7 +58,7 @@ class RSCSRepository @Inject constructor(
     private val serviceManager: ServiceManager,
     private val stringConst: StringConst
 ) {
-    private var logger: BlekLoggerAndLauncher? = null
+    private var logger: BleLoggerAndLauncher? = null
 
     private val _data = MutableStateFlow(RSCSServiceData())
     internal val data = _data.asStateFlow()
@@ -86,7 +86,7 @@ class RSCSRepository @Inject constructor(
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
     fun launch(device: ServerDevice) {
-        logger = NordicBlekLogger.create(context, stringConst.APP_NAME, "RSCS", device.address)
+        logger = DefaultBleLogger.create(context, stringConst.APP_NAME, "RSCS", device.address)
         _data.value = _data.value.copy(deviceName = device.name)
         serviceManager.startService(RSCSService::class.java, device)
     }

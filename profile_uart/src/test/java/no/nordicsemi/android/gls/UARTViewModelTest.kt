@@ -24,16 +24,16 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import no.nordicsemi.android.analytics.AppAnalytics
-import no.nordicsemi.android.common.logger.NordicBlekLogger
+import no.nordicsemi.android.common.core.ApplicationScope
+import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
+import no.nordicsemi.android.common.logger.DefaultBleLogger
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.di.NavigationModule
-import no.nordicsemi.android.kotlin.ble.client.main.ClientScope
 import no.nordicsemi.android.kotlin.ble.core.MockServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectionStatus
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
-import no.nordicsemi.android.kotlin.ble.server.main.ServerScope
 import no.nordicsemi.android.uart.data.UARTPersistentDataSource
 import no.nordicsemi.android.uart.repository.UARTRepository
 import no.nordicsemi.android.uart.view.DisconnectEvent
@@ -84,7 +84,7 @@ internal class UARTViewModelTest {
     lateinit var context: Context
 
     @RelaxedMockK
-    lateinit var logger: NordicBlekLogger
+    lateinit var logger: BleLoggerAndLauncher
 
     @Inject
     lateinit var repository: UARTRepository
@@ -119,16 +119,14 @@ internal class UARTViewModelTest {
                 profile: String?,
                 key: String,
                 name: String?,
-            ): NordicBlekLogger {
+            ): BleLoggerAndLauncher {
                 return logger
             }
 
         })
         runBlocking {
-            mockkStatic("no.nordicsemi.android.kotlin.ble.client.main.ClientScopeKt")
-            every { ClientScope } returns CoroutineScope(UnconfinedTestDispatcher())
-            mockkStatic("no.nordicsemi.android.kotlin.ble.server.main.ServerScopeKt")
-            every { ServerScope } returns CoroutineScope(UnconfinedTestDispatcher())
+            mockkStatic("no.nordicsemi.android.common.core.ApplicationScopeKt")
+            every { ApplicationScope } returns CoroutineScope(UnconfinedTestDispatcher())
             every { stringConst.APP_NAME } returns "Test"
 
             uartServer = UartServer(CoroutineScope(UnconfinedTestDispatcher()))
@@ -138,8 +136,8 @@ internal class UARTViewModelTest {
 
     @Before
     fun prepareLogger() {
-        mockkObject(NordicBlekLogger.Companion)
-        every { NordicBlekLogger.create(any(), any(), any(), any()) } returns mockk()
+        mockkObject(DefaultBleLogger.Companion)
+        every { DefaultBleLogger.create(any(), any(), any(), any()) } returns mockk()
     }
 
     @Test

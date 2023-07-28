@@ -38,7 +38,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.core.simpleSharedFlow
-import no.nordicsemi.android.common.logger.BlekLoggerAndLauncher
+import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
@@ -65,7 +65,7 @@ class UARTRepository @Inject internal constructor(
     private val stringConst: StringConst,
     private val loggerFactory: NordicLoggerFactory
 ) {
-    private var logger: BlekLoggerAndLauncher? = null
+    private var logger: BleLoggerAndLauncher? = null
 
     private val _data = MutableStateFlow(UARTServiceData())
     internal val data = _data.asStateFlow()

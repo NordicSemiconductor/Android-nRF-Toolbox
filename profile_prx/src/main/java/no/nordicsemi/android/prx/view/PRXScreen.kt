@@ -42,15 +42,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import no.nordicsemi.android.common.ui.scanner.view.DeviceConnectingView
-import no.nordicsemi.android.common.ui.scanner.view.DeviceDisconnectedView
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.ui.scanner.view.DeviceConnectingView
+import no.nordicsemi.android.kotlin.ble.ui.scanner.view.DeviceDisconnectedView
 import no.nordicsemi.android.prx.R
 import no.nordicsemi.android.prx.viewmodel.PRXViewModel
 import no.nordicsemi.android.ui.view.NavigateUpButton
 import no.nordicsemi.android.ui.view.ProfileAppBar
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PRXScreen() {
     val viewModel: PRXViewModel = hiltViewModel()

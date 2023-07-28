@@ -38,8 +38,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.core.simpleSharedFlow
-import no.nordicsemi.android.common.logger.BlekLoggerAndLauncher
-import no.nordicsemi.android.common.logger.NordicBlekLogger
+import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
+import no.nordicsemi.android.common.logger.DefaultBleLogger
 import no.nordicsemi.android.csc.data.CSCServiceData
 import no.nordicsemi.android.csc.data.SpeedUnit
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
@@ -61,7 +61,7 @@ class CSCRepository @Inject constructor(
     private val serviceManager: ServiceManager,
     private val stringConst: StringConst
 ) {
-    private var logger: BlekLoggerAndLauncher? = null
+    private var logger: BleLoggerAndLauncher? = null
 
     private val _wheelSize = MutableStateFlow(WheelSizes.default)
     internal val wheelSize = _wheelSize.asStateFlow()
@@ -92,7 +92,7 @@ class CSCRepository @Inject constructor(
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
     fun launch(device: ServerDevice) {
-        logger = NordicBlekLogger.create(context, stringConst.APP_NAME, "CSC", device.address)
+        logger = DefaultBleLogger.create(context, stringConst.APP_NAME, "CSC", device.address)
         _data.value = _data.value.copy(deviceName = device.name)
         serviceManager.startService(CSCService::class.java, device)
     }

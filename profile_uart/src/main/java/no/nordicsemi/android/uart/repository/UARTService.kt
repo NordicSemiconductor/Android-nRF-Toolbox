@@ -41,10 +41,10 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
-import no.nordicsemi.android.kotlin.ble.client.main.connect
-import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattCharacteristic
-import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
+import no.nordicsemi.android.common.core.DataByteArray
+import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
+import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattCharacteristic
+import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattProperty
 import no.nordicsemi.android.kotlin.ble.core.data.BleWriteType
@@ -69,7 +69,7 @@ internal class UARTService : NotificationService() {
     @Inject
     lateinit var repository: UARTRepository
 
-    private lateinit var client: BleGattClient
+    private lateinit var client: ClientBleGatt
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
@@ -88,7 +88,7 @@ internal class UARTService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        client = device.connect(this@UARTService, logger = { p, s -> repository.log(p, s) })
+        client = ClientBleGatt.connect(this@UARTService, device, logger = { p, s -> repository.log(p, s) })
 
         client.requestMtu(Mtu.max)
 
@@ -101,14 +101,15 @@ internal class UARTService : NotificationService() {
             return@launch
         }
 
-        client.discoverServices()
-            .filterNotNull()
-            .onEach { configureGatt(it) }
-            .catch { repository.onMissingServices() }
-            .launchIn(lifecycleScope)
+        try {
+            val services = client.discoverServices()
+            configureGatt(services)
+        } catch (e: Exception) {
+            repository.onMissingServices()
+        }
     }
 
-    private suspend fun configureGatt(services: BleGattServices) {
+    private suspend fun configureGatt(services: ClientBleGattServices) {
         val uartService = services.findService(UART_SERVICE_UUID)!!
         val rxCharacteristic = uartService.findCharacteristic(UART_RX_CHARACTERISTIC_UUID)!!
         val txCharacteristic = uartService.findCharacteristic(UART_TX_CHARACTERISTIC_UUID)!!
@@ -122,19 +123,19 @@ internal class UARTService : NotificationService() {
             ?.launchIn(lifecycleScope)
 
         txCharacteristic.getNotifications()
-            .onEach { repository.onNewMessageReceived(String(it)) }
-            .onEach { repository.log(10, "Received: ${String(it)}") }
+            .onEach { repository.onNewMessageReceived(String(it.value)) }
+            .onEach { repository.log(10, "Received: ${String(it.value)}") }
             .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
 
         repository.command
-            .onEach { rxCharacteristic.splitWrite(it.toByteArray(), getWriteType(rxCharacteristic)) }
+            .onEach { rxCharacteristic.splitWrite(DataByteArray.from(it), getWriteType(rxCharacteristic)) }
             .onEach { repository.onNewMessageSent(it) }
             .onEach { repository.log(10, "Sent: $it") }
             .launchIn(lifecycleScope)
     }
 
-    private fun getWriteType(characteristic: BleGattCharacteristic): BleWriteType {
+    private fun getWriteType(characteristic: ClientBleGattCharacteristic): BleWriteType {
         return if (characteristic.properties.contains(BleGattProperty.PROPERTY_WRITE)) {
             BleWriteType.DEFAULT
         } else {

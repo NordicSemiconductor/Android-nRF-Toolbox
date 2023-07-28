@@ -44,13 +44,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.cgms.R
 import no.nordicsemi.android.cgms.viewmodel.CGMViewModel
-import no.nordicsemi.android.common.ui.scanner.view.DeviceConnectingView
-import no.nordicsemi.android.common.ui.scanner.view.DeviceDisconnectedView
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.ui.scanner.view.DeviceConnectingView
+import no.nordicsemi.android.kotlin.ble.ui.scanner.view.DeviceDisconnectedView
 import no.nordicsemi.android.ui.view.NavigateUpButton
 import no.nordicsemi.android.ui.view.ProfileAppBar
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CGMScreen() {
     val viewModel: CGMViewModel = hiltViewModel()

@@ -39,7 +39,7 @@ android {
 
 dependencies {
     implementation(libs.nordic.navigation)
-    implementation(libs.nordic.uiscanner)
+    implementation(libs.nordic.blek.uiscanner)
 
     implementation(libs.nordic.blek.scanner)
 

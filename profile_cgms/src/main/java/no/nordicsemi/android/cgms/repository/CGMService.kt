@@ -41,15 +41,12 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.ble.common.data.cgm.CGMSpecificOpsControlPointData
 import no.nordicsemi.android.cgms.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.cgms.data.CGMServiceCommand
-import no.nordicsemi.android.common.logger.NordicBlekLogger
-import no.nordicsemi.android.kotlin.ble.client.main.callback.BleGattClient
-import no.nordicsemi.android.kotlin.ble.client.main.connect
+import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
 import no.nordicsemi.android.kotlin.ble.client.main.errors.GattOperationException
-import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattCharacteristic
-import no.nordicsemi.android.kotlin.ble.client.main.service.BleGattServices
+import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattCharacteristic
+import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
@@ -60,6 +57,8 @@ import no.nordicsemi.android.kotlin.ble.profile.cgm.CGMSpecificOpsControlPointPa
 import no.nordicsemi.android.kotlin.ble.profile.cgm.CGMStatusParser
 import no.nordicsemi.android.kotlin.ble.profile.cgm.data.CGMErrorCode
 import no.nordicsemi.android.kotlin.ble.profile.cgm.data.CGMOpCode
+import no.nordicsemi.android.kotlin.ble.profile.cgm.data.CGMSpecificOpsControlPointData
+import no.nordicsemi.android.kotlin.ble.profile.gls.CGMSpecificOpsControlPointDataParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.RecordAccessControlPointInputParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.RecordAccessControlPointParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.NumberOfRecordsData
@@ -70,7 +69,6 @@ import no.nordicsemi.android.kotlin.ble.profile.racp.RACPOpCode
 import no.nordicsemi.android.kotlin.ble.profile.racp.RACPResponseCode
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
-import no.nordicsemi.android.ui.view.StringConst
 import no.nordicsemi.android.utils.launchWithCatch
 import java.util.*
 import javax.inject.Inject
@@ -93,7 +91,7 @@ internal class CGMService : NotificationService() {
     @Inject
     lateinit var repository: CGMRepository
 
-    private lateinit var client: BleGattClient
+    private lateinit var client: ClientBleGatt
 
     private var secured = false
 
@@ -101,7 +99,7 @@ internal class CGMService : NotificationService() {
 
     private var sessionStartTime: Long = 0
 
-    private lateinit var recordAccessControlPointCharacteristic: BleGattCharacteristic
+    private lateinit var recordAccessControlPointCharacteristic: ClientBleGattCharacteristic
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
@@ -133,7 +131,7 @@ internal class CGMService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        client = device.connect(this@CGMService, logger = { p, s -> repository.log(p, s) })
+        client = ClientBleGatt.connect(this@CGMService, device, logger = { p, s -> repository.log(p, s) })
 
         client.connectionStateWithStatus
             .onEach { repository.onConnectionStateChanged(it) }
@@ -145,14 +143,15 @@ internal class CGMService : NotificationService() {
             return@launch
         }
 
-        client.discoverServices()
-            .filterNotNull()
-            .onEach { configureGatt(it) }
-            .catch { repository.onMissingServices() }
-            .launchIn(lifecycleScope)
+        try {
+            val services = client.discoverServices()
+            configureGatt(services)
+        } catch (e: Exception) {
+            repository.onMissingServices()
+        }
     }
 
-    private suspend fun configureGatt(services: BleGattServices) {
+    private suspend fun configureGatt(services: ClientBleGattServices) {
         val cgmService = services.findService(CGMS_SERVICE_UUID)!!
         val statusCharacteristic = cgmService.findCharacteristic(CGM_STATUS_UUID)!!
         val featureCharacteristic = cgmService.findCharacteristic(CGM_FEATURE_UUID)!!
@@ -225,7 +224,7 @@ internal class CGMService : NotificationService() {
         }
 
         if (sessionStartTime == 0L) {
-            opsControlPointCharacteristic.write(CGMSpecificOpsControlPointData.startSession(secured).value!!)
+            opsControlPointCharacteristic.write(CGMSpecificOpsControlPointDataParser.startSession(secured))
         }
     }
 
@@ -262,11 +261,11 @@ internal class CGMService : NotificationService() {
         if (numberOfRecords > 0) {
             if (repository.hasRecords) {
                 recordAccessControlPointCharacteristic.write(
-                    RecordAccessControlPointInputParser.reportStoredRecordsGreaterThenOrEqualTo(repository.highestSequenceNumber).value
+                    RecordAccessControlPointInputParser.reportStoredRecordsGreaterThenOrEqualTo(repository.highestSequenceNumber)
                 )
             } else {
                 recordAccessControlPointCharacteristic.write(
-                    RecordAccessControlPointInputParser.reportAllStoredRecords().value
+                    RecordAccessControlPointInputParser.reportAllStoredRecords()
                 )
             }
         }
@@ -289,7 +288,7 @@ internal class CGMService : NotificationService() {
         clear()
         repository.onNewRequestStatus(RequestStatus.PENDING)
         try {
-            recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportLastStoredRecord().value)
+            recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportLastStoredRecord())
         } catch (e: GattOperationException) {
             e.printStackTrace()
             repository.onNewRequestStatus(RequestStatus.FAILED)
@@ -300,7 +299,7 @@ internal class CGMService : NotificationService() {
         clear()
         repository.onNewRequestStatus(RequestStatus.PENDING)
         try {
-            recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportFirstStoredRecord().value)
+            recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportFirstStoredRecord())
         } catch (e: GattOperationException) {
             e.printStackTrace()
             repository.onNewRequestStatus(RequestStatus.FAILED)
@@ -311,7 +310,7 @@ internal class CGMService : NotificationService() {
         clear()
         repository.onNewRequestStatus(RequestStatus.PENDING)
         try {
-            recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords().value)
+            recordAccessControlPointCharacteristic.write(RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords())
         } catch (e: GattOperationException) {
             e.printStackTrace()
             repository.onNewRequestStatus(RequestStatus.FAILED)

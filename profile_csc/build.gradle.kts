@@ -54,7 +54,7 @@ dependencies {
 
     implementation(libs.nordic.theme)
     implementation(libs.nordic.navigation)
-    implementation(libs.nordic.uiscanner)
+    implementation(libs.nordic.blek.uiscanner)
     implementation(libs.nordic.core)
 
     implementation(libs.androidx.hilt.navigation.compose)

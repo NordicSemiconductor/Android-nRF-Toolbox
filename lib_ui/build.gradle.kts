@@ -51,4 +51,5 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
     implementation(libs.nordic.blek.client)
+    implementation(libs.nordic.logger)
 }
