@@ -81,7 +81,6 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.service)
-    implementation(libs.okio)
 
     testImplementation(libs.hilt.android.testing)
     kaptTest(libs.hilt.compiler)
