@@ -35,7 +35,7 @@ import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.AppOpenEvent
-import no.nordicsemi.android.gls.UartServer
+import no.nordicsemi.android.uart.UartServer
 import javax.inject.Inject
 
 @HiltAndroidApp

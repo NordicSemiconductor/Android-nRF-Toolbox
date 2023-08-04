@@ -1,26 +1,26 @@
-package no.nordicsemi.android.gls
+package no.nordicsemi.android.uart
 
 import android.annotation.SuppressLint
 import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.common.core.DataByteArray
 import no.nordicsemi.android.kotlin.ble.advertiser.BleAdvertiser
 import no.nordicsemi.android.kotlin.ble.core.MockServerDevice
-import no.nordicsemi.android.kotlin.ble.core.advertiser.BleAdvertiseConfig
+import no.nordicsemi.android.kotlin.ble.core.advertiser.BleAdvertisingConfig
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattPermission
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattProperty
 import no.nordicsemi.android.kotlin.ble.profile.gls.RecordAccessControlPointInputParser
-import no.nordicsemi.android.kotlin.ble.server.main.BleGattServer
-import no.nordicsemi.android.kotlin.ble.server.main.service.BleGattServerServiceType
-import no.nordicsemi.android.kotlin.ble.server.main.service.BleServerGattCharacteristic
-import no.nordicsemi.android.kotlin.ble.server.main.service.BleServerGattCharacteristicConfig
-import no.nordicsemi.android.kotlin.ble.server.main.service.BleServerGattServiceConfig
-import no.nordicsemi.android.kotlin.ble.server.main.service.BluetoothGattServerConnection
+import no.nordicsemi.android.kotlin.ble.server.main.ServerBleGatt
+import no.nordicsemi.android.kotlin.ble.server.main.service.ServerBleGattCharacteristic
+import no.nordicsemi.android.kotlin.ble.server.main.service.ServerBleGattCharacteristicConfig
+import no.nordicsemi.android.kotlin.ble.server.main.service.ServerBleGattServiceConfig
+import no.nordicsemi.android.kotlin.ble.server.main.service.ServerBleGattServiceType
+import no.nordicsemi.android.kotlin.ble.server.main.service.ServerBluetoothGattConnection
 import no.nordicsemi.android.uart.repository.BATTERY_LEVEL_CHARACTERISTIC_UUID
 import no.nordicsemi.android.uart.repository.BATTERY_SERVICE_UUID
 import no.nordicsemi.android.uart.repository.UART_RX_CHARACTERISTIC_UUID
@@ -37,27 +37,27 @@ class UartServer @Inject constructor(
     private val scope: CoroutineScope
 ) {
 
-    lateinit var server: BleGattServer
+    lateinit var server: ServerBleGatt
 
-    lateinit var glsCharacteristic: BleServerGattCharacteristic
-    lateinit var glsContextCharacteristic: BleServerGattCharacteristic
-    lateinit var racpCharacteristic: BleServerGattCharacteristic
-    lateinit var batteryLevelCharacteristic: BleServerGattCharacteristic
+    lateinit var glsCharacteristic: ServerBleGattCharacteristic
+    lateinit var glsContextCharacteristic: ServerBleGattCharacteristic
+    lateinit var racpCharacteristic: ServerBleGattCharacteristic
+    lateinit var batteryLevelCharacteristic: ServerBleGattCharacteristic
 
-    private var lastRequest = byteArrayOf()
+    private var lastRequest = DataByteArray()
 
-    val YOUNGEST_RECORD = byteArrayOf(0x07, 0x00, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x05, 0x00, 0x00, 0x26, 0xD2.toByte(), 0x11)
-    val OLDEST_RECORD = byteArrayOf(0x07, 0x04, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x11, 0x00, 0x00, 0x82.toByte(), 0xD2.toByte(), 0x11)
+    val YOUNGEST_RECORD = DataByteArray.from(0x07, 0x00, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x05, 0x00, 0x00, 0x26, 0xD2.toByte(), 0x11)
+    val OLDEST_RECORD = DataByteArray.from(0x07, 0x04, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x11, 0x00, 0x00, 0x82.toByte(), 0xD2.toByte(), 0x11)
 
     val records = listOf(
         YOUNGEST_RECORD,
-        byteArrayOf(0x07, 0x01, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x08, 0x00, 0x00, 0x3D, 0xD2.toByte(), 0x11),
-        byteArrayOf(0x07, 0x02, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x0B, 0x00, 0x00, 0x54, 0xD2.toByte(), 0x11),
-        byteArrayOf(0x07, 0x03, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x0E, 0x00, 0x00, 0x6B, 0xD2.toByte(), 0x11),
+        DataByteArray.from(0x07, 0x01, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x08, 0x00, 0x00, 0x3D, 0xD2.toByte(), 0x11),
+        DataByteArray.from(0x07, 0x02, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x0B, 0x00, 0x00, 0x54, 0xD2.toByte(), 0x11),
+        DataByteArray.from(0x07, 0x03, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x0E, 0x00, 0x00, 0x6B, 0xD2.toByte(), 0x11),
         OLDEST_RECORD
     )
 
-    val racp = byteArrayOf(0x06, 0x00, 0x01, 0x01)
+    val racp = DataByteArray.from(0x06, 0x00, 0x01, 0x01)
 
     fun start(
         context: Context,
@@ -66,44 +66,44 @@ class UartServer @Inject constructor(
             address = "55:44:33:22:11"
         ),
     ) = scope.launch {
-        val rxCharacteristic = BleServerGattCharacteristicConfig(
+        val rxCharacteristic = ServerBleGattCharacteristicConfig(
             UART_RX_CHARACTERISTIC_UUID,
             listOf(BleGattProperty.PROPERTY_NOTIFY),
             listOf()
         )
 
-        val txCharacteristic = BleServerGattCharacteristicConfig(
+        val txCharacteristic = ServerBleGattCharacteristicConfig(
             UART_TX_CHARACTERISTIC_UUID,
             listOf(BleGattProperty.PROPERTY_INDICATE, BleGattProperty.PROPERTY_WRITE),
             listOf(BleGattPermission.PERMISSION_WRITE)
         )
 
-        val uartService = BleServerGattServiceConfig(
+        val uartService = ServerBleGattServiceConfig(
             UART_SERVICE_UUID,
-            BleGattServerServiceType.SERVICE_TYPE_PRIMARY,
+            ServerBleGattServiceType.SERVICE_TYPE_PRIMARY,
             listOf(rxCharacteristic, txCharacteristic)
         )
 
-        val batteryLevelCharacteristic = BleServerGattCharacteristicConfig(
+        val batteryLevelCharacteristic = ServerBleGattCharacteristicConfig(
             BATTERY_LEVEL_CHARACTERISTIC_UUID,
             listOf(BleGattProperty.PROPERTY_READ, BleGattProperty.PROPERTY_NOTIFY),
             listOf(BleGattPermission.PERMISSION_READ)
         )
 
-        val batteryService = BleServerGattServiceConfig(
+        val batteryService = ServerBleGattServiceConfig(
             BATTERY_SERVICE_UUID,
-            BleGattServerServiceType.SERVICE_TYPE_PRIMARY,
+            ServerBleGattServiceType.SERVICE_TYPE_PRIMARY,
             listOf(batteryLevelCharacteristic)
         )
 
-        server = BleGattServer.create(
+        server = ServerBleGatt.create(
             context = context,
             config = arrayOf(uartService, batteryService),
             mock = device
         )
 
         val advertiser = BleAdvertiser.create(context)
-        advertiser.advertise(config = BleAdvertiseConfig(), mock = device).launchIn(scope)
+        advertiser.advertise(config = BleAdvertisingConfig(), mock = device).launchIn(scope)
 
         launch {
             server.connections
@@ -116,7 +116,7 @@ class UartServer @Inject constructor(
         server.stopServer()
     }
 
-    private fun setUpConnection(connection: BluetoothGattServerConnection) {
+    private fun setUpConnection(connection: ServerBluetoothGattConnection) {
 //        val glsService = connection.services.findService(GLS_SERVICE_UUID)!!
 //        glsCharacteristic = glsService.findCharacteristic(GLUCOSE_MEASUREMENT_CHARACTERISTIC)!!
 //        glsContextCharacteristic = glsService.findCharacteristic(GLUCOSE_MEASUREMENT_CONTEXT_CHARACTERISTIC)!!
@@ -130,9 +130,8 @@ class UartServer @Inject constructor(
 //        startBatteryService(connection)
     }
 
-    private fun startGlsService(connection: BluetoothGattServerConnection) {
+    private fun startGlsService(connection: ServerBluetoothGattConnection) {
         racpCharacteristic.value
-            .filter { it.isNotEmpty() }
             .onEach { lastRequest = it }
             .launchIn(scope)
     }
@@ -141,42 +140,42 @@ class UartServer @Inject constructor(
         sendResponse(lastRequest)
     }
 
-    private fun sendResponse(request: ByteArray) {
-        if (request.contentEquals(RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords().value)) {
+    private fun sendResponse(request: DataByteArray) {
+        if (request == RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords()) {
             sendAll(glsCharacteristic)
             racpCharacteristic.setValue(racp)
-        } else if (request.contentEquals(RecordAccessControlPointInputParser.reportLastStoredRecord().value)) {
+        } else if (request == RecordAccessControlPointInputParser.reportLastStoredRecord()) {
             sendLast(glsCharacteristic)
             racpCharacteristic.setValue(racp)
-        } else if (request.contentEquals(RecordAccessControlPointInputParser.reportFirstStoredRecord().value)) {
+        } else if (request == RecordAccessControlPointInputParser.reportFirstStoredRecord()) {
             sendFirst(glsCharacteristic)
             racpCharacteristic.setValue(racp)
         }
     }
 
-    private fun sendFirst(characteristics: BleServerGattCharacteristic) {
+    private fun sendFirst(characteristics: ServerBleGattCharacteristic) {
         characteristics.setValue(records.first())
     }
 
-    private fun sendLast(characteristics: BleServerGattCharacteristic) {
+    private fun sendLast(characteristics: ServerBleGattCharacteristic) {
         characteristics.setValue(records.last())
     }
 
-    private fun sendAll(characteristics: BleServerGattCharacteristic) = scope.launch {
+    private fun sendAll(characteristics: ServerBleGattCharacteristic) = scope.launch {
         records.forEach {
             characteristics.setValue(it)
             delay(100)
         }
     }
 
-    private fun startBatteryService(connection: BluetoothGattServerConnection) {
+    private fun startBatteryService(connection: ServerBluetoothGattConnection) {
         scope.launch {
             repeat(100) {
-                batteryLevelCharacteristic.setValue(byteArrayOf(0x61))
+                batteryLevelCharacteristic.setValue(DataByteArray.from(0x61))
                 delay(STANDARD_DELAY)
-                batteryLevelCharacteristic.setValue(byteArrayOf(0x60))
+                batteryLevelCharacteristic.setValue(DataByteArray.from(0x60))
                 delay(STANDARD_DELAY)
-                batteryLevelCharacteristic.setValue(byteArrayOf(0x5F))
+                batteryLevelCharacteristic.setValue(DataByteArray.from(0x5F))
                 delay(STANDARD_DELAY)
             }
         }

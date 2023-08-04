@@ -34,6 +34,7 @@ import no.nordicsemi.android.kotlin.ble.core.MockServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectionStatus
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
+import no.nordicsemi.android.uart.UartServer
 import no.nordicsemi.android.uart.data.UARTPersistentDataSource
 import no.nordicsemi.android.uart.repository.UARTRepository
 import no.nordicsemi.android.uart.view.DisconnectEvent
