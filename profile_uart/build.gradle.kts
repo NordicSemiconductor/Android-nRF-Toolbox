@@ -83,12 +83,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.service)
     implementation(libs.okio)
 
-    // For Robolectric tests.
-    testImplementation("com.google.dagger:hilt-android-testing:2.44")
-    // ...with Kotlin.
-    kaptTest("com.google.dagger:hilt-android-compiler:2.46.1")
-
-    testImplementation("androidx.test:rules:1.5.0")
+    testImplementation(libs.hilt.android.testing)
+    kaptTest(libs.hilt.compiler)
+    testImplementation(libs.androidx.test.rules)
 
     testImplementation(libs.junit4)
     testImplementation(libs.test.mockk)
