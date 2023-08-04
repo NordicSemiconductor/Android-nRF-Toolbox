@@ -33,7 +33,6 @@ plugins {
     alias(libs.plugins.nordic.feature)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.wire)
 }
 
 android {
@@ -42,10 +41,6 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
     }
-}
-
-wire {
-    kotlin {}
 }
 
 dependencies {
