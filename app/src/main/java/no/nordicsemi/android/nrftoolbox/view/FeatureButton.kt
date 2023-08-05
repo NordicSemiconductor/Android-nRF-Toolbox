@@ -44,6 +44,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -61,6 +62,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.nrftoolbox.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeatureButton(
     @DrawableRes iconId: Int,
@@ -70,7 +72,7 @@ fun FeatureButton(
     @StringRes description: Int? = null,
     onClick: () -> Unit
 ) {
-    OutlinedCard(modifier = Modifier.clickable { onClick() }) {
+    OutlinedCard(onClick = onClick) {
         Row(
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
