@@ -92,18 +92,11 @@ internal class UARTService : NotificationService() {
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
         client = ClientBleGatt.connect(this@UARTService, device, logger = { p, s -> repository.log(p, s) })
 
-        client.requestMtu(Mtu.max)
-
-        client.connectionStateWithStatus
-            .filterNotNull()
-            .onEach { repository.onConnectionStateChanged(it) }
-            .onEach { stopIfDisconnected(it.state, it.status) }
-            .filterNotNull()
-            .launchIn(lifecycleScope)
-
         if (!client.isConnected) {
             return@launch
         }
+
+        client.requestMtu(Mtu.max)
 
         try {
             val services = client.discoverServices()
@@ -111,6 +104,13 @@ internal class UARTService : NotificationService() {
         } catch (e: Exception) {
             repository.onMissingServices()
         }
+
+        client.connectionStateWithStatus
+            .filterNotNull()
+            .onEach { repository.onConnectionStateChanged(it) }
+            .onEach { stopIfDisconnected(it.state, it.status) }
+            .filterNotNull()
+            .launchIn(lifecycleScope)
     }
 
     private suspend fun configureGatt(services: ClientBleGattServices) {
