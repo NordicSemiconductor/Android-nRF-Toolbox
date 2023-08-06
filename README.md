@@ -19,18 +19,12 @@ for bidirectional text communication between devices.
 ### How to import to Android Studio
 
 The production version of nRF Toolbox depends on
-[Android BLE Library](https://github.com/NordicSemiconductor/Android-BLE-Library/) and demonstrates
-use of the Android BLE Common Library (ble-common module), which provides parsers for common profiles
-adopted by Bluetooth SIG.
+[Kotlin BLE Library](https://github.com/NordicSemiconductor/Kotlin-BLE-Library) and demonstrates
+use of the [Android BLE Common Library](https://github.com/NordicPlayground/Android-Common-Libraries), 
+which contains utility classes used by apps developed by Nordic Semiconductor.
 
 You may also include the BLE Library and BLE Common Library as modules. Clone the library project
 to the same root folder.
-
-If you are having issue like [#40](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/issues/40)
-or [#41](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/issues/41), the correct folders
-structure should look like this:
-
-![Folders structure](resources/structure.png)
 
 If you prefer a different name for BLE library, update the
 [*settings.gradle*](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/blob/master/settings.gradle)
@@ -41,7 +35,7 @@ switch the configuration to 'app'.
 
 ### BleManager and how to use it
 
-There are 4 different solutions how to use the manager shown in different profiles.
+There are 2 different solutions how to use the manager shown in different profiles.
 The very basic approach is used by the BPS nd GLS profiles. Each of those activities holds a
 static reference to the manager. Keeping the manager as a view model object protects from disposing it
 when device orientation changes and the activities are being destroyed and recreated. However, this
@@ -71,8 +65,8 @@ https://github.com/NordicSemiconductor/Android-DFU-Library
 
 ### Dependencies
 
-nRF Toolbox depends on [Android BLE Library](https://github.com/NordicSemiconductor/Android-BLE-Library/)
-which has to be cloned into the same root folder as this app. If you prefer a different name,
+nRF Toolbox depends on [Kotlin BLE Library](https://github.com/NordicSemiconductor/Kotlin-BLE-Library)
+which may to be cloned into the same root folder as this app. If you prefer a different name,
 update the [*settings.gradle*](https://github.com/NordicSemiconductor/Android-BLE-Library/blob/master/settings.gradle) file.
 
 The nRF Toolbox also uses the nRF Logger API library which may be found here:
@@ -82,7 +76,7 @@ in *build.gradle* file. This library allows the app to create log entries in the
 Please, read the library documentation on GitHub for more information about the usage and permissions.
 
 The graph in HRM profile is created using the [MPAndroidChart v3.1.0](https://github.com/PhilJay/MPAndroidChart)
-contributed based on the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0).
+contribution based on the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0).
 
 ### Note
 - Android 5.0 or newer is required.
