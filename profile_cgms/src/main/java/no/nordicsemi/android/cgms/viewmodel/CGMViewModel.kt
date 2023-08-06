@@ -116,6 +116,7 @@ internal class CGMViewModel @Inject constructor(
 
     private fun disconnect() {
         repository.disconnect()
+        navigationManager.navigateUp()
     }
 
     override fun onCleared() {
