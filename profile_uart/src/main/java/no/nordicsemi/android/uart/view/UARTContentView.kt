@@ -42,12 +42,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.uart.data.UARTData
+import no.nordicsemi.android.uart.data.UARTServiceData
 import no.nordicsemi.android.ui.view.ScreenSection
 
 @Composable
 internal fun UARTContentView(
-    state: UARTData,
+    state: UARTServiceData,
     onEvent: (UARTViewEvent) -> Unit
 ) {
     Column(

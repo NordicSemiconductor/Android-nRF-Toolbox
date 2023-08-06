@@ -38,77 +38,52 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.bps.R
 import no.nordicsemi.android.bps.viewmodel.BPSViewModel
-import no.nordicsemi.android.common.ui.scanner.view.DeviceConnectingView
-import no.nordicsemi.android.common.ui.scanner.view.DeviceDisconnectedView
-import no.nordicsemi.android.common.ui.scanner.view.Reason
-import no.nordicsemi.android.service.ConnectedResult
-import no.nordicsemi.android.service.ConnectingResult
-import no.nordicsemi.android.service.DeviceHolder
-import no.nordicsemi.android.service.DisconnectedResult
-import no.nordicsemi.android.service.IdleResult
-import no.nordicsemi.android.service.LinkLossResult
-import no.nordicsemi.android.service.MissingServiceResult
-import no.nordicsemi.android.service.SuccessResult
-import no.nordicsemi.android.service.UnknownErrorResult
-import no.nordicsemi.android.ui.view.BackIconAppBar
-import no.nordicsemi.android.ui.view.LoggerIconAppBar
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.ui.scanner.view.DeviceConnectingView
+import no.nordicsemi.android.kotlin.ble.ui.scanner.view.DeviceDisconnectedView
 import no.nordicsemi.android.ui.view.NavigateUpButton
+import no.nordicsemi.android.ui.view.ProfileAppBar
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BPSScreen() {
     val viewModel: BPSViewModel = hiltViewModel()
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val state = viewModel.state.collectAsState().value
 
     val navigateUp = { viewModel.onEvent(DisconnectEvent) }
 
     Scaffold(
-        topBar = { AppBar(state = state, navigateUp = navigateUp, viewModel = viewModel) }
+        topBar = {
+            ProfileAppBar(
+                deviceName = state.deviceName,
+                connectionState = state.result.connectionState,
+                title = R.string.bps_title,
+                navigateUp = navigateUp,
+                disconnect = { viewModel.onEvent(DisconnectEvent) },
+                openLogger = { viewModel.onEvent(OpenLoggerEvent) }
+            )
+        }
     ) {
         Column(
             modifier = Modifier
                 .padding(it)
-                .padding(16.dp)
                 .verticalScroll(rememberScrollState())
+                .padding(16.dp)
         ) {
-            when (val bpsState = state) {
-                NoDeviceState -> DeviceConnectingView()
-                is WorkingState -> when (bpsState.result) {
-                    is IdleResult,
-                    is ConnectingResult -> DeviceConnectingView { NavigateUpButton(navigateUp) }
-                    is ConnectedResult -> DeviceConnectingView { NavigateUpButton(navigateUp) }
-                    is DisconnectedResult -> DeviceDisconnectedView(Reason.USER) { NavigateUpButton(navigateUp) }
-                    is LinkLossResult -> DeviceDisconnectedView(Reason.LINK_LOSS) { NavigateUpButton(navigateUp) }
-                    is MissingServiceResult -> DeviceDisconnectedView(Reason.MISSING_SERVICE) { NavigateUpButton(navigateUp) }
-                    is UnknownErrorResult -> DeviceDisconnectedView(Reason.UNKNOWN) { NavigateUpButton(navigateUp) }
-                    is SuccessResult -> BPSContentView(bpsState.result.data) { viewModel.onEvent(it) }
+            when (state.result.connectionState?.state) {
+                null,
+                GattConnectionState.STATE_CONNECTING -> DeviceConnectingView { NavigateUpButton(navigateUp) }
+                GattConnectionState.STATE_DISCONNECTED,
+                GattConnectionState.STATE_DISCONNECTING -> DeviceDisconnectedView(state.disconnectStatus) {
+                    NavigateUpButton(navigateUp)
                 }
+                GattConnectionState.STATE_CONNECTED -> BPSContentView(state.result) { viewModel.onEvent(it) }
             }
-        }
-    }
-}
-
-@Composable
-private fun AppBar(state: BPSViewState, navigateUp: () -> Unit, viewModel: BPSViewModel) {
-    val toolbarName = (state as? WorkingState)?.let {
-        (it.result as? DeviceHolder)?.deviceName()
-    }
-
-    if (toolbarName == null) {
-        BackIconAppBar(stringResource(id = R.string.bps_title), navigateUp)
-    } else {
-        LoggerIconAppBar(toolbarName, {
-            viewModel.onEvent(DisconnectEvent)
-        }, { viewModel.onEvent(DisconnectEvent) }) {
-            viewModel.onEvent(OpenLoggerEvent)
         }
     }
 }

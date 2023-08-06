@@ -32,16 +32,15 @@
 plugins {
     alias(libs.plugins.nordic.feature)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.kotlin.kapt)
-    alias(libs.plugins.wire)
+    alias(libs.plugins.ksp)
 }
 
 android {
     namespace = "no.nordicsemi.android.uart"
-}
 
-wire {
-    kotlin {}
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 dependencies {
@@ -51,9 +50,15 @@ dependencies {
     implementation(project(":lib_ui"))
     implementation(project(":lib_utils"))
 
+    implementation(libs.nordic.blek.client)
+    implementation(libs.nordic.blek.profile)
+    implementation(libs.nordic.blek.core)
+    implementation(libs.nordic.blek.server)
+    implementation(libs.nordic.blek.advertiser)
+
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    kapt(libs.room.compiler)
+    ksp(libs.room.compiler)
 
     implementation(libs.accompanist.pager)
     implementation(libs.accompanist.pagerindicators)
@@ -62,9 +67,10 @@ dependencies {
     implementation(libs.nordic.ble.ktx)
 
     implementation(libs.nordic.theme)
-    implementation(libs.nordic.uiscanner)
     implementation(libs.nordic.navigation)
     implementation(libs.nordic.uilogger)
+    implementation(libs.nordic.core)
+    implementation(libs.nordic.blek.uiscanner)
 
     implementation(libs.androidx.dataStore.core)
     implementation(libs.androidx.dataStore.preferences)
@@ -75,6 +81,18 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.service)
+
+    testImplementation(libs.hilt.android.testing)
+    kaptTest(libs.hilt.compiler)
+    testImplementation(libs.androidx.test.rules)
+
+    testImplementation(libs.junit4)
+    testImplementation(libs.test.mockk)
+    testImplementation(libs.androidx.test.ext)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.test.slf4j.simple)
+    testImplementation(libs.test.robolectric)
+    testImplementation(libs.kotlin.junit)
 
     implementation("org.simpleframework:simple-xml:2.7.1") {
         exclude(group = "stax", module = "stax-api")

@@ -33,22 +33,22 @@ package no.nordicsemi.android.csc.repository
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import no.nordicsemi.android.ble.ktx.suspend
-import no.nordicsemi.android.common.logger.NordicLogger
-import no.nordicsemi.android.common.logger.NordicLoggerFactory
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
-import no.nordicsemi.android.csc.data.CSCData
-import no.nordicsemi.android.csc.data.CSCManager
-import no.nordicsemi.android.csc.data.WheelSize
-import no.nordicsemi.android.service.BleManagerResult
-import no.nordicsemi.android.service.IdleResult
+import no.nordicsemi.android.common.core.simpleSharedFlow
+import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
+import no.nordicsemi.android.common.logger.DefaultBleLogger
+import no.nordicsemi.android.csc.data.CSCServiceData
+import no.nordicsemi.android.csc.data.SpeedUnit
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
+import no.nordicsemi.android.kotlin.ble.profile.csc.data.CSCData
+import no.nordicsemi.android.kotlin.ble.profile.csc.data.WheelSize
+import no.nordicsemi.android.kotlin.ble.profile.csc.data.WheelSizes
+import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.ui.view.StringConst
 import javax.inject.Inject
@@ -59,60 +59,83 @@ class CSCRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
-    private val loggerFactory: NordicLoggerFactory,
     private val stringConst: StringConst
 ) {
-    private var manager: CSCManager? = null
-    private var logger: NordicLogger? = null
+    private var logger: BleLoggerAndLauncher? = null
 
-    private val _data = MutableStateFlow<BleManagerResult<CSCData>>(IdleResult())
+    private val _wheelSize = MutableStateFlow(WheelSizes.default)
+    internal val wheelSize = _wheelSize.asStateFlow()
+
+    private val _data = MutableStateFlow(CSCServiceData())
     internal val data = _data.asStateFlow()
 
-    val isRunning = data.map { it.isRunning() }
-    val hasBeenDisconnected = data.map { it.hasBeenDisconnected() }
+    private val _stopEvent = simpleSharedFlow<DisconnectAndStopEvent>()
+    internal val stopEvent = _stopEvent.asSharedFlow()
 
-    fun launch(device: DiscoveredBluetoothDevice) {
+    val isRunning = data.map { it.connectionState?.state == GattConnectionState.STATE_CONNECTED }
+
+    private var isOnScreen = false
+    private var isServiceRunning = false
+
+    fun setOnScreen(isOnScreen: Boolean) {
+        this.isOnScreen = isOnScreen
+
+        if (shouldClean()) clean()
+    }
+
+    fun setServiceRunning(serviceRunning: Boolean) {
+        this.isServiceRunning = serviceRunning
+
+        if (shouldClean()) clean()
+    }
+
+    private fun shouldClean() = !isOnScreen && !isServiceRunning
+
+    fun launch(device: ServerDevice) {
+        logger = DefaultBleLogger.create(context, stringConst.APP_NAME, "CSC", device.address)
+        _data.value = _data.value.copy(deviceName = device.name)
         serviceManager.startService(CSCService::class.java, device)
     }
 
-    fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
-        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "CSC", device.address).also {
-            logger = it
-        }
-        val manager = CSCManager(context, scope, createdLogger)
-        this.manager = manager
-
-        manager.dataHolder.status.onEach {
-            _data.value = it
-        }.launchIn(scope)
-
-        scope.launch {
-            manager.start(device)
-        }
+    internal fun setSpeedUnit(speedUnit: SpeedUnit) {
+        _data.value = _data.value.copy(speedUnit = speedUnit)
     }
 
     fun setWheelSize(wheelSize: WheelSize) {
-        manager?.setWheelSize(wheelSize)
+        _wheelSize.value = wheelSize
     }
 
-    private suspend fun CSCManager.start(device: DiscoveredBluetoothDevice) {
-        try {
-            connect(device.device)
-                .useAutoConnect(false)
-                .retry(3, 100)
-                .suspend()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+    fun onConnectionStateChanged(connectionState: GattConnectionStateWithStatus?) {
+        _data.value = _data.value.copy(connectionState = connectionState)
+    }
+
+    fun onBatteryLevelChanged(batteryLevel: Int) {
+        _data.value = _data.value.copy(batteryLevel = batteryLevel)
+    }
+
+    fun onCSCDataChanged(cscData: CSCData) {
+        _data.value = _data.value.copy(data = cscData)
+    }
+
+    fun onMissingServices() {
+        _data.value = _data.value.copy(missingServices = true)
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 
     fun openLogger() {
-        NordicLogger.launch(context, logger)
+        logger?.launch()
     }
 
-    fun release() {
-        manager?.disconnect()?.enqueue()
+    fun log(priority: Int, message: String) {
+        logger?.log(priority, message)
+    }
+
+    fun disconnect() {
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
+    }
+
+    private fun clean() {
         logger = null
-        manager = null
+        _data.value = CSCServiceData()
     }
 }

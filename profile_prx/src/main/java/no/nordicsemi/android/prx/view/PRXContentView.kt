@@ -34,7 +34,6 @@ package no.nordicsemi.android.prx.view
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -45,14 +44,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.prx.R
-import no.nordicsemi.android.prx.data.PRXData
+import no.nordicsemi.android.prx.data.PRXServiceData
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.KeyValueField
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
-internal fun ContentView(state: PRXData, onEvent: (PRXScreenViewEvent) -> Unit) {
+internal fun ContentView(state: PRXServiceData, onEvent: (PRXScreenViewEvent) -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -79,7 +78,7 @@ internal fun ContentView(state: PRXData, onEvent: (PRXScreenViewEvent) -> Unit) 
 }
 
 @Composable
-private fun SettingsSection(state: PRXData, onEvent: (PRXScreenViewEvent) -> Unit) {
+private fun SettingsSection(state: PRXServiceData, onEvent: (PRXScreenViewEvent) -> Unit) {
     ScreenSection {
         SectionTitle(icon = Icons.Default.Settings, title = stringResource(R.string.prx_settings))
 
@@ -112,7 +111,7 @@ private fun TurnAlarmOffButton(onEvent: (PRXScreenViewEvent) -> Unit) {
 }
 
 @Composable
-private fun RecordsSection(state: PRXData) {
+private fun RecordsSection(state: PRXServiceData) {
     ScreenSection {
         SectionTitle(resId = R.drawable.ic_records, title = stringResource(id = R.string.prx_records))
 

@@ -45,12 +45,17 @@ dependencies {
     implementation(project(":lib_ui"))
     implementation(project(":lib_utils"))
 
+    implementation(libs.nordic.blek.client)
+    implementation(libs.nordic.blek.profile)
+    implementation(libs.nordic.blek.server)
+    implementation(libs.nordic.blek.advertiser)
+
     implementation(libs.chart)
 
     implementation(libs.nordic.ble.common)
     implementation(libs.nordic.ble.ktx)
     implementation(libs.nordic.theme)
-    implementation(libs.nordic.uiscanner)
+    implementation(libs.nordic.blek.uiscanner)
     implementation(libs.nordic.navigation)
     implementation(libs.nordic.uilogger)
 
@@ -60,4 +65,12 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.service)
+
+    testImplementation(libs.junit4)
+    testImplementation(libs.test.mockk)
+    testImplementation(libs.androidx.test.ext)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.test.slf4j.simple)
+    testImplementation(libs.test.robolectric)
+    testImplementation(libs.kotlin.junit)
 }

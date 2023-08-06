@@ -47,7 +47,7 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
-import no.nordicsemi.android.hrs.data.HRSData
+import no.nordicsemi.android.hrs.data.HRSServiceData
 
 private const val X_AXIS_ELEMENTS_COUNT = 40f
 
@@ -55,7 +55,7 @@ private const val AXIS_MIN = 0
 private const val AXIS_MAX = 300
 
 @Composable
-internal fun LineChartView(state: HRSData, zoomIn: Boolean,) {
+internal fun LineChartView(state: HRSServiceData, zoomIn: Boolean,) {
     val items = state.heartRates.takeLast(X_AXIS_ELEMENTS_COUNT.toInt()).reversed()
     val isSystemInDarkTheme = isSystemInDarkTheme()
     AndroidView(
@@ -119,8 +119,8 @@ internal fun createLineChartView(
         val entries = points.mapIndexed { i, v ->
             Entry(-i.toFloat(), v.toFloat())
         }.reversed()
-        // create a dataset and give it a type
 
+        // create a dataset and give it a type
         if (data != null && data.dataSetCount > 0) {
             val set1 = data!!.getDataSetByIndex(0) as LineDataSet
             set1.values = entries
@@ -134,11 +134,7 @@ internal fun createLineChartView(
             set1.setDrawValues(false)
 
             // draw dashed line
-
-            // draw dashed line
             set1.enableDashedLine(10f, 5f, 0f)
-
-            // black lines and points
 
             // black lines and points
             if (isDarkTheme) {
@@ -150,17 +146,11 @@ internal fun createLineChartView(
             }
 
             // line thickness and point size
-
-            // line thickness and point size
             set1.lineWidth = 1f
             set1.circleRadius = 3f
 
             // draw points as solid circles
-
-            // draw points as solid circles
             set1.setDrawCircleHole(false)
-
-            // customize legend entry
 
             // customize legend entry
             set1.formLineWidth = 1f
@@ -168,11 +158,7 @@ internal fun createLineChartView(
             set1.formSize = 15f
 
             // text size of values
-
-            // text size of values
             set1.valueTextSize = 9f
-
-            // draw selection line as dashed
 
             // draw selection line as dashed
             set1.enableDashedHighlightLine(10f, 5f, 0f)
@@ -182,8 +168,6 @@ internal fun createLineChartView(
 
             // create a data object with the data sets
             val data = LineData(dataSets)
-
-            // set data
 
             // set data
             setData(data)

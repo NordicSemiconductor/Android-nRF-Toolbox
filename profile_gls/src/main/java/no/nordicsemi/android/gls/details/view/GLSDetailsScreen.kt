@@ -51,6 +51,6 @@ internal fun GLSDetailsScreen() {
             viewModel.navigateBack()
         }
 
-        GLSDetailsContentView(record)
+        GLSDetailsContentView(record.first, record.second)
     }
 }

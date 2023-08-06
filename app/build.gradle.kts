@@ -65,9 +65,9 @@ dependencies {
     implementation(libs.nordic.core)
     implementation(libs.nordic.theme)
     implementation(libs.nordic.navigation)
-    implementation(libs.nordic.uiscanner)
+    implementation(libs.nordic.blek.uiscanner)
     implementation(libs.nordic.uilogger)
-    implementation(libs.nordic.permission)
+    implementation(libs.nordic.permissions.ble)
     implementation(libs.nordic.analytics)
 
     implementation(libs.androidx.lifecycle.runtime.compose)
@@ -81,4 +81,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
+
+    implementation(libs.nordic.blek.client)
 }

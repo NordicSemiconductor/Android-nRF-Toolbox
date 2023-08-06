@@ -31,41 +31,11 @@
 
 package no.nordicsemi.android.service
 
-import android.bluetooth.BluetoothDevice
-import android.content.Context
-import android.content.Intent
-import dagger.hilt.android.qualifiers.ApplicationContext
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
-import javax.inject.Inject
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 
 const val DEVICE_DATA = "device-data"
 
-class ServiceManager @Inject constructor(
-    @ApplicationContext
-    private val context: Context
-) {
+interface ServiceManager {
 
-    fun <T> startService(service: Class<T>, device: DiscoveredBluetoothDevice) {
-        val intent = Intent(context, service).apply {
-            putExtra(DEVICE_DATA, device)
-        }
-        context.startService(intent)
-    }
-
-    fun <T> startService(service: Class<T>, device: BluetoothDevice) {
-        val intent = Intent(context, service).apply {
-            putExtra(DEVICE_DATA, device)
-        }
-        context.startService(intent)
-    }
-
-    fun <T> startService(service: Class<T>) {
-        val intent = Intent(context, service)
-        context.startService(intent)
-    }
-
-    fun <T> stopService(service: Class<T>) {
-        val intent = Intent(context, service)
-        context.stopService(intent)
-    }
+    fun <T> startService(service: Class<T>, device: ServerDevice)
 }

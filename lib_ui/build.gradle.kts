@@ -35,6 +35,10 @@ plugins {
 
 android {
     namespace = "no.nordicsemi.android.ui"
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 dependencies {
@@ -46,4 +50,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.nordic.blek.client)
+    implementation(libs.nordic.logger)
 }

@@ -34,33 +34,44 @@ package no.nordicsemi.android.bps.view
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.bps.R
-import no.nordicsemi.android.bps.data.BPSData
+import no.nordicsemi.android.bps.data.BPSServiceData
+import no.nordicsemi.android.kotlin.ble.profile.bps.data.BloodPressureMeasurementData
+import no.nordicsemi.android.kotlin.ble.profile.bps.data.IntermediateCuffPressureData
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.KeyValueField
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
-internal fun BPSSensorsReadingView(state: BPSData) {
+internal fun BPSSensorsReadingView(state: BPSServiceData) {
     ScreenSection {
         Column {
             SectionTitle(resId = R.drawable.ic_records, title = stringResource(id = R.string.bps_records))
-            Spacer(modifier = Modifier.height(16.dp))
-            KeyValueField(stringResource(id = R.string.bps_systolic), state.displaySystolic())
-            Spacer(modifier = Modifier.height(4.dp))
-            KeyValueField(stringResource(id = R.string.bps_diastolic), state.displayDiastolic())
-            Spacer(modifier = Modifier.height(4.dp))
-            KeyValueField(stringResource(id = R.string.bps_mean), state.displayMeanArterialPressure())
 
-            state.displayHeartRate()?.let {
+            state.bloodPressureMeasurement?.let {
+                Spacer(modifier = Modifier.height(16.dp))
+                BloodPressureView(it)
+            }
+
+            state.intermediateCuffPressure?.displayHeartRate()?.let {
                 Spacer(modifier = Modifier.height(4.dp))
                 KeyValueField(stringResource(id = R.string.bps_pulse), it)
+            }
+
+            if (state.intermediateCuffPressure == null && state.bloodPressureMeasurement == null) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    stringResource(id = R.string.no_data_info),
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
     }
@@ -72,8 +83,37 @@ internal fun BPSSensorsReadingView(state: BPSData) {
     }
 }
 
+@Composable
+private fun BloodPressureView(state: BloodPressureMeasurementData) {
+    KeyValueField(stringResource(id = R.string.bps_systolic), state.displaySystolic())
+    Spacer(modifier = Modifier.height(4.dp))
+    KeyValueField(stringResource(id = R.string.bps_diastolic), state.displayDiastolic())
+    Spacer(modifier = Modifier.height(4.dp))
+    KeyValueField(stringResource(id = R.string.bps_mean), state.displayMeanArterialPressure())
+}
+
+@Composable
+fun BloodPressureMeasurementData.displaySystolic(): String {
+    return stringResource(id = R.string.bps_blood_pressure, systolic)
+}
+
+@Composable
+fun BloodPressureMeasurementData.displayDiastolic(): String {
+    return stringResource(id = R.string.bps_blood_pressure, diastolic)
+}
+
+@Composable
+fun BloodPressureMeasurementData.displayMeanArterialPressure(): String {
+    return stringResource(id = R.string.bps_blood_pressure, meanArterialPressure)
+}
+
+@Composable
+fun IntermediateCuffPressureData.displayHeartRate(): String? {
+    return pulseRate?.toString()
+}
+
 @Preview
 @Composable
 private fun Preview() {
-    BPSSensorsReadingView(BPSData())
+    BPSSensorsReadingView(BPSServiceData())
 }

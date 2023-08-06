@@ -51,16 +51,15 @@ import no.nordicsemi.android.analytics.UARTMode
 import no.nordicsemi.android.analytics.UARTSendAnalyticsEvent
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
-import no.nordicsemi.android.service.ConnectedResult
-import no.nordicsemi.android.service.IdleResult
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import no.nordicsemi.android.uart.data.MacroEol
 import no.nordicsemi.android.uart.data.UARTConfiguration
 import no.nordicsemi.android.uart.data.UARTMacro
 import no.nordicsemi.android.uart.data.UARTPersistentDataSource
-import no.nordicsemi.android.uart.data.UART_SERVICE_UUID
 import no.nordicsemi.android.uart.repository.UARTRepository
+import no.nordicsemi.android.uart.repository.UART_SERVICE_UUID
 import no.nordicsemi.android.uart.view.ClearOutputItems
 import no.nordicsemi.android.uart.view.DisconnectEvent
 import no.nordicsemi.android.uart.view.MacroInputSwitchClick
@@ -78,7 +77,7 @@ import no.nordicsemi.android.uart.view.OnRunMacro
 import no.nordicsemi.android.uart.view.OpenLogger
 import no.nordicsemi.android.uart.view.UARTViewEvent
 import no.nordicsemi.android.uart.view.UARTViewState
-import no.nordicsemi.android.uart.view.WorkingState
+import no.nordicsemi.android.ui.view.NordicLoggerFactory
 import javax.inject.Inject
 
 @HiltViewModel
@@ -86,13 +85,16 @@ internal class UARTViewModel @Inject constructor(
     private val repository: UARTRepository,
     private val navigationManager: Navigator,
     private val dataSource: UARTPersistentDataSource,
-    private val analytics: AppAnalytics
+    private val analytics: AppAnalytics,
+    private val loggerFactory: NordicLoggerFactory
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UARTViewState())
     val state = _state.asStateFlow()
 
     init {
+        repository.setOnScreen(true)
+
         viewModelScope.launch {
             if (repository.isRunning.firstOrNull() == false) {
                 requestBluetoothDevice()
@@ -100,12 +102,9 @@ internal class UARTViewModel @Inject constructor(
         }
 
         repository.data.onEach {
-            if (it is IdleResult) {
-                return@onEach
-            }
-            _state.value = _state.value.copy(uartManagerState = WorkingState(it))
+            _state.value = _state.value.copy(uartManagerState = it)
 
-            (it as? ConnectedResult)?.let {
+            if (it.connectionState?.state == GattConnectionState.STATE_CONNECTED) {
                 analytics.logEvent(ProfileConnectedEvent(Profile.UART))
             }
         }.launchIn(viewModelScope)
@@ -129,11 +128,15 @@ internal class UARTViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    private fun handleResult(result: NavigationResult<DiscoveredBluetoothDevice>) {
+    internal fun handleResult(result: NavigationResult<ServerDevice>) {
         when (result) {
             is NavigationResult.Cancelled -> navigationManager.navigateUp()
-            is NavigationResult.Success -> repository.launch(result.value)
+            is NavigationResult.Success -> onDeviceSelected(result.value)
         }
+    }
+
+    private fun onDeviceSelected(device: ServerDevice) {
+        repository.launch(device)
     }
 
     fun onEvent(event: UARTViewEvent) {
@@ -238,7 +241,12 @@ internal class UARTViewModel @Inject constructor(
     }
 
     private fun disconnect() {
-        repository.release()
+        repository.disconnect()
         navigationManager.navigateUp()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        repository.setOnScreen(false)
     }
 }

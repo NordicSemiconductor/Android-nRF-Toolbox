@@ -47,7 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import no.nordicsemi.android.csc.R
-import no.nordicsemi.android.csc.data.CSCData
+import no.nordicsemi.android.kotlin.ble.profile.csc.data.CSCData
 
 @Composable
 internal fun WheelSizeView(state: CSCData, onClick: () -> Unit) {

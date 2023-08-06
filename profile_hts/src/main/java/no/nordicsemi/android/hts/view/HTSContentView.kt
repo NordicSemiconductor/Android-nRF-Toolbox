@@ -35,7 +35,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,14 +45,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.common.theme.view.RadioButtonGroup
 import no.nordicsemi.android.hts.R
-import no.nordicsemi.android.hts.data.HTSData
+import no.nordicsemi.android.hts.data.HTSServiceData
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.KeyValueField
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
-internal fun HTSContentView(state: HTSData, temperatureUnit: TemperatureUnit, onEvent: (HTSScreenViewEvent) -> Unit) {
+internal fun HTSContentView(state: HTSServiceData, onEvent: (HTSScreenViewEvent) -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -63,7 +62,7 @@ internal fun HTSContentView(state: HTSData, temperatureUnit: TemperatureUnit, on
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            RadioButtonGroup(viewEntity = temperatureUnit.temperatureSettingsItems()) {
+            RadioButtonGroup(viewEntity = state.temperatureUnit.temperatureSettingsItems()) {
                 onEvent(OnTemperatureUnitSelected(it.label.toTemperatureUnit()))
             }
         }
@@ -77,7 +76,7 @@ internal fun HTSContentView(state: HTSData, temperatureUnit: TemperatureUnit, on
 
             KeyValueField(
                 stringResource(id = R.string.hts_temperature),
-                displayTemperature(state.temperatureValue, temperatureUnit)
+                displayTemperature(state.data.temperature, state.temperatureUnit)
             )
         }
 
@@ -100,5 +99,5 @@ internal fun HTSContentView(state: HTSData, temperatureUnit: TemperatureUnit, on
 @Preview
 @Composable
 private fun Preview() {
-    HTSContentView(state = HTSData(), TemperatureUnit.CELSIUS) { }
+    HTSContentView(state = HTSServiceData()) { }
 }

@@ -33,21 +33,20 @@ package no.nordicsemi.android.hts.repository
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import no.nordicsemi.android.ble.ktx.suspend
-import no.nordicsemi.android.common.logger.NordicLogger
-import no.nordicsemi.android.common.logger.NordicLoggerFactory
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
-import no.nordicsemi.android.hts.data.HTSData
-import no.nordicsemi.android.hts.data.HTSManager
-import no.nordicsemi.android.service.BleManagerResult
-import no.nordicsemi.android.service.IdleResult
+import no.nordicsemi.android.common.core.simpleSharedFlow
+import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
+import no.nordicsemi.android.common.logger.DefaultBleLogger
+import no.nordicsemi.android.hts.data.HTSServiceData
+import no.nordicsemi.android.hts.view.TemperatureUnit
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
+import no.nordicsemi.android.kotlin.ble.profile.hts.data.HTSData
+import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.ui.view.StringConst
 import javax.inject.Inject
@@ -58,56 +57,76 @@ class HTSRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
     private val serviceManager: ServiceManager,
-    private val loggerFactory: NordicLoggerFactory,
     private val stringConst: StringConst
 ) {
-    private var manager: HTSManager? = null
-    private var logger: NordicLogger? = null
+    private var logger: BleLoggerAndLauncher? = null
 
-    private val _data = MutableStateFlow<BleManagerResult<HTSData>>(IdleResult())
+    private val _data = MutableStateFlow(HTSServiceData())
     internal val data = _data.asStateFlow()
 
-    val isRunning = data.map { it.isRunning() }
-    val hasBeenDisconnected = data.map { it.hasBeenDisconnected() }
+    private val _stopEvent = simpleSharedFlow<DisconnectAndStopEvent>()
+    internal val stopEvent = _stopEvent.asSharedFlow()
 
-    fun launch(device: DiscoveredBluetoothDevice) {
+    val isRunning = data.map { it.connectionState?.state == GattConnectionState.STATE_CONNECTED }
+
+    private var isOnScreen = false
+    private var isServiceRunning = false
+
+    fun setOnScreen(isOnScreen: Boolean) {
+        this.isOnScreen = isOnScreen
+
+        if (shouldClean()) clean()
+    }
+
+    fun setServiceRunning(serviceRunning: Boolean) {
+        this.isServiceRunning = serviceRunning
+
+        if (shouldClean()) clean()
+    }
+
+    private fun shouldClean() = !isOnScreen && !isServiceRunning
+
+    fun launch(device: ServerDevice) {
+        _data.value = _data.value.copy(deviceName = device.name)
+        logger = DefaultBleLogger.create(context, stringConst.APP_NAME, "HTS", device.address)
         serviceManager.startService(HTSService::class.java, device)
     }
 
-    fun start(device: DiscoveredBluetoothDevice, scope: CoroutineScope) {
-        val createdLogger = loggerFactory.create(stringConst.APP_NAME, "HTS", device.address).also {
-            logger = it
-        }
-        val manager = HTSManager(context, scope, createdLogger)
-        this.manager = manager
+    internal fun setTemperatureUnit(temperatureUnit: TemperatureUnit) {
+        _data.value = _data.value.copy(temperatureUnit = temperatureUnit)
+    }
 
-        manager.dataHolder.status.onEach {
-            _data.value = it
-        }.launchIn(scope)
+    fun onConnectionStateChanged(connectionState: GattConnectionStateWithStatus?) {
+        _data.value = _data.value.copy(connectionState = connectionState)
+    }
 
-        scope.launch {
-            manager.start(device)
-        }
+    fun onHTSDataChanged(data: HTSData) {
+        _data.value = _data.value.copy(data = data)
+    }
+
+    fun onBatteryLevelChanged(batteryLevel: Int) {
+        _data.value = _data.value.copy(batteryLevel = batteryLevel)
     }
 
     fun openLogger() {
-        NordicLogger.launch(context, logger)
+        logger?.launch()
     }
 
-    private suspend fun HTSManager.start(device: DiscoveredBluetoothDevice) {
-        try {
-            connect(device.device)
-                .useAutoConnect(false)
-                .retry(3, 100)
-                .suspend()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+    fun log(priority: Int, message: String) {
+        logger?.log(priority, message)
     }
 
-    fun release() {
-        manager?.disconnect()?.enqueue()
+    fun disconnect() {
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
+    }
+
+    fun onMissingServices() {
+        _data.value = _data.value.copy(missingServices = true)
+        _stopEvent.tryEmit(DisconnectAndStopEvent())
+    }
+
+    private fun clean() {
         logger = null
-        manager = null
+        _data.value = HTSServiceData()
     }
 }

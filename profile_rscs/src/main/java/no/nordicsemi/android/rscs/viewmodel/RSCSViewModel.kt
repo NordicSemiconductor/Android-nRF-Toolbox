@@ -35,8 +35,6 @@ import android.os.ParcelUuid
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -46,17 +44,14 @@ import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
-import no.nordicsemi.android.rscs.data.RSCS_SERVICE_UUID
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.rscs.repository.RSCSRepository
+import no.nordicsemi.android.rscs.repository.RSCS_SERVICE_UUID
 import no.nordicsemi.android.rscs.view.DisconnectEvent
 import no.nordicsemi.android.rscs.view.NavigateUpEvent
-import no.nordicsemi.android.rscs.view.NoDeviceState
 import no.nordicsemi.android.rscs.view.OpenLoggerEvent
-import no.nordicsemi.android.rscs.view.RSCSViewState
 import no.nordicsemi.android.rscs.view.RSCScreenViewEvent
-import no.nordicsemi.android.rscs.view.WorkingState
-import no.nordicsemi.android.service.ConnectedResult
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import javax.inject.Inject
 
@@ -67,10 +62,11 @@ internal class RSCSViewModel @Inject constructor(
     private val analytics: AppAnalytics
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<RSCSViewState>(NoDeviceState)
-    val state = _state.asStateFlow()
+    val state = repository.data
 
     init {
+        repository.setOnScreen(true)
+
         viewModelScope.launch {
             if (repository.isRunning.firstOrNull() == false) {
                 requestBluetoothDevice()
@@ -78,9 +74,7 @@ internal class RSCSViewModel @Inject constructor(
         }
 
         repository.data.onEach {
-            _state.value = WorkingState(it)
-
-            (it as? ConnectedResult)?.let {
+            if (it.connectionState?.state == GattConnectionState.STATE_CONNECTED) {
                 analytics.logEvent(ProfileConnectedEvent(Profile.RSCS))
             }
         }.launchIn(viewModelScope)
@@ -94,11 +88,15 @@ internal class RSCSViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    private fun handleResult(result: NavigationResult<DiscoveredBluetoothDevice>) {
+    private fun handleResult(result: NavigationResult<ServerDevice>) {
         when (result) {
             is NavigationResult.Cancelled -> navigationManager.navigateUp()
-            is NavigationResult.Success -> repository.launch(result.value)
+            is NavigationResult.Success -> onDeviceSelected(result.value)
         }
+    }
+
+    private fun onDeviceSelected(device: ServerDevice) {
+        repository.launch(device)
     }
 
     fun onEvent(event: RSCScreenViewEvent) {
@@ -110,7 +108,12 @@ internal class RSCSViewModel @Inject constructor(
     }
 
     private fun disconnect() {
-        repository.release()
+        repository.disconnect()
         navigationManager.navigateUp()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        repository.setOnScreen(false)
     }
 }

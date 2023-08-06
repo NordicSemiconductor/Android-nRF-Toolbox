@@ -31,33 +31,135 @@
 
 package no.nordicsemi.android.uart.repository
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
+import kotlinx.coroutines.launch
+import no.nordicsemi.android.common.core.DataByteArray
+import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
+import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattCharacteristic
+import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattServices
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectionStatus
+import no.nordicsemi.android.kotlin.ble.core.data.BleGattProperty
+import no.nordicsemi.android.kotlin.ble.core.data.BleWriteType
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.Mtu
+import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
+import java.util.*
 import javax.inject.Inject
 
+val UART_SERVICE_UUID: UUID = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")
+internal val UART_RX_CHARACTERISTIC_UUID = UUID.fromString("6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
+internal val UART_TX_CHARACTERISTIC_UUID = UUID.fromString("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
+
+internal val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
+internal val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
+
+@SuppressLint("MissingPermission")
 @AndroidEntryPoint
 internal class UARTService : NotificationService() {
 
     @Inject
     lateinit var repository: UARTRepository
 
+    private lateinit var client: ClientBleGatt
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
-        val device = intent!!.getParcelableExtra<DiscoveredBluetoothDevice>(DEVICE_DATA)!!
+        repository.setServiceRunning(true)
 
-        repository.start(device, lifecycleScope)
+        val device = intent!!.getParcelableExtra<ServerDevice>(DEVICE_DATA)!!
 
-        repository.hasBeenDisconnected.onEach {
-            if (it) stopSelf()
-        }.launchIn(lifecycleScope)
+        startGattClient(device)
+
+        repository.stopEvent
+            .onEach { disconnect() }
+            .launchIn(lifecycleScope)
 
         return START_REDELIVER_INTENT
+    }
+
+    private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
+        client = ClientBleGatt.connect(this@UARTService, device, logger = { p, s -> repository.log(p, s) })
+
+        if (!client.isConnected) {
+            return@launch
+        }
+
+        client.requestMtu(Mtu.max)
+
+        try {
+            val services = client.discoverServices()
+            configureGatt(services)
+        } catch (e: Exception) {
+            repository.onMissingServices()
+        }
+
+        client.connectionStateWithStatus
+            .filterNotNull()
+            .onEach { repository.onConnectionStateChanged(it) }
+            .onEach { stopIfDisconnected(it.state, it.status) }
+            .filterNotNull()
+            .launchIn(lifecycleScope)
+    }
+
+    private suspend fun configureGatt(services: ClientBleGattServices) {
+        val uartService = services.findService(UART_SERVICE_UUID)!!
+        val rxCharacteristic = uartService.findCharacteristic(UART_RX_CHARACTERISTIC_UUID)!!
+        val txCharacteristic = uartService.findCharacteristic(UART_TX_CHARACTERISTIC_UUID)!!
+
+        val batteryService = services.findService(BATTERY_SERVICE_UUID)
+
+        batteryService?.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)?.getNotifications()
+            ?.mapNotNull { BatteryLevelParser.parse(it) }
+            ?.onEach { repository.onBatteryLevelChanged(it) }
+            ?.catch { it.printStackTrace() }
+            ?.launchIn(lifecycleScope)
+
+        txCharacteristic.getNotifications()
+            .onEach { repository.onNewMessageReceived(String(it.value)) }
+            .onEach { repository.log(10, "Received: ${String(it.value)}") }
+            .catch { it.printStackTrace() }
+            .launchIn(lifecycleScope)
+
+        repository.command
+            .onEach { rxCharacteristic.splitWrite(DataByteArray.from(it), getWriteType(rxCharacteristic)) }
+            .onEach { repository.onNewMessageSent(it) }
+            .onEach { repository.log(10, "Sent: $it") }
+            .launchIn(lifecycleScope)
+    }
+
+    private fun getWriteType(characteristic: ClientBleGattCharacteristic): BleWriteType {
+        return if (characteristic.properties.contains(BleGattProperty.PROPERTY_WRITE)) {
+            BleWriteType.DEFAULT
+        } else {
+            BleWriteType.NO_RESPONSE
+        }
+    }
+
+    private fun stopIfDisconnected(connectionState: GattConnectionState, connectionStatus: BleGattConnectionStatus) {
+        if (connectionState == GattConnectionState.STATE_DISCONNECTED && !connectionStatus.isLinkLoss) {
+            repository.disconnect()
+            stopSelf()
+        }
+    }
+
+    private fun disconnect() {
+        client.disconnect()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        repository.setServiceRunning(false)
     }
 }

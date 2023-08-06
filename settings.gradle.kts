@@ -45,11 +45,12 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
+        maven(url = "https://androidx.dev/storage/compose-compiler/repository/")
         maven(url = "https://jitpack.io")
     }
     versionCatalogs {
         create("libs") {
-            from("no.nordicsemi.android.gradle:version-catalog:1.2.6")
+            from("no.nordicsemi.android.gradle:version-catalog:1.8.2")
         }
     }
 }
@@ -74,10 +75,10 @@ include(":lib_service")
 include(":lib_ui")
 include(":lib_utils")
 
-//if (file("../Android-Common-Libraries").exists()) {
-//    includeBuild("../Android-Common-Libraries")
-//}
-//
-//if (file('../Android-BLE-Library').exists()) {
-//    includeBuild('../Android-BLE-Library')
-//}
+if (file("../Android-Common-Libraries").exists()) {
+    includeBuild("../Android-Common-Libraries")
+}
+
+if (file("../Kotlin-BLE-Library").exists()) {
+    includeBuild("../Kotlin-BLE-Library")
+}

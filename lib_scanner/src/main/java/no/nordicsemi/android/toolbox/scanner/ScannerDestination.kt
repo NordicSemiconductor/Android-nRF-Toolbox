@@ -5,12 +5,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.common.navigation.createDestination
 import no.nordicsemi.android.common.navigation.defineDestination
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
-import no.nordicsemi.android.common.ui.scanner.DeviceSelected
-import no.nordicsemi.android.common.ui.scanner.ScannerScreen
-import no.nordicsemi.android.common.ui.scanner.ScanningCancelled
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.ui.scanner.DeviceSelected
+import no.nordicsemi.android.kotlin.ble.ui.scanner.ScannerScreen
+import no.nordicsemi.android.kotlin.ble.ui.scanner.ScanningCancelled
 
-val ScannerDestinationId = createDestination<ParcelUuid, DiscoveredBluetoothDevice>("uiscanner-destination")
+val ScannerDestinationId = createDestination<ParcelUuid, ServerDevice>("uiscanner-destination")
 
 val ScannerDestination = defineDestination(ScannerDestinationId) {
     val navigationViewModel = hiltViewModel<SimpleNavigationViewModel>()
@@ -21,7 +21,7 @@ val ScannerDestination = defineDestination(ScannerDestinationId) {
         uuid = arg,
         onResult = {
             when (it) {
-                is DeviceSelected -> navigationViewModel.navigateUpWithResult(ScannerDestinationId, it.device)
+                is DeviceSelected -> navigationViewModel.navigateUpWithResult(ScannerDestinationId, it.scanResults.device)
                 ScanningCancelled -> navigationViewModel.navigateUp()
             }
         }

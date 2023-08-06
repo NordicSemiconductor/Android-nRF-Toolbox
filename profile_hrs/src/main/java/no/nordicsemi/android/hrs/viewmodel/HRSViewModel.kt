@@ -35,8 +35,6 @@ import android.os.ParcelUuid
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -46,18 +44,15 @@ import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
-import no.nordicsemi.android.hrs.data.HRS_SERVICE_UUID
 import no.nordicsemi.android.hrs.service.HRSRepository
+import no.nordicsemi.android.hrs.service.HRS_SERVICE_UUID
 import no.nordicsemi.android.hrs.view.DisconnectEvent
 import no.nordicsemi.android.hrs.view.HRSScreenViewEvent
-import no.nordicsemi.android.hrs.view.HRSViewState
 import no.nordicsemi.android.hrs.view.NavigateUpEvent
-import no.nordicsemi.android.hrs.view.NoDeviceState
 import no.nordicsemi.android.hrs.view.OpenLoggerEvent
 import no.nordicsemi.android.hrs.view.SwitchZoomEvent
-import no.nordicsemi.android.hrs.view.WorkingState
-import no.nordicsemi.android.service.ConnectedResult
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import javax.inject.Inject
 
@@ -68,10 +63,11 @@ internal class HRSViewModel @Inject constructor(
     private val analytics: AppAnalytics
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<HRSViewState>(NoDeviceState)
-    val state = _state.asStateFlow()
+    val state = repository.data
 
     init {
+        repository.setOnScreen(true)
+
         viewModelScope.launch {
             if (repository.isRunning.firstOrNull() == false) {
                 requestBluetoothDevice()
@@ -79,10 +75,7 @@ internal class HRSViewModel @Inject constructor(
         }
 
         repository.data.onEach {
-            val zoomIn = (_state.value as? WorkingState)?.zoomIn ?: false
-            _state.value = WorkingState(it, zoomIn)
-
-            (it as? ConnectedResult)?.let {
+            if (it.connectionState?.state == GattConnectionState.STATE_CONNECTED) {
                 analytics.logEvent(ProfileConnectedEvent(Profile.HRS))
             }
         }.launchIn(viewModelScope)
@@ -96,11 +89,15 @@ internal class HRSViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    private fun handleResult(result: NavigationResult<DiscoveredBluetoothDevice>) {
+    private fun handleResult(result: NavigationResult<ServerDevice>) {
         when (result) {
             is NavigationResult.Cancelled -> navigationManager.navigateUp()
-            is NavigationResult.Success -> repository.launch(result.value)
+            is NavigationResult.Success -> onDeviceSelected(result.value)
         }
+    }
+
+    private fun onDeviceSelected(device: ServerDevice) {
+        repository.launch(device)
     }
 
     fun onEvent(event: HRSScreenViewEvent) {
@@ -113,13 +110,16 @@ internal class HRSViewModel @Inject constructor(
     }
 
     private fun onZoomButtonClicked() {
-        (_state.value as? WorkingState)?.let {
-            _state.value = it.copy(zoomIn = !it.zoomIn)
-        }
+        repository.switchZoomIn()
     }
 
     private fun disconnect() {
-        repository.release()
+        repository.disconnect()
         navigationManager.navigateUp()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        repository.setOnScreen(false)
     }
 }

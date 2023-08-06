@@ -34,9 +34,9 @@ package no.nordicsemi.android.gls.main.view
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import no.nordicsemi.android.gls.R
-import no.nordicsemi.android.gls.data.ConcentrationUnit
-import no.nordicsemi.android.gls.data.RecordType
 import no.nordicsemi.android.gls.data.WorkingMode
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.ConcentrationUnit
+import no.nordicsemi.android.kotlin.ble.profile.gls.data.RecordType
 
 @Composable
 internal fun RecordType?.toDisplayString(): String {

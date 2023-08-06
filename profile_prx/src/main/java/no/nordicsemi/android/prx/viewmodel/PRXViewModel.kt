@@ -35,10 +35,10 @@ import android.os.ParcelUuid
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
@@ -46,19 +46,18 @@ import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
-import no.nordicsemi.android.prx.data.PRX_SERVICE_UUID
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.profile.prx.AlarmLevel
+import no.nordicsemi.android.prx.repository.AlarmHandler
 import no.nordicsemi.android.prx.repository.PRXRepository
+import no.nordicsemi.android.prx.repository.PRX_SERVICE_UUID
 import no.nordicsemi.android.prx.view.DisconnectEvent
 import no.nordicsemi.android.prx.view.NavigateUpEvent
-import no.nordicsemi.android.prx.view.NoDeviceState
 import no.nordicsemi.android.prx.view.OpenLoggerEvent
 import no.nordicsemi.android.prx.view.PRXScreenViewEvent
-import no.nordicsemi.android.prx.view.PRXViewState
 import no.nordicsemi.android.prx.view.TurnOffAlert
 import no.nordicsemi.android.prx.view.TurnOnAlert
-import no.nordicsemi.android.prx.view.WorkingState
-import no.nordicsemi.android.service.ConnectedResult
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import javax.inject.Inject
 
@@ -66,13 +65,15 @@ import javax.inject.Inject
 internal class PRXViewModel @Inject constructor(
     private val repository: PRXRepository,
     private val navigationManager: Navigator,
-    private val analytics: AppAnalytics
+    private val analytics: AppAnalytics,
+    private val alarmHandler: AlarmHandler
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<PRXViewState>(NoDeviceState)
-    val state = _state.asStateFlow()
+    val state = repository.data
 
     init {
+        repository.setOnScreen(true)
+
         viewModelScope.launch {
             if (repository.isRunning.firstOrNull() == false) {
                 requestBluetoothDevice()
@@ -80,12 +81,20 @@ internal class PRXViewModel @Inject constructor(
         }
 
         repository.data.onEach {
-            _state.value = WorkingState(it)
+            if (it.isLinkLossDisconnected) {
+                alarmHandler.playAlarm(it.linkLossAlarmLevel)
+            }
 
-            (it as? ConnectedResult)?.let {
+            if (it.connectionState?.state == GattConnectionState.STATE_CONNECTED) {
                 analytics.logEvent(ProfileConnectedEvent(Profile.PRX))
             }
         }.launchIn(viewModelScope)
+
+        repository.data
+            .map { it.localAlarmLevel }
+            .distinctUntilChanged()
+            .onEach { alarmHandler.playAlarm(it) }
+            .launchIn(viewModelScope)
     }
 
     private fun requestBluetoothDevice() {
@@ -96,7 +105,7 @@ internal class PRXViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    private fun handleResult(result: NavigationResult<DiscoveredBluetoothDevice>) {
+    private fun handleResult(result: NavigationResult<ServerDevice>) {
         when (result) {
             is NavigationResult.Cancelled -> navigationManager.navigateUp()
             is NavigationResult.Success -> repository.launch(result.value)
@@ -106,15 +115,22 @@ internal class PRXViewModel @Inject constructor(
     fun onEvent(event: PRXScreenViewEvent) {
         when (event) {
             DisconnectEvent -> disconnect()
-            TurnOffAlert -> repository.disableAlarm()
-            TurnOnAlert -> repository.enableAlarm()
+            TurnOffAlert -> repository.setRemoteAlarmLevel(AlarmLevel.NONE)
+            TurnOnAlert -> repository.setRemoteAlarmLevel(AlarmLevel.HIGH)
             NavigateUpEvent -> navigationManager.navigateUp()
             OpenLoggerEvent -> repository.openLogger()
         }
     }
 
     private fun disconnect() {
-        repository.release()
+        alarmHandler.pauseAlarm()
         navigationManager.navigateUp()
+        repository.disconnect()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        alarmHandler.pauseAlarm()
+        repository.setOnScreen(false)
     }
 }

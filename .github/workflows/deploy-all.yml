@@ -11,6 +11,10 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '17'
       - shell: bash
         run: |
           git config user.email mag@nordicsemi.no
@@ -29,6 +33,10 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '17'
       - shell: bash
         env:
           KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}

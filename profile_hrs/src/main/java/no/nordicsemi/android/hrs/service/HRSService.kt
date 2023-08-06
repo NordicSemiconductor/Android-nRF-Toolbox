@@ -31,33 +31,119 @@
 
 package no.nordicsemi.android.hrs.service
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
-import no.nordicsemi.android.common.ui.scanner.model.DiscoveredBluetoothDevice
+import kotlinx.coroutines.launch
+import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
+import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattServices
+import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
+import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
+import no.nordicsemi.android.kotlin.ble.profile.hrs.BodySensorLocationParser
+import no.nordicsemi.android.kotlin.ble.profile.hrs.HRSDataParser
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
+import java.util.*
 import javax.inject.Inject
 
+val HRS_SERVICE_UUID: UUID = UUID.fromString("0000180D-0000-1000-8000-00805f9b34fb")
+private val BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID = UUID.fromString("00002A38-0000-1000-8000-00805f9b34fb")
+private val HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb")
+
+private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
+private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
+
+@SuppressLint("MissingPermission")
 @AndroidEntryPoint
 internal class HRSService : NotificationService() {
 
     @Inject
     lateinit var repository: HRSRepository
 
+    private lateinit var client: ClientBleGatt
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
-        val device = intent!!.getParcelableExtra<DiscoveredBluetoothDevice>(DEVICE_DATA)!!
+        repository.setServiceRunning(true)
 
-        repository.start(device, lifecycleScope)
+        val device = intent!!.getParcelableExtra<ServerDevice>(DEVICE_DATA)!!
 
-        repository.hasBeenDisconnected.onEach {
-            if (it) stopSelf()
-        }.launchIn(lifecycleScope)
+        startGattClient(device)
+
+        repository.stopEvent
+            .onEach { disconnect() }
+            .launchIn(lifecycleScope)
 
         return START_REDELIVER_INTENT
+    }
+
+    private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
+        client = ClientBleGatt.connect(this@HRSService, device, logger = { p, s -> repository.log(p, s) })
+
+        client.waitForBonding()
+
+        client.connectionStateWithStatus
+            .onEach { repository.onConnectionStateChanged(it) }
+            .filterNotNull()
+            .onEach { stopIfDisconnected(it) }
+            .launchIn(lifecycleScope)
+
+        if (!client.isConnected) {
+            return@launch
+        }
+
+        try {
+            val services = client.discoverServices()
+            configureGatt(services)
+        } catch (e: Exception) {
+            repository.onMissingServices()
+        }
+    }
+
+    private suspend fun configureGatt(services: ClientBleGattServices) {
+        val hrsService = services.findService(HRS_SERVICE_UUID)!!
+        val hrsMeasurementCharacteristic = hrsService.findCharacteristic(HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID)!!
+        val bodySensorLocationCharacteristic = hrsService.findCharacteristic(BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID)!!
+        val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
+        val batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
+
+        val bodySensorLocation = bodySensorLocationCharacteristic.read()
+        BodySensorLocationParser.parse(bodySensorLocation)?.let { repository.onBodySensorLocationChanged(it) }
+
+        batteryLevelCharacteristic.getNotifications()
+            .mapNotNull { BatteryLevelParser.parse(it) }
+            .onEach { repository.onBatteryLevelChanged(it) }
+            .catch { it.printStackTrace() }
+            .launchIn(lifecycleScope)
+
+        hrsMeasurementCharacteristic.getNotifications()
+            .mapNotNull { HRSDataParser.parse(it) }
+            .onEach { repository.onHRSDataChanged(it) }
+            .catch { it.printStackTrace() }
+            .launchIn(lifecycleScope)
+    }
+
+    private fun stopIfDisconnected(connectionState: GattConnectionStateWithStatus) {
+        if (connectionState.state == GattConnectionState.STATE_DISCONNECTED) {
+            stopSelf()
+        }
+    }
+
+    private fun disconnect() {
+        client.disconnect()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        repository.setServiceRunning(false)
     }
 }

@@ -1,16 +1,18 @@
 
 # Simple XML
--keep public class org.simpleframework.** { *; }
--keep class org.simpleframework.xml.** { *; }
--keep class org.simpleframework.xml.core.** { *; }
--keep class org.simpleframework.xml.util.** { *; }
+-dontwarn javax.xml.**
 
--keep class no.nordicsemi.android.log.** { *; }
+-keep public class org.simpleframework.**{ *; }
+-keep class org.simpleframework.xml.**{ *; }
+-keep class org.simpleframework.xml.core.**{ *; }
+-keep class org.simpleframework.xml.util.**{ *; }
 
--keepattributes ElementList, Root, InnerClasses, LineNumberTable
+-keepattributes Signature
+-keepattributes *Annotation*
 
--keepclasseswithmembers class * {
-    @org.simpleframework.xml.* <fields>;
+# Ignore our XML Serialization classes
+-keep public class your.annotated.pojo.models.*{
+  public protected private *;
 }
 
 # Crashlytics
