@@ -66,6 +66,10 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.service)
 
+    testImplementation(libs.hilt.android.testing)
+    kaptTest(libs.hilt.compiler)
+    testImplementation(libs.androidx.test.rules)
+
     testImplementation(libs.junit4)
     testImplementation(libs.test.mockk)
     testImplementation(libs.androidx.test.ext)

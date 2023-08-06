@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.core.DataByteArray
+import no.nordicsemi.android.common.logger.BleLogger
 import no.nordicsemi.android.gls.main.viewmodel.BATTERY_LEVEL_CHARACTERISTIC_UUID
 import no.nordicsemi.android.gls.main.viewmodel.BATTERY_SERVICE_UUID
 import no.nordicsemi.android.gls.main.viewmodel.GLS_SERVICE_UUID
@@ -106,7 +107,8 @@ class GlsServer @Inject constructor(
         server = ServerBleGatt.create(
             context = context,
             config = arrayOf(serviceConfig, batteryService),
-            mock = device
+            mock = device,
+            logger = { priority, log -> println(log) }
         )
 
         val advertiser = BleAdvertiser.create(context)

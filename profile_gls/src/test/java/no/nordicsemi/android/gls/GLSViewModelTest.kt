@@ -1,13 +1,13 @@
 package no.nordicsemi.android.gls
 
 import android.content.Context
+import dagger.hilt.android.testing.HiltAndroidTest
+import dagger.hilt.android.testing.HiltTestApplication
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.justRun
-import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.spyk
 import kotlinx.coroutines.CoroutineScope
@@ -19,20 +19,19 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import no.nordicsemi.android.analytics.AppAnalytics
-import no.nordicsemi.android.common.logger.NordicBlekLogger
+import no.nordicsemi.android.common.core.ApplicationScope
+import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.gls.data.WorkingMode
 import no.nordicsemi.android.gls.main.view.OnWorkingModeSelected
 import no.nordicsemi.android.gls.main.viewmodel.GLSViewModel
-import no.nordicsemi.android.kotlin.ble.client.main.ClientScope
 import no.nordicsemi.android.kotlin.ble.core.MockServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectionStatus
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.gls.GlucoseMeasurementParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.RequestStatus
-import no.nordicsemi.android.kotlin.ble.server.main.ServerScope
 import no.nordicsemi.android.ui.view.NordicLoggerFactory
 import no.nordicsemi.android.ui.view.StringConst
 import org.junit.After
@@ -40,6 +39,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import kotlin.test.assertContentEquals
 
 /**
@@ -47,6 +49,9 @@ import kotlin.test.assertContentEquals
  *
  * See [testing documentation](http://d.android.com/tools/testing).
  */
+@HiltAndroidTest
+@Config(application = HiltTestApplication::class)
+@RunWith(RobolectricTestRunner::class)
 internal class GLSViewModelTest {
 
     @get:Rule
@@ -65,7 +70,7 @@ internal class GLSViewModelTest {
     lateinit var context: Context
 
     @RelaxedMockK
-    lateinit var logger: NordicBlekLogger
+    lateinit var logger: BleLoggerAndLauncher
 
     lateinit var viewModel: GLSViewModel
 
@@ -89,10 +94,8 @@ internal class GLSViewModelTest {
     @Before
     fun before() {
         runBlocking {
-            mockkStatic("no.nordicsemi.android.kotlin.ble.client.main.ClientScopeKt")
-            every { ClientScope } returns CoroutineScope(UnconfinedTestDispatcher())
-            mockkStatic("no.nordicsemi.android.kotlin.ble.server.main.ServerScopeKt")
-            every { ServerScope } returns CoroutineScope(UnconfinedTestDispatcher())
+            mockkStatic("no.nordicsemi.android.common.core.ApplicationScopeKt")
+            every { ApplicationScope } returns CoroutineScope(UnconfinedTestDispatcher())
             every { stringConst.APP_NAME } returns "Test"
 
             viewModel = spyk(GLSViewModel(context, navigator, analytics, stringConst, object :
@@ -102,7 +105,7 @@ internal class GLSViewModelTest {
                     profile: String?,
                     key: String,
                     name: String?,
-                ): NordicBlekLogger {
+                ): BleLoggerAndLauncher {
                     return logger
                 }
 
@@ -112,12 +115,6 @@ internal class GLSViewModelTest {
             glsServer = GlsServer(CoroutineScope(UnconfinedTestDispatcher()))
             glsServer.start(spyk(), device)
         }
-    }
-
-    @Before
-    fun prepareLogger() {
-        mockkObject(NordicBlekLogger.Companion)
-        every { NordicBlekLogger.create(any(), any(), any(), any()) } returns mockk()
     }
 
     @Test
