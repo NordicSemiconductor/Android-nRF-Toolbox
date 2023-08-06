@@ -1,5 +1,8 @@
 name: Deploy to Play Store Internal
 on:
+  push:
+    tags:
+      - '*'
   workflow_dispatch:
 jobs:
   restorePassword:
