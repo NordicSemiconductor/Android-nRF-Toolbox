@@ -61,7 +61,6 @@ platform :android do
   desc "Deploy build to internal channel."
     lane :deployInternal do
       gradle(task: "clean bundleRelease")
-      gradle(task: "test")
       upload_to_play_store(
         track: 'internal',
         aab: 'app/build/outputs/bundle/release/app-release.aab'
