@@ -14,6 +14,7 @@ keystore
 keystore.encrypted
 sec.gpg
 fastlane-api.json
+google-services.json
 
 # Files for the ART/Dalvik VM
 *.dex
