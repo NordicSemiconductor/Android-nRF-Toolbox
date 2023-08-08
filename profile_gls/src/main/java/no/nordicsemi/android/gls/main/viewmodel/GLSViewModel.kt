@@ -106,7 +106,7 @@ internal class GLSViewModel @Inject constructor(
     private val loggerFactory: NordicLoggerFactory
 ) : ViewModel() {
 
-    internal lateinit var client: ClientBleGatt
+    private var client: ClientBleGatt? = null
     private lateinit var logger: BleLoggerAndLauncher
 
     private lateinit var glucoseMeasurementCharacteristic: ClientBleGattCharacteristic
@@ -143,7 +143,7 @@ internal class GLSViewModel @Inject constructor(
     }
 
     private fun onDisconnectEvent() {
-        client.disconnect()
+        client?.disconnect()
         navigationManager.navigateUp()
     }
 
@@ -169,7 +169,8 @@ internal class GLSViewModel @Inject constructor(
 
         logger = loggerFactory.createNordicLogger(context, stringConst.APP_NAME, "GLS", device.address)
 
-        client = ClientBleGatt.connect(context, device, logger = logger)
+        val client = ClientBleGatt.connect(context, device, logger = logger)
+        this@GLSViewModel.client = client
 
         client.waitForBonding()
 
@@ -193,7 +194,7 @@ internal class GLSViewModel @Inject constructor(
 
     private fun onMissingServices() {
         _state.value = state.value.copy(missingServices = true)
-        client.disconnect()
+        client?.disconnect()
     }
 
     internal fun logAnalytics(connectionState: GattConnectionStateWithStatus) {

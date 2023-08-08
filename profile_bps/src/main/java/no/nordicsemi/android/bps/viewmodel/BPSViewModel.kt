@@ -92,7 +92,7 @@ internal class BPSViewModel @Inject constructor(
     private val _state = MutableStateFlow(BPSViewState())
     val state = _state.asStateFlow()
 
-    private lateinit var client: ClientBleGatt
+    private var client: ClientBleGatt? = null
     private lateinit var logger: BleLoggerAndLauncher
 
     init {
@@ -118,7 +118,7 @@ internal class BPSViewModel @Inject constructor(
     }
 
     private fun onDisconnectEvent() {
-        client.disconnect()
+        client?.disconnect()
         navigationManager.navigateUp()
     }
 
@@ -127,7 +127,8 @@ internal class BPSViewModel @Inject constructor(
 
         logger = DefaultBleLogger.create(context, stringConst.APP_NAME, "BPS", device.address)
 
-        client = ClientBleGatt.connect(context, device, logger = logger)
+        val client = ClientBleGatt.connect(context, device, logger = logger)
+        this@BPSViewModel.client = client
 
         client.connectionStateWithStatus
             .filterNotNull()
@@ -175,7 +176,7 @@ internal class BPSViewModel @Inject constructor(
 
     private fun onMissingServices() {
         _state.value = _state.value.copy(missingServices = true)
-        client.disconnect()
+        client?.disconnect()
     }
 
     private fun onDataUpdate(connectionState: GattConnectionStateWithStatus) {
