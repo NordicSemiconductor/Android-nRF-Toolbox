@@ -82,6 +82,7 @@ import no.nordicsemi.android.kotlin.ble.profile.racp.RACPResponseCode
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import no.nordicsemi.android.ui.view.NordicLoggerFactory
 import no.nordicsemi.android.ui.view.StringConst
+import no.nordicsemi.android.utils.tryOrLog
 import java.util.*
 import javax.inject.Inject
 
@@ -268,13 +269,17 @@ internal class GLSViewModel @Inject constructor(
         if (numberOfRecords > 0) {
             try {
                 if (state.value.glsServiceData.records.isNotEmpty()) {
-                    recordAccessControlPointCharacteristic.write(
-                        RecordAccessControlPointInputParser.reportStoredRecordsGreaterThenOrEqualTo(highestSequenceNumber)
-                    )
+                    tryOrLog {
+                        recordAccessControlPointCharacteristic.write(
+                            RecordAccessControlPointInputParser.reportStoredRecordsGreaterThenOrEqualTo(highestSequenceNumber)
+                        )
+                    }
                 } else {
-                    recordAccessControlPointCharacteristic.write(
-                        RecordAccessControlPointInputParser.reportAllStoredRecords()
-                    )
+                    tryOrLog {
+                        recordAccessControlPointCharacteristic.write(
+                            RecordAccessControlPointInputParser.reportAllStoredRecords()
+                        )
+                    }
                 }
             } catch (e: GattOperationException) {
                 e.printStackTrace()

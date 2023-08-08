@@ -62,6 +62,7 @@ import no.nordicsemi.android.kotlin.ble.server.main.service.ServerBleGattService
 import no.nordicsemi.android.kotlin.ble.server.main.service.ServerBluetoothGattConnection
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
+import no.nordicsemi.android.utils.tryOrLog
 import java.util.*
 import javax.inject.Inject
 
@@ -200,7 +201,9 @@ internal class PRXService : NotificationService() {
             .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
 
-        linkLossCharacteristic.write(AlertLevelInputParser.parse(AlarmLevel.HIGH))
+        tryOrLog {
+            linkLossCharacteristic.write(AlertLevelInputParser.parse(AlarmLevel.HIGH))
+        }
     }
 
     private suspend fun writeAlertLevel(alarmLevel: AlarmLevel) {

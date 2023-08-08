@@ -70,6 +70,7 @@ import no.nordicsemi.android.kotlin.ble.profile.racp.RACPResponseCode
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
 import no.nordicsemi.android.utils.launchWithCatch
+import no.nordicsemi.android.utils.tryOrLog
 import java.util.*
 import javax.inject.Inject
 
@@ -224,7 +225,9 @@ internal class CGMService : NotificationService() {
         }
 
         if (sessionStartTime == 0L) {
-            opsControlPointCharacteristic.write(CGMSpecificOpsControlPointDataParser.startSession(secured))
+            tryOrLog {
+                opsControlPointCharacteristic.write(CGMSpecificOpsControlPointDataParser.startSession(secured))
+            }
         }
     }
 
@@ -260,13 +263,17 @@ internal class CGMService : NotificationService() {
     private suspend fun onNumberOfRecordsReceived(numberOfRecords: Int) {
         if (numberOfRecords > 0) {
             if (repository.hasRecords) {
-                recordAccessControlPointCharacteristic.write(
-                    RecordAccessControlPointInputParser.reportStoredRecordsGreaterThenOrEqualTo(repository.highestSequenceNumber)
-                )
+                tryOrLog {
+                    recordAccessControlPointCharacteristic.write(
+                        RecordAccessControlPointInputParser.reportStoredRecordsGreaterThenOrEqualTo(repository.highestSequenceNumber)
+                    )
+                }
             } else {
-                recordAccessControlPointCharacteristic.write(
-                    RecordAccessControlPointInputParser.reportAllStoredRecords()
-                )
+                tryOrLog {
+                    recordAccessControlPointCharacteristic.write(
+                        RecordAccessControlPointInputParser.reportAllStoredRecords()
+                    )
+                }
             }
         }
         repository.onNewRequestStatus(RequestStatus.SUCCESS)
