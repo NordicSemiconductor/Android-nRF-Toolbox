@@ -97,7 +97,11 @@ internal class UARTService : NotificationService() {
             return@launch
         }
 
-        client.requestMtu(Mtu.max)
+        try {
+            client.requestMtu(Mtu.max)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
         try {
             val services = client.discoverServices()
