@@ -50,7 +50,7 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("libs") {
-            from("no.nordicsemi.android.gradle:version-catalog:1.9.0")
+            from("no.nordicsemi.android.gradle:version-catalog:1.9.1")
         }
     }
 }
@@ -75,10 +75,10 @@ include(":lib_service")
 include(":lib_ui")
 include(":lib_utils")
 
-if (file("../Android-Common-Libraries").exists()) {
-    includeBuild("../Android-Common-Libraries")
-}
-
-if (file("../Kotlin-BLE-Library").exists()) {
-    includeBuild("../Kotlin-BLE-Library")
-}
+//if (file("../Android-Common-Libraries").exists()) {
+//    includeBuild("../Android-Common-Libraries")
+//}
+//
+//if (file("../Kotlin-BLE-Library").exists()) {
+//    includeBuild("../Kotlin-BLE-Library")
+//}
