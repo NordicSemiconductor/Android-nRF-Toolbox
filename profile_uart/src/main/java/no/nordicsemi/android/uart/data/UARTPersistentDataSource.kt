@@ -54,13 +54,24 @@ internal class UARTPersistentDataSource @Inject constructor(
 ) {
 
     fun getConfigurations(): Flow<List<UARTConfiguration>> = configurationsDao.load().map {
-        it.map {
-            val xml: String = it.xml
+        it.mapNotNull { it.toDomain() }
+    }
+
+    private fun Configuration.toDomain(): UARTConfiguration? {
+        return try {
+            val xml: String = xml
             val format = Format(HyphenStyle())
             val serializer: Serializer = Persister(format)
             val configuration = serializer.read(XmlConfiguration::class.java, xml)
 
-            UARTConfiguration(it._id, configuration.name ?: "Unknown", createMacro(configuration.commands))
+            UARTConfiguration(
+                _id,
+                configuration.name ?: "Unknown",
+                createMacro(configuration.commands)
+            )
+        } catch (t: Throwable) {
+            t.printStackTrace()
+            null
         }
     }
 
