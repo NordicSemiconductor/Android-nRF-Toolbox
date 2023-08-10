@@ -141,6 +141,7 @@ internal class UARTService : NotificationService() {
             .onEach { rxCharacteristic.splitWrite(DataByteArray.from(it), getWriteType(rxCharacteristic)) }
             .onEach { repository.onNewMessageSent(it) }
             .onEach { repository.log(10, "Sent: $it") }
+            .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
     }
 
