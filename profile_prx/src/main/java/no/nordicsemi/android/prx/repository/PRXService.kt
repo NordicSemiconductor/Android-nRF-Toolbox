@@ -81,8 +81,8 @@ internal class PRXService : NotificationService() {
     @Inject
     lateinit var repository: PRXRepository
 
-    private lateinit var client: ClientBleGatt
-    private lateinit var server: ServerBleGatt
+    private var client: ClientBleGatt? = null
+    private var server: ServerBleGatt? = null
 
     private var alertLevelCharacteristic: ClientBleGattCharacteristic? = null
 
@@ -127,7 +127,8 @@ internal class PRXService : NotificationService() {
             characteristicConfigs = listOf(linkLossCharacteristic)
         )
 
-        server = ServerBleGatt.create(this@PRXService, prxServiceConfig, linkLossServiceConfig)
+        val server = ServerBleGatt.create(this@PRXService, prxServiceConfig, linkLossServiceConfig)
+        this@PRXService.server = server
 
         //Order is important. We don't want to connect before services have been added to the server.
         startGattClient(device)
@@ -156,12 +157,13 @@ internal class PRXService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        client = ClientBleGatt.connect(
+        val client = ClientBleGatt.connect(
             this@PRXService,
             device,
             logger = { p, s -> repository.log(p, s) },
             options = BleGattConnectOptions(autoConnect = true)
         )
+        this@PRXService.client = client
 
         client.waitForBonding()
 
@@ -219,15 +221,15 @@ internal class PRXService : NotificationService() {
 
     private fun stopIfDisconnected(connectionState: GattConnectionState, connectionStatus: BleGattConnectionStatus) {
         if (connectionState == GattConnectionState.STATE_DISCONNECTED && !connectionStatus.isLinkLoss) {
-            server.stopServer()
+            server?.stopServer()
             repository.disconnect()
             stopSelf()
         }
     }
 
     private fun disconnect() {
-        client.disconnect()
-        server.stopServer()
+        client?.disconnect()
+        server?.stopServer()
     }
 
     override fun onDestroy() {

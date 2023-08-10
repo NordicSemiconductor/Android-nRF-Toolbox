@@ -66,7 +66,7 @@ internal class CSCService : NotificationService() {
     @Inject
     lateinit var repository: CSCRepository
 
-    private lateinit var client: ClientBleGatt
+    private var client: ClientBleGatt? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
@@ -85,7 +85,8 @@ internal class CSCService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        client = ClientBleGatt.connect(this@CSCService, device, logger = { p, s -> repository.log(p, s) })
+        val client = ClientBleGatt.connect(this@CSCService, device, logger = { p, s -> repository.log(p, s) })
+        this@CSCService.client = client
 
         client.connectionStateWithStatus
             .onEach { repository.onConnectionStateChanged(it) }
@@ -132,7 +133,7 @@ internal class CSCService : NotificationService() {
     }
 
     private fun disconnect() {
-        client.disconnect()
+        client?.disconnect()
     }
 
     override fun onDestroy() {

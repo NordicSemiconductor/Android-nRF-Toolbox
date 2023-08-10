@@ -92,7 +92,7 @@ internal class CGMService : NotificationService() {
     @Inject
     lateinit var repository: CGMRepository
 
-    private lateinit var client: ClientBleGatt
+    private var client: ClientBleGatt? = null
 
     private var secured = false
 
@@ -127,12 +127,13 @@ internal class CGMService : NotificationService() {
             CGMServiceCommand.REQUEST_ALL_RECORDS -> requestAllRecords()
             CGMServiceCommand.REQUEST_LAST_RECORD -> requestLastRecord()
             CGMServiceCommand.REQUEST_FIRST_RECORD -> requestFirstRecord()
-            CGMServiceCommand.DISCONNECT -> client.disconnect()
+            CGMServiceCommand.DISCONNECT -> disconnect()
         }
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        client = ClientBleGatt.connect(this@CGMService, device, logger = { p, s -> repository.log(p, s) })
+        val client = ClientBleGatt.connect(this@CGMService, device, logger = { p, s -> repository.log(p, s) })
+        this@CGMService.client = client
 
         client.connectionStateWithStatus
             .onEach { repository.onConnectionStateChanged(it) }
@@ -331,7 +332,7 @@ internal class CGMService : NotificationService() {
     }
 
     private fun disconnect() {
-        client.disconnect()
+        client?.disconnect()
     }
 
     override fun onDestroy() {

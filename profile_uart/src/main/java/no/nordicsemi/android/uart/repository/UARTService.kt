@@ -71,7 +71,7 @@ internal class UARTService : NotificationService() {
     @Inject
     lateinit var repository: UARTRepository
 
-    private lateinit var client: ClientBleGatt
+    private var client: ClientBleGatt? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
@@ -90,7 +90,8 @@ internal class UARTService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        client = ClientBleGatt.connect(this@UARTService, device, logger = { p, s -> repository.log(p, s) })
+        val client = ClientBleGatt.connect(this@UARTService, device, logger = { p, s -> repository.log(p, s) })
+        this@UARTService.client = client
 
         if (!client.isConnected) {
             return@launch
@@ -155,7 +156,7 @@ internal class UARTService : NotificationService() {
     }
 
     private fun disconnect() {
-        client.disconnect()
+        client?.disconnect()
     }
 
     override fun onDestroy() {

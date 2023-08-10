@@ -68,7 +68,7 @@ internal class HRSService : NotificationService() {
     @Inject
     lateinit var repository: HRSRepository
 
-    private lateinit var client: ClientBleGatt
+    private var client: ClientBleGatt? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
@@ -87,7 +87,8 @@ internal class HRSService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        client = ClientBleGatt.connect(this@HRSService, device, logger = { p, s -> repository.log(p, s) })
+        val client = ClientBleGatt.connect(this@HRSService, device, logger = { p, s -> repository.log(p, s) })
+        this@HRSService.client = client
 
         client.waitForBonding()
 
@@ -139,7 +140,7 @@ internal class HRSService : NotificationService() {
     }
 
     private fun disconnect() {
-        client.disconnect()
+        client?.disconnect()
     }
 
     override fun onDestroy() {
