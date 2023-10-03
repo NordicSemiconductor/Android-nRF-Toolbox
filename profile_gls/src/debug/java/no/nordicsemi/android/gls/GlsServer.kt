@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.core.DataByteArray
 import no.nordicsemi.android.common.logger.BleLogger
+import no.nordicsemi.android.common.logger.DefaultConsoleLogger
 import no.nordicsemi.android.gls.main.viewmodel.BATTERY_LEVEL_CHARACTERISTIC_UUID
 import no.nordicsemi.android.gls.main.viewmodel.BATTERY_SERVICE_UUID
 import no.nordicsemi.android.gls.main.viewmodel.GLS_SERVICE_UUID
@@ -36,7 +37,9 @@ private const val STANDARD_DELAY = 1000L
 @SuppressLint("MissingPermission")
 @Singleton
 class GlsServer @Inject constructor(
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    private val context: Context,
+    private val logger: BleLogger = DefaultConsoleLogger(context)
 ) {
 
     lateinit var server: ServerBleGatt
