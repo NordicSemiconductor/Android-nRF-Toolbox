@@ -15,6 +15,3 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
-
--keep class no.nordicsemi.android.uart.db.XmlConfiguration{ *; }
--keep class no.nordicsemi.android.uart.db.XmlMacro{ *; }
