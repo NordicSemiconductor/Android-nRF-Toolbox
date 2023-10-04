@@ -31,6 +31,7 @@
 
 package no.nordicsemi.android.uart.view
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -98,6 +99,7 @@ private fun PaddingBox(content: @Composable () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SuccessScreen() {
     val input = stringResource(id = R.string.uart_input)
