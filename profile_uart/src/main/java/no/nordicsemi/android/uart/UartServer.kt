@@ -46,14 +46,94 @@ class UartServer @Inject constructor(
 
     private var lastRequest = DataByteArray()
 
-    val YOUNGEST_RECORD = DataByteArray.from(0x07, 0x00, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x05, 0x00, 0x00, 0x26, 0xD2.toByte(), 0x11)
-    val OLDEST_RECORD = DataByteArray.from(0x07, 0x04, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x11, 0x00, 0x00, 0x82.toByte(), 0xD2.toByte(), 0x11)
+    val YOUNGEST_RECORD = DataByteArray.from(
+        0x07,
+        0x00,
+        0x00,
+        0xDC.toByte(),
+        0x07,
+        0x01,
+        0x01,
+        0x0C,
+        0x1E,
+        0x05,
+        0x00,
+        0x00,
+        0x26,
+        0xD2.toByte(),
+        0x11
+    )
+    val OLDEST_RECORD = DataByteArray.from(
+        0x07,
+        0x04,
+        0x00,
+        0xDC.toByte(),
+        0x07,
+        0x01,
+        0x01,
+        0x0C,
+        0x1E,
+        0x11,
+        0x00,
+        0x00,
+        0x82.toByte(),
+        0xD2.toByte(),
+        0x11
+    )
 
     val records = listOf(
         YOUNGEST_RECORD,
-        DataByteArray.from(0x07, 0x01, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x08, 0x00, 0x00, 0x3D, 0xD2.toByte(), 0x11),
-        DataByteArray.from(0x07, 0x02, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x0B, 0x00, 0x00, 0x54, 0xD2.toByte(), 0x11),
-        DataByteArray.from(0x07, 0x03, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x0E, 0x00, 0x00, 0x6B, 0xD2.toByte(), 0x11),
+        DataByteArray.from(
+            0x07,
+            0x01,
+            0x00,
+            0xDC.toByte(),
+            0x07,
+            0x01,
+            0x01,
+            0x0C,
+            0x1E,
+            0x08,
+            0x00,
+            0x00,
+            0x3D,
+            0xD2.toByte(),
+            0x11
+        ),
+        DataByteArray.from(
+            0x07,
+            0x02,
+            0x00,
+            0xDC.toByte(),
+            0x07,
+            0x01,
+            0x01,
+            0x0C,
+            0x1E,
+            0x0B,
+            0x00,
+            0x00,
+            0x54,
+            0xD2.toByte(),
+            0x11
+        ),
+        DataByteArray.from(
+            0x07,
+            0x03,
+            0x00,
+            0xDC.toByte(),
+            0x07,
+            0x01,
+            0x01,
+            0x0C,
+            0x1E,
+            0x0E,
+            0x00,
+            0x00,
+            0x6B,
+            0xD2.toByte(),
+            0x11
+        ),
         OLDEST_RECORD
     )
 
@@ -123,7 +203,9 @@ class UartServer @Inject constructor(
 //        racpCharacteristic = glsService.findCharacteristic(RACP_CHARACTERISTIC)!!
 
         val batteryService = connection.services.findService(BATTERY_SERVICE_UUID)!!
-        batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
+        batteryLevelCharacteristic = batteryService.findCharacteristic(
+            BATTERY_LEVEL_CHARACTERISTIC_UUID
+        )!!
 
 
 //        startGlsService(connection)

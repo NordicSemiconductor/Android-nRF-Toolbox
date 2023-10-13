@@ -2,6 +2,7 @@ package no.nordicsemi.android.gls
 
 import android.annotation.SuppressLint
 import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.core.DataByteArray
 import no.nordicsemi.android.common.logger.BleLogger
+import no.nordicsemi.android.common.logger.DefaultConsoleLogger
 import no.nordicsemi.android.gls.main.viewmodel.BATTERY_LEVEL_CHARACTERISTIC_UUID
 import no.nordicsemi.android.gls.main.viewmodel.BATTERY_SERVICE_UUID
 import no.nordicsemi.android.gls.main.viewmodel.GLS_SERVICE_UUID
@@ -36,7 +38,10 @@ private const val STANDARD_DELAY = 1000L
 @SuppressLint("MissingPermission")
 @Singleton
 class GlsServer @Inject constructor(
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    @ApplicationContext
+    private val context: Context,
+    private val logger: BleLogger = DefaultConsoleLogger(context)
 ) {
 
     lateinit var server: ServerBleGatt
@@ -48,14 +53,94 @@ class GlsServer @Inject constructor(
 
     private var lastRequest = DataByteArray()
 
-    val YOUNGEST_RECORD = DataByteArray.from(0x07, 0x00, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x05, 0x00, 0x00, 0x26, 0xD2.toByte(), 0x11)
-    val OLDEST_RECORD = DataByteArray.from(0x07, 0x04, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x11, 0x00, 0x00, 0x82.toByte(), 0xD2.toByte(), 0x11)
+    val YOUNGEST_RECORD = DataByteArray.from(
+        0x07,
+        0x00,
+        0x00,
+        0xDC.toByte(),
+        0x07,
+        0x01,
+        0x01,
+        0x0C,
+        0x1E,
+        0x05,
+        0x00,
+        0x00,
+        0x26,
+        0xD2.toByte(),
+        0x11
+    )
+    val OLDEST_RECORD = DataByteArray.from(
+        0x07,
+        0x04,
+        0x00,
+        0xDC.toByte(),
+        0x07,
+        0x01,
+        0x01,
+        0x0C,
+        0x1E,
+        0x11,
+        0x00,
+        0x00,
+        0x82.toByte(),
+        0xD2.toByte(),
+        0x11
+    )
 
     val records = listOf(
         YOUNGEST_RECORD,
-        DataByteArray.from(0x07, 0x01, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x08, 0x00, 0x00, 0x3D, 0xD2.toByte(), 0x11),
-        DataByteArray.from(0x07, 0x02, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x0B, 0x00, 0x00, 0x54, 0xD2.toByte(), 0x11),
-        DataByteArray.from(0x07, 0x03, 0x00, 0xDC.toByte(), 0x07, 0x01, 0x01, 0x0C, 0x1E, 0x0E, 0x00, 0x00, 0x6B, 0xD2.toByte(), 0x11),
+        DataByteArray.from(
+            0x07,
+            0x01,
+            0x00,
+            0xDC.toByte(),
+            0x07,
+            0x01,
+            0x01,
+            0x0C,
+            0x1E,
+            0x08,
+            0x00,
+            0x00,
+            0x3D,
+            0xD2.toByte(),
+            0x11
+        ),
+        DataByteArray.from(
+            0x07,
+            0x02,
+            0x00,
+            0xDC.toByte(),
+            0x07,
+            0x01,
+            0x01,
+            0x0C,
+            0x1E,
+            0x0B,
+            0x00,
+            0x00,
+            0x54,
+            0xD2.toByte(),
+            0x11
+        ),
+        DataByteArray.from(
+            0x07,
+            0x03,
+            0x00,
+            0xDC.toByte(),
+            0x07,
+            0x01,
+            0x01,
+            0x0C,
+            0x1E,
+            0x0E,
+            0x00,
+            0x00,
+            0x6B,
+            0xD2.toByte(),
+            0x11
+        ),
         OLDEST_RECORD
     )
 
@@ -128,11 +213,15 @@ class GlsServer @Inject constructor(
     private fun setUpConnection(connection: ServerBluetoothGattConnection) {
         val glsService = connection.services.findService(GLS_SERVICE_UUID)!!
         glsCharacteristic = glsService.findCharacteristic(GLUCOSE_MEASUREMENT_CHARACTERISTIC)!!
-        glsContextCharacteristic = glsService.findCharacteristic(GLUCOSE_MEASUREMENT_CONTEXT_CHARACTERISTIC)!!
+        glsContextCharacteristic = glsService.findCharacteristic(
+            GLUCOSE_MEASUREMENT_CONTEXT_CHARACTERISTIC
+        )!!
         racpCharacteristic = glsService.findCharacteristic(RACP_CHARACTERISTIC)!!
 
         val batteryService = connection.services.findService(BATTERY_SERVICE_UUID)!!
-        batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
+        batteryLevelCharacteristic = batteryService.findCharacteristic(
+            BATTERY_LEVEL_CHARACTERISTIC_UUID
+        )!!
 
 
         startGlsService(connection)

@@ -78,7 +78,7 @@ internal class UARTService : NotificationService() {
 
         repository.setServiceRunning(true)
 
-        val device = intent!!.getParcelableExtra<ServerDevice>(DEVICE_DATA)!!
+        val device = intent!!.parcelable<ServerDevice>(DEVICE_DATA)!!
 
         startGattClient(device)
 

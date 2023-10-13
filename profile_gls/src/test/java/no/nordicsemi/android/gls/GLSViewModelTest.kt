@@ -39,9 +39,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.robolectric.annotation.Config
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 import kotlin.test.assertContentEquals
 
 /**
@@ -112,7 +112,7 @@ internal class GLSViewModelTest {
             }))
             justRun { viewModel.logAnalytics(any()) }
 
-            glsServer = GlsServer(CoroutineScope(UnconfinedTestDispatcher()))
+            glsServer = GlsServer(CoroutineScope(UnconfinedTestDispatcher()), context, logger)
             glsServer.start(spyk(), device)
         }
     }

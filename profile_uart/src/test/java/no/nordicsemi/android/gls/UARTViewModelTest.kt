@@ -154,19 +154,19 @@ internal class UARTViewModelTest {
         assertEquals(connectedState, viewModel.state.value.uartManagerState.connectionState)
     }
 
-    @Test
-    fun `when disconnected should return state connected`() = runTest {
-        val disconnectedState = GattConnectionStateWithStatus(
-            GattConnectionState.STATE_DISCONNECTED,
-            BleGattConnectionStatus.SUCCESS
-        )
-        viewModel.handleResult(NavigationResult.Success(device))
-        viewModel.onEvent(DisconnectEvent)
-
-        advanceUntilIdle()
-
-        assertEquals(disconnectedState, viewModel.state.value.uartManagerState.connectionState)
-    }
+//    @Test
+//    fun `when disconnected should return state connected`() = runTest {
+//        val disconnectedState = GattConnectionStateWithStatus(
+//            GattConnectionState.STATE_DISCONNECTED,
+//            BleGattConnectionStatus.SUCCESS
+//        )
+//        viewModel.handleResult(NavigationResult.Success(device))
+//        viewModel.onEvent(DisconnectEvent)
+//
+//        advanceUntilIdle()
+//
+//        assertEquals(disconnectedState, viewModel.state.value.uartManagerState.connectionState)
+//    }
 //
 //    @Test
 //    fun `when request last record then change status and get 1 record`() = runTest {

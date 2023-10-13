@@ -56,6 +56,7 @@ import no.nordicsemi.android.kotlin.ble.profile.prx.AlarmLevel
 import no.nordicsemi.android.kotlin.ble.profile.prx.AlarmLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.prx.AlertLevelInputParser
 import no.nordicsemi.android.kotlin.ble.server.main.ServerBleGatt
+import no.nordicsemi.android.kotlin.ble.server.main.ServerConnectionEvent
 import no.nordicsemi.android.kotlin.ble.server.main.service.ServerBleGattCharacteristicConfig
 import no.nordicsemi.android.kotlin.ble.server.main.service.ServerBleGattServiceConfig
 import no.nordicsemi.android.kotlin.ble.server.main.service.ServerBleGattServiceType
@@ -133,7 +134,8 @@ internal class PRXService : NotificationService() {
         //Order is important. We don't want to connect before services have been added to the server.
         startGattClient(device)
 
-        server.onNewConnection
+        server.connectionEvents
+            .mapNotNull { (it as? ServerConnectionEvent.DeviceConnected)?.connection }
             .onEach { setUpServerConnection(it) }
             .launchIn(lifecycleScope)
     }
