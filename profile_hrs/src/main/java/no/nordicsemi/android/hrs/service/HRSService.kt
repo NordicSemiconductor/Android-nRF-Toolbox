@@ -33,6 +33,7 @@ package no.nordicsemi.android.hrs.service
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import androidx.core.content.IntentCompat
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.catch
@@ -75,7 +76,7 @@ internal class HRSService : NotificationService() {
 
         repository.setServiceRunning(true)
 
-        val device = intent!!.getParcelableExtra<ServerDevice>(DEVICE_DATA)!!
+        val device = IntentCompat.getParcelableExtra(intent!!, DEVICE_DATA, ServerDevice::class.java)!!
 
         startGattClient(device)
 
