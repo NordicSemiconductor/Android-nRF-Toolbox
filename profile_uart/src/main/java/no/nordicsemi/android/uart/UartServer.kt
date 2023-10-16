@@ -14,7 +14,6 @@ import no.nordicsemi.android.kotlin.ble.core.MockServerDevice
 import no.nordicsemi.android.kotlin.ble.core.advertiser.BleAdvertisingConfig
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattPermission
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattProperty
-import no.nordicsemi.android.kotlin.ble.profile.gls.RecordAccessControlPointInputParser
 import no.nordicsemi.android.kotlin.ble.server.main.ServerBleGatt
 import no.nordicsemi.android.kotlin.ble.server.main.service.ServerBleGattCharacteristic
 import no.nordicsemi.android.kotlin.ble.server.main.service.ServerBleGattCharacteristicConfig
@@ -39,116 +38,20 @@ class UartServer @Inject constructor(
 
     lateinit var server: ServerBleGatt
 
-    lateinit var glsCharacteristic: ServerBleGattCharacteristic
-    lateinit var glsContextCharacteristic: ServerBleGattCharacteristic
-    lateinit var racpCharacteristic: ServerBleGattCharacteristic
+    lateinit var rxCharacteristic: ServerBleGattCharacteristic
+    lateinit var txCharacteristic: ServerBleGattCharacteristic
     lateinit var batteryLevelCharacteristic: ServerBleGattCharacteristic
-
-    private var lastRequest = DataByteArray()
-
-    val YOUNGEST_RECORD = DataByteArray.from(
-        0x07,
-        0x00,
-        0x00,
-        0xDC.toByte(),
-        0x07,
-        0x01,
-        0x01,
-        0x0C,
-        0x1E,
-        0x05,
-        0x00,
-        0x00,
-        0x26,
-        0xD2.toByte(),
-        0x11
-    )
-    val OLDEST_RECORD = DataByteArray.from(
-        0x07,
-        0x04,
-        0x00,
-        0xDC.toByte(),
-        0x07,
-        0x01,
-        0x01,
-        0x0C,
-        0x1E,
-        0x11,
-        0x00,
-        0x00,
-        0x82.toByte(),
-        0xD2.toByte(),
-        0x11
-    )
-
-    val records = listOf(
-        YOUNGEST_RECORD,
-        DataByteArray.from(
-            0x07,
-            0x01,
-            0x00,
-            0xDC.toByte(),
-            0x07,
-            0x01,
-            0x01,
-            0x0C,
-            0x1E,
-            0x08,
-            0x00,
-            0x00,
-            0x3D,
-            0xD2.toByte(),
-            0x11
-        ),
-        DataByteArray.from(
-            0x07,
-            0x02,
-            0x00,
-            0xDC.toByte(),
-            0x07,
-            0x01,
-            0x01,
-            0x0C,
-            0x1E,
-            0x0B,
-            0x00,
-            0x00,
-            0x54,
-            0xD2.toByte(),
-            0x11
-        ),
-        DataByteArray.from(
-            0x07,
-            0x03,
-            0x00,
-            0xDC.toByte(),
-            0x07,
-            0x01,
-            0x01,
-            0x0C,
-            0x1E,
-            0x0E,
-            0x00,
-            0x00,
-            0x6B,
-            0xD2.toByte(),
-            0x11
-        ),
-        OLDEST_RECORD
-    )
-
-    val racp = DataByteArray.from(0x06, 0x00, 0x01, 0x01)
 
     fun start(
         context: Context,
         device: MockServerDevice = MockServerDevice(
-            name = "GLS Server",
+            name = "UART Server",
             address = "55:44:33:22:11"
         ),
     ) = scope.launch {
         val rxCharacteristic = ServerBleGattCharacteristicConfig(
             UART_RX_CHARACTERISTIC_UUID,
-            listOf(BleGattProperty.PROPERTY_NOTIFY),
+            listOf(BleGattProperty.PROPERTY_NOTIFY, BleGattProperty.PROPERTY_WRITE),
             listOf()
         )
 
@@ -197,57 +100,20 @@ class UartServer @Inject constructor(
     }
 
     private fun setUpConnection(connection: ServerBluetoothGattConnection) {
-//        val glsService = connection.services.findService(GLS_SERVICE_UUID)!!
-//        glsCharacteristic = glsService.findCharacteristic(GLUCOSE_MEASUREMENT_CHARACTERISTIC)!!
-//        glsContextCharacteristic = glsService.findCharacteristic(GLUCOSE_MEASUREMENT_CONTEXT_CHARACTERISTIC)!!
-//        racpCharacteristic = glsService.findCharacteristic(RACP_CHARACTERISTIC)!!
+        val glsService = connection.services.findService(UART_SERVICE_UUID)!!
+        rxCharacteristic = glsService.findCharacteristic(UART_RX_CHARACTERISTIC_UUID)!!
+        txCharacteristic = glsService.findCharacteristic(UART_TX_CHARACTERISTIC_UUID)!!
+
+        rxCharacteristic.value.onEach {
+            txCharacteristic.setValue(it)
+        }.launchIn(scope)
 
         val batteryService = connection.services.findService(BATTERY_SERVICE_UUID)!!
         batteryLevelCharacteristic = batteryService.findCharacteristic(
             BATTERY_LEVEL_CHARACTERISTIC_UUID
         )!!
 
-
-//        startGlsService(connection)
-//        startBatteryService(connection)
-    }
-
-    private fun startGlsService(connection: ServerBluetoothGattConnection) {
-        racpCharacteristic.value
-            .onEach { lastRequest = it }
-            .launchIn(scope)
-    }
-
-    internal fun continueWithResponse() {
-        sendResponse(lastRequest)
-    }
-
-    private fun sendResponse(request: DataByteArray) {
-        if (request == RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords()) {
-            sendAll(glsCharacteristic)
-            racpCharacteristic.setValue(racp)
-        } else if (request == RecordAccessControlPointInputParser.reportLastStoredRecord()) {
-            sendLast(glsCharacteristic)
-            racpCharacteristic.setValue(racp)
-        } else if (request == RecordAccessControlPointInputParser.reportFirstStoredRecord()) {
-            sendFirst(glsCharacteristic)
-            racpCharacteristic.setValue(racp)
-        }
-    }
-
-    private fun sendFirst(characteristics: ServerBleGattCharacteristic) {
-        characteristics.setValue(records.first())
-    }
-
-    private fun sendLast(characteristics: ServerBleGattCharacteristic) {
-        characteristics.setValue(records.last())
-    }
-
-    private fun sendAll(characteristics: ServerBleGattCharacteristic) = scope.launch {
-        records.forEach {
-            characteristics.setValue(it)
-            delay(100)
-        }
+        startBatteryService(connection)
     }
 
     private fun startBatteryService(connection: ServerBluetoothGattConnection) {
