@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2022, Nordic Semiconductor
   ~ All rights reserved.
   ~
@@ -37,7 +36,10 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
     <application>
-        <service android:name=".repository.CSCService" />
+        <service
+            android:name=".repository.CSCService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
     </application>
 
 </manifest>

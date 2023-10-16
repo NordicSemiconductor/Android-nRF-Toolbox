@@ -51,5 +51,7 @@ class NrfToolboxApplication : Application() {
         super.onCreate()
 
         analytics.logEvent(AppOpenEvent)
+
+        uartServer.start(this)
     }
 }
