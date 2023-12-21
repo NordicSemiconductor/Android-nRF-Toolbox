@@ -125,14 +125,6 @@ internal class UARTService : NotificationService() {
         val rxCharacteristic = uartService.findCharacteristic(UART_RX_CHARACTERISTIC_UUID)!!
         val txCharacteristic = uartService.findCharacteristic(UART_TX_CHARACTERISTIC_UUID)!!
 
-        val batteryService = services.findService(BATTERY_SERVICE_UUID)
-
-        batteryService?.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)?.getNotifications()
-            ?.mapNotNull { BatteryLevelParser.parse(it) }
-            ?.onEach { repository.onBatteryLevelChanged(it) }
-            ?.catch { it.printStackTrace() }
-            ?.launchIn(lifecycleScope)
-
         txCharacteristic.getNotifications()
             .map { String(it.value) }
             .onEach { repository.onNewMessageReceived(it) }
@@ -146,6 +138,15 @@ internal class UARTService : NotificationService() {
             .onEach { repository.log(10, "Sent: $it") }
             .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
+
+        // Battery service is optional
+        services.findService(BATTERY_SERVICE_UUID)
+            ?.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
+            ?.getNotifications()
+            ?.mapNotNull { BatteryLevelParser.parse(it) }
+            ?.onEach { repository.onBatteryLevelChanged(it) }
+            ?.catch { it.printStackTrace() }
+            ?.launchIn(lifecycleScope)
     }
 
     private fun getWriteType(characteristic: ClientBleGattCharacteristic): BleWriteType {

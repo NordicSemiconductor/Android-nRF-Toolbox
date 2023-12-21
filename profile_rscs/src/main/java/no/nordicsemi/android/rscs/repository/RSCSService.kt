@@ -110,20 +110,21 @@ internal class RSCSService : NotificationService() {
     private suspend fun configureGatt(services: ClientBleGattServices) {
         val rscsService = services.findService(RSCS_SERVICE_UUID)!!
         val rscsMeasurementCharacteristic = rscsService.findCharacteristic(RSC_MEASUREMENT_CHARACTERISTIC_UUID)!!
-        val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
-        val batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
-
-        batteryLevelCharacteristic.getNotifications()
-            .mapNotNull { BatteryLevelParser.parse(it) }
-            .onEach { repository.onBatteryLevelChanged(it) }
-            .catch { it.printStackTrace() }
-            .launchIn(lifecycleScope)
 
         rscsMeasurementCharacteristic.getNotifications()
             .mapNotNull { RSCSDataParser.parse(it) }
             .onEach { repository.onRSCSDataChanged(it) }
             .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
+
+        // Battery service is optional
+        services.findService(BATTERY_SERVICE_UUID)
+            ?.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
+            ?.getNotifications()
+            ?.mapNotNull { BatteryLevelParser.parse(it) }
+            ?.onEach { repository.onBatteryLevelChanged(it) }
+            ?.catch { it.printStackTrace() }
+            ?.launchIn(lifecycleScope)
     }
 
     private fun stopIfDisconnected(connectionState: GattConnectionStateWithStatus) {

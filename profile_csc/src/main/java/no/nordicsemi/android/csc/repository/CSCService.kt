@@ -110,14 +110,6 @@ internal class CSCService : NotificationService() {
     private suspend fun configureGatt(services: ClientBleGattServices) {
         val cscService = services.findService(CSC_SERVICE_UUID)!!
         val cscMeasurementCharacteristic = cscService.findCharacteristic(CSC_MEASUREMENT_CHARACTERISTIC_UUID)!!
-        val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
-        val batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
-
-        batteryLevelCharacteristic.getNotifications()
-            .mapNotNull { BatteryLevelParser.parse(it) }
-            .onEach { repository.onBatteryLevelChanged(it) }
-            .catch { it.printStackTrace() }
-            .launchIn(lifecycleScope)
 
         val cscDataParser = CSCDataParser()
         cscMeasurementCharacteristic.getNotifications()
@@ -125,6 +117,15 @@ internal class CSCService : NotificationService() {
             .onEach { repository.onCSCDataChanged(it) }
             .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
+
+        // Battery service is optional
+        services.findService(BATTERY_SERVICE_UUID)
+            ?.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
+            ?.getNotifications()
+            ?.mapNotNull { BatteryLevelParser.parse(it) }
+            ?.onEach { repository.onBatteryLevelChanged(it) }
+            ?.catch { it.printStackTrace() }
+            ?.launchIn(lifecycleScope)
     }
 
     private fun stopIfDisconnected(connectionState: GattConnectionStateWithStatus) {

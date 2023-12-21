@@ -152,14 +152,6 @@ internal class BPSViewModel @Inject constructor(
         val bpsService = services.findService(BPS_SERVICE_UUID)!!
         val bpmCharacteristic = bpsService.findCharacteristic(BPM_CHARACTERISTIC_UUID)!!
         val icpCharacteristic = bpsService.findCharacteristic(ICP_CHARACTERISTIC_UUID)
-        val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
-        val batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
-
-        batteryLevelCharacteristic.getNotifications()
-            .mapNotNull { BatteryLevelParser.parse(it) }
-            .onEach { onDataUpdate(it) }
-            .catch { it.printStackTrace() }
-            .launchIn(viewModelScope)
 
         bpmCharacteristic.getNotifications()
             .mapNotNull { BloodPressureMeasurementParser.parse(it) }
@@ -169,6 +161,15 @@ internal class BPSViewModel @Inject constructor(
 
         icpCharacteristic?.getNotifications()
             ?.mapNotNull { IntermediateCuffPressureParser.parse(it) }
+            ?.onEach { onDataUpdate(it) }
+            ?.catch { it.printStackTrace() }
+            ?.launchIn(viewModelScope)
+
+        // Battery service is optional
+        services.findService(BATTERY_SERVICE_UUID)
+            ?.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
+            ?.getNotifications()
+            ?.mapNotNull { BatteryLevelParser.parse(it) }
             ?.onEach { onDataUpdate(it) }
             ?.catch { it.printStackTrace() }
             ?.launchIn(viewModelScope)
