@@ -225,7 +225,7 @@ class GlsServer @Inject constructor(
         )!!
 
         startGlsService()
-//      startBatteryService()
+        startBatteryService()
     }
 
     private fun startGlsService() {

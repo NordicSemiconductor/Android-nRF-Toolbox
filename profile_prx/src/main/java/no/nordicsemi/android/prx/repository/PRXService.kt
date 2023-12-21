@@ -198,14 +198,15 @@ internal class PRXService : NotificationService() {
         alertLevelCharacteristic = prxService.findCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID)!!
         val linkLossService = services.findService(LINK_LOSS_SERVICE_UUID)!!
         val linkLossCharacteristic = linkLossService.findCharacteristic(ALERT_LEVEL_CHARACTERISTIC_UUID)!!
-        val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
-        val batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
 
-        batteryLevelCharacteristic.getNotifications()
-            .mapNotNull { BatteryLevelParser.parse(it) }
-            .onEach { repository.onBatteryLevelChanged(it) }
-            .catch { it.printStackTrace() }
-            .launchIn(lifecycleScope)
+        // Battery service is optional
+        services.findService(BATTERY_SERVICE_UUID)
+            ?.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
+            ?.getNotifications()
+            ?.mapNotNull { BatteryLevelParser.parse(it) }
+            ?.onEach { repository.onBatteryLevelChanged(it) }
+            ?.catch { it.printStackTrace() }
+            ?.launchIn(lifecycleScope)
 
         tryOrLog {
             linkLossCharacteristic.write(AlertLevelInputParser.parse(AlarmLevel.HIGH))

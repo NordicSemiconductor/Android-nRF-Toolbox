@@ -115,23 +115,24 @@ internal class HRSService : NotificationService() {
         val hrsService = services.findService(HRS_SERVICE_UUID)!!
         val hrsMeasurementCharacteristic = hrsService.findCharacteristic(HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID)!!
         val bodySensorLocationCharacteristic = hrsService.findCharacteristic(BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID)!!
-        val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
-        val batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
 
         val bodySensorLocation = bodySensorLocationCharacteristic.read()
         BodySensorLocationParser.parse(bodySensorLocation)?.let { repository.onBodySensorLocationChanged(it) }
-
-        batteryLevelCharacteristic.getNotifications()
-            .mapNotNull { BatteryLevelParser.parse(it) }
-            .onEach { repository.onBatteryLevelChanged(it) }
-            .catch { it.printStackTrace() }
-            .launchIn(lifecycleScope)
 
         hrsMeasurementCharacteristic.getNotifications()
             .mapNotNull { HRSDataParser.parse(it) }
             .onEach { repository.onHRSDataChanged(it) }
             .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
+
+        // Battery service is optional
+        services.findService(BATTERY_SERVICE_UUID)
+            ?.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
+            ?.getNotifications()
+            ?.mapNotNull { BatteryLevelParser.parse(it) }
+            ?.onEach { repository.onBatteryLevelChanged(it) }
+            ?.catch { it.printStackTrace() }
+            ?.launchIn(lifecycleScope)
     }
 
     private fun stopIfDisconnected(connectionState: GattConnectionStateWithStatus) {

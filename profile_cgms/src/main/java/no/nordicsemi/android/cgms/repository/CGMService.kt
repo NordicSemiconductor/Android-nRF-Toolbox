@@ -160,14 +160,6 @@ internal class CGMService : NotificationService() {
         val measurementCharacteristic = cgmService.findCharacteristic(CGM_MEASUREMENT_UUID)!!
         val opsControlPointCharacteristic = cgmService.findCharacteristic(CGM_OPS_CONTROL_POINT_UUID)!!
         recordAccessControlPointCharacteristic = cgmService.findCharacteristic(RACP_UUID)!!
-        val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
-        val batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
-
-        batteryLevelCharacteristic.getNotifications()
-            .mapNotNull { BatteryLevelParser.parse(it) }
-            .onEach { repository.onBatteryLevelChanged(it) }
-            .catch { it.printStackTrace() }
-            .launchIn(lifecycleScope)
 
         measurementCharacteristic.getNotifications()
             .mapNotNull { CGMMeasurementParser.parse(it) }
@@ -212,6 +204,15 @@ internal class CGMService : NotificationService() {
             .onEach { onAccessControlPointDataReceived(it) }
             .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
+
+        // Battery service is optional
+        services.findService(BATTERY_SERVICE_UUID)
+            ?.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
+            ?.getNotifications()
+            ?.mapNotNull { BatteryLevelParser.parse(it) }
+            ?.onEach { repository.onBatteryLevelChanged(it) }
+            ?.catch { it.printStackTrace() }
+            ?.launchIn(lifecycleScope)
 
         lifecycleScope.launchWithCatch {
             val featuresEnvelope = featureCharacteristic.read().let { CGMFeatureParser.parse(it) }!!

@@ -208,14 +208,6 @@ internal class GLSViewModel @Inject constructor(
         val glsService = services.findService(GLS_SERVICE_UUID)!!
         glucoseMeasurementCharacteristic = glsService.findCharacteristic(GLUCOSE_MEASUREMENT_CHARACTERISTIC)!!
         recordAccessControlPointCharacteristic = glsService.findCharacteristic(RACP_CHARACTERISTIC)!!
-        val batteryService = services.findService(BATTERY_SERVICE_UUID)!!
-        val batteryLevelCharacteristic = batteryService.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
-
-        batteryLevelCharacteristic.getNotifications()
-            .mapNotNull { BatteryLevelParser.parse(it) }
-            .onEach { _state.value = _state.value.copyWithNewBatteryLevel(it) }
-            .catch { it.printStackTrace() }
-            .launchIn(viewModelScope)
 
         glucoseMeasurementCharacteristic.getNotifications()
             .mapNotNull { GlucoseMeasurementParser.parse(it) }
@@ -234,6 +226,15 @@ internal class GLSViewModel @Inject constructor(
             .onEach { onAccessControlPointDataReceived(it) }
             .catch { it.printStackTrace() }
             .launchIn(viewModelScope)
+
+        // Battery service is optional
+        services.findService(BATTERY_SERVICE_UUID)
+            ?.findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)
+            ?.getNotifications()
+            ?.mapNotNull { BatteryLevelParser.parse(it) }
+            ?.onEach { _state.value = _state.value.copyWithNewBatteryLevel(it) }
+            ?.catch { it.printStackTrace() }
+            ?.launchIn(viewModelScope)
     }
 
     private fun onAccessControlPointDataReceived(data: RecordAccessControlPointData) = viewModelScope.launch {
