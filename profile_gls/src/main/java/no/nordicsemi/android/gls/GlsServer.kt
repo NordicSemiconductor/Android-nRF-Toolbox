@@ -224,7 +224,6 @@ class GlsServer @Inject constructor(
             BATTERY_LEVEL_CHARACTERISTIC_UUID
         )!!
 
-
         startGlsService()
 //      startBatteryService()
     }

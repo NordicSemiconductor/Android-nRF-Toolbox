@@ -38,7 +38,6 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
@@ -66,7 +65,7 @@ abstract class NotificationService : LifecycleService() {
     private fun startForegroundService() {
         // when the activity closes we need to show the notification that user is connected to the peripheral sensor
         // We start the service as a foreground service as Android 8.0 (Oreo) onwards kills any running background services
-        val notification = createNotification(R.string.csc_notification_connected_message, 0)
+        val notification = createNotification(R.string.csc_notification_connected_message)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForeground(NOTIFICATION_ID, notification)
         } else {
@@ -93,9 +92,8 @@ abstract class NotificationService : LifecycleService() {
      *
      * @param messageResId the message resource id. The message must have one String parameter,<br></br>
      * f.e. `<string name="name">%s is connected</string>`
-     * @param defaults
      */
-    private fun createNotification(messageResId: Int, defaults: Int): Notification {
+    private fun createNotification(messageResId: Int): Notification {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel(CHANNEL_ID)
         }
@@ -112,6 +110,7 @@ abstract class NotificationService : LifecycleService() {
             .build()
     }
 
+    @Suppress("SameParameterValue")
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(channelName: String) {
         val channel = NotificationChannel(
