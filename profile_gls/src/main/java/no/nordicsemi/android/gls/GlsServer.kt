@@ -44,12 +44,12 @@ class GlsServer @Inject constructor(
     private val logger: BleLogger = DefaultConsoleLogger(context)
 ) {
 
-    lateinit var server: ServerBleGatt
+    private lateinit var server: ServerBleGatt
 
-    lateinit var glsCharacteristic: ServerBleGattCharacteristic
-    lateinit var glsContextCharacteristic: ServerBleGattCharacteristic
-    lateinit var racpCharacteristic: ServerBleGattCharacteristic
-    lateinit var batteryLevelCharacteristic: ServerBleGattCharacteristic
+    private lateinit var glsCharacteristic: ServerBleGattCharacteristic
+    private lateinit var glsContextCharacteristic: ServerBleGattCharacteristic
+    private lateinit var racpCharacteristic: ServerBleGattCharacteristic
+    private lateinit var batteryLevelCharacteristic: ServerBleGattCharacteristic
 
     private var lastRequest = DataByteArray()
 
@@ -144,7 +144,7 @@ class GlsServer @Inject constructor(
         OLDEST_RECORD
     )
 
-    val racp = DataByteArray.from(0x06, 0x00, 0x01, 0x01)
+    private val SUCCESS = DataByteArray.from(0x06, 0x00, 0x01, 0x01)
 
     fun start(
         context: Context,
@@ -193,7 +193,8 @@ class GlsServer @Inject constructor(
             context = context,
             config = arrayOf(serviceConfig, batteryService),
             mock = device,
-            logger = { priority, log -> println(log) }
+            scope = scope,
+            logger = { _, log -> println(log) }
         )
 
         val advertiser = BleAdvertiser.create(context)
@@ -223,12 +224,11 @@ class GlsServer @Inject constructor(
             BATTERY_LEVEL_CHARACTERISTIC_UUID
         )!!
 
-
-        startGlsService(connection)
-//        startBatteryService(connection)
+        startGlsService()
+//      startBatteryService()
     }
 
-    private fun startGlsService(connection: ServerBluetoothGattConnection) {
+    private fun startGlsService() {
         racpCharacteristic.value
             .onEach { lastRequest = it }
             .launchIn(scope)
@@ -238,42 +238,38 @@ class GlsServer @Inject constructor(
         sendResponse(lastRequest)
     }
 
-    private fun sendResponse(request: DataByteArray) {
-        if (request == RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords()) {
-            sendAll(glsCharacteristic)
-            racpCharacteristic.setValue(racp)
-        } else if (request == RecordAccessControlPointInputParser.reportLastStoredRecord()) {
-            sendLast(glsCharacteristic)
-            racpCharacteristic.setValue(racp)
-        } else if (request == RecordAccessControlPointInputParser.reportFirstStoredRecord()) {
-            sendFirst(glsCharacteristic)
-            racpCharacteristic.setValue(racp)
+    private fun sendResponse(request: DataByteArray) = scope.launch {
+        when (request) {
+            RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords() -> {
+                records.forEach {
+                    send(glsCharacteristic, it)
+                    delay(100)
+                }
+                racpCharacteristic.setValueAndNotifyClient(SUCCESS)
+            }
+            RecordAccessControlPointInputParser.reportLastStoredRecord() -> {
+                send(glsCharacteristic, records.last())
+                send(racpCharacteristic, SUCCESS)
+            }
+            RecordAccessControlPointInputParser.reportFirstStoredRecord() -> {
+                send(glsCharacteristic, records.first())
+                send(racpCharacteristic, SUCCESS)
+            }
         }
     }
 
-    private fun sendFirst(characteristics: ServerBleGattCharacteristic) {
-        characteristics.setValue(records.first())
+    private suspend fun send(characteristics: ServerBleGattCharacteristic, data: DataByteArray) {
+        characteristics.setValueAndNotifyClient(data)
     }
 
-    private fun sendLast(characteristics: ServerBleGattCharacteristic) {
-        characteristics.setValue(records.last())
-    }
-
-    private fun sendAll(characteristics: ServerBleGattCharacteristic) = scope.launch {
-        records.forEach {
-            characteristics.setValue(it)
-            delay(100)
-        }
-    }
-
-    private fun startBatteryService(connection: ServerBluetoothGattConnection) {
+    private fun startBatteryService() {
         scope.launch {
             repeat(100) {
-                batteryLevelCharacteristic.setValue(DataByteArray.from(0x61))
+                send(batteryLevelCharacteristic, DataByteArray.from(0x61))
                 delay(STANDARD_DELAY)
-                batteryLevelCharacteristic.setValue(DataByteArray.from(0x60))
+                send(batteryLevelCharacteristic, DataByteArray.from(0x60))
                 delay(STANDARD_DELAY)
-                batteryLevelCharacteristic.setValue(DataByteArray.from(0x5F))
+                send(batteryLevelCharacteristic, DataByteArray.from(0x5F))
                 delay(STANDARD_DELAY)
             }
         }

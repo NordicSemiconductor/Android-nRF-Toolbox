@@ -127,7 +127,7 @@ internal class BPSViewModel @Inject constructor(
 
         logger = DefaultBleLogger.create(context, stringConst.APP_NAME, "BPS", device.address)
 
-        val client = ClientBleGatt.connect(context, device, logger = logger)
+        val client = ClientBleGatt.connect(context, device, viewModelScope, logger = logger)
         this@BPSViewModel.client = client
 
         client.connectionStateWithStatus

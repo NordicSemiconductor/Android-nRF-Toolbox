@@ -45,12 +45,12 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.cgms.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.cgms.data.CGMServiceCommand
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
-import no.nordicsemi.android.kotlin.ble.client.main.errors.GattOperationException
 import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattCharacteristic
 import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
+import no.nordicsemi.android.kotlin.ble.core.errors.GattOperationException
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.cgm.CGMFeatureParser
 import no.nordicsemi.android.kotlin.ble.profile.cgm.CGMMeasurementParser
@@ -58,7 +58,6 @@ import no.nordicsemi.android.kotlin.ble.profile.cgm.CGMSpecificOpsControlPointPa
 import no.nordicsemi.android.kotlin.ble.profile.cgm.CGMStatusParser
 import no.nordicsemi.android.kotlin.ble.profile.cgm.data.CGMErrorCode
 import no.nordicsemi.android.kotlin.ble.profile.cgm.data.CGMOpCode
-import no.nordicsemi.android.kotlin.ble.profile.cgm.data.CGMSpecificOpsControlPointData
 import no.nordicsemi.android.kotlin.ble.profile.gls.CGMSpecificOpsControlPointDataParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.RecordAccessControlPointInputParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.RecordAccessControlPointParser
@@ -133,7 +132,7 @@ internal class CGMService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        val client = ClientBleGatt.connect(this@CGMService, device, logger = { p, s -> repository.log(p, s) })
+        val client = ClientBleGatt.connect(this@CGMService, device, lifecycleScope, logger = { p, s -> repository.log(p, s) })
         this@CGMService.client = client
 
         client.connectionStateWithStatus

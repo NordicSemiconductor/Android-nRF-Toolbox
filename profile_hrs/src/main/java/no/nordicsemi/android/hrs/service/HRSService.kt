@@ -88,7 +88,7 @@ internal class HRSService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        val client = ClientBleGatt.connect(this@HRSService, device, logger = { p, s -> repository.log(p, s) })
+        val client = ClientBleGatt.connect(this@HRSService, device, lifecycleScope, logger = { p, s -> repository.log(p, s) })
         this@HRSService.client = client
 
         client.waitForBonding()

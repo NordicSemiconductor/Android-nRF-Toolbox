@@ -50,11 +50,17 @@ dependencies {
     implementation(project(":lib_ui"))
     implementation(project(":lib_utils"))
 
+    implementation(libs.nordic.core)
+    implementation(libs.nordic.theme)
+    implementation(libs.nordic.navigation)
+    implementation(libs.nordic.uilogger)
+
     implementation(libs.nordic.blek.client)
     implementation(libs.nordic.blek.profile)
     implementation(libs.nordic.blek.core)
     implementation(libs.nordic.blek.server)
     implementation(libs.nordic.blek.advertiser)
+    implementation(libs.nordic.blek.uiscanner)
 
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
@@ -63,24 +69,15 @@ dependencies {
     implementation(libs.accompanist.pager)
     implementation(libs.accompanist.pagerindicators)
 
-    implementation(libs.nordic.ble.common)
-    implementation(libs.nordic.ble.ktx)
-
-    implementation(libs.nordic.theme)
-    implementation(libs.nordic.navigation)
-    implementation(libs.nordic.uilogger)
-    implementation(libs.nordic.core)
-    implementation(libs.nordic.blek.uiscanner)
-
     implementation(libs.androidx.dataStore.core)
     implementation(libs.androidx.dataStore.preferences)
-
-    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.service)
+
+    implementation(libs.androidx.hilt.navigation.compose)
 
     testImplementation(libs.hilt.android.testing)
     kaptTest(libs.hilt.compiler)

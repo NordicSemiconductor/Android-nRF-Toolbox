@@ -129,7 +129,7 @@ internal class PRXService : NotificationService() {
             characteristicConfigs = listOf(linkLossCharacteristic)
         )
 
-        val server = ServerBleGatt.create(this@PRXService, prxServiceConfig, linkLossServiceConfig)
+        val server = ServerBleGatt.create(this@PRXService, lifecycleScope, prxServiceConfig, linkLossServiceConfig)
         this@PRXService.server = server
 
         //Order is important. We don't want to connect before services have been added to the server.
@@ -163,6 +163,7 @@ internal class PRXService : NotificationService() {
         val client = ClientBleGatt.connect(
             this@PRXService,
             device,
+            lifecycleScope,
             logger = { p, s -> repository.log(p, s) },
             options = BleGattConnectOptions(autoConnect = true)
         )
