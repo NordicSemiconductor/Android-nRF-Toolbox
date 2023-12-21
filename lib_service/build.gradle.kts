@@ -40,11 +40,8 @@ android {
 
 dependencies {
     implementation(project(":lib_ui"))
-
-    implementation(libs.nordic.ble.common)
-    implementation(libs.nordic.ble.ktx)
+    
     implementation(libs.nordic.blek.uiscanner)
-
     implementation(libs.nordic.blek.core)
 
     implementation(libs.androidx.lifecycle.service)

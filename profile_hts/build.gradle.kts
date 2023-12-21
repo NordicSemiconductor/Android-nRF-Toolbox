@@ -47,20 +47,18 @@ dependencies {
 
     implementation(libs.nordic.blek.client)
     implementation(libs.nordic.blek.profile)
-
-    implementation(libs.nordic.ble.common)
-    implementation(libs.nordic.ble.ktx)
-
-    implementation(libs.nordic.theme)
     implementation(libs.nordic.blek.uiscanner)
+
+    implementation(libs.nordic.core)
+    implementation(libs.nordic.theme)
     implementation(libs.nordic.navigation)
     implementation(libs.nordic.uilogger)
-    implementation(libs.nordic.core)
 
-    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.service)
+
+    implementation(libs.androidx.hilt.navigation.compose)
 }

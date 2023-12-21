@@ -32,9 +32,10 @@
 package no.nordicsemi.android.gls.main.viewmodel
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.content.Context
 import android.os.ParcelUuid
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -61,12 +62,12 @@ import no.nordicsemi.android.gls.main.view.OnGLSRecordClick
 import no.nordicsemi.android.gls.main.view.OnWorkingModeSelected
 import no.nordicsemi.android.gls.main.view.OpenLoggerEvent
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
-import no.nordicsemi.android.kotlin.ble.client.main.errors.GattOperationException
 import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattCharacteristic
 import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattServices
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
+import no.nordicsemi.android.kotlin.ble.core.errors.GattOperationException
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.GlucoseMeasurementContextParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.GlucoseMeasurementParser
@@ -99,13 +100,12 @@ val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000
 @SuppressLint("MissingPermission")
 @HiltViewModel
 internal class GLSViewModel @Inject constructor(
-    @ApplicationContext
-    private val context: Context,
+    @ApplicationContext context: Context,
     private val navigationManager: Navigator,
     private val analytics: AppAnalytics,
     private val stringConst: StringConst,
     private val loggerFactory: NordicLoggerFactory
-) : ViewModel() {
+) : AndroidViewModel(context as Application) {
 
     private var client: ClientBleGatt? = null
     private lateinit var logger: BleLoggerAndLauncher
@@ -168,9 +168,9 @@ internal class GLSViewModel @Inject constructor(
     private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
         _state.value = _state.value.copy(deviceName = device.name)
 
-        logger = loggerFactory.createNordicLogger(context, stringConst.APP_NAME, "GLS", device.address)
+        logger = loggerFactory.createNordicLogger(getApplication(), stringConst.APP_NAME, "GLS", device.address)
 
-        val client = ClientBleGatt.connect(context, device, logger = logger)
+        val client = ClientBleGatt.connect(getApplication(), device, viewModelScope, logger = logger)
         this@GLSViewModel.client = client
 
         client.waitForBonding()

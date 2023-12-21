@@ -33,7 +33,7 @@ plugins {
     alias(libs.plugins.nordic.hilt)
 }
 
-if (getGradle().getStartParameter().getTaskRequests().toString().contains("Release")){
+if (getGradle().getStartParameter().getTaskRequests().toString().contains("Release")) {
     apply(plugin = "com.google.gms.google-services")
     apply(plugin = "com.google.firebase.crashlytics")
 }
@@ -69,18 +69,14 @@ dependencies {
     implementation(libs.nordic.uilogger)
     implementation(libs.nordic.permissions.ble)
     implementation(libs.nordic.analytics)
+    
+    implementation(libs.nordic.blek.client)
 
-    implementation(libs.androidx.lifecycle.runtime.compose)
-
-    implementation(libs.nordic.ble.common)
-    implementation(libs.nordic.ble.ktx)
-
-    implementation(libs.androidx.hilt.navigation.compose)
-
-    implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
 
-    implementation(libs.nordic.blek.client)
+    implementation(libs.androidx.hilt.navigation.compose)
 }

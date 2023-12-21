@@ -86,7 +86,7 @@ internal class CSCService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        val client = ClientBleGatt.connect(this@CSCService, device, logger = { p, s -> repository.log(p, s) })
+        val client = ClientBleGatt.connect(this@CSCService, device, lifecycleScope, logger = { p, s -> repository.log(p, s) })
         this@CSCService.client = client
 
         client.connectionStateWithStatus

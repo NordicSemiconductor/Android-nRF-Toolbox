@@ -39,6 +39,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -91,7 +92,7 @@ internal class UARTService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        val client = ClientBleGatt.connect(this@UARTService, device, logger = { p, s -> repository.log(p, s) })
+        val client = ClientBleGatt.connect(this@UARTService, device, lifecycleScope, logger = { p, s -> repository.log(p, s) })
         this@UARTService.client = client
 
         if (!client.isConnected) {
@@ -133,8 +134,9 @@ internal class UARTService : NotificationService() {
             ?.launchIn(lifecycleScope)
 
         txCharacteristic.getNotifications()
-            .onEach { repository.onNewMessageReceived(String(it.value)) }
-            .onEach { repository.log(10, "Received: ${String(it.value)}") }
+            .map { String(it.value) }
+            .onEach { repository.onNewMessageReceived(it) }
+            .onEach { repository.log(10, "Received: $it") }
             .catch { it.printStackTrace() }
             .launchIn(lifecycleScope)
 

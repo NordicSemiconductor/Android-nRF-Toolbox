@@ -36,11 +36,11 @@ class UartServer @Inject constructor(
     private val scope: CoroutineScope
 ) {
 
-    lateinit var server: ServerBleGatt
+    private lateinit var server: ServerBleGatt
 
-    lateinit var rxCharacteristic: ServerBleGattCharacteristic
-    lateinit var txCharacteristic: ServerBleGattCharacteristic
-    lateinit var batteryLevelCharacteristic: ServerBleGattCharacteristic
+    private lateinit var rxCharacteristic: ServerBleGattCharacteristic
+    private lateinit var txCharacteristic: ServerBleGattCharacteristic
+    private lateinit var batteryLevelCharacteristic: ServerBleGattCharacteristic
 
     fun start(
         context: Context,
@@ -81,6 +81,7 @@ class UartServer @Inject constructor(
 
         server = ServerBleGatt.create(
             context = context,
+            scope = scope,
             config = arrayOf(uartService, batteryService),
             mock = device
         )
@@ -105,27 +106,30 @@ class UartServer @Inject constructor(
         txCharacteristic = glsService.findCharacteristic(UART_TX_CHARACTERISTIC_UUID)!!
 
         rxCharacteristic.value.onEach {
-            txCharacteristic.setValue(it)
+            send(txCharacteristic, it)
         }.launchIn(scope)
 
         val batteryService = connection.services.findService(BATTERY_SERVICE_UUID)!!
-        batteryLevelCharacteristic = batteryService.findCharacteristic(
-            BATTERY_LEVEL_CHARACTERISTIC_UUID
-        )!!
+        batteryLevelCharacteristic = batteryService
+            .findCharacteristic(BATTERY_LEVEL_CHARACTERISTIC_UUID)!!
 
-        startBatteryService(connection)
+        startBatteryService()
     }
 
-    private fun startBatteryService(connection: ServerBluetoothGattConnection) {
+    private fun startBatteryService() {
         scope.launch {
             repeat(100) {
-                batteryLevelCharacteristic.setValue(DataByteArray.from(0x61))
+                send(batteryLevelCharacteristic, DataByteArray.from(0x61))
                 delay(STANDARD_DELAY)
-                batteryLevelCharacteristic.setValue(DataByteArray.from(0x60))
+                send(batteryLevelCharacteristic, DataByteArray.from(0x60))
                 delay(STANDARD_DELAY)
-                batteryLevelCharacteristic.setValue(DataByteArray.from(0x5F))
+                send(batteryLevelCharacteristic, DataByteArray.from(0x5F))
                 delay(STANDARD_DELAY)
             }
         }
+    }
+
+    private suspend fun send(characteristics: ServerBleGattCharacteristic, data: DataByteArray) {
+        characteristics.setValueAndNotifyClient(data)
     }
 }

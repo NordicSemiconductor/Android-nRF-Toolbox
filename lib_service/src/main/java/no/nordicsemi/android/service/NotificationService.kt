@@ -38,6 +38,7 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
@@ -81,7 +82,7 @@ abstract class NotificationService : LifecycleService() {
         // when the activity rebinds to the service, remove the notification and stop the foreground service
         // on devices running Android 8.0 (Oreo) or above
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            stopForeground(true)
+            stopForeground(STOP_FOREGROUND_REMOVE)
         } else {
             cancelNotification()
         }

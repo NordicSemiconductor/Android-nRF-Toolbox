@@ -40,6 +40,8 @@ android {
 
 dependencies {
     implementation(libs.nordic.navigation)
+
     implementation(libs.nordic.blek.uiscanner)
+
     implementation(libs.kotlinx.coroutines.core)
 }

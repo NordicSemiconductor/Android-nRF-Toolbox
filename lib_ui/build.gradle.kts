@@ -43,13 +43,13 @@ android {
 
 dependencies {
     implementation(libs.nordic.uilogger)
-
     implementation(libs.nordic.theme)
+    implementation(libs.nordic.logger)
 
+    implementation(libs.nordic.blek.client)
+
+    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.nordic.blek.client)
-    implementation(libs.nordic.logger)
 }
