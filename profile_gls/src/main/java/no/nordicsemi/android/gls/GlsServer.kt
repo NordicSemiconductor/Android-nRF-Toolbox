@@ -2,6 +2,7 @@ package no.nordicsemi.android.gls
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.ParcelUuid
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -21,6 +22,7 @@ import no.nordicsemi.android.gls.main.viewmodel.RACP_CHARACTERISTIC
 import no.nordicsemi.android.kotlin.ble.advertiser.BleAdvertiser
 import no.nordicsemi.android.kotlin.ble.core.MockServerDevice
 import no.nordicsemi.android.kotlin.ble.core.advertiser.BleAdvertisingConfig
+import no.nordicsemi.android.kotlin.ble.core.advertiser.BleAdvertisingData
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattPermission
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattProperty
 import no.nordicsemi.android.kotlin.ble.profile.gls.RecordAccessControlPointInputParser
@@ -41,7 +43,7 @@ class GlsServer @Inject constructor(
     private val scope: CoroutineScope,
     @ApplicationContext
     private val context: Context,
-    private val logger: BleLogger = DefaultConsoleLogger(context)
+    private val logger: BleLogger = DefaultConsoleLogger(context),
 ) {
 
     private lateinit var server: ServerBleGatt
@@ -150,7 +152,7 @@ class GlsServer @Inject constructor(
         context: Context,
         device: MockServerDevice = MockServerDevice(
             name = "GLS Server",
-            address = "55:44:33:22:11"
+            address = "11:22:33:44:55:66"
         ),
     ) = scope.launch {
         val gmCharacteristic = ServerBleGattCharacteristicConfig(
@@ -198,7 +200,10 @@ class GlsServer @Inject constructor(
         )
 
         val advertiser = BleAdvertiser.create(context)
-        advertiser.advertise(config = BleAdvertisingConfig(), mock = device).launchIn(scope)
+        advertiser.advertise(
+            config = BleAdvertisingConfig(advertiseData = BleAdvertisingData(serviceUuid = ParcelUuid(GLS_SERVICE_UUID))),
+            mock = device
+        ).launchIn(scope)
 
         launch {
             server.connections
@@ -231,6 +236,7 @@ class GlsServer @Inject constructor(
     private fun startGlsService() {
         racpCharacteristic.value
             .onEach { lastRequest = it }
+            .onEach { continueWithResponse() } //comment to make tests working
             .launchIn(scope)
     }
 
@@ -247,10 +253,12 @@ class GlsServer @Inject constructor(
                 }
                 racpCharacteristic.setValueAndNotifyClient(SUCCESS)
             }
+
             RecordAccessControlPointInputParser.reportLastStoredRecord() -> {
                 send(glsCharacteristic, records.last())
                 send(racpCharacteristic, SUCCESS)
             }
+
             RecordAccessControlPointInputParser.reportFirstStoredRecord() -> {
                 send(glsCharacteristic, records.first())
                 send(racpCharacteristic, SUCCESS)

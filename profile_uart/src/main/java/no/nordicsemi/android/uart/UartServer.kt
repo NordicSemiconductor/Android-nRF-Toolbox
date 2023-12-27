@@ -2,6 +2,7 @@ package no.nordicsemi.android.uart
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.ParcelUuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
@@ -12,6 +13,7 @@ import no.nordicsemi.android.common.core.DataByteArray
 import no.nordicsemi.android.kotlin.ble.advertiser.BleAdvertiser
 import no.nordicsemi.android.kotlin.ble.core.MockServerDevice
 import no.nordicsemi.android.kotlin.ble.core.advertiser.BleAdvertisingConfig
+import no.nordicsemi.android.kotlin.ble.core.advertiser.BleAdvertisingData
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattPermission
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattProperty
 import no.nordicsemi.android.kotlin.ble.server.main.ServerBleGatt
@@ -33,7 +35,7 @@ private const val STANDARD_DELAY = 1000L
 @SuppressLint("MissingPermission")
 @Singleton
 class UartServer @Inject constructor(
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
 ) {
 
     private lateinit var server: ServerBleGatt
@@ -46,7 +48,7 @@ class UartServer @Inject constructor(
         context: Context,
         device: MockServerDevice = MockServerDevice(
             name = "UART Server",
-            address = "55:44:33:22:11"
+            address = "66:55:44:33:22:11"
         ),
     ) = scope.launch {
         val rxCharacteristic = ServerBleGattCharacteristicConfig(
@@ -87,7 +89,13 @@ class UartServer @Inject constructor(
         )
 
         val advertiser = BleAdvertiser.create(context)
-        advertiser.advertise(config = BleAdvertisingConfig(), mock = device).launchIn(scope)
+        advertiser.advertise(
+            config = BleAdvertisingConfig(
+                advertiseData = BleAdvertisingData(
+                    serviceUuid = ParcelUuid(UART_SERVICE_UUID)
+                )
+            ), mock = device
+        ).launchIn(scope)
 
         launch {
             server.connections
