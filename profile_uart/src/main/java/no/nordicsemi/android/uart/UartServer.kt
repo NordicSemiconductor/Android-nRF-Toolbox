@@ -47,7 +47,7 @@ class UartServer @Inject constructor(
     fun start(
         context: Context,
         device: MockServerDevice = MockServerDevice(
-            name = "UART Server",
+            name = "Mock UART Server",
             address = "66:55:44:33:22:11"
         ),
     ) = scope.launch {
