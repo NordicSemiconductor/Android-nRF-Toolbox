@@ -23,6 +23,7 @@ import no.nordicsemi.android.kotlin.ble.advertiser.BleAdvertiser
 import no.nordicsemi.android.kotlin.ble.core.MockServerDevice
 import no.nordicsemi.android.kotlin.ble.core.advertiser.BleAdvertisingConfig
 import no.nordicsemi.android.kotlin.ble.core.advertiser.BleAdvertisingData
+import no.nordicsemi.android.kotlin.ble.core.advertiser.BleAdvertisingSettings
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattPermission
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattProperty
 import no.nordicsemi.android.kotlin.ble.profile.gls.RecordAccessControlPointInputParser
@@ -39,7 +40,7 @@ private const val STANDARD_DELAY = 1000L
 
 @SuppressLint("MissingPermission")
 @Singleton
-class GlsServer @Inject constructor(
+class GLSServer @Inject constructor(
     private val scope: CoroutineScope,
     @ApplicationContext
     private val context: Context,
@@ -151,8 +152,8 @@ class GlsServer @Inject constructor(
     fun start(
         context: Context,
         device: MockServerDevice = MockServerDevice(
-            name = "GLS Server",
-            address = "11:22:33:44:55:66"
+            name = "Mock Glucose Server",
+            address = "AA:BB:CC:DD:EE:FF"
         ),
     ) = scope.launch {
         val gmCharacteristic = ServerBleGattCharacteristicConfig(
@@ -199,11 +200,20 @@ class GlsServer @Inject constructor(
             logger = { _, log -> println(log) }
         )
 
-        val advertiser = BleAdvertiser.create(context)
-        advertiser.advertise(
-            config = BleAdvertisingConfig(advertiseData = BleAdvertisingData(serviceUuid = ParcelUuid(GLS_SERVICE_UUID))),
-            mock = device
-        ).launchIn(scope)
+        BleAdvertiser.create(context)
+            .advertise(
+                config = BleAdvertisingConfig(
+                    settings = BleAdvertisingSettings(
+                        deviceName = "Glucose",
+                        legacyMode = true,
+                    ),
+                    advertiseData = BleAdvertisingData(
+                        includeDeviceName = true,
+                        serviceUuid = ParcelUuid(GLS_SERVICE_UUID),
+                    )
+                ),
+                mock = device)
+            .launchIn(scope)
 
         launch {
             server.connections

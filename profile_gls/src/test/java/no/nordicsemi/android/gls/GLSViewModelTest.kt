@@ -74,7 +74,7 @@ internal class GLSViewModelTest {
 
     lateinit var viewModel: GLSViewModel
 
-    lateinit var glsServer: GlsServer
+    lateinit var glsServer: GLSServer
 
     private val device = MockServerDevice(
         name = "GLS Server",
@@ -112,7 +112,7 @@ internal class GLSViewModelTest {
             }))
             justRun { viewModel.logAnalytics(any()) }
 
-            glsServer = GlsServer(CoroutineScope(UnconfinedTestDispatcher()), context, logger)
+            glsServer = GLSServer(CoroutineScope(UnconfinedTestDispatcher()), context, logger)
             glsServer.start(spyk(), device)
         }
     }
