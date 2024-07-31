@@ -51,7 +51,7 @@ internal class CommentVisitor : Visitor {
             val element = node.node
             val builder =
                 StringBuilder("A configuration must have 9 commands, one for each button.\n        Possible icons are:")
-            for (icon in MacroIcon.values()) builder.append("\n          - ")
+             for (icon in MacroIcon.entries) builder.append("\n          - ")
                 .append(icon.toString())
             element.comment = builder.toString()
         }
