@@ -32,9 +32,10 @@
 package no.nordicsemi.android.gls.main.viewmodel
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.content.Context
 import android.os.ParcelUuid
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -85,7 +86,7 @@ import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import no.nordicsemi.android.ui.view.StringConst
 import no.nordicsemi.android.utils.tryOrLog
 import timber.log.Timber
-import java.util.UUID
+import java.util.*
 import javax.inject.Inject
 
 val GLS_SERVICE_UUID: UUID = UUID.fromString("00001808-0000-1000-8000-00805f9b34fb")
@@ -105,10 +106,10 @@ internal class GLSViewModel @Inject constructor(
     private val navigationManager: Navigator,
     private val analytics: AppAnalytics,
     private val stringConst: StringConst,
-) : ViewModel() {
+) : AndroidViewModel(context as Application) {
 
     private var client: ClientBleGatt? = null
-    private var logger: nRFLoggerTree? = null
+    private lateinit var logger: nRFLoggerTree
 
     private lateinit var glucoseMeasurementCharacteristic: ClientBleGattCharacteristic
     private lateinit var recordAccessControlPointCharacteristic: ClientBleGattCharacteristic
@@ -136,7 +137,7 @@ internal class GLSViewModel @Inject constructor(
 
     fun onEvent(event: GLSScreenViewEvent) {
         when (event) {
-            OpenLoggerEvent -> LoggerLauncher.launch(context, logger?.session as? LogSession)
+            OpenLoggerEvent -> LoggerLauncher.launch(context, logger.session as? LogSession)
             is OnWorkingModeSelected -> onEvent(event)
             is OnGLSRecordClick -> navigateToDetails(event.record)
             DisconnectEvent -> onDisconnectEvent()
@@ -169,7 +170,7 @@ internal class GLSViewModel @Inject constructor(
         _state.value = _state.value.copy(deviceName = device.name)
         initLogger(device)
 
-        val client = ClientBleGatt.connect(context, device, viewModelScope)
+        val client = ClientBleGatt.connect(getApplication(), device, viewModelScope)
         this@GLSViewModel.client = client
 
         client.waitForBonding()
@@ -334,7 +335,7 @@ internal class GLSViewModel @Inject constructor(
     }
 
     private fun initLogger(device: ServerDevice) {
-        logger?.let { Timber.uproot(it) }
+        logger.let { Timber.uproot(it) }
         logger = nRFLoggerTree(context, stringConst.APP_NAME, "GLS", device.address)
             .also { Timber.plant(it) }
     }
