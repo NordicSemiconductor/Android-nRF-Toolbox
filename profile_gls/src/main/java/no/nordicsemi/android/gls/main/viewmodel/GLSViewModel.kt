@@ -50,7 +50,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
-import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
+import no.nordicsemi.android.common.logger.LoggerLauncher
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.gls.GlsDetailsDestinationId
@@ -80,10 +80,12 @@ import no.nordicsemi.android.kotlin.ble.profile.gls.data.RequestStatus
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.ResponseData
 import no.nordicsemi.android.kotlin.ble.profile.racp.RACPOpCode
 import no.nordicsemi.android.kotlin.ble.profile.racp.RACPResponseCode
+import no.nordicsemi.android.log.LogSession
+import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
-import no.nordicsemi.android.ui.view.NordicLoggerFactory
 import no.nordicsemi.android.ui.view.StringConst
 import no.nordicsemi.android.utils.tryOrLog
+import timber.log.Timber
 import java.util.*
 import javax.inject.Inject
 
@@ -100,15 +102,14 @@ val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000
 @SuppressLint("MissingPermission")
 @HiltViewModel
 internal class GLSViewModel @Inject constructor(
-    @ApplicationContext context: Context,
+    @ApplicationContext private val context: Context,
     private val navigationManager: Navigator,
     private val analytics: AppAnalytics,
     private val stringConst: StringConst,
-    private val loggerFactory: NordicLoggerFactory
 ) : AndroidViewModel(context as Application) {
 
     private var client: ClientBleGatt? = null
-    private lateinit var logger: BleLoggerAndLauncher
+    private lateinit var logger: nRFLoggerTree
 
     private lateinit var glucoseMeasurementCharacteristic: ClientBleGattCharacteristic
     private lateinit var recordAccessControlPointCharacteristic: ClientBleGattCharacteristic
@@ -136,7 +137,7 @@ internal class GLSViewModel @Inject constructor(
 
     fun onEvent(event: GLSScreenViewEvent) {
         when (event) {
-            OpenLoggerEvent -> logger.launch()
+            OpenLoggerEvent -> LoggerLauncher.launch(context, logger.session as? LogSession)
             is OnWorkingModeSelected -> onEvent(event)
             is OnGLSRecordClick -> navigateToDetails(event.record)
             DisconnectEvent -> onDisconnectEvent()
@@ -167,6 +168,7 @@ internal class GLSViewModel @Inject constructor(
 
     private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
         _state.value = _state.value.copy(deviceName = device.name)
+        initLogger(device)
 
         logger = loggerFactory.createNordicLogger(getApplication(), stringConst.APP_NAME, "GLS", device.address)
 
@@ -332,5 +334,11 @@ internal class GLSViewModel @Inject constructor(
             e.printStackTrace()
             _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.FAILED)
         }
+    }
+
+    private fun initLogger(device: ServerDevice) {
+        logger.let { Timber.uproot(it) }
+        logger = nRFLoggerTree(context, stringConst.APP_NAME, "GLS", device.address)
+            .also { Timber.plant(it) }
     }
 }
