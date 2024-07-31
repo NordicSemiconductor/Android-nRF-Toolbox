@@ -34,7 +34,6 @@ package no.nordicsemi.android.nrftoolbox.view
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -69,7 +68,6 @@ private const val DFU_LINK = "https://play.google.com/store/apps/details?id=no.n
 
 private const val LOGGER_PACKAGE_NAME = "no.nordicsemi.android.log"
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen() {
     val viewModel: HomeViewModel = hiltViewModel()
