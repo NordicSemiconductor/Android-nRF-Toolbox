@@ -132,7 +132,7 @@ internal class CGMService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        val client = ClientBleGatt.connect(this@CGMService, device, lifecycleScope, logger = { p, s -> repository.log(p, s) })
+        val client = ClientBleGatt.connect(this@CGMService, device, lifecycleScope)
         this@CGMService.client = client
 
         client.connectionStateWithStatus

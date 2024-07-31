@@ -170,9 +170,7 @@ internal class GLSViewModel @Inject constructor(
         _state.value = _state.value.copy(deviceName = device.name)
         initLogger(device)
 
-        logger = loggerFactory.createNordicLogger(getApplication(), stringConst.APP_NAME, "GLS", device.address)
-
-        val client = ClientBleGatt.connect(getApplication(), device, viewModelScope, logger = logger)
+        val client = ClientBleGatt.connect(getApplication(), device, viewModelScope)
         this@GLSViewModel.client = client
 
         client.waitForBonding()

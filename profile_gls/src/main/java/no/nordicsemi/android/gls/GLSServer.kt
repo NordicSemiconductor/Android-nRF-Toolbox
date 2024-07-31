@@ -191,7 +191,6 @@ class GLSServer @Inject constructor(
             config = arrayOf(serviceConfig, batteryService),
             mock = device,
             scope = scope,
-            logger = { _, log -> println(log) }
         )
 
         BleAdvertiser.create(context)
