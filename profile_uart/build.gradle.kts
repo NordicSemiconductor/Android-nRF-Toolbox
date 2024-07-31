@@ -52,6 +52,7 @@ dependencies {
 
     implementation(libs.nordic.core)
     implementation(libs.nordic.theme)
+    implementation(libs.nordic.ui)
     implementation(libs.nordic.navigation)
     implementation(libs.nordic.logger)
 
