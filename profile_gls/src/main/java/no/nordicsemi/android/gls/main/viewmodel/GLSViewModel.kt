@@ -86,7 +86,7 @@ import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import no.nordicsemi.android.ui.view.StringConst
 import no.nordicsemi.android.utils.tryOrLog
 import timber.log.Timber
-import java.util.*
+import java.util.UUID
 import javax.inject.Inject
 
 val GLS_SERVICE_UUID: UUID = UUID.fromString("00001808-0000-1000-8000-00805f9b34fb")
@@ -109,7 +109,7 @@ internal class GLSViewModel @Inject constructor(
 ) : AndroidViewModel(context as Application) {
 
     private var client: ClientBleGatt? = null
-    private lateinit var logger: nRFLoggerTree
+    private var logger: nRFLoggerTree? = null
 
     private lateinit var glucoseMeasurementCharacteristic: ClientBleGattCharacteristic
     private lateinit var recordAccessControlPointCharacteristic: ClientBleGattCharacteristic
@@ -137,7 +137,7 @@ internal class GLSViewModel @Inject constructor(
 
     fun onEvent(event: GLSScreenViewEvent) {
         when (event) {
-            OpenLoggerEvent -> LoggerLauncher.launch(context, logger.session as? LogSession)
+            OpenLoggerEvent -> LoggerLauncher.launch(context, logger?.session as? LogSession)
             is OnWorkingModeSelected -> onEvent(event)
             is OnGLSRecordClick -> navigateToDetails(event.record)
             DisconnectEvent -> onDisconnectEvent()
@@ -335,7 +335,7 @@ internal class GLSViewModel @Inject constructor(
     }
 
     private fun initLogger(device: ServerDevice) {
-        logger.let { Timber.uproot(it) }
+        logger?.let { Timber.uproot(it) }
         logger = nRFLoggerTree(context, stringConst.APP_NAME, "GLS", device.address)
             .also { Timber.plant(it) }
     }
