@@ -95,7 +95,7 @@ internal class BPSViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     private var client: ClientBleGatt? = null
-    private lateinit var logger: nRFLoggerTree
+    private var logger: nRFLoggerTree? = null
 
     init {
         navigationManager.navigateTo(ScannerDestinationId, ParcelUuid(BPS_SERVICE_UUID))
@@ -115,7 +115,7 @@ internal class BPSViewModel @Inject constructor(
     fun onEvent(event: BPSViewEvent) {
         when (event) {
             DisconnectEvent -> onDisconnectEvent()
-            OpenLoggerEvent -> LoggerLauncher.launch(context, logger.session as? LogSession)
+            OpenLoggerEvent -> LoggerLauncher.launch(context, logger?.session as? LogSession)
         }
     }
 
@@ -125,7 +125,7 @@ internal class BPSViewModel @Inject constructor(
     }
 
     private fun initLogger(device: ServerDevice) {
-        logger.let { Timber.uproot(it) }
+        logger?.let { Timber.uproot(it) }
         logger = nRFLoggerTree(context, stringConst.APP_NAME, "BPS", device.address)
             .also { Timber.plant(it) }
     }
