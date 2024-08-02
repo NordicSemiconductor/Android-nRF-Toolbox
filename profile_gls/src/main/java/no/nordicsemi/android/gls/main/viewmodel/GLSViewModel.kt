@@ -32,10 +32,9 @@
 package no.nordicsemi.android.gls.main.viewmodel
 
 import android.annotation.SuppressLint
-import android.app.Application
 import android.content.Context
 import android.os.ParcelUuid
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -106,7 +105,7 @@ internal class GLSViewModel @Inject constructor(
     private val navigationManager: Navigator,
     private val analytics: AppAnalytics,
     private val stringConst: StringConst,
-) : AndroidViewModel(context as Application) {
+) : ViewModel() {
 
     private var client: ClientBleGatt? = null
     private var logger: nRFLoggerTree? = null
@@ -170,7 +169,7 @@ internal class GLSViewModel @Inject constructor(
         _state.value = _state.value.copy(deviceName = device.name)
         initLogger(device)
 
-        val client = ClientBleGatt.connect(getApplication(), device, viewModelScope)
+        val client = ClientBleGatt.connect(context, device, viewModelScope)
         this@GLSViewModel.client = client
 
         client.waitForBonding()
