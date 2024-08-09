@@ -31,8 +31,9 @@
 
 package no.nordicsemi.android.hts.view
 
-import no.nordicsemi.android.common.theme.view.RadioButtonItem
-import no.nordicsemi.android.common.theme.view.RadioGroupViewEntity
+import no.nordicsemi.android.common.ui.view.RadioButtonItem
+import no.nordicsemi.android.common.ui.view.RadioGroupViewEntity
+import java.util.Locale
 
 private const val DISPLAY_FAHRENHEIT = "°F"
 private const val DISPLAY_CELSIUS = "°C"
@@ -40,9 +41,9 @@ private const val DISPLAY_KELVIN = "°K"
 
 internal fun displayTemperature(value: Float, temperatureUnit: TemperatureUnit): String {
     return when (temperatureUnit) {
-        TemperatureUnit.CELSIUS -> String.format("%.1f °C", value)
-        TemperatureUnit.FAHRENHEIT -> String.format("%.1f °F", value * 1.8f + 32f)
-        TemperatureUnit.KELVIN -> String.format("%.1f °K", value + 273.15f)
+        TemperatureUnit.CELSIUS -> String.format(Locale.US, "%.1f °C", value)
+        TemperatureUnit.FAHRENHEIT -> String.format(Locale.US, "%.1f °F", value * 1.8f + 32f)
+        TemperatureUnit.KELVIN -> String.format(Locale.US, "%.1f °K", value + 273.15f)
     }
 }
 
@@ -57,11 +58,14 @@ internal fun String.toTemperatureUnit(): TemperatureUnit {
 
 internal fun TemperatureUnit.temperatureSettingsItems(): RadioGroupViewEntity {
     return RadioGroupViewEntity(
-        TemperatureUnit.values().map { createRadioButtonItem(it, this) }
+        TemperatureUnit.entries.map { createRadioButtonItem(it, this) }
     )
 }
 
-private fun createRadioButtonItem(unit: TemperatureUnit, selectedTemperatureUnit: TemperatureUnit): RadioButtonItem {
+private fun createRadioButtonItem(
+    unit: TemperatureUnit,
+    selectedTemperatureUnit: TemperatureUnit
+): RadioButtonItem {
     return RadioButtonItem(displayTemperature(unit), unit == selectedTemperatureUnit)
 }
 

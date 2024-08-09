@@ -34,12 +34,21 @@ package no.nordicsemi.android.uart.view
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -52,9 +61,9 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.common.theme.view.RadioButtonGroup
-import no.nordicsemi.android.common.theme.view.RadioButtonItem
-import no.nordicsemi.android.common.theme.view.RadioGroupViewEntity
+import no.nordicsemi.android.common.ui.view.RadioButtonGroup
+import no.nordicsemi.android.common.ui.view.RadioButtonItem
+import no.nordicsemi.android.common.ui.view.RadioGroupViewEntity
 import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.uart.data.MacroEol
 import no.nordicsemi.android.uart.data.MacroIcon
@@ -67,7 +76,7 @@ private const val GRID_SIZE = 5
 internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (UARTViewEvent) -> Unit) {
     val newLineChar = rememberSaveable { mutableStateOf(macro?.newLineChar ?: MacroEol.LF) }
     val command = rememberSaveable { mutableStateOf(macro?.command ?: String.EMPTY) }
-    val selectedIcon = rememberSaveable { mutableStateOf(macro?.icon ?: MacroIcon.values()[0]) }
+    val selectedIcon = rememberSaveable { mutableStateOf(macro?.icon ?: MacroIcon.entries.toTypedArray()[0]) }
 
     AlertDialog(
         onDismissRequest = { onEvent(OnEditFinish) },
@@ -130,7 +139,6 @@ internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (UARTViewEvent) -> U
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CommandInput(command: MutableState<String>) {
     Column {
@@ -150,7 +158,7 @@ private fun CommandInput(command: MutableState<String>) {
 
 @Composable
 private fun NewLineCharSection(checkedItem: MacroEol, onItemClick: (MacroEol) -> Unit) {
-    val items = MacroEol.values().map {
+    val items = MacroEol.entries.map {
         RadioButtonItem(it.toDisplayString(), it == checkedItem)
     }
     val viewEntity = RadioGroupViewEntity(items)

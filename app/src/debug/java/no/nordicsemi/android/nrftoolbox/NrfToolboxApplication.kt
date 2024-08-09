@@ -37,6 +37,7 @@ import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.AppOpenEvent
 import no.nordicsemi.android.gls.GLSServer
 import no.nordicsemi.android.uart.UartServer
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -58,5 +59,7 @@ class NrfToolboxApplication : Application() {
 
         uartServer.start(this)
         glsServer.start(this)
+
+        Timber.plant(Timber.DebugTree())
     }
 }

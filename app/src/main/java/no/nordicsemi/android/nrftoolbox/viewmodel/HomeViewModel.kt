@@ -114,7 +114,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun openLogger() {
-        LoggerLauncher.launch(context)
+        LoggerLauncher.launch(context, null)
     }
 
     fun logEvent(event: ProfileOpenEvent) {

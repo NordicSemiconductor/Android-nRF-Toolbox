@@ -52,8 +52,9 @@ dependencies {
 
     implementation(libs.nordic.core)
     implementation(libs.nordic.theme)
+    implementation(libs.nordic.ui)
     implementation(libs.nordic.navigation)
-    implementation(libs.nordic.uilogger)
+    implementation(libs.nordic.logger)
 
     implementation(libs.nordic.blek.client)
     implementation(libs.nordic.blek.profile)
@@ -66,18 +67,19 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
-    implementation(libs.accompanist.pager)
-    implementation(libs.accompanist.pagerindicators)
-
     implementation(libs.androidx.dataStore.core)
     implementation(libs.androidx.dataStore.preferences)
-    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.service)
 
     implementation(libs.androidx.hilt.navigation.compose)
+
+
+    // Timber & SLF4J
+    implementation (libs.slf4j.timber)
+    implementation(libs.nordic.log.timber)
 
     testImplementation(libs.hilt.android.testing)
     kaptTest(libs.hilt.compiler)
@@ -87,7 +89,7 @@ dependencies {
     testImplementation(libs.test.mockk)
     testImplementation(libs.androidx.test.ext)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.test.slf4j.simple)
+    testImplementation(libs.slf4j.simple)
     testImplementation(libs.test.robolectric)
     testImplementation(libs.kotlin.junit)
 

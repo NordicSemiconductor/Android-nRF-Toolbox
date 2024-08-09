@@ -61,7 +61,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.nrftoolbox.R
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeatureButton(
     @DrawableRes iconId: Int,
