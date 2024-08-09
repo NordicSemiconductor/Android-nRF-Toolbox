@@ -49,7 +49,7 @@ internal class HomeViewModel @Inject constructor(
         startScanning()
     }
 
-    private fun startScanning() {
+    fun startScanning() {
         _state.value = _state.value.copy(isScanning = true)
         job = centralManager.scan(5000.milliseconds)
             .distinctByPeripheral()
