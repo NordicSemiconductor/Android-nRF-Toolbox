@@ -1,11 +1,9 @@
 package no.nordicsemi.android.nrftoolbox.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -38,16 +36,10 @@ data class HomeViewState(
 internal class HomeViewModel @Inject constructor(
     private val centralManager: CentralManager,
     private val navigator: Navigator,
-    private val scope: CoroutineScope,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeViewState())
     val viewState = _state.asStateFlow()
     private var job: Job? = null
-    private var connectionScope: CoroutineScope? = null
-
-    init {
-        startScanning()
-    }
 
     fun startScanning() {
         _state.value = _state.value.copy(isScanning = true)
@@ -68,7 +60,7 @@ internal class HomeViewModel @Inject constructor(
                     isScanning = false,
                 )
             }
-            .launchIn(scope)
+            .launchIn(viewModelScope)
     }
 
     private fun checkForExistingDevice(peripheral: Peripheral) {
@@ -91,53 +83,48 @@ internal class HomeViewModel @Inject constructor(
         }
     }
 
-    fun connect(peripheral: Peripheral, autoConnect: Boolean = false) {
+    fun connect(peripheral: Peripheral, autoConnect: Boolean = false) = viewModelScope.launch {
         stopScanning()
-        connectionScope = CoroutineScope(context = Dispatchers.IO).apply {
-            launch {
-                centralManager.connect(
-                    peripheral = peripheral,
-                    options = if (autoConnect) {
-                        CentralManager.ConnectionOptions.AutoConnect
-                    } else CentralManager.ConnectionOptions.Default
-                )
-                peripheral.state
-                    .onEach {
-                        if (it == ConnectionState.Connected) {
-                            peripheral.services().onEach { remoteServices ->
-                                remoteServices.forEach { remoteService ->
-                                    when (remoteService.uuid) {
-                                        HTS_SERVICE_UUID -> {
-                                            // HTS service found
-                                            // Navigate to the HTS screen.
-                                            navigator.navigateTo(
-                                                HTSDestinationId, Profile.HTS(
-                                                    MockRemoteService(
-                                                        remoteService,
-                                                        peripheral.state,
-                                                        peripheral,
-                                                    )
-                                                )
+        centralManager.connect(
+            peripheral = peripheral,
+            options = if (autoConnect) {
+                CentralManager.ConnectionOptions.AutoConnect
+            } else CentralManager.ConnectionOptions.Default
+        )
+        peripheral.state
+            .onEach {
+                if (it == ConnectionState.Connected) {
+                    peripheral.services().onEach { remoteServices ->
+                        remoteServices.forEach { remoteService ->
+                            when (remoteService.uuid) {
+                                HTS_SERVICE_UUID -> {
+                                    // HTS service found
+                                    // Navigate to the HTS screen.
+                                    navigator.navigateTo(
+                                        HTSDestinationId, Profile.HTS(
+                                            MockRemoteService(
+                                                remoteService,
+                                                peripheral.state,
+                                                peripheral,
                                             )
-                                            connectionScope?.cancel()
-                                        }
-
-                                        BPS_SERVICE_UUID -> {
-                                            Timber.tag("BBB").d("BPS Service found.")
-                                            // BPS service found
-                                            // Navigate to the BPS screen.
-                                        }
-                                    }
+                                        )
+                                    )
+                                    job?.cancel()
                                 }
-                            }.launchIn(this)
+
+                                BPS_SERVICE_UUID -> {
+                                    Timber.tag("BBB").d("BPS Service found.")
+                                    // BPS service found
+                                    // Navigate to the BPS screen.
+                                }
+                            }
                         }
-                    }
-                    .onCompletion {
-                        connectionScope?.cancel()
-                    }
-                    .launchIn(this)
+                    }.launchIn(this)
+                }
             }
-        }
+            .catch { e -> Timber.e(e) }
+            .launchIn(this)
+
     }
 
     private fun closeCentralManager() {

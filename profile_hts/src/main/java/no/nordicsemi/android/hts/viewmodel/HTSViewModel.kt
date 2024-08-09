@@ -3,17 +3,14 @@ package no.nordicsemi.android.hts.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.parcelize.RawValue
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
 import no.nordicsemi.android.hts.HTSDestinationId
@@ -54,7 +51,6 @@ internal data class OnTemperatureUnitSelectedEvent(
 internal class HTSViewModel @Inject constructor(
     private val navigator: Navigator,
     savedStateHandle: SavedStateHandle,
-    private val scope: CoroutineScope,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
     private val htsParam = parameterOf(HTSDestinationId).remoteService
     private val _viewState: MutableStateFlow<HTSServiceData> =
@@ -78,13 +74,14 @@ internal class HTSViewModel @Inject constructor(
     fun onEvent(event: HtsClickEvent) {
         when (event) {
             is HtsClickEventBack, is DisconnectClickEvent -> {
-                scope.launch {
-                    // Disconnect from the device
-                    htsParam.serviceData?.owner?.disconnect()
+                viewModelScope.launch {
                     // Navigate back
-                    disconnect(htsParam.peripheral!!)
+                    try {
+                        disconnect(htsParam.peripheral!!)
+                    } catch (e: Exception) {
+                        Timber.e(e)
+                    }
                     navigator.navigateUp()
-                    scope.cancel()
                 }
             }
 
@@ -100,7 +97,7 @@ internal class HTSViewModel @Inject constructor(
         }
     }
 
-    private suspend fun discoverService(remoteService: @RawValue RemoteService) {
+    private suspend fun discoverService(remoteService: RemoteService) {
         remoteService.owner?.services()
             ?.onEach { services ->
                 handleServiceDiscovery(
@@ -114,11 +111,8 @@ internal class HTSViewModel @Inject constructor(
                     ::handleBatteryLevel
                 )
             }
-            ?.onCompletion {
-                scope.cancel()
-            }
             ?.catch { e -> Timber.e(e) }
-            ?.launchIn(scope)
+            ?.launchIn(viewModelScope)
     }
 
     private suspend fun handleServiceDiscovery(
