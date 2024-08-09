@@ -1,125 +1,171 @@
-/*
- * Copyright (c) 2022, Nordic Semiconductor
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification, are
- * permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this list of
- * conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice, this list
- * of conditions and the following disclaimer in the documentation and/or other materials
- * provided with the distribution.
- *
- * 3. Neither the name of the copyright holder nor the names of its contributors may be
- * used to endorse or promote products derived from this software without specific prior
- * written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
- * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
- * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
- * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 package no.nordicsemi.android.hts.viewmodel
 
-import android.os.ParcelUuid
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.analytics.AppAnalytics
-import no.nordicsemi.android.analytics.Profile
-import no.nordicsemi.android.analytics.ProfileConnectedEvent
-import no.nordicsemi.android.common.navigation.NavigationResult
+import kotlinx.parcelize.RawValue
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.hts.repository.HTSRepository
-import no.nordicsemi.android.hts.repository.HTS_SERVICE_UUID
-import no.nordicsemi.android.hts.view.DisconnectEvent
-import no.nordicsemi.android.hts.view.HTSScreenViewEvent
-import no.nordicsemi.android.hts.view.NavigateUp
-import no.nordicsemi.android.hts.view.OnTemperatureUnitSelected
-import no.nordicsemi.android.hts.view.OpenLoggerEvent
-import no.nordicsemi.android.kotlin.ble.core.ServerDevice
-import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
-import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
+import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
+import no.nordicsemi.android.hts.HTSDestinationId
+import no.nordicsemi.android.hts.data.BatteryLevelParser
+import no.nordicsemi.android.hts.data.HTSDataParser
+import no.nordicsemi.android.hts.data.HTSServiceData
+import no.nordicsemi.android.hts.view.TemperatureUnit
+import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
+import no.nordicsemi.kotlin.ble.client.RemoteService
+import no.nordicsemi.kotlin.ble.client.android.Peripheral
+import timber.log.Timber
+import java.util.UUID
 import javax.inject.Inject
 
+private val HTS_MEASUREMENT_CHARACTERISTIC_UUID: UUID =
+    UUID.fromString("00002A1C-0000-1000-8000-00805f9b34fb")
+
+private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
+private val BATTERY_LEVEL_CHARACTERISTIC_UUID =
+    UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
+
+internal interface HtsClickEvent
+
+internal data object HtsClickEventBack : HtsClickEvent
+
+internal data object DisconnectClickEvent : HtsClickEvent
+
+internal data object LoggersClickEvent : HtsClickEvent
+
+internal data class OnTemperatureUnitSelectedEvent(
+    val value: TemperatureUnit = TemperatureUnit.CELSIUS,
+) : HtsClickEvent
+
+/**
+ * ViewModel for the Health Thermometer Service.
+ */
 @HiltViewModel
 internal class HTSViewModel @Inject constructor(
-    private val repository: HTSRepository,
-    private val navigationManager: Navigator,
-    private val analytics: AppAnalytics
-) : ViewModel() {
-
-    val state = repository.data
+    private val navigator: Navigator,
+    savedStateHandle: SavedStateHandle,
+    private val scope: CoroutineScope,
+) : SimpleNavigationViewModel(navigator, savedStateHandle) {
+    private val htsParam = parameterOf(HTSDestinationId).remoteService
+    private val _viewState: MutableStateFlow<HTSServiceData> =
+        MutableStateFlow(HTSServiceData())
+    val viewState = _viewState.asStateFlow()
 
     init {
-        repository.setOnScreen(true)
-
         viewModelScope.launch {
-            if (repository.isRunning.firstOrNull() == false) {
-                requestBluetoothDevice()
-            }
+            htsParam
+                .serviceData?.let { remoteService ->
+                    discoverService(remoteService)
+                }
+            htsParam.connectionState
+                ?.onEach {
+                    _viewState.value = _viewState.value.copy(connectionState = it)
+                }
+                ?.launchIn(viewModelScope)
         }
-
-        repository.data.onEach {
-            if (it.connectionState?.state == GattConnectionState.STATE_CONNECTED) {
-                analytics.logEvent(ProfileConnectedEvent(Profile.HTS))
-            }
-        }.launchIn(viewModelScope)
     }
 
-    private fun requestBluetoothDevice() {
-        navigationManager.navigateTo(ScannerDestinationId, ParcelUuid(HTS_SERVICE_UUID))
+    fun onEvent(event: HtsClickEvent) {
+        when (event) {
+            is HtsClickEventBack, is DisconnectClickEvent -> {
+                scope.launch {
+                    // Disconnect from the device
+                    htsParam.serviceData?.owner?.disconnect()
+                    // Navigate back
+                    disconnect(htsParam.peripheral!!)
+                    navigator.navigateUp()
+                    scope.cancel()
+                }
+            }
 
-        navigationManager.resultFrom(ScannerDestinationId)
-            .onEach { handleResult(it) }
+            LoggersClickEvent -> {
+                // Open the loggers screen.
+            }
+
+            is OnTemperatureUnitSelectedEvent -> {
+                _viewState.value = _viewState.value.copy(
+                    temperatureUnit = event.value
+                )
+            }
+        }
+    }
+
+    private suspend fun discoverService(remoteService: @RawValue RemoteService) {
+        remoteService.owner?.services()
+            ?.onEach { services ->
+                handleServiceDiscovery(
+                    services,
+                    HTS_MEASUREMENT_CHARACTERISTIC_UUID,
+                    ::handleHTSData
+                )
+                handleServiceDiscovery(
+                    services,
+                    BATTERY_LEVEL_CHARACTERISTIC_UUID,
+                    ::handleBatteryLevel
+                )
+            }
+            ?.onCompletion {
+                scope.cancel()
+            }
+            ?.catch { e -> Timber.e(e) }
+            ?.launchIn(scope)
+    }
+
+    private suspend fun handleServiceDiscovery(
+        services: List<RemoteService>,
+        characteristicUuid: UUID,
+        handleData: suspend (characteristic: RemoteCharacteristic) -> Unit
+    ) {
+        services.forEach { service ->
+            service.characteristics.firstOrNull { it.uuid == characteristicUuid }?.let {
+                handleData(it)
+            }
+        }
+    }
+
+    private suspend fun handleHTSData(characteristic: RemoteCharacteristic) {
+        characteristic.subscribe()
+            .mapNotNull { HTSDataParser.parse(it) }
+            .onEach { htsData ->
+                _viewState.value = _viewState.value.copy(
+                    deviceName = characteristic.service.owner?.name,
+                    data = htsData
+                )
+            }
+            .catch { e -> Timber.e(e) }
             .launchIn(viewModelScope)
     }
 
-    private fun handleResult(result: NavigationResult<ServerDevice>) {
-        when (result) {
-            is NavigationResult.Cancelled -> navigationManager.navigateUp()
-            is NavigationResult.Success -> onDeviceSelected(result.value)
-        }
-    }
-
-    private fun onDeviceSelected(device: ServerDevice) {
-        repository.launch(device)
-    }
-
-    fun onEvent(event: HTSScreenViewEvent) {
-        when (event) {
-            DisconnectEvent -> disconnect()
-            is OnTemperatureUnitSelected -> onTemperatureUnitSelected(event)
-            NavigateUp -> navigationManager.navigateUp()
-            OpenLoggerEvent -> repository.openLogger()
-        }
-    }
-
-    private fun disconnect() {
-        repository.disconnect()
-        navigationManager.navigateUp()
-    }
-
-    private fun onTemperatureUnitSelected(event: OnTemperatureUnitSelected) {
-        repository.setTemperatureUnit(event.value)
+    private suspend fun handleBatteryLevel(characteristic: RemoteCharacteristic) {
+        characteristic.subscribe()
+            .mapNotNull { BatteryLevelParser.parse(it) }
+            .onEach { batteryLevel ->
+                _viewState.value = _viewState.value.copy(
+                    batteryLevel = batteryLevel
+                )
+            }
+            .catch { e -> Timber.e(e) }
+            .launchIn(viewModelScope)
     }
 
     override fun onCleared() {
         super.onCleared()
-        repository.setOnScreen(false)
+        viewModelScope.cancel()
     }
+
+
+    private suspend fun disconnect(peripheral: Peripheral) {
+        peripheral.disconnect()
+    }
+
 }
