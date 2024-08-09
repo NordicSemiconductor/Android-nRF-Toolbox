@@ -1,123 +1,153 @@
-/*
- * Copyright (c) 2022, Nordic Semiconductor
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification, are
- * permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this list of
- * conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice, this list
- * of conditions and the following disclaimer in the documentation and/or other materials
- * provided with the distribution.
- *
- * 3. Neither the name of the copyright holder nor the names of its contributors may be
- * used to endorse or promote products derived from this software without specific prior
- * written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
- * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
- * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
- * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 package no.nordicsemi.android.nrftoolbox.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import no.nordicsemi.android.analytics.AppAnalytics
-import no.nordicsemi.android.analytics.ProfileOpenEvent
-import no.nordicsemi.android.cgms.repository.CGMRepository
-import no.nordicsemi.android.common.logger.LoggerLauncher
-import no.nordicsemi.android.common.navigation.DestinationId
+import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.csc.repository.CSCRepository
-import no.nordicsemi.android.hrs.service.HRSRepository
-import no.nordicsemi.android.hts.repository.HTSRepository
-import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
-import no.nordicsemi.android.nrftoolbox.view.HomeViewState
-import no.nordicsemi.android.prx.repository.PRXRepository
-import no.nordicsemi.android.rscs.repository.RSCSRepository
-import no.nordicsemi.android.uart.repository.UARTRepository
+import no.nordicsemi.android.hts.HTSDestinationId
+import no.nordicsemi.android.nrftoolbox.data.BPS_SERVICE_UUID
+import no.nordicsemi.android.nrftoolbox.data.HTS_SERVICE_UUID
+import no.nordicsemi.android.toolbox.scanner.MockRemoteService
+import no.nordicsemi.android.toolbox.scanner.Profile
+import no.nordicsemi.kotlin.ble.client.android.CentralManager
+import no.nordicsemi.kotlin.ble.client.android.Peripheral
+import no.nordicsemi.kotlin.ble.client.distinctByPeripheral
+import no.nordicsemi.kotlin.ble.core.ConnectionState
+import no.nordicsemi.kotlin.ble.core.util.distinct
+import timber.log.Timber
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
+
+data class HomeViewState(
+    val isScanning: Boolean = false,
+    val devices: List<Peripheral> = emptyList(),
+)
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(
-    @ApplicationContext
-    private val context: Context,
-    private val navigationManager: Navigator,
-    private val activitySignals: ActivitySignals,
-    cgmRepository: CGMRepository,
-    cscRepository: CSCRepository,
-    hrsRepository: HRSRepository,
-    htsRepository: HTSRepository,
-    prxRepository: PRXRepository,
-    rscsRepository: RSCSRepository,
-    uartRepository: UARTRepository,
-    private val analytics: AppAnalytics
+internal class HomeViewModel @Inject constructor(
+    private val centralManager: CentralManager,
+    private val navigator: Navigator,
+    private val scope: CoroutineScope,
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(HomeViewState())
-    val state = _state.asStateFlow()
+    val viewState = _state.asStateFlow()
+    private var job: Job? = null
+    private var connectionScope: CoroutineScope? = null
 
     init {
-        cgmRepository.isRunning.onEach {
-            _state.value = _state.value.copy(isCGMModuleRunning = it)
-        }.launchIn(viewModelScope)
-
-        cscRepository.isRunning.onEach {
-            _state.value = _state.value.copy(isCSCModuleRunning = it)
-        }.launchIn(viewModelScope)
-
-        hrsRepository.isRunning.onEach {
-            _state.value = _state.value.copy(isHRSModuleRunning = it)
-        }.launchIn(viewModelScope)
-
-        htsRepository.isRunning.onEach {
-            _state.value = _state.value.copy(isHTSModuleRunning = it)
-        }.launchIn(viewModelScope)
-
-        prxRepository.isRunning.onEach {
-            _state.value = _state.value.copy(isPRXModuleRunning = it)
-        }.launchIn(viewModelScope)
-
-        rscsRepository.isRunning.onEach {
-            _state.value = _state.value.copy(isRSCSModuleRunning = it)
-        }.launchIn(viewModelScope)
-
-        uartRepository.isRunning.onEach {
-            _state.value = _state.value.copy(isUARTModuleRunning = it)
-        }.launchIn(viewModelScope)
-
-        activitySignals.state.onEach {
-            _state.value = _state.value.copyWithRefresh()
-        }.launchIn(viewModelScope)
+        startScanning()
     }
 
-    fun openProfile(destination: DestinationId<Unit, Unit>) {
-        navigationManager.navigateTo(destination)
+    private fun startScanning() {
+        _state.value = _state.value.copy(isScanning = true)
+        job = centralManager.scan(5000.milliseconds)
+            .distinctByPeripheral()
+            .map {
+                it.peripheral
+            }
+            .distinct()
+            .onEach { device ->
+                checkForExistingDevice(device)
+            }
+            .catch { e ->
+                Timber.e(e)
+            }
+            .onCompletion {
+                _state.value = _state.value.copy(
+                    isScanning = false,
+                )
+            }
+            .launchIn(scope)
     }
 
-    fun openLogger() {
-        LoggerLauncher.launch(context, null)
+    private fun checkForExistingDevice(peripheral: Peripheral) {
+        val devices = _state.value.devices.toMutableList()
+        val existingDevice = devices.firstOrNull { it.address == peripheral.address }
+        if (existingDevice != null) {
+            val index = devices.indexOf(existingDevice)
+            devices[index] = peripheral
+            _state.value = _state.value.copy(devices = devices)
+        } else {
+            devices.add(peripheral)
+            _state.value = _state.value.copy(devices = devices)
+        }
     }
 
-    fun logEvent(event: ProfileOpenEvent) {
-        analytics.logEvent(event)
+    private fun stopScanning() {
+        if (_state.value.isScanning) {
+            job?.cancel()
+            _state.value = _state.value.copy(isScanning = false)
+        }
     }
+
+    fun connect(peripheral: Peripheral, autoConnect: Boolean = false) {
+        stopScanning()
+        connectionScope = CoroutineScope(context = Dispatchers.IO).apply {
+            launch {
+                centralManager.connect(
+                    peripheral = peripheral,
+                    options = if (autoConnect) {
+                        CentralManager.ConnectionOptions.AutoConnect
+                    } else CentralManager.ConnectionOptions.Default
+                )
+                peripheral.state
+                    .onEach {
+                        if (it == ConnectionState.Connected) {
+                            peripheral.services().onEach { remoteServices ->
+                                remoteServices.forEach { remoteService ->
+                                    when (remoteService.uuid) {
+                                        HTS_SERVICE_UUID -> {
+                                            // HTS service found
+                                            // Navigate to the HTS screen.
+                                            navigator.navigateTo(
+                                                HTSDestinationId, Profile.HTS(
+                                                    MockRemoteService(
+                                                        remoteService,
+                                                        peripheral.state,
+                                                        peripheral,
+                                                    )
+                                                )
+                                            )
+                                            connectionScope?.cancel()
+                                        }
+
+                                        BPS_SERVICE_UUID -> {
+                                            Timber.tag("BBB").d("BPS Service found.")
+                                            // BPS service found
+                                            // Navigate to the BPS screen.
+                                        }
+                                    }
+                                }
+                            }.launchIn(this)
+                        }
+                    }
+                    .onCompletion {
+                        connectionScope?.cancel()
+                    }
+                    .launchIn(this)
+            }
+        }
+    }
+
+    private fun closeCentralManager() {
+        if (job?.isActive == true) job?.cancel()
+        centralManager.close()
+    }
+
+    public override fun onCleared() {
+        super.onCleared()
+        closeCentralManager()
+    }
+
 }

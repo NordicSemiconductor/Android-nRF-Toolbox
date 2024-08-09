@@ -31,6 +31,7 @@
 plugins {
     alias(libs.plugins.nordic.application.compose)
     alias(libs.plugins.nordic.hilt)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 if (getGradle().getStartParameter().getTaskRequests().toString().contains("Release")) {
@@ -43,18 +44,7 @@ android {
 }
 
 dependencies {
-    //Hilt requires to implement every module in the main app module
-    //https://github.com/google/dagger/issues/2123
-    implementation(project(":profile_bps"))
-    implementation(project(":profile_csc"))
-    implementation(project(":profile_cgms"))
-    implementation(project(":profile_gls"))
-    implementation(project(":profile_hrs"))
     implementation(project(":profile_hts"))
-    implementation(project(":profile_prx"))
-    implementation(project(":profile_rscs"))
-
-    implementation(project(":profile_uart"))
 
     implementation(project(":lib_analytics"))
     implementation(project(":lib_ui"))
@@ -64,13 +54,11 @@ dependencies {
 
     implementation(libs.nordic.core)
     implementation(libs.nordic.theme)
+    implementation(libs.nordic.ui)
     implementation(libs.nordic.navigation)
-    implementation(libs.nordic.blek.uiscanner)
     implementation(libs.nordic.logger)
     implementation(libs.nordic.permissions.ble)
     implementation(libs.nordic.analytics)
-    
-    implementation(libs.nordic.blek.client)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.compose.material3)
@@ -83,4 +71,6 @@ dependencies {
     // Timber & SLF4J
     implementation (libs.slf4j.timber)
     implementation(libs.nordic.log.timber)
+
+    implementation("no.nordicsemi.kotlin.ble:client-android")
 }

@@ -34,7 +34,7 @@ package no.nordicsemi.android.ui.view
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,8 +51,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
-import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.ui.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,7 +91,7 @@ fun LoggerBackIconAppBar(text: String, onClick: () -> Unit) {
         navigationIcon = {
             IconButton(onClick = { onClick() }) {
                 Icon(
-                    Icons.Default.ArrowBack,
+                    Icons.AutoMirrored.Filled.ArrowBack,
                     tint = MaterialTheme.colorScheme.onPrimary,
                     contentDescription = stringResource(id = R.string.back_screen),
                 )
@@ -127,7 +125,7 @@ fun BackIconAppBar(text: String, onClick: () -> Unit) {
         navigationIcon = {
             IconButton(onClick = { onClick() }) {
                 Icon(
-                    Icons.Default.ArrowBack,
+                    Icons.AutoMirrored.Filled.ArrowBack,
                     tint = MaterialTheme.colorScheme.onPrimary,
                     contentDescription = stringResource(id = R.string.back_screen),
                 )
@@ -156,7 +154,7 @@ fun LoggerIconAppBar(
         navigationIcon = {
             IconButton(onClick = { onClick() }) {
                 Icon(
-                    Icons.Default.ArrowBack,
+                    Icons.AutoMirrored.Filled.ArrowBack,
                     tint = MaterialTheme.colorScheme.onPrimary,
                     contentDescription = stringResource(id = R.string.back_screen),
                 )
@@ -187,19 +185,14 @@ fun LoggerIconAppBar(
 @Composable
 fun ProfileAppBar(
     deviceName: String?,
-    connectionState: GattConnectionStateWithStatus?,
     @StringRes
     title: Int,
     navigateUp: () -> Unit,
     disconnect: () -> Unit,
     openLogger: () -> Unit
 ) {
-    if (deviceName?.isNotBlank() == true) {
-        if (connectionState?.state == GattConnectionState.STATE_DISCONNECTING || connectionState?.state == GattConnectionState.STATE_DISCONNECTED) {
-            LoggerBackIconAppBar(deviceName, openLogger)
-        } else {
-            LoggerIconAppBar(deviceName, navigateUp, disconnect, openLogger)
-        }
+    if (deviceName != null) {
+        LoggerIconAppBar(deviceName, navigateUp, disconnect, openLogger)
     } else {
         BackIconAppBar(stringResource(id = title), navigateUp)
     }

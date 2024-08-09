@@ -1,4 +1,4 @@
-package no.nordicsemi.android.nrftoolbox
+package no.nordicsemi.android.nrftoolbox.di
 
 import dagger.Module
 import dagger.Provides

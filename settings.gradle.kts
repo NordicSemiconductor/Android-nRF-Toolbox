@@ -59,15 +59,7 @@ rootProject.name = "Android-nRF-Toolbox"
 
 include(":app")
 
-include(":profile_bps")
-include(":profile_cgms")
-include(":profile_csc")
-include(":profile_gls")
-include(":profile_hrs")
 include(":profile_hts")
-include(":profile_prx")
-include(":profile_rscs")
-include(":profile_uart")
 
 include(":lib_analytics")
 include(":lib_scanner")
@@ -79,6 +71,6 @@ include(":lib_utils")
 //    includeBuild("../Android-Common-Libraries")
 //}
 //
-//if (file("../Kotlin-BLE-Library").exists()) {
-//    includeBuild("../Kotlin-BLE-Library")
-//}
+if (file("../Kotlin-BLE-Library").exists()) {
+    includeBuild("../Kotlin-BLE-Library")
+}

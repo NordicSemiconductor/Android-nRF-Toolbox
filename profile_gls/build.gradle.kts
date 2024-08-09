@@ -78,7 +78,6 @@ dependencies {
     testImplementation(libs.test.mockk)
     testImplementation(libs.androidx.test.ext)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.slf4j.simple)
     testImplementation(libs.test.robolectric)
     testImplementation(libs.kotlin.junit)
 }
