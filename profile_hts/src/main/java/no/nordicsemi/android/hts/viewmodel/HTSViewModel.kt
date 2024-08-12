@@ -17,7 +17,6 @@ import no.nordicsemi.android.hts.HTSDestinationId
 import no.nordicsemi.android.hts.data.BatteryLevelParser
 import no.nordicsemi.android.hts.data.HTSDataParser
 import no.nordicsemi.android.hts.data.HTSServiceData
-import no.nordicsemi.android.hts.view.TemperatureUnit
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
@@ -32,18 +31,6 @@ private val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-0080
 private val BATTERY_LEVEL_CHARACTERISTIC_UUID =
     UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
 
-internal interface HtsClickEvent
-
-internal data object HtsClickEventBack : HtsClickEvent
-
-internal data object DisconnectClickEvent : HtsClickEvent
-
-internal data object LoggersClickEvent : HtsClickEvent
-
-internal data class OnTemperatureUnitSelectedEvent(
-    val value: TemperatureUnit = TemperatureUnit.CELSIUS,
-) : HtsClickEvent
-
 /**
  * ViewModel for the Health Thermometer Service.
  */
@@ -53,9 +40,9 @@ internal class HTSViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
     private val htsParam = parameterOf(HTSDestinationId).remoteService
-    private val _viewState: MutableStateFlow<HTSServiceData> =
+    private val _state: MutableStateFlow<HTSServiceData> =
         MutableStateFlow(HTSServiceData())
-    val viewState = _viewState.asStateFlow()
+    val state = _state.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -65,15 +52,15 @@ internal class HTSViewModel @Inject constructor(
                 }
             htsParam.connectionState
                 ?.onEach {
-                    _viewState.value = _viewState.value.copy(connectionState = it)
+                    _state.value = _state.value.copy(connectionState = it)
                 }
                 ?.launchIn(viewModelScope)
         }
     }
 
-    fun onEvent(event: HtsClickEvent) {
+    fun onEvent(event: HTSScreenViewEvent) {
         when (event) {
-            is HtsClickEventBack, is DisconnectClickEvent -> {
+            is NavigateUp, is DisconnectEvent -> {
                 viewModelScope.launch {
                     // Navigate back
                     try {
@@ -85,12 +72,12 @@ internal class HTSViewModel @Inject constructor(
                 }
             }
 
-            LoggersClickEvent -> {
+            OpenLoggerEvent -> {
                 // Open the loggers screen.
             }
 
-            is OnTemperatureUnitSelectedEvent -> {
-                _viewState.value = _viewState.value.copy(
+            is OnTemperatureUnitSelected -> {
+                _state.value = _state.value.copy(
                     temperatureUnit = event.value
                 )
             }
@@ -131,7 +118,7 @@ internal class HTSViewModel @Inject constructor(
         characteristic.subscribe()
             .mapNotNull { HTSDataParser.parse(it) }
             .onEach { htsData ->
-                _viewState.value = _viewState.value.copy(
+                _state.value = _state.value.copy(
                     deviceName = characteristic.service.owner?.name,
                     data = htsData
                 )
@@ -144,7 +131,7 @@ internal class HTSViewModel @Inject constructor(
         characteristic.subscribe()
             .mapNotNull { BatteryLevelParser.parse(it) }
             .onEach { batteryLevel ->
-                _viewState.value = _viewState.value.copy(
+                _state.value = _state.value.copy(
                     batteryLevel = batteryLevel
                 )
             }
