@@ -22,11 +22,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.ui.view.RadioButtonGroup
 import no.nordicsemi.android.hts.R
-import no.nordicsemi.android.hts.viewmodel.DisconnectClickEvent
+import no.nordicsemi.android.hts.viewmodel.DisconnectEvent
 import no.nordicsemi.android.hts.viewmodel.HTSViewModel
-import no.nordicsemi.android.hts.viewmodel.HtsClickEvent
-import no.nordicsemi.android.hts.viewmodel.HtsClickEventBack
-import no.nordicsemi.android.hts.viewmodel.OnTemperatureUnitSelectedEvent
+import no.nordicsemi.android.hts.viewmodel.HTSScreenViewEvent
+import no.nordicsemi.android.hts.viewmodel.NavigateUp
+import no.nordicsemi.android.hts.viewmodel.OnTemperatureUnitSelected
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.KeyValueField
 import no.nordicsemi.android.ui.view.ProfileAppBar
@@ -37,16 +37,16 @@ import no.nordicsemi.kotlin.ble.core.ConnectionState
 @Composable
 internal fun HtsHomeView() {
     val htsVM = hiltViewModel<HTSViewModel>()
-    val healthThermometerServiceData by htsVM.viewState.collectAsStateWithLifecycle()
-    val onClickEvent: (HtsClickEvent) -> Unit = { htsVM.onEvent(it) }
+    val state by htsVM.state.collectAsStateWithLifecycle()
+    val onClickEvent: (HTSScreenViewEvent) -> Unit = { htsVM.onEvent(it) }
 
     Scaffold(
         topBar = {
             ProfileAppBar(
-                deviceName = healthThermometerServiceData.deviceName,
+                deviceName = state.deviceName,
                 title = R.string.hts_title,
-                navigateUp = { onClickEvent(HtsClickEventBack) },
-                disconnect = { onClickEvent(DisconnectClickEvent) },
+                navigateUp = { onClickEvent(NavigateUp) },
+                disconnect = { onClickEvent(DisconnectEvent) },
                 openLogger = { }
             )
         }
@@ -57,11 +57,9 @@ internal fun HtsHomeView() {
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            when (healthThermometerServiceData.connectionState) {
+            when (state.connectionState) {
 
-                ConnectionState.Connecting, ConnectionState.Disconnecting -> {
-                    LoadingView()
-                }
+                ConnectionState.Connecting, ConnectionState.Disconnecting -> LoadingView()
 
                 is ConnectionState.Disconnected -> {}
 
@@ -76,8 +74,8 @@ internal fun HtsHomeView() {
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            RadioButtonGroup(viewEntity = healthThermometerServiceData.temperatureUnit.temperatureSettingsItems()) {
-                                onClickEvent(OnTemperatureUnitSelectedEvent(it.label.toTemperatureUnit()))
+                            RadioButtonGroup(viewEntity = state.temperatureUnit.temperatureSettingsItems()) {
+                                onClickEvent(OnTemperatureUnitSelected(it.label.toTemperatureUnit()))
                             }
                         }
 
@@ -94,15 +92,15 @@ internal fun HtsHomeView() {
                             KeyValueField(
                                 stringResource(id = R.string.hts_temperature),
                                 displayTemperature(
-                                    healthThermometerServiceData.data.temperature,
-                                    healthThermometerServiceData.temperatureUnit
+                                    state.data.temperature,
+                                    state.temperatureUnit
                                 )
                             )
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        healthThermometerServiceData.batteryLevel?.let { batteryLevel ->
+                        state.batteryLevel?.let { batteryLevel ->
                             BatteryLevelView(batteryLevel)
 
                             Spacer(modifier = Modifier.height(16.dp))
