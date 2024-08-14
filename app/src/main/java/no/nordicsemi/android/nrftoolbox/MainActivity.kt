@@ -44,6 +44,8 @@ import no.nordicsemi.android.common.theme.NordicActivity
 import no.nordicsemi.android.common.theme.NordicTheme
 import no.nordicsemi.android.hts.HTSDestination
 import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
+import no.nordicsemi.android.toolbox.profile.ProfileDestination
+import no.nordicsemi.android.toolbox.scanner.ScannerDestination
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -61,7 +63,7 @@ class MainActivity : NordicActivity() {
                     color = MaterialTheme.colorScheme.surface,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    NavigationView(HomeDestinations + HTSDestination)
+                    NavigationView(HomeDestinations + ScannerDestination + ProfileDestination + HTSDestination)
                 }
 
                 AnalyticsPermissionRequestDialog()

@@ -74,3 +74,4 @@ include(":lib_utils")
 if (file("../Kotlin-BLE-Library").exists()) {
     includeBuild("../Kotlin-BLE-Library")
 }
+include(":profile")
