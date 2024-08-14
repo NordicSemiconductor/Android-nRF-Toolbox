@@ -1,4 +1,4 @@
-package no.nordicsemi.android.nrftoolbox.data
+package no.nordicsemi.android.toolbox.profile
 
 import java.util.UUID
 

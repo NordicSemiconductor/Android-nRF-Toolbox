@@ -64,7 +64,6 @@ internal fun HtsHomeView() {
                 is ConnectionState.Disconnected -> {}
 
                 ConnectionState.Connected -> {
-
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally
