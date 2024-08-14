@@ -12,6 +12,7 @@ import no.nordicsemi.android.ui.view.Profile
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -52,6 +53,9 @@ internal class ConnectionManager @Inject constructor(
                                     _profile.value =
                                         Profile.HTS(MockRemoteService(service, state, peripheral))
                                 }
+                                else -> {
+                                    Timber.tag("aaa").d("Unknown service: ${service.uuid}")
+                                }
                             }
                         }
                     }.launchIn(scope)
@@ -81,7 +85,9 @@ internal class ConnectionManager @Inject constructor(
     }
 
     fun disconnect(peripheral: Peripheral) = scope.launch {
+        // clear all states.
         _connectionState.value = ConnectionViewState()
+        _profile.value = null
         peripheral.disconnect()
     }
 }

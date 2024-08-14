@@ -33,7 +33,10 @@ internal class ProfileViewModel @Inject constructor(
             when (it) {
                 is Profile.BPS -> {}
                 is Profile.HRS -> {}
-                is Profile.HTS -> { navigator.navigateTo(HTSDestinationId, it) }
+                is Profile.HTS -> {
+                    navigator.navigateTo(HTSDestinationId, it)
+                }
+
                 null -> {
                     connectionManager.isLoading()
                 }
@@ -48,11 +51,6 @@ internal class ProfileViewModel @Inject constructor(
     fun onDisconnect() {
         connectionManager.disconnect(peripheral)
         navigator.navigateUp()
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        connectionManager.disconnect(peripheral)
     }
 
 }
