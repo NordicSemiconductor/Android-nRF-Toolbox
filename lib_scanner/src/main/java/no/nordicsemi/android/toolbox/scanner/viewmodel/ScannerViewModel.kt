@@ -30,11 +30,7 @@ internal class ScannerViewModel @Inject constructor(
 
     private var job: Job? = null
 
-    init {
-        startScanning()
-    }
-
-    private fun startScanning() {
+    fun startScanning() {
         job?.cancel()
         job = bleScanner.startScanning()
             .onStart {
