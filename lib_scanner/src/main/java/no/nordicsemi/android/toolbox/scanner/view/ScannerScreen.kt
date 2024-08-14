@@ -123,7 +123,7 @@ internal fun DeviceListView(
                 }
             }
 
-            is ScanningState.Error -> item { Text(text = "Error: ${bleState.error.message}") }
+            is ScanningState.Error -> item { ScanErrorView(bleState.error) }
             ScanningState.Loading -> item { ScanEmptyView(isLocationRequiredAndDisabled) }
         }
     }
@@ -197,7 +197,7 @@ private fun DeviceListItemPreview() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScannerAppBar(
+internal fun ScannerAppBar(
     title: @Composable () -> Unit,
     showProgress: Boolean = false,
     backButtonIcon: ImageVector = Icons.AutoMirrored.Filled.ArrowBack,
