@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.nordic.navigation)
     implementation(libs.nordic.permissions.ble)
     implementation(libs.nordic.theme)
+    implementation(libs.nordic.core)
     implementation(libs.nordic.ui)
 
     implementation(libs.androidx.compose.material.iconsExtended)

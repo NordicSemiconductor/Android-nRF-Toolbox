@@ -16,28 +16,33 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.common.core.parseBold
 import no.nordicsemi.android.common.theme.NordicTheme
 import no.nordicsemi.android.common.ui.view.WarningView
 
 @Composable
 internal fun ScanEmptyView(locationRequiredAndDisabled: Boolean) {
-
     WarningView(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         imageVector = Icons.AutoMirrored.Filled.BluetoothSearching,
-        title = "No device detected yet.",
-        hint = "Wait" + if (locationRequiredAndDisabled) {
-            "\n\n" +"Location permission is required to scan for Bluetooth devices."
+        title = "CAN\\'T SEE YOUR DEVICE?",
+        hint = "1. Make sure the device is turned on and is connected to a power source." +
+                "\\n\\n2. Make sure the appropriate firmware and SoftDevice are flashed.\n" +
+                "   " + if (locationRequiredAndDisabled) {
+            "\n\n" + "3. Location is turned off. Most Android phones " +
+                    " require it in order to scan for Bluetooth LE devices. If you are sure your " +
+                    " device is advertising and it doesn\\'t show up here, click the button below to " +
+                    " enable Location"
         } else {
             ""
-        },
+        }.parseBold(),
         hintTextAlign = TextAlign.Justify,
     ) {
         if (locationRequiredAndDisabled) {
             val context = LocalContext.current
-            Button(onClick = { openLocationSettings(context)}) {
+            Button(onClick = { openLocationSettings(context) }) {
                 Text(text = "Enable location")
             }
         }
@@ -53,7 +58,7 @@ private fun openLocationSettings(context: Context) {
 @Preview(showBackground = true)
 @Composable
 private fun ScanEmptyViewPreview_RequiredLocation() {
-   NordicTheme {
+    NordicTheme {
         ScanEmptyView(
             locationRequiredAndDisabled = true,
         )
