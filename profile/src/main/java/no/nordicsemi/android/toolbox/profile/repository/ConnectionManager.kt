@@ -20,6 +20,7 @@ import no.nordicsemi.android.ui.view.Profile
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -83,73 +84,36 @@ internal class ConnectionManager @Inject constructor(
         peripheral.state.onEach { state ->
             when (state) {
                 ConnectionState.Connected -> {
-                    _uiViewState.value =
-                        _uiViewState.value.copy(connectionState = ConnectionState.Connected)
+                    _uiViewState.value = _uiViewState.value.copy(
+                        connectionState = ConnectionState.Connected
+                    )
                     peripheral.services().onEach { remoteServices ->
-                        remoteServices.forEach { service ->
-                            when (service.uuid) {
-                                HTS_SERVICE_UUID -> {
-                                    _uiViewState.value = _uiViewState.value.copy(
-                                        profileViewState = ProfileViewState.ProfileFound(
-                                            Profile.HTS(MockRemoteService(service, peripheral))
-                                        ),
+                        when {
+                            remoteServices.firstOrNull { it.uuid == HTS_SERVICE_UUID } != null -> {
+                                val service = remoteServices.first { it.uuid == HTS_SERVICE_UUID }
+                                _uiViewState.value = _uiViewState.value.copy(
+                                    profileViewState = ProfileViewState.ProfileFound(
+                                        Profile.HTS(MockRemoteService(service, peripheral))
                                     )
-                                }
-
-                                BPS_SERVICE_UUID -> {
-                                    _uiViewState.value = _uiViewState.value.copy(
-                                        profileViewState = ProfileViewState.NotImplemented
-                                    )
-                                }
-
-                                CSC_SERVICE_UUID -> {
-                                    _uiViewState.value = _uiViewState.value.copy(
-                                        profileViewState = ProfileViewState.NotImplemented
-                                    )
-                                }
-
-                                CGMS_SERVICE_UUID -> {
-                                    _uiViewState.value = _uiViewState.value.copy(
-                                        profileViewState = ProfileViewState.NotImplemented
-                                    )
-                                }
-
-                                GLS_SERVICE_UUID -> {
-                                    _uiViewState.value = _uiViewState.value.copy(
-                                        profileViewState = ProfileViewState.NotImplemented
-                                    )
-                                }
-
-                                HRS_SERVICE_UUID -> {
-                                    _uiViewState.value = _uiViewState.value.copy(
-                                        profileViewState = ProfileViewState.NotImplemented
-                                    )
-                                }
-
-                                PRX_SERVICE_UUID -> {
-                                    _uiViewState.value = _uiViewState.value.copy(
-                                        profileViewState = ProfileViewState.NotImplemented
-                                    )
-                                }
-
-                                RSCS_SERVICE_UUID -> {
-                                    _uiViewState.value = _uiViewState.value.copy(
-                                        profileViewState = ProfileViewState.NotImplemented
-                                    )
-                                }
-
-                                UART_SERVICE_UUID -> {
-                                    _uiViewState.value = _uiViewState.value.copy(
-                                        profileViewState = ProfileViewState.NotImplemented
-                                    )
-                                }
-
-                                else -> {
-                                    _uiViewState.value = _uiViewState.value.copy(
-                                        profileViewState = ProfileViewState.NoServiceFound,
-                                    )
-                                }
+                                )
                             }
+
+                            remoteServices.firstOrNull { it.uuid == BPS_SERVICE_UUID } != null ||
+                                    remoteServices.firstOrNull { it.uuid == CSC_SERVICE_UUID } != null ||
+                                    remoteServices.firstOrNull { it.uuid == CGMS_SERVICE_UUID } != null ||
+                                    remoteServices.firstOrNull { it.uuid == GLS_SERVICE_UUID } != null ||
+                                    remoteServices.firstOrNull { it.uuid == HRS_SERVICE_UUID } != null ||
+                                    remoteServices.firstOrNull { it.uuid == PRX_SERVICE_UUID } != null ||
+                                    remoteServices.firstOrNull { it.uuid == RSCS_SERVICE_UUID } != null ||
+                                    remoteServices.firstOrNull { it.uuid == UART_SERVICE_UUID } != null -> {
+                                _uiViewState.value = _uiViewState.value.copy(
+                                    profileViewState = ProfileViewState.NotImplemented
+                                )
+                            }
+                            else -> {
+                                Timber.tag("AAA").d("No service found")
+                            }
+
                         }
                     }.launchIn(scope)
                 }
