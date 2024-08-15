@@ -30,6 +30,9 @@ internal class ScannerViewModel @Inject constructor(
 
     private var job: Job? = null
 
+    /**
+     * Starts scanning for BLE devices.
+     */
     fun startScanning() {
         job?.cancel()
         job = bleScanner.startScanning()
@@ -53,6 +56,11 @@ internal class ScannerViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
+    /**
+     * Callback when a device is selected.
+     *
+     * @param peripheral The selected peripheral.
+     */
     fun onDeviceSelected(peripheral: Peripheral) {
         job?.cancel()
         try {
@@ -62,6 +70,9 @@ internal class ScannerViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Refresh the scanning process.
+     */
     fun refreshScanning() {
         startScanning()
     }
