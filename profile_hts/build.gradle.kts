@@ -46,8 +46,6 @@ dependencies {
     implementation(project(":lib_utils"))
 
     implementation(libs.nordic.blek.client)
-    implementation(libs.nordic.blek.profile)
-    implementation(libs.nordic.blek.uiscanner)
 
     implementation(libs.nordic.core)
     implementation(libs.nordic.ui)
