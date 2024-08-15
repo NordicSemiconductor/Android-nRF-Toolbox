@@ -40,8 +40,7 @@ internal class HTSViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
     private val htsParam = parameterOf(HTSDestinationId).remoteService
-    private val _state: MutableStateFlow<HTSServiceData> =
-        MutableStateFlow(HTSServiceData())
+    private val _state: MutableStateFlow<HTSServiceData> = MutableStateFlow(HTSServiceData())
     val state = _state.asStateFlow()
 
     init {
