@@ -24,14 +24,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.common.permissions.ble.RequireLocation
 import no.nordicsemi.android.common.ui.view.NordicAppBar
+import no.nordicsemi.android.toolbox.profile.repository.ProfileViewState
 import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileViewModel
 import no.nordicsemi.kotlin.ble.core.ConnectionState
+
+private const val SERVICE_NOT_FOUND = "No service found."
+private const val PROFILE_NOT_IMPLEMENTED = "Profile not implemented yet."
+private const val DISCONNECTED = "Disconnected"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ProfileScreen() {
     val profileViewModel: ProfileViewModel = hiltViewModel()
-    val state by profileViewModel.connectionState.collectAsStateWithLifecycle()
+    val state by profileViewModel.uiState.collectAsStateWithLifecycle()
 
     // Display the connection state
     Scaffold(
@@ -51,10 +56,32 @@ internal fun ProfileScreen() {
             RequireBluetooth {
                 RequireLocation {
                     // Display the connection state
-                    when (state.connectionStepState) {
+                    when (state.connectionState) {
                         ConnectionState.Connected -> {
-                            profileViewModel.profileFound()
-                            if (state.isLoading) Loading()
+                            when (val p = state.profileViewState) {
+                                ProfileViewState.Loading -> Loading()
+                                ProfileViewState.NoServiceFound -> {
+                                    Toast.makeText(
+                                        LocalContext.current,
+                                        SERVICE_NOT_FOUND,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    profileViewModel.onDisconnect()
+                                }
+
+                                is ProfileViewState.NotImplemented -> {
+                                    Toast.makeText(
+                                        LocalContext.current,
+                                        PROFILE_NOT_IMPLEMENTED,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    profileViewModel.onDisconnect()
+                                }
+
+                                is ProfileViewState.ProfileFound -> {
+                                    profileViewModel.discoveredProfile(p.profile)
+                                }
+                            }
                         }
 
                         ConnectionState.Connecting, ConnectionState.Disconnecting -> Loading()
@@ -62,7 +89,7 @@ internal fun ProfileScreen() {
                         is ConnectionState.Disconnected -> {
                             Toast.makeText(
                                 LocalContext.current,
-                                "Disconnected",
+                                DISCONNECTED,
                                 Toast.LENGTH_SHORT
                             ).show()
                             profileViewModel.onDisconnect()
