@@ -21,6 +21,8 @@ internal class ScanningManager @Inject constructor(
 
     /**
      * Scans for BLE devices.
+     *
+     * @return A flow of [Peripheral] devices.
      */
     fun startScanning(): Flow<Peripheral> {
         return centralManager.scan(2000.milliseconds)
