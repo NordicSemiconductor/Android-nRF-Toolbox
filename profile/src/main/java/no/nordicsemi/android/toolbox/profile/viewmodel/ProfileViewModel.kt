@@ -28,14 +28,20 @@ internal class ProfileViewModel @Inject constructor(
         connect(peripheral)
     }
 
-    fun profileFound() {
-        connectionManager.profile.onEach {
-            when (it) {
-                is Profile.BPS -> {}
-                is Profile.HRS -> {}
-                is Profile.HTS -> {
-                    navigator.navigateTo(HTSDestinationId, it)
-                }
+    /**
+     * This method is called when a matching profile is discovered.
+     *
+     * @param profile The matching profile.
+     */
+    fun discoveredProfile(profile: Profile?) {
+        when (profile) {
+            is Profile.HTS -> {
+                val args = MockRemoteService(
+                    serviceData = profile.remoteService.serviceData,
+                    peripheral = peripheral,
+                )
+                navigator.navigateTo(HTSDestinationId, Profile.HTS(args))
+            }
 
                 null -> {
                     connectionManager.isLoading()

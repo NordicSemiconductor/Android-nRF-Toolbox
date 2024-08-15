@@ -6,31 +6,70 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.toolbox.profile.BPS_SERVICE_UUID
+import no.nordicsemi.android.toolbox.profile.CGMS_SERVICE_UUID
+import no.nordicsemi.android.toolbox.profile.CSC_SERVICE_UUID
+import no.nordicsemi.android.toolbox.profile.GLS_SERVICE_UUID
+import no.nordicsemi.android.toolbox.profile.HRS_SERVICE_UUID
 import no.nordicsemi.android.toolbox.profile.HTS_SERVICE_UUID
+import no.nordicsemi.android.toolbox.profile.PRX_SERVICE_UUID
+import no.nordicsemi.android.toolbox.profile.RSCS_SERVICE_UUID
+import no.nordicsemi.android.toolbox.profile.UART_SERVICE_UUID
 import no.nordicsemi.android.ui.view.MockRemoteService
 import no.nordicsemi.android.ui.view.Profile
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
-internal data class ConnectionViewState(
-    val connectionStepState: ConnectionState? = null,
-    val isLoading: Boolean = false,
+/**
+ * This class is responsible for managing the ui states of connection to the peripheral device.
+ *
+ * @param connectionState The current connection state.
+ * @param profileViewState The current profile view state.
+ */
+internal data class UiViewState(
+    val connectionState: ConnectionState? = null,
+    val profileViewState: ProfileViewState = ProfileViewState.Loading,
 )
+
+/**
+ * This class is responsible for managing the profile view states.
+ */
+internal sealed class ProfileViewState {
+    /** The profile view state when the profile is loading. */
+    data object Loading : ProfileViewState()
+
+    /** The profile view state when no matching service is found. */
+    data object NoServiceFound : ProfileViewState()
+
+    /**
+     * The profile view state when a matching profile is found.
+     *
+     * @param profile The matching profile.
+     */
+    data class ProfileFound(val profile: Profile? = null) : ProfileViewState()
+
+    /** The profile view state when the profile is not implemented yet. */
+    // TODO: This state will be removed once the profile is implemented.
+    data object NotImplemented : ProfileViewState()
+}
 
 @Singleton
 internal class ConnectionManager @Inject constructor(
     private val centralManager: CentralManager,
     private val scope: CoroutineScope,
 ) {
-    private val _profile = MutableStateFlow<Profile?>(null)
-    val profile = _profile.asStateFlow()
-    private val _connectionState = MutableStateFlow(ConnectionViewState())
-    val connectionState = _connectionState.asStateFlow()
+    private val _uiViewState = MutableStateFlow(UiViewState())
+    val uiViewState = _uiViewState.asStateFlow()
 
+    /**
+     * Connect to the peripheral device.
+     *
+     * @param peripheral The peripheral device to connect to.
+     * @param autoConnect True to auto connect to the peripheral device, false otherwise.
+     */
     suspend fun connect(
         peripheral: Peripheral,
         autoConnect: Boolean = false
@@ -44,17 +83,71 @@ internal class ConnectionManager @Inject constructor(
         peripheral.state.onEach { state ->
             when (state) {
                 ConnectionState.Connected -> {
-                    _connectionState.value =
-                        _connectionState.value.copy(connectionStepState = ConnectionState.Connected)
+                    _uiViewState.value =
+                        _uiViewState.value.copy(connectionState = ConnectionState.Connected)
                     peripheral.services().onEach { remoteServices ->
                         remoteServices.forEach { service ->
                             when (service.uuid) {
                                 HTS_SERVICE_UUID -> {
-                                    _profile.value =
-                                        Profile.HTS(MockRemoteService(service, state, peripheral))
+                                    _uiViewState.value = _uiViewState.value.copy(
+                                        profileViewState = ProfileViewState.ProfileFound(
+                                            Profile.HTS(MockRemoteService(service, peripheral))
+                                        ),
+                                    )
                                 }
+
+                                BPS_SERVICE_UUID -> {
+                                    _uiViewState.value = _uiViewState.value.copy(
+                                        profileViewState = ProfileViewState.NotImplemented
+                                    )
+                                }
+
+                                CSC_SERVICE_UUID -> {
+                                    _uiViewState.value = _uiViewState.value.copy(
+                                        profileViewState = ProfileViewState.NotImplemented
+                                    )
+                                }
+
+                                CGMS_SERVICE_UUID -> {
+                                    _uiViewState.value = _uiViewState.value.copy(
+                                        profileViewState = ProfileViewState.NotImplemented
+                                    )
+                                }
+
+                                GLS_SERVICE_UUID -> {
+                                    _uiViewState.value = _uiViewState.value.copy(
+                                        profileViewState = ProfileViewState.NotImplemented
+                                    )
+                                }
+
+                                HRS_SERVICE_UUID -> {
+                                    _uiViewState.value = _uiViewState.value.copy(
+                                        profileViewState = ProfileViewState.NotImplemented
+                                    )
+                                }
+
+                                PRX_SERVICE_UUID -> {
+                                    _uiViewState.value = _uiViewState.value.copy(
+                                        profileViewState = ProfileViewState.NotImplemented
+                                    )
+                                }
+
+                                RSCS_SERVICE_UUID -> {
+                                    _uiViewState.value = _uiViewState.value.copy(
+                                        profileViewState = ProfileViewState.NotImplemented
+                                    )
+                                }
+
+                                UART_SERVICE_UUID -> {
+                                    _uiViewState.value = _uiViewState.value.copy(
+                                        profileViewState = ProfileViewState.NotImplemented
+                                    )
+                                }
+
                                 else -> {
-                                    Timber.tag("aaa").d("Unknown service: ${service.uuid}")
+                                    _uiViewState.value = _uiViewState.value.copy(
+                                        profileViewState = ProfileViewState.NoServiceFound,
+                                    )
                                 }
                             }
                         }
@@ -62,32 +155,43 @@ internal class ConnectionManager @Inject constructor(
                 }
 
                 ConnectionState.Connecting -> {
-                    _connectionState.value =
-                        _connectionState.value.copy(connectionStepState = ConnectionState.Connecting)
+                    _uiViewState.value = _uiViewState.value.copy(
+                        connectionState = ConnectionState.Connecting
+                    )
                 }
 
                 is ConnectionState.Disconnected -> {
-                    _connectionState.value = _connectionState.value.copy(
-                        connectionStepState = ConnectionState.Disconnected(state.reason)
+                    _uiViewState.value = _uiViewState.value.copy(
+                        connectionState = ConnectionState.Disconnected(state.reason)
                     )
                 }
 
                 ConnectionState.Disconnecting -> {
-                    _connectionState.value =
-                        _connectionState.value.copy(connectionStepState = ConnectionState.Disconnecting)
+                    _uiViewState.value = _uiViewState.value.copy(
+                        connectionState = ConnectionState.Disconnecting
+                    )
                 }
             }
         }.launchIn(scope)
     }
 
+    /**
+     * Update the ui state to loading.
+     */
     fun isLoading() {
-        _connectionState.value = _connectionState.value.copy(isLoading = true)
+        _uiViewState.value = _uiViewState.value.copy(
+            profileViewState = ProfileViewState.Loading,
+        )
     }
 
+    /**
+     * Disconnect from the peripheral device.
+     *
+     * @param peripheral The peripheral device to disconnect from.
+     */
     fun disconnect(peripheral: Peripheral) = scope.launch {
         // clear all states.
-        _connectionState.value = ConnectionViewState()
-        _profile.value = null
+        _uiViewState.value = UiViewState()
         peripheral.disconnect()
     }
 }
