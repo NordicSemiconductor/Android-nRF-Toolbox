@@ -51,10 +51,6 @@ internal class HTSViewModel @Inject constructor(
                     discoverService(remoteService)
                 }
 
-            htsParam.connectionState?.let {
-                _state.value = _state.value.copy(connectionState = it)
-            }
-
         }
     }
 
@@ -142,7 +138,6 @@ internal class HTSViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         viewModelScope.cancel()
-        Timber.tag("aaa").d("HTSViewModel cleared.")
     }
 
 
