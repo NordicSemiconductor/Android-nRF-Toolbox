@@ -25,8 +25,8 @@ internal class ScannerViewModel @Inject constructor(
     private val bleScanner: ScanningManager,
     private val navigator: Navigator,
 ) : ViewModel() {
-    private val _bleScanningState = MutableStateFlow<ScanningState>(ScanningState.Loading)
-    val bleScanningState = _bleScanningState.asStateFlow()
+    private val _scanningState = MutableStateFlow<ScanningState>(ScanningState.Loading)
+    val scanningState = _scanningState.asStateFlow()
 
     private var job: Job? = null
 
@@ -37,21 +37,23 @@ internal class ScannerViewModel @Inject constructor(
         job?.cancel()
         job = bleScanner.startScanning()
             .onStart {
-                _bleScanningState.value = ScanningState.DevicesDiscovered(emptyList())
-                _bleScanningState.value = ScanningState.Loading
+                // Clear the previous devices list.
+                _scanningState.value = ScanningState.DevicesDiscovered(emptyList())
+                // Reset the state to loading.
+                _scanningState.value = ScanningState.Loading
             }
             .onEach { peripheral ->
                 val devices =
-                    (bleScanningState.value as? ScanningState.DevicesDiscovered)?.devices.orEmpty()
+                    (_scanningState.value as? ScanningState.DevicesDiscovered)?.devices.orEmpty()
                 val isExistingDevice = devices.firstOrNull { it.address == peripheral.address }
                 if (isExistingDevice == null) {
-                    _bleScanningState.value = ScanningState.DevicesDiscovered(devices + peripheral)
+                    _scanningState.value = ScanningState.DevicesDiscovered(devices + peripheral)
                 }
             }
             .cancellable()
             .catch { e ->
                 Timber.e(e)
-                _bleScanningState.value = ScanningState.Error(e)
+                _scanningState.value = ScanningState.Error(e)
             }
             .launchIn(viewModelScope)
     }

@@ -46,7 +46,7 @@ import no.nordicsemi.android.toolbox.scanner.viewmodel.ScannerViewModel
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 
 @Composable
-fun ScannerScreen() {
+internal fun ScannerScreen() {
     Scaffold(
         topBar = {
             ScannerAppBar(
@@ -75,7 +75,7 @@ internal fun ScannerView() {
         RequireLocation { isLocationRequiredAndDisabled ->
             val viewModel: ScannerViewModel = hiltViewModel()
             val pullToRefreshState = rememberPullToRefreshState()
-            val bleState by viewModel.bleScanningState.collectAsStateWithLifecycle()
+            val scanningState by viewModel.scanningState.collectAsStateWithLifecycle()
             val scope = rememberCoroutineScope()
 
             LaunchedEffect(key1 = isLocationRequiredAndDisabled) {
@@ -84,7 +84,7 @@ internal fun ScannerView() {
 
             Column(modifier = Modifier.fillMaxSize()) {
                 PullToRefreshBox(
-                    isRefreshing = bleState is ScanningState.Loading,
+                    isRefreshing = scanningState is ScanningState.Loading,
                     onRefresh = {
                         viewModel.refreshScanning()
                         scope.launch {
@@ -95,7 +95,7 @@ internal fun ScannerView() {
                     content = {
                         DeviceListView(
                             isLocationRequiredAndDisabled = isLocationRequiredAndDisabled,
-                            bleState = bleState,
+                            bleState = scanningState,
                             modifier = Modifier.fillMaxSize(),
                             onClick = { viewModel.onDeviceSelected(it) },
                         )
@@ -104,7 +104,6 @@ internal fun ScannerView() {
         }
     }
 }
-
 
 @Composable
 internal fun DeviceListView(
@@ -131,7 +130,7 @@ internal fun DeviceListView(
 }
 
 @Suppress("FunctionName")
-fun LazyListScope.DeviceListItems(
+internal fun LazyListScope.DeviceListItems(
     devices: List<Peripheral>,
     onClick: (Peripheral) -> Unit,
 ) {
@@ -219,5 +218,3 @@ internal fun ScannerAppBar(
         },
     )
 }
-
-
