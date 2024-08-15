@@ -28,7 +28,37 @@ sealed interface Profile : Parcelable {
     ) : Profile
 
     @Parcelize
+    data class CGMS(
+        override val remoteService: MockRemoteService = MockRemoteService()
+    ) : Profile
+
+    @Parcelize
     data class BPS(
+        override val remoteService: MockRemoteService = MockRemoteService()
+    ) : Profile
+
+    @Parcelize
+    data class CSC(
+        override val remoteService: MockRemoteService = MockRemoteService()
+    ) : Profile
+
+    @Parcelize
+    data class GLS(
+        override val remoteService: MockRemoteService = MockRemoteService()
+    ) : Profile
+
+    @Parcelize
+    data class PRX(
+        override val remoteService: MockRemoteService = MockRemoteService()
+    ) : Profile
+
+    @Parcelize
+    data class RSCS(
+        override val remoteService: MockRemoteService = MockRemoteService()
+    ) : Profile
+
+    @Parcelize
+    data class UART(
         override val remoteService: MockRemoteService = MockRemoteService()
     ) : Profile
 }
