@@ -5,12 +5,10 @@ import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
-import no.nordicsemi.kotlin.ble.core.ConnectionState
 
 @Parcelize
 data class MockRemoteService(
     val serviceData: @RawValue RemoteService? = null,
-    val connectionState: @RawValue ConnectionState? = null,
     val peripheral: @RawValue Peripheral? = null,
 ) : Parcelable
 
