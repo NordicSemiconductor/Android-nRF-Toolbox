@@ -3,6 +3,7 @@ package no.nordicsemi.android.toolbox.scanner.repository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
@@ -26,6 +27,7 @@ internal class ScanningManager @Inject constructor(
      */
     fun startScanning(): Flow<Peripheral> {
         return centralManager.scan(2000.milliseconds)
+            .filter { it.isConnectable }
             .distinctByPeripheral()
             .map { it.peripheral }
             .distinct()
