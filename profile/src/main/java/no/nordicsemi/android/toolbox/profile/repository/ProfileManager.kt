@@ -58,7 +58,7 @@ internal sealed class ProfileViewState {
 }
 
 @Singleton
-internal class ConnectionManager @Inject constructor(
+internal class ProfileManager @Inject constructor(
     private val centralManager: CentralManager,
     private val scope: CoroutineScope,
 ) {
@@ -110,6 +110,7 @@ internal class ConnectionManager @Inject constructor(
                                     profileViewState = ProfileViewState.NotImplemented
                                 )
                             }
+
                             else -> {
                                 Timber.tag("AAA").d("No service found")
                             }
@@ -125,6 +126,7 @@ internal class ConnectionManager @Inject constructor(
                 }
 
                 is ConnectionState.Disconnected -> {
+                    Timber.tag("AAA").d("Disconnected: ${state.reason}")
                     _uiViewState.value = _uiViewState.value.copy(
                         connectionState = ConnectionState.Disconnected(state.reason)
                     )
