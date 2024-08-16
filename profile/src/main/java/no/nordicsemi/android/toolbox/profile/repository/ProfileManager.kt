@@ -17,12 +17,14 @@ import no.nordicsemi.android.toolbox.profile.RSCS_SERVICE_UUID
 import no.nordicsemi.android.toolbox.profile.UART_SERVICE_UUID
 import no.nordicsemi.android.ui.view.MockRemoteService
 import no.nordicsemi.android.ui.view.Profile
+import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * This class is responsible for managing the ui states of connection to the peripheral device.
@@ -60,7 +62,6 @@ internal sealed class ProfileViewState {
 @Singleton
 internal class ProfileManager @Inject constructor(
     private val centralManager: CentralManager,
-    private val scope: CoroutineScope,
 ) {
     private val _uiViewState = MutableStateFlow(UiViewState())
     val uiViewState = _uiViewState.asStateFlow()
@@ -73,9 +74,11 @@ internal class ProfileManager @Inject constructor(
      */
     suspend fun connect(
         peripheral: Peripheral,
-        autoConnect: Boolean = false
+        autoConnect: Boolean = false,
+        scope: CoroutineScope,
     ) {
         try {
+            if (!peripheral.isDisconnected) return
             centralManager.connect(
                 peripheral = peripheral,
                 options = if (autoConnect) {
@@ -116,7 +119,10 @@ internal class ProfileManager @Inject constructor(
                             }
 
                             else -> {
-                                Timber.tag("AAA").d("No service found")
+                                if (remoteServices.isNotEmpty())
+                                    _uiViewState.value = _uiViewState.value.copy(
+                                        profileViewState = ProfileViewState.NoServiceFound
+                                    )
                             }
 
                         }
@@ -159,7 +165,7 @@ internal class ProfileManager @Inject constructor(
      *
      * @param peripheral The peripheral device to disconnect from.
      */
-    fun disconnect(peripheral: Peripheral) = scope.launch {
+    fun disconnect(peripheral: Peripheral, scope: CoroutineScope) = scope.launch {
         // clear all states.
         _uiViewState.value = UiViewState()
         peripheral.disconnect()
