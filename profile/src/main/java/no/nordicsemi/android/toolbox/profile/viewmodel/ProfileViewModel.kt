@@ -11,7 +11,7 @@ import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
 import no.nordicsemi.android.hts.HTSDestinationId
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
-import no.nordicsemi.android.toolbox.profile.repository.ConnectionManager
+import no.nordicsemi.android.toolbox.profile.repository.ProfileManager
 import no.nordicsemi.android.ui.view.MockRemoteService
 import no.nordicsemi.android.ui.view.Profile
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
@@ -21,11 +21,11 @@ import javax.inject.Inject
 internal class ProfileViewModel @Inject constructor(
     private val navigator: Navigator,
     savedStateHandle: SavedStateHandle,
-    private val connectionManager: ConnectionManager,
+    private val profileManager: ProfileManager,
     @ApplicationContext private val context: Context
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
     private val peripheral = parameterOf(ProfileDestinationId).peripheral
-    val uiState = connectionManager.uiViewState
+    val uiState = profileManager.uiViewState
 
     init {
         connect(peripheral)
@@ -47,7 +47,7 @@ internal class ProfileViewModel @Inject constructor(
             }
 
             null -> {
-                connectionManager.isLoading()
+                profileManager.isLoading()
             }
 
             else -> {
@@ -62,19 +62,19 @@ internal class ProfileViewModel @Inject constructor(
      * @param peripheral The peripheral to connect to.
      */
     private fun connect(peripheral: Peripheral) = viewModelScope.launch {
-        connectionManager.connect(peripheral)
+        profileManager.connect(peripheral)
     }
 
     /** Disconnect from the peripheral and navigate back. */
     fun onDisconnect() {
-        connectionManager.disconnect(peripheral)
+        profileManager.disconnect(peripheral)
         navigator.navigateUp()
     }
 
     /** This method is called when the profile is not implemented yet. */
     private fun profileNotImplemented() {
         Toast.makeText(context, "Profile not implemented yet.", Toast.LENGTH_SHORT).show()
-        connectionManager.disconnect(peripheral)
+        profileManager.disconnect(peripheral)
         navigator.navigateUp()
     }
 
