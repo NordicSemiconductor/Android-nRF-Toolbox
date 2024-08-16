@@ -75,12 +75,16 @@ internal class ProfileManager @Inject constructor(
         peripheral: Peripheral,
         autoConnect: Boolean = false
     ) {
-        centralManager.connect(
-            peripheral = peripheral,
-            options = if (autoConnect) {
-                CentralManager.ConnectionOptions.AutoConnect
-            } else CentralManager.ConnectionOptions.Default
-        )
+        try {
+            centralManager.connect(
+                peripheral = peripheral,
+                options = if (autoConnect) {
+                    CentralManager.ConnectionOptions.AutoConnect
+                } else CentralManager.ConnectionOptions.Default
+            )
+        } catch (e: Exception) {
+            Timber.e(e)
+        }
         peripheral.state.onEach { state ->
             when (state) {
                 ConnectionState.Connected -> {
