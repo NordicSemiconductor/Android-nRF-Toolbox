@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
-import no.nordicsemi.android.common.permissions.ble.RequireLocation
 import no.nordicsemi.android.common.ui.view.NordicAppBar
 import no.nordicsemi.android.toolbox.profile.repository.ProfileViewState
 import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileViewModel
@@ -54,50 +53,48 @@ internal fun ProfileScreen() {
                 .fillMaxSize()
         ) {
             RequireBluetooth {
-                RequireLocation {
-                    // Display the connection state
-                    when (state.connectionState) {
-                        ConnectionState.Connected -> {
-                            when (val p = state.profileViewState) {
-                                ProfileViewState.Loading -> Loading()
-                                ProfileViewState.NoServiceFound -> {
-                                    Toast.makeText(
-                                        LocalContext.current,
-                                        SERVICE_NOT_FOUND,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    profileViewModel.onDisconnect()
-                                }
+                // Display the connection state
+                when (state.connectionState) {
+                    ConnectionState.Connected -> {
+                        when (val p = state.profileViewState) {
+                            ProfileViewState.Loading -> Loading()
+                            ProfileViewState.NoServiceFound -> {
+                                Toast.makeText(
+                                    LocalContext.current,
+                                    SERVICE_NOT_FOUND,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                profileViewModel.onDisconnect()
+                            }
 
-                                is ProfileViewState.NotImplemented -> {
-                                    Toast.makeText(
-                                        LocalContext.current,
-                                        PROFILE_NOT_IMPLEMENTED,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    profileViewModel.onDisconnect()
-                                }
+                            is ProfileViewState.NotImplemented -> {
+                                Toast.makeText(
+                                    LocalContext.current,
+                                    PROFILE_NOT_IMPLEMENTED,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                profileViewModel.onDisconnect()
+                            }
 
-                                is ProfileViewState.ProfileFound -> {
-                                    profileViewModel.discoveredProfile(p.profile)
-                                }
+                            is ProfileViewState.ProfileFound -> {
+                                profileViewModel.discoveredProfile(p.profile)
                             }
                         }
+                    }
 
-                        ConnectionState.Connecting, ConnectionState.Disconnecting -> Loading()
+                    ConnectionState.Connecting, ConnectionState.Disconnecting -> Loading()
 
-                        is ConnectionState.Disconnected -> {
-                            Toast.makeText(
-                                LocalContext.current,
-                                DISCONNECTED,
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            profileViewModel.onDisconnect()
-                        }
+                    is ConnectionState.Disconnected -> {
+                        Toast.makeText(
+                            LocalContext.current,
+                            DISCONNECTED,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        profileViewModel.onDisconnect()
+                    }
 
-                        null -> {
-                            // Do nothing
-                        }
+                    null -> {
+                        // Do nothing
                     }
                 }
             }
