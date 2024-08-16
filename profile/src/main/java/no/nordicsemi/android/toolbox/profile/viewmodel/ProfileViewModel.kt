@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
@@ -62,19 +63,20 @@ internal class ProfileViewModel @Inject constructor(
      * @param peripheral The peripheral to connect to.
      */
     private fun connect(peripheral: Peripheral) = viewModelScope.launch {
-        profileManager.connect(peripheral)
+        profileManager.connect(peripheral, autoConnect = false, scope = viewModelScope)
     }
 
     /** Disconnect from the peripheral and navigate back. */
     fun onDisconnect() {
-        profileManager.disconnect(peripheral)
+        profileManager.disconnect(peripheral, viewModelScope)
+        viewModelScope.cancel()
         navigator.navigateUp()
     }
 
     /** This method is called when the profile is not implemented yet. */
     private fun profileNotImplemented() {
         Toast.makeText(context, "Profile not implemented yet.", Toast.LENGTH_SHORT).show()
-        profileManager.disconnect(peripheral)
+        profileManager.disconnect(peripheral, viewModelScope)
         navigator.navigateUp()
     }
 
