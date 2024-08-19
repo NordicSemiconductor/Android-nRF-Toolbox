@@ -10,6 +10,7 @@ android {
 dependencies {
     implementation(project(":profile_hts"))
     implementation(project(":lib_ui"))
+    implementation(project(":lib_profile"))
 
     implementation(libs.nordic.navigation)
     implementation(libs.nordic.ui)

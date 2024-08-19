@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionManager
 import no.nordicsemi.android.toolbox.profile.BPS_SERVICE_UUID
 import no.nordicsemi.android.toolbox.profile.CGMS_SERVICE_UUID
 import no.nordicsemi.android.toolbox.profile.CSC_SERVICE_UUID
@@ -17,14 +18,10 @@ import no.nordicsemi.android.toolbox.profile.RSCS_SERVICE_UUID
 import no.nordicsemi.android.toolbox.profile.UART_SERVICE_UUID
 import no.nordicsemi.android.ui.view.MockRemoteService
 import no.nordicsemi.android.ui.view.Profile
-import no.nordicsemi.kotlin.ble.client.RemoteService
-import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * This class is responsible for managing the ui states of connection to the peripheral device.
@@ -61,7 +58,7 @@ internal sealed class ProfileViewState {
 
 @Singleton
 internal class ProfileManager @Inject constructor(
-    private val centralManager: CentralManager,
+    private val deviceConnectionManager: DeviceConnectionManager
 ) {
     private val _uiViewState = MutableStateFlow(UiViewState())
     val uiViewState = _uiViewState.asStateFlow()
@@ -77,17 +74,7 @@ internal class ProfileManager @Inject constructor(
         autoConnect: Boolean = false,
         scope: CoroutineScope,
     ) {
-        try {
-            if (!peripheral.isDisconnected) return
-            centralManager.connect(
-                peripheral = peripheral,
-                options = if (autoConnect) {
-                    CentralManager.ConnectionOptions.AutoConnect
-                } else CentralManager.ConnectionOptions.Default
-            )
-        } catch (e: Exception) {
-            Timber.e(e)
-        }
+        deviceConnectionManager.connectToDevice(peripheral, autoConnect)
         peripheral.state.onEach { state ->
             when (state) {
                 ConnectionState.Connected -> {
@@ -136,7 +123,6 @@ internal class ProfileManager @Inject constructor(
                 }
 
                 is ConnectionState.Disconnected -> {
-                    Timber.tag("AAA").d("Disconnected: ${state.reason}")
                     _uiViewState.value = _uiViewState.value.copy(
                         connectionState = ConnectionState.Disconnected(state.reason)
                     )
