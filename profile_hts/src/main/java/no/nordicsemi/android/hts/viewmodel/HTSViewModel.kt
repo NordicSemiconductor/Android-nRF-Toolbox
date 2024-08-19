@@ -17,6 +17,7 @@ import no.nordicsemi.android.hts.HTSDestinationId
 import no.nordicsemi.android.hts.data.BatteryLevelParser
 import no.nordicsemi.android.hts.data.HTSDataParser
 import no.nordicsemi.android.hts.data.HTSServiceData
+import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionManager
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
@@ -36,6 +37,7 @@ private val BATTERY_LEVEL_CHARACTERISTIC_UUID =
  */
 @HiltViewModel
 internal class HTSViewModel @Inject constructor(
+    private val connectionManager: DeviceConnectionManager,
     private val navigator: Navigator,
     savedStateHandle: SavedStateHandle,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
@@ -80,6 +82,13 @@ internal class HTSViewModel @Inject constructor(
                 _state.value = _state.value.copy(
                     temperatureUnit = event.value
                 )
+            }
+
+            OnRetryClicked -> {
+                // Retry the connection.
+                viewModelScope.launch {
+                    connectionManager.connectToDevice(htsParam.peripheral!!)
+                }
             }
         }
     }

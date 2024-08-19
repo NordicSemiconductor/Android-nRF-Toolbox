@@ -8,6 +8,8 @@ internal data class OnTemperatureUnitSelected(
     val value: TemperatureUnit,
 ) : HTSScreenViewEvent
 
+internal data object OnRetryClicked : HTSScreenViewEvent
+
 internal data object NavigateUp : HTSScreenViewEvent
 
 internal data object DisconnectEvent : HTSScreenViewEvent
