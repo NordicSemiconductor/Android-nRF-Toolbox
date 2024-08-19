@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
@@ -20,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.common.ui.view.RadioButtonGroup
 import no.nordicsemi.android.hts.R
 import no.nordicsemi.android.hts.viewmodel.DisconnectEvent
@@ -50,18 +49,20 @@ internal fun HtsHomeView() {
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp)
-        ) {
+        RequireBluetooth {
             Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .padding(16.dp)
             ) {
-                ScreenSection {
-                    SectionTitle(resId = R.drawable.ic_thermometer, title = "Settings")
+                when (val r = state.connectionState) {
+                    ConnectionState.Connected -> {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            ScreenSection {
+                                SectionTitle(resId = R.drawable.ic_thermometer, title = "Settings")
 
                     Spacer(modifier = Modifier.height(16.dp))
 
