@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.nordic.ui)
     implementation(libs.nordic.theme)
     implementation(libs.nordic.navigation)
+    implementation(libs.nordic.permissions.ble)
     implementation(libs.nordic.logger)
 
     implementation(libs.androidx.compose.material3)
