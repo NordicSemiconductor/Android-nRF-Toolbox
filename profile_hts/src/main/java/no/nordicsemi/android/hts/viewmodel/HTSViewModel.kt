@@ -7,6 +7,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
@@ -21,6 +22,7 @@ import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionManager
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
+import no.nordicsemi.kotlin.ble.core.Manager
 import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
@@ -44,6 +46,7 @@ internal class HTSViewModel @Inject constructor(
     private val htsParam = parameterOf(HTSDestinationId).remoteService
     private val _state: MutableStateFlow<HTSServiceData> = MutableStateFlow(HTSServiceData())
     val state = _state.asStateFlow()
+    private val peripheral: Peripheral? = htsParam.peripheral
 
     init {
         viewModelScope.launch {
@@ -51,13 +54,23 @@ internal class HTSViewModel @Inject constructor(
                 .serviceData?.let { remoteService ->
                     discoverService(remoteService)
                 }
-            htsParam.peripheral?.state?.onEach {
+            peripheral?.state?.onEach {
                 _state.value = _state.value.copy(
                     connectionState = it,
                 )
             }?.launchIn(viewModelScope)
-
         }
+        // Check the Bluetooth connection status and reestablish the device connection if Bluetooth is reconnected.
+        connectionManager.state.drop(1).onEach { state ->
+            // If the Bluetooth adapter has been disabled, disconnect the device.
+            if (state == Manager.State.POWERED_OFF) {
+                peripheral?.disconnect()
+            } else if (state == Manager.State.POWERED_ON) {
+                // Reconnect to the peripheral.
+                connectionManager.connectToDevice(peripheral!!)
+            }
+        }.launchIn(viewModelScope)
+
     }
 
     fun onEvent(event: HTSScreenViewEvent) {
@@ -66,7 +79,7 @@ internal class HTSViewModel @Inject constructor(
                 viewModelScope.launch {
                     // Navigate back
                     try {
-                        disconnect(htsParam.peripheral!!)
+                        if (peripheral?.isConnected == true) disconnect(peripheral)
                     } catch (e: Exception) {
                         Timber.e(e)
                     }
@@ -87,7 +100,7 @@ internal class HTSViewModel @Inject constructor(
             OnRetryClicked -> {
                 // Retry the connection.
                 viewModelScope.launch {
-                    connectionManager.connectToDevice(htsParam.peripheral!!)
+                    connectionManager.connectToDevice(peripheral!!)
                 }
             }
         }

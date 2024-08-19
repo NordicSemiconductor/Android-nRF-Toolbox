@@ -62,6 +62,7 @@ internal class ProfileManager @Inject constructor(
 ) {
     private val _uiViewState = MutableStateFlow(UiViewState())
     val uiViewState = _uiViewState.asStateFlow()
+    val bleState = deviceConnectionManager.state
 
     /**
      * Connect to the peripheral device.
@@ -155,5 +156,12 @@ internal class ProfileManager @Inject constructor(
         // clear all states.
         _uiViewState.value = UiViewState()
         peripheral.disconnect()
+    }
+
+    /**
+     * Clear states to initial state.
+     */
+    fun clear() {
+        _uiViewState.value = UiViewState()
     }
 }

@@ -10,6 +10,7 @@ import javax.inject.Singleton
 class DeviceConnectionManager @Inject constructor(
     private val centralManager: CentralManager,
 ) {
+    val state = centralManager.state
     /**
      * Connects to the peripheral device.
      *
