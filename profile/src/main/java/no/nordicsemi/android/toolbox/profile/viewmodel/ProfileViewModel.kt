@@ -1,12 +1,12 @@
 package no.nordicsemi.android.toolbox.profile.viewmodel
 
-import android.content.Context
-import android.widget.Toast
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
@@ -16,20 +16,30 @@ import no.nordicsemi.android.toolbox.profile.repository.ProfileManager
 import no.nordicsemi.android.ui.view.MockRemoteService
 import no.nordicsemi.android.ui.view.Profile
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
+import no.nordicsemi.kotlin.ble.core.Manager
 import javax.inject.Inject
 
 @HiltViewModel
 internal class ProfileViewModel @Inject constructor(
     private val navigator: Navigator,
     savedStateHandle: SavedStateHandle,
-    private val profileManager: ProfileManager,
-    @ApplicationContext private val context: Context
+    private val profileManager: ProfileManager
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
     private val peripheral = parameterOf(ProfileDestinationId).peripheral
     val uiState = profileManager.uiViewState
 
     init {
+        // Connect to the peripheral.
         connect(peripheral)
+        // Check the Bluetooth connection status and reestablish the device connection if Bluetooth is reconnected.
+        profileManager.bleState.drop(1).onEach {
+            if (it == Manager.State.POWERED_ON && peripheral.isDisconnected) {
+                // Clear the profile manager to start from scratch.
+                profileManager.clear()
+                // Reconnect to the peripheral.
+                connect(peripheral)
+            }
+        }.launchIn(viewModelScope)
     }
 
     /**
@@ -75,7 +85,6 @@ internal class ProfileViewModel @Inject constructor(
 
     /** This method is called when the profile is not implemented yet. */
     private fun profileNotImplemented() {
-        Toast.makeText(context, "Profile not implemented yet.", Toast.LENGTH_SHORT).show()
         profileManager.disconnect(peripheral, viewModelScope)
         navigator.navigateUp()
     }
