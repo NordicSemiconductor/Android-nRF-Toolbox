@@ -49,6 +49,11 @@ internal class HTSViewModel @Inject constructor(
                 .serviceData?.let { remoteService ->
                     discoverService(remoteService)
                 }
+            htsParam.peripheral?.state?.onEach {
+                _state.value = _state.value.copy(
+                    connectionState = it,
+                )
+            }?.launchIn(viewModelScope)
 
         }
     }

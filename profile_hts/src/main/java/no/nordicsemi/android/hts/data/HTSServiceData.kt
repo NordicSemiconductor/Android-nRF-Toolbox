@@ -1,6 +1,7 @@
 package no.nordicsemi.android.hts.data
 
 import no.nordicsemi.android.hts.view.TemperatureUnit
+import no.nordicsemi.kotlin.ble.core.ConnectionState
 import java.util.Calendar
 
 /**
@@ -49,4 +50,5 @@ internal data class HTSServiceData(
     val temperatureUnit: TemperatureUnit = TemperatureUnit.CELSIUS,
     val deviceName: String? = null,
     val missingServices: Boolean = false,
+    val connectionState: ConnectionState? = null,
 )
