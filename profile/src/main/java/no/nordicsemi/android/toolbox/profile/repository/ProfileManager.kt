@@ -155,7 +155,7 @@ internal class ProfileManager @Inject constructor(
     fun disconnect(peripheral: Peripheral, scope: CoroutineScope) = scope.launch {
         // clear all states.
         _uiViewState.value = UiViewState()
-        peripheral.disconnect()
+        if (peripheral.isConnected) peripheral.disconnect()
     }
 
     /**
