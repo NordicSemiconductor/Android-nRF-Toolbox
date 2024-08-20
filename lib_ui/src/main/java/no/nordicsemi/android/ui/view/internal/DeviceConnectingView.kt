@@ -1,4 +1,4 @@
-package no.nordicsemi.android.hts.view
+package no.nordicsemi.android.ui.view.internal
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.HighlightOff
+import androidx.compose.material.icons.filled.HourglassTop
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -20,33 +20,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.common.ui.view.CircularIcon
-import no.nordicsemi.kotlin.ble.core.ConnectionState.Disconnected.Reason
 
 @Composable
-fun DeviceDisconnectedView(
-    reason: Reason,
+fun DeviceConnectingView(
     modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.(PaddingValues) -> Unit = {},
-) {
-    val disconnectedReason = when (reason) {
-        Reason.Cancelled -> "Connection was cancelled."
-        Reason.LinkLoss -> "Device signal has been lost."
-        Reason.Success -> "Device disconnected successfully."
-        Reason.TerminateLocalHost -> "Device disconnected by the local host."
-        Reason.TerminatePeerUser -> "Device disconnected by the peer user."
-        is Reason.Timeout -> "Connection attempt timed out."
-        is Reason.Unknown -> "Device disconnected with unknown reason."
-        Reason.UnsupportedAddress -> "Device disconnected due to unsupported address."
-    }
-
-    DeviceDisconnectedView(disconnectedReason = disconnectedReason, modifier, content)
-}
-
-@Composable
-private fun DeviceDisconnectedView(
-    disconnectedReason: String,
-    modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.(PaddingValues) -> Unit = {},
+    content: @Composable ColumnScope.(PaddingValues) -> Unit = {}
 ) {
     Column(
         modifier = modifier,
@@ -63,15 +41,21 @@ private fun DeviceDisconnectedView(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                CircularIcon(imageVector = Icons.Default.HighlightOff)
+                CircularIcon(imageVector = Icons.Default.HourglassTop)
 
                 Text(
-                    text = "Device disconnected",
+                    text = "Connecting...",
                     style = MaterialTheme.typography.titleMedium
                 )
 
                 Text(
-                    text = disconnectedReason,
+                    text = "The mobile is trying to connect to peripheral device.",
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Text(
+                    text = "Please wait...",
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -84,18 +68,15 @@ private fun DeviceDisconnectedView(
 
 @Preview(showBackground = true)
 @Composable
-private fun DeviceDisconnectedViewPreview() {
+private fun DeviceConnectingView_Preview() {
     MaterialTheme {
-        DeviceDisconnectedView(
-            reason = Reason.LinkLoss,
-            content = { padding ->
-                Button(
-                    onClick = {},
-                    modifier = Modifier.padding(padding)
-                ) {
-                    Text(text = "Retry")
-                }
+        DeviceConnectingView { padding ->
+            Button(
+                onClick = {},
+                modifier = Modifier.padding(padding)
+            ) {
+                Text(text = "Cancel")
             }
-        )
+        }
     }
 }
