@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -27,7 +28,9 @@ fun DeviceConnectingView(
     content: @Composable ColumnScope.(PaddingValues) -> Unit = {}
 ) {
     Column(
-        modifier = modifier,
+        modifier = Modifier
+            .fillMaxSize()
+            .then(modifier),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         OutlinedCard(

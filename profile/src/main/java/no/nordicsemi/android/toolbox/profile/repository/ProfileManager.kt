@@ -20,6 +20,7 @@ import no.nordicsemi.android.ui.view.MockRemoteService
 import no.nordicsemi.android.ui.view.Profile
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -75,12 +76,18 @@ internal class ProfileManager @Inject constructor(
         autoConnect: Boolean = false,
         scope: CoroutineScope,
     ) {
-        deviceConnectionManager.connectToDevice(peripheral, autoConnect)
+        try {
+            deviceConnectionManager.connectToDevice(peripheral, autoConnect)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Timber.e(e)
+        }
         peripheral.state.onEach { state ->
             when (state) {
                 ConnectionState.Connected -> {
                     _uiViewState.value = _uiViewState.value.copy(
-                        connectionState = ConnectionState.Connected
+                        connectionState = ConnectionState.Connected,
+                        profileViewState = ProfileViewState.Loading
                     )
                     peripheral.services().onEach { remoteServices ->
                         when {

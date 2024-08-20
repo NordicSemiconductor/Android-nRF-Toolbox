@@ -3,7 +3,6 @@ package no.nordicsemi.android.toolbox.profile.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -55,6 +54,14 @@ internal class ProfileViewModel @Inject constructor(
                     peripheral = peripheral,
                 )
                 navigator.navigateTo(HTSDestinationId, Profile.HTS(args))
+                {
+                    popUpTo(ProfileDestinationId.toString()) {
+                        inclusive = true
+                    }
+                }
+                // Clear the profile manager states to prevent reconnection.
+                profileManager.clear()
+
             }
 
             null -> {
@@ -79,14 +86,25 @@ internal class ProfileViewModel @Inject constructor(
     /** Disconnect from the peripheral and navigate back. */
     fun onDisconnect() {
         profileManager.disconnect(peripheral, viewModelScope)
-        viewModelScope.cancel()
+        profileManager.clear()
         navigator.navigateUp()
     }
 
     /** This method is called when the profile is not implemented yet. */
     private fun profileNotImplemented() {
         profileManager.disconnect(peripheral, viewModelScope)
+        profileManager.clear()
         navigator.navigateUp()
+    }
+
+    fun reconnect() {
+        connect(peripheral)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        // Clear the profile manager to prevent reconnection.
+        profileManager.clear()
     }
 
 }
