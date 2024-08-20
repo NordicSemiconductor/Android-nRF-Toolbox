@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -56,12 +57,15 @@ internal fun ProfileScreen() {
         ) {
             RequireBluetooth {
                 // Display the connection state
-                when (state.connectionState) {
+                when (val r = state.connectionState) {
                     ConnectionState.Connected -> {
                         when (val p = state.profileViewState) {
                             ProfileViewState.Loading -> Loading()
                             ProfileViewState.NoServiceFound -> {
-                                DeviceDisconnectedView(reason = DisconnectReason.MISSING_SERVICE)
+                                DeviceDisconnectedView(
+                                    reason = DisconnectReason.MISSING_SERVICE,
+                                    modifier = Modifier.padding(16.dp)
+                                )
                             }
 
                             is ProfileViewState.NotImplemented -> {
@@ -79,21 +83,49 @@ internal fun ProfileScreen() {
                         }
                     }
 
-                    ConnectionState.Connecting -> DeviceConnectingView()
+                    ConnectionState.Connecting ->
+                        DeviceConnectingView(modifier = Modifier.padding(16.dp))
 
                     ConnectionState.Disconnecting -> Loading()
 
                     is ConnectionState.Disconnected -> {
-                        Toast.makeText(
-                            LocalContext.current,
-                            DISCONNECTED,
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        profileViewModel.onDisconnect()
+                        when (r.reason) {
+                            ConnectionState.Disconnected.Reason.Success -> {
+                                Toast.makeText(
+                                    LocalContext.current,
+                                    DISCONNECTED,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                profileViewModel.onDisconnect()
+                            }
+
+                            is ConnectionState.Disconnected.Reason.Timeout -> {
+                                DeviceDisconnectedView(
+                                    reason = DisconnectReason.UNKNOWN,
+                                    modifier = Modifier.padding(16.dp)
+                                ) {
+                                    Button(
+                                        modifier = Modifier.padding(it),
+                                        onClick = { profileViewModel.reconnect() }) {
+                                        Text(text = "Reconnect")
+                                    }
+                                }
+
+                            }
+
+                            else -> {
+                                DeviceDisconnectedView(
+                                    reason = r.reason
+                                        ?: ConnectionState.Disconnected.Reason.Unknown(0),
+                                    modifier = Modifier.padding(16.dp)
+                                )
+                            }
+                        }
+
                     }
 
                     null -> {
-                        // Do nothing
+                        Loading()
                     }
                 }
             }

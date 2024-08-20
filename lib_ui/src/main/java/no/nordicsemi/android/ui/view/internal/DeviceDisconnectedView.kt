@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -34,8 +35,8 @@ fun DeviceDisconnectedView(
         Reason.Success -> "Device disconnected successfully."
         Reason.TerminateLocalHost -> "Device disconnected by the local host."
         Reason.TerminatePeerUser -> "Device disconnected by the peer user."
-        is Reason.Timeout -> "Connection attempt timed out."
-        is Reason.Unknown -> "Device disconnected with unknown reason."
+        is Reason.Timeout -> "Connection attempt timed out with ${reason.duration}."
+        is Reason.Unknown -> "Device disconnected with unknown reason with status ${reason.status}."
         Reason.UnsupportedAddress -> "Device disconnected due to unsupported address."
     }
 
@@ -69,7 +70,9 @@ private fun DeviceDisconnectedView(
     content: @Composable ColumnScope.(PaddingValues) -> Unit = {},
 ) {
     Column(
-        modifier = modifier,
+        modifier = Modifier
+            .fillMaxSize()
+            .then(modifier),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         OutlinedCard(
