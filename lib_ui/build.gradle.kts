@@ -44,6 +44,7 @@ android {
 
 dependencies {
     implementation(libs.nordic.theme)
+    implementation(libs.nordic.ui)
     implementation(libs.nordic.logger)
 
     implementation(libs.nordic.blek.client)

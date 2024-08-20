@@ -30,10 +30,12 @@ import no.nordicsemi.android.hts.viewmodel.NavigateUp
 import no.nordicsemi.android.hts.viewmodel.OnRetryClicked
 import no.nordicsemi.android.hts.viewmodel.OnTemperatureUnitSelected
 import no.nordicsemi.android.ui.view.BatteryLevelView
+import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
 import no.nordicsemi.android.ui.view.KeyValueField
 import no.nordicsemi.android.ui.view.ProfileAppBar
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
+import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 
 @Composable
