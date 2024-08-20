@@ -25,9 +25,11 @@ import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.common.ui.view.NordicAppBar
 import no.nordicsemi.android.toolbox.profile.repository.ProfileViewState
 import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileViewModel
+import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
+import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
+import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 
-private const val SERVICE_NOT_FOUND = "No service found."
 private const val PROFILE_NOT_IMPLEMENTED = "Profile not implemented yet."
 private const val DISCONNECTED = "Disconnected"
 
@@ -59,12 +61,7 @@ internal fun ProfileScreen() {
                         when (val p = state.profileViewState) {
                             ProfileViewState.Loading -> Loading()
                             ProfileViewState.NoServiceFound -> {
-                                Toast.makeText(
-                                    LocalContext.current,
-                                    SERVICE_NOT_FOUND,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                profileViewModel.onDisconnect()
+                                DeviceDisconnectedView(reason = DisconnectReason.MISSING_SERVICE)
                             }
 
                             is ProfileViewState.NotImplemented -> {
@@ -82,7 +79,9 @@ internal fun ProfileScreen() {
                         }
                     }
 
-                    ConnectionState.Connecting, ConnectionState.Disconnecting -> Loading()
+                    ConnectionState.Connecting -> DeviceConnectingView()
+
+                    ConnectionState.Disconnecting -> Loading()
 
                     is ConnectionState.Disconnected -> {
                         Toast.makeText(
