@@ -9,4 +9,5 @@ android {
 dependencies {
     implementation("no.nordicsemi.kotlin.ble:client-android")
     implementation(libs.slf4j.timber)
+    implementation(project(":lib_ui"))
 }

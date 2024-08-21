@@ -10,8 +10,8 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
 import no.nordicsemi.android.hts.HTSDestinationId
+import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionManager
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
-import no.nordicsemi.android.toolbox.profile.repository.ProfileManager
 import no.nordicsemi.android.ui.view.MockRemoteService
 import no.nordicsemi.android.ui.view.Profile
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
@@ -22,7 +22,7 @@ import javax.inject.Inject
 internal class ProfileViewModel @Inject constructor(
     private val navigator: Navigator,
     savedStateHandle: SavedStateHandle,
-    private val profileManager: ProfileManager
+    private val profileManager: DeviceConnectionManager
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
     private val peripheral = parameterOf(ProfileDestinationId).peripheral
     val uiState = profileManager.uiViewState
@@ -31,7 +31,7 @@ internal class ProfileViewModel @Inject constructor(
         // Connect to the peripheral.
         connect(peripheral)
         // Check the Bluetooth connection status and reestablish the device connection if Bluetooth is reconnected.
-        profileManager.bleState.drop(1).onEach {
+        profileManager.state.drop(1).onEach {
             if (it == Manager.State.POWERED_ON && peripheral.isDisconnected) {
                 // Clear the profile manager to start from scratch.
                 profileManager.clear()
@@ -80,7 +80,7 @@ internal class ProfileViewModel @Inject constructor(
      * @param peripheral The peripheral to connect to.
      */
     private fun connect(peripheral: Peripheral) = viewModelScope.launch {
-        profileManager.connect(peripheral, autoConnect = false, scope = viewModelScope)
+        profileManager.connectToDevice(peripheral, autoConnect = false, scope = viewModelScope)
     }
 
     /** Disconnect from the peripheral and navigate back. */
