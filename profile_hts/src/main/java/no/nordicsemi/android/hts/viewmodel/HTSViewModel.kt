@@ -67,7 +67,7 @@ internal class HTSViewModel @Inject constructor(
                 peripheral?.disconnect()
             } else if (state == Manager.State.POWERED_ON) {
                 // Reconnect to the peripheral.
-                connectionManager.connectToDevice(peripheral!!)
+                connectionManager.connectToDevice(peripheral!!, scope = viewModelScope)
             }
         }.launchIn(viewModelScope)
 
@@ -100,7 +100,7 @@ internal class HTSViewModel @Inject constructor(
             OnRetryClicked -> {
                 // Retry the connection.
                 viewModelScope.launch {
-                    connectionManager.connectToDevice(peripheral!!)
+                    connectionManager.connectToDevice(peripheral!!, scope = viewModelScope)
                 }
             }
         }
