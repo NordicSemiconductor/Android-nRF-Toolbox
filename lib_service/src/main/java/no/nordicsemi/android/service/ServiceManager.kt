@@ -31,11 +31,7 @@
 
 package no.nordicsemi.android.service
 
-import no.nordicsemi.android.kotlin.ble.core.ServerDevice
-
-const val DEVICE_DATA = "device-data"
-
 interface ServiceManager {
 
-    fun <T> startService(service: Class<T>, device: ServerDevice)
+    fun <T> startService(service: Class<T>)
 }

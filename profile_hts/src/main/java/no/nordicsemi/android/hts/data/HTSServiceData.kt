@@ -44,7 +44,7 @@ enum class TemperatureUnitData(private val value: Int) {
  * @param deviceName The device name.
  * @param missingServices True if the services are missing, false otherwise.
  */
-internal data class HTSServiceData(
+data class HTSServiceData(
     val data: HtsData = HtsData(),
     val batteryLevel: Int? = null,
     val temperatureUnit: TemperatureUnit = TemperatureUnit.CELSIUS,
