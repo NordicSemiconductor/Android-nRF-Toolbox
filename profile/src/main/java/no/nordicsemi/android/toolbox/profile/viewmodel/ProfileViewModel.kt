@@ -22,19 +22,19 @@ import javax.inject.Inject
 internal class ProfileViewModel @Inject constructor(
     private val navigator: Navigator,
     savedStateHandle: SavedStateHandle,
-    private val profileManager: DeviceConnectionManager
+    private val connectionProvider: ConnectionProvider
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
     private val peripheral = parameterOf(ProfileDestinationId).peripheral
-    val uiState = profileManager.uiViewState
+    val uiState = connectionProvider.uiViewState
 
     init {
         // Connect to the peripheral.
         connect(peripheral)
         // Check the Bluetooth connection status and reestablish the device connection if Bluetooth is reconnected.
-        profileManager.state.drop(1).onEach {
+        connectionProvider.state.drop(1).onEach {
             if (it == Manager.State.POWERED_ON && peripheral.isDisconnected) {
                 // Clear the profile manager to start from scratch.
-                profileManager.clear()
+                connectionProvider.clear()
                 // Reconnect to the peripheral.
                 connect(peripheral)
             }
@@ -49,23 +49,19 @@ internal class ProfileViewModel @Inject constructor(
     fun discoveredProfile(profile: Profile?) {
         when (profile) {
             is Profile.HTS -> {
-                val args = MockRemoteService(
-                    serviceData = profile.remoteService.serviceData,
-                    peripheral = peripheral,
-                )
-                navigator.navigateTo(HTSDestinationId, Profile.HTS(args))
+                navigator.navigateTo(HTSDestinationId)
                 {
                     popUpTo(ProfileDestinationId.toString()) {
                         inclusive = true
                     }
                 }
                 // Clear the profile manager states to prevent reconnection.
-                profileManager.clear()
+                connectionProvider.clear()
 
             }
 
             null -> {
-                profileManager.isLoading()
+                connectionProvider.isLoading()
             }
 
             else -> {
@@ -80,20 +76,20 @@ internal class ProfileViewModel @Inject constructor(
      * @param peripheral The peripheral to connect to.
      */
     private fun connect(peripheral: Peripheral) = viewModelScope.launch {
-        profileManager.connectToDevice(peripheral, autoConnect = false, scope = viewModelScope)
+        connectionProvider.connectToDevice(peripheral, autoConnect = false, scope = viewModelScope)
     }
 
     /** Disconnect from the peripheral and navigate back. */
     fun onDisconnect() {
-        profileManager.disconnect(peripheral, viewModelScope)
-        profileManager.clear()
+        connectionProvider.disconnect(peripheral, viewModelScope)
+        connectionProvider.clear()
         navigator.navigateUp()
     }
 
     /** This method is called when the profile is not implemented yet. */
     private fun profileNotImplemented() {
-        profileManager.disconnect(peripheral, viewModelScope)
-        profileManager.clear()
+        connectionProvider.disconnect(peripheral, viewModelScope)
+        connectionProvider.clear()
         navigator.navigateUp()
     }
 
@@ -104,7 +100,7 @@ internal class ProfileViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         // Clear the profile manager to prevent reconnection.
-        profileManager.clear()
+        connectionProvider.clear()
     }
 
 }
