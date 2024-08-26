@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -21,8 +21,11 @@ internal fun HomeView() {
         }
     ) {
         Column(modifier = Modifier.padding(it)) {
-            LaunchedEffect(key1 = viewModel) {
+            DisposableEffect(key1 = viewModel) {
                 viewModel.startScanning()
+                onDispose {
+                    viewModel.cancel()
+                }
             }
         }
     }

@@ -23,30 +23,29 @@ import javax.inject.Inject
  */
 @HiltViewModel
 internal class HTSViewModel @Inject constructor(
-    private val connectionManager: DeviceConnectionManager,
+    private val connectionProvider: ConnectionProvider,
     private val navigator: Navigator,
     savedStateHandle: SavedStateHandle,
     private val htsRepository: HTSRepository,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
-    private val htsParam = parameterOf(HTSDestinationId)
+    private val htsProfile = connectionProvider.profile
     val state = htsRepository.data
-    private val peripheral: Peripheral? = htsParam.remoteService.peripheral
+    private val peripheral: Peripheral? = htsProfile?.remoteService?.peripheral
 
     init {
-        htsRepository.setOnScreen(true)
         htsRepository.peripheral = peripheral
-        htsRepository.remoteService = htsParam.remoteService.serviceData
+        htsRepository.remoteService = htsProfile?.remoteService?.serviceData
         htsRepository.getConnection(viewModelScope)
-        htsRepository.launch(htsParam.remoteService)
+        htsProfile?.let { htsRepository.launch() }
 
         // Check the Bluetooth connection status and reestablish the device connection if Bluetooth is reconnected.
-        connectionManager.state.drop(1).onEach { state ->
+        connectionProvider.state.drop(1).onEach { state ->
             // If the Bluetooth adapter has been disabled, disconnect the device.
             if (state == Manager.State.POWERED_OFF) {
                 peripheral?.disconnect()
             } else if (state == Manager.State.POWERED_ON) {
                 // Reconnect to the peripheral.
-                connectionManager.connectToDevice(peripheral!!, scope = viewModelScope)
+                connectionProvider.connectToDevice(peripheral!!, scope = viewModelScope)
             }
         }.launchIn(viewModelScope)
 
@@ -77,7 +76,7 @@ internal class HTSViewModel @Inject constructor(
             OnRetryClicked -> {
                 // Retry the connection.
                 viewModelScope.launch {
-                    connectionManager.connectToDevice(peripheral!!, scope = viewModelScope)
+                    connectionProvider.connectToDevice(peripheral!!, scope = viewModelScope)
                 }
             }
         }

@@ -28,8 +28,8 @@ class HTSRepository @Inject constructor(
     val data = _data.asStateFlow()
     var peripheral: Peripheral? = null
     var remoteService: RemoteService? = null
-    val device: MockRemoteService
-        get() = MockRemoteService(
+    val device: PeripheralDetails
+        get() = PeripheralDetails(
             serviceData = remoteService,
             peripheral = peripheral
         )
@@ -75,8 +75,8 @@ class HTSRepository @Inject constructor(
         _data.value = _data.value.copy(batteryLevel = batteryLevel)
     }
 
-    fun launch(device: MockRemoteService) {
-        _data.value = _data.value.copy(deviceName = device.peripheral?.name)
+    fun launch() {
+        _data.value = _data.value.copy(deviceName = peripheral?.name)
         serviceManager.startService(HTSService::class.java)
     }
 

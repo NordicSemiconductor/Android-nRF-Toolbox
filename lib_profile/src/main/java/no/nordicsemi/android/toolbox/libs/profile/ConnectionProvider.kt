@@ -123,9 +123,20 @@ class ConnectionProvider @Inject constructor(
                         when {
                             remoteServices.firstOrNull { it.uuid == HTS_SERVICE_UUID } != null -> {
                                 val service = remoteServices.first { it.uuid == HTS_SERVICE_UUID }
+                                profile = Profile.HTS(
+                                    PeripheralDetails(
+                                        serviceData = service,
+                                        peripheral = peripheral
+                                    )
+                                )
                                 _uiViewState.value = _uiViewState.value.copy(
                                     profileViewState = ProfileViewState.ProfileFound(
-                                        Profile.HTS(MockRemoteService(service, peripheral))
+                                        Profile.HTS(
+                                            PeripheralDetails(
+                                                serviceData = service,
+                                                peripheral = peripheral
+                                            )
+                                        )
                                     )
                                 )
                             }
