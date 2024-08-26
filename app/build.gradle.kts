@@ -59,6 +59,8 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.material.iconsExtended)
+    implementation(libs.androidx.compose.runtime)
 
     implementation(libs.androidx.hilt.navigation.compose)
 
