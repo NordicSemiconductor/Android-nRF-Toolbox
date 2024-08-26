@@ -1,5 +1,6 @@
 package no.nordicsemi.android.hts.view
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -43,6 +44,10 @@ internal fun HtsHomeView() {
     val htsVM = hiltViewModel<HTSViewModel>()
     val state by htsVM.state.collectAsStateWithLifecycle()
     val onClickEvent: (HTSScreenViewEvent) -> Unit = { htsVM.onEvent(it) }
+
+    BackHandler {
+        onClickEvent(NavigateUp)
+    }
 
     Scaffold(
         topBar = {
