@@ -33,7 +33,6 @@ class HTSService : NotificationService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
-        repository.setServiceRunning(true)
 
         val device = repository.device
 
@@ -110,11 +109,6 @@ class HTSService : NotificationService() {
 
     private suspend fun disconnect() {
         if (repository.peripheral?.isConnected == true) repository.peripheral?.disconnect()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        repository.setServiceRunning(false)
     }
 
 }

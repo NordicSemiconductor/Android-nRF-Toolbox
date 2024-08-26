@@ -13,7 +13,7 @@ import no.nordicsemi.android.hts.data.HtsData
 import no.nordicsemi.android.hts.view.TemperatureUnit
 import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.ServiceManager
-import no.nordicsemi.android.ui.view.MockRemoteService
+import no.nordicsemi.android.toolbox.libs.profile.PeripheralDetails
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
@@ -38,34 +38,18 @@ class HTSRepository @Inject constructor(
     internal val stopEvent = _stopEvent.asSharedFlow()
 
     val isRunning = data.map { it.connectionState == ConnectionState.Connected }
-    private var isOnScreen = false
-    private var isServiceRunning = false
-
-    fun setOnScreen(isOnScreen: Boolean) {
-        this.isOnScreen = isOnScreen
-
-        if (shouldClean()) clean()
-    }
 
     fun getConnection(scope: CoroutineScope) {
         peripheral?.state?.onEach {
             _data.value = _data.value.copy(
                 connectionState = it,
             )
-        }
-            ?.launchIn(scope)
+        }?.launchIn(scope)
     }
 
     fun disconnect() {
         _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
-
-    fun setServiceRunning(serviceRunning: Boolean) {
-        this.isServiceRunning = serviceRunning
-
-        if (shouldClean()) clean()
-    }
-
 
     fun onHTSDataChanged(data: HtsData) {
         _data.value = _data.value.copy(data = data)
@@ -78,13 +62,6 @@ class HTSRepository @Inject constructor(
     fun launch() {
         _data.value = _data.value.copy(deviceName = peripheral?.name)
         serviceManager.startService(HTSService::class.java)
-    }
-
-    private fun shouldClean() = !isOnScreen && !isServiceRunning
-
-    private fun clean() {
-        // logger = null
-        _data.value = HTSServiceData()
     }
 
     fun onTemperatureUnitChanged(temperatureUnit: TemperatureUnit) {
