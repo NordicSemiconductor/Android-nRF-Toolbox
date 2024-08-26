@@ -41,6 +41,7 @@ android {
 dependencies {
     implementation("no.nordicsemi.kotlin.ble:client-android")
     implementation(project(":profile"))
+    implementation(project(":lib_profile"))
 
     implementation(libs.nordic.navigation)
     implementation(libs.nordic.permissions.ble)
