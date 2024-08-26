@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.toolbox.libs.profile.ConnectionProvider
-import no.nordicsemi.android.toolbox.profile.ProfileArgs
+import no.nordicsemi.android.toolbox.profile.SelectedDevice
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.scanner.repository.ScanningState
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
@@ -66,7 +66,7 @@ internal class ScannerViewModel @Inject constructor(
     fun onDeviceSelected(peripheral: Peripheral) {
         job?.cancel()
         try {
-            navigator.navigateTo(to = ProfileDestinationId, args = ProfileArgs(peripheral))
+            navigator.navigateTo(to = ProfileDestinationId, SelectedDevice(peripheral.address))
         } catch (e: Exception) {
             Timber.e(e)
         }

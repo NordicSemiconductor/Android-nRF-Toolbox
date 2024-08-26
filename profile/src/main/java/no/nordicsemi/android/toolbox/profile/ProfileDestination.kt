@@ -2,19 +2,17 @@ package no.nordicsemi.android.toolbox.profile
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import kotlinx.parcelize.RawValue
 import no.nordicsemi.android.common.navigation.createDestination
 import no.nordicsemi.android.common.navigation.defineDestination
-import no.nordicsemi.android.toolbox.profile.view.ProfileScreen
-import no.nordicsemi.kotlin.ble.client.android.Peripheral
+import no.nordicsemi.android.toolbox.profile.view.DeviceConnectionScreen
 
 @Parcelize
-data class ProfileArgs(
-    val peripheral: @RawValue Peripheral,
+data class SelectedDevice(
+    val deviceAddress: String,
 ) : Parcelable
 
-val ProfileDestinationId = createDestination<ProfileArgs, Unit>("ble-profile-destination")
+val ProfileDestinationId = createDestination<SelectedDevice, Unit>("ble-profile-destination")
 
 val ProfileDestination = defineDestination(ProfileDestinationId) {
-    ProfileScreen()
+    DeviceConnectionScreen()
 }
