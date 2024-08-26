@@ -10,9 +10,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
-import no.nordicsemi.android.hts.HTSDestinationId
 import no.nordicsemi.android.hts.repository.HTSRepository
-import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionManager
+import no.nordicsemi.android.toolbox.libs.profile.ConnectionProvider
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.Manager
 import timber.log.Timber
@@ -45,7 +44,7 @@ internal class HTSViewModel @Inject constructor(
                 peripheral?.disconnect()
             } else if (state == Manager.State.POWERED_ON) {
                 // Reconnect to the peripheral.
-                connectionProvider.connectToDevice(peripheral!!, scope = viewModelScope)
+                peripheral?.address?.let { connectionProvider.connectToDevice(it, scope = viewModelScope) }
             }
         }.launchIn(viewModelScope)
 
@@ -76,7 +75,7 @@ internal class HTSViewModel @Inject constructor(
             OnRetryClicked -> {
                 // Retry the connection.
                 viewModelScope.launch {
-                    connectionProvider.connectToDevice(peripheral!!, scope = viewModelScope)
+                    peripheral?.let { connectionProvider.connectToDevice(it.address, scope = viewModelScope) }
                 }
             }
         }
@@ -85,7 +84,6 @@ internal class HTSViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         viewModelScope.cancel()
-        htsRepository.setOnScreen(false)
     }
 
 }
