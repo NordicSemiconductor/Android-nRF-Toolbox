@@ -70,9 +70,8 @@ class ConnectionProvider @Inject constructor(
 ) {
     private val _uiViewState = MutableStateFlow(UiViewState())
     val uiViewState = _uiViewState.asStateFlow()
-
+    var profile: Profile? = null
     val state = centralManager.state
-    private var connectedPeripheral: Peripheral? = null
 
     /**
      * Scans for BLE devices.
