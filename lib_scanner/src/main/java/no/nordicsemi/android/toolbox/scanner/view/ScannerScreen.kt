@@ -1,5 +1,6 @@
 package no.nordicsemi.android.toolbox.scanner.view
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -77,6 +78,11 @@ internal fun ScannerView() {
             val pullToRefreshState = rememberPullToRefreshState()
             val scanningState by viewModel.scanningState.collectAsStateWithLifecycle()
             val scope = rememberCoroutineScope()
+
+            BackHandler {
+                // Handle back button press
+                // Do nothing.
+            }
 
             LaunchedEffect(key1 = isLocationRequiredAndDisabled) {
                 viewModel.startScanning()
