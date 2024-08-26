@@ -92,14 +92,15 @@ class ConnectionProvider @Inject constructor(
     /**
      * Connects to the peripheral device.
      *
-     * @param peripheral The peripheral to connect to.
+     * @param deviceAddress The peripheral to connect to.
      * @param autoConnect If `true`, the connection will be established using the Auto Connect feature.
      */
     suspend fun connectToDevice(
-        peripheral: Peripheral,
+        deviceAddress: String,
         autoConnect: Boolean = false,
         scope: CoroutineScope
     ) {
+        val peripheral = getPeripheral(deviceAddress) ?: return
         try {
             if (!peripheral.isDisconnected) return
             centralManager.connect(
@@ -184,6 +185,10 @@ class ConnectionProvider @Inject constructor(
                 }
             }
         }.launchIn(scope)
+    }
+
+    fun getPeripheral(peripheralByAddress: String): Peripheral? {
+        return centralManager.getPeripheralById(peripheralByAddress)
     }
 
     /**
