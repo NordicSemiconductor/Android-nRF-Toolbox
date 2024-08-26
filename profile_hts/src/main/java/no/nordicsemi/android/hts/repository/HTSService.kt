@@ -37,7 +37,7 @@ class HTSService : NotificationService() {
 
         val device = repository.device
 
-        device.serviceData?.let { discoverService(it, lifecycleScope) }
+        device.serviceData?.let { getRemoteServices(it, lifecycleScope) }
 
         repository.stopEvent
             .onEach {
@@ -48,7 +48,7 @@ class HTSService : NotificationService() {
         return START_REDELIVER_INTENT
     }
 
-    private fun discoverService(remoteService: RemoteService, scope: CoroutineScope) =
+    private fun getRemoteServices(remoteService: RemoteService, scope: CoroutineScope) =
         lifecycleScope.launch {
             remoteService.owner?.services()
                 ?.onEach { services ->

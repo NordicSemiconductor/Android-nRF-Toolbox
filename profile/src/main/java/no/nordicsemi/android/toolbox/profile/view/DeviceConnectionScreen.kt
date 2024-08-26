@@ -25,7 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.common.ui.view.NordicAppBar
 import no.nordicsemi.android.toolbox.libs.profile.ProfileViewState
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileViewModel
+import no.nordicsemi.android.toolbox.profile.viewmodel.ConnectionViewModel
 import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
 import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
@@ -36,9 +36,9 @@ private const val DISCONNECTED = "Disconnected"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun ProfileScreen() {
-    val profileViewModel: ProfileViewModel = hiltViewModel()
-    val state by profileViewModel.uiState.collectAsStateWithLifecycle()
+internal fun DeviceConnectionScreen() {
+    val viewModel: ConnectionViewModel = hiltViewModel()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     // Display the connection state
     Scaffold(
@@ -46,7 +46,7 @@ internal fun ProfileScreen() {
             NordicAppBar(
                 title = { Text(text = "Profile") },
                 backButtonIcon = Icons.AutoMirrored.Filled.ArrowBack,
-                onNavigationButtonClick = { profileViewModel.onDisconnect() },
+                onNavigationButtonClick = { viewModel.onDisconnect() },
             )
         }
     ) { paddingValues ->
@@ -74,11 +74,11 @@ internal fun ProfileScreen() {
                                     PROFILE_NOT_IMPLEMENTED,
                                     Toast.LENGTH_SHORT
                                 ).show()
-                                profileViewModel.onDisconnect()
+                                viewModel.onDisconnect()
                             }
 
                             is ProfileViewState.ProfileFound -> {
-                                profileViewModel.discoveredProfile(p.profile)
+                                viewModel.discoveredProfile(p.profile)
                             }
                         }
                     }
@@ -96,7 +96,7 @@ internal fun ProfileScreen() {
                                     DISCONNECTED,
                                     Toast.LENGTH_SHORT
                                 ).show()
-                                profileViewModel.onDisconnect()
+                                viewModel.onDisconnect()
                             }
 
                             is ConnectionState.Disconnected.Reason.Timeout -> {
@@ -106,7 +106,7 @@ internal fun ProfileScreen() {
                                 ) {
                                     Button(
                                         modifier = Modifier.padding(it),
-                                        onClick = { profileViewModel.reconnect() }) {
+                                        onClick = { viewModel.reconnect() }) {
                                         Text(text = "Reconnect")
                                     }
                                 }
