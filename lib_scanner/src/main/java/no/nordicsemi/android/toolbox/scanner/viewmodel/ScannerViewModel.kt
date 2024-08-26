@@ -12,9 +12,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import no.nordicsemi.android.common.navigation.Navigator
+import no.nordicsemi.android.toolbox.libs.profile.ConnectionProvider
 import no.nordicsemi.android.toolbox.profile.ProfileArgs
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
-import no.nordicsemi.android.toolbox.scanner.repository.ScanningManager
 import no.nordicsemi.android.toolbox.scanner.repository.ScanningState
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import timber.log.Timber
@@ -22,7 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class ScannerViewModel @Inject constructor(
-    private val bleScanner: ScanningManager,
+    private val connectionProvider: ConnectionProvider,
     private val navigator: Navigator,
 ) : ViewModel() {
     private val _scanningState = MutableStateFlow<ScanningState>(ScanningState.Loading)
@@ -35,7 +35,7 @@ internal class ScannerViewModel @Inject constructor(
      */
     fun startScanning() {
         job?.cancel()
-        job = bleScanner.startScanning()
+        job = connectionProvider.startScanning()
             .onStart {
                 // Clear the previous devices list.
                 _scanningState.value = ScanningState.DevicesDiscovered(emptyList())
