@@ -5,7 +5,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
@@ -49,6 +48,13 @@ sealed class ProfileState {
     data object NotImplementedYet : ProfileState()
 }
 
+/** A set of supported service UUIDs. */
+private val supportedServiceUuids = setOf(
+    BPS_SERVICE_UUID, CSC_SERVICE_UUID, CGMS_SERVICE_UUID,
+    GLS_SERVICE_UUID, HRS_SERVICE_UUID, PRX_SERVICE_UUID,
+    RSCS_SERVICE_UUID, UART_SERVICE_UUID
+)
+
 @Singleton
 class ConnectionProvider @Inject constructor(
     private val centralManager: CentralManager,
@@ -77,19 +83,19 @@ class ConnectionProvider @Inject constructor(
     }
 
     /**
-     * Connects to the peripheral device.
+     * Connects to the peripheral device and observe peripheral states.
      *
      * @param deviceAddress The peripheral to connect to.
      * @param autoConnect If `true`, the connection will be established using the Auto Connect feature.
      */
-    suspend fun connectToDevice(
+    suspend fun connectAndObservePeripheral(
         deviceAddress: String,
         autoConnect: Boolean = false,
         scope: CoroutineScope
     ) {
-        val peripheral = getPeripheral(deviceAddress) ?: return
+        val peripheral = findPeripheralByAddress(deviceAddress) ?: return
+        if (!peripheral.isDisconnected) return
         try {
-            if (!peripheral.isDisconnected) return
             centralManager.connect(
                 peripheral = peripheral,
                 options = if (autoConnect) {
@@ -99,45 +105,19 @@ class ConnectionProvider @Inject constructor(
         } catch (e: Exception) {
             e.printStackTrace()
             Timber.e(e)
+            return
         }
+        observerPeripheralState(peripheral, scope)
+    }
+
+    private fun observerPeripheralState(
+        peripheral: Peripheral,
+        scope: CoroutineScope
+    ) {
         peripheral.state.onEach { state ->
             when (state) {
                 ConnectionState.Connected -> {
-                    _connectionState.value = ConnectionState.Connected
-                    peripheral.services().onEach { remoteServices ->
-                        when {
-                            remoteServices.firstOrNull { it.uuid == HTS_SERVICE_UUID } != null -> {
-                                val service = remoteServices.first { it.uuid == HTS_SERVICE_UUID }
-                                _profile.value = Profile.HTS(
-                                    PeripheralDetails(
-                                        serviceData = service,
-                                        peripheral = peripheral
-                                    )
-                                )
-                                _profileState.value = ProfileState.ProfileFound(
-                                    ProfileModule.HTS
-                                )
-                            }
-
-                            remoteServices.firstOrNull { it.uuid == BPS_SERVICE_UUID } != null ||
-                                    remoteServices.firstOrNull { it.uuid == CSC_SERVICE_UUID } != null ||
-                                    remoteServices.firstOrNull { it.uuid == CGMS_SERVICE_UUID } != null ||
-                                    remoteServices.firstOrNull { it.uuid == GLS_SERVICE_UUID } != null ||
-                                    remoteServices.firstOrNull { it.uuid == HRS_SERVICE_UUID } != null ||
-                                    remoteServices.firstOrNull { it.uuid == PRX_SERVICE_UUID } != null ||
-                                    remoteServices.firstOrNull { it.uuid == RSCS_SERVICE_UUID } != null ||
-                                    remoteServices.firstOrNull { it.uuid == UART_SERVICE_UUID } != null -> {
-                                _profileState.value = ProfileState.NotImplementedYet
-                            }
-
-                            else -> {
-                                if (remoteServices.isNotEmpty()) {
-                                    _profileState.value = ProfileState.NoServiceFound
-                                }
-                            }
-
-                        }
-                    }.launchIn(scope)
+                    handleConnectedState(peripheral, scope)
                 }
 
                 ConnectionState.Connecting -> {
@@ -155,9 +135,49 @@ class ConnectionProvider @Inject constructor(
         }.launchIn(scope)
     }
 
-    fun getPeripheral(peripheralByAddress: String): Peripheral? {
-        return centralManager.getPeripheralById(peripheralByAddress)
+    private fun handleConnectedState(
+        peripheral: Peripheral,
+        scope: CoroutineScope
+    ) {
+        _connectionState.value = ConnectionState.Connected
+        peripheral.services().onEach { remoteServices ->
+            when {
+                remoteServices.firstOrNull { it.uuid == HTS_SERVICE_UUID } != null -> {
+                    val service = remoteServices.first { it.uuid == HTS_SERVICE_UUID }
+                    _profile.value = Profile.HTS(
+                        PeripheralDetails(
+                            serviceData = service,
+                            peripheral = peripheral
+                        )
+                    )
+                    _profileState.value = ProfileState.ProfileFound(
+                        ProfileModule.HTS
+                    )
+                }
+
+                remoteServices.any { it.uuid in supportedServiceUuids } -> {
+                    _profileState.value = ProfileState.NotImplementedYet
+                }
+
+                else -> {
+                    if (remoteServices.isNotEmpty()) {
+                        _profileState.value = ProfileState.NoServiceFound
+                    }
+                }
+
+            }
+        }.launchIn(scope)
     }
+
+    /**
+     * Find a peripheral device by its address.
+     *
+     * @param peripheralByAddress The address of the peripheral device.
+     * @return The peripheral device if found, or `null` otherwise.
+     */
+    fun findPeripheralByAddress(peripheralByAddress: String): Peripheral? =
+        centralManager.getPeripheralById(peripheralByAddress)
+
 
     /**
      * Update the ui state to loading.
@@ -173,7 +193,7 @@ class ConnectionProvider @Inject constructor(
      */
     fun disconnect(peripheral: Peripheral, scope: CoroutineScope) = scope.launch {
         // clear all states.
-        clear()
+        clearState()
         if (peripheral.isConnected) {
             peripheral.disconnect()
             scope.cancel()
@@ -183,7 +203,7 @@ class ConnectionProvider @Inject constructor(
     /**
      * Clear states to initial state.
      */
-    fun clear() {
+    fun clearState() {
         _profile.value
         _profileState.value = ProfileState.Loading
         _connectionState.value = null

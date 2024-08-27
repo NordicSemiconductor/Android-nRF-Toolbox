@@ -40,7 +40,7 @@ class HTSRepository @Inject constructor(
     val isRunning = data.map { it.connectionState == ConnectionState.Connected }
 
     /** Launches the HTS service. */
-    fun launch() {
+    fun launchHtsService() {
         _data.value = _data.value.copy(deviceName = peripheral?.name)
         serviceManager.startService(HTSService::class.java)
     }

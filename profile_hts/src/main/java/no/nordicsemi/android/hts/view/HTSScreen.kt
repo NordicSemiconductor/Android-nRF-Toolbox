@@ -18,12 +18,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.common.ui.view.RadioButtonGroup
 import no.nordicsemi.android.hts.R
+import no.nordicsemi.android.hts.data.HTSServiceData
 import no.nordicsemi.android.hts.viewmodel.DisconnectEvent
 import no.nordicsemi.android.hts.viewmodel.HTSScreenViewEvent
 import no.nordicsemi.android.hts.viewmodel.HTSViewModel
@@ -40,7 +42,7 @@ import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 
 @Composable
-internal fun HtsHomeView() {
+internal fun HtsHomeScreen() {
     val htsVM = hiltViewModel<HTSViewModel>()
     val state by htsVM.state.collectAsStateWithLifecycle()
     val onClickEvent: (HTSScreenViewEvent) -> Unit = { htsVM.onEvent(it) }
@@ -69,47 +71,7 @@ internal fun HtsHomeView() {
             ) {
                 when (val r = state.connectionState) {
                     ConnectionState.Connected -> {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            ScreenSection {
-                                SectionTitle(resId = R.drawable.ic_thermometer, title = "Settings")
-
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                RadioButtonGroup(viewEntity = state.temperatureUnit.temperatureSettingsItems()) {
-                                    onClickEvent(OnTemperatureUnitSelected(it.label.toTemperatureUnit()))
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            ScreenSection {
-                                SectionTitle(
-                                    resId = R.drawable.ic_records,
-                                    title = stringResource(id = R.string.hts_records_section)
-                                )
-
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                KeyValueField(
-                                    stringResource(id = R.string.hts_temperature),
-                                    displayTemperature(
-                                        state.data.temperature,
-                                        state.temperatureUnit
-                                    )
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            state.batteryLevel?.let { batteryLevel ->
-                                BatteryLevelView(batteryLevel)
-
-                                Spacer(modifier = Modifier.height(16.dp))
-                            }
-                        }
+                        DeviceConnectedView(state, onClickEvent)
                     }
 
                     null, ConnectionState.Connecting ->
@@ -137,6 +99,63 @@ internal fun HtsHomeView() {
             }
         }
     }
+}
+
+@Composable
+private fun DeviceConnectedView(
+    state: HTSServiceData,
+    onClickEvent: (HTSScreenViewEvent) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        ScreenSection {
+            SectionTitle(resId = R.drawable.ic_thermometer, title = "Settings")
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            RadioButtonGroup(viewEntity = state.temperatureUnit.temperatureSettingsItems()) {
+                onClickEvent(OnTemperatureUnitSelected(it.label.toTemperatureUnit()))
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        ScreenSection {
+            SectionTitle(
+                resId = R.drawable.ic_records,
+                title = stringResource(id = R.string.hts_records_section)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            KeyValueField(
+                stringResource(id = R.string.hts_temperature),
+                displayTemperature(
+                    state.data.temperature,
+                    state.temperatureUnit
+                )
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        state.batteryLevel?.let { batteryLevel ->
+            BatteryLevelView(batteryLevel)
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun DeviceConnectedViewPreview() {
+    DeviceConnectedView(
+        state = HTSServiceData(),
+        onClickEvent = {}
+    )
 }
 
 @Composable

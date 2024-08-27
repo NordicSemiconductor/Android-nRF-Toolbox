@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.common.navigation.DestinationId
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.hts.repository.HTSRepository
@@ -19,9 +20,7 @@ data class HomeViewState(
     val profileModule: ProfileModule? = null,
     val refreshToggle: Boolean = false,
 ) {
-    fun copyWithRefresh(): HomeViewState {
-        return copy(refreshToggle = !refreshToggle)
-    }
+    fun toggleRefresh(): HomeViewState = copy(refreshToggle = !refreshToggle)
 }
 
 @HiltViewModel
@@ -35,19 +34,15 @@ internal class HomeViewModel @Inject constructor(
 
     init {
         htsRepository.isRunning.onEach {
-            if (it) {
-                _state.value = _state.value.copy(
-                    profileModule = ProfileModule.HTS,
-                )
-            } else {
-                _state.value = _state.value.copy(
-                    profileModule = null,
-                )
+            _state.update { currentState ->
+                currentState.copy(profileModule = if (it) ProfileModule.HTS else null)
             }
         }.launchIn(viewModelScope)
 
         activitySignals.state.onEach {
-            _state.value = _state.value.copyWithRefresh()
+            _state.update { currentState ->
+                currentState.toggleRefresh()
+            }
         }.launchIn(viewModelScope)
     }
 
