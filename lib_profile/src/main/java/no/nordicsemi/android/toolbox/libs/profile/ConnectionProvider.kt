@@ -2,8 +2,10 @@ package no.nordicsemi.android.toolbox.libs.profile
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
@@ -12,15 +14,16 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.ui.view.BPS_SERVICE_UUID
-import no.nordicsemi.android.ui.view.CGMS_SERVICE_UUID
-import no.nordicsemi.android.ui.view.CSC_SERVICE_UUID
-import no.nordicsemi.android.ui.view.GLS_SERVICE_UUID
-import no.nordicsemi.android.ui.view.HRS_SERVICE_UUID
-import no.nordicsemi.android.ui.view.HTS_SERVICE_UUID
-import no.nordicsemi.android.ui.view.PRX_SERVICE_UUID
-import no.nordicsemi.android.ui.view.RSCS_SERVICE_UUID
-import no.nordicsemi.android.ui.view.UART_SERVICE_UUID
+import no.nordicsemi.android.toolbox.libs.profile.spec.BPS_SERVICE_UUID
+import no.nordicsemi.android.toolbox.libs.profile.spec.CGMS_SERVICE_UUID
+import no.nordicsemi.android.toolbox.libs.profile.spec.CSC_SERVICE_UUID
+import no.nordicsemi.android.toolbox.libs.profile.spec.GLS_SERVICE_UUID
+import no.nordicsemi.android.toolbox.libs.profile.spec.HRS_SERVICE_UUID
+import no.nordicsemi.android.toolbox.libs.profile.spec.HTS_SERVICE_UUID
+import no.nordicsemi.android.toolbox.libs.profile.spec.PRX_SERVICE_UUID
+import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
+import no.nordicsemi.android.toolbox.libs.profile.spec.RSCS_SERVICE_UUID
+import no.nordicsemi.android.toolbox.libs.profile.spec.UART_SERVICE_UUID
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.client.distinctByPeripheral
@@ -31,47 +34,31 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 
-/**
- * This class is responsible for managing the ui states of connection to the peripheral device.
- *
- * @param connectionState The current connection state.
- * @param profileViewState The current profile view state.
- */
-data class UiViewState(
-    val connectionState: ConnectionState? = null,
-    val profileViewState: ProfileViewState = ProfileViewState.Loading,
-)
-
-/**
- * This class is responsible for managing the profile view states.
- */
-sealed class ProfileViewState {
+// TODO: This class will be removed once all profiles are implemented.
+sealed class ProfileState {
     /** The profile view state when the profile is loading. */
-    data object Loading : ProfileViewState()
+    data object Loading : ProfileState()
 
     /** The profile view state when no matching service is found. */
-    data object NoServiceFound : ProfileViewState()
+    data object NoServiceFound : ProfileState()
 
-    /**
-     * The profile view state when a matching profile is found.
-     *
-     * @param profile The matching profile.
-     */
-    data class ProfileFound(val profile: Profile? = null) : ProfileViewState()
+    /** The profile state when the profile is found. */
+    data class ProfileFound(val profile: ProfileModule) : ProfileState()
 
     /** The profile view state when the profile is not implemented yet. */
-    // TODO: This state will be removed once the profile is implemented.
-    data object NotImplemented : ProfileViewState()
+    data object NotImplementedYet : ProfileState()
 }
 
 @Singleton
 class ConnectionProvider @Inject constructor(
     private val centralManager: CentralManager,
 ) {
-    private val _uiViewState = MutableStateFlow(UiViewState())
-    val uiViewState = _uiViewState.asStateFlow()
     var profile: Profile? = null
-    val state = centralManager.state
+    private val _profileState = MutableStateFlow<ProfileState>(ProfileState.Loading)
+    val profileState = _profileState.asStateFlow()
+    val bleState = centralManager.state
+    private val _connectionState = MutableStateFlow<ConnectionState?>(null)
+    val connectionState = _connectionState.asStateFlow()
 
     /**
      * Scans for BLE devices.
@@ -102,6 +89,7 @@ class ConnectionProvider @Inject constructor(
         val peripheral = getPeripheral(deviceAddress) ?: return
         try {
             if (!peripheral.isDisconnected) return
+            clear()
             centralManager.connect(
                 peripheral = peripheral,
                 options = if (autoConnect) {
@@ -115,10 +103,7 @@ class ConnectionProvider @Inject constructor(
         peripheral.state.onEach { state ->
             when (state) {
                 ConnectionState.Connected -> {
-                    _uiViewState.value = _uiViewState.value.copy(
-                        connectionState = ConnectionState.Connected,
-                        profileViewState = ProfileViewState.Loading
-                    )
+                    _connectionState.value = ConnectionState.Connected
                     peripheral.services().onEach { remoteServices ->
                         when {
                             remoteServices.firstOrNull { it.uuid == HTS_SERVICE_UUID } != null -> {
@@ -129,15 +114,8 @@ class ConnectionProvider @Inject constructor(
                                         peripheral = peripheral
                                     )
                                 )
-                                _uiViewState.value = _uiViewState.value.copy(
-                                    profileViewState = ProfileViewState.ProfileFound(
-                                        Profile.HTS(
-                                            PeripheralDetails(
-                                                serviceData = service,
-                                                peripheral = peripheral
-                                            )
-                                        )
-                                    )
+                                _profileState.value = ProfileState.ProfileFound(
+                                    ProfileModule.HTS
                                 )
                             }
 
@@ -149,16 +127,15 @@ class ConnectionProvider @Inject constructor(
                                     remoteServices.firstOrNull { it.uuid == PRX_SERVICE_UUID } != null ||
                                     remoteServices.firstOrNull { it.uuid == RSCS_SERVICE_UUID } != null ||
                                     remoteServices.firstOrNull { it.uuid == UART_SERVICE_UUID } != null -> {
-                                _uiViewState.value = _uiViewState.value.copy(
-                                    profileViewState = ProfileViewState.NotImplemented
-                                )
+                                _profileState.value = ProfileState.NotImplementedYet
+                                profile = null
                             }
 
                             else -> {
-                                if (remoteServices.isNotEmpty())
-                                    _uiViewState.value = _uiViewState.value.copy(
-                                        profileViewState = ProfileViewState.NoServiceFound
-                                    )
+                                if (remoteServices.isNotEmpty()) {
+                                    _profileState.value = ProfileState.NoServiceFound
+                                    profile = null
+                                }
                             }
 
                         }
@@ -166,21 +143,15 @@ class ConnectionProvider @Inject constructor(
                 }
 
                 ConnectionState.Connecting -> {
-                    _uiViewState.value = _uiViewState.value.copy(
-                        connectionState = ConnectionState.Connecting
-                    )
+                    _connectionState.value = ConnectionState.Connecting
                 }
 
                 is ConnectionState.Disconnected -> {
-                    _uiViewState.value = _uiViewState.value.copy(
-                        connectionState = ConnectionState.Disconnected(state.reason)
-                    )
+                    _connectionState.value = ConnectionState.Disconnected(state.reason)
                 }
 
                 ConnectionState.Disconnecting -> {
-                    _uiViewState.value = _uiViewState.value.copy(
-                        connectionState = ConnectionState.Disconnecting
-                    )
+                    _connectionState.value = ConnectionState.Disconnecting
                 }
             }
         }.launchIn(scope)
@@ -194,9 +165,7 @@ class ConnectionProvider @Inject constructor(
      * Update the ui state to loading.
      */
     fun isLoading() {
-        _uiViewState.value = _uiViewState.value.copy(
-            profileViewState = ProfileViewState.Loading,
-        )
+        _profileState.value = ProfileState.Loading
     }
 
     /**
@@ -206,14 +175,19 @@ class ConnectionProvider @Inject constructor(
      */
     fun disconnect(peripheral: Peripheral, scope: CoroutineScope) = scope.launch {
         // clear all states.
-        _uiViewState.value = UiViewState()
-        if (peripheral.isConnected) peripheral.disconnect()
+        clear()
+        if (peripheral.isConnected) {
+            peripheral.disconnect()
+            scope.cancel()
+        }
     }
 
     /**
      * Clear states to initial state.
      */
     fun clear() {
-        _uiViewState.value = UiViewState()
+        profile = null
+        _profileState.value = ProfileState.Loading
+        _connectionState.value = null
     }
 }

@@ -34,7 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.hts.HTSDestinationId
 import no.nordicsemi.android.nrftoolbox.R
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewModel
-import no.nordicsemi.android.nrftoolbox.viewmodel.RunningModule
+import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
 
 @Composable
 internal fun HomeView() {
@@ -49,10 +49,10 @@ internal fun HomeView() {
         Column(modifier = Modifier
             .padding(it)
             .padding(16.dp)) {
-            when (state.runningModule) {
-                RunningModule.CSC -> TODO()
-                RunningModule.HRS -> TODO()
-                RunningModule.HTS -> {
+            when (state.profileModule) {
+                ProfileModule.CSC -> TODO()
+                ProfileModule.HRS -> TODO()
+                ProfileModule.HTS -> {
                     FeatureButton(
                         iconId = Icons.Default.HourglassEmpty,
                         name = "HTS Module",
@@ -62,10 +62,10 @@ internal fun HomeView() {
                     }
                 }
 
-                RunningModule.RSCS -> TODO()
-                RunningModule.PRX -> TODO()
-                RunningModule.CGM -> TODO()
-                RunningModule.UART -> TODO()
+                ProfileModule.RSCS -> TODO()
+                ProfileModule.PRX -> TODO()
+                ProfileModule.CGM -> TODO()
+                ProfileModule.UART -> TODO()
                 null -> {
                     viewModel.startScanning()
                 }

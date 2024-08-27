@@ -29,7 +29,7 @@ internal class HTSViewModel @Inject constructor(
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
     private val htsProfile = connectionProvider.profile
     val state = htsRepository.data
-    private val peripheral: Peripheral? = htsProfile?.remoteService?.peripheral
+    private var peripheral: Peripheral? = connectionProvider.profile?.remoteService?.peripheral
 
     init {
         htsRepository.peripheral = peripheral
@@ -38,13 +38,18 @@ internal class HTSViewModel @Inject constructor(
         htsProfile?.let { htsRepository.launch() }
 
         // Check the Bluetooth connection status and reestablish the device connection if Bluetooth is reconnected.
-        connectionProvider.state.drop(1).onEach { state ->
+        connectionProvider.bleState.drop(1).onEach { state ->
             // If the Bluetooth adapter has been disabled, disconnect the device.
             if (state == Manager.State.POWERED_OFF) {
                 peripheral?.disconnect()
             } else if (state == Manager.State.POWERED_ON) {
                 // Reconnect to the peripheral.
-                peripheral?.address?.let { connectionProvider.connectToDevice(it, scope = viewModelScope) }
+                peripheral?.address?.let {
+                    connectionProvider.connectToDevice(
+                        it,
+                        scope = viewModelScope
+                    )
+                }
             }
         }.launchIn(viewModelScope)
 
@@ -56,7 +61,11 @@ internal class HTSViewModel @Inject constructor(
                 viewModelScope.launch {
                     // Navigate back
                     try {
-                        if (peripheral?.isConnected == true) htsRepository.disconnect()
+                        if (peripheral?.isConnected == true) {
+                            htsRepository.disconnect()
+                            peripheral?.let { connectionProvider.disconnect(it, viewModelScope) }
+                            viewModelScope.cancel()
+                        }
                     } catch (e: Exception) {
                         Timber.e(e)
                     }
@@ -75,7 +84,12 @@ internal class HTSViewModel @Inject constructor(
             OnRetryClicked -> {
                 // Retry the connection.
                 viewModelScope.launch {
-                    peripheral?.let { connectionProvider.connectToDevice(it.address, scope = viewModelScope) }
+                    peripheral?.let {
+                        connectionProvider.connectToDevice(
+                            it.address,
+                            scope = viewModelScope
+                        )
+                    }
                 }
             }
         }

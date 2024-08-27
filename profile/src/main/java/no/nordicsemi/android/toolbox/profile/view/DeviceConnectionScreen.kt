@@ -24,7 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.common.ui.view.NordicAppBar
-import no.nordicsemi.android.toolbox.libs.profile.ProfileViewState
+import no.nordicsemi.android.toolbox.libs.profile.ProfileState
 import no.nordicsemi.android.toolbox.profile.viewmodel.ConnectionViewModel
 import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
 import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
@@ -44,7 +44,7 @@ internal fun DeviceConnectionScreen() {
     Scaffold(
         topBar = {
             NordicAppBar(
-                title = { Text(text = "Profile") },
+                title = { Text(text = viewModel.peripheral?.name ?: "Unknown Peripheral") },
                 backButtonIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onNavigationButtonClick = { viewModel.onDisconnect() },
             )
@@ -59,16 +59,14 @@ internal fun DeviceConnectionScreen() {
                 // Display the connection state
                 when (val r = state.connectionState) {
                     ConnectionState.Connected -> {
-                        when (val p = state.profileViewState) {
-                            ProfileViewState.Loading -> Loading()
-                            ProfileViewState.NoServiceFound -> {
-                                DeviceDisconnectedView(
-                                    reason = DisconnectReason.MISSING_SERVICE,
-                                    modifier = Modifier.padding(16.dp)
-                                )
-                            }
+                        when (val p = state.profileUiState) {
+                            ProfileState.Loading -> Loading()
+                            ProfileState.NoServiceFound -> DeviceDisconnectedView(
+                                reason = DisconnectReason.MISSING_SERVICE,
+                                modifier = Modifier.padding(16.dp)
+                            )
 
-                            is ProfileViewState.NotImplemented -> {
+                            ProfileState.NotImplementedYet -> {
                                 Toast.makeText(
                                     LocalContext.current,
                                     PROFILE_NOT_IMPLEMENTED,
@@ -77,8 +75,8 @@ internal fun DeviceConnectionScreen() {
                                 viewModel.onDisconnect()
                             }
 
-                            is ProfileViewState.ProfileFound -> {
-                                viewModel.discoveredProfile(p.profile)
+                            is ProfileState.ProfileFound -> {
+                                viewModel.onProfileFound(p.profile)
                             }
                         }
                     }
