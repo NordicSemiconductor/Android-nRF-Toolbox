@@ -34,9 +34,7 @@ class HTSService : NotificationService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
-        val device = repository.device
-
-        device.serviceData?.let { getRemoteServices(it, lifecycleScope) }
+        repository.device.serviceData?.let { getRemoteServices(it, lifecycleScope) }
 
         repository.stopEvent
             .onEach {
@@ -47,16 +45,17 @@ class HTSService : NotificationService() {
         return START_REDELIVER_INTENT
     }
 
+    /** Get the remote services and subscribe to the characteristics. */
     private fun getRemoteServices(remoteService: RemoteService, scope: CoroutineScope) =
         lifecycleScope.launch {
             remoteService.owner?.services()
                 ?.onEach { services ->
-                    handleServiceDiscovery(
+                    findServiceByCharacteristic(
                         services,
                         HTS_MEASUREMENT_CHARACTERISTIC_UUID,
                         ::handleHTSData
                     )
-                    handleServiceDiscovery(
+                    findServiceByCharacteristic(
                         services,
                         BATTERY_LEVEL_CHARACTERISTIC_UUID,
                         ::handleBatteryLevel
@@ -66,7 +65,8 @@ class HTSService : NotificationService() {
                 ?.launchIn(scope)
         }
 
-    private suspend fun handleServiceDiscovery(
+    /** Find the service by the characteristic UUID and subscribe to the characteristic. */
+    private suspend fun findServiceByCharacteristic(
         services: List<RemoteService>,
         characteristicUuid: UUID,
         handleData: suspend (characteristic: RemoteCharacteristic) -> Unit
@@ -78,6 +78,7 @@ class HTSService : NotificationService() {
         }
     }
 
+    /** Subscribe to the HTS data characteristic. */
     private suspend fun handleHTSData(characteristic: RemoteCharacteristic) {
         characteristic.subscribe()
             .mapNotNull { HTSDataParser.parse(it) }
@@ -88,6 +89,7 @@ class HTSService : NotificationService() {
             .launchIn(lifecycleScope)
     }
 
+    /** Subscribe to the battery level characteristic. */
     private suspend fun handleBatteryLevel(
         characteristic: RemoteCharacteristic
     ) {
@@ -103,10 +105,12 @@ class HTSService : NotificationService() {
             .launchIn(lifecycleScope)
     }
 
+    /** Stop the service if the device is disconnected. */
     private fun stopIfDisconnected() {
         stopSelf()
     }
 
+    /** Disconnect the device. */
     private suspend fun disconnect() {
         if (repository.peripheral?.isConnected == true) repository.peripheral?.disconnect()
     }
