@@ -76,7 +76,7 @@ internal fun DeviceConnectionScreen() {
                             }
 
                             is ProfileState.ProfileFound -> {
-                                viewModel.onProfileFound(p.profile)
+                                viewModel.handleProfileDiscovery(p.profile)
                             }
                         }
                     }

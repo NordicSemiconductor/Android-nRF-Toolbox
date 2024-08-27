@@ -40,10 +40,12 @@ internal class HTSViewModel @Inject constructor(
                 return@onEach
             }
             peripheral = it.remoteService.peripheral
-            htsRepository.peripheral = peripheral
-            htsRepository.remoteService = it.remoteService.serviceData
-            htsRepository.getConnection(viewModelScope)
-            htsRepository.launch()
+            htsRepository.apply {
+                peripheral = it.remoteService.peripheral
+                remoteService = it.remoteService.serviceData
+                getConnection(viewModelScope)
+                launchHtsService()
+            }
         }.launchIn(viewModelScope)
         // Check the Bluetooth connection status and reestablish the device connection if Bluetooth is reconnected.
         connectionProvider.bleState.drop(1).onEach { state ->
@@ -53,7 +55,7 @@ internal class HTSViewModel @Inject constructor(
             } else if (state == Manager.State.POWERED_ON) {
                 // Reconnect to the peripheral.
                 peripheral?.address?.let {
-                    connectionProvider.connectToDevice(
+                    connectionProvider.connectAndObservePeripheral(
                         it,
                         scope = viewModelScope
                     )
@@ -71,8 +73,6 @@ internal class HTSViewModel @Inject constructor(
                         if (peripheral?.isConnected == true) {
                             htsRepository.disconnect()
                             peripheral?.let { connectionProvider.disconnect(it, viewModelScope) }
-                            viewModelScope.cancel()
-                            connectionProvider.clear()
                         }
                     } catch (e: Exception) {
                         Timber.e(e)
@@ -93,7 +93,7 @@ internal class HTSViewModel @Inject constructor(
                 // Retry the connection.
                 viewModelScope.launch {
                     peripheral?.let {
-                        connectionProvider.connectToDevice(
+                        connectionProvider.connectAndObservePeripheral(
                             it.address,
                             scope = viewModelScope
                         )
