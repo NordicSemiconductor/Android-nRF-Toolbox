@@ -3,6 +3,8 @@ package no.nordicsemi.android.toolbox.profile.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -11,11 +13,24 @@ import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
 import no.nordicsemi.android.hts.HTSDestinationId
 import no.nordicsemi.android.toolbox.libs.profile.ConnectionProvider
+import no.nordicsemi.android.toolbox.libs.profile.ProfileState
+import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
-import no.nordicsemi.android.toolbox.libs.profile.Profile
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
+import no.nordicsemi.kotlin.ble.core.ConnectionState
 import no.nordicsemi.kotlin.ble.core.Manager
 import javax.inject.Inject
+
+/**
+ * This class is responsible for managing the ui states of connection to the peripheral device.
+ *
+ * @param connectionState The current connection state.
+ * @param profileUiState The current profile view state.
+ */
+data class UiState(
+    val connectionState: ConnectionState? = null,
+    val profileUiState: ProfileState = ProfileState.Loading,
+)
 
 @HiltViewModel
 internal class ConnectionViewModel @Inject constructor(
@@ -24,16 +39,34 @@ internal class ConnectionViewModel @Inject constructor(
     private val connectionProvider: ConnectionProvider
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
     private val peripheralAddress = parameterOf(ProfileDestinationId).deviceAddress
-    private val peripheral = connectionProvider.getPeripheral(peripheralAddress)
-    val uiState = connectionProvider.uiViewState
+    val peripheral = connectionProvider.getPeripheral(peripheralAddress)
+
+    private val _uiState = MutableStateFlow(UiState())
+    val uiState = _uiState.asStateFlow()
 
     init {
         // Connect to the peripheral.
         if (peripheral != null) {
             connect(peripheral)
         }
+        getConnectionState()
+
+    }
+
+    private fun getConnectionState() {
+        // Observe the connection state.
+        connectionProvider
+            .connectionState.onEach {
+                _uiState.value = UiState(connectionState = it)
+            }.launchIn(viewModelScope)
+        // Observe the profile view state.
+        connectionProvider.profileState.onEach {
+            _uiState.value = _uiState.value.copy(
+                profileUiState = it
+            )
+        }.launchIn(viewModelScope)
         // Check the Bluetooth connection status and reestablish the device connection if Bluetooth is reconnected.
-        connectionProvider.state.drop(1).onEach {
+        connectionProvider.bleState.drop(1).onEach {
             if (it == Manager.State.POWERED_ON && peripheral?.isDisconnected == true) {
                 // Clear the profile manager to start from scratch.
                 connectionProvider.clear()
@@ -48,26 +81,28 @@ internal class ConnectionViewModel @Inject constructor(
      *
      * @param profile The matching profile.
      */
-    fun discoveredProfile(profile: Profile?) {
+    fun onProfileFound(profile: ProfileModule?) {
         when (profile) {
-            is Profile.HTS -> {
+            ProfileModule.HTS -> {
                 navigator.navigateTo(HTSDestinationId)
                 {
                     popUpTo(ProfileDestinationId.toString()) {
                         inclusive = true
                     }
                 }
-                // Clear the profile manager states to prevent reconnection.
-                connectionProvider.clear()
+            }
 
+            ProfileModule.CSC,
+            ProfileModule.HRS,
+            ProfileModule.RSCS,
+            ProfileModule.PRX,
+            ProfileModule.CGM,
+            ProfileModule.UART -> {
+                profileNotImplemented()
             }
 
             null -> {
                 connectionProvider.isLoading()
-            }
-
-            else -> {
-                profileNotImplemented()
             }
         }
     }
@@ -78,7 +113,11 @@ internal class ConnectionViewModel @Inject constructor(
      * @param peripheral The peripheral to connect to.
      */
     private fun connect(peripheral: Peripheral) = viewModelScope.launch {
-        connectionProvider.connectToDevice(peripheral.address, autoConnect = false, scope = viewModelScope)
+        connectionProvider.connectToDevice(
+            peripheral.address,
+            autoConnect = false,
+            scope = viewModelScope
+        )
     }
 
     /** Disconnect from the peripheral and navigate back. */

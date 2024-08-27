@@ -11,24 +11,15 @@ import no.nordicsemi.android.common.navigation.DestinationId
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.hts.repository.HTSRepository
 import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
+import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
+import timber.log.Timber
 import javax.inject.Inject
 
-enum class RunningModule {
-    CSC,
-    HRS,
-    HTS,
-    RSCS,
-    PRX,
-    CGM,
-    UART
-}
-
 data class HomeViewState(
-    val runningModule: RunningModule? = null,
+    val profileModule: ProfileModule? = null,
     val refreshToggle: Boolean = false,
 ) {
-
     fun copyWithRefresh(): HomeViewState {
         return copy(refreshToggle = !refreshToggle)
     }
@@ -46,13 +37,14 @@ internal class HomeViewModel @Inject constructor(
 
     init {
         htsRepository.isRunning.onEach {
+            Timber.d("HTS is running: $it")
             if (it) {
                 _state.value = _state.value.copy(
-                    runningModule = RunningModule.HTS,
+                    profileModule = ProfileModule.HTS,
                 )
             } else {
                 _state.value = _state.value.copy(
-                    runningModule = null,
+                    profileModule = null,
                 )
             }
         }.launchIn(viewModelScope)
