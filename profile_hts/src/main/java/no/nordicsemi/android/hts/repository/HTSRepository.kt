@@ -39,6 +39,13 @@ class HTSRepository @Inject constructor(
 
     val isRunning = data.map { it.connectionState == ConnectionState.Connected }
 
+    /** Launches the HTS service. */
+    fun launch() {
+        _data.value = _data.value.copy(deviceName = peripheral?.name)
+        serviceManager.startService(HTSService::class.java)
+    }
+
+    /** Gets the connection state of the peripheral device. */
     fun getConnection(scope: CoroutineScope) {
         peripheral?.state?.onEach {
             _data.value = _data.value.copy(
@@ -47,6 +54,7 @@ class HTSRepository @Inject constructor(
         }?.launchIn(scope)
     }
 
+    /** Disconnects the device and stops the service. */
     fun disconnect() {
         _data.value = _data.value.copy(
             connectionState = ConnectionState.Disconnected(),
@@ -54,19 +62,17 @@ class HTSRepository @Inject constructor(
         _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 
+    /** Collects the HTS data from the characteristic and updates the UI. */
     fun onHTSDataChanged(data: HtsData) {
         _data.value = _data.value.copy(data = data)
     }
 
+    /** Collects the battery level from the characteristic and updates the UI. */
     fun onBatteryLevelChanged(batteryLevel: Int) {
         _data.value = _data.value.copy(batteryLevel = batteryLevel)
     }
 
-    fun launch() {
-        _data.value = _data.value.copy(deviceName = peripheral?.name)
-        serviceManager.startService(HTSService::class.java)
-    }
-
+    /** Collects the temperature unit from the characteristic and updates the UI. */
     fun onTemperatureUnitChanged(temperatureUnit: TemperatureUnit) {
         _data.value = _data.value.copy(
             temperatureUnit = temperatureUnit
