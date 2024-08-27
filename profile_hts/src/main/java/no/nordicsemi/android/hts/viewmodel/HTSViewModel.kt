@@ -27,16 +27,24 @@ internal class HTSViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val htsRepository: HTSRepository,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
-    private val htsProfile = connectionProvider.profile
     val state = htsRepository.data
-    private var peripheral: Peripheral? = connectionProvider.profile?.remoteService?.peripheral
+    private var peripheral: Peripheral? = null
 
     init {
-        htsRepository.peripheral = peripheral
-        htsRepository.remoteService = htsProfile?.remoteService?.serviceData
-        htsRepository.getConnection(viewModelScope)
-        htsProfile?.let { htsRepository.launch() }
+        startHtsService()
+    }
 
+    private fun startHtsService() {
+        connectionProvider.profile.onEach {
+            if (it == null) {
+                return@onEach
+            }
+            peripheral = it.remoteService.peripheral
+            htsRepository.peripheral = peripheral
+            htsRepository.remoteService = it.remoteService.serviceData
+            htsRepository.getConnection(viewModelScope)
+            htsRepository.launch()
+        }.launchIn(viewModelScope)
         // Check the Bluetooth connection status and reestablish the device connection if Bluetooth is reconnected.
         connectionProvider.bleState.drop(1).onEach { state ->
             // If the Bluetooth adapter has been disabled, disconnect the device.
@@ -52,7 +60,6 @@ internal class HTSViewModel @Inject constructor(
                 }
             }
         }.launchIn(viewModelScope)
-
     }
 
     fun onEvent(event: HTSScreenViewEvent) {
@@ -65,6 +72,7 @@ internal class HTSViewModel @Inject constructor(
                             htsRepository.disconnect()
                             peripheral?.let { connectionProvider.disconnect(it, viewModelScope) }
                             viewModelScope.cancel()
+                            connectionProvider.clear()
                         }
                     } catch (e: Exception) {
                         Timber.e(e)

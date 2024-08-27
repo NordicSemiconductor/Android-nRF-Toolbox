@@ -53,7 +53,8 @@ sealed class ProfileState {
 class ConnectionProvider @Inject constructor(
     private val centralManager: CentralManager,
 ) {
-    var profile: Profile? = null
+    private val _profile = MutableStateFlow<Profile?>(null)
+    var profile = _profile.asStateFlow()
     private val _profileState = MutableStateFlow<ProfileState>(ProfileState.Loading)
     val profileState = _profileState.asStateFlow()
     val bleState = centralManager.state
@@ -89,7 +90,6 @@ class ConnectionProvider @Inject constructor(
         val peripheral = getPeripheral(deviceAddress) ?: return
         try {
             if (!peripheral.isDisconnected) return
-            clear()
             centralManager.connect(
                 peripheral = peripheral,
                 options = if (autoConnect) {
@@ -108,7 +108,7 @@ class ConnectionProvider @Inject constructor(
                         when {
                             remoteServices.firstOrNull { it.uuid == HTS_SERVICE_UUID } != null -> {
                                 val service = remoteServices.first { it.uuid == HTS_SERVICE_UUID }
-                                profile = Profile.HTS(
+                                _profile.value = Profile.HTS(
                                     PeripheralDetails(
                                         serviceData = service,
                                         peripheral = peripheral
@@ -128,13 +128,11 @@ class ConnectionProvider @Inject constructor(
                                     remoteServices.firstOrNull { it.uuid == RSCS_SERVICE_UUID } != null ||
                                     remoteServices.firstOrNull { it.uuid == UART_SERVICE_UUID } != null -> {
                                 _profileState.value = ProfileState.NotImplementedYet
-                                profile = null
                             }
 
                             else -> {
                                 if (remoteServices.isNotEmpty()) {
                                     _profileState.value = ProfileState.NoServiceFound
-                                    profile = null
                                 }
                             }
 
@@ -186,7 +184,7 @@ class ConnectionProvider @Inject constructor(
      * Clear states to initial state.
      */
     fun clear() {
-        profile = null
+        _profile.value
         _profileState.value = ProfileState.Loading
         _connectionState.value = null
     }
