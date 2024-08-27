@@ -48,6 +48,9 @@ class HTSRepository @Inject constructor(
     }
 
     fun disconnect() {
+        _data.value = _data.value.copy(
+            connectionState = ConnectionState.Disconnected(),
+        )
         _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 

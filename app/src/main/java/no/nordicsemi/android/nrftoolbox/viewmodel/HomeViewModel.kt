@@ -13,7 +13,6 @@ import no.nordicsemi.android.hts.repository.HTSRepository
 import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
 import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
-import timber.log.Timber
 import javax.inject.Inject
 
 data class HomeViewState(
@@ -31,13 +30,11 @@ internal class HomeViewModel @Inject constructor(
     htsRepository: HTSRepository,
     activitySignals: ActivitySignals,
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(HomeViewState())
     val state = _state.asStateFlow()
 
     init {
         htsRepository.isRunning.onEach {
-            Timber.d("HTS is running: $it")
             if (it) {
                 _state.value = _state.value.copy(
                     profileModule = ProfileModule.HTS,
