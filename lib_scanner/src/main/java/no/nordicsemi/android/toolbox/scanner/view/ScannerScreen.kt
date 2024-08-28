@@ -25,7 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -46,14 +45,25 @@ import no.nordicsemi.android.toolbox.scanner.repository.ScanningState
 import no.nordicsemi.android.toolbox.scanner.viewmodel.ScannerViewModel
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ScannerScreen() {
+    val viewModel: ScannerViewModel = hiltViewModel()
+    val pullToRefreshState = rememberPullToRefreshState()
+    val scanningState by viewModel.scanningState.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+
+    // Handle back button press
+    BackHandler {
+        viewModel.navigateBack()
+    }
+
     Scaffold(
         topBar = {
             ScannerAppBar(
-                { Text(text = "Scanning") },
-                showProgress = false,
-                onNavigationButtonClick = null
+                { Text(text = "Scanner") },
+                showProgress = true,
+                onNavigationButtonClick = { viewModel.navigateBack() }
             )
         }
     ) { paddingValues ->
@@ -62,53 +72,35 @@ internal fun ScannerScreen() {
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            ScannerView()
-        }
+            RequireBluetooth {
+                RequireLocation { isLocationRequiredAndDisabled ->
 
-    }
-
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-internal fun ScannerView() {
-    RequireBluetooth {
-        RequireLocation { isLocationRequiredAndDisabled ->
-            val viewModel: ScannerViewModel = hiltViewModel()
-            val pullToRefreshState = rememberPullToRefreshState()
-            val scanningState by viewModel.scanningState.collectAsStateWithLifecycle()
-            val scope = rememberCoroutineScope()
-
-            BackHandler {
-                // Handle back button press
-                // Do nothing.
-            }
-
-            LaunchedEffect(key1 = isLocationRequiredAndDisabled) {
-                viewModel.startScanning()
-            }
-
-            Column(modifier = Modifier.fillMaxSize()) {
-                PullToRefreshBox(
-                    isRefreshing = scanningState is ScanningState.Loading,
-                    onRefresh = {
-                        viewModel.refreshScanning()
-                        scope.launch {
-                            pullToRefreshState.animateToHidden()
-                        }
-                    },
-                    state = pullToRefreshState,
-                    content = {
-                        DeviceListView(
-                            isLocationRequiredAndDisabled = isLocationRequiredAndDisabled,
-                            bleState = scanningState,
-                            modifier = Modifier.fillMaxSize(),
-                            onClick = { viewModel.onDeviceSelected(it) },
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        PullToRefreshBox(
+                            isRefreshing = scanningState is ScanningState.Loading,
+                            onRefresh = {
+                                viewModel.refreshScanning()
+                                scope.launch {
+                                    pullToRefreshState.animateToHidden()
+                                }
+                            },
+                            state = pullToRefreshState,
+                            content = {
+                                DeviceListView(
+                                    isLocationRequiredAndDisabled = isLocationRequiredAndDisabled,
+                                    bleState = scanningState,
+                                    modifier = Modifier.fillMaxSize(),
+                                    onClick = { viewModel.onDeviceSelected(it) },
+                                )
+                            }
                         )
-                    })
+                    }
+                }
             }
         }
+
     }
+
 }
 
 @Composable
