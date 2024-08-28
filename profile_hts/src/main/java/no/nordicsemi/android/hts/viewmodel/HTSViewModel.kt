@@ -39,10 +39,10 @@ internal class HTSViewModel @Inject constructor(
             if (it == null) {
                 return@onEach
             }
-            peripheral = it.remoteService.peripheral
+            peripheral = it.peripheralDetails.peripheral
             htsRepository.apply {
-                peripheral = it.remoteService.peripheral
-                remoteService = it.remoteService.serviceData
+                peripheral = it.peripheralDetails.peripheral
+                remoteService = it.peripheralDetails.serviceData
                 getConnection(viewModelScope)
                 launchHtsService()
             }

@@ -59,7 +59,7 @@ private val supportedServiceUuids = setOf(
 class ConnectionProvider @Inject constructor(
     private val centralManager: CentralManager,
 ) {
-    private val _profile = MutableStateFlow<Profile?>(null)
+    private val _profile = MutableStateFlow<ServiceProfile?>(null)
     var profile = _profile.asStateFlow()
     private val _profileState = MutableStateFlow<ProfileState>(ProfileState.Loading)
     val profileState = _profileState.asStateFlow()
@@ -144,7 +144,7 @@ class ConnectionProvider @Inject constructor(
             when {
                 remoteServices.firstOrNull { it.uuid == HTS_SERVICE_UUID } != null -> {
                     val service = remoteServices.first { it.uuid == HTS_SERVICE_UUID }
-                    _profile.value = Profile.HTS(
+                    _profile.value = ServiceProfile.HTS(
                         PeripheralDetails(
                             serviceData = service,
                             peripheral = peripheral
