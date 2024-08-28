@@ -25,8 +25,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,9 +48,24 @@ import no.nordicsemi.android.toolbox.scanner.repository.ScanningState
 import no.nordicsemi.android.toolbox.scanner.viewmodel.ScannerViewModel
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ScannerScreen() {
+    val viewModel: ScannerViewModel = hiltViewModel()
+    val isDeviceSelected = rememberSaveable { mutableStateOf(false) }
+
+    if (isDeviceSelected.value) {
+        // Show device connectionState
+        viewModel.selectedDevice?.let { DeviceConnectionScreen() }
+
+    } else {
+        ScannerView(isDeviceSelected)
+    }
+
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun ScannerView(isDeviceSelected: MutableState<Boolean>) {
     val viewModel: ScannerViewModel = hiltViewModel()
     val pullToRefreshState = rememberPullToRefreshState()
     val scanningState by viewModel.scanningState.collectAsStateWithLifecycle()
@@ -57,7 +75,6 @@ internal fun ScannerScreen() {
     BackHandler {
         viewModel.navigateBack()
     }
-
     Scaffold(
         topBar = {
             ScannerAppBar(
@@ -90,7 +107,10 @@ internal fun ScannerScreen() {
                                     isLocationRequiredAndDisabled = isLocationRequiredAndDisabled,
                                     bleState = scanningState,
                                     modifier = Modifier.fillMaxSize(),
-                                    onClick = { viewModel.onDeviceSelected(it) },
+                                    onClick = {
+                                        isDeviceSelected.value = true
+                                        viewModel.onDeviceSelected(it)
+                                    },
                                 )
                             }
                         )
@@ -98,9 +118,7 @@ internal fun ScannerScreen() {
                 }
             }
         }
-
     }
-
 }
 
 @Composable

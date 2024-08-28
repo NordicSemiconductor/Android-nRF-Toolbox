@@ -11,11 +11,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.toolbox.libs.profile.ConnectionProvider
-import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
-import no.nordicsemi.android.toolbox.profile.SelectedDevice
-import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import no.nordicsemi.android.toolbox.scanner.repository.ScanningState
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import timber.log.Timber
@@ -26,6 +24,7 @@ internal class ScannerViewModel @Inject constructor(
     private val connectionProvider: ConnectionProvider,
     private val navigator: Navigator,
 ) : ViewModel() {
+    var selectedDevice: Peripheral? = null
     private val _scanningState = MutableStateFlow<ScanningState>(ScanningState.Loading)
     val scanningState = _scanningState.asStateFlow()
 
@@ -71,11 +70,12 @@ internal class ScannerViewModel @Inject constructor(
     fun onDeviceSelected(peripheral: Peripheral) {
         job?.cancel()
         try {
-            navigator.navigateTo(to = ProfileDestinationId, SelectedDevice(peripheral.address))
-            {
-                popUpTo(ScannerDestinationId.toString()) {
-                    inclusive = true
-                }
+            selectedDevice = peripheral
+            viewModelScope.launch {
+                connectionProvider.connectAndObservePeripheral(
+                    peripheral,
+                    scope = viewModelScope
+                )
             }
         } catch (e: Exception) {
             Timber.e(e)
@@ -92,6 +92,8 @@ internal class ScannerViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         job?.cancel()
+        // Clear the profile manager to prevent reconnection.
+        connectionProvider.clearState()
     }
 
     /**

@@ -50,7 +50,6 @@ dependencies {
     implementation(project(":lib_utils"))
     implementation(project(":lib_service"))
     implementation(project(":lib_scanner"))
-    implementation(project(":profile"))
     implementation(project(":lib_profile"))
 
     implementation(libs.nordic.navigation)

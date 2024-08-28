@@ -54,7 +54,7 @@ internal class HTSViewModel @Inject constructor(
                 peripheral?.disconnect()
             } else if (state == Manager.State.POWERED_ON) {
                 // Reconnect to the peripheral.
-                peripheral?.address?.let {
+                peripheral?.let {
                     connectionProvider.connectAndObservePeripheral(
                         it,
                         scope = viewModelScope
@@ -95,7 +95,7 @@ internal class HTSViewModel @Inject constructor(
                 viewModelScope.launch {
                     peripheral?.let {
                         connectionProvider.connectAndObservePeripheral(
-                            it.address,
+                            it,
                             scope = viewModelScope
                         )
                     }
