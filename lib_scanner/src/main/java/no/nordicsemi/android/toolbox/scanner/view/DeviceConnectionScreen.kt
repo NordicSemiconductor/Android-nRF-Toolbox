@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.profile.view
+package no.nordicsemi.android.toolbox.scanner.view
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
@@ -25,7 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.common.ui.view.NordicAppBar
 import no.nordicsemi.android.toolbox.libs.profile.ProfileState
-import no.nordicsemi.android.toolbox.profile.viewmodel.ConnectionViewModel
+import no.nordicsemi.android.toolbox.scanner.viewmodel.ConnectionViewModel
 import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
 import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
