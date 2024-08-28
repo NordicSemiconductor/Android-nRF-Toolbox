@@ -133,7 +133,6 @@ internal fun LazyListScope.DeviceListItems(
     onClick: (Peripheral) -> Unit,
 ) {
     // Filter out peripherals with null names.
-    // Todo: Add a view filters to view section here.
     val nonNullPeripherals = devices.filter { it.name != null }.toList()
     items(nonNullPeripherals.size) { index ->
         Box(modifier = Modifier
