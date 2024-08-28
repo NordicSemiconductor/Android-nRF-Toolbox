@@ -66,7 +66,8 @@ internal class HTSViewModel @Inject constructor(
 
     fun onEvent(event: HTSScreenViewEvent) {
         when (event) {
-            is NavigateUp, is DisconnectEvent -> {
+            is NavigateUp -> navigator.navigateUp()
+            is DisconnectEvent -> {
                 viewModelScope.launch {
                     // Navigate back
                     try {

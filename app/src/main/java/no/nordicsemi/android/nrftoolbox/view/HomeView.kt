@@ -1,40 +1,38 @@
 package no.nordicsemi.android.nrftoolbox.view
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.HourglassEmpty
+import androidx.compose.material.icons.automirrored.outlined.BluetoothSearching
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.hts.HTSDestinationId
+import no.nordicsemi.android.nrftoolbox.BuildConfig
 import no.nordicsemi.android.nrftoolbox.R
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewModel
 import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
+
+private const val DFU_PACKAGE_NAME = "no.nordicsemi.android.dfu"
+private const val DFU_LINK =
+    "https://play.google.com/store/apps/details?id=no.nordicsemi.android.dfu"
+
+private const val LOGGER_PACKAGE_NAME = "no.nordicsemi.android.log"
 
 @Composable
 internal fun HomeView() {
@@ -46,17 +44,30 @@ internal fun HomeView() {
             TitleAppBar(stringResource(id = R.string.app_name), false)
         }
     ) {
-        Column(modifier = Modifier
-            .padding(it)
-            .padding(16.dp)) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier
+                .padding(it)
+                .padding(16.dp)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            if (state.profileModule != null) {
+                Text(
+                    text = "Running Services",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+            }
             when (state.profileModule) {
                 ProfileModule.CSC -> TODO()
                 ProfileModule.HRS -> TODO()
                 ProfileModule.HTS -> {
                     FeatureButton(
-                        iconId = Icons.Default.HourglassEmpty,
-                        name = "HTS Module",
-                        isRunning = true,
+                        R.drawable.ic_hts,
+                        R.string.hts_module_full,
+                        true
                     ) {
                         viewModel.openProfile(HTSDestinationId)
                     }
@@ -66,76 +77,84 @@ internal fun HomeView() {
                 ProfileModule.PRX -> TODO()
                 ProfileModule.CGM -> TODO()
                 ProfileModule.UART -> TODO()
-                null -> {
-                    viewModel.startScanning()
+
+                else -> {
+                    // do nothing
                 }
             }
-
-        }
-    }
-}
-
-@Composable
-fun FeatureButton(
-    iconId: ImageVector,
-    name: String,
-    isRunning: Boolean? = null,
-    description: String? = null,
-    onClick: () -> Unit
-) {
-    OutlinedCard(onClick = onClick) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            val color = if (isRunning == true) {
-                colorResource(id = R.color.nordicGrass)
-            } else {
-                MaterialTheme.colorScheme.secondary
+            Text(
+                text = "Scan for devices",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            FeatureButton(
+                iconId = Icons.AutoMirrored.Outlined.BluetoothSearching,
+                name = "Start Scanning",
+                isRunning = false,
+                description = "Scan for BLE devices"
+            ) {
+                viewModel.startScanning()
             }
-            Image(
-                imageVector = iconId,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary),
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(CircleShape)
-                    .background(color)
-                    .padding(16.dp)
+            Text(
+                text = stringResource(id = R.string.utils_services),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.fillMaxWidth(),
             )
 
-            Spacer(modifier = Modifier.size(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center
-                )
-
-                description?.let {
-                    Spacer(modifier = Modifier.size(4.dp))
-
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = it,
-                        style = MaterialTheme.typography.labelMedium,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+            FeatureButton(
+                R.drawable.ic_uart,
+                R.string.uart_module_full,
+                false,
+            ) {
+//                viewModel.openProfile(UARTDestinationId)
+//                viewModel.logEvent(ProfileOpenEvent(Profile.UART))
             }
+
+            val uriHandler = LocalUriHandler.current
+            val context = LocalContext.current
+            val packageManger = context.packageManager
+
+            val description = packageManger.getLaunchIntentForPackage(DFU_PACKAGE_NAME)?.let {
+                R.string.dfu_module_info
+            } ?: R.string.dfu_module_install
+
+            FeatureButton(
+                R.drawable.ic_dfu,
+                R.string.dfu_module_full,
+                null,
+                description
+            ) {
+                val intent = packageManger.getLaunchIntentForPackage(DFU_PACKAGE_NAME)
+                if (intent != null) {
+                    context.startActivity(intent)
+                } else {
+                    uriHandler.openUri(DFU_LINK)
+                }
+//                viewModel.logEvent(ProfileOpenEvent(Link.DFU))
+            }
+
+            val loggerDescription =
+                packageManger.getLaunchIntentForPackage(LOGGER_PACKAGE_NAME)?.let {
+                    R.string.logger_module_info
+                } ?: R.string.dfu_module_install
+
+            FeatureButton(
+                R.drawable.ic_logger,
+                R.string.logger_module_full,
+                null,
+                loggerDescription
+            ) {
+//                viewModel.openLogger()
+//                viewModel.logEvent(ProfileOpenEvent(Link.LOGGER))
+            }
+
+            Text(
+                text = BuildConfig.VERSION_NAME,
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+
         }
     }
-}
-
-@Preview
-@Composable
-private fun FeatureButtonPreview() {
-    FeatureButton(Icons.Default.HourglassEmpty, "HTS Module", true) { }
 }
