@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.profile.viewmodel
+package no.nordicsemi.android.toolbox.scanner.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -17,7 +17,7 @@ import no.nordicsemi.android.hts.HTSDestinationId
 import no.nordicsemi.android.toolbox.libs.profile.ConnectionProvider
 import no.nordicsemi.android.toolbox.libs.profile.ProfileState
 import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
-import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
+import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import no.nordicsemi.kotlin.ble.core.Manager
@@ -40,19 +40,12 @@ internal class ConnectionViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val connectionProvider: ConnectionProvider
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
-    private val peripheralAddress = parameterOf(ProfileDestinationId).deviceAddress
-    val peripheral = connectionProvider.findPeripheralByAddress(peripheralAddress)
-
+    var peripheral = connectionProvider.peripheral
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
 
     init {
-        // Connect to the peripheral.
-        if (peripheral != null) {
-            connect(peripheral)
-        }
         observeConnectionStates()
-
     }
 
     private fun observeConnectionStates() {
@@ -74,7 +67,7 @@ internal class ConnectionViewModel @Inject constructor(
                 // Clear the profile manager to start from scratch.
                 connectionProvider.clearState()
                 // Reconnect to the peripheral.
-                connect(peripheral)
+                connect(peripheral!!)
             }
         }.launchIn(viewModelScope)
     }
@@ -111,7 +104,7 @@ internal class ConnectionViewModel @Inject constructor(
     private fun navigateToProfile(destinationId: DestinationId<Unit, Unit>) {
         navigator.navigateTo(destinationId)
         {
-            popUpTo(ProfileDestinationId.toString()) {
+            popUpTo(ScannerDestinationId.toString()) {
                 inclusive = true
             }
         }
@@ -124,7 +117,7 @@ internal class ConnectionViewModel @Inject constructor(
      */
     private fun connect(peripheral: Peripheral) = viewModelScope.launch {
         connectionProvider.connectAndObservePeripheral(
-            peripheral.address,
+            peripheral,
             autoConnect = false,
             scope = viewModelScope
         )
@@ -133,7 +126,7 @@ internal class ConnectionViewModel @Inject constructor(
     /** Disconnect from the peripheral and navigate back. */
     fun onDisconnect() {
         if (peripheral != null) {
-            connectionProvider.disconnect(peripheral, viewModelScope)
+            connectionProvider.disconnect(peripheral!!, viewModelScope)
         }
         connectionProvider.clearState()
         navigator.navigateUp()
@@ -142,16 +135,14 @@ internal class ConnectionViewModel @Inject constructor(
     /** This method is called when the profile is not implemented yet. */
     private fun profileNotImplemented() {
         if (peripheral != null) {
-            connectionProvider.disconnect(peripheral, viewModelScope)
+            connectionProvider.disconnect(peripheral!!, viewModelScope)
         }
         connectionProvider.clearState()
         navigator.navigateUp()
     }
 
     fun reconnect() {
-        if (peripheral != null) {
-            connect(peripheral)
-        }
+        peripheral?.let { connect(it) }
     }
 
     override fun onCleared() {
