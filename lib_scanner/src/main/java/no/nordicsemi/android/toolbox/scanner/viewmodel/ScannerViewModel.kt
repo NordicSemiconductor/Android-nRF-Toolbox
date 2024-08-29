@@ -30,14 +30,10 @@ internal class ScannerViewModel @Inject constructor(
 
     private var job: Job? = null
 
-    init {
-        startScanning()
-    }
-
     /**
      * Starts scanning for BLE devices.
      */
-    private fun startScanning() {
+    fun startScanning() {
         job?.cancel()
         job = connectionProvider.startScanning()
             .onStart {
