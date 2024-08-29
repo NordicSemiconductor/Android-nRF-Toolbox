@@ -90,19 +90,19 @@ class ConnectionProvider @Inject constructor(
     /**
      * Connects to the peripheral device and observe peripheral states.
      *
-     * @param deviceAddress The peripheral to connect to.
+     * @param device The peripheral to connect to.
      * @param autoConnect If `true`, the connection will be established using the Auto Connect feature.
      */
     suspend fun connectAndObservePeripheral(
-        deviceAddress: Peripheral,
+        device: Peripheral,
         autoConnect: Boolean = false,
         scope: CoroutineScope
     ) {
-        peripheral = deviceAddress
-        if (!deviceAddress.isDisconnected) return
+        peripheral = device
+        if (!device.isDisconnected) return
         try {
             centralManager.connect(
-                peripheral = deviceAddress,
+                peripheral = device,
                 options = if (autoConnect) {
                     CentralManager.ConnectionOptions.AutoConnect
                 } else CentralManager.ConnectionOptions.Direct()
@@ -112,7 +112,7 @@ class ConnectionProvider @Inject constructor(
             Timber.e(e)
             return
         }
-        observerPeripheralState(deviceAddress, scope)
+        observerPeripheralState(device, scope)
     }
 
     private fun observerPeripheralState(
