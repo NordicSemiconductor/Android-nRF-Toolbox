@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -85,7 +86,12 @@ private fun ScannerView(onDeviceSelected: (Peripheral) -> Unit) {
         ) {
             RequireBluetooth {
                 RequireLocation { isLocationRequiredAndDisabled ->
-
+                    // Both Bluetooth and Location permissions are granted.
+                    // If the permission is not granted then the scanning will not start.
+                    // So to start scanning we need to check if the location permission is granted.
+                    LaunchedEffect(isLocationRequiredAndDisabled) {
+                        viewModel.startScanning()
+                    }
                     Column(modifier = Modifier.fillMaxSize()) {
                         PullToRefreshBox(
                             isRefreshing = scanningState.scanningState is ScanningState.Loading,
