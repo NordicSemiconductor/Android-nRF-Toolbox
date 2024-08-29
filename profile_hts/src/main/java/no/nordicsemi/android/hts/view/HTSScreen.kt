@@ -55,6 +55,7 @@ internal fun HtsHomeScreen() {
         topBar = {
             ProfileAppBar(
                 deviceName = state.deviceName,
+                connectionState = state.connectionState,
                 title = R.string.hts_title,
                 navigateUp = { onClickEvent(NavigateUp) },
                 disconnect = { onClickEvent(DisconnectEvent) },
