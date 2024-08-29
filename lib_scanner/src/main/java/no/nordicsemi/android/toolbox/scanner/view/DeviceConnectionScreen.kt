@@ -43,8 +43,14 @@ internal fun DeviceConnectionScreen() {
     // Display the connection state
     Scaffold(
         topBar = {
+            val peripheralName = if (viewModel.peripheral?.name?.trim().isNullOrEmpty()) {
+                "No Name"
+            } else viewModel.peripheral?.name!!
+
             NordicAppBar(
-                title = { Text(text = viewModel.peripheral?.name ?: "Unknown Peripheral") },
+                title = {
+                    Text(text = peripheralName, maxLines = 2)
+                },
                 backButtonIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onNavigationButtonClick = { viewModel.onDisconnect() },
             )
