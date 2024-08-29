@@ -48,10 +48,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.ui.R
+import no.nordicsemi.kotlin.ble.core.ConnectionState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -146,7 +148,7 @@ fun LoggerIconAppBar(
         title = { Text(text, maxLines = 2) },
         colors = TopAppBarDefaults.topAppBarColors(
             scrolledContainerColor = MaterialTheme.colorScheme.primary,
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            containerColor = colorResource(id = R.color.appBarColor),
             titleContentColor = MaterialTheme.colorScheme.onPrimary,
             actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
             navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
@@ -185,14 +187,18 @@ fun LoggerIconAppBar(
 @Composable
 fun ProfileAppBar(
     deviceName: String?,
-    @StringRes
-    title: Int,
+    connectionState: ConnectionState?,
+    @StringRes title: Int,
     navigateUp: () -> Unit,
     disconnect: () -> Unit,
     openLogger: () -> Unit
 ) {
-    if (deviceName != null) {
-        LoggerIconAppBar(deviceName, navigateUp, disconnect, openLogger)
+    if (deviceName?.isNotBlank() == true) {
+        if (connectionState == ConnectionState.Disconnecting || connectionState == ConnectionState.Disconnected()) {
+            LoggerBackIconAppBar(deviceName, openLogger)
+        } else {
+            LoggerIconAppBar(deviceName, navigateUp, disconnect, openLogger)
+        }
     } else {
         BackIconAppBar(stringResource(id = title), navigateUp)
     }
