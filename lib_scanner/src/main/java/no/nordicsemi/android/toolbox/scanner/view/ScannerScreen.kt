@@ -25,11 +25,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,24 +48,21 @@ import no.nordicsemi.kotlin.ble.client.android.Peripheral
 @Composable
 internal fun ScannerScreen() {
     val viewModel: ScannerViewModel = hiltViewModel()
-    val isDeviceSelected = rememberSaveable { mutableStateOf(false) }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    if (isDeviceSelected.value) {
-        // Show device connectionState
+    if (uiState.isDeviceSelected) {
         viewModel.selectedDevice?.let { DeviceConnectionScreen() }
-
     } else {
-        ScannerView(isDeviceSelected)
+        ScannerView(onDeviceSelected = { viewModel.onDeviceSelected(it) })
     }
-
 }
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun ScannerView(isDeviceSelected: MutableState<Boolean>) {
+private fun ScannerView(onDeviceSelected: (Peripheral) -> Unit) {
     val viewModel: ScannerViewModel = hiltViewModel()
     val pullToRefreshState = rememberPullToRefreshState()
-    val scanningState by viewModel.scanningState.collectAsStateWithLifecycle()
+    val scanningState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
     // Handle back button press
@@ -79,7 +73,7 @@ private fun ScannerView(isDeviceSelected: MutableState<Boolean>) {
         topBar = {
             ScannerAppBar(
                 { Text(text = "Scanner") },
-                showProgress = true,
+                showProgress = scanningState.isScanning,
                 onNavigationButtonClick = { viewModel.navigateBack() }
             )
         }
@@ -94,7 +88,7 @@ private fun ScannerView(isDeviceSelected: MutableState<Boolean>) {
 
                     Column(modifier = Modifier.fillMaxSize()) {
                         PullToRefreshBox(
-                            isRefreshing = scanningState is ScanningState.Loading,
+                            isRefreshing = scanningState.scanningState is ScanningState.Loading,
                             onRefresh = {
                                 viewModel.refreshScanning()
                                 scope.launch {
@@ -105,11 +99,10 @@ private fun ScannerView(isDeviceSelected: MutableState<Boolean>) {
                             content = {
                                 DeviceListView(
                                     isLocationRequiredAndDisabled = isLocationRequiredAndDisabled,
-                                    bleState = scanningState,
+                                    bleState = scanningState.scanningState,
                                     modifier = Modifier.fillMaxSize(),
                                     onClick = {
-                                        isDeviceSelected.value = true
-                                        viewModel.onDeviceSelected(it)
+                                        onDeviceSelected(it)
                                     },
                                 )
                             }
