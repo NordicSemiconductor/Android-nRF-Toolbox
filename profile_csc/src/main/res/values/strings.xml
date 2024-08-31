@@ -32,6 +32,7 @@
 
 <resources>
     <string name="csc_title">Cyclic and speed cadence</string>
+    <string name="csc_title_short">CSC</string>
 
     <string name="csc_dialog_title">Select wheel size</string>
 

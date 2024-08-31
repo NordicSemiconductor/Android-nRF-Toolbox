@@ -37,13 +37,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import no.nordicsemi.android.common.core.simpleSharedFlow
-import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
+import no.nordicsemi.android.common.logger.LoggerLauncher
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
+import no.nordicsemi.android.log.LogSession
+import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.uart.data.ConfigurationDataSource
 import no.nordicsemi.android.uart.data.MacroEol
 import no.nordicsemi.android.uart.data.UARTMacro
@@ -51,21 +53,18 @@ import no.nordicsemi.android.uart.data.UARTRecord
 import no.nordicsemi.android.uart.data.UARTRecordType
 import no.nordicsemi.android.uart.data.UARTServiceData
 import no.nordicsemi.android.uart.data.parseWithNewLineChar
-import no.nordicsemi.android.ui.view.NordicLoggerFactory
-import no.nordicsemi.android.ui.view.StringConst
+import no.nordicsemi.android.utils.simpleSharedFlow
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class UARTRepository @Inject internal constructor(
-    @ApplicationContext
-    private val context: Context,
+    @ApplicationContext private val context: Context,
     private val serviceManager: ServiceManager,
     private val configurationDataSource: ConfigurationDataSource,
-    private val stringConst: StringConst,
-    private val loggerFactory: NordicLoggerFactory
 ) {
-    private var logger: BleLoggerAndLauncher? = null
+    private var tree: nRFLoggerTree? = null
 
     private val _data = MutableStateFlow(UARTServiceData())
     internal val data = _data.asStateFlow()
@@ -98,9 +97,12 @@ class UARTRepository @Inject internal constructor(
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
     fun launch(device: ServerDevice) {
-        logger = loggerFactory.createNordicLogger(context, stringConst.APP_NAME, "UART", device.address)
+        tree = nRFLoggerTree(context, "UART", device.address, device.name)
+            .apply { setLoggingTagsEnabled(false) }
+            .also { Timber.plant(it) }
+
         _data.value = _data.value.copy(deviceName = device.name)
-        serviceManager.startService(UARTService::class.java, device)
+        serviceManager.startService(UARTService::class.java, device, context.getString(R.string.uart_title))
     }
 
     fun onConnectionStateChanged(connectionState: GattConnectionStateWithStatus?) {
@@ -135,11 +137,7 @@ class UARTRepository @Inject internal constructor(
     }
 
     fun openLogger() {
-        logger?.launch()
-    }
-
-    fun log(priority: Int, message: String) {
-        logger?.log(priority, message)
+        LoggerLauncher.launch(context, tree?.session as? LogSession)
     }
 
     fun onMissingServices() {
@@ -156,7 +154,8 @@ class UARTRepository @Inject internal constructor(
     }
 
     private fun clean() {
-        logger = null
+        tree?.let { Timber.uproot(it) }
+        tree = null
         _data.value = UARTServiceData()
     }
 }

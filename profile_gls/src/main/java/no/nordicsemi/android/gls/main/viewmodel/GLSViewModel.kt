@@ -50,7 +50,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
-import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
+import no.nordicsemi.android.common.logger.LoggerLauncher
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.gls.GlsDetailsDestinationId
@@ -80,22 +80,22 @@ import no.nordicsemi.android.kotlin.ble.profile.gls.data.RequestStatus
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.ResponseData
 import no.nordicsemi.android.kotlin.ble.profile.racp.RACPOpCode
 import no.nordicsemi.android.kotlin.ble.profile.racp.RACPResponseCode
+import no.nordicsemi.android.log.LogSession
+import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
-import no.nordicsemi.android.ui.view.NordicLoggerFactory
-import no.nordicsemi.android.ui.view.StringConst
 import no.nordicsemi.android.utils.tryOrLog
+import timber.log.Timber
 import java.util.*
 import javax.inject.Inject
 
 val GLS_SERVICE_UUID: UUID = UUID.fromString("00001808-0000-1000-8000-00805f9b34fb")
 
-val GLUCOSE_MEASUREMENT_CHARACTERISTIC = UUID.fromString("00002A18-0000-1000-8000-00805f9b34fb")
-val GLUCOSE_MEASUREMENT_CONTEXT_CHARACTERISTIC = UUID.fromString("00002A34-0000-1000-8000-00805f9b34fb")
-val GLUCOSE_FEATURE_CHARACTERISTIC = UUID.fromString("00002A51-0000-1000-8000-00805f9b34fb")
-val RACP_CHARACTERISTIC = UUID.fromString("00002A52-0000-1000-8000-00805f9b34fb")
+val GLUCOSE_MEASUREMENT_CHARACTERISTIC: UUID = UUID.fromString("00002A18-0000-1000-8000-00805f9b34fb")
+val GLUCOSE_MEASUREMENT_CONTEXT_CHARACTERISTIC: UUID = UUID.fromString("00002A34-0000-1000-8000-00805f9b34fb")
+val RACP_CHARACTERISTIC: UUID = UUID.fromString("00002A52-0000-1000-8000-00805f9b34fb")
 
-val BATTERY_SERVICE_UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
-val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
+val BATTERY_SERVICE_UUID: UUID = UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb")
+val BATTERY_LEVEL_CHARACTERISTIC_UUID: UUID = UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
 
 @SuppressLint("MissingPermission")
 @HiltViewModel
@@ -103,18 +103,16 @@ internal class GLSViewModel @Inject constructor(
     @ApplicationContext context: Context,
     private val navigationManager: Navigator,
     private val analytics: AppAnalytics,
-    private val stringConst: StringConst,
-    private val loggerFactory: NordicLoggerFactory
 ) : AndroidViewModel(context as Application) {
-
     private var client: ClientBleGatt? = null
-    private lateinit var logger: BleLoggerAndLauncher
 
     private lateinit var glucoseMeasurementCharacteristic: ClientBleGattCharacteristic
     private lateinit var recordAccessControlPointCharacteristic: ClientBleGattCharacteristic
 
     private val _state = MutableStateFlow(GLSViewState())
     val state = _state.asStateFlow()
+
+    private var tree: nRFLoggerTree? = null
 
     private val highestSequenceNumber
         get() = state.value.glsServiceData.records.keys.maxByOrNull { it.sequenceNumber }?.sequenceNumber ?: -1
@@ -127,6 +125,12 @@ internal class GLSViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        tree?.let { Timber.uproot(it) }
+        tree = null
+    }
+
     internal fun handleResult(result: NavigationResult<ServerDevice>) {
         when (result) {
             is NavigationResult.Cancelled -> navigationManager.navigateUp()
@@ -136,7 +140,7 @@ internal class GLSViewModel @Inject constructor(
 
     fun onEvent(event: GLSScreenViewEvent) {
         when (event) {
-            OpenLoggerEvent -> logger.launch()
+            OpenLoggerEvent -> openLogger()
             is OnWorkingModeSelected -> onEvent(event)
             is OnGLSRecordClick -> navigateToDetails(event.record)
             DisconnectEvent -> onDisconnectEvent()
@@ -168,9 +172,11 @@ internal class GLSViewModel @Inject constructor(
     private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
         _state.value = _state.value.copy(deviceName = device.name)
 
-        logger = loggerFactory.createNordicLogger(getApplication(), stringConst.APP_NAME, "GLS", device.address)
+        tree = nRFLoggerTree(getApplication(), "GLS", device.address, device.name)
+            .apply { setLoggingTagsEnabled(false) }
+            .also { Timber.plant(it) }
 
-        val client = ClientBleGatt.connect(getApplication(), device, viewModelScope, logger = logger)
+        val client = ClientBleGatt.connect(getApplication(), device, viewModelScope)
         this@GLSViewModel.client = client
 
         client.waitForBonding()
@@ -295,6 +301,10 @@ internal class GLSViewModel @Inject constructor(
         } else {
             _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.FAILED)
         }
+    }
+
+    private fun openLogger() {
+        LoggerLauncher.launch(getApplication(), tree?.session as? LogSession)
     }
 
     private fun clear() {

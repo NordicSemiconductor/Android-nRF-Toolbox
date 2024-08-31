@@ -9,13 +9,13 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.common.core.DataByteArray
 import no.nordicsemi.android.kotlin.ble.advertiser.BleAdvertiser
 import no.nordicsemi.android.kotlin.ble.core.MockServerDevice
 import no.nordicsemi.android.kotlin.ble.core.advertiser.BleAdvertisingConfig
 import no.nordicsemi.android.kotlin.ble.core.advertiser.BleAdvertisingData
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattPermission
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattProperty
+import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
 import no.nordicsemi.android.kotlin.ble.server.main.ServerBleGatt
 import no.nordicsemi.android.kotlin.ble.server.main.service.ServerBleGattCharacteristic
 import no.nordicsemi.android.kotlin.ble.server.main.service.ServerBleGattCharacteristicConfig
@@ -37,7 +37,6 @@ private const val STANDARD_DELAY = 1000L
 class UartServer @Inject constructor(
     private val scope: CoroutineScope,
 ) {
-
     private lateinit var server: ServerBleGatt
 
     private lateinit var rxCharacteristic: ServerBleGattCharacteristic
@@ -127,11 +126,7 @@ class UartServer @Inject constructor(
     private fun startBatteryService() {
         scope.launch {
             repeat(100) {
-                send(batteryLevelCharacteristic, DataByteArray.from(0x61))
-                delay(STANDARD_DELAY)
-                send(batteryLevelCharacteristic, DataByteArray.from(0x60))
-                delay(STANDARD_DELAY)
-                send(batteryLevelCharacteristic, DataByteArray.from(0x5F))
+                send(batteryLevelCharacteristic, DataByteArray.from(it.toByte()))
                 delay(STANDARD_DELAY)
             }
         }

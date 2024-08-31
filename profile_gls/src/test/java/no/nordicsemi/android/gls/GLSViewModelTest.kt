@@ -3,8 +3,6 @@ package no.nordicsemi.android.gls
 import android.content.Context
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
-import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.justRun
@@ -19,8 +17,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import no.nordicsemi.android.analytics.AppAnalytics
-import no.nordicsemi.android.common.core.ApplicationScope
-import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.gls.data.WorkingMode
@@ -32,16 +28,14 @@ import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.gls.GlucoseMeasurementParser
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.RequestStatus
-import no.nordicsemi.android.ui.view.NordicLoggerFactory
-import no.nordicsemi.android.ui.view.StringConst
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.robolectric.annotation.Config
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import kotlin.test.assertContentEquals
 
 /**
@@ -63,14 +57,8 @@ internal class GLSViewModelTest {
     @RelaxedMockK
     lateinit var analytics: AppAnalytics
 
-    @MockK
-    lateinit var stringConst: StringConst
-
     @RelaxedMockK
     lateinit var context: Context
-
-    @RelaxedMockK
-    lateinit var logger: BleLoggerAndLauncher
 
     lateinit var viewModel: GLSViewModel
 
@@ -95,24 +83,11 @@ internal class GLSViewModelTest {
     fun before() {
         runBlocking {
             mockkStatic("no.nordicsemi.android.common.core.ApplicationScopeKt")
-            every { ApplicationScope } returns CoroutineScope(UnconfinedTestDispatcher())
-            every { stringConst.APP_NAME } returns "Test"
 
-            viewModel = spyk(GLSViewModel(context, navigator, analytics, stringConst, object :
-                NordicLoggerFactory {
-                override fun createNordicLogger(
-                    context: Context,
-                    profile: String?,
-                    key: String,
-                    name: String?,
-                ): BleLoggerAndLauncher {
-                    return logger
-                }
-
-            }))
+            viewModel = spyk(GLSViewModel(context, navigator, analytics))
             justRun { viewModel.logAnalytics(any()) }
 
-            glsServer = GLSServer(CoroutineScope(UnconfinedTestDispatcher()), context, logger)
+            glsServer = GLSServer(CoroutineScope(UnconfinedTestDispatcher()))
             glsServer.start(spyk(), device)
         }
     }

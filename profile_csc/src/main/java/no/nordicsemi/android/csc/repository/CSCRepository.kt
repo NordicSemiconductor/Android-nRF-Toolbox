@@ -37,9 +37,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import no.nordicsemi.android.common.core.simpleSharedFlow
-import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
-import no.nordicsemi.android.common.logger.DefaultBleLogger
+import no.nordicsemi.android.common.logger.LoggerLauncher
+import no.nordicsemi.android.csc.R
 import no.nordicsemi.android.csc.data.CSCServiceData
 import no.nordicsemi.android.csc.data.SpeedUnit
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
@@ -48,20 +47,21 @@ import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.csc.data.CSCData
 import no.nordicsemi.android.kotlin.ble.profile.csc.data.WheelSize
 import no.nordicsemi.android.kotlin.ble.profile.csc.data.WheelSizes
+import no.nordicsemi.android.log.LogSession
+import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.ServiceManager
-import no.nordicsemi.android.ui.view.StringConst
+import no.nordicsemi.android.utils.simpleSharedFlow
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class CSCRepository @Inject constructor(
-    @ApplicationContext
-    private val context: Context,
+    @ApplicationContext private val context: Context,
     private val serviceManager: ServiceManager,
-    private val stringConst: StringConst
 ) {
-    private var logger: BleLoggerAndLauncher? = null
+    private var tree: nRFLoggerTree? = null
 
     private val _wheelSize = MutableStateFlow(WheelSizes.default)
     internal val wheelSize = _wheelSize.asStateFlow()
@@ -92,9 +92,12 @@ class CSCRepository @Inject constructor(
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
     fun launch(device: ServerDevice) {
-        logger = DefaultBleLogger.create(context, stringConst.APP_NAME, "CSC", device.address)
+        tree = nRFLoggerTree(context, "CSC", device.address, device.name)
+            .apply { setLoggingTagsEnabled(false) }
+            .also { Timber.plant(it) }
+
         _data.value = _data.value.copy(deviceName = device.name)
-        serviceManager.startService(CSCService::class.java, device)
+        serviceManager.startService(CSCService::class.java, device, context.getString(R.string.csc_title_short))
     }
 
     internal fun setSpeedUnit(speedUnit: SpeedUnit) {
@@ -123,11 +126,7 @@ class CSCRepository @Inject constructor(
     }
 
     fun openLogger() {
-        logger?.launch()
-    }
-
-    fun log(priority: Int, message: String) {
-        logger?.log(priority, message)
+        LoggerLauncher.launch(context, tree?.session as? LogSession)
     }
 
     fun disconnect() {
@@ -135,7 +134,8 @@ class CSCRepository @Inject constructor(
     }
 
     private fun clean() {
-        logger = null
+        tree?.let { Timber.uproot(it) }
+        tree = null
         _data.value = CSCServiceData()
     }
 }

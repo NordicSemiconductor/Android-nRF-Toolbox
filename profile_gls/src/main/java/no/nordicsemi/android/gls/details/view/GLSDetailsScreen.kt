@@ -39,7 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.gls.R
 import no.nordicsemi.android.gls.details.viewmodel.GLSDetailsViewModel
-import no.nordicsemi.android.ui.view.LoggerBackIconAppBar
+import no.nordicsemi.android.ui.view.CloseIconAppBar
 
 @Composable
 internal fun GLSDetailsScreen() {
@@ -47,7 +47,7 @@ internal fun GLSDetailsScreen() {
     val record by viewModel.record.collectAsStateWithLifecycle()
 
     Column {
-        LoggerBackIconAppBar(stringResource(id = R.string.gls_title)) {
+        CloseIconAppBar(stringResource(id = R.string.gls_title)) {
             viewModel.navigateBack()
         }
 

@@ -45,9 +45,10 @@ dependencies {
     implementation(project(":lib_ui"))
     implementation(project(":lib_utils"))
 
+    implementation(libs.nordic.ui)
     implementation(libs.nordic.theme)
+    implementation(libs.nordic.logger)
     implementation(libs.nordic.navigation)
-    implementation(libs.nordic.uilogger)
 
     implementation(libs.nordic.blek.client)
     implementation(libs.nordic.blek.profile)
@@ -73,7 +74,7 @@ dependencies {
     testImplementation(libs.test.mockk)
     testImplementation(libs.androidx.test.ext)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.test.slf4j.simple)
+    testImplementation(libs.slf4j.simple)
     testImplementation(libs.test.robolectric)
     testImplementation(libs.kotlin.junit)
 }

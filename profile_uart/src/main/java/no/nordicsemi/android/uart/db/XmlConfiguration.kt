@@ -29,56 +29,66 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.uart.db;
+package no.nordicsemi.android.uart.db
 
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.ElementArray;
-import org.simpleframework.xml.Root;
-import org.simpleframework.xml.core.PersistenceException;
-import org.simpleframework.xml.core.Validate;
+import kotlinx.serialization.Serializable
+import nl.adaptivity.xmlutil.serialization.XmlElement
+import nl.adaptivity.xmlutil.serialization.XmlIgnoreWhitespace
+import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
-@Root
-public class XmlConfiguration {
-	public static final int COMMANDS_COUNT = 9;
+@Serializable
+@XmlSerialName("xml-configuration")
+@XmlIgnoreWhitespace
+data class XmlConfiguration(
+	@XmlElement(false)
+	var name: String = "Unnamed",
 
-	@Attribute(required = false, empty = "Unnamed")
-	private String name;
+	@XmlElement(true)
+	var commands: Commands = Commands()
+) {
 
-	@ElementArray
-	private XmlMacro[] commands = new XmlMacro[COMMANDS_COUNT];
+	@Serializable
+	@XmlSerialName("commands")
+	data class Commands(
+		var commands: Array<XmlMacro> = arrayOf(
+			XmlMacro(),
+			XmlMacro(),
+			XmlMacro(),
+			XmlMacro(),
+			XmlMacro(),
+			XmlMacro(),
+			XmlMacro(),
+			XmlMacro(),
+			XmlMacro()
+		),
 
-	/**
-	 * Returns the field name
-	 *
-	 * @return optional name
-	 */
-	public String getName() {
-		return name;
+		@XmlElement(false)
+		val length: Int = commands.size,
+	) {
+		init {
+			require(commands.size == COMMANDS_COUNT) { "A Macro must have 9 commands" }
+		}
+
+		override fun equals(other: Any?): Boolean {
+			if (this === other) return true
+			if (javaClass != other?.javaClass) return false
+
+			other as Commands
+
+			if (length != other.length) return false
+			if (!commands.contentEquals(other.commands)) return false
+
+			return true
+		}
+
+		override fun hashCode(): Int {
+			var result = length
+			result = 31 * result + commands.contentHashCode()
+			return result
+		}
 	}
 
-	/**
-	 * Sets the name to specified value
-	 * @param name the new name
-	 */
-	public void setName(final String name) {
-		this.name = name;
-	}
-
-	/**
-	 * Returns the array of commands. There is always 9 of them.
-	 * @return the commands array
-	 */
-	public XmlMacro[] getCommands() {
-		return commands;
-	}
-
-	public void setCommands(XmlMacro[] commands) {
-		this.commands = commands;
-	}
-
-	@Validate
-	private void validate() throws PersistenceException{
-		if (commands == null || commands.length != COMMANDS_COUNT)
-			throw new PersistenceException("There must be always " + COMMANDS_COUNT + " commands in a configuration.");
+	companion object {
+		const val COMMANDS_COUNT = 9
 	}
 }

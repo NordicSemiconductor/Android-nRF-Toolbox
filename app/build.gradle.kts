@@ -33,7 +33,7 @@ plugins {
     alias(libs.plugins.nordic.hilt)
 }
 
-if (getGradle().getStartParameter().getTaskRequests().toString().contains("Release")) {
+if (gradle.startParameter.taskRequests.toString().contains("Release")) {
     apply(plugin = "com.google.gms.google-services")
     apply(plugin = "com.google.firebase.crashlytics")
 }
@@ -53,7 +53,6 @@ dependencies {
     implementation(project(":profile_hts"))
     implementation(project(":profile_prx"))
     implementation(project(":profile_rscs"))
-
     implementation(project(":profile_uart"))
 
     implementation(project(":lib_analytics"))
@@ -62,15 +61,18 @@ dependencies {
     implementation(project(":lib_service"))
     implementation(project(":lib_scanner"))
 
-    implementation(libs.nordic.core)
+    implementation(libs.nordic.ui)
     implementation(libs.nordic.theme)
     implementation(libs.nordic.navigation)
-    implementation(libs.nordic.blek.uiscanner)
-    implementation(libs.nordic.uilogger)
+    implementation(libs.nordic.logger)
     implementation(libs.nordic.permissions.ble)
     implementation(libs.nordic.analytics)
-    
+
+    implementation(libs.nordic.blek.uiscanner)
     implementation(libs.nordic.blek.client)
+
+    // Pass SLF4J logs to Timber
+    implementation(libs.slf4j.timber)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.compose.material3)

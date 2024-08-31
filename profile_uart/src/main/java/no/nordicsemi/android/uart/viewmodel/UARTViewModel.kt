@@ -77,7 +77,6 @@ import no.nordicsemi.android.uart.view.OnRunMacro
 import no.nordicsemi.android.uart.view.OpenLogger
 import no.nordicsemi.android.uart.view.UARTViewEvent
 import no.nordicsemi.android.uart.view.UARTViewState
-import no.nordicsemi.android.ui.view.NordicLoggerFactory
 import javax.inject.Inject
 
 @HiltViewModel
@@ -86,9 +85,7 @@ internal class UARTViewModel @Inject constructor(
     private val navigationManager: Navigator,
     private val dataSource: UARTPersistentDataSource,
     private val analytics: AppAnalytics,
-    private val loggerFactory: NordicLoggerFactory
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(UARTViewState())
     val state = _state.asStateFlow()
 

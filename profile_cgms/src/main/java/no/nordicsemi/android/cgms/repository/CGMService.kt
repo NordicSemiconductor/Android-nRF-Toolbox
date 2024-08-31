@@ -71,7 +71,8 @@ import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
 import no.nordicsemi.android.utils.launchWithCatch
 import no.nordicsemi.android.utils.tryOrLog
-import java.util.*
+import timber.log.Timber
+import java.util.UUID
 import javax.inject.Inject
 
 val CGMS_SERVICE_UUID: UUID = UUID.fromString("0000181F-0000-1000-8000-00805f9b34fb")
@@ -132,7 +133,7 @@ internal class CGMService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        val client = ClientBleGatt.connect(this@CGMService, device, lifecycleScope, logger = { p, s -> repository.log(p, s) })
+        val client = ClientBleGatt.connect(this@CGMService, device, lifecycleScope)
         this@CGMService.client = client
 
         client.connectionStateWithStatus
@@ -149,6 +150,7 @@ internal class CGMService : NotificationService() {
             val services = client.discoverServices()
             configureGatt(services)
         } catch (e: Exception) {
+            Timber.e(e)
             repository.onMissingServices()
         }
     }

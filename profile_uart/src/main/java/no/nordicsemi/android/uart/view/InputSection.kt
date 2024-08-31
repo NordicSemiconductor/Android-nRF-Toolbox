@@ -45,21 +45,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.common.theme.view.RadioButtonGroup
-import no.nordicsemi.android.common.theme.view.RadioButtonItem
-import no.nordicsemi.android.common.theme.view.RadioGroupViewEntity
+import no.nordicsemi.android.common.ui.view.RadioButtonGroup
+import no.nordicsemi.android.common.ui.view.RadioButtonItem
+import no.nordicsemi.android.common.ui.view.RadioGroupViewEntity
 import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.uart.data.MacroEol
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.utils.EMPTY
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun InputSection(onEvent: (UARTViewEvent) -> Unit) {
     val text = rememberSaveable { mutableStateOf(String.EMPTY) }
     val hint = stringResource(id = R.string.uart_input_hint)
-    val checkedItem = rememberSaveable { mutableStateOf(MacroEol.values()[0]) }
+    val checkedItem = rememberSaveable { mutableStateOf(MacroEol.entries[0]) }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(modifier = Modifier.weight(1f)) {
@@ -99,9 +98,9 @@ internal fun InputSection(onEvent: (UARTViewEvent) -> Unit) {
 
 @Composable
 internal fun EditInputSection(onEvent: (UARTViewEvent) -> Unit) {
-    val checkedItem = rememberSaveable { mutableStateOf(MacroEol.values()[0]) }
+    val checkedItem = rememberSaveable { mutableStateOf(MacroEol.entries[0]) }
 
-    val items = MacroEol.values().map {
+    val items = MacroEol.entries.map {
         RadioButtonItem(it.toDisplayString(), it == checkedItem.value)
     }
     val viewEntity = RadioGroupViewEntity(items)
@@ -131,7 +130,7 @@ internal fun EditInputSection(onEvent: (UARTViewEvent) -> Unit) {
 
                 RadioButtonGroup(viewEntity) {
                     val i = items.indexOf(it)
-                    checkedItem.value = MacroEol.values()[i]
+                    checkedItem.value = MacroEol.entries.toTypedArray()[i]
                 }
             }
 

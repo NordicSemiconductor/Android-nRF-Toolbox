@@ -7,11 +7,10 @@ import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import javax.inject.Inject
 
 class ServiceManagerImpl @Inject constructor(
-    @ApplicationContext
-    private val context: Context
+    @ApplicationContext private val context: Context
 ): ServiceManager {
 
-    override fun <T> startService(service: Class<T>, device: ServerDevice) {
+    override fun <T> startService(service: Class<T>, device: ServerDevice, profile: String) {
         val intent = Intent(context, service).apply {
             putExtra(DEVICE_DATA, device)
         }

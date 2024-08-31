@@ -50,10 +50,10 @@ dependencies {
     implementation(project(":lib_ui"))
     implementation(project(":lib_utils"))
 
-    implementation(libs.nordic.core)
+    implementation(libs.nordic.ui)
     implementation(libs.nordic.theme)
     implementation(libs.nordic.navigation)
-    implementation(libs.nordic.uilogger)
+    implementation(libs.nordic.logger)
 
     implementation(libs.nordic.blek.client)
     implementation(libs.nordic.blek.profile)
@@ -62,12 +62,8 @@ dependencies {
     implementation(libs.nordic.blek.advertiser)
     implementation(libs.nordic.blek.uiscanner)
 
-    implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
-
-    implementation(libs.accompanist.pager)
-    implementation(libs.accompanist.pagerindicators)
+    kapt(libs.room.compiler)
 
     implementation(libs.androidx.dataStore.core)
     implementation(libs.androidx.dataStore.preferences)
@@ -79,6 +75,9 @@ dependencies {
 
     implementation(libs.androidx.hilt.navigation.compose)
 
+    // XML Serialization
+    implementation("io.github.pdvrieze.xmlutil:serialization-android:0.90.1")
+
     testImplementation(libs.hilt.android.testing)
     kaptTest(libs.hilt.compiler)
     testImplementation(libs.androidx.test.rules)
@@ -87,12 +86,6 @@ dependencies {
     testImplementation(libs.test.mockk)
     testImplementation(libs.androidx.test.ext)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.test.slf4j.simple)
     testImplementation(libs.test.robolectric)
     testImplementation(libs.kotlin.junit)
-
-    implementation("org.simpleframework:simple-xml:2.7.1") {
-        exclude(group = "stax", module = "stax-api")
-        exclude(group = "xpp3", module = "xpp3")
-    }
 }

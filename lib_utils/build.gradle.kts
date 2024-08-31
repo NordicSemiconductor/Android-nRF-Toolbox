@@ -44,4 +44,6 @@ dependencies {
     implementation(libs.nordic.blek.uiscanner)
 
     implementation(libs.kotlinx.coroutines.core)
+
+    api("no.nordicsemi.android:log-timber:2.5.0")
 }

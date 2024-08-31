@@ -32,27 +32,16 @@
 package no.nordicsemi.android.nrftoolbox.view
 
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.colorResource
 import no.nordicsemi.android.common.analytics.view.AnalyticsPermissionButton
-import no.nordicsemi.android.nrftoolbox.R
+import no.nordicsemi.android.common.ui.view.NordicAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TitleAppBar(text: String) {
-    SmallTopAppBar(
+    NordicAppBar(
         title = { Text(text, maxLines = 2) },
-        colors = TopAppBarDefaults.smallTopAppBarColors(
-            scrolledContainerColor = MaterialTheme.colorScheme.primary,
-            containerColor = colorResource(id = R.color.appBarColor),
-            titleContentColor = MaterialTheme.colorScheme.onPrimary,
-            actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
-            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-        ),
         actions = {
             AnalyticsPermissionButton()
         }

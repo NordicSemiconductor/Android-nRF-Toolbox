@@ -1,18 +1,13 @@
 package no.nordicsemi.android.gls
 
-import android.content.Context
 import androidx.test.rule.ServiceTestRule
 import dagger.hilt.android.testing.BindValue
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
 import dagger.hilt.android.testing.UninstallModules
-import io.mockk.every
-import io.mockk.impl.annotations.MockK
-import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.spyk
 import kotlinx.coroutines.CoroutineScope
@@ -23,10 +18,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import no.nordicsemi.android.analytics.AppAnalytics
-import no.nordicsemi.android.common.core.ApplicationScope
-import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
-import no.nordicsemi.android.common.logger.DefaultBleLogger
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.di.NavigationModule
@@ -37,10 +28,7 @@ import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.uart.UartServer
 import no.nordicsemi.android.uart.data.UARTPersistentDataSource
 import no.nordicsemi.android.uart.repository.UARTRepository
-import no.nordicsemi.android.uart.view.DisconnectEvent
 import no.nordicsemi.android.uart.viewmodel.UARTViewModel
-import no.nordicsemi.android.ui.view.NordicLoggerFactory
-import no.nordicsemi.android.ui.view.StringConst
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -75,18 +63,6 @@ internal class UARTViewModelTest {
     @JvmField
     val analyticsService: Navigator = mockk(relaxed = true)
 
-    @RelaxedMockK
-    lateinit var analytics: AppAnalytics
-
-    @MockK
-    lateinit var stringConst: StringConst
-
-    @RelaxedMockK
-    lateinit var context: Context
-
-    @RelaxedMockK
-    lateinit var logger: BleLoggerAndLauncher
-
     @Inject
     lateinit var repository: UARTRepository
 
@@ -113,32 +89,13 @@ internal class UARTViewModelTest {
 
     @Before
     fun before() {
-        viewModel = UARTViewModel(repository, mockk(relaxed = true), dataSource, mockk(relaxed = true), object :
-            NordicLoggerFactory {
-            override fun createNordicLogger(
-                context: Context,
-                profile: String?,
-                key: String,
-                name: String?,
-            ): BleLoggerAndLauncher {
-                return logger
-            }
-
-        })
+        viewModel = UARTViewModel(repository, mockk(relaxed = true), dataSource, mockk(relaxed = true))
         runBlocking {
             mockkStatic("no.nordicsemi.android.common.core.ApplicationScopeKt")
-            every { ApplicationScope } returns CoroutineScope(UnconfinedTestDispatcher())
-            every { stringConst.APP_NAME } returns "Test"
 
             uartServer = UartServer(CoroutineScope(UnconfinedTestDispatcher()))
             uartServer.start(spyk(), device)
         }
-    }
-
-    @Before
-    fun prepareLogger() {
-        mockkObject(DefaultBleLogger.Companion)
-        every { DefaultBleLogger.create(any(), any(), any(), any()) } returns mockk()
     }
 
     @Test

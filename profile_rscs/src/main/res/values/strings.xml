@@ -32,6 +32,7 @@
 
 <resources>
     <string name="rscs_title">Running speed &amp; cadence</string>
+    <string name="rscs_title_short">RSC</string>
 
     <string name="rscs_activity">Activity</string>
     <string name="rscs_pace">Pace</string>

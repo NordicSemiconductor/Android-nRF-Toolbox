@@ -33,18 +33,13 @@ package no.nordicsemi.android.uart.data
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import no.nordicsemi.android.uart.db.CommentVisitor
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import nl.adaptivity.xmlutil.serialization.XML
 import no.nordicsemi.android.uart.db.Configuration
 import no.nordicsemi.android.uart.db.ConfigurationsDao
 import no.nordicsemi.android.uart.db.XmlConfiguration
 import no.nordicsemi.android.uart.db.XmlMacro
-import org.simpleframework.xml.Serializer
-import org.simpleframework.xml.core.Persister
-import org.simpleframework.xml.strategy.Strategy
-import org.simpleframework.xml.strategy.VisitorStrategy
-import org.simpleframework.xml.stream.Format
-import org.simpleframework.xml.stream.HyphenStyle
-import java.io.StringWriter
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -52,22 +47,24 @@ import javax.inject.Singleton
 internal class UARTPersistentDataSource @Inject constructor(
     private val configurationsDao: ConfigurationsDao,
 ) {
-
-    fun getConfigurations(): Flow<List<UARTConfiguration>> = configurationsDao.load().map {
-        it.mapNotNull { it.toDomain() }
+    private val serializer = XML {
+        recommended()
     }
+
+    fun getConfigurations(): Flow<List<UARTConfiguration>> = configurationsDao.load()
+        .map { list ->
+            list.mapNotNull { it.toDomain() }
+        }
 
     private fun Configuration.toDomain(): UARTConfiguration? {
         return try {
             val xml: String = xml
-            val format = Format(HyphenStyle())
-            val serializer: Serializer = Persister(format)
-            val configuration = serializer.read(XmlConfiguration::class.java, xml)
+            val configuration = serializer.decodeFromString<XmlConfiguration>(xml)
 
             UARTConfiguration(
                 _id,
-                configuration.name ?: "Unknown",
-                createMacro(configuration.commands)
+                configuration.name,
+                createMacro(configuration.commands.commands)
             )
         } catch (t: Throwable) {
             t.printStackTrace()
@@ -75,24 +72,16 @@ internal class UARTPersistentDataSource @Inject constructor(
         }
     }
 
-    private fun createMacro(macros: Array<XmlMacro?>): List<UARTMacro?> {
+    private fun createMacro(macros: Array<XmlMacro>): List<UARTMacro?> {
         return macros.map {
-            if (it == null) {
-                null
-            } else {
-                val icon = MacroIcon.create(it.iconIndex)
-                UARTMacro(icon, it.command, it.eol)
-            }
+            if (it.command == null) return@map null
+            val icon = MacroIcon.create(it.iconIndex)
+            UARTMacro(icon, it.command, it.eol)
         }
     }
 
     suspend fun saveConfiguration(configuration: UARTConfiguration) {
-        val format = Format(HyphenStyle())
-        val strategy: Strategy = VisitorStrategy(CommentVisitor())
-        val serializer: Serializer = Persister(strategy, format)
-        val writer = StringWriter()
-        serializer.write(configuration.toXmlConfiguration(), writer)
-        val xml = writer.toString()
+        val xml = serializer.encodeToString(configuration.toXmlConfiguration())
 
         configurationsDao.insert(Configuration(configuration.id, configuration.name, xml, 0))
     }
@@ -107,13 +96,13 @@ internal class UARTPersistentDataSource @Inject constructor(
         val commands = macros.map { macro ->
             macro?.let {
                 XmlMacro().apply {
-                    setEol(it.newLineChar.index)
+                    eolIndex = it.newLineChar.index
                     command = it.command
                     iconIndex = it.icon.index
                 }
-            }
+            } ?: XmlMacro()
         }.toTypedArray()
-        xmlConfiguration.commands = commands
+        xmlConfiguration.commands = XmlConfiguration.Commands(commands = commands)
         return xmlConfiguration
     }
 }

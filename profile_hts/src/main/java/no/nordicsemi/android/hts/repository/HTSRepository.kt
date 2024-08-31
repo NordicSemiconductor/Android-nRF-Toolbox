@@ -37,29 +37,29 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import no.nordicsemi.android.common.core.simpleSharedFlow
-import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
-import no.nordicsemi.android.common.logger.DefaultBleLogger
+import no.nordicsemi.android.common.logger.LoggerLauncher
+import no.nordicsemi.android.hts.R
 import no.nordicsemi.android.hts.data.HTSServiceData
 import no.nordicsemi.android.hts.view.TemperatureUnit
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.hts.data.HTSData
+import no.nordicsemi.android.log.LogSession
+import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.ServiceManager
-import no.nordicsemi.android.ui.view.StringConst
+import no.nordicsemi.android.utils.simpleSharedFlow
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class HTSRepository @Inject constructor(
-    @ApplicationContext
-    private val context: Context,
+    @ApplicationContext private val context: Context,
     private val serviceManager: ServiceManager,
-    private val stringConst: StringConst
 ) {
-    private var logger: BleLoggerAndLauncher? = null
+    private var tree: nRFLoggerTree? = null
 
     private val _data = MutableStateFlow(HTSServiceData())
     internal val data = _data.asStateFlow()
@@ -87,9 +87,12 @@ class HTSRepository @Inject constructor(
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
     fun launch(device: ServerDevice) {
+        tree = nRFLoggerTree(context, "HTS", device.address, device.name)
+            .apply { setLoggingTagsEnabled(false) }
+            .also { Timber.plant(it) }
+
         _data.value = _data.value.copy(deviceName = device.name)
-        logger = DefaultBleLogger.create(context, stringConst.APP_NAME, "HTS", device.address)
-        serviceManager.startService(HTSService::class.java, device)
+        serviceManager.startService(HTSService::class.java, device, context.getString(R.string.hts_title))
     }
 
     internal fun setTemperatureUnit(temperatureUnit: TemperatureUnit) {
@@ -109,11 +112,7 @@ class HTSRepository @Inject constructor(
     }
 
     fun openLogger() {
-        logger?.launch()
-    }
-
-    fun log(priority: Int, message: String) {
-        logger?.log(priority, message)
+        LoggerLauncher.launch(context, tree?.session as? LogSession)
     }
 
     fun disconnect() {
@@ -126,7 +125,8 @@ class HTSRepository @Inject constructor(
     }
 
     private fun clean() {
-        logger = null
+        tree?.let { Timber.uproot(it) }
+        tree = null
         _data.value = HTSServiceData()
     }
 }

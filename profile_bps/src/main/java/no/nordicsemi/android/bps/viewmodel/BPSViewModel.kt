@@ -32,9 +32,10 @@
 package no.nordicsemi.android.bps.viewmodel
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.content.Context
 import android.os.ParcelUuid
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -53,8 +54,7 @@ import no.nordicsemi.android.bps.view.BPSViewEvent
 import no.nordicsemi.android.bps.view.BPSViewState
 import no.nordicsemi.android.bps.view.DisconnectEvent
 import no.nordicsemi.android.bps.view.OpenLoggerEvent
-import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
-import no.nordicsemi.android.common.logger.DefaultBleLogger
+import no.nordicsemi.android.common.logger.LoggerLauncher
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
@@ -67,8 +67,10 @@ import no.nordicsemi.android.kotlin.ble.profile.bps.BloodPressureMeasurementPars
 import no.nordicsemi.android.kotlin.ble.profile.bps.IntermediateCuffPressureParser
 import no.nordicsemi.android.kotlin.ble.profile.bps.data.BloodPressureMeasurementData
 import no.nordicsemi.android.kotlin.ble.profile.bps.data.IntermediateCuffPressureData
+import no.nordicsemi.android.log.LogSession
+import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
-import no.nordicsemi.android.ui.view.StringConst
+import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
 
@@ -82,18 +84,16 @@ private val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1
 @SuppressLint("MissingPermission", "StaticFieldLeak")
 @HiltViewModel
 internal class BPSViewModel @Inject constructor(
-    @ApplicationContext
-    private val context: Context,
+    @ApplicationContext context: Context,
     private val navigationManager: Navigator,
     private val analytics: AppAnalytics,
-    private val stringConst: StringConst
-) : ViewModel() {
-
+) : AndroidViewModel(context as Application) {
     private val _state = MutableStateFlow(BPSViewState())
     val state = _state.asStateFlow()
 
     private var client: ClientBleGatt? = null
-    private lateinit var logger: BleLoggerAndLauncher
+
+    private var tree: nRFLoggerTree? = null
 
     init {
         navigationManager.navigateTo(ScannerDestinationId, ParcelUuid(BPS_SERVICE_UUID))
@@ -113,8 +113,14 @@ internal class BPSViewModel @Inject constructor(
     fun onEvent(event: BPSViewEvent) {
         when (event) {
             DisconnectEvent -> onDisconnectEvent()
-            OpenLoggerEvent -> logger.launch()
+            OpenLoggerEvent -> openLogger()
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        tree?.let { Timber.uproot(it) }
+        tree = null
     }
 
     private fun onDisconnectEvent() {
@@ -125,9 +131,11 @@ internal class BPSViewModel @Inject constructor(
     private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
         _state.value = _state.value.copy(deviceName = device.name)
 
-        logger = DefaultBleLogger.create(context, stringConst.APP_NAME, "BPS", device.address)
+        tree = nRFLoggerTree(getApplication(), "BPS", device.address, device.name)
+            .apply { setLoggingTagsEnabled(false) }
+            .also { Timber.plant(it) }
 
-        val client = ClientBleGatt.connect(context, device, viewModelScope, logger = logger)
+        val client = ClientBleGatt.connect(getApplication(), device, viewModelScope)
         this@BPSViewModel.client = client
 
         client.connectionStateWithStatus
@@ -204,5 +212,9 @@ internal class BPSViewModel @Inject constructor(
         if (connectionState == GattConnectionState.STATE_CONNECTED) {
             analytics.logEvent(ProfileConnectedEvent(Profile.BPS))
         }
+    }
+
+    private fun openLogger() {
+        LoggerLauncher.launch(getApplication(), tree?.session as? LogSession)
     }
 }

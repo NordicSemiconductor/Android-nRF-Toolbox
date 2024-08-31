@@ -51,7 +51,7 @@ import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.kotlin.ble.profile.csc.CSCDataParser
 import no.nordicsemi.android.service.DEVICE_DATA
 import no.nordicsemi.android.service.NotificationService
-import java.util.*
+import java.util.UUID
 import javax.inject.Inject
 
 val CSC_SERVICE_UUID: UUID = UUID.fromString("00001816-0000-1000-8000-00805f9b34fb")
@@ -86,7 +86,7 @@ internal class CSCService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        val client = ClientBleGatt.connect(this@CSCService, device, lifecycleScope, logger = { p, s -> repository.log(p, s) })
+        val client = ClientBleGatt.connect(this@CSCService, device, lifecycleScope)
         this@CSCService.client = client
 
         client.connectionStateWithStatus

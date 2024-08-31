@@ -52,9 +52,9 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.common.theme.view.RadioButtonGroup
-import no.nordicsemi.android.common.theme.view.RadioButtonItem
-import no.nordicsemi.android.common.theme.view.RadioGroupViewEntity
+import no.nordicsemi.android.common.ui.view.RadioButtonGroup
+import no.nordicsemi.android.common.ui.view.RadioButtonItem
+import no.nordicsemi.android.common.ui.view.RadioGroupViewEntity
 import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.uart.data.MacroEol
 import no.nordicsemi.android.uart.data.MacroIcon
@@ -67,7 +67,7 @@ private const val GRID_SIZE = 5
 internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (UARTViewEvent) -> Unit) {
     val newLineChar = rememberSaveable { mutableStateOf(macro?.newLineChar ?: MacroEol.LF) }
     val command = rememberSaveable { mutableStateOf(macro?.command ?: String.EMPTY) }
-    val selectedIcon = rememberSaveable { mutableStateOf(macro?.icon ?: MacroIcon.values()[0]) }
+    val selectedIcon = rememberSaveable { mutableStateOf(macro?.icon ?: MacroIcon.entries.toTypedArray()[0]) }
 
     AlertDialog(
         onDismissRequest = { onEvent(OnEditFinish) },
@@ -130,7 +130,6 @@ internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (UARTViewEvent) -> U
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CommandInput(command: MutableState<String>) {
     Column {
@@ -150,7 +149,7 @@ private fun CommandInput(command: MutableState<String>) {
 
 @Composable
 private fun NewLineCharSection(checkedItem: MacroEol, onItemClick: (MacroEol) -> Unit) {
-    val items = MacroEol.values().map {
+    val items = MacroEol.entries.map {
         RadioButtonItem(it.toDisplayString(), it == checkedItem)
     }
     val viewEntity = RadioGroupViewEntity(items)
@@ -163,7 +162,7 @@ private fun NewLineCharSection(checkedItem: MacroEol, onItemClick: (MacroEol) ->
 
         RadioButtonGroup(viewEntity) {
             val i = items.indexOf(it)
-            onItemClick(MacroEol.values()[i])
+            onItemClick(MacroEol.entries[i])
         }
     }
 }

@@ -37,5 +37,5 @@ const val DEVICE_DATA = "device-data"
 
 interface ServiceManager {
 
-    fun <T> startService(service: Class<T>, device: ServerDevice)
+    fun <T> startService(service: Class<T>, device: ServerDevice, profile: String)
 }

@@ -40,7 +40,7 @@ android {
 
 dependencies {
     implementation(project(":lib_ui"))
-    
+
     implementation(libs.nordic.blek.uiscanner)
     implementation(libs.nordic.blek.core)
 

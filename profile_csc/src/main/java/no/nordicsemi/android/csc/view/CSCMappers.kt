@@ -31,8 +31,8 @@
 
 package no.nordicsemi.android.csc.view
 
-import no.nordicsemi.android.common.theme.view.RadioButtonItem
-import no.nordicsemi.android.common.theme.view.RadioGroupViewEntity
+import no.nordicsemi.android.common.ui.view.RadioButtonItem
+import no.nordicsemi.android.common.ui.view.RadioGroupViewEntity
 import no.nordicsemi.android.csc.data.SpeedUnit
 import no.nordicsemi.android.kotlin.ble.profile.csc.data.CSCData
 import java.util.Locale
@@ -52,29 +52,29 @@ internal fun CSCData.speedWithSpeedUnit(speedUnit: SpeedUnit): Float {
 internal fun CSCData.displaySpeed(speedUnit: SpeedUnit): String {
     val speedWithUnit = speedWithSpeedUnit(speedUnit)
     return when (speedUnit) {
-        SpeedUnit.M_S -> String.format("%.1f m/s", speedWithUnit)
-        SpeedUnit.KM_H -> String.format("%.1f km/h", speedWithUnit)
-        SpeedUnit.MPH -> String.format("%.1f mph", speedWithUnit)
+        SpeedUnit.M_S -> String.format(Locale.US, "%.1f m/s", speedWithUnit)
+        SpeedUnit.KM_H -> String.format(Locale.US, "%.1f km/h", speedWithUnit)
+        SpeedUnit.MPH -> String.format(Locale.US,  "%.1f mph", speedWithUnit)
     }
 }
 
 internal fun CSCData.displayCadence(): String {
-    return String.format("%.0f RPM", cadence)
+    return String.format(Locale.US, "%.0f RPM", cadence)
 }
 
 internal fun CSCData.displayDistance(speedUnit: SpeedUnit): String {
     return when (speedUnit) {
-        SpeedUnit.M_S -> String.format("%.0f m", distance)
-        SpeedUnit.KM_H -> String.format("%.0f m", distance)
-        SpeedUnit.MPH -> String.format("%.0f yd", distance.toYards())
+        SpeedUnit.M_S -> String.format(Locale.US, "%.0f m", distance)
+        SpeedUnit.KM_H -> String.format(Locale.US, "%.0f m", distance)
+        SpeedUnit.MPH -> String.format(Locale.US, "%.0f yd", distance.toYards())
     }
 }
 
 internal fun CSCData.displayTotalDistance(speedUnit: SpeedUnit): String {
     return when (speedUnit) {
-        SpeedUnit.M_S -> String.format("%.2f m", totalDistance)
-        SpeedUnit.KM_H -> String.format("%.2f km", totalDistance.toKilometers())
-        SpeedUnit.MPH -> String.format("%.2f mile", totalDistance.toMiles())
+        SpeedUnit.M_S -> String.format(Locale.US, "%.2f m", totalDistance)
+        SpeedUnit.KM_H -> String.format(Locale.US, "%.2f km", totalDistance.toKilometers())
+        SpeedUnit.MPH -> String.format(Locale.US, "%.2f mile", totalDistance.toMiles())
     }
 }
 
@@ -93,7 +93,7 @@ internal fun String.toSpeedUnit(): SpeedUnit {
 
 internal fun SpeedUnit.temperatureSettingsItems(): RadioGroupViewEntity {
     return RadioGroupViewEntity(
-        SpeedUnit.values().map { createRadioButtonItem(it, this) }
+        SpeedUnit.entries.map { createRadioButtonItem(it, this) }
     )
 }
 
@@ -110,14 +110,14 @@ private fun displayTemperature(unit: SpeedUnit): String {
 }
 
 private fun Float.toYards(): Float {
-    return this*1.0936f
+    return this * 1.0936f
 }
 
 private fun Float.toKilometers(): Float {
-    return this/1000f
+    return this / 1000f
 }
 
 private fun Float.toMiles(): Float {
-    return this*0.0006f
+    return this * 0.0006f
 }
 

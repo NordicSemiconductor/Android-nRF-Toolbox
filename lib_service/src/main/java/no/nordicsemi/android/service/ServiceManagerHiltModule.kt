@@ -13,8 +13,7 @@ class ServiceManagerHiltModule {
 
     @Provides
     fun createServiceManager(
-        @ApplicationContext
-        context: Context,
+        @ApplicationContext context: Context,
     ): ServiceManager {
         return ServiceManagerImpl(context)
     }

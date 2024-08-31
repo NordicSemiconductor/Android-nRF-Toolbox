@@ -58,10 +58,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    @ApplicationContext
-    private val context: Context,
+    @ApplicationContext private val context: Context,
     private val navigationManager: Navigator,
-    private val activitySignals: ActivitySignals,
+    activitySignals: ActivitySignals,
     cgmRepository: CGMRepository,
     cscRepository: CSCRepository,
     hrsRepository: HRSRepository,
@@ -114,7 +113,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun openLogger() {
-        LoggerLauncher.launch(context)
+        LoggerLauncher.launch(context, null)
     }
 
     fun logEvent(event: ProfileOpenEvent) {

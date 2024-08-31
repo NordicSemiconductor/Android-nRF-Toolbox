@@ -60,12 +60,11 @@ internal class AlarmHandler @Inject constructor(
         }
 
     fun playAlarm(alarmLevel: AlarmLevel) {
-        if (alarmLevel == AlarmLevel.NONE) {
-            pauseAlarm()
-            return
-        }
         val ringtone = when (alarmLevel) {
-            AlarmLevel.NONE -> null
+            AlarmLevel.NONE -> {
+                pauseAlarm()
+                return
+            }
             AlarmLevel.MEDIUM -> mediumLevelRingtone
             AlarmLevel.HIGH -> highLevelRingtone
         }

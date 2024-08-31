@@ -14,7 +14,6 @@ data class PRXServiceData(
     val deviceName: String? = null,
     val missingServices: Boolean = false
 ) {
-
     val disconnectStatus = if (missingServices) {
         BleGattConnectionStatus.NOT_SUPPORTED
     } else {

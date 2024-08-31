@@ -37,28 +37,28 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import no.nordicsemi.android.common.core.simpleSharedFlow
-import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
-import no.nordicsemi.android.common.logger.DefaultBleLogger
+import no.nordicsemi.android.common.logger.LoggerLauncher
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.prx.AlarmLevel
+import no.nordicsemi.android.log.LogSession
+import no.nordicsemi.android.log.timber.nRFLoggerTree
+import no.nordicsemi.android.prx.R
 import no.nordicsemi.android.prx.data.PRXServiceData
 import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.ServiceManager
-import no.nordicsemi.android.ui.view.StringConst
+import no.nordicsemi.android.utils.simpleSharedFlow
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class PRXRepository @Inject internal constructor(
-    @ApplicationContext
-    private val context: Context,
+    @ApplicationContext private val context: Context,
     private val serviceManager: ServiceManager,
-    private val stringConst: StringConst
 ) {
-    private var logger: BleLoggerAndLauncher? = null
+    private var tree: nRFLoggerTree? = null
 
     private val _data = MutableStateFlow(PRXServiceData())
     internal val data = _data.asStateFlow()
@@ -89,9 +89,12 @@ class PRXRepository @Inject internal constructor(
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
     fun launch(device: ServerDevice) {
-        logger = DefaultBleLogger.create(context, stringConst.APP_NAME, "PRX", device.address)
+        tree = nRFLoggerTree(context, "Proximity", device.address, device.name)
+            .apply { setLoggingTagsEnabled(false) }
+            .also { Timber.plant(it) }
+
         _data.value = _data.value.copy(deviceName = device.name)
-        serviceManager.startService(PRXService::class.java, device)
+        serviceManager.startService(PRXService::class.java, device, context.getString(R.string.prx_title))
     }
 
     fun onConnectionStateChanged(connection: GattConnectionStateWithStatus) {
@@ -119,11 +122,7 @@ class PRXRepository @Inject internal constructor(
     }
 
     fun openLogger() {
-        logger?.launch()
-    }
-
-    fun log(priority: Int, message: String) {
-        logger?.log(priority, message)
+        LoggerLauncher.launch(context, tree?.session as? LogSession)
     }
 
     fun onMissingServices() {
@@ -137,7 +136,8 @@ class PRXRepository @Inject internal constructor(
     }
 
     private fun clean() {
-        logger = null
+        tree?.let { Timber.uproot(it) }
+        tree = null
         _data.value = PRXServiceData()
     }
 }

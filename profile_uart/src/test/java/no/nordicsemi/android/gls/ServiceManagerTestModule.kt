@@ -1,6 +1,5 @@
 package no.nordicsemi.android.gls
 
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import dagger.Module
@@ -25,8 +24,6 @@ import javax.inject.Singleton
 )
 class ServiceManagerTestModule {
 
-    private val componentName = ComponentName("org.robolectric", UARTService::class.java.name)
-
     @Provides
     internal fun provideDevice(): MockServerDevice {
         return MockServerDevice(
@@ -49,7 +46,7 @@ class ServiceManagerTestModule {
     @Singleton
     internal fun provideServiceManager(controller: ServiceController<UARTService>): ServiceManager {
         return object : ServiceManager {
-            override fun <T> startService(service: Class<T>, device: ServerDevice) {
+            override fun <T> startService(service: Class<T>, device: ServerDevice, profile: String) {
                 controller.create().startCommand(3, 4).get()
             }
         }

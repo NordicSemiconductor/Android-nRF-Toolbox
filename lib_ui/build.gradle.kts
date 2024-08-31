@@ -42,7 +42,7 @@ android {
 }
 
 dependencies {
-    implementation(libs.nordic.uilogger)
+    implementation(libs.nordic.ui)
     implementation(libs.nordic.theme)
     implementation(libs.nordic.logger)
 
