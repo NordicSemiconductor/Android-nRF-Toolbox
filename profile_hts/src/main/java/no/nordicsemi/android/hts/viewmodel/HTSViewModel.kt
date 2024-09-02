@@ -31,20 +31,22 @@ internal class HTSViewModel @Inject constructor(
     private var peripheral: Peripheral? = null
 
     init {
+        htsRepository.setOnScreen(true)
         startHtsService()
     }
 
-    private fun startHtsService() {
+    fun startHtsService() {
         connectionProvider.profile.onEach {
             if (it == null) {
                 return@onEach
             }
+
             peripheral = it.peripheralDetails.peripheral
             htsRepository.apply {
                 peripheral = it.peripheralDetails.peripheral
                 remoteService = it.peripheralDetails.serviceData
                 getConnection(viewModelScope)
-                launchHtsService()
+                if (!this.data.value.isServiceRunning) launchHtsService()
             }
         }.launchIn(viewModelScope)
         // Check the Bluetooth connection status and reestablish the device connection if Bluetooth is reconnected.
@@ -69,15 +71,15 @@ internal class HTSViewModel @Inject constructor(
             is NavigateUp -> navigator.navigateUp()
             is DisconnectEvent -> {
                 viewModelScope.launch {
-                    // Navigate back
                     try {
                         if (peripheral?.isConnected == true) {
+                            connectionProvider.disconnect(peripheral!!, viewModelScope)
                             htsRepository.disconnect()
-                            peripheral?.let { connectionProvider.disconnect(it, viewModelScope) }
                         }
                     } catch (e: Exception) {
                         Timber.e(e)
                     }
+                    // Navigate back
                     navigator.navigateUp()
                 }
             }
@@ -107,6 +109,7 @@ internal class HTSViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         viewModelScope.cancel()
+        htsRepository.setOnScreen(false)
     }
 
 }

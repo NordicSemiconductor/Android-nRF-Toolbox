@@ -54,7 +54,6 @@ abstract class NotificationService : LifecycleService() {
 
     override fun onDestroy() {
         // when user has disconnected from the sensor, we have to cancel the notification that we've created some milliseconds before using unbindService
-        cancelNotification()
         stopForegroundService()
         super.onDestroy()
     }
@@ -102,9 +101,9 @@ abstract class NotificationService : LifecycleService() {
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(getString(R.string.app_name))
             .setContentText(getString(messageResId, "Device"))
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setColor(ContextCompat.getColor(this, R.color.md_theme_primary))
             .setContentIntent(pendingIntent)
             .build()

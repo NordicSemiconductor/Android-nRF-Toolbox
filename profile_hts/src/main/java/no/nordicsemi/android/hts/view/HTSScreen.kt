@@ -14,6 +14,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,38 +65,45 @@ internal fun HtsHomeScreen() {
         }
     ) { paddingValues ->
         RequireBluetooth {
-            Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp)
-            ) {
-                when (val r = state.connectionState) {
-                    ConnectionState.Connected -> {
-                        DeviceConnectedView(state, onClickEvent)
-                    }
+            RequestNotificationPermission { granted ->
+                // Run the effect once when permission status is determined
+                LaunchedEffect(key1 = granted) {
+                    htsVM.startHtsService()
 
-                    null, ConnectionState.Connecting ->
-                        DeviceConnectingView(modifier = Modifier.padding(16.dp))
-
-                    is ConnectionState.Disconnected -> {
-                        r.reason?.let {
-                            DeviceDisconnectedView(
-                                reason = it,
-                                content = { paddingValues ->
-                                    Button(
-                                        modifier = Modifier.padding(paddingValues),
-                                        onClick = { onClickEvent(OnRetryClicked) },
-                                    ) {
-                                        Text(text = "Reconnect")
-                                    }
-                                }
-                            )
+                }
+                Column(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp)
+                ) {
+                    when (val r = state.connectionState) {
+                        ConnectionState.Connected -> {
+                            DeviceConnectedView(state, onClickEvent)
                         }
 
-                    }
+                        null, ConnectionState.Connecting ->
+                            DeviceConnectingView(modifier = Modifier.padding(16.dp))
 
-                    ConnectionState.Disconnecting -> LoadingView()
+                        is ConnectionState.Disconnected -> {
+                            r.reason?.let {
+                                DeviceDisconnectedView(
+                                    reason = it,
+                                    content = { paddingValues ->
+                                        Button(
+                                            modifier = Modifier.padding(paddingValues),
+                                            onClick = { onClickEvent(OnRetryClicked) },
+                                        ) {
+                                            Text(text = "Reconnect")
+                                        }
+                                    }
+                                )
+                            }
+
+                        }
+
+                        ConnectionState.Disconnecting -> LoadingView()
+                    }
                 }
             }
         }
