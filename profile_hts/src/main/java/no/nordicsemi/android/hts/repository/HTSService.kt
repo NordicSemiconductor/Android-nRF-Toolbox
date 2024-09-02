@@ -26,22 +26,21 @@ private val BATTERY_LEVEL_CHARACTERISTIC_UUID =
     UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
 
 @AndroidEntryPoint
-class HTSService : NotificationService() {
+internal class HTSService : NotificationService() {
 
     @Inject
     lateinit var repository: HTSRepository
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
-
-        repository.device.serviceData?.let { getRemoteServices(it, lifecycleScope) }
-
-        repository.stopEvent
-            .onEach {
-                disconnect()
-                stopIfDisconnected()
-            }.launchIn(lifecycleScope)
-
+        repository.apply {
+            setServiceRunning(true)
+            device.serviceData?.let { getRemoteServices(it, lifecycleScope) }
+            stopEvent
+                .onEach {
+                    stopIfDisconnected()
+                }.launchIn(lifecycleScope)
+        }
         return START_REDELIVER_INTENT
     }
 
@@ -110,9 +109,9 @@ class HTSService : NotificationService() {
         stopSelf()
     }
 
-    /** Disconnect the device. */
-    private suspend fun disconnect() {
-        if (repository.peripheral?.isConnected == true) repository.peripheral?.disconnect()
+    override fun onDestroy() {
+        super.onDestroy()
+        repository.setServiceRunning(false)
     }
 
 }

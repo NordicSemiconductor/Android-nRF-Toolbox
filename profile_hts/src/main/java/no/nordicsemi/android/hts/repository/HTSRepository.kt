@@ -39,6 +39,27 @@ class HTSRepository @Inject constructor(
 
     val isRunning = data.map { it.connectionState == ConnectionState.Connected }
 
+    private var isOnScreen = false
+    private var isServiceRunning = false
+
+    /** Sets the value of the [isOnScreen] flag. */
+    fun setOnScreen(isOnScreen: Boolean) {
+        this.isOnScreen = isOnScreen
+
+        if (shouldClean()) clean()
+    }
+
+    /** Sets the value of the [isServiceRunning] flag. */
+    fun setServiceRunning(serviceRunning: Boolean) {
+        this.isServiceRunning = serviceRunning
+        _data.value = _data.value.copy(isServiceRunning = serviceRunning)
+
+        if (shouldClean()) clean()
+    }
+
+    /** Cleans the repository if the service is not running and the screen is off. */
+    private fun shouldClean() = !isOnScreen && !isServiceRunning
+
     /** Launches the HTS service. */
     fun launchHtsService() {
         _data.value = _data.value.copy(deviceName = peripheral?.name)
@@ -56,9 +77,6 @@ class HTSRepository @Inject constructor(
 
     /** Disconnects the device and stops the service. */
     fun disconnect() {
-        _data.value = _data.value.copy(
-            connectionState = ConnectionState.Disconnected(),
-        )
         _stopEvent.tryEmit(DisconnectAndStopEvent())
     }
 
@@ -78,4 +96,10 @@ class HTSRepository @Inject constructor(
             temperatureUnit = temperatureUnit
         )
     }
+
+    /** Cleans the repository. */
+    private fun clean() {
+        _data.value = HTSServiceData()
+    }
+
 }

@@ -43,6 +43,7 @@ enum class TemperatureUnitData(private val value: Int) {
  * @param temperatureUnit The temperature unit.
  * @param deviceName The device name.
  * @param connectionState The connection state.
+ * @param isServiceRunning The service running state.
  */
 data class HTSServiceData(
     val data: HtsData = HtsData(),
@@ -50,4 +51,5 @@ data class HTSServiceData(
     val temperatureUnit: TemperatureUnit = TemperatureUnit.CELSIUS,
     val deviceName: String? = null,
     val connectionState: ConnectionState? = null,
+    val isServiceRunning: Boolean = false,
 )

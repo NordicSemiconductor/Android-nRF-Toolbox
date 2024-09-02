@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.service)
 
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.accompanist.permissions)
 
     // Timber & SLF4J
     implementation (libs.slf4j.timber)
