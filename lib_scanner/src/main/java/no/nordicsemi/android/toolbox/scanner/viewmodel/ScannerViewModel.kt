@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.cancellable
@@ -13,9 +14,9 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.toolbox.libs.profile.ConnectionProvider
+import no.nordicsemi.android.toolbox.scanner.ConnectDeviceDestinationId
 import no.nordicsemi.android.toolbox.scanner.repository.ScanningState
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import timber.log.Timber
@@ -38,10 +39,10 @@ internal data class ScannerUiState(
 internal class ScannerViewModel @Inject constructor(
     private val connectionProvider: ConnectionProvider,
     private val navigator: Navigator,
+//    private val repository: ConnectionRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ScannerUiState())
     val uiState = _uiState.asStateFlow()
-    var selectedDevice: Peripheral? = null
 
     private var job: Job? = null
 
@@ -84,6 +85,7 @@ internal class ScannerViewModel @Inject constructor(
                         isScanning = false
                     )
                 }
+                job?.cancel()
             }
             .cancellable()
             .catch { e ->
@@ -107,15 +109,9 @@ internal class ScannerViewModel @Inject constructor(
     fun onDeviceSelected(peripheral: Peripheral) {
         job?.cancel()
         try {
-            selectedDevice = peripheral
             _uiState.update { it.copy(isDeviceSelected = true) }
-            viewModelScope.launch {
-                connectionProvider.connectAndObservePeripheral(
-                    device = peripheral,
-                    autoConnect = false,
-                    scope = viewModelScope
-                )
-            }
+            onCleared()
+            navigator.navigateTo(ConnectDeviceDestinationId, peripheral.address)
         } catch (e: Exception) {
             Timber.e(e)
         }
@@ -131,8 +127,7 @@ internal class ScannerViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         job?.cancel()
-        // Clear the profile manager to prevent reconnection.
-        connectionProvider.clearState()
+        viewModelScope.cancel()
     }
 
     /**

@@ -1,2 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest/>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <service
+            android:name="no.nordicsemi.android.toolbox.libs.profile.service.ConnectionService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
+    </application>
+
+</manifest>

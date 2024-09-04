@@ -3,67 +3,79 @@ package no.nordicsemi.android.hts.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
-import no.nordicsemi.android.hts.repository.HTSRepository
-import no.nordicsemi.android.toolbox.libs.profile.ConnectionProvider
-import no.nordicsemi.kotlin.ble.client.android.Peripheral
-import no.nordicsemi.kotlin.ble.core.Manager
-import timber.log.Timber
+import no.nordicsemi.android.hts.HTSDestinationId
+import no.nordicsemi.android.hts.data.BatteryLevelParser
+import no.nordicsemi.android.hts.data.HTSDataParser
+import no.nordicsemi.android.hts.data.HTSServiceData
+import no.nordicsemi.android.toolbox.libs.profile.repository.ConnectionRepository
+import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
 import javax.inject.Inject
 
 /**
  * ViewModel for the Health Thermometer Service.
  */
+
 @HiltViewModel
 internal class HTSViewModel @Inject constructor(
-    private val connectionProvider: ConnectionProvider,
     private val navigator: Navigator,
     savedStateHandle: SavedStateHandle,
-    private val htsRepository: HTSRepository,
+    private val htsRepository: ConnectionRepository,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
-    val state = htsRepository.data
-    private var peripheral: Peripheral? = null
+    private val peripheral = parameterOf(HTSDestinationId)
+    private val _data = MutableStateFlow(HTSServiceData())
+    val data = _data.asStateFlow()
 
     init {
-        htsRepository.setOnScreen(true)
-        startHtsService()
+        getData()
     }
 
-    fun startHtsService() {
-        connectionProvider.profile.onEach {
-            if (it == null) {
-                return@onEach
-            }
+    private fun getData() {
+        htsRepository.connectedDevice
+            .onEach { peripheralListMap ->
+                peripheralListMap.filter { it.key.address == peripheral }.values
+                    .firstOrNull()
+                    ?.let { handlers ->
+                        handlers.forEach { profile ->
+                            if (profile.profileModule == ProfileModule.HTS) {
+                                // Get the data from the repository.
+                                // Update the data.
+                                // Update the view state.
+                                profile.observeData()
+                                    .mapNotNull {
+                                        HTSDataParser.parse(it)
+                                    }.onEach {
+                                        _data.value = _data.value.copy(
+                                            data = it
+                                        )
+                                    }.launchIn(viewModelScope)
 
-            peripheral = it.peripheralDetails.peripheral
-            htsRepository.apply {
-                peripheral = it.peripheralDetails.peripheral
-                remoteService = it.peripheralDetails.serviceData
-                getConnection(viewModelScope)
-                if (!this.data.value.isServiceRunning) launchHtsService()
-            }
-        }.launchIn(viewModelScope)
-        // Check the Bluetooth connection status and reestablish the device connection if Bluetooth is reconnected.
-        connectionProvider.bleState.drop(1).onEach { state ->
-            // If the Bluetooth adapter has been disabled, disconnect the device.
-            if (state == Manager.State.POWERED_OFF) {
-                peripheral?.disconnect()
-            } else if (state == Manager.State.POWERED_ON) {
-                // Reconnect to the peripheral.
-                peripheral?.let {
-                    connectionProvider.connectAndObservePeripheral(
-                        it,
-                        scope = viewModelScope
-                    )
-                }
-            }
-        }.launchIn(viewModelScope)
+                            } else if (profile.profileModule == ProfileModule.BATTERY) {
+                                // Get the data from the repository.
+                                // Update the data.
+                                // Update the view state.
+                                profile.observeData()
+                                    .mapNotNull {
+                                        BatteryLevelParser.parse(it)
+                                    }
+                                    .onEach {
+                                        // Update the battery level.
+                                        _data.value = _data.value.copy(
+                                            batteryLevel = it
+                                        )
+                                    }.launchIn(viewModelScope)
+                            }
+                        }
+                    }
+            }.launchIn(viewModelScope)
+
     }
 
     fun onEvent(event: HTSScreenViewEvent) {
@@ -71,14 +83,7 @@ internal class HTSViewModel @Inject constructor(
             is NavigateUp -> navigator.navigateUp()
             is DisconnectEvent -> {
                 viewModelScope.launch {
-                    try {
-                        if (peripheral?.isConnected == true) {
-                            connectionProvider.disconnect(peripheral!!, viewModelScope)
-                            htsRepository.disconnect()
-                        }
-                    } catch (e: Exception) {
-                        Timber.e(e)
-                    }
+                    // Disconnect the device.
                     // Navigate back
                     navigator.navigateUp()
                 }
@@ -89,27 +94,13 @@ internal class HTSViewModel @Inject constructor(
             }
 
             is OnTemperatureUnitSelected -> {
-                htsRepository.onTemperatureUnitChanged(event.value)
+                _data.value = _data.value.copy(temperatureUnit = event.value)
             }
 
             OnRetryClicked -> {
                 // Retry the connection.
-                viewModelScope.launch {
-                    peripheral?.let {
-                        connectionProvider.connectAndObservePeripheral(
-                            it,
-                            scope = viewModelScope
-                        )
-                    }
-                }
             }
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        viewModelScope.cancel()
-        htsRepository.setOnScreen(false)
     }
 
 }

@@ -8,10 +8,12 @@ import javax.inject.Inject
 class ServiceManagerImpl @Inject constructor(
     @ApplicationContext
     private val context: Context
-): ServiceManager {
+) : ServiceManager {
 
-    override fun <T> startService(service: Class<T>) {
-        val intent = Intent(context, service)
+    override fun <T> startService(service: Class<T>, device: String) {
+        val intent = Intent(context, service).apply {
+            putExtra(DEVICE_ADDRESS, device)
+        }
         context.startService(intent)
     }
 }

@@ -31,7 +31,9 @@
 
 package no.nordicsemi.android.service
 
+const val DEVICE_ADDRESS = "device-address"
+
 interface ServiceManager {
 
-    fun <T> startService(service: Class<T>)
+    fun <T> startService(service: Class<T>, device: String)
 }
