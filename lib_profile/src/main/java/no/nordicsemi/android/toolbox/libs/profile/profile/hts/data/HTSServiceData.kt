@@ -1,6 +1,5 @@
-package no.nordicsemi.android.hts.data
+package no.nordicsemi.android.toolbox.libs.profile.profile.hts.data
 
-import no.nordicsemi.android.hts.view.TemperatureUnit
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import java.util.Calendar
 

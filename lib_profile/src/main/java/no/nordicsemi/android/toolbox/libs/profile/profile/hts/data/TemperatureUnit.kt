@@ -29,7 +29,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.hts.view
+package no.nordicsemi.android.toolbox.libs.profile.profile.hts.data
 
 enum class TemperatureUnit {
     CELSIUS,
