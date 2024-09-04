@@ -33,6 +33,7 @@ package no.nordicsemi.android.hts.view
 
 import no.nordicsemi.android.common.ui.view.RadioButtonItem
 import no.nordicsemi.android.common.ui.view.RadioGroupViewEntity
+import no.nordicsemi.android.toolbox.libs.profile.profile.hts.data.TemperatureUnit
 import java.util.Locale
 
 private const val DISPLAY_FAHRENHEIT = "°F"

@@ -1,4 +1,4 @@
-package no.nordicsemi.android.hts.data
+package no.nordicsemi.android.toolbox.libs.profile.profile.hts.data
 
 import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
 import no.nordicsemi.android.kotlin.ble.core.data.util.IntFormat

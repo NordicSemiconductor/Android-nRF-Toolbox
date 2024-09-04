@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.hts.data.BatteryLevelParser
-import no.nordicsemi.android.hts.data.HTSDataParser
+import no.nordicsemi.android.toolbox.libs.profile.profile.hts.data.BatteryLevelParser
+import no.nordicsemi.android.toolbox.libs.profile.profile.hts.data.HTSDataParser
 import no.nordicsemi.android.service.NotificationService
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService

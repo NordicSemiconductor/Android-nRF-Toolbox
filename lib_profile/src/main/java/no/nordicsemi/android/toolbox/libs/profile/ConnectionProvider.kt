@@ -72,6 +72,8 @@ class ConnectionProvider @Inject constructor(
 
     var peripheral: Peripheral? = null
 
+    private val connectedDevice: Map<Peripheral, List<ProfileHandler>> = mutableMapOf()
+
     /**
      * Scans for BLE devices.
      *
@@ -148,7 +150,12 @@ class ConnectionProvider @Inject constructor(
         peripheral.services().onEach { remoteServices ->
             when {
                 remoteServices.firstOrNull { it.uuid == HTS_SERVICE_UUID } != null -> {
+//                    htsServiceHolder.subscribe(remoteServices, scope)
                     val service = remoteServices.first { it.uuid == HTS_SERVICE_UUID }
+
+                    // Update the handler.
+                    connectedDevice[peripheral] to HrmHandler()
+
                     _profile.value = ServiceProfile.HTS(
                         PeripheralDetails(
                             serviceData = service,

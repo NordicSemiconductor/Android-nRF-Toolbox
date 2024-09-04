@@ -1,6 +1,6 @@
 package no.nordicsemi.android.hts.viewmodel
 
-import no.nordicsemi.android.hts.view.TemperatureUnit
+import no.nordicsemi.android.toolbox.libs.profile.profile.hts.data.TemperatureUnit
 
 internal sealed interface HTSScreenViewEvent
 

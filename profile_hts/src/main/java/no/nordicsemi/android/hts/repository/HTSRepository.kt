@@ -8,9 +8,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.common.core.simpleSharedFlow
-import no.nordicsemi.android.hts.data.HTSServiceData
-import no.nordicsemi.android.hts.data.HtsData
-import no.nordicsemi.android.hts.view.TemperatureUnit
+import no.nordicsemi.android.toolbox.libs.profile.profile.hts.data.HTSServiceData
+import no.nordicsemi.android.toolbox.libs.profile.profile.hts.data.HtsData
+import no.nordicsemi.android.toolbox.libs.profile.profile.hts.data.TemperatureUnit
 import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.ServiceManager
 import no.nordicsemi.android.toolbox.libs.profile.PeripheralDetails
