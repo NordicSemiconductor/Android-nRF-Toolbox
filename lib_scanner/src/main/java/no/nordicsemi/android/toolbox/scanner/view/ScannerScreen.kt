@@ -49,13 +49,8 @@ import no.nordicsemi.kotlin.ble.client.android.Peripheral
 @Composable
 internal fun ScannerScreen() {
     val viewModel: ScannerViewModel = hiltViewModel()
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    if (uiState.isDeviceSelected) {
-        viewModel.selectedDevice?.let { DeviceConnectionScreen() }
-    } else {
-        ScannerView(onDeviceSelected = { viewModel.onDeviceSelected(it) })
-    }
+    ScannerView(onDeviceSelected = { viewModel.onDeviceSelected(it) })
 }
 
 @Composable

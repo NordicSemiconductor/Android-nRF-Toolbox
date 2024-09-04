@@ -9,12 +9,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,21 +28,17 @@ import no.nordicsemi.android.hts.viewmodel.DisconnectEvent
 import no.nordicsemi.android.hts.viewmodel.HTSScreenViewEvent
 import no.nordicsemi.android.hts.viewmodel.HTSViewModel
 import no.nordicsemi.android.hts.viewmodel.NavigateUp
-import no.nordicsemi.android.hts.viewmodel.OnRetryClicked
 import no.nordicsemi.android.hts.viewmodel.OnTemperatureUnitSelected
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.KeyValueField
 import no.nordicsemi.android.ui.view.ProfileAppBar
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
-import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
-import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
-import no.nordicsemi.kotlin.ble.core.ConnectionState
 
 @Composable
 internal fun HtsHomeScreen() {
     val htsVM = hiltViewModel<HTSViewModel>()
-    val state by htsVM.state.collectAsStateWithLifecycle()
+    val state by htsVM.data.collectAsStateWithLifecycle()
     val onClickEvent: (HTSScreenViewEvent) -> Unit = { htsVM.onEvent(it) }
 
     BackHandler {
@@ -67,43 +60,13 @@ internal fun HtsHomeScreen() {
         RequireBluetooth {
             RequestNotificationPermission { granted ->
                 // Run the effect once when permission status is determined
-                LaunchedEffect(key1 = granted) {
-                    htsVM.startHtsService()
-
-                }
                 Column(
                     modifier = Modifier
                         .padding(paddingValues)
                         .verticalScroll(rememberScrollState())
                         .padding(16.dp)
                 ) {
-                    when (val r = state.connectionState) {
-                        ConnectionState.Connected -> {
-                            DeviceConnectedView(state, onClickEvent)
-                        }
-
-                        null, ConnectionState.Connecting ->
-                            DeviceConnectingView(modifier = Modifier.padding(16.dp))
-
-                        is ConnectionState.Disconnected -> {
-                            r.reason?.let {
-                                DeviceDisconnectedView(
-                                    reason = it,
-                                    content = { paddingValues ->
-                                        Button(
-                                            modifier = Modifier.padding(paddingValues),
-                                            onClick = { onClickEvent(OnRetryClicked) },
-                                        ) {
-                                            Text(text = "Reconnect")
-                                        }
-                                    }
-                                )
-                            }
-
-                        }
-
-                        ConnectionState.Disconnecting -> LoadingView()
-                    }
+                    DeviceConnectedView(state, onClickEvent)
                 }
             }
         }

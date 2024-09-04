@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.common.navigation.DestinationId
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.hts.repository.HTSRepository
 import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
 import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
@@ -26,19 +25,12 @@ data class HomeViewState(
 @HiltViewModel
 internal class HomeViewModel @Inject constructor(
     private val navigator: Navigator,
-    htsRepository: HTSRepository,
     activitySignals: ActivitySignals,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeViewState())
     val state = _state.asStateFlow()
 
     init {
-        htsRepository.isRunning.onEach {
-            _state.update { currentState ->
-                currentState.copy(profileModule = if (it) ProfileModule.HTS else null)
-            }
-        }.launchIn(viewModelScope)
-
         activitySignals.state.onEach {
             _state.update { currentState ->
                 currentState.toggleRefresh()

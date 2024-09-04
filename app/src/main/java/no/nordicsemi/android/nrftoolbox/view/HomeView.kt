@@ -23,10 +23,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import no.nordicsemi.android.hts.HTSDestinationId
 import no.nordicsemi.android.nrftoolbox.R
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewModel
-import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
 
 private const val DFU_PACKAGE_NAME = "no.nordicsemi.android.dfu"
 private const val DFU_LINK =
@@ -74,29 +72,32 @@ internal fun HomeView() {
                 )
 
             }
-            when (state.profileModule) {
-                ProfileModule.CSC -> TODO()
-                ProfileModule.HRS -> TODO()
-                ProfileModule.HTS -> {
-                    FeatureButton(
-                        R.drawable.ic_hts,
-                        R.string.hts_module_full,
-                        true
-                    ) {
-                        viewModel.openProfile(HTSDestinationId)
-                    }
-                }
+            NoConnectedDeviceView()
+            /*
+                        when (state.profileModule) {
+                            ProfileModule.CSC -> TODO()
+                            ProfileModule.HRS -> TODO()
+                            ProfileModule.HTS -> {
+                                FeatureButton(
+                                    R.drawable.ic_hts,
+                                    R.string.hts_module_full,
+                                    true
+                                ) {
+                                    viewModel.openProfile(HTSDestinationId)
+                                }
+                            }
 
-                ProfileModule.RSCS -> TODO()
-                ProfileModule.PRX -> TODO()
-                ProfileModule.CGM -> TODO()
-                ProfileModule.UART -> TODO()
+                            ProfileModule.RSCS -> TODO()
+                            ProfileModule.PRX -> TODO()
+                            ProfileModule.CGM -> TODO()
+                            ProfileModule.UART -> TODO()
 
-                else -> {
-                    // do nothing
-                    NoConnectedDeviceView()
-                }
-            }
+                            else -> {
+                                // do nothing
+
+                            }
+                        }
+            */
 
         }
     }

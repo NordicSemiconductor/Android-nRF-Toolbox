@@ -7,5 +7,6 @@ enum class ProfileModule {
     RSCS,
     PRX,
     CGM,
-    UART
+    UART,
+    BATTERY,
 }
