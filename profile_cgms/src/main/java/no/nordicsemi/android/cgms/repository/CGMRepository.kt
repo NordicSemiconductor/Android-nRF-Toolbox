@@ -42,7 +42,6 @@ import no.nordicsemi.android.cgms.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.cgms.data.CGMServiceCommand
 import no.nordicsemi.android.cgms.data.CGMServiceData
 import no.nordicsemi.android.common.logger.LoggerLauncher
-import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.RequestStatus
@@ -50,6 +49,7 @@ import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.android.toolbox.scanner.SelectedDevice
 import no.nordicsemi.android.utils.simpleSharedFlow
 import timber.log.Timber
 import javax.inject.Inject
@@ -92,13 +92,13 @@ class CGMRepository @Inject constructor(
 
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
-    fun launch(device: ServerDevice) {
-        tree = nRFLoggerTree(context, "CGMS", device.address, device.name)
+    fun launch(device: SelectedDevice) {
+        tree = nRFLoggerTree(context, "CGMS", device.device.address, device.name)
             .apply { setLoggingTagsEnabled(false) }
             .also { Timber.plant(it) }
 
         _data.value = _data.value.copy(deviceName = device.name)
-        serviceManager.startService(CGMService::class.java, device, context.getString(R.string.cgms_title))
+        serviceManager.startService(CGMService::class.java, device.device, context.getString(R.string.cgms_title))
     }
 
     fun onDataReceived(data: List<CGMRecordWithSequenceNumber>) {

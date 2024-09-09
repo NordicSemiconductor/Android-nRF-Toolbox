@@ -46,7 +46,6 @@ import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.profile.prx.AlarmLevel
 import no.nordicsemi.android.prx.repository.AlarmHandler
@@ -59,6 +58,7 @@ import no.nordicsemi.android.prx.view.PRXScreenViewEvent
 import no.nordicsemi.android.prx.view.TurnOffAlert
 import no.nordicsemi.android.prx.view.TurnOnAlert
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
+import no.nordicsemi.android.toolbox.scanner.SelectedDevice
 import javax.inject.Inject
 
 @HiltViewModel
@@ -105,7 +105,7 @@ internal class PRXViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    private fun handleResult(result: NavigationResult<ServerDevice>) {
+    private fun handleResult(result: NavigationResult<SelectedDevice>) {
         when (result) {
             is NavigationResult.Cancelled -> navigationManager.navigateUp()
             is NavigationResult.Success -> repository.launch(result.value)

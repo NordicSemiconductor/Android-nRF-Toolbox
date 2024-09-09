@@ -51,9 +51,9 @@ import no.nordicsemi.android.analytics.UARTMode
 import no.nordicsemi.android.analytics.UARTSendAnalyticsEvent
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
+import no.nordicsemi.android.toolbox.scanner.SelectedDevice
 import no.nordicsemi.android.uart.data.MacroEol
 import no.nordicsemi.android.uart.data.UARTConfiguration
 import no.nordicsemi.android.uart.data.UARTMacro
@@ -125,14 +125,14 @@ internal class UARTViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    internal fun handleResult(result: NavigationResult<ServerDevice>) {
+    internal fun handleResult(result: NavigationResult<SelectedDevice>) {
         when (result) {
             is NavigationResult.Cancelled -> navigationManager.navigateUp()
             is NavigationResult.Success -> onDeviceSelected(result.value)
         }
     }
 
-    private fun onDeviceSelected(device: ServerDevice) {
+    private fun onDeviceSelected(device: SelectedDevice) {
         repository.launch(device)
     }
 

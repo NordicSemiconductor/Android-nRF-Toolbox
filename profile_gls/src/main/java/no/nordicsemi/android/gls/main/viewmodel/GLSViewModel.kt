@@ -64,7 +64,6 @@ import no.nordicsemi.android.gls.main.view.OpenLoggerEvent
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
 import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattCharacteristic
 import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattServices
-import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.core.errors.GattOperationException
@@ -83,9 +82,10 @@ import no.nordicsemi.android.kotlin.ble.profile.racp.RACPResponseCode
 import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
+import no.nordicsemi.android.toolbox.scanner.SelectedDevice
 import no.nordicsemi.android.utils.tryOrLog
 import timber.log.Timber
-import java.util.*
+import java.util.UUID
 import javax.inject.Inject
 
 val GLS_SERVICE_UUID: UUID = UUID.fromString("00001808-0000-1000-8000-00805f9b34fb")
@@ -131,7 +131,7 @@ internal class GLSViewModel @Inject constructor(
         tree = null
     }
 
-    internal fun handleResult(result: NavigationResult<ServerDevice>) {
+    internal fun handleResult(result: NavigationResult<SelectedDevice>) {
         when (result) {
             is NavigationResult.Cancelled -> navigationManager.navigateUp()
             is NavigationResult.Success -> onDeviceSelected(result.value)
@@ -157,7 +157,7 @@ internal class GLSViewModel @Inject constructor(
         navigationManager.navigateTo(GlsDetailsDestinationId, record to context)
     }
 
-    private fun onDeviceSelected(device: ServerDevice) {
+    private fun onDeviceSelected(device: SelectedDevice) {
         startGattClient(device)
     }
 
@@ -169,14 +169,14 @@ internal class GLSViewModel @Inject constructor(
         }
     }
 
-    private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
+    private fun startGattClient(device: SelectedDevice) = viewModelScope.launch {
         _state.value = _state.value.copy(deviceName = device.name)
 
-        tree = nRFLoggerTree(getApplication(), "GLS", device.address, device.name)
+        tree = nRFLoggerTree(getApplication(), "GLS", device.device.address, device.name)
             .apply { setLoggingTagsEnabled(false) }
             .also { Timber.plant(it) }
 
-        val client = ClientBleGatt.connect(getApplication(), device, viewModelScope)
+        val client = ClientBleGatt.connect(getApplication(), device.device, viewModelScope)
         this@GLSViewModel.client = client
 
         client.waitForBonding()

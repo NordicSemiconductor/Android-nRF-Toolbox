@@ -51,9 +51,9 @@ import no.nordicsemi.android.hts.view.HTSScreenViewEvent
 import no.nordicsemi.android.hts.view.NavigateUp
 import no.nordicsemi.android.hts.view.OnTemperatureUnitSelected
 import no.nordicsemi.android.hts.view.OpenLoggerEvent
-import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
+import no.nordicsemi.android.toolbox.scanner.SelectedDevice
 import javax.inject.Inject
 
 @HiltViewModel
@@ -89,14 +89,14 @@ internal class HTSViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    private fun handleResult(result: NavigationResult<ServerDevice>) {
+    private fun handleResult(result: NavigationResult<SelectedDevice>) {
         when (result) {
             is NavigationResult.Cancelled -> navigationManager.navigateUp()
             is NavigationResult.Success -> onDeviceSelected(result.value)
         }
     }
 
-    private fun onDeviceSelected(device: ServerDevice) {
+    private fun onDeviceSelected(device: SelectedDevice) {
         repository.launch(device)
     }
 

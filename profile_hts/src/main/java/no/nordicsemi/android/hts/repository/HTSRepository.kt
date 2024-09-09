@@ -41,7 +41,6 @@ import no.nordicsemi.android.common.logger.LoggerLauncher
 import no.nordicsemi.android.hts.R
 import no.nordicsemi.android.hts.data.HTSServiceData
 import no.nordicsemi.android.hts.view.TemperatureUnit
-import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.hts.data.HTSData
@@ -49,6 +48,7 @@ import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.android.toolbox.scanner.SelectedDevice
 import no.nordicsemi.android.utils.simpleSharedFlow
 import timber.log.Timber
 import javax.inject.Inject
@@ -86,13 +86,13 @@ class HTSRepository @Inject constructor(
 
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
-    fun launch(device: ServerDevice) {
-        tree = nRFLoggerTree(context, "HTS", device.address, device.name)
+    fun launch(device: SelectedDevice) {
+        tree = nRFLoggerTree(context, "HTS", device.device.address, device.name)
             .apply { setLoggingTagsEnabled(false) }
             .also { Timber.plant(it) }
 
         _data.value = _data.value.copy(deviceName = device.name)
-        serviceManager.startService(HTSService::class.java, device, context.getString(R.string.hts_title))
+        serviceManager.startService(HTSService::class.java, device.device, context.getString(R.string.hts_title))
     }
 
     internal fun setTemperatureUnit(temperatureUnit: TemperatureUnit) {

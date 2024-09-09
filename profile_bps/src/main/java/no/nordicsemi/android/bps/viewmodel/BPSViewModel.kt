@@ -59,7 +59,6 @@ import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
 import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattServices
-import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.kotlin.ble.profile.battery.BatteryLevelParser
@@ -70,6 +69,7 @@ import no.nordicsemi.android.kotlin.ble.profile.bps.data.IntermediateCuffPressur
 import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
+import no.nordicsemi.android.toolbox.scanner.SelectedDevice
 import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
@@ -103,7 +103,7 @@ internal class BPSViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    private fun handleArgs(result: NavigationResult<ServerDevice>) {
+    private fun handleArgs(result: NavigationResult<SelectedDevice>) {
         when (result) {
             is NavigationResult.Cancelled -> navigationManager.navigateUp()
             is NavigationResult.Success -> startGattClient(result.value)
@@ -128,14 +128,14 @@ internal class BPSViewModel @Inject constructor(
         navigationManager.navigateUp()
     }
 
-    private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
+    private fun startGattClient(device: SelectedDevice) = viewModelScope.launch {
         _state.value = _state.value.copy(deviceName = device.name)
 
-        tree = nRFLoggerTree(getApplication(), "BPS", device.address, device.name)
+        tree = nRFLoggerTree(getApplication(), "BPS", device.device.address, device.name)
             .apply { setLoggingTagsEnabled(false) }
             .also { Timber.plant(it) }
 
-        val client = ClientBleGatt.connect(getApplication(), device, viewModelScope)
+        val client = ClientBleGatt.connect(getApplication(), device.device, viewModelScope)
         this@BPSViewModel.client = client
 
         client.connectionStateWithStatus

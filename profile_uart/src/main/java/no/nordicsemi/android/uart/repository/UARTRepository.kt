@@ -38,13 +38,13 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.common.logger.LoggerLauncher
-import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.DisconnectAndStopEvent
 import no.nordicsemi.android.service.ServiceManager
+import no.nordicsemi.android.toolbox.scanner.SelectedDevice
 import no.nordicsemi.android.uart.R
 import no.nordicsemi.android.uart.data.ConfigurationDataSource
 import no.nordicsemi.android.uart.data.MacroEol
@@ -96,13 +96,13 @@ class UARTRepository @Inject internal constructor(
 
     private fun shouldClean() = !isOnScreen && !isServiceRunning
 
-    fun launch(device: ServerDevice) {
-        tree = nRFLoggerTree(context, "UART", device.address, device.name)
+    fun launch(device: SelectedDevice) {
+        tree = nRFLoggerTree(context, "UART", device.device.address, device.name)
             .apply { setLoggingTagsEnabled(false) }
             .also { Timber.plant(it) }
 
         _data.value = _data.value.copy(deviceName = device.name)
-        serviceManager.startService(UARTService::class.java, device, context.getString(R.string.uart_title))
+        serviceManager.startService(UARTService::class.java, device.device, context.getString(R.string.uart_title))
     }
 
     fun onConnectionStateChanged(connectionState: GattConnectionStateWithStatus?) {
