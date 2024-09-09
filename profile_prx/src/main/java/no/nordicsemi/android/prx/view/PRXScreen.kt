@@ -35,7 +35,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -45,7 +44,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.ui.scanner.view.DeviceConnectingView
 import no.nordicsemi.android.kotlin.ble.ui.scanner.view.DeviceDisconnectedView
-import no.nordicsemi.android.prx.R
 import no.nordicsemi.android.prx.viewmodel.PRXViewModel
 import no.nordicsemi.android.ui.view.NavigateUpButton
 import no.nordicsemi.android.ui.view.ProfileAppBar
@@ -62,7 +60,6 @@ fun PRXScreen() {
             ProfileAppBar(
                 deviceName = state.deviceName,
                 connectionState = state.connectionState,
-                title = R.string.prx_title,
                 navigateUp = navigateUp,
                 disconnect = { viewModel.onEvent(DisconnectEvent) },
                 openLogger = { viewModel.onEvent(OpenLoggerEvent) }

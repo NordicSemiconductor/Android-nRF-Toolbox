@@ -41,7 +41,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import no.nordicsemi.android.hrs.R
 import no.nordicsemi.android.hrs.viewmodel.HRSViewModel
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.ui.scanner.view.DeviceConnectingView
@@ -61,7 +60,6 @@ fun HRSScreen() {
             ProfileAppBar(
                 deviceName = state.deviceName,
                 connectionState = state.connectionState,
-                title = R.string.hrs_title,
                 navigateUp = navigateUp,
                 disconnect = { viewModel.onEvent(DisconnectEvent) },
                 openLogger = { viewModel.onEvent(OpenLoggerEvent) }

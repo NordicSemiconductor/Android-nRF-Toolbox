@@ -67,7 +67,6 @@ fun UARTScreen() {
             ProfileAppBar(
                 deviceName = state.uartManagerState.deviceName,
                 connectionState = state.uartManagerState.connectionState,
-                title = R.string.uart_title,
                 navigateUp = navigateUp,
                 disconnect = { viewModel.onEvent(DisconnectEvent) },
                 openLogger = { viewModel.onEvent(OpenLogger) }

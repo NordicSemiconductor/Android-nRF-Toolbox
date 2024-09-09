@@ -35,14 +35,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import no.nordicsemi.android.csc.R
 import no.nordicsemi.android.csc.viewmodel.CSCViewModel
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.ui.scanner.view.DeviceConnectingView
@@ -62,7 +60,6 @@ fun CSCScreen() {
             ProfileAppBar(
                 deviceName = state.deviceName,
                 connectionState = state.connectionState,
-                title = R.string.csc_title,
                 navigateUp = navigateUp,
                 disconnect = { viewModel.onEvent(OnDisconnectButtonClick) },
                 openLogger = { viewModel.onEvent(OpenLogger) }

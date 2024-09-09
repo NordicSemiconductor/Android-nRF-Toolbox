@@ -33,5 +33,5 @@ val ScannerDestination = defineDestination(ScannerDestinationId) {
 }
 
 class SelectedDevice(val device: ServerDevice, advertisedName: String?) {
-    val name: String = advertisedName ?: device.name ?: "Unknown"
+    val name: String? = advertisedName?.ifBlank { device.name }
 }

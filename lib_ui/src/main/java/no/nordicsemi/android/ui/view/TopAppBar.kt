@@ -31,7 +31,6 @@
 
 package no.nordicsemi.android.ui.view
 
-import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,17 +48,8 @@ import no.nordicsemi.android.ui.R
 @Composable
 fun CloseIconAppBar(text: String, onClick: () -> Unit) {
     NordicAppBar(
-        title = { Text(text, maxLines = 2) },
+        title = { Text(text) },
         backButtonIcon = Icons.Default.Close,
-        onNavigationButtonClick = onClick,
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BackIconAppBar(text: String, onClick: () -> Unit) {
-    NordicAppBar(
-        title = { Text(text, maxLines = 2) },
         onNavigationButtonClick = onClick,
     )
 }
@@ -74,7 +64,7 @@ fun LoggerIconAppBar(
     onLoggerClick: () -> Unit
 ) {
     NordicAppBar(
-        title = { Text(text, maxLines = 2) },
+        title = { Text(text) },
         onNavigationButtonClick = onClick,
         actions = {
             TextButton(
@@ -94,15 +84,10 @@ fun LoggerIconAppBar(
 fun ProfileAppBar(
     deviceName: String?,
     connectionState: GattConnectionStateWithStatus?,
-    @StringRes title: Int,
     navigateUp: () -> Unit,
     disconnect: () -> Unit,
     openLogger: () -> Unit
 ) {
-    if (deviceName?.isNotBlank() == true) {
-        val isConnected = connectionState?.state == GattConnectionState.STATE_CONNECTED
-        LoggerIconAppBar(deviceName, navigateUp, isConnected, disconnect, openLogger)
-    } else {
-        BackIconAppBar(stringResource(id = title), navigateUp)
-    }
+    val isConnected = connectionState?.state == GattConnectionState.STATE_CONNECTED
+    LoggerIconAppBar(deviceName ?: "No name", navigateUp, isConnected, disconnect, openLogger)
 }

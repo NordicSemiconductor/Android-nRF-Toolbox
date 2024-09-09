@@ -44,7 +44,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.ui.scanner.view.DeviceConnectingView
 import no.nordicsemi.android.kotlin.ble.ui.scanner.view.DeviceDisconnectedView
-import no.nordicsemi.android.rscs.R
 import no.nordicsemi.android.rscs.viewmodel.RSCSViewModel
 import no.nordicsemi.android.ui.view.NavigateUpButton
 import no.nordicsemi.android.ui.view.ProfileAppBar
@@ -61,7 +60,6 @@ fun RSCSScreen() {
             ProfileAppBar(
                 deviceName = state.deviceName,
                 connectionState = state.connectionState,
-                title = R.string.rscs_title,
                 navigateUp = navigateUp,
                 disconnect = { viewModel.onEvent(DisconnectEvent) },
                 openLogger = { viewModel.onEvent(OpenLoggerEvent) }
