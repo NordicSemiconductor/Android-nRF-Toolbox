@@ -23,7 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.common.ui.view.RadioButtonGroup
 import no.nordicsemi.android.hts.R
-import no.nordicsemi.android.toolbox.libs.profile.profile.hts.data.HTSServiceData
+import no.nordicsemi.android.hts.data.HTSServiceData
 import no.nordicsemi.android.hts.viewmodel.DisconnectEvent
 import no.nordicsemi.android.hts.viewmodel.HTSScreenViewEvent
 import no.nordicsemi.android.hts.viewmodel.HTSViewModel
