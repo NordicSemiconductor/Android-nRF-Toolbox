@@ -39,11 +39,9 @@ internal data class ScannerUiState(
 internal class ScannerViewModel @Inject constructor(
     private val connectionProvider: ConnectionProvider,
     private val navigator: Navigator,
-//    private val repository: ConnectionRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ScannerUiState())
     val uiState = _uiState.asStateFlow()
-
     private var job: Job? = null
 
     /**

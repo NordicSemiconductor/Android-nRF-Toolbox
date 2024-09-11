@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.nordic.feature)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {
@@ -15,6 +16,5 @@ dependencies {
     implementation(libs.nordic.core)
     implementation(libs.nordic.navigation)
 
-    implementation(libs.androidx.lifecycle.service)
     implementation(libs.slf4j.timber)
 }

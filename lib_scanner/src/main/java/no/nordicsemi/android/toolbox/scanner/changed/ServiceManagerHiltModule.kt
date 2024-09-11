@@ -1,4 +1,4 @@
-package no.nordicsemi.android.service
+package no.nordicsemi.android.toolbox.scanner.changed
 
 import android.content.Context
 import dagger.Module
