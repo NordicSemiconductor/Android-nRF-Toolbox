@@ -46,16 +46,24 @@ private const val CHANNEL_ID = "FOREGROUND_BLE_SERVICE"
 
 abstract class NotificationService : LifecycleService() {
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val result = super.onStartCommand(intent, flags, startId)
+    override fun onCreate() {
+        super.onCreate()
         startForegroundService()
-        return result
     }
 
     override fun onDestroy() {
         // when user has disconnected from the sensor, we have to cancel the notification that we've created some milliseconds before using unbindService
         stopForegroundService()
+        stopSelf()
         super.onDestroy()
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        // This method is called when user removed the app from recent app list.
+        // By default, the service will be killed and recreated immediately after that.
+        // However, all managed devices will be lost and devices will be disconnected.
+        stopSelf()
     }
 
     /**
@@ -84,6 +92,7 @@ abstract class NotificationService : LifecycleService() {
         } else {
             cancelNotification()
         }
+        stopSelf() // Ensure the service stops when it's no longer needed
     }
 
     /**

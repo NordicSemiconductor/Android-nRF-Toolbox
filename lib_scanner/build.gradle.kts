@@ -43,6 +43,7 @@ dependencies {
     implementation(project(":lib_profile"))
     implementation(project(":lib_ui"))
     implementation(project(":profile_hts"))
+    implementation(project(":lib_service"))
 
     implementation(libs.nordic.navigation)
     implementation(libs.nordic.permissions.ble)
@@ -51,6 +52,7 @@ dependencies {
     implementation(libs.nordic.ui)
 
     implementation(libs.androidx.compose.material.iconsExtended)
+    implementation(libs.androidx.lifecycle.service)
     implementation(libs.slf4j.timber)
 
 }

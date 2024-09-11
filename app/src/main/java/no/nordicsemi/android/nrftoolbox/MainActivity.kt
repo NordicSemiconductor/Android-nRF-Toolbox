@@ -33,6 +33,7 @@ package no.nordicsemi.android.nrftoolbox
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -46,6 +47,7 @@ import no.nordicsemi.android.hts.HTSDestination
 import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
 import no.nordicsemi.android.toolbox.scanner.ConnectDeviceDestination
 import no.nordicsemi.android.toolbox.scanner.ScannerDestination
+import no.nordicsemi.android.toolbox.scanner.changed.ClientViewModel
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -54,8 +56,12 @@ class MainActivity : NordicActivity() {
     @Inject
     lateinit var activitySignals: ActivitySignals
 
+    private val viewModel: ClientViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Bind to the service when the activity starts
+        viewModel.bindService()
 
         setContent {
             NordicTheme {
@@ -74,5 +80,11 @@ class MainActivity : NordicActivity() {
     override fun onResume() {
         super.onResume()
         activitySignals.onResume()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Unbind from the service when the activity is destroyed
+        viewModel.unbindService()
     }
 }
