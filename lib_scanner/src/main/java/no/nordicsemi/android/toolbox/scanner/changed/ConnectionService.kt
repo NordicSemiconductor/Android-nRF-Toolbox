@@ -31,11 +31,12 @@ class ConnectionService : NotificationService() {
 
     private val _connectedDevices =
         MutableStateFlow<Map<Peripheral, List<ProfileHandler>>>(emptyMap())
-    val connectedDevices = _connectedDevices.asStateFlow()
 
     inner class LocalBinder : Binder() {
         // TODO: get list of peripherals flow, and pass it to client view model.
         fun getService(): ConnectionService = this@ConnectionService
+
+        val connectedDevices = _connectedDevices.asStateFlow()
 
         // Connect device from the view model.
         fun connectPeripheral(deviceAddress: String, scope: CoroutineScope) {
