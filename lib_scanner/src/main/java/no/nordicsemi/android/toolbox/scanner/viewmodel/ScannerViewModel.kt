@@ -126,6 +126,7 @@ internal class ScannerViewModel @Inject constructor(
         super.onCleared()
         job?.cancel()
         viewModelScope.cancel()
+        connectionProvider.close()
     }
 
     /**
