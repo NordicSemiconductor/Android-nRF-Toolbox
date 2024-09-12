@@ -1,34 +1,47 @@
 package no.nordicsemi.android.toolbox.scanner.changed
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.os.Build
-import androidx.annotation.RequiresApi
+import android.os.IBinder
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
-interface ServiceManager {
-    fun bindService(connection: ServiceConnection)
-    fun unbindService(connection: ServiceConnection)
-}
-
-class ServiceManagerImpl @Inject constructor(
+class ServiceManager @Inject constructor(
     @ApplicationContext private val context: Context
-) : ServiceManager {
+) {
+    private var serviceConnection = ProximityService()
 
-    @RequiresApi(Build.VERSION_CODES.M)
-    override fun bindService(connection: ServiceConnection) {
+    suspend fun bindService(): ConnectionService.LocalBinder {
         val intent = Intent(context, ConnectionService::class.java)
         // check if the all permission is granted, if not the service will not start
-        if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-            return
-        }
+        // TODO() check if the permission is granted
+
         context.startService(intent)
-        context.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        serviceConnection = ProximityService()
+        context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+        return serviceConnection.result.first()
     }
 
-    override fun unbindService(connection: ServiceConnection) {
-        context.unbindService(connection)
+    fun unbindService() {
+        context.unbindService(serviceConnection)
     }
+}
+
+private class ProximityService : ServiceConnection {
+
+    val result = MutableSharedFlow<ConnectionService.LocalBinder>(extraBufferCapacity = 1)
+
+    override fun onServiceConnected(className: ComponentName, service: IBinder) {
+        val binder = service as ConnectionService.LocalBinder
+        result.tryEmit(binder)
+    }
+
+    override fun onServiceDisconnected(p0: ComponentName?) {
+        TODO("Not yet implemented")
+    }
+
 }
