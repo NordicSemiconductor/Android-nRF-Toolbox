@@ -34,4 +34,8 @@ class ConnectionProvider @Inject constructor(
             .flowOn(Dispatchers.IO)
     }
 
+    fun close() {
+        centralManager.close()
+    }
+
 }
