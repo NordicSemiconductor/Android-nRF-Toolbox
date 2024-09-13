@@ -13,7 +13,7 @@ import javax.inject.Inject
 class ServiceManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    private var serviceConnection = ProximityService()
+    private var serviceConnection = ProximityBinder()
 
     suspend fun bindService(): ConnectionService.LocalBinder {
         val intent = Intent(context, ConnectionService::class.java)
@@ -21,7 +21,7 @@ class ServiceManager @Inject constructor(
         // TODO() check if the permission is granted
 
         context.startService(intent)
-        serviceConnection = ProximityService()
+        serviceConnection = ProximityBinder()
         context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
         return serviceConnection.result.first()
     }
@@ -31,7 +31,7 @@ class ServiceManager @Inject constructor(
     }
 }
 
-private class ProximityService : ServiceConnection {
+private class ProximityBinder : ServiceConnection {
 
     val result = MutableSharedFlow<ConnectionService.LocalBinder>(extraBufferCapacity = 1)
 
