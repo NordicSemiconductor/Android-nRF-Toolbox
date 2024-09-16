@@ -29,11 +29,11 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.hts.view
+package no.nordicsemi.android.toolbox.scanner.view.hts.view
 
 import no.nordicsemi.android.common.ui.view.RadioButtonItem
 import no.nordicsemi.android.common.ui.view.RadioGroupViewEntity
-import no.nordicsemi.android.hts.data.TemperatureUnit
+import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.TemperatureUnit
 import java.util.Locale
 
 private const val DISPLAY_FAHRENHEIT = "°F"

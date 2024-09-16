@@ -7,6 +7,7 @@ import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -21,7 +22,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class ConnectionService : NotificationService() {
+class ProfileService : NotificationService() {
 
     @Inject
     lateinit var centralManager: CentralManager
@@ -33,14 +34,20 @@ class ConnectionService : NotificationService() {
         MutableStateFlow<Map<Peripheral, List<ProfileHandler>>>(emptyMap())
 
     inner class LocalBinder : Binder() {
-        // TODO: get list of peripherals flow, and pass it to client view model.
-        fun getService(): ConnectionService = this@ConnectionService
-
-        val connectedDevices = _connectedDevices.asStateFlow()
+        val connectedDevices
+            get() = _connectedDevices.asStateFlow()
 
         // Connect device from the view model.
         fun connectPeripheral(deviceAddress: String, scope: CoroutineScope) {
             connectToPeripheral(deviceAddress, scope)
+        }
+
+        fun peripheralConnectionState(peripheralAddress: String): StateFlow<ConnectionState>? {
+            return getPeripheralById(peripheralAddress)?.state
+        }
+
+        fun getPeripheralById(peripheralAddress: String): Peripheral? {
+            return centralManager.getPeripheralById(peripheralAddress)
         }
 
         // Disconnect the peripheral
@@ -93,15 +100,12 @@ class ConnectionService : NotificationService() {
                 }
 
                 ConnectionState.Connecting -> {
-                    // TODO Handle the connecting state
                 }
 
                 is ConnectionState.Disconnected -> {
-                    // TODO Handle the connecting state
                 }
 
                 ConnectionState.Disconnecting -> {
-                    // TODO Handle the connecting state
                 }
             }
         }.launchIn(scope)
@@ -132,9 +136,17 @@ class ConnectionService : NotificationService() {
 
             // Add the connected device and its handlers to the repository.
             if (handlers.isNotEmpty()) {
-                _connectedDevices.value += (peripheral to handlers)
+                updateConnectedDevices(peripheral, handlers)
             }
         }.launchIn(lifecycleScope)
+    }
+
+    private fun updateConnectedDevices(peripheral: Peripheral, handlers: List<ProfileHandler>) {
+        val currentDevices = _connectedDevices.replayCache.firstOrNull() ?: emptyMap()
+        val updatedDevices = currentDevices.toMutableMap().apply {
+            this[peripheral] = handlers
+        }
+        _connectedDevices.tryEmit(updatedDevices) // Emit the updated device map
     }
 
 }

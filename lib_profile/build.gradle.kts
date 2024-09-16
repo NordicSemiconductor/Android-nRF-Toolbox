@@ -17,4 +17,7 @@ dependencies {
     implementation(libs.nordic.navigation)
 
     implementation(libs.slf4j.timber)
+
+    //TODO: Remove this once profile is implemented in new BLEK.
+    implementation(libs.nordic.blek.client)
 }

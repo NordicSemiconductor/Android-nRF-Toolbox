@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
+import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HTSDataParser
+import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HtsData
 import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.core.ConnectionState
@@ -22,13 +24,13 @@ class HtsHandler : ProfileHandler() {
     override val connectionState: Flow<ConnectionState>
         get() = MutableSharedFlow()
 
-    private val _htsData = MutableSharedFlow<ByteArray>()
+    private val _htsData = MutableSharedFlow<HtsData>()
     override fun observeData() = _htsData.asSharedFlow()
 
     override suspend fun handleServices(remoteService: RemoteService, scope: CoroutineScope) {
         remoteService.characteristics.firstOrNull { it.uuid == HTS_MEASUREMENT_CHARACTERISTIC_UUID }
             ?.subscribe()
-            ?.mapNotNull { it }
+            ?.mapNotNull { HTSDataParser.parse(it) }
             ?.onEach { htsData ->
                 _htsData.emit(htsData) // Emit the data to the flow
             }

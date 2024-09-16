@@ -9,6 +9,6 @@ import no.nordicsemi.kotlin.ble.core.ConnectionState
 abstract class ProfileHandler {
     abstract val profileModule: ProfileModule
     abstract val connectionState: Flow<ConnectionState>
-    abstract fun observeData(): Flow<ByteArray>
+    abstract fun observeData(): Flow<Any>
     abstract suspend fun handleServices(remoteService: RemoteService, scope: CoroutineScope)
 }

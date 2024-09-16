@@ -55,4 +55,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.service)
     implementation(libs.slf4j.timber)
 
+    implementation(libs.accompanist.permissions)
+
 }

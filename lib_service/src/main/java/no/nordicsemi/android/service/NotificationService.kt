@@ -51,6 +51,11 @@ abstract class NotificationService : LifecycleService() {
         startForegroundService()
     }
 
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
+        return START_REDELIVER_INTENT
+    }
+
     override fun onDestroy() {
         // when user has disconnected from the sensor, we have to cancel the notification that we've created some milliseconds before using unbindService
         stopForegroundService()
