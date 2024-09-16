@@ -23,6 +23,7 @@ import no.nordicsemi.android.toolbox.scanner.changed.ClientViewModel
 import no.nordicsemi.android.toolbox.scanner.view.ScannerAppBar
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.HTSScreen
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.LoadingView
+import no.nordicsemi.android.toolbox.scanner.view.hts.view.ProfileScreenViewEvent
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.RequestNotificationPermission
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.kotlin.ble.core.ConnectionState
@@ -37,6 +38,7 @@ val ConnectDeviceDestination = defineDestination(ConnectDeviceDestinationId) {
 internal fun ConnectDeviceScreen(peripheral: String) {
     val clientViewModel: ClientViewModel = hiltViewModel()
     val clientData by clientViewModel.clientData.collectAsStateWithLifecycle()
+    val onClickEvent: (ProfileScreenViewEvent) -> Unit = { clientViewModel.onClickEvent(it) }
 
     LaunchedEffect(peripheral) {
         clientViewModel.connectToPeripheral(peripheral)
@@ -58,7 +60,7 @@ internal fun ConnectDeviceScreen(peripheral: String) {
         ) {
             when (clientData.connectionState) {
                 ConnectionState.Connected -> {
-                    ConnectedView(clientData)
+                    ConnectedView(clientData, onClickEvent)
                 }
 
                 ConnectionState.Connecting -> {
@@ -79,7 +81,10 @@ internal fun ConnectDeviceScreen(peripheral: String) {
 }
 
 @Composable
-fun ConnectedView(clientData: ClientData) {
+internal fun ConnectedView(
+    clientData: ClientData,
+    onClickEvent: (ProfileScreenViewEvent) -> Unit,
+) {
     if (clientData.peripheral != null) {
         RequireBluetooth {
             RequestNotificationPermission { granted ->
@@ -92,7 +97,7 @@ fun ConnectedView(clientData: ClientData) {
                         HTSScreen(
                             htsServiceData = clientData.htsServiceData,
                         ) {
-
+                            onClickEvent(it)
                         }
                     }
                     if (clientData.batteryLevel != null) {
