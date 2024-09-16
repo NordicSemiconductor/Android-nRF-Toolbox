@@ -22,7 +22,7 @@ import no.nordicsemi.android.ui.view.SectionTitle
 @Composable
 internal fun HTSScreen(
     htsServiceData: HTSServiceData,
-    onClickEvent: (HTSScreenViewEvent) -> Unit
+    onClickEvent: (ProfileScreenViewEvent) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()
