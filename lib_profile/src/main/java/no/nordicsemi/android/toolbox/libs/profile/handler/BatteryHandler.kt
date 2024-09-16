@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
+import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.BatteryLevelParser
 import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.core.ConnectionState
@@ -22,13 +23,13 @@ class BatteryHandler : ProfileHandler() {
     override val profileModule: ProfileModule = ProfileModule.BATTERY
     override val connectionState: Flow<ConnectionState>
         get() = MutableSharedFlow()
-    private val _batteryLevel = MutableSharedFlow<ByteArray>()
+    private val _batteryLevel = MutableSharedFlow<Int>()
     override fun observeData() = _batteryLevel.asSharedFlow()
 
     override suspend fun handleServices(remoteService: RemoteService, scope: CoroutineScope) {
         remoteService.characteristics.firstOrNull { it.uuid == BATTERY_LEVEL_CHARACTERISTIC_UUID }
             ?.subscribe()
-            ?.mapNotNull { it }
+            ?.mapNotNull { BatteryLevelParser.parse(it) }
             ?.onEach { batteryLevel ->
                 // Send the data to the repository
                 _batteryLevel.emit(batteryLevel)

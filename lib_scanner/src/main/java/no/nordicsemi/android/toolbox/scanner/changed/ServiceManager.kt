@@ -8,6 +8,7 @@ import android.os.IBinder
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
+import timber.log.Timber
 import javax.inject.Inject
 
 class ServiceManager @Inject constructor(
@@ -15,8 +16,8 @@ class ServiceManager @Inject constructor(
 ) {
     private var serviceConnection = ProximityBinder()
 
-    suspend fun bindService(): ConnectionService.LocalBinder {
-        val intent = Intent(context, ConnectionService::class.java)
+    suspend fun bindService(): ProfileService.LocalBinder {
+        val intent = Intent(context, ProfileService::class.java)
         // check if the all permission is granted, if not the service will not start
         // TODO() check if the permission is granted
 
@@ -33,14 +34,18 @@ class ServiceManager @Inject constructor(
 
 private class ProximityBinder : ServiceConnection {
 
-    val result = MutableSharedFlow<ConnectionService.LocalBinder>(extraBufferCapacity = 1)
+    val result = MutableSharedFlow<ProfileService.LocalBinder>(replay = 1)
 
     override fun onServiceConnected(className: ComponentName, service: IBinder) {
-        val binder = service as ConnectionService.LocalBinder
+        val binder = service as ProfileService.LocalBinder
         result.tryEmit(binder)
     }
 
     override fun onServiceDisconnected(p0: ComponentName?) {
+        TODO("Not yet implemented")
+    }
+    override fun onBindingDied(p0: ComponentName?) {
+        Timber.e("Service binding died")
         TODO("Not yet implemented")
     }
 
