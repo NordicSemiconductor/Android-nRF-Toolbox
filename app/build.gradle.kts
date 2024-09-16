@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.nordic.analytics)
     implementation(libs.nordic.ui)
     implementation(libs.nordic.core)
+    implementation(libs.nordic.permissions.ble)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

@@ -37,10 +37,13 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
 import no.nordicsemi.android.common.analytics.view.AnalyticsPermissionRequestDialog
 import no.nordicsemi.android.common.navigation.NavigationView
+import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
+import no.nordicsemi.android.common.permissions.ble.RequireLocation
 import no.nordicsemi.android.common.theme.NordicActivity
 import no.nordicsemi.android.common.theme.NordicTheme
 import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
@@ -59,8 +62,6 @@ class MainActivity : NordicActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Bind to the service when the activity starts
-        viewModel.bindService()
 
         setContent {
             NordicTheme {
@@ -68,7 +69,18 @@ class MainActivity : NordicActivity() {
                     color = MaterialTheme.colorScheme.surface,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    NavigationView(HomeDestinations + ScannerDestination + ConnectDeviceDestination)
+                    RequireBluetooth {
+                        // Bluetooth is enabled
+                        RequireLocation {
+                            // Location permission granted
+                            NavigationView(HomeDestinations + ScannerDestination + ConnectDeviceDestination)
+
+                            LaunchedEffect(Unit) {
+                                // Bind to the service when the activity starts
+                                viewModel.bindService()
+                            }
+                        }
+                    }
                 }
 
                 AnalyticsPermissionRequestDialog()
