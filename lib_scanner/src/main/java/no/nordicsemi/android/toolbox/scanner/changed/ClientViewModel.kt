@@ -87,15 +87,10 @@ class ClientViewModel @Inject constructor(
                     ProfileModule.HTS -> {
                         profileHandler.observeData().onEach {
                             _clientData.value = _clientData.value.copy(
-                                htsServiceData = updateServiceData(
-                                    currentData = _clientData.value.htsServiceData,
-                                    defaultData = HTSServiceData()
-                                ) {
-                                    copy(
-                                        data = it as HtsData,
-                                        deviceName = peripheral?.name ?: peripheral?.address
-                                    )
-                                }
+                                htsServiceData = _clientData.value.htsServiceData.copy(
+                                    data = it as HtsData,
+                                    deviceName = peripheral?.name ?: peripheral?.address,
+                                )
                             )
                         }.launchIn(viewModelScope)
                     }
@@ -136,31 +131,17 @@ class ClientViewModel @Inject constructor(
 
             OnRetryClicked -> TODO()
             is OnTemperatureUnitSelected -> {
+                // Handle temperature unit selection
                 _clientData.value = _clientData.value.copy(
-                    htsServiceData = updateServiceData(
-                        currentData = _clientData.value.htsServiceData,
-                        defaultData = HTSServiceData()
-                    ) {
-                        copy(temperatureUnit = event.value)
-                    }
+                    htsServiceData = _clientData.value.htsServiceData.copy(
+                        temperatureUnit = event.value
+                    )
                 )
             }
 
             OpenLoggerEvent -> TODO()
         }
 
-    }
-
-    private fun <T> updateServiceData(
-        currentData: T,
-        defaultData: T,
-        update: T.() -> T
-    ): T {
-        return if (currentData != defaultData) {
-            currentData.update()
-        } else {
-            defaultData.update()
-        }
     }
 
 }
