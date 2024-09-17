@@ -92,12 +92,10 @@ internal fun ConnectedView(
                 modifier = Modifier
                     .padding(16.dp)
             ) {
-                clientData.htsServiceData.takeIf { it != HTSServiceData() }?.let {
+                clientData.htsServiceData.takeIf { it != HTSServiceData() }?.let { htsServiceData ->
                     HTSScreen(
-                        htsServiceData = it,
-                    ) {
-                        onClickEvent(it)
-                    }
+                        htsServiceData = htsServiceData,
+                    ) { onClickEvent(it) }
                 }
 
                 if (clientData.batteryLevel != null) {
