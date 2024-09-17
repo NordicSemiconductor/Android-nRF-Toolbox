@@ -23,8 +23,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.nrftoolbox.R
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewModel
+import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
 
 private const val DFU_PACKAGE_NAME = "no.nordicsemi.android.dfu"
 private const val DFU_LINK =
@@ -55,50 +57,46 @@ internal fun HomeView() {
                 }
             }
         }
-    ) {
+    ) { paddingValues ->
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
-                .padding(it)
+                .padding(paddingValues)
                 .padding(16.dp)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
         ) {
-            if (state.profileModule != null) {
-                Text(
-                    text = "Connected Devices",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+            RequireBluetooth {
+                if (state.connectedDevices.isNotEmpty()) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        Text(
+                            text = "Connected Devices",
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                        state.connectedDevices.forEach { (peripheral, handlers) ->
+                            handlers.forEach { handler ->
+                                if (handler.profileModule == ProfileModule.HTS) {
+                                    FeatureButton(
+                                        iconId = R.drawable.ic_hts,
+                                        profileName = R.string.hts_module_full,
+                                        deviceName = peripheral.name,
+                                        true
+                                    ) {
+                                        // Open the profile screen
 
-            }
-            NoConnectedDeviceView()
-            /*
-                        when (state.profileModule) {
-                            ProfileModule.CSC -> TODO()
-                            ProfileModule.HRS -> TODO()
-                            ProfileModule.HTS -> {
-                                FeatureButton(
-                                    R.drawable.ic_hts,
-                                    R.string.hts_module_full,
-                                    true
-                                ) {
-                                    viewModel.openProfile(HTSDestinationId)
+                                    }
                                 }
                             }
-
-                            ProfileModule.RSCS -> TODO()
-                            ProfileModule.PRX -> TODO()
-                            ProfileModule.CGM -> TODO()
-                            ProfileModule.UART -> TODO()
-
-                            else -> {
-                                // do nothing
-
-                            }
                         }
-            */
-
+                    }
+                } else {
+                    NoConnectedDeviceView()
+                }
+            }
         }
     }
 }

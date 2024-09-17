@@ -31,9 +31,10 @@ data class ClientData(
 )
 
 @HiltViewModel
-class ClientViewModel @Inject constructor(
+internal class ClientViewModel @Inject constructor(
     private val serviceManager: ServiceManager,
     private val navigator: Navigator,
+    private val deviceRepository: DeviceRepository, // Inject the repository
 ) : ViewModel() {
     private val _clientData = MutableStateFlow(ClientData())
     val clientData = _clientData.asStateFlow()
@@ -71,6 +72,11 @@ class ClientViewModel @Inject constructor(
                     _clientData.value = _clientData.value.copy(connectionState = it)
                     if (it == ConnectionState.Connected) {
                         updateServiceData()
+
+                        // Update repository with the new connected device and its handlers
+                        connectedDevices.onEach {
+                            deviceRepository.updateConnectedDevices(it)
+                        }.launchIn(viewModelScope)
                     }
                 }?.launchIn(viewModelScope)
             }
