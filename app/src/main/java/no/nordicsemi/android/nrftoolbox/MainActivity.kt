@@ -41,7 +41,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import no.nordicsemi.android.common.analytics.view.AnalyticsPermissionRequestDialog
 import no.nordicsemi.android.common.navigation.NavigationView
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
-import no.nordicsemi.android.common.permissions.ble.RequireLocation
 import no.nordicsemi.android.common.theme.NordicActivity
 import no.nordicsemi.android.common.theme.NordicTheme
 import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
@@ -66,10 +65,7 @@ class MainActivity : NordicActivity() {
                 ) {
                     RequireBluetooth {
                         // Bluetooth is enabled
-                        RequireLocation {
-                            // Location permission granted
-                            NavigationView(HomeDestinations + ScannerDestination + ConnectDeviceDestination)
-                        }
+                        NavigationView(HomeDestinations + ScannerDestination + ConnectDeviceDestination)
                     }
                 }
 
