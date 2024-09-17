@@ -23,6 +23,7 @@ import no.nordicsemi.android.toolbox.scanner.changed.ClientViewModel
 import no.nordicsemi.android.toolbox.scanner.view.ScannerAppBar
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.HTSScreen
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.LoadingView
+import no.nordicsemi.android.toolbox.scanner.view.hts.view.NavigateUp
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.ProfileScreenViewEvent
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.RequestNotificationPermission
 import no.nordicsemi.android.ui.view.BatteryLevelView
@@ -49,6 +50,7 @@ internal fun ConnectDeviceScreen(peripheral: String) {
             ScannerAppBar(title = { Text(clientData.peripheral?.name ?: peripheral) },
                 onNavigationButtonClick = {
                     // Navigate back
+                    onClickEvent(NavigateUp)
                 })
         },
     ) { paddingValues ->
