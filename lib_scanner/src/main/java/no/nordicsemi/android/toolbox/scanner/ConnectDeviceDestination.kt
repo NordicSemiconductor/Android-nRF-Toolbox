@@ -17,7 +17,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.navigation.createDestination
 import no.nordicsemi.android.common.navigation.defineDestination
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
-import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
+import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HTSServiceData
 import no.nordicsemi.android.toolbox.scanner.changed.ClientData
 import no.nordicsemi.android.toolbox.scanner.changed.ClientViewModel
 import no.nordicsemi.android.toolbox.scanner.view.ScannerAppBar
@@ -86,25 +86,23 @@ internal fun ConnectedView(
     onClickEvent: (ProfileScreenViewEvent) -> Unit,
 ) {
     if (clientData.peripheral != null) {
-        RequireBluetooth {
-            RequestNotificationPermission { granted ->
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier
-                        .padding(16.dp)
-                ) {
-                    if (clientData.htsServiceData != null) {
-                        HTSScreen(
-                            htsServiceData = clientData.htsServiceData,
-                        ) {
-                            onClickEvent(it)
-                        }
-                    }
-                    if (clientData.batteryLevel != null) {
-                        BatteryLevelView(clientData.batteryLevel)
+        RequestNotificationPermission { granted ->
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier
+                    .padding(16.dp)
+            ) {
+                clientData.htsServiceData.takeIf { it != HTSServiceData() }?.let {
+                    HTSScreen(
+                        htsServiceData = it,
+                    ) {
+                        onClickEvent(it)
                     }
                 }
 
+                if (clientData.batteryLevel != null) {
+                    BatteryLevelView(clientData.batteryLevel)
+                }
             }
         }
     }

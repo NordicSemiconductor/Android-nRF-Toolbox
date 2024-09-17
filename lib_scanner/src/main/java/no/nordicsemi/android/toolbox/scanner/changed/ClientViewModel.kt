@@ -26,7 +26,7 @@ import javax.inject.Inject
 data class ClientData(
     val peripheral: Peripheral? = null,
     val connectionState: ConnectionState? = null,
-    val htsServiceData: HTSServiceData? = null,
+    val htsServiceData: HTSServiceData = HTSServiceData(),
     val batteryLevel: Int? = null,
 )
 
@@ -70,15 +70,14 @@ class ClientViewModel @Inject constructor(
                 peripheralConnectionState(deviceAddress)?.onEach {
                     _clientData.value = _clientData.value.copy(connectionState = it)
                     if (it == ConnectionState.Connected) {
-                        getProfile()
+                        updateServiceData()
                     }
                 }?.launchIn(viewModelScope)
-
             }
         }
     }
 
-    private fun getProfile() {
+    private fun updateServiceData() {
         profileService?.get()?.connectedDevices?.onEach { peripheralListMap ->
             val peripheral =
                 deviceAddress?.let { it1 -> profileService?.get()?.getPeripheralById(it1) }
@@ -88,10 +87,15 @@ class ClientViewModel @Inject constructor(
                     ProfileModule.HTS -> {
                         profileHandler.observeData().onEach {
                             _clientData.value = _clientData.value.copy(
-                                htsServiceData = HTSServiceData(
-                                    data = it as HtsData,
-                                    deviceName = peripheral?.name ?: peripheral?.address,
-                                )
+                                htsServiceData = updateServiceData(
+                                    currentData = _clientData.value.htsServiceData,
+                                    defaultData = HTSServiceData()
+                                ) {
+                                    copy(
+                                        data = it as HtsData,
+                                        deviceName = peripheral?.name ?: peripheral?.address
+                                    )
+                                }
                             )
                         }.launchIn(viewModelScope)
                     }
@@ -116,30 +120,47 @@ class ClientViewModel @Inject constructor(
         }?.launchIn(viewModelScope)
     }
 
-    fun onClickEvent(event: ProfileScreenViewEvent){
+    fun onClickEvent(event: ProfileScreenViewEvent) {
         // Handle click events
-        when(event){
+        when (event) {
             is DisconnectEvent -> {
                 // Disconnect from the peripheral
                 viewModelScope.launch {
                     profileService?.get()?.disconnectPeripheral(event.device)
                 }
             }
+
             NavigateUp -> {
                 navigator.navigateUp()
             }
+
             OnRetryClicked -> TODO()
             is OnTemperatureUnitSelected -> {
-                // Handle temperature unit selection
                 _clientData.value = _clientData.value.copy(
-                    htsServiceData = _clientData.value.htsServiceData?.copy(
-                        temperatureUnit = event.value
-                    )
+                    htsServiceData = updateServiceData(
+                        currentData = _clientData.value.htsServiceData,
+                        defaultData = HTSServiceData()
+                    ) {
+                        copy(temperatureUnit = event.value)
+                    }
                 )
             }
+
             OpenLoggerEvent -> TODO()
         }
 
+    }
+
+    private fun <T> updateServiceData(
+        currentData: T,
+        defaultData: T,
+        update: T.() -> T
+    ): T {
+        return if (currentData != defaultData) {
+            currentData.update()
+        } else {
+            defaultData.update()
+        }
     }
 
 }
