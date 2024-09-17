@@ -33,7 +33,8 @@ import no.nordicsemi.android.nrftoolbox.R
 @Composable
 internal fun FeatureButton(
     @DrawableRes iconId: Int,
-    @StringRes name: Int,
+    @StringRes profileName: Int,
+    deviceName: String? = null,
     isRunning: Boolean? = null,
     @StringRes description: Int? = null,
     onClick: () -> Unit
@@ -54,7 +55,7 @@ internal fun FeatureButton(
 
             Image(
                 painter = painterResource(iconId),
-                contentDescription = stringResource(id = name),
+                contentDescription = stringResource(id = profileName),
                 contentScale = ContentScale.Crop,
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary),
                 modifier = Modifier
@@ -69,10 +70,22 @@ internal fun FeatureButton(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(id = name),
+                    text = stringResource(id = profileName),
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center
                 )
+
+                deviceName?.let {
+                    Spacer(modifier = Modifier.size(4.dp))
+
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = it,
+                        style = MaterialTheme.typography.labelMedium,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
 
                 description?.let {
                     Spacer(modifier = Modifier.size(4.dp))

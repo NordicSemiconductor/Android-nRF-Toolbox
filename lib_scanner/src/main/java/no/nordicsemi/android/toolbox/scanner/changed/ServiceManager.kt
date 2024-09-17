@@ -18,9 +18,6 @@ class ServiceManager @Inject constructor(
 
     suspend fun bindService(): ProfileService.LocalBinder {
         val intent = Intent(context, ProfileService::class.java)
-        // check if the all permission is granted, if not the service will not start
-        // TODO() check if the permission is granted
-
         context.startService(intent)
         serviceConnection = ProximityBinder()
         context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
@@ -44,6 +41,7 @@ private class ProximityBinder : ServiceConnection {
     override fun onServiceDisconnected(p0: ComponentName?) {
         TODO("Not yet implemented")
     }
+
     override fun onBindingDied(p0: ComponentName?) {
         Timber.e("Service binding died")
         TODO("Not yet implemented")
