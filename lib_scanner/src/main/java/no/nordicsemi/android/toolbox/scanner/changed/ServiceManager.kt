@@ -6,45 +6,62 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.suspendCancellableCoroutine
+import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
+import no.nordicsemi.kotlin.ble.client.android.Peripheral
+import no.nordicsemi.kotlin.ble.core.ConnectionState
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.coroutines.resumeWithException
+
+val DEVICE_ADDRESS = "deviceAddress"
 
 class ServiceManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    private var serviceConnection = ProximityBinder()
+    private var serviceConnection: ServiceConnection? = null
+    private var api: ServiceApi? = null
 
-    suspend fun bindService(): ProfileService.LocalBinder {
+    suspend fun bindService(): ServiceApi = suspendCancellableCoroutine { continuation ->
         val intent = Intent(context, ProfileService::class.java)
-        context.startService(intent)
-        serviceConnection = ProximityBinder()
-        context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
-        return serviceConnection.result.first()
+        serviceConnection = object : ServiceConnection {
+            override fun onServiceConnected(className: ComponentName, service: IBinder) {
+                api = service as ServiceApi
+                continuation.resume(api!!) { cause, _, _ -> }
+            }
+
+            override fun onServiceDisconnected(p0: ComponentName?) {
+                Timber.e("Service disconnected")
+                continuation.resumeWithException(Exception("Service disconnected"))
+            }
+
+            override fun onBindingDied(p0: ComponentName?) {
+                Timber.e("Service binding died")
+                continuation.resumeWithException(Exception("Service binding died"))
+            }
+        }.apply {
+            context.bindService(intent, this, Context.BIND_AUTO_CREATE)
+        }
     }
 
     fun unbindService() {
-        context.unbindService(serviceConnection)
+        serviceConnection?.let { context.unbindService(it) }
+    }
+
+    fun connectToPeripheral(deviceAddress: String) {
+        val intent = Intent(context, ProfileService::class.java)
+        intent.putExtra(DEVICE_ADDRESS, deviceAddress)
+        context.startService(intent)
     }
 }
 
-private class ProximityBinder : ServiceConnection {
-
-    val result = MutableSharedFlow<ProfileService.LocalBinder>(replay = 1)
-
-    override fun onServiceConnected(className: ComponentName, service: IBinder) {
-        val binder = service as ProfileService.LocalBinder
-        result.tryEmit(binder)
-    }
-
-    override fun onServiceDisconnected(p0: ComponentName?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onBindingDied(p0: ComponentName?) {
-        Timber.e("Service binding died")
-        TODO("Not yet implemented")
-    }
-
+interface ServiceApi {
+    val connectedDevices: Flow<Map<Peripheral, List<ProfileHandler>>>
+    fun connectPeripheral(deviceAddress: String, scope: CoroutineScope)
+    fun getHandlers(address: String): Flow<List<ProfileHandler>>?
+    fun getPeripheralById(address: String): Peripheral?
+    suspend fun disconnectPeripheral(deviceAddress: String)
+    fun getPeripheralConnectionState(address: String): Flow<ConnectionState>?
 }

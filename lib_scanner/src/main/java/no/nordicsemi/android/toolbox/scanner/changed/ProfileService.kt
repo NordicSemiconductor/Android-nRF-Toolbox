@@ -6,8 +6,9 @@ import android.os.IBinder
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -33,26 +34,31 @@ class ProfileService : NotificationService() {
     private val _connectedDevices =
         MutableStateFlow<Map<Peripheral, List<ProfileHandler>>>(emptyMap())
 
-    inner class LocalBinder : Binder() {
-        val connectedDevices
-            get() = _connectedDevices.asStateFlow()
+    inner class LocalBinder : Binder(), ServiceApi {
+        override val connectedDevices: Flow<Map<Peripheral, List<ProfileHandler>>>
+            get() = _connectedDevices.asSharedFlow()
+
+        // get flow of list of handlers for a device
+        override fun getHandlers(address: String): Flow<List<ProfileHandler>>? {
+            return getPeripheralById(address)?.let { peripheral ->
+                _connectedDevices.replayCache.firstOrNull()?.get(peripheral)?.let {
+                    MutableStateFlow(it).asStateFlow()
+                }
+            }
+        }
+
+        override fun getPeripheralById(address: String): Peripheral? {
+            return getPeripheralById(address)
+        }
 
         // Connect device from the view model.
-        fun connectPeripheral(deviceAddress: String, scope: CoroutineScope) {
+        override fun connectPeripheral(deviceAddress: String, scope: CoroutineScope) {
             connectToPeripheral(deviceAddress, scope)
         }
 
-        fun peripheralConnectionState(peripheralAddress: String): StateFlow<ConnectionState>? {
-            return getPeripheralById(peripheralAddress)?.state
-        }
-
-        fun getPeripheralById(peripheralAddress: String): Peripheral? {
-            return centralManager.getPeripheralById(peripheralAddress)
-        }
-
         // Disconnect the peripheral
-        suspend fun disconnectPeripheral(peripheralAddress: String) {
-            val peripheral = centralManager.getPeripheralById(peripheralAddress)
+        override suspend fun disconnectPeripheral(deviceAddress: String) {
+            val peripheral = centralManager.getPeripheralById(deviceAddress)
             peripheral?.let {
                 peripheral.disconnect()
                 // Remove the device from the connected devices map
@@ -69,11 +75,22 @@ class ProfileService : NotificationService() {
                 }
             }
         }
+
+        override fun getPeripheralConnectionState(address: String): Flow<ConnectionState>? {
+            return getPeripheralById(address)?.state
+        }
     }
 
     override fun onBind(intent: Intent): IBinder {
         super.onBind(intent)
         return binder
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val deviceAddress = intent?.getStringExtra(DEVICE_ADDRESS)
+        // TODO check if yor're not connected already
+        connectToPeripheral(deviceAddress ?: "", lifecycleScope)
+        return super.onStartCommand(intent, flags, startId)
     }
 
     // Public method to connect a peripheral (can be called from the client)

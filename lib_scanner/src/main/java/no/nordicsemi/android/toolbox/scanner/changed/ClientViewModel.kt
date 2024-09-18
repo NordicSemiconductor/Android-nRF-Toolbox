@@ -42,84 +42,81 @@ internal class ClientViewModel @Inject constructor(
 
     private var deviceAddress: String? = null
 
-    private var profileService: WeakReference<ProfileService.LocalBinder>? = null
+    private var serviceApi: WeakReference<ServiceApi>? = null
 
-    // Bind the service when necessary
-    fun bindService() {
+    init {
         viewModelScope.launch {
-            synchronousBind()
+            bindService()
         }
     }
 
-    private suspend fun synchronousBind() {
-        profileService = WeakReference(serviceManager.bindService())
+    private suspend fun bindService() {
+        serviceApi = WeakReference(serviceManager.bindService())
     }
 
-    fun unbindService() {
-        profileService?.let { serviceManager.unbindService() }
-        profileService = null
+    private fun unbindService() {
+        serviceApi?.let { serviceManager.unbindService() }
+        serviceApi = null
     }
 
     // Function to initiate a connection with a peripheral via the service
     fun connectToPeripheral(deviceAddress: String) {
-        viewModelScope.launch {
-            this@ClientViewModel.deviceAddress = deviceAddress
-            if (profileService == null) {
-                synchronousBind()
-            }
-            profileService?.get()?.apply {
-                connectPeripheral(deviceAddress, viewModelScope)
-                peripheralConnectionState(deviceAddress)?.onEach {
-                    _clientData.value = _clientData.value.copy(connectionState = it)
-                    if (it == ConnectionState.Connected) {
-                        updateServiceData()
+        this.deviceAddress = deviceAddress
+        serviceManager.connectToPeripheral(deviceAddress)
+        updateServiceData(deviceAddress)
+    }
 
-                        // Update repository with the new connected device and its handlers
-                        connectedDevices.onEach {
-                            deviceRepository.updateConnectedDevices(it)
-                        }.launchIn(viewModelScope)
-                    }
-                }?.launchIn(viewModelScope)
-            }
+    private fun updateServiceData(deviceAddress: String) {
+        // Observe the handlers for the connected device
+        serviceApi?.get()?.apply {
+            getPeripheralConnectionState(deviceAddress)?.onEach { connectionState ->
+                _clientData.value = _clientData.value.copy(
+                    connectionState = connectionState,
+                )
+                if (connectionState == ConnectionState.Connected) {
+                    connectedDevices.onEach {
+                        deviceRepository.updateConnectedDevices(it)
+                        val peripheral = this.getPeripheralById(deviceAddress)
+                        _clientData.value = _clientData.value.copy(
+                            peripheral = peripheral,
+                        )
+                        it[peripheral]?.forEach { profileHandler ->
+                            updateProfileData(profileHandler)
+                        }
+                    }.launchIn(viewModelScope)
+                }
+            }?.launchIn(viewModelScope)
         }
     }
 
-    private fun updateServiceData() {
-        profileService?.get()?.connectedDevices?.onEach { peripheralListMap ->
-            val peripheral =
-                deviceAddress?.let { it1 -> profileService?.get()?.getPeripheralById(it1) }
-            peripheralListMap[peripheral]?.forEach { profileHandler ->
-                _clientData.value = _clientData.value.copy(peripheral = peripheral)
-                when (profileHandler.profileModule) {
-                    ProfileModule.HTS -> {
-                        profileHandler.observeData().onEach {
-                            _clientData.value = _clientData.value.copy(
-                                htsServiceData = _clientData.value.htsServiceData.copy(
-                                    data = it as HtsData,
-                                    deviceName = peripheral?.name ?: peripheral?.address,
-                                )
-                            )
-                        }.launchIn(viewModelScope)
-                    }
-
-                    ProfileModule.BATTERY -> {
-                        // Handle battery service
-                        profileHandler.observeData().onEach {
-                            _clientData.value = _clientData.value.copy(
-                                batteryLevel = it as Int,
-                            )
-                        }.launchIn(viewModelScope)
-                    }
-
-                    ProfileModule.CSC -> TODO()
-                    ProfileModule.HRS -> TODO()
-                    ProfileModule.RSCS -> TODO()
-                    ProfileModule.PRX -> TODO()
-                    ProfileModule.CGM -> TODO()
-                    ProfileModule.UART -> TODO()
-                }
+    private fun updateProfileData(profileHandler: ProfileHandler) {
+        when (profileHandler.profileModule) {
+            ProfileModule.HTS -> {
+                profileHandler.observeData().onEach {
+                    _clientData.value = _clientData.value.copy(
+                        htsServiceData = _clientData.value.htsServiceData.copy(
+                            data = it as HtsData,
+                        )
+                    )
+                }.launchIn(viewModelScope)
             }
-        }?.launchIn(viewModelScope)
+
+            ProfileModule.BATTERY -> {
+                // Handle battery service
+                profileHandler.observeData().onEach {
+                    _clientData.value = _clientData.value.copy(
+                        batteryLevel = it as Int,
+                    )
+                }.launchIn(viewModelScope)
+            }
+
+            ProfileModule.CSC -> TODO()
+            ProfileModule.HRS -> TODO()
+            ProfileModule.RSCS -> TODO()
+            ProfileModule.PRX -> TODO()
+            ProfileModule.CGM -> TODO()
+            ProfileModule.UART -> TODO()
+        }
     }
 
     fun onClickEvent(event: ProfileScreenViewEvent) {
