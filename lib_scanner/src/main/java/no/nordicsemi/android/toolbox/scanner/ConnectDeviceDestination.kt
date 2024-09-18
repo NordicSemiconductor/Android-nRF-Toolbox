@@ -47,20 +47,24 @@ internal fun ConnectDeviceScreen(peripheral: String) {
 
     Scaffold(
         topBar = {
-            ScannerAppBar(title = { Text(clientData.peripheral?.name ?: peripheral) },
-                onNavigationButtonClick = {
-                    // Navigate back
-                    onClickEvent(NavigateUp)
-                })
+            ProfileAppBar(
+                deviceName = clientData.peripheral?.name ?: peripheral,
+                connectionState = clientData.connectionState,
+                title = R.string.hts_title,
+                navigateUp = { onClickEvent(NavigateUp) },
+                disconnect = { onClickEvent(DisconnectEvent(peripheral)) },
+                openLogger = { }
+            )
         },
     ) { paddingValues ->
         Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            when (clientData.connectionState) {
+            when (val s = clientData.connectionState) {
                 ConnectionState.Connected -> {
                     ConnectedView(clientData, onClickEvent)
                 }
@@ -69,7 +73,22 @@ internal fun ConnectDeviceScreen(peripheral: String) {
                     LoadingView()
                 }
 
-                is ConnectionState.Disconnected -> TODO()
+                is ConnectionState.Disconnected -> {
+                    s.reason?.let {
+                        DeviceDisconnectedView(
+                            reason = it,
+                            content = { paddingValues ->
+                                Button(
+                                    modifier = Modifier.padding(paddingValues),
+                                    onClick = { onClickEvent(OnRetryClicked) },
+                                ) {
+                                    Text(text = "Reconnect")
+                                }
+                            }
+                        )
+                    }
+                }
+
                 ConnectionState.Disconnecting -> {
                     LoadingView()
                 }
