@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HtsData
+import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.DisconnectEvent
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.NavigateUp
@@ -127,7 +128,14 @@ internal class ClientViewModel @Inject constructor(
             is DisconnectEvent -> {
                 // Disconnect from the peripheral
                 viewModelScope.launch {
-                    profileService?.get()?.disconnectPeripheral(event.device)
+                    serviceApi?.get()?.apply {
+                        // Disconnect the peripheral
+                        disconnectPeripheral(event.device)
+                        // Unbind the service.
+                        unbindService()
+                    }
+                    // navigate back
+                    navigator.navigateUp()
                 }
             }
 
@@ -135,7 +143,11 @@ internal class ClientViewModel @Inject constructor(
                 navigator.navigateUp()
             }
 
-            OnRetryClicked -> TODO()
+            OnRetryClicked -> {
+                // Retry connection
+                connectToPeripheral(deviceAddress!!)
+            }
+
             is OnTemperatureUnitSelected -> {
                 // Handle temperature unit selection
                 _clientData.value = _clientData.value.copy(
@@ -148,6 +160,11 @@ internal class ClientViewModel @Inject constructor(
             OpenLoggerEvent -> TODO()
         }
 
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        unbindService()
     }
 
 }

@@ -55,6 +55,18 @@ class ProfileService : NotificationService() {
             val peripheral = centralManager.getPeripheralById(peripheralAddress)
             peripheral?.let {
                 peripheral.disconnect()
+                // Remove the device from the connected devices map
+                val currentDevices = _connectedDevices.replayCache.firstOrNull() ?: emptyMap()
+                currentDevices[peripheral]?.let {
+                    val updatedDevices = currentDevices.toMutableMap().apply {
+                        remove(peripheral)
+                    }
+                    _connectedDevices.tryEmit(updatedDevices)
+                }
+                // Stop the service if no device is connected
+                if (_connectedDevices.replayCache.firstOrNull()?.isEmpty() == true) {
+                    stopSelf()
+                }
             }
         }
     }
