@@ -1,5 +1,6 @@
 package no.nordicsemi.android.toolbox.libs.profile
 
+import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -12,10 +13,9 @@ import no.nordicsemi.kotlin.ble.client.distinctByPeripheral
 import no.nordicsemi.kotlin.ble.core.util.distinct
 import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 
-@Singleton
+@ViewModelScoped
 class ConnectionProvider @Inject constructor(
     private val centralManager: CentralManager,
 ) {

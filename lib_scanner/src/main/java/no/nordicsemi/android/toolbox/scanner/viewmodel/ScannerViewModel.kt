@@ -132,6 +132,7 @@ internal class ScannerViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         job?.cancel()
+        _uiState.value = ScannerUiState()
         viewModelScope.cancel()
         connectionProvider.close()
     }
