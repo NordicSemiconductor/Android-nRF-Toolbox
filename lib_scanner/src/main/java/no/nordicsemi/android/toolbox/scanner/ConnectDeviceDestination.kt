@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,13 +21,16 @@ import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewMod
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HTSServiceData
 import no.nordicsemi.android.toolbox.scanner.changed.ClientData
 import no.nordicsemi.android.toolbox.scanner.changed.ClientViewModel
-import no.nordicsemi.android.toolbox.scanner.view.ScannerAppBar
+import no.nordicsemi.android.toolbox.scanner.view.hts.view.DisconnectEvent
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.HTSScreen
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.LoadingView
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.NavigateUp
+import no.nordicsemi.android.toolbox.scanner.view.hts.view.OnRetryClicked
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.ProfileScreenViewEvent
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.RequestNotificationPermission
 import no.nordicsemi.android.ui.view.BatteryLevelView
+import no.nordicsemi.android.ui.view.ProfileAppBar
+import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 
 val ConnectDeviceDestinationId = createDestination<String, Unit>("connect-device-destination")
