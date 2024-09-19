@@ -40,32 +40,44 @@ internal class ClientViewModel @Inject constructor(
     private val _clientData = MutableStateFlow(ClientData())
     val clientData = _clientData.asStateFlow()
 
-    private var deviceAddress: String? = null
+    private var address: String? = null
 
     private var serviceApi: WeakReference<ServiceApi>? = null
 
-    init {
-        viewModelScope.launch {
-            bindService()
-        }
-    }
-
+    /**
+     * Bind the service. The service will be started if not already running.
+     */
     private suspend fun bindService() {
         serviceApi = WeakReference(serviceManager.bindService())
     }
 
+    /**
+     * Unbind the service.
+     */
     private fun unbindService() {
         serviceApi?.let { serviceManager.unbindService() }
         serviceApi = null
     }
 
-    // Function to initiate a connection with a peripheral via the service
-    fun connectToPeripheral(deviceAddress: String) {
-        this.deviceAddress = deviceAddress
+    /**
+     * Connect to the peripheral with the given address. Before connecting, the service must be bound.
+     * The service will be started if not already running.
+     * @param deviceAddress the address of the peripheral to connect to.
+     */
+    fun connectToPeripheral(deviceAddress: String) = viewModelScope.launch {
+        address = deviceAddress
+        bindService()
         serviceManager.connectToPeripheral(deviceAddress)
-        updateServiceData(deviceAddress)
+        serviceApi?.get()?.apply {
+            // Connect to the peripheral
+            updateServiceData(deviceAddress)
+        }
     }
 
+    /**
+     * Update the service data. This method will observe the connection state and the data from the
+     * connected device.
+     */
     private fun updateServiceData(deviceAddress: String) {
         // Observe the handlers for the connected device
         serviceApi?.get()?.apply {
@@ -89,6 +101,9 @@ internal class ClientViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Update the profile data. This method will observe the data from the profile handler.
+     */
     private fun updateProfileData(profileHandler: ProfileHandler) {
         when (profileHandler.profileModule) {
             ProfileModule.HTS -> {
@@ -119,6 +134,9 @@ internal class ClientViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Handle click events from the view.
+     */
     fun onClickEvent(event: ProfileScreenViewEvent) {
         // Handle click events
         when (event) {
@@ -142,7 +160,7 @@ internal class ClientViewModel @Inject constructor(
 
             OnRetryClicked -> {
                 // Retry connection
-                connectToPeripheral(deviceAddress!!)
+                connectToPeripheral(address!!)
             }
 
             is OnTemperatureUnitSelected -> {

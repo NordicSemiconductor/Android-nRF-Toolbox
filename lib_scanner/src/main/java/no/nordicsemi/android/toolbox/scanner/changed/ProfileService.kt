@@ -5,7 +5,6 @@ import android.os.Binder
 import android.os.IBinder
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -39,7 +38,7 @@ class ProfileService : NotificationService() {
             get() = _connectedDevices.asSharedFlow()
 
         // get flow of list of handlers for a device
-        override fun getHandlers(address: String): Flow<List<ProfileHandler>>? {
+        override fun getHandlers(address: String?): Flow<List<ProfileHandler>>? {
             return getPeripheralById(address)?.let { peripheral ->
                 _connectedDevices.replayCache.firstOrNull()?.get(peripheral)?.let {
                     MutableStateFlow(it).asStateFlow()
@@ -47,13 +46,8 @@ class ProfileService : NotificationService() {
             }
         }
 
-        override fun getPeripheralById(address: String): Peripheral? {
-            return getPeripheralById(address)
-        }
-
-        // Connect device from the view model.
-        override fun connectPeripheral(deviceAddress: String, scope: CoroutineScope) {
-            connectToPeripheral(deviceAddress, scope)
+        override fun getPeripheralById(address: String?): Peripheral? {
+            return address?.let { centralManager.getPeripheralById(it) }
         }
 
         // Disconnect the peripheral
@@ -89,26 +83,25 @@ class ProfileService : NotificationService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val deviceAddress = intent?.getStringExtra(DEVICE_ADDRESS)
         // TODO check if yor're not connected already
-        connectToPeripheral(deviceAddress ?: "", lifecycleScope)
+        connectToPeripheral(deviceAddress ?: "")
         return super.onStartCommand(intent, flags, startId)
     }
 
     // Public method to connect a peripheral (can be called from the client)
-    fun connectToPeripheral(deviceAddress: String, scope: CoroutineScope) {
+    private fun connectToPeripheral(deviceAddress: String) {
         val peripheral = centralManager.getPeripheralById(deviceAddress)
         peripheral?.let {
-            connect(it, scope)
-            observePeripheralState(it, scope)
+            connect(it)
+            observePeripheralState(it)
         }
     }
 
     private fun connect(
         device: Peripheral,
-        scope: CoroutineScope
     ) {
         // Similar to your existing connect function
         try {
-            scope.launch {
+            lifecycleScope.launch {
                 centralManager.connect(device)
             }
         } catch (e: Exception) {
@@ -119,13 +112,12 @@ class ProfileService : NotificationService() {
 
     private fun observePeripheralState(
         peripheral: Peripheral,
-        scope: CoroutineScope
     ) {
         peripheral.state.onEach { state ->
             when (state) {
                 ConnectionState.Connected -> {
                     // Handle the connected state
-                    handleConnectedState(peripheral, scope)
+                    handleConnectedState(peripheral)
                 }
 
                 ConnectionState.Connecting -> {
@@ -137,12 +129,11 @@ class ProfileService : NotificationService() {
                 ConnectionState.Disconnecting -> {
                 }
             }
-        }.launchIn(scope)
+        }.launchIn(lifecycleScope)
     }
 
     private fun handleConnectedState(
         peripheral: Peripheral,
-        scope: CoroutineScope
     ) {
         peripheral.services().onEach { remoteServices ->
             val handlers = mutableListOf<ProfileHandler>()
@@ -150,8 +141,8 @@ class ProfileService : NotificationService() {
                 val handler = ProfileHandlerFactory.createHandler(remoteService.uuid)
                 handler?.let {
                     handlers.add(it)
-                    scope.launch {
-                        it.handleServices(remoteService, scope)
+                    lifecycleScope.launch {
+                        it.handleServices(remoteService, lifecycleScope)
                     }
                 }
             }
