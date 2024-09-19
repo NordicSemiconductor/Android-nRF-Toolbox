@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
@@ -16,7 +15,7 @@ import timber.log.Timber
 import javax.inject.Inject
 import kotlin.coroutines.resumeWithException
 
-val DEVICE_ADDRESS = "deviceAddress"
+const val DEVICE_ADDRESS = "deviceAddress"
 
 class ServiceManager @Inject constructor(
     @ApplicationContext private val context: Context
@@ -59,9 +58,8 @@ class ServiceManager @Inject constructor(
 
 interface ServiceApi {
     val connectedDevices: Flow<Map<Peripheral, List<ProfileHandler>>>
-    fun connectPeripheral(deviceAddress: String, scope: CoroutineScope)
-    fun getHandlers(address: String): Flow<List<ProfileHandler>>?
-    fun getPeripheralById(address: String): Peripheral?
+    fun getHandlers(address: String?): Flow<List<ProfileHandler>>?
+    fun getPeripheralById(address: String?): Peripheral?
     suspend fun disconnectPeripheral(deviceAddress: String)
     fun getPeripheralConnectionState(address: String): Flow<ConnectionState>?
 }
