@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
+import no.nordicsemi.android.toolbox.scanner.ConnectDeviceDestinationId
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import no.nordicsemi.android.toolbox.scanner.changed.DeviceRepository
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
@@ -22,6 +23,11 @@ data class HomeViewState(
     val refreshToggle: Boolean = false,
 ) {
     fun toggleRefresh(): HomeViewState = copy(refreshToggle = !refreshToggle)
+}
+
+sealed interface HomeViewEvent {
+    data object AddDeviceClick : HomeViewEvent
+    data class OnConnectedDeviceClick(val deviceAddress: String) : HomeViewEvent
 }
 
 @HiltViewModel
@@ -52,6 +58,14 @@ internal class HomeViewModel @Inject constructor(
 
     fun startScanning() {
         navigator.navigateTo(ScannerDestinationId)
+    }
+
+    fun onClickEvent(event: HomeViewEvent) {
+        when(event){
+            HomeViewEvent.AddDeviceClick -> navigator.navigateTo(ScannerDestinationId)
+            is HomeViewEvent.OnConnectedDeviceClick -> navigator.navigateTo(
+                ConnectDeviceDestinationId, event.deviceAddress)
+        }
     }
 
 }
