@@ -25,6 +25,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.nrftoolbox.R
+import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewEvent
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewModel
 import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
 
@@ -38,6 +39,7 @@ private const val LOGGER_PACKAGE_NAME = "no.nordicsemi.android.log"
 internal fun HomeView() {
     val viewModel = hiltViewModel<HomeViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val onEvent: (HomeViewEvent) -> Unit = {viewModel.onClickEvent(it)}
 
     Scaffold(
         topBar = {
@@ -87,7 +89,7 @@ internal fun HomeView() {
                                         true
                                     ) {
                                         // Open the profile screen
-
+                                        onEvent(HomeViewEvent.OnConnectedDeviceClick(peripheral.address))
                                     }
                                 }
                             }
