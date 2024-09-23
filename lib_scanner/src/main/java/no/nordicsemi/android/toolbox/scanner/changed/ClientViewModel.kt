@@ -96,14 +96,23 @@ internal class ClientViewModel @Inject constructor(
 
                         } else {
                             // Observe the data from the connected device
-                            connectedDevices.onEach {
-                                deviceRepository.updateConnectedDevices(it)
+                            connectedDevices.onEach { peripheralListMap ->
+                                deviceRepository.updateConnectedDevices(peripheralListMap)
                                 val peripheral = this.getPeripheralById(deviceAddress)
                                 _clientData.value = _clientData.value.copy(
                                     peripheral = peripheral,
                                 )
-                                it[peripheral]?.forEach { profileHandler ->
-                                    updateProfileData(profileHandler)
+                                peripheral?.let { device ->
+                                    // Update the profile data
+                                    peripheralListMap[device]?.forEach { profileHandler ->
+                                        updateProfileData(profileHandler)
+                                    }
+                                    // Update battery level
+                                    batteryLevel.onEach {
+                                        _clientData.value = _clientData.value.copy(
+                                            batteryLevel = it,
+                                        )
+                                    }.launchIn(viewModelScope)
                                 }
                             }.launchIn(viewModelScope)
                         }
@@ -124,15 +133,6 @@ internal class ClientViewModel @Inject constructor(
                         htsServiceData = _clientData.value.htsServiceData.copy(
                             data = it as HtsData,
                         )
-                    )
-                }.launchIn(viewModelScope)
-            }
-
-            ProfileModule.BATTERY -> {
-                // Handle battery service
-                profileHandler.observeData().onEach {
-                    _clientData.value = _clientData.value.copy(
-                        batteryLevel = it as Int,
                     )
                 }.launchIn(viewModelScope)
             }

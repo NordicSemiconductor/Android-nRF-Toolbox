@@ -59,6 +59,7 @@ class ServiceManager @Inject constructor(
 interface ServiceApi {
     val connectedDevices: Flow<Map<Peripheral, List<ProfileHandler>>>
     val isMissingServices: Flow<Boolean>
+    val batteryLevel: Flow<Int?>
     fun getPeripheralById(address: String?): Peripheral?
     suspend fun disconnectPeripheral(deviceAddress: String)
     fun getPeripheralConnectionState(address: String): Flow<ConnectionState>?

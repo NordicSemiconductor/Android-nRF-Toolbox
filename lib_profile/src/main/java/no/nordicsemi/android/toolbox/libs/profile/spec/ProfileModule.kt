@@ -8,5 +8,4 @@ enum class ProfileModule {
     PRX,
     CGM,
     UART,
-    BATTERY,
 }
