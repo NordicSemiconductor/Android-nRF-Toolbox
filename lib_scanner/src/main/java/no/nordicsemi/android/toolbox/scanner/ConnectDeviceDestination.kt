@@ -31,6 +31,7 @@ import no.nordicsemi.android.toolbox.scanner.view.hts.view.RequestNotificationPe
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.ProfileAppBar
 import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
+import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 
 val ConnectDeviceDestinationId = createDestination<String, Unit>("connect-device-destination")
@@ -117,14 +118,26 @@ internal fun ConnectedView(
                 modifier = Modifier
                     .padding(16.dp)
             ) {
-                clientData.htsServiceData.takeIf { it != HTSServiceData() }?.let { htsServiceData ->
-                    HTSScreen(
-                        htsServiceData = htsServiceData,
-                    ) { onClickEvent(it) }
-                }
+                when (clientData.isMissingServices) {
+                    true -> {
+                        DeviceDisconnectedView(
+                            reason = DisconnectReason.MISSING_SERVICE,
+                            modifier = Modifier.padding(16.dp),
+                        )
+                    }
 
-                if (clientData.batteryLevel != null) {
-                    BatteryLevelView(clientData.batteryLevel)
+                    false -> {
+                        clientData.htsServiceData.takeIf { it != HTSServiceData() }
+                            ?.let { htsServiceData ->
+                                HTSScreen(
+                                    htsServiceData = htsServiceData,
+                                ) { onClickEvent(it) }
+                            }
+
+                        if (clientData.batteryLevel != null) {
+                            BatteryLevelView(clientData.batteryLevel)
+                        }
+                    }
                 }
             }
         }

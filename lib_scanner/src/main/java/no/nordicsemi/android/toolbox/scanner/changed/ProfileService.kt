@@ -33,18 +33,15 @@ class ProfileService : NotificationService() {
     private val _connectedDevices =
         MutableStateFlow<Map<Peripheral, List<ProfileHandler>>>(emptyMap())
 
+    // Missing services flag
+    private val _isMissingServices = MutableStateFlow(false)
+
     inner class LocalBinder : Binder(), ServiceApi {
         override val connectedDevices: Flow<Map<Peripheral, List<ProfileHandler>>>
             get() = _connectedDevices.asSharedFlow()
 
-        // get flow of list of handlers for a device
-        override fun getHandlers(address: String?): Flow<List<ProfileHandler>>? {
-            return getPeripheralById(address)?.let { peripheral ->
-                _connectedDevices.replayCache.firstOrNull()?.get(peripheral)?.let {
-                    MutableStateFlow(it).asStateFlow()
-                }
-            }
-        }
+        override val isMissingServices: Flow<Boolean>
+            get() = _isMissingServices.asStateFlow()
 
         override fun getPeripheralById(address: String?): Peripheral? {
             return address?.let { centralManager.getPeripheralById(it) }
@@ -54,7 +51,7 @@ class ProfileService : NotificationService() {
         override suspend fun disconnectPeripheral(deviceAddress: String) {
             val peripheral = centralManager.getPeripheralById(deviceAddress)
             peripheral?.let {
-                peripheral.disconnect()
+                if (it.isConnected) it.disconnect()
                 // Remove the device from the connected devices map
                 val currentDevices = _connectedDevices.replayCache.firstOrNull() ?: emptyMap()
                 currentDevices[peripheral]?.let {
@@ -149,7 +146,7 @@ class ProfileService : NotificationService() {
             // Check if no service is found.
             if (handlers.isEmpty() && remoteServices.isNotEmpty()) {
                 // No service found.
-                //
+               updateMissingService(peripheral)
                 // Stop the service.
                 stopSelf()
             }
@@ -167,6 +164,21 @@ class ProfileService : NotificationService() {
             this[peripheral] = handlers
         }
         _connectedDevices.tryEmit(updatedDevices) // Emit the updated device map
+    }
+
+    /**
+     * Update the missing services flag and remove the device from the connected devices map.
+     * @param peripheral the peripheral to update.
+     */
+    private fun updateMissingService(peripheral: Peripheral) {
+        // Remove the device from the connected devices map before updating the missing services flag.
+        val currentDevices = _connectedDevices.replayCache.firstOrNull() ?: emptyMap()
+        val updatedDevices = currentDevices.toMutableMap().apply {
+            remove(peripheral)
+        }
+        _connectedDevices.tryEmit(updatedDevices)
+        // Update the missing services flag
+        _isMissingServices.tryEmit(true)
     }
 
 }

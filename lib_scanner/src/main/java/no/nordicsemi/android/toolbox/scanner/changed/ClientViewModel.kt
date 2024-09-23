@@ -29,6 +29,7 @@ data class ClientData(
     val connectionState: ConnectionState? = null,
     val htsServiceData: HTSServiceData = HTSServiceData(),
     val batteryLevel: Int? = null,
+    val isMissingServices: Boolean = false,
 )
 
 @HiltViewModel
@@ -86,14 +87,25 @@ internal class ClientViewModel @Inject constructor(
                     connectionState = connectionState,
                 )
                 if (connectionState == ConnectionState.Connected) {
-                    connectedDevices.onEach {
-                        deviceRepository.updateConnectedDevices(it)
-                        val peripheral = this.getPeripheralById(deviceAddress)
-                        _clientData.value = _clientData.value.copy(
-                            peripheral = peripheral,
-                        )
-                        it[peripheral]?.forEach { profileHandler ->
-                            updateProfileData(profileHandler)
+                    isMissingServices.onEach { isMissing ->
+                        if (isMissing) {
+                            // Update missing service flag.
+                            _clientData.value = _clientData.value.copy(
+                                isMissingServices = true,
+                            )
+
+                        } else {
+                            // Observe the data from the connected device
+                            connectedDevices.onEach {
+                                deviceRepository.updateConnectedDevices(it)
+                                val peripheral = this.getPeripheralById(deviceAddress)
+                                _clientData.value = _clientData.value.copy(
+                                    peripheral = peripheral,
+                                )
+                                it[peripheral]?.forEach { profileHandler ->
+                                    updateProfileData(profileHandler)
+                                }
+                            }.launchIn(viewModelScope)
                         }
                     }.launchIn(viewModelScope)
                 }
@@ -154,9 +166,16 @@ internal class ClientViewModel @Inject constructor(
                 }
             }
 
-            NavigateUp -> {
-                navigator.navigateUp()
-            }
+            NavigateUp ->
+                // Disconnect the peripheral before navigating back if services are missing
+                viewModelScope.launch {
+                    if (_clientData.value.isMissingServices) {
+                        serviceApi?.get()?.apply {
+                            disconnectPeripheral(address!!)
+                        }
+                    }
+                    navigator.navigateUp()
+                }
 
             OnRetryClicked -> {
                 // Retry connection
