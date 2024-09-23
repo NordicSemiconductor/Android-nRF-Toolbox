@@ -68,10 +68,16 @@ internal class ClientViewModel @Inject constructor(
     fun connectToPeripheral(deviceAddress: String) = viewModelScope.launch {
         address = deviceAddress
         bindService()
-        serviceManager.connectToPeripheral(deviceAddress)
         serviceApi?.get()?.apply {
-            // Connect to the peripheral
-            updateServiceData(deviceAddress)
+            val peripheral = this.getPeripheralById(deviceAddress)
+            connectedDevices.onEach { device ->
+                if (!device.containsKey(peripheral)) {
+                    // The device is not connected
+                    serviceManager.connectToPeripheral(deviceAddress)
+                }
+                updateServiceData(deviceAddress)
+
+            }.launchIn(viewModelScope)
         }
     }
 
