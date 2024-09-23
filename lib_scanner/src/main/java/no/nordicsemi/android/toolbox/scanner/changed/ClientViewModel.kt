@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HtsData
+import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.DisconnectEvent
@@ -36,20 +37,22 @@ data class ClientData(
 internal class ClientViewModel @Inject constructor(
     private val serviceManager: ServiceManager,
     private val navigator: Navigator,
-    private val deviceRepository: DeviceRepository, // Inject the repository
+    private val deviceRepository: DeviceRepository,
 ) : ViewModel() {
     private val _clientData = MutableStateFlow(ClientData())
     val clientData = _clientData.asStateFlow()
 
     private var address: String? = null
-
     private var serviceApi: WeakReference<ServiceApi>? = null
 
     /**
-     * Bind the service. The service will be started if not already running.
+     * Bind the service and return the API if successful.
      */
-    private suspend fun bindService() {
-        serviceApi = WeakReference(serviceManager.bindService())
+    private suspend fun getServiceApi(): ServiceApi? {
+        if (serviceApi == null) {
+            serviceApi = WeakReference(serviceManager.bindService())
+        }
+        return serviceApi?.get()
     }
 
     /**
@@ -67,12 +70,11 @@ internal class ClientViewModel @Inject constructor(
      */
     fun connectToPeripheral(deviceAddress: String) = viewModelScope.launch {
         address = deviceAddress
-        bindService()
-        serviceApi?.get()?.apply {
-            val peripheral = this.getPeripheralById(deviceAddress)
-            connectedDevices.onEach { device ->
+        getServiceApi()?.let { api ->
+            val peripheral = api.getPeripheralById(deviceAddress)
+            api.connectedDevices.onEach { device ->
                 if (!device.containsKey(peripheral)) {
-                    // The device is not connected
+                    // If not connected, attempt connection
                     serviceManager.connectToPeripheral(deviceAddress)
                 }
                 updateServiceData(deviceAddress)
@@ -82,18 +84,18 @@ internal class ClientViewModel @Inject constructor(
     }
 
     /**
-     * Update the service data. This method will observe the connection state and the data from the
-     * connected device.
+     * Update the service data, including connection state and peripheral data.
+     * @param deviceAddress the address of the connected device.
      */
-    private fun updateServiceData(deviceAddress: String) {
+    private suspend fun updateServiceData(deviceAddress: String) {
         // Observe the handlers for the connected device
-        serviceApi?.get()?.apply {
-            getPeripheralConnectionState(deviceAddress)?.onEach { connectionState ->
+        getServiceApi()?.let { api ->
+            api.getPeripheralConnectionState(deviceAddress)?.onEach { connectionState ->
                 _clientData.value = _clientData.value.copy(
                     connectionState = connectionState,
                 )
                 if (connectionState == ConnectionState.Connected) {
-                    isMissingServices.onEach { isMissing ->
+                    api.isMissingServices.onEach { isMissing ->
                         if (isMissing) {
                             // Update missing service flag.
                             _clientData.value = _clientData.value.copy(
@@ -102,25 +104,7 @@ internal class ClientViewModel @Inject constructor(
 
                         } else {
                             // Observe the data from the connected device
-                            connectedDevices.onEach { peripheralListMap ->
-                                deviceRepository.updateConnectedDevices(peripheralListMap)
-                                val peripheral = this.getPeripheralById(deviceAddress)
-                                _clientData.value = _clientData.value.copy(
-                                    peripheral = peripheral,
-                                )
-                                peripheral?.let { device ->
-                                    // Update the profile data
-                                    peripheralListMap[device]?.forEach { profileHandler ->
-                                        updateProfileData(profileHandler)
-                                    }
-                                    // Update battery level
-                                    batteryLevel.onEach {
-                                        _clientData.value = _clientData.value.copy(
-                                            batteryLevel = it,
-                                        )
-                                    }.launchIn(viewModelScope)
-                                }
-                            }.launchIn(viewModelScope)
+                            updateConnectedData(api, deviceAddress)
                         }
                     }.launchIn(viewModelScope)
                 }
@@ -129,7 +113,38 @@ internal class ClientViewModel @Inject constructor(
     }
 
     /**
-     * Update the profile data. This method will observe the data from the profile handler.
+     * Update the connected data, including the peripheral, profile data, and battery level.
+     * @param api the service API.
+     * @param deviceAddress the address of the connected device.
+     */
+    private fun updateConnectedData(
+        api: ServiceApi,
+        deviceAddress: String
+    ) {
+        api.connectedDevices.onEach { peripheralProfileMap ->
+            deviceRepository.updateConnectedDevices(peripheralProfileMap)
+            val peripheral = api.getPeripheralById(deviceAddress)
+            _clientData.value = _clientData.value.copy(
+                peripheral = peripheral,
+            )
+            peripheral?.let { device ->
+                // Update the profile data
+                peripheralProfileMap[device]?.forEach { profileHandler ->
+                    updateProfileData(profileHandler)
+                }
+                // Update battery level
+                api.batteryLevel.collect {
+                    _clientData.value = _clientData.value.copy(
+                        batteryLevel = it,
+                    )
+                }
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    /**
+     * Observe and update the data from the profile handler.
+     * @param profileHandler the profile handler.
      */
     private fun updateProfileData(profileHandler: ProfileHandler) {
         when (profileHandler.profileModule) {
@@ -142,13 +157,8 @@ internal class ClientViewModel @Inject constructor(
                     )
                 }.launchIn(viewModelScope)
             }
-
-            ProfileModule.CSC -> TODO()
-            ProfileModule.HRS -> TODO()
-            ProfileModule.RSCS -> TODO()
-            ProfileModule.PRX -> TODO()
-            ProfileModule.CGM -> TODO()
-            ProfileModule.UART -> TODO()
+            // TODO: Add more profile modules here
+            else -> TODO()
         }
     }
 
@@ -158,48 +168,39 @@ internal class ClientViewModel @Inject constructor(
     fun onClickEvent(event: ProfileScreenViewEvent) {
         // Handle click events
         when (event) {
-            is DisconnectEvent -> {
-                // Disconnect from the peripheral
-                viewModelScope.launch {
-                    serviceApi?.get()?.apply {
-                        // Disconnect the peripheral
-                        disconnectPeripheral(event.device)
-                        // Unbind the service.
-                        unbindService()
-                    }
-                    // navigate back
-                    navigator.navigateUp()
-                }
-            }
-
-            NavigateUp ->
-                // Disconnect the peripheral before navigating back if services are missing
-                viewModelScope.launch {
-                    if (_clientData.value.isMissingServices) {
-                        serviceApi?.get()?.apply {
-                            disconnectPeripheral(address!!)
-                        }
-                    }
-                    navigator.navigateUp()
-                }
-
-            OnRetryClicked -> {
-                // Retry connection
-                connectToPeripheral(address!!)
-            }
-
-            is OnTemperatureUnitSelected -> {
-                // Handle temperature unit selection
-                _clientData.value = _clientData.value.copy(
-                    htsServiceData = _clientData.value.htsServiceData.copy(
-                        temperatureUnit = event.value
-                    )
-                )
-            }
-
+            is DisconnectEvent -> disconnectAndNavigate(event.device)
+            NavigateUp -> disconnectIfNeededAndNavigate()
+            is OnRetryClicked -> connectToPeripheral(event.device)
+            is OnTemperatureUnitSelected -> updateTemperatureUnit(event.value)
             OpenLoggerEvent -> TODO()
         }
 
+    }
+
+    private fun disconnectIfNeededAndNavigate() = viewModelScope.launch {
+        if (_clientData.value.isMissingServices) {
+            serviceApi?.get()?.apply {
+                disconnectPeripheral(address!!)
+            }
+        }
+        navigator.navigateUp()
+    }
+
+    private fun disconnectAndNavigate(device: String) = viewModelScope.launch {
+        getServiceApi()?.disconnectPeripheral(device)
+        // Unbind the service.
+        unbindService()
+        // navigate back
+        navigator.navigateUp()
+    }
+
+    private fun updateTemperatureUnit(unit: TemperatureUnit) {
+        // Handle temperature unit selection
+        _clientData.value = _clientData.value.copy(
+            htsServiceData = _clientData.value.htsServiceData.copy(
+                temperatureUnit = unit
+            )
+        )
     }
 
     override fun onCleared() {
