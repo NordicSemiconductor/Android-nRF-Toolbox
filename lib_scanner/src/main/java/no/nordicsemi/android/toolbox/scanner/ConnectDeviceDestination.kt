@@ -85,7 +85,7 @@ internal fun ConnectDeviceScreen(peripheral: String) {
                             content = { paddingValues ->
                                 Button(
                                     modifier = Modifier.padding(paddingValues),
-                                    onClick = { onClickEvent(OnRetryClicked) },
+                                    onClick = { onClickEvent(OnRetryClicked(peripheral)) },
                                 ) {
                                     Text(text = "Reconnect")
                                 }
