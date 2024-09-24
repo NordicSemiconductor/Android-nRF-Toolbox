@@ -8,7 +8,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,7 +16,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.navigation.createDestination
 import no.nordicsemi.android.common.navigation.defineDestination
-import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HTSServiceData
 import no.nordicsemi.android.toolbox.scanner.changed.ClientData
 import no.nordicsemi.android.toolbox.scanner.changed.ClientViewModel
@@ -36,19 +34,15 @@ import no.nordicsemi.kotlin.ble.core.ConnectionState
 
 val ConnectDeviceDestinationId = createDestination<String, Unit>("connect-device-destination")
 val ConnectDeviceDestination = defineDestination(ConnectDeviceDestinationId) {
-    val simpleNavigationViewModel: SimpleNavigationViewModel = hiltViewModel()
-    ConnectDeviceScreen(simpleNavigationViewModel.parameterOf(ConnectDeviceDestinationId))
+    ConnectDeviceScreen()
 }
 
 @Composable
-internal fun ConnectDeviceScreen(peripheral: String) {
+internal fun ConnectDeviceScreen() {
     val clientViewModel: ClientViewModel = hiltViewModel()
     val clientData by clientViewModel.clientData.collectAsStateWithLifecycle()
     val onClickEvent: (ProfileScreenViewEvent) -> Unit = { clientViewModel.onClickEvent(it) }
-
-    LaunchedEffect(peripheral) {
-        clientViewModel.connectToPeripheral(peripheral)
-    }
+    val peripheral = clientViewModel.address
 
     Scaffold(
         topBar = {
