@@ -1,6 +1,6 @@
 package no.nordicsemi.android.toolbox.scanner.changed
 
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,11 +9,13 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
+import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HtsData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
+import no.nordicsemi.android.toolbox.scanner.ConnectDeviceDestinationId
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.DisconnectEvent
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.NavigateUp
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.OnRetryClicked
@@ -38,11 +40,12 @@ internal class ClientViewModel @Inject constructor(
     private val serviceManager: ServiceManager,
     private val navigator: Navigator,
     private val deviceRepository: DeviceRepository,
-) : ViewModel() {
+    savedStateHandle: SavedStateHandle,
+) : SimpleNavigationViewModel(navigator, savedStateHandle) {
     private val _clientData = MutableStateFlow(ClientData())
     val clientData = _clientData.asStateFlow()
 
-    private var address: String? = null
+    val address: String = parameterOf(ConnectDeviceDestinationId)
     private var serviceApi: WeakReference<ServiceApi>? = null
 
     /**
