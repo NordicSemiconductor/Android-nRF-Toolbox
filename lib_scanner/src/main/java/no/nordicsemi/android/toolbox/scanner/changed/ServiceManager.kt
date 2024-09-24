@@ -11,7 +11,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
-import timber.log.Timber
 import javax.inject.Inject
 import kotlin.coroutines.resumeWithException
 
@@ -32,12 +31,10 @@ class ServiceManager @Inject constructor(
             }
 
             override fun onServiceDisconnected(p0: ComponentName?) {
-                Timber.e("Service disconnected")
                 continuation.resumeWithException(Exception("Service disconnected"))
             }
 
             override fun onBindingDied(p0: ComponentName?) {
-                Timber.e("Service binding died")
                 continuation.resumeWithException(Exception("Service binding died"))
             }
         }.apply {
@@ -61,6 +58,6 @@ interface ServiceApi {
     val isMissingServices: Flow<Boolean>
     val batteryLevel: Flow<Int?>
     fun getPeripheralById(address: String?): Peripheral?
-    suspend fun disconnectPeripheral(deviceAddress: String)
-    fun getPeripheralConnectionState(address: String): Flow<ConnectionState>?
+    fun disconnect(deviceAddress: String)
+    fun getConnectionState(address: String): Flow<ConnectionState>?
 }

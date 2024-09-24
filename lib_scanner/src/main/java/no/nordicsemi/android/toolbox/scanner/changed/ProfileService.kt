@@ -6,7 +6,6 @@ import android.os.IBinder
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -68,26 +67,28 @@ class ProfileService : NotificationService() {
         }
 
         // Disconnect the peripheral
-        override suspend fun disconnectPeripheral(deviceAddress: String) {
-            val peripheral = centralManager.getPeripheralById(deviceAddress)
-            peripheral?.let {
-                if (it.isConnected) it.disconnect()
-                // Remove the device from the connected devices map
-                val currentDevices = _connectedDevices.replayCache.firstOrNull() ?: emptyMap()
-                currentDevices[peripheral]?.let {
-                    val updatedDevices = currentDevices.toMutableMap().apply {
-                        remove(peripheral)
+        override fun disconnect(deviceAddress: String) {
+            lifecycleScope.launch {
+                val peripheral = centralManager.getPeripheralById(deviceAddress)
+                peripheral?.let {
+                    if (it.isConnected) it.disconnect()
+                    // Remove the device from the connected devices map
+                    val currentDevices = _connectedDevices.replayCache.firstOrNull() ?: emptyMap()
+                    currentDevices[peripheral]?.let {
+                        val updatedDevices = currentDevices.toMutableMap().apply {
+                            remove(peripheral)
+                        }
+                        _connectedDevices.tryEmit(updatedDevices)
                     }
-                    _connectedDevices.tryEmit(updatedDevices)
-                }
-                // Stop the service if no device is connected
-                if (_connectedDevices.replayCache.firstOrNull()?.isEmpty() == true) {
-                    stopSelf()
+                    // Stop the service if no device is connected
+                    if (_connectedDevices.replayCache.firstOrNull()?.isEmpty() == true) {
+                        stopSelf()
+                    }
                 }
             }
         }
 
-        override fun getPeripheralConnectionState(address: String): Flow<ConnectionState>? {
+        override fun getConnectionState(address: String): Flow<ConnectionState>? {
             return getPeripheralById(address)?.state
         }
     }
