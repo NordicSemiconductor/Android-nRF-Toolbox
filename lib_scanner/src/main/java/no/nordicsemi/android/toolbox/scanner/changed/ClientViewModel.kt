@@ -43,8 +43,8 @@ internal class ClientViewModel @Inject constructor(
     private val deviceRepository: DeviceRepository,
     savedStateHandle: SavedStateHandle,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
-    val address: String = parameterOf(ConnectDeviceDestinationId)
-    private val _clientData = MutableStateFlow(ClientData(deviceAddress = address))
+    private val address: String = parameterOf(ConnectDeviceDestinationId)
+    private val _clientData = MutableStateFlow(ClientData(deviceAddress = address, batteryLevel = null))
 
     val clientData = _clientData.asStateFlow()
     private var serviceApi: WeakReference<ServiceApi>? = null
@@ -108,15 +108,18 @@ internal class ClientViewModel @Inject constructor(
             )
             if (connectionState == ConnectionState.Connected) {
                 api.isMissingServices.onEach { isMissing ->
-                    if (isMissing) {
-                        // Update missing service flag.
-                        _clientData.value = _clientData.value.copy(
-                            isMissingServices = true,
-                        )
-
-                    } else {
+                    val peripheral = api.getPeripheralById(deviceAddress)
+                    _clientData.value = _clientData.value.copy(
+                        isMissingServices = isMissing,
+                        peripheral = peripheral,
+                    )
+                    if (!isMissing) {
                         // Observe the data from the connected device
-                        updateConnectedData(api, deviceAddress)
+                        updateConnectedData(api, peripheral)
+                    } else{
+                        _clientData.value = _clientData.value.copy(
+                            batteryLevel = null,
+                        )
                     }
                 }.launchIn(viewModelScope)
             }
@@ -126,30 +129,27 @@ internal class ClientViewModel @Inject constructor(
     /**
      * Update the connected data, including the peripheral, profile data, and battery level.
      * @param api the service API.
-     * @param deviceAddress the address of the connected device.
+     * @param peripheral the address of the connected device.
      */
     private fun updateConnectedData(
         api: ServiceApi,
-        deviceAddress: String
+        peripheral: Peripheral?
     ) {
         api.connectedDevices.onEach { peripheralProfileMap ->
-            val peripheral = api.getPeripheralById(deviceAddress)
-            _clientData.value = _clientData.value.copy(
-                peripheral = peripheral,
-            )
             peripheral?.let { device ->
                 // Update the profile data
                 peripheralProfileMap[device]?.forEach { profileHandler ->
+                    _clientData.value = _clientData.value.copy(
+                        peripheral = peripheral,
+                    )
                     updateProfileData(profileHandler)
                 }
                 // Update the battery level if the peripheral is the same.
-                if (_clientData.value.deviceAddress == device.address) {
-                    api.batteryLevel.collect {
-                        _clientData.value = _clientData.value.copy(
-                            batteryLevel = it,
-                        )
-                    }
-                }
+                api.batteryLevel.onEach {
+                    _clientData.value = _clientData.value.copy(
+                        batteryLevel = it,
+                    )
+                }.launchIn(viewModelScope)
             }
         }.launchIn(viewModelScope)
     }
