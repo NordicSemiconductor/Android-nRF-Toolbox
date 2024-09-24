@@ -47,11 +47,11 @@ internal fun ConnectDeviceScreen() {
     Scaffold(
         topBar = {
             ProfileAppBar(
-                deviceName = clientData.peripheral?.name ?: peripheral,
+                deviceName = clientData.peripheral?.name ?: clientData.deviceAddress,
                 connectionState = clientData.connectionState,
                 title = R.string.hts_title,
                 navigateUp = { onClickEvent(NavigateUp) },
-                disconnect = { onClickEvent(DisconnectEvent(peripheral)) },
+                disconnect = { onClickEvent(DisconnectEvent(clientData.deviceAddress)) },
                 openLogger = { }
             )
         },
@@ -79,7 +79,7 @@ internal fun ConnectDeviceScreen() {
                             content = { paddingValues ->
                                 Button(
                                     modifier = Modifier.padding(paddingValues),
-                                    onClick = { onClickEvent(OnRetryClicked(peripheral)) },
+                                    onClick = { onClickEvent(OnRetryClicked(clientData.deviceAddress)) },
                                 ) {
                                     Text(text = "Reconnect")
                                 }
@@ -93,7 +93,7 @@ internal fun ConnectDeviceScreen() {
                 }
 
                 null -> {
-                    Text("Connecting to $peripheral")
+                    Text("Connecting to $clientData.deviceAddress")
                 }
             }
         }

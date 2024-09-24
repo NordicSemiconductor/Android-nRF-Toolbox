@@ -74,10 +74,13 @@ class ProfileService : NotificationService() {
          * @param deviceAddress the device address to disconnect.
          */
         override fun disconnect(deviceAddress: String) {
+            val peripheral = centralManager.getPeripheralById(deviceAddress)
             lifecycleScope.launch {
-                centralManager.getPeripheralById(deviceAddress)?.let { peripheral ->
+                peripheral?.let { peripheral ->
                     if (peripheral.isConnected) peripheral.disconnect()
-                    updateConnectedDevices(peripheral, remove = true)
+                    removeDevice(peripheral)
+                    // clear the flags
+                    clearFlags()
                     stopServiceIfNoDevices()
                 }
             }
@@ -146,9 +149,8 @@ class ProfileService : NotificationService() {
 
             // Check if no supported service is found.
             if (handlers.isEmpty() && remoteServices.isNotEmpty()) {
-                updateMissingService(peripheral)
-                stopSelf()
-            } else {
+                _isMissingServices.tryEmit(true)
+            } else if (handlers.isNotEmpty()) {
                 updateConnectedDevices(peripheral, handlers)
                 observeBatteryService(remoteServices)
             }
@@ -171,43 +173,47 @@ class ProfileService : NotificationService() {
     }
 
     /**
-     * Update the missing services flag and remove the device from the connected devices map.
-     * @param peripheral the peripheral to update.
-     */
-    private fun updateMissingService(peripheral: Peripheral) {
-        // Remove the device from the connected devices map
-        updateConnectedDevices(peripheral, remove = true)
-        // Update the missing services flag
-        _isMissingServices.tryEmit(true)
-    }
-
-    /**
      * Stop the service if no devices are connected.
      */
     private fun stopServiceIfNoDevices() {
-        if (_connectedDevices.value.isEmpty()) stopSelf()
+        if (_connectedDevices.value.isEmpty()) {
+            stopSelf()
+        }
     }
 
     /**
      * Update the connected devices map.
      * @param peripheral the connected peripheral.
-     * @param handlers the list of profile handlers.
-     * @param remove flag to remove the device from the map.
      */
+    private fun removeDevice(
+        peripheral: Peripheral
+    ) {
+        // Remove the device from the connected devices map before updating the missing services flag.
+        val currentDevices = _connectedDevices.replayCache.firstOrNull() ?: emptyMap()
+        val updatedDevices = currentDevices.toMutableMap().apply {
+            remove(peripheral)
+        }
+        _connectedDevices.tryEmit(updatedDevices)
+    }
+
     private fun updateConnectedDevices(
         peripheral: Peripheral,
-        handlers: List<ProfileHandler>? = null,
-        remove: Boolean = false
+        handlers: List<ProfileHandler>
     ) {
-        val currentDevices = _connectedDevices.value.toMutableMap()
-
-        if (remove) {
-            currentDevices.remove(peripheral)
-        } else {
-            handlers?.let { currentDevices[peripheral] = it }
+        val currentDevices = _connectedDevices.replayCache.firstOrNull() ?: emptyMap()
+        val updatedDevices = currentDevices.toMutableMap().apply {
+            this[peripheral] = handlers
         }
-
-        _connectedDevices.tryEmit(currentDevices)
+        _connectedDevices.tryEmit(updatedDevices)
     }
+
+    /**
+     * Clear the missing services and battery level flags.
+     */
+    private fun clearFlags() {
+        _isMissingServices.tryEmit(false)
+        _batteryLevel.tryEmit(null)
+    }
+
 
 }
