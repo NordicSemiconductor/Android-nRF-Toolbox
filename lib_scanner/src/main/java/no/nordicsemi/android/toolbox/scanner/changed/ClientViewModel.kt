@@ -67,7 +67,7 @@ internal class ClientViewModel @Inject constructor(
                 // Observe the connected devices
                 api.connectedDevices.onEach { peripheralProfileMap ->
                     deviceRepository.updateConnectedDevices(peripheralProfileMap)
-                    updateServiceData(address, api)
+                    updateServiceData(api, address)
                 }.launchIn(viewModelScope)
             }
 
@@ -96,9 +96,10 @@ internal class ClientViewModel @Inject constructor(
 
     /**
      * Update the service data, including connection state and peripheral data.
+     * @param api the service API.
      * @param deviceAddress the address of the connected device.
      */
-    private fun updateServiceData(deviceAddress: String, api: ServiceApi) {
+    private fun updateServiceData(api: ServiceApi, deviceAddress: String) {
         // Observe the handlers for the connected device
         api.getConnectionState(deviceAddress)?.onEach { connectionState ->
             _clientData.value = _clientData.value.copy(
@@ -185,12 +186,19 @@ internal class ClientViewModel @Inject constructor(
 
     }
 
+    /**
+     * Reconnect to the device with the given address.
+     * @param address the address of the device to reconnect to.
+     */
     private fun reConnectDevice(address: String) = viewModelScope.launch {
         getServiceApi()?.let { api ->
             connectToPeripheral(api, address)
         }
     }
 
+    /**
+     * Disconnect the device if missing services and navigate back.
+     */
     private fun disconnectIfNeededAndNavigate() = viewModelScope.launch {
         // Disconnect the peripheral if missing services.
         if (_clientData.value.isMissingServices) {
@@ -202,6 +210,10 @@ internal class ClientViewModel @Inject constructor(
         navigator.navigateUp()
     }
 
+    /**
+     * Disconnect the device with the given address and navigate back.
+     * @param device the address of the device to disconnect.
+     */
     private fun disconnectAndNavigate(device: String) = viewModelScope.launch {
         getServiceApi()?.apply {
             disconnect(device)
@@ -212,6 +224,10 @@ internal class ClientViewModel @Inject constructor(
         navigator.navigateUp()
     }
 
+    /**
+     * Update the temperature unit.
+     * @param unit the temperature unit.
+     */
     private fun updateTemperatureUnit(unit: TemperatureUnit) {
         // Handle temperature unit selection
         _clientData.value = _clientData.value.copy(
