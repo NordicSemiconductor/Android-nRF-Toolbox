@@ -28,6 +28,7 @@ import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 data class ClientData(
+    val deviceAddress: String,
     val peripheral: Peripheral? = null,
     val connectionState: ConnectionState? = null,
     val htsServiceData: HTSServiceData = HTSServiceData(),
@@ -42,10 +43,10 @@ internal class ClientViewModel @Inject constructor(
     private val deviceRepository: DeviceRepository,
     savedStateHandle: SavedStateHandle,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
-    private val _clientData = MutableStateFlow(ClientData())
-    val clientData = _clientData.asStateFlow()
-
     val address: String = parameterOf(ConnectDeviceDestinationId)
+    private val _clientData = MutableStateFlow(ClientData(deviceAddress = address))
+
+    val clientData = _clientData.asStateFlow()
     private var serviceApi: WeakReference<ServiceApi>? = null
 
     /**
@@ -141,11 +142,13 @@ internal class ClientViewModel @Inject constructor(
                 peripheralProfileMap[device]?.forEach { profileHandler ->
                     updateProfileData(profileHandler)
                 }
-                // Update battery level
-                api.batteryLevel.collect {
-                    _clientData.value = _clientData.value.copy(
-                        batteryLevel = it,
-                    )
+                // Update the battery level if the peripheral is the same.
+                if (_clientData.value.deviceAddress == device.address) {
+                    api.batteryLevel.collect {
+                        _clientData.value = _clientData.value.copy(
+                            batteryLevel = it,
+                        )
+                    }
                 }
             }
         }.launchIn(viewModelScope)
