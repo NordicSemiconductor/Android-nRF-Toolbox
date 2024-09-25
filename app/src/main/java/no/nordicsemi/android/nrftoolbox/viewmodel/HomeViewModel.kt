@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
@@ -25,16 +24,11 @@ data class HomeViewState(
     fun toggleRefresh(): HomeViewState = copy(refreshToggle = !refreshToggle)
 }
 
-sealed interface HomeViewEvent {
-    data object AddDeviceClick : HomeViewEvent
-    data class OnConnectedDeviceClick(val deviceAddress: String) : HomeViewEvent
-}
-
 @HiltViewModel
 internal class HomeViewModel @Inject constructor(
     private val navigator: Navigator,
     activitySignals: ActivitySignals,
-    private val deviceRepository: DeviceRepository,
+    deviceRepository: DeviceRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeViewState())
     val state = _state.asStateFlow()
@@ -47,24 +41,19 @@ internal class HomeViewModel @Inject constructor(
         }.launchIn(viewModelScope)
 
         // Observe connected devices from the repository
-        viewModelScope.launch {
-            deviceRepository.connectedDevices.collect { devices ->
-                _state.update { currentState ->
-                    currentState.copy(connectedDevices = devices) // Update UI state with connected devices
-                }
+        deviceRepository.connectedDevices.onEach { devices ->
+            _state.update { currentState ->
+                currentState.copy(connectedDevices = devices)
             }
-        }
-    }
-
-    fun startScanning() {
-        navigator.navigateTo(ScannerDestinationId)
+        }.launchIn(viewModelScope)
     }
 
     fun onClickEvent(event: HomeViewEvent) {
-        when(event){
+        when (event) {
             HomeViewEvent.AddDeviceClick -> navigator.navigateTo(ScannerDestinationId)
             is HomeViewEvent.OnConnectedDeviceClick -> navigator.navigateTo(
-                ConnectDeviceDestinationId, event.deviceAddress)
+                ConnectDeviceDestinationId, event.deviceAddress
+            )
         }
     }
 
