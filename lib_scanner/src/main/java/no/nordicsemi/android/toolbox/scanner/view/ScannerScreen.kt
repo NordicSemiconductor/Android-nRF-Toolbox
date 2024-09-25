@@ -144,8 +144,10 @@ internal fun LazyListScope.DeviceListItems(
     devices: List<Peripheral>,
     onClick: (Peripheral) -> Unit,
 ) {
-    // Filter out peripherals with null names.
-    val nonNullPeripherals = devices.filter { it.name != null }.toList()
+    // Filter out peripherals with null names or empty names.
+    val nonNullPeripherals = devices
+        .filter { it.name != null && it.name?.isNotEmpty() == true }
+        .toList()
     items(nonNullPeripherals.size) { index ->
         Box(modifier = Modifier
             .clip(RoundedCornerShape(10.dp))
