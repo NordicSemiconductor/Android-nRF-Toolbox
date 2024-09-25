@@ -39,14 +39,14 @@ private const val LOGGER_PACKAGE_NAME = "no.nordicsemi.android.log"
 internal fun HomeView() {
     val viewModel = hiltViewModel<HomeViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val onEvent: (HomeViewEvent) -> Unit = {viewModel.onClickEvent(it)}
+    val onEvent: (HomeViewEvent) -> Unit = { viewModel.onClickEvent(it) }
 
     Scaffold(
         topBar = {
             TitleAppBar(stringResource(id = R.string.app_name), false)
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = { viewModel.startScanning() }) {
+            ExtendedFloatingActionButton(onClick = { onEvent(HomeViewEvent.AddDeviceClick)}) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
