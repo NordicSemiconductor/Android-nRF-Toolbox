@@ -116,7 +116,6 @@ internal fun ConnectedView(
                     true -> {
                         DeviceDisconnectedView(
                             reason = DisconnectReason.MISSING_SERVICE,
-                            modifier = Modifier.padding(16.dp),
                         )
                     }
 
