@@ -8,8 +8,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
-import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HTSDataParser
-import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HtsData
+import no.nordicsemi.android.toolbox.libs.profile.parser.HTSDataParser
+import no.nordicsemi.android.toolbox.libs.profile.data.hts.HtsData
 import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.core.ConnectionState

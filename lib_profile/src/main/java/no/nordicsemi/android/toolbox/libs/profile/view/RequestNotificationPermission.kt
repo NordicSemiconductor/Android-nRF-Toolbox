@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.scanner.view.hts.view
+package no.nordicsemi.android.toolbox.libs.profile.view
 
 import android.Manifest
 import android.os.Build

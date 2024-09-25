@@ -10,11 +10,11 @@ import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
-import no.nordicsemi.android.toolbox.scanner.ConnectDeviceDestinationId
+import no.nordicsemi.android.toolbox.libs.profile.ConnectDeviceDestinationId
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
-import no.nordicsemi.android.toolbox.scanner.changed.ClientViewModel
-import no.nordicsemi.android.toolbox.scanner.changed.DeviceRepository
-import no.nordicsemi.android.toolbox.scanner.changed.ServiceManager
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.ClientViewModel
+import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
+import no.nordicsemi.android.toolbox.libs.profile.repository.ServiceManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import javax.inject.Inject
 

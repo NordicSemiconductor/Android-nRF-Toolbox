@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.libs.profile
+package no.nordicsemi.android.toolbox.scanner.repository
 
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +16,7 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
 @ViewModelScoped
-class ConnectionProvider @Inject constructor(
+internal class ConnectionProvider @Inject constructor(
     private val centralManager: CentralManager,
 ) {
     /**

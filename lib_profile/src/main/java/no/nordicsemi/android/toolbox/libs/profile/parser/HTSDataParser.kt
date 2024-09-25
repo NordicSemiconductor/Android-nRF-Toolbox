@@ -29,52 +29,53 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.toolbox.libs.profile.data.hts.data
+package no.nordicsemi.android.toolbox.libs.profile.parser
 
+import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
+import no.nordicsemi.android.kotlin.ble.core.data.util.FloatFormat
+import no.nordicsemi.android.kotlin.ble.core.data.util.IntFormat
+import no.nordicsemi.android.toolbox.libs.profile.data.hts.HtsData
+import no.nordicsemi.android.toolbox.libs.profile.data.hts.TemperatureUnitData
 import java.util.Calendar
 
-/**
- * HTS data class that holds the temperature data.
- *
- * @param temperature The temperature value.
- * @param unit The unit of the temperature value.
- * @param timestamp The timestamp of the measurement.
- * @param type The type of the measurement.
- */
-data class HtsData(
-    val temperature: Float = 0f,
-    val unit: TemperatureUnitData = TemperatureUnitData.CELSIUS,
-    val timestamp: Calendar? = null,
-    val type: Int? = null
-)
+object HTSDataParser {
 
-/**
- * The temperature unit data class.
- *
- * @param value The value of the temperature unit.
- */
-enum class TemperatureUnitData(private val value: Int) {
-    CELSIUS(0),
-    FAHRENHEIT(1);
+    fun parse(byte: ByteArray): HtsData? {
+        val bytes = DataByteArray(byte)
 
-    companion object {
-        fun create(value: Int): TemperatureUnitData? {
-            return entries.firstOrNull { it.value == value }
+        if (bytes.size < 5) {
+            return null
         }
+
+        var offset = 0
+        val flags: Int = bytes.getIntValue(IntFormat.FORMAT_UINT8, offset) ?: return null
+
+        val unit: TemperatureUnitData = TemperatureUnitData.create(flags and 0x01) ?: return null
+
+        val timestampPresent = flags and 0x02 != 0
+        val temperatureTypePresent = flags and 0x04 != 0
+        offset += 1
+
+        if (bytes.size < 5 + (if (timestampPresent) 7 else 0) + (if (temperatureTypePresent) 1 else 0)) {
+            return null
+        }
+
+        val temperature: Float =
+            bytes.getFloatValue(FloatFormat.FORMAT_FLOAT, offset) ?: return null
+        offset += 4
+
+        var calendar: Calendar? = null
+        if (timestampPresent) {
+            calendar = DateTimeParser.parse(bytes, offset)
+            offset += 7
+        }
+
+        var type: Int? = null
+        if (temperatureTypePresent) {
+            type = bytes.getIntValue(IntFormat.FORMAT_UINT8, offset)
+            // offset += 1;
+        }
+
+        return HtsData(temperature, unit, calendar, type)
     }
 }
-
-/**
- * HTS service data class that holds the HTS data.
- *
- * @param data The HTS data.
- * @param batteryLevel The battery level.
- * @param temperatureUnit The temperature unit.
- * @param isServiceRunning The service running state.
- */
-data class HTSServiceData(
-    val data: HtsData = HtsData(),
-    val batteryLevel: Int? = null,
-    val temperatureUnit: TemperatureUnit = TemperatureUnit.CELSIUS,
-    val isServiceRunning: Boolean = false,
-)

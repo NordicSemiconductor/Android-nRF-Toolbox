@@ -44,7 +44,7 @@ import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.common.theme.NordicActivity
 import no.nordicsemi.android.common.theme.NordicTheme
 import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
-import no.nordicsemi.android.toolbox.scanner.ConnectDeviceDestination
+import no.nordicsemi.android.toolbox.libs.profile.ConnectDeviceDestination
 import no.nordicsemi.android.toolbox.scanner.ScannerDestination
 import javax.inject.Inject
 

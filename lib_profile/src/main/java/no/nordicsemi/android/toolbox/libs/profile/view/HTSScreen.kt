@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.scanner.view.hts.view
+package no.nordicsemi.android.toolbox.libs.profile.view
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,8 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.common.ui.view.RadioButtonGroup
-import no.nordicsemi.android.hts.R
-import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HTSServiceData
+import no.nordicsemi.android.toolbox.lib.profile.R
+import no.nordicsemi.android.toolbox.libs.profile.data.hts.HTSServiceData
 import no.nordicsemi.android.ui.view.KeyValueField
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle

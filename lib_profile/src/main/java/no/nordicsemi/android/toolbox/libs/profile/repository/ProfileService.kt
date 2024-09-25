@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.scanner.changed
+package no.nordicsemi.android.toolbox.libs.profile.repository
 
 import android.content.Intent
 import android.os.Binder

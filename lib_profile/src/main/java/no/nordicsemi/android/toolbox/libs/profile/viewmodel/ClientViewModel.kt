@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.scanner.changed
+package no.nordicsemi.android.toolbox.libs.profile.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,17 +9,20 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HTSServiceData
-import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HtsData
-import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.TemperatureUnit
+import no.nordicsemi.android.toolbox.libs.profile.data.hts.HTSServiceData
+import no.nordicsemi.android.toolbox.libs.profile.data.hts.HtsData
+import no.nordicsemi.android.toolbox.libs.profile.data.hts.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
+import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
+import no.nordicsemi.android.toolbox.libs.profile.repository.ServiceApi
+import no.nordicsemi.android.toolbox.libs.profile.repository.ServiceManager
 import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
-import no.nordicsemi.android.toolbox.scanner.view.hts.view.DisconnectEvent
-import no.nordicsemi.android.toolbox.scanner.view.hts.view.NavigateUp
-import no.nordicsemi.android.toolbox.scanner.view.hts.view.OnRetryClicked
-import no.nordicsemi.android.toolbox.scanner.view.hts.view.OnTemperatureUnitSelected
-import no.nordicsemi.android.toolbox.scanner.view.hts.view.OpenLoggerEvent
-import no.nordicsemi.android.toolbox.scanner.view.hts.view.ProfileScreenViewEvent
+import no.nordicsemi.android.toolbox.libs.profile.view.DisconnectEvent
+import no.nordicsemi.android.toolbox.libs.profile.view.NavigateUp
+import no.nordicsemi.android.toolbox.libs.profile.view.OnRetryClicked
+import no.nordicsemi.android.toolbox.libs.profile.view.OnTemperatureUnitSelected
+import no.nordicsemi.android.toolbox.libs.profile.view.OpenLoggerEvent
+import no.nordicsemi.android.toolbox.libs.profile.view.ProfileScreenViewEvent
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import java.lang.ref.WeakReference

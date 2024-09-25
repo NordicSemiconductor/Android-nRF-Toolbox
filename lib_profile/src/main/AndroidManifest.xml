@@ -3,7 +3,7 @@
 
     <application>
         <service
-            android:name="no.nordicsemi.android.toolbox.libs.profile.service.ConnectionService"
+            android:name="no.nordicsemi.android.toolbox.libs.profile.repository.ProfileService"
             android:exported="false"
             android:foregroundServiceType="connectedDevice" />
     </application>
