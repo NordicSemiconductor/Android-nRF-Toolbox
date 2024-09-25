@@ -8,6 +8,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,6 +17,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.navigation.createDestination
 import no.nordicsemi.android.common.navigation.defineDestination
+import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HTSServiceData
 import no.nordicsemi.android.toolbox.scanner.changed.ClientData
 import no.nordicsemi.android.toolbox.scanner.changed.ClientViewModel
@@ -34,24 +36,29 @@ import no.nordicsemi.kotlin.ble.core.ConnectionState
 
 val ConnectDeviceDestinationId = createDestination<String, Unit>("connect-device-destination")
 val ConnectDeviceDestination = defineDestination(ConnectDeviceDestinationId) {
-    ConnectDeviceScreen()
+    val simpleNavigationViewModel: SimpleNavigationViewModel = hiltViewModel()
+    val deviceAddress = simpleNavigationViewModel.parameterOf(ConnectDeviceDestinationId)
+    ConnectDeviceScreen(deviceAddress)
 }
 
 @Composable
-internal fun ConnectDeviceScreen() {
+internal fun ConnectDeviceScreen(deviceAddress: String) {
     val clientViewModel: ClientViewModel = hiltViewModel()
     val clientData by clientViewModel.clientData.collectAsStateWithLifecycle()
     val onClickEvent: (ProfileScreenViewEvent) -> Unit = { clientViewModel.onClickEvent(it) }
-    val peripheral = clientViewModel.address
+
+    LaunchedEffect(deviceAddress) {
+        clientViewModel.connectToPeripheral(deviceAddress)
+    }
 
     Scaffold(
         topBar = {
             ProfileAppBar(
-                deviceName = clientData.peripheral?.name ?: clientData.deviceAddress,
+                deviceName = clientData.peripheral?.name ?: deviceAddress,
                 connectionState = clientData.connectionState,
                 title = R.string.hts_title,
                 navigateUp = { onClickEvent(NavigateUp) },
-                disconnect = { onClickEvent(DisconnectEvent(clientData.deviceAddress)) },
+                disconnect = { onClickEvent(DisconnectEvent(deviceAddress)) },
                 openLogger = { }
             )
         },
@@ -79,7 +86,7 @@ internal fun ConnectDeviceScreen() {
                             content = { paddingValues ->
                                 Button(
                                     modifier = Modifier.padding(paddingValues),
-                                    onClick = { onClickEvent(OnRetryClicked(clientData.deviceAddress)) },
+                                    onClick = { onClickEvent(OnRetryClicked(deviceAddress)) },
                                 ) {
                                     Text(text = "Reconnect")
                                 }
@@ -93,7 +100,7 @@ internal fun ConnectDeviceScreen() {
                 }
 
                 null -> {
-                    Text("Connecting to $clientData.deviceAddress")
+                    Text("Connecting to $deviceAddress")
                 }
             }
         }

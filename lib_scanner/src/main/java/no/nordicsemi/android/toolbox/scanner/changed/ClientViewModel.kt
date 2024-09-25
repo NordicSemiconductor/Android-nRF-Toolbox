@@ -1,6 +1,6 @@
 package no.nordicsemi.android.toolbox.scanner.changed
 
-import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,13 +9,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HtsData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
-import no.nordicsemi.android.toolbox.scanner.ConnectDeviceDestinationId
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.DisconnectEvent
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.NavigateUp
 import no.nordicsemi.android.toolbox.scanner.view.hts.view.OnRetryClicked
@@ -28,7 +26,6 @@ import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 data class ClientData(
-    val deviceAddress: String,
     val peripheral: Peripheral? = null,
     val connectionState: ConnectionState? = null,
     val htsServiceData: HTSServiceData = HTSServiceData(),
@@ -37,15 +34,13 @@ data class ClientData(
 )
 
 @HiltViewModel
-internal class ClientViewModel @Inject constructor(
+open class ClientViewModel @Inject constructor(
     private val serviceManager: ServiceManager,
     private val navigator: Navigator,
     private val deviceRepository: DeviceRepository,
-    savedStateHandle: SavedStateHandle,
-) : SimpleNavigationViewModel(navigator, savedStateHandle) {
-    private val address: String = parameterOf(ConnectDeviceDestinationId)
-    private val _clientData =
-        MutableStateFlow(ClientData(deviceAddress = address, batteryLevel = null))
+) : ViewModel() {
+    private var address: String? = null
+    private val _clientData = MutableStateFlow(ClientData())
 
     val clientData = _clientData.asStateFlow()
     private var serviceApi: WeakReference<ServiceApi>? = null
@@ -62,16 +57,9 @@ internal class ClientViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            getServiceApi()?.let { api ->
-                // Connect to the peripheral
-                connectToPeripheral(api, address)
-
-                // Observe the connected devices
-                api.connectedDevices.onEach { peripheralProfileMap ->
-                    deviceRepository.updateConnectedDevices(peripheralProfileMap)
-                    updateServiceData(api, address)
-                }.launchIn(viewModelScope)
-            }
+            getServiceApi()?.connectedDevices?.onEach { peripheralProfileMap ->
+                deviceRepository.updateConnectedDevices(peripheralProfileMap)
+            }?.launchIn(viewModelScope)
 
         }
     }
@@ -89,10 +77,16 @@ internal class ClientViewModel @Inject constructor(
      * The service will be started if not already running.
      * @param deviceAddress the address of the peripheral to connect to.
      */
-    private fun connectToPeripheral(api: ServiceApi, deviceAddress: String) {
-        val peripheral = api.getPeripheralById(deviceAddress)
-        if (peripheral?.isConnected != true) {
-            serviceManager.connectToPeripheral(deviceAddress)
+    fun connectToPeripheral(deviceAddress: String) = viewModelScope.launch {
+        // Update the device address
+        address = deviceAddress
+        // Connect to the peripheral
+        getServiceApi()?.let { api ->
+            val peripheral = api.getPeripheralById(deviceAddress)
+            if (peripheral?.isConnected != true) {
+                serviceManager.connectToPeripheral(deviceAddress)
+            }
+            updateServiceData(api, deviceAddress)
         }
     }
 
@@ -181,6 +175,7 @@ internal class ClientViewModel @Inject constructor(
             is OnRetryClicked -> reConnectDevice(event.device)
             is OnTemperatureUnitSelected -> updateTemperatureUnit(event.value)
             OpenLoggerEvent -> TODO()
+
         }
 
     }
@@ -191,7 +186,7 @@ internal class ClientViewModel @Inject constructor(
      */
     private fun reConnectDevice(address: String) = viewModelScope.launch {
         getServiceApi()?.let { api ->
-            connectToPeripheral(api, address)
+            connectToPeripheral(address)
         }
     }
 
@@ -202,7 +197,7 @@ internal class ClientViewModel @Inject constructor(
         // Disconnect the peripheral if missing services.
         if (_clientData.value.isMissingServices) {
             getServiceApi()?.apply {
-                disconnect(address)
+                address?.let { disconnect(it) }
             }
         }
         // navigate back
