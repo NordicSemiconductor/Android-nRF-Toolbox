@@ -44,7 +44,8 @@ internal class ClientViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
     private val address: String = parameterOf(ConnectDeviceDestinationId)
-    private val _clientData = MutableStateFlow(ClientData(deviceAddress = address, batteryLevel = null))
+    private val _clientData =
+        MutableStateFlow(ClientData(deviceAddress = address, batteryLevel = null))
 
     val clientData = _clientData.asStateFlow()
     private var serviceApi: WeakReference<ServiceApi>? = null
@@ -107,19 +108,17 @@ internal class ClientViewModel @Inject constructor(
                 connectionState = connectionState,
             )
             if (connectionState == ConnectionState.Connected) {
+                val peripheral = api.getPeripheralById(deviceAddress)
+                _clientData.value = _clientData.value.copy(
+                    peripheral = peripheral,
+                )
                 api.isMissingServices.onEach { isMissing ->
-                    val peripheral = api.getPeripheralById(deviceAddress)
                     _clientData.value = _clientData.value.copy(
                         isMissingServices = isMissing,
-                        peripheral = peripheral,
                     )
                     if (!isMissing) {
                         // Observe the data from the connected device
                         updateConnectedData(api, peripheral)
-                    } else{
-                        _clientData.value = _clientData.value.copy(
-                            batteryLevel = null,
-                        )
                     }
                 }.launchIn(viewModelScope)
             }
@@ -139,17 +138,14 @@ internal class ClientViewModel @Inject constructor(
             peripheral?.let { device ->
                 // Update the profile data
                 peripheralProfileMap[device]?.forEach { profileHandler ->
-                    _clientData.value = _clientData.value.copy(
-                        peripheral = peripheral,
-                    )
                     updateProfileData(profileHandler)
+                    // Update the battery level if the peripheral is the same.
+                    api.batteryLevel.onEach {
+                        _clientData.value = _clientData.value.copy(
+                            batteryLevel = it,
+                        )
+                    }.launchIn(viewModelScope)
                 }
-                // Update the battery level if the peripheral is the same.
-                api.batteryLevel.onEach {
-                    _clientData.value = _clientData.value.copy(
-                        batteryLevel = it,
-                    )
-                }.launchIn(viewModelScope)
             }
         }.launchIn(viewModelScope)
     }
