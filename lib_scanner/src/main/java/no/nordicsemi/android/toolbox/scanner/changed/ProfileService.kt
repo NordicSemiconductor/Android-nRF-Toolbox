@@ -19,6 +19,7 @@ import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandlerFactory
 import no.nordicsemi.android.toolbox.libs.profile.spec.BATTERY_SERVICE_UUID
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
+import no.nordicsemi.kotlin.ble.client.android.CentralManager.ConnectionOptions
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import timber.log.Timber
@@ -102,16 +103,16 @@ class ProfileService : NotificationService() {
      */
     private fun connectToPeripheral(deviceAddress: String) {
         centralManager.getPeripheralById(deviceAddress)?.let {
-            try {
-                lifecycleScope.launch {
-                    centralManager.connect(it)
+            lifecycleScope.launch {
+                try {
+                    centralManager.connect(it, options = ConnectionOptions.Direct())
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Timber.e(e)
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Timber.e(e)
+                // Observe the peripheral state
+                observePeripheralState(it)
             }
-            // Observe the peripheral state
-            observePeripheralState(it)
         }
     }
 
