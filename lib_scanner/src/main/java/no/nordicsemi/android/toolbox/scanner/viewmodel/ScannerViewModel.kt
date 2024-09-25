@@ -15,8 +15,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.toolbox.libs.profile.ConnectionProvider
-import no.nordicsemi.android.toolbox.scanner.ConnectDeviceDestinationId
+import no.nordicsemi.android.toolbox.scanner.repository.ConnectionProvider
+import no.nordicsemi.android.toolbox.libs.profile.ConnectDeviceDestinationId
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import no.nordicsemi.android.toolbox.scanner.repository.ScanningState
 import no.nordicsemi.kotlin.ble.client.android.Peripheral

@@ -1,6 +1,6 @@
-package no.nordicsemi.android.toolbox.scanner.view.hts.view
+package no.nordicsemi.android.toolbox.libs.profile.view
 
-import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.TemperatureUnit
+import no.nordicsemi.android.toolbox.libs.profile.data.hts.TemperatureUnit
 
 sealed interface ProfileScreenViewEvent
 

@@ -29,30 +29,10 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-plugins {
-    alias(libs.plugins.nordic.feature)
-    alias(libs.plugins.kotlin.parcelize)
-}
+package no.nordicsemi.android.toolbox.libs.profile.data.hts
 
-android {
-    namespace = "no.nordicsemi.android.toolbox.scanner"
-}
-
-dependencies {
-    implementation("no.nordicsemi.kotlin.ble:client-android")
-    implementation(project(":lib_profile"))
-    implementation(project(":lib_ui"))
-    implementation(project(":profile_hts"))
-    implementation(project(":lib_service"))
-
-    implementation(libs.nordic.navigation)
-    implementation(libs.nordic.permissions.ble)
-    implementation(libs.nordic.theme)
-    implementation(libs.nordic.core)
-    implementation(libs.nordic.ui)
-
-    implementation(libs.androidx.compose.material.iconsExtended)
-    implementation(libs.slf4j.timber)
-
-
+enum class TemperatureUnit {
+    CELSIUS,
+    FAHRENHEIT,
+    KELVIN
 }

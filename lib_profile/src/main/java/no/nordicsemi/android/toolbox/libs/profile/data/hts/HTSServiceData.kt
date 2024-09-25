@@ -29,18 +29,52 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.toolbox.libs.profile.data.hts.data
+package no.nordicsemi.android.toolbox.libs.profile.data.hts
 
-import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
-import no.nordicsemi.android.kotlin.ble.core.data.util.IntFormat
+import java.util.Calendar
 
-object BatteryLevelParser {
+/**
+ * HTS data class that holds the temperature data.
+ *
+ * @param temperature The temperature value.
+ * @param unit The unit of the temperature value.
+ * @param timestamp The timestamp of the measurement.
+ * @param type The type of the measurement.
+ */
+data class HtsData(
+    val temperature: Float = 0f,
+    val unit: TemperatureUnitData = TemperatureUnitData.CELSIUS,
+    val timestamp: Calendar? = null,
+    val type: Int? = null
+)
 
-    fun parse(byte: ByteArray): Int? {
-        val bytes = DataByteArray(byte)
-        if (bytes.size == 1) {
-            return bytes.getIntValue(IntFormat.FORMAT_UINT8, 0)
+/**
+ * The temperature unit data class.
+ *
+ * @param value The value of the temperature unit.
+ */
+enum class TemperatureUnitData(private val value: Int) {
+    CELSIUS(0),
+    FAHRENHEIT(1);
+
+    companion object {
+        fun create(value: Int): TemperatureUnitData? {
+            return entries.firstOrNull { it.value == value }
         }
-        return null
     }
 }
+
+/**
+ * HTS service data class that holds the HTS data.
+ *
+ * @param data The HTS data.
+ * @param batteryLevel The battery level.
+ * @param temperatureUnit The temperature unit.
+ * @param isServiceRunning The service running state.
+ */
+data class HTSServiceData(
+    val data: HtsData = HtsData(),
+    val batteryLevel: Int? = null,
+    val temperatureUnit: TemperatureUnit = TemperatureUnit.CELSIUS,
+    val isServiceRunning: Boolean = false,
+)

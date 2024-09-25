@@ -29,10 +29,18 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.toolbox.libs.profile.data.hts.data
+package no.nordicsemi.android.toolbox.libs.profile.parser
 
-enum class TemperatureUnit {
-    CELSIUS,
-    FAHRENHEIT,
-    KELVIN
+import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
+import no.nordicsemi.android.kotlin.ble.core.data.util.IntFormat
+
+object BatteryLevelParser {
+
+    fun parse(byte: ByteArray): Int? {
+        val bytes = DataByteArray(byte)
+        if (bytes.size == 1) {
+            return bytes.getIntValue(IntFormat.FORMAT_UINT8, 0)
+        }
+        return null
+    }
 }

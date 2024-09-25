@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.scanner
+package no.nordicsemi.android.toolbox.libs.profile
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,16 +18,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.navigation.createDestination
 import no.nordicsemi.android.common.navigation.defineDestination
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
-import no.nordicsemi.android.toolbox.libs.profile.data.hts.data.HTSServiceData
-import no.nordicsemi.android.toolbox.scanner.changed.ClientData
-import no.nordicsemi.android.toolbox.scanner.changed.ClientViewModel
-import no.nordicsemi.android.toolbox.scanner.view.hts.view.DisconnectEvent
-import no.nordicsemi.android.toolbox.scanner.view.hts.view.HTSScreen
-import no.nordicsemi.android.toolbox.scanner.view.hts.view.LoadingView
-import no.nordicsemi.android.toolbox.scanner.view.hts.view.NavigateUp
-import no.nordicsemi.android.toolbox.scanner.view.hts.view.OnRetryClicked
-import no.nordicsemi.android.toolbox.scanner.view.hts.view.ProfileScreenViewEvent
-import no.nordicsemi.android.toolbox.scanner.view.hts.view.RequestNotificationPermission
+import no.nordicsemi.android.toolbox.lib.profile.R
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.ClientData
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.ClientViewModel
+import no.nordicsemi.android.toolbox.libs.profile.data.hts.HTSServiceData
+import no.nordicsemi.android.toolbox.libs.profile.view.DisconnectEvent
+import no.nordicsemi.android.toolbox.libs.profile.view.HTSScreen
+import no.nordicsemi.android.toolbox.libs.profile.view.LoadingView
+import no.nordicsemi.android.toolbox.libs.profile.view.NavigateUp
+import no.nordicsemi.android.toolbox.libs.profile.view.OnRetryClicked
+import no.nordicsemi.android.toolbox.libs.profile.view.ProfileScreenViewEvent
+import no.nordicsemi.android.toolbox.libs.profile.view.RequestNotificationPermission
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.ProfileAppBar
 import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
