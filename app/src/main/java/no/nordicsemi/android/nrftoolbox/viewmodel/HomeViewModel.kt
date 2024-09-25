@@ -1,6 +1,5 @@
 package no.nordicsemi.android.nrftoolbox.viewmodel
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +12,9 @@ import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.scanner.ConnectDeviceDestinationId
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
+import no.nordicsemi.android.toolbox.scanner.changed.ClientViewModel
 import no.nordicsemi.android.toolbox.scanner.changed.DeviceRepository
+import no.nordicsemi.android.toolbox.scanner.changed.ServiceManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import javax.inject.Inject
 
@@ -26,10 +27,11 @@ data class HomeViewState(
 
 @HiltViewModel
 internal class HomeViewModel @Inject constructor(
+    serviceManager: ServiceManager,
     private val navigator: Navigator,
     activitySignals: ActivitySignals,
     deviceRepository: DeviceRepository,
-) : ViewModel() {
+) : ClientViewModel(serviceManager, navigator, deviceRepository) {
     private val _state = MutableStateFlow(HomeViewState())
     val state = _state.asStateFlow()
 
