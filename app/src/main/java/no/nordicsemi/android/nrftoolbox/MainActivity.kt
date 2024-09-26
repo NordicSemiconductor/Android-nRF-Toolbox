@@ -40,19 +40,13 @@ import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
 import no.nordicsemi.android.common.analytics.view.AnalyticsPermissionRequestDialog
 import no.nordicsemi.android.common.navigation.NavigationView
-import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.common.theme.NordicActivity
 import no.nordicsemi.android.common.theme.NordicTheme
-import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
-import no.nordicsemi.android.toolbox.libs.profile.ConnectDeviceDestination
+import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestination
 import no.nordicsemi.android.toolbox.scanner.ScannerDestination
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : NordicActivity() {
-
-    @Inject
-    lateinit var activitySignals: ActivitySignals
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,20 +57,12 @@ class MainActivity : NordicActivity() {
                     color = MaterialTheme.colorScheme.surface,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    RequireBluetooth {
-                        // Bluetooth is enabled
-                        NavigationView(HomeDestinations + ScannerDestination + ConnectDeviceDestination)
-                    }
+                    NavigationView(HomeDestinations + ScannerDestination + DeviceConnectionDestination)
                 }
 
                 AnalyticsPermissionRequestDialog()
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        activitySignals.onResume()
     }
 
 }

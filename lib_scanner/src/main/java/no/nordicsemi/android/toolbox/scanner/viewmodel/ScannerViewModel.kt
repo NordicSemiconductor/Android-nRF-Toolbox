@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.toolbox.scanner.repository.ConnectionProvider
-import no.nordicsemi.android.toolbox.libs.profile.ConnectDeviceDestinationId
+import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestinationId
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import no.nordicsemi.android.toolbox.scanner.repository.ScanningState
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
@@ -110,7 +110,7 @@ internal class ScannerViewModel @Inject constructor(
         try {
             _uiState.update { it.copy(isDeviceSelected = true) }
             onCleared()
-            navigator.navigateTo(ConnectDeviceDestinationId, peripheral.address)
+            navigator.navigateTo(DeviceConnectionDestinationId, peripheral.address)
             {
                 popUpTo(ScannerDestinationId.toString()) {
                     inclusive = true

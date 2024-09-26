@@ -59,13 +59,11 @@ rootProject.name = "Android-nRF-Toolbox"
 
 include(":app")
 
-include(":profile_hts")
 
 include(":lib_analytics")
 include(":lib_scanner")
 include(":lib_service")
 include(":lib_ui")
-include(":lib_utils")
 
 //if (file("../Android-Common-Libraries").exists()) {
 //    includeBuild("../Android-Common-Libraries")

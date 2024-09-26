@@ -22,7 +22,7 @@ import no.nordicsemi.kotlin.ble.core.ConnectionState
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 
-data class ClientData(
+data class DeviceData(
     val peripheral: Peripheral? = null,
     val connectionState: ConnectionState? = null,
     val htsServiceData: HTSServiceData = HTSServiceData(),
@@ -31,15 +31,15 @@ data class ClientData(
 )
 
 @HiltViewModel
-open class ClientViewModel @Inject constructor(
+open class DeviceConnectionViewModel @Inject constructor(
     private val serviceManager: ServiceManager,
     private val navigator: Navigator,
     private val deviceRepository: DeviceRepository,
 ) : ViewModel() {
     private var address: String? = null
-    private val _clientData = MutableStateFlow(ClientData())
+    private val _deviceData = MutableStateFlow(DeviceData())
 
-    val clientData = _clientData.asStateFlow()
+    val deviceData = _deviceData.asStateFlow()
     private var serviceApi: WeakReference<ServiceApi>? = null
 
     /**
@@ -95,16 +95,16 @@ open class ClientViewModel @Inject constructor(
     private fun updateServiceData(api: ServiceApi, deviceAddress: String) {
         // Observe the handlers for the connected device
         api.getConnectionState(deviceAddress)?.onEach { connectionState ->
-            _clientData.value = _clientData.value.copy(
+            _deviceData.value = _deviceData.value.copy(
                 connectionState = connectionState,
             )
             if (connectionState == ConnectionState.Connected) {
                 val peripheral = api.getPeripheralById(deviceAddress)
-                _clientData.value = _clientData.value.copy(
+                _deviceData.value = _deviceData.value.copy(
                     peripheral = peripheral,
                 )
                 api.isMissingServices.onEach { isMissing ->
-                    _clientData.value = _clientData.value.copy(
+                    _deviceData.value = _deviceData.value.copy(
                         isMissingServices = isMissing,
                     )
                     if (!isMissing) {
@@ -132,7 +132,7 @@ open class ClientViewModel @Inject constructor(
                     updateProfileData(profileHandler)
                     // Update the battery level if the peripheral is the same.
                     api.batteryLevel.onEach {
-                        _clientData.value = _clientData.value.copy(
+                        _deviceData.value = _deviceData.value.copy(
                             batteryLevel = it,
                         )
                     }.launchIn(viewModelScope)
@@ -149,8 +149,8 @@ open class ClientViewModel @Inject constructor(
         when (profileHandler.profile) {
             Profile.HTS -> {
                 profileHandler.observeData().onEach {
-                    _clientData.value = _clientData.value.copy(
-                        htsServiceData = _clientData.value.htsServiceData.copy(
+                    _deviceData.value = _deviceData.value.copy(
+                        htsServiceData = _deviceData.value.htsServiceData.copy(
                             data = it as HtsData,
                         )
                     )
@@ -164,7 +164,7 @@ open class ClientViewModel @Inject constructor(
     /**
      * Handle click events from the view.
      */
-    fun onClickEvent(event: ProfileScreenViewEvent) {
+    fun onClickEvent(event: DeviceConnectionViewEvent) {
         // Handle click events
         when (event) {
             is DisconnectEvent -> disconnectAndNavigate(event.device)
@@ -192,7 +192,7 @@ open class ClientViewModel @Inject constructor(
      */
     private fun disconnectIfNeededAndNavigate() = viewModelScope.launch {
         // Disconnect the peripheral if missing services.
-        if (_clientData.value.isMissingServices) {
+        if (_deviceData.value.isMissingServices) {
             getServiceApi()?.apply {
                 address?.let { disconnect(it) }
             }
@@ -221,8 +221,8 @@ open class ClientViewModel @Inject constructor(
      */
     private fun updateTemperatureUnit(unit: TemperatureUnit) {
         // Handle temperature unit selection
-        _clientData.value = _clientData.value.copy(
-            htsServiceData = _clientData.value.htsServiceData.copy(
+        _deviceData.value = _deviceData.value.copy(
+            htsServiceData = _deviceData.value.htsServiceData.copy(
                 temperatureUnit = unit
             )
         )
