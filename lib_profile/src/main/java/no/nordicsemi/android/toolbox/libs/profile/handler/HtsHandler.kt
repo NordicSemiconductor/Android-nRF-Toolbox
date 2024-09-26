@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.toolbox.libs.profile.parser.HTSDataParser
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.HtsData
-import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
+import no.nordicsemi.android.toolbox.libs.profile.data.Profile
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import timber.log.Timber
@@ -20,7 +20,7 @@ private val HTS_MEASUREMENT_CHARACTERISTIC_UUID: UUID =
     UUID.fromString("00002A1C-0000-1000-8000-00805f9b34fb")
 
 class HtsHandler : ProfileHandler() {
-    override val profileModule: ProfileModule = ProfileModule.HTS
+    override val profile: Profile = Profile.HTS
     override val connectionState: Flow<ConnectionState>
         get() = MutableSharedFlow()
 

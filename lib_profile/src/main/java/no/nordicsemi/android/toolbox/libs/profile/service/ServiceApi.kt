@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.libs.profile.repository
+package no.nordicsemi.android.toolbox.libs.profile.service
 
 import kotlinx.coroutines.flow.Flow
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler

@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.libs.profile.repository
+package no.nordicsemi.android.toolbox.libs.profile.service
 
 import android.content.ComponentName
 import android.content.Context

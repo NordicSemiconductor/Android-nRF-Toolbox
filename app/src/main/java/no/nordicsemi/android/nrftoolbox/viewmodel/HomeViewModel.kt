@@ -14,7 +14,7 @@ import no.nordicsemi.android.toolbox.libs.profile.ConnectDeviceDestinationId
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.ClientViewModel
 import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
-import no.nordicsemi.android.toolbox.libs.profile.repository.ServiceManager
+import no.nordicsemi.android.toolbox.libs.profile.service.ServiceManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import javax.inject.Inject
 

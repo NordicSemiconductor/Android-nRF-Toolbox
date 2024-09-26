@@ -22,12 +22,12 @@ import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.ClientData
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.ClientViewModel
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.HTSServiceData
-import no.nordicsemi.android.toolbox.libs.profile.view.DisconnectEvent
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DisconnectEvent
 import no.nordicsemi.android.toolbox.libs.profile.view.HTSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.LoadingView
-import no.nordicsemi.android.toolbox.libs.profile.view.NavigateUp
-import no.nordicsemi.android.toolbox.libs.profile.view.OnRetryClicked
-import no.nordicsemi.android.toolbox.libs.profile.view.ProfileScreenViewEvent
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.NavigateUp
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OnRetryClicked
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.ProfileScreenViewEvent
 import no.nordicsemi.android.toolbox.libs.profile.view.RequestNotificationPermission
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.ProfileAppBar

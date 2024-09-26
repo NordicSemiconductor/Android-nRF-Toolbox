@@ -14,15 +14,9 @@ import no.nordicsemi.android.toolbox.libs.profile.data.hts.HtsData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
-import no.nordicsemi.android.toolbox.libs.profile.repository.ServiceApi
-import no.nordicsemi.android.toolbox.libs.profile.repository.ServiceManager
-import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
-import no.nordicsemi.android.toolbox.libs.profile.view.DisconnectEvent
-import no.nordicsemi.android.toolbox.libs.profile.view.NavigateUp
-import no.nordicsemi.android.toolbox.libs.profile.view.OnRetryClicked
-import no.nordicsemi.android.toolbox.libs.profile.view.OnTemperatureUnitSelected
-import no.nordicsemi.android.toolbox.libs.profile.view.OpenLoggerEvent
-import no.nordicsemi.android.toolbox.libs.profile.view.ProfileScreenViewEvent
+import no.nordicsemi.android.toolbox.libs.profile.service.ServiceApi
+import no.nordicsemi.android.toolbox.libs.profile.service.ServiceManager
+import no.nordicsemi.android.toolbox.libs.profile.data.Profile
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import java.lang.ref.WeakReference
@@ -152,8 +146,8 @@ open class ClientViewModel @Inject constructor(
      * @param profileHandler the profile handler.
      */
     private fun updateProfileData(profileHandler: ProfileHandler) {
-        when (profileHandler.profileModule) {
-            ProfileModule.HTS -> {
+        when (profileHandler.profile) {
+            Profile.HTS -> {
                 profileHandler.observeData().onEach {
                     _clientData.value = _clientData.value.copy(
                         htsServiceData = _clientData.value.htsServiceData.copy(

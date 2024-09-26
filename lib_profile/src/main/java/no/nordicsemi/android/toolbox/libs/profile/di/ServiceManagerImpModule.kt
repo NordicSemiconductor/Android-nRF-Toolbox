@@ -6,8 +6,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import no.nordicsemi.android.toolbox.libs.profile.repository.ServiceManager
-import no.nordicsemi.android.toolbox.libs.profile.repository.ServiceManagerImp
+import no.nordicsemi.android.toolbox.libs.profile.service.ServiceManager
+import no.nordicsemi.android.toolbox.libs.profile.service.ServiceManagerImp
 
 @Module
 @InstallIn(SingletonComponent::class)
