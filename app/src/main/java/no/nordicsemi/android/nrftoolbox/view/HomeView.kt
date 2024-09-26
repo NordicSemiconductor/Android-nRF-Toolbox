@@ -27,7 +27,7 @@ import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.nrftoolbox.R
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewEvent
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewModel
-import no.nordicsemi.android.toolbox.libs.profile.spec.ProfileModule
+import no.nordicsemi.android.toolbox.libs.profile.data.Profile
 
 private const val DFU_PACKAGE_NAME = "no.nordicsemi.android.dfu"
 private const val DFU_LINK =
@@ -81,7 +81,7 @@ internal fun HomeView() {
                         )
                         state.connectedDevices.forEach { (peripheral, handlers) ->
                             handlers.forEach { handler ->
-                                if (handler.profileModule == ProfileModule.HTS) {
+                                if (handler.profile == Profile.HTS) {
                                     FeatureButton(
                                         iconId = R.drawable.ic_hts,
                                         profileName = R.string.hts_module_full,

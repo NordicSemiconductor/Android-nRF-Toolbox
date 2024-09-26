@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.libs.profile.view
+package no.nordicsemi.android.toolbox.libs.profile.viewmodel
 
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.TemperatureUnit
 

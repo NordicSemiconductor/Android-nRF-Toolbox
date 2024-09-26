@@ -15,6 +15,11 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.common.ui.view.RadioButtonGroup
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.HTSServiceData
+import no.nordicsemi.android.toolbox.libs.profile.data.hts.displayTemperature
+import no.nordicsemi.android.toolbox.libs.profile.data.hts.temperatureSettingsItems
+import no.nordicsemi.android.toolbox.libs.profile.data.hts.toTemperatureUnit
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OnTemperatureUnitSelected
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.ProfileScreenViewEvent
 import no.nordicsemi.android.ui.view.KeyValueField
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
