@@ -44,10 +44,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":profile_hts"))
-
     implementation(project(":lib_analytics"))
-    implementation(project(":lib_utils"))
     implementation(project(":lib_service"))
     implementation(project(":lib_scanner"))
     implementation(project(":lib_profile"))

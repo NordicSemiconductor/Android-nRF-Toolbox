@@ -8,14 +8,13 @@ android {
 }
 
 dependencies {
-    implementation("no.nordicsemi.kotlin.ble:client-android")
-    implementation(libs.slf4j.timber)
     implementation(project(":lib_ui"))
     implementation(project(":lib_service"))
 
     implementation(libs.nordic.core)
     implementation(libs.nordic.navigation)
     implementation(libs.nordic.ui)
+    implementation(libs.nordic.permissions.ble)
 
     implementation(libs.slf4j.timber)
     implementation(libs.androidx.lifecycle.service)
@@ -24,4 +23,5 @@ dependencies {
 
     //TODO: Remove this once profile is implemented in new BLEK.
     implementation(libs.nordic.blek.client)
+    implementation("no.nordicsemi.kotlin.ble:client-android")
 }

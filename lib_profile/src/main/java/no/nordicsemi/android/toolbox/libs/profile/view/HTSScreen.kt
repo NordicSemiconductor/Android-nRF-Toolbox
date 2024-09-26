@@ -19,7 +19,7 @@ import no.nordicsemi.android.toolbox.libs.profile.data.hts.displayTemperature
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.temperatureSettingsItems
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.toTemperatureUnit
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OnTemperatureUnitSelected
-import no.nordicsemi.android.toolbox.libs.profile.viewmodel.ProfileScreenViewEvent
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.ui.view.KeyValueField
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
@@ -27,7 +27,7 @@ import no.nordicsemi.android.ui.view.SectionTitle
 @Composable
 internal fun HTSScreen(
     htsServiceData: HTSServiceData,
-    onClickEvent: (ProfileScreenViewEvent) -> Unit
+    onClickEvent: (DeviceConnectionViewEvent) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()

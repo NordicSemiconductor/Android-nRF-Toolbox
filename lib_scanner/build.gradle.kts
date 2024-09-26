@@ -42,7 +42,6 @@ dependencies {
     implementation("no.nordicsemi.kotlin.ble:client-android")
     implementation(project(":lib_profile"))
     implementation(project(":lib_ui"))
-    implementation(project(":profile_hts"))
     implementation(project(":lib_service"))
 
     implementation(libs.nordic.navigation)
