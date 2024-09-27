@@ -185,7 +185,7 @@ open class DeviceConnectionViewModel @Inject constructor(
      * @param address the address of the device to reconnect to.
      */
     private fun reConnectDevice(address: String) = viewModelScope.launch {
-        getServiceApi()?.let { api ->
+        getServiceApi()?.let {
             connectToPeripheral(address)
         }
     }
