@@ -58,8 +58,6 @@ dependencyResolutionManagement {
 rootProject.name = "Android-nRF-Toolbox"
 
 include(":app")
-
-
 include(":lib_analytics")
 include(":lib_scanner")
 include(":lib_service")
