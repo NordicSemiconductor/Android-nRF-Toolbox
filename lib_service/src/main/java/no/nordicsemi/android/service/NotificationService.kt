@@ -46,14 +46,10 @@ private const val CHANNEL_ID = "FOREGROUND_BLE_SERVICE"
 
 abstract class NotificationService : LifecycleService() {
 
-    override fun onCreate() {
-        super.onCreate()
-        startForegroundService()
-    }
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        super.onStartCommand(intent, flags, startId)
-        return START_REDELIVER_INTENT
+        val result = super.onStartCommand(intent, flags, startId)
+        startForegroundService()
+        return result
     }
 
     override fun onDestroy() {
@@ -89,7 +85,7 @@ abstract class NotificationService : LifecycleService() {
     /**
      * Stops the service as a foreground service
      */
-    private fun stopForegroundService() {
+    fun stopForegroundService() {
         // when the activity rebinds to the service, remove the notification and stop the foreground service
         // on devices running Android 8.0 (Oreo) or above
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

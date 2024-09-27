@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
+import no.nordicsemi.android.common.permissions.notification.RequestNotificationPermission
 import no.nordicsemi.android.common.ui.view.NordicAppBar
 import no.nordicsemi.android.nrftoolbox.R
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewEvent
@@ -47,7 +48,9 @@ internal fun HomeScreen() {
     Column {
         NordicAppBar(title = { TitleAppBar(stringResource(id = R.string.app_name), false) })
         RequireBluetooth {
-            HomeView()
+            RequestNotificationPermission {
+                HomeView()
+            }
         }
     }
 }

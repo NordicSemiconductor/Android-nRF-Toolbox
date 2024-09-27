@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
+import no.nordicsemi.android.toolbox.libs.profile.data.Profile
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.HtsData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.TemperatureUnit
@@ -16,7 +17,6 @@ import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
 import no.nordicsemi.android.toolbox.libs.profile.service.ServiceApi
 import no.nordicsemi.android.toolbox.libs.profile.service.ServiceManager
-import no.nordicsemi.android.toolbox.libs.profile.data.Profile
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import java.lang.ref.WeakReference
@@ -64,7 +64,7 @@ open class DeviceConnectionViewModel @Inject constructor(
     /**
      * Unbind the service.
      */
-    private fun unbindService() {
+    fun unbindService() {
         serviceApi?.let { serviceManager.unbindService() }
         serviceApi = null
     }

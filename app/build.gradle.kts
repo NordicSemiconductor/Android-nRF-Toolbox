@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.nordic.ui)
     implementation(libs.nordic.core)
     implementation(libs.nordic.permissions.ble)
+    implementation(libs.nordic.permissions.notification)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
