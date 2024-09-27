@@ -112,6 +112,9 @@ open class DeviceConnectionViewModel @Inject constructor(
                         updateConnectedData(api, peripheral)
                     }
                 }.launchIn(viewModelScope)
+            } else if (connectionState is ConnectionState.Disconnected) {
+                // unbind the service
+                unbindService()
             }
         }?.launchIn(viewModelScope)
     }

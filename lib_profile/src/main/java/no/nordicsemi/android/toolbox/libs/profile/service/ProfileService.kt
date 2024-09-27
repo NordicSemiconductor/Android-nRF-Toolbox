@@ -26,7 +26,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class ProfileService : NotificationService() {
+internal class ProfileService : NotificationService() {
 
     @Inject
     lateinit var centralManager: CentralManager
@@ -109,6 +109,9 @@ class ProfileService : NotificationService() {
                     centralManager.connect(it, options = ConnectionOptions.Direct())
                 } catch (e: Exception) {
                     e.printStackTrace()
+                    // Could not connect to the device
+                    // Since service is started with the device address, stop the service
+                    stopForegroundService() // Remove notification from the foreground service
                     Timber.e(e)
                 }
                 // Observe the peripheral state
@@ -128,6 +131,14 @@ class ProfileService : NotificationService() {
             if (state is ConnectionState.Connected) {
                 // Handle the connected state
                 handleConnectedState(peripheral)
+            } else if (state is ConnectionState.Disconnected) {
+                // Generally the peripheral is disconnected by clicking the disconnect button, but it can also be disconnected by the device itself.
+                // Remove the device from the connected devices map
+                removeDevice(peripheral)
+                // Clear the flags
+                clearFlags()
+                // Stop the service if no devices are connected
+                stopServiceIfNoDevices()
             }
         }.launchIn(lifecycleScope)
     }
