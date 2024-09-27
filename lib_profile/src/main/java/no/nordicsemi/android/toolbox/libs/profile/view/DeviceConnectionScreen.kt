@@ -56,10 +56,10 @@ internal fun DeviceConnectionScreen(deviceAddress: String) {
         RequireBluetooth {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
-                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 when (val s = deviceData.connectionState) {
                     ConnectionState.Connected -> DeviceConnectedView(deviceData, onClickEvent)
@@ -95,30 +95,28 @@ internal fun DeviceConnectedView(
     onClickEvent: (DeviceConnectionViewEvent) -> Unit,
 ) {
     if (clientData.peripheral != null) {
-        RequestNotificationPermission { granted ->
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier
-                    .padding(16.dp)
-            ) {
-                when (clientData.isMissingServices) {
-                    true -> {
-                        DeviceDisconnectedView(
-                            reason = DisconnectReason.MISSING_SERVICE,
-                        )
-                    }
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier
+                .padding(16.dp)
+        ) {
+            when (clientData.isMissingServices) {
+                true -> {
+                    DeviceDisconnectedView(
+                        reason = DisconnectReason.MISSING_SERVICE,
+                    )
+                }
 
-                    false -> {
-                        clientData.htsServiceData.takeIf { it != HTSServiceData() }
-                            ?.let { htsServiceData ->
-                                HTSScreen(
-                                    htsServiceData = htsServiceData,
-                                ) { onClickEvent(it) }
-                            }
-
-                        if (clientData.batteryLevel != null) {
-                            BatteryLevelView(clientData.batteryLevel)
+                false -> {
+                    clientData.htsServiceData.takeIf { it != HTSServiceData() }
+                        ?.let { htsServiceData ->
+                            HTSScreen(
+                                htsServiceData = htsServiceData,
+                            ) { onClickEvent(it) }
                         }
+
+                    if (clientData.batteryLevel != null) {
+                        BatteryLevelView(clientData.batteryLevel)
                     }
                 }
             }

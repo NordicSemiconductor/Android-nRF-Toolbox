@@ -45,10 +45,11 @@ class ProfileService : NotificationService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
         intent?.getStringExtra(DEVICE_ADDRESS)?.let { deviceAddress ->
             connectToPeripheral(deviceAddress)
         }
-        return super.onStartCommand(intent, flags, startId)
+        return START_REDELIVER_INTENT
     }
 
     inner class LocalBinder : Binder(), ServiceApi {
@@ -178,7 +179,8 @@ class ProfileService : NotificationService() {
      */
     private fun stopServiceIfNoDevices() {
         if (_connectedDevices.value.isEmpty()) {
-            stopSelf()
+            stopForegroundService() //// Remove notification from the foreground service
+            stopSelf() // Stop the service
         }
     }
 

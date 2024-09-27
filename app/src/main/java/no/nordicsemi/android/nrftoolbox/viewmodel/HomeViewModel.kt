@@ -8,12 +8,12 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestinationId
-import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
-import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewModel
+import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
 import no.nordicsemi.android.toolbox.libs.profile.service.ServiceManager
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewModel
+import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import javax.inject.Inject
 
@@ -46,6 +46,11 @@ internal class HomeViewModel @Inject constructor(
                 DeviceConnectionDestinationId, event.deviceAddress
             )
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        unbindService()
     }
 
 }
