@@ -12,7 +12,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.NotificationService
+import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.profile.handler.BatteryHandler
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandlerFactory
@@ -31,6 +33,8 @@ internal class ProfileService : NotificationService() {
     @Inject
     lateinit var centralManager: CentralManager
 
+    private var logger: nRFLoggerTree? = null
+
     // Binder to expose methods to the client
     private val binder = LocalBinder()
 
@@ -47,6 +51,7 @@ internal class ProfileService : NotificationService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         intent?.getStringExtra(DEVICE_ADDRESS)?.let { deviceAddress ->
+            initLogger(deviceAddress)
             connectToPeripheral(deviceAddress)
         }
         return START_REDELIVER_INTENT
@@ -153,6 +158,7 @@ internal class ProfileService : NotificationService() {
             remoteServices.forEach { remoteService ->
                 val handler = ProfileHandlerFactory.createHandler(remoteService.uuid)
                 handler?.let {
+                    Timber.i("Found supported service: ${it.profile}")
                     handlers.add(it)
                     lifecycleScope.launch {
                         it.handleServices(remoteService, lifecycleScope)
@@ -222,12 +228,30 @@ internal class ProfileService : NotificationService() {
     }
 
     /**
+     * Initialize the logger with the device address and plant the logger.
+     * @param device the device address.
+     */
+    private fun initLogger(device: String) {
+        logger?.let { Timber.uproot(it) }
+        logger = nRFLoggerTree(this, this.getString(R.string.app_name), device)
+            .also { Timber.plant(it) }
+    }
+
+    /**
+     * Uproot the logger and clear the logger instance.
+     */
+    private fun uprootLogger() {
+        logger?.let { Timber.uproot(it) }
+        logger = null
+    }
+
+    /**
      * Clear the missing services and battery level flags.
      */
     private fun clearFlags() {
         _isMissingServices.tryEmit(false)
         _batteryLevel.tryEmit(null)
+        uprootLogger()
     }
-
 
 }

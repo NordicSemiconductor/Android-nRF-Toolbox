@@ -7,5 +7,8 @@ enum class Profile {
     RSCS,
     PRX,
     CGM,
-    UART,
+    UART;
+
+    override fun toString(): String = this.name
+
 }

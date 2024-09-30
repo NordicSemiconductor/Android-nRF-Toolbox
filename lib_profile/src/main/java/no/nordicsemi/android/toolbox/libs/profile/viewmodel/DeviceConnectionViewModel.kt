@@ -1,14 +1,19 @@
 package no.nordicsemi.android.toolbox.libs.profile.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.common.logger.LoggerLauncher
 import no.nordicsemi.android.common.navigation.Navigator
+import no.nordicsemi.android.log.LogSession
+import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.toolbox.libs.profile.data.Profile
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.HtsData
@@ -35,9 +40,12 @@ open class DeviceConnectionViewModel @Inject constructor(
     private val serviceManager: ServiceManager,
     private val navigator: Navigator,
     private val deviceRepository: DeviceRepository,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
     private var address: String? = null
     private val _deviceData = MutableStateFlow(DeviceData())
+
+    private var logger: nRFLoggerTree? = null
 
     val deviceData = _deviceData.asStateFlow()
     private var serviceApi: WeakReference<ServiceApi>? = null
@@ -133,7 +141,7 @@ open class DeviceConnectionViewModel @Inject constructor(
                 // Update the profile data
                 peripheralProfileMap[device]?.forEach { profileHandler ->
                     updateProfileData(profileHandler)
-                    // Update the battery level if the peripheral is the same.
+                    // Update the battery level, if any.
                     api.batteryLevel.onEach {
                         _deviceData.value = _deviceData.value.copy(
                             batteryLevel = it,
@@ -174,10 +182,17 @@ open class DeviceConnectionViewModel @Inject constructor(
             NavigateUp -> disconnectIfNeededAndNavigate()
             is OnRetryClicked -> reConnectDevice(event.device)
             is OnTemperatureUnitSelected -> updateTemperatureUnit(event.value)
-            OpenLoggerEvent -> TODO()
+            OpenLoggerEvent -> openLogger()
 
         }
 
+    }
+
+    /**
+     * Launch the logger activity.
+     */
+    private fun openLogger() {
+        LoggerLauncher.launch(context, logger?.session as? LogSession)
     }
 
     /**

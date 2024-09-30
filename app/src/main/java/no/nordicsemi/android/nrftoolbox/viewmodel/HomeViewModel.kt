@@ -1,7 +1,9 @@
 package no.nordicsemi.android.nrftoolbox.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -26,7 +28,8 @@ internal class HomeViewModel @Inject constructor(
     serviceManager: ServiceManager,
     private val navigator: Navigator,
     deviceRepository: DeviceRepository,
-) : DeviceConnectionViewModel(serviceManager, navigator, deviceRepository) {
+    @ApplicationContext context: Context,
+) : DeviceConnectionViewModel(serviceManager, navigator, deviceRepository, context) {
     private val _state = MutableStateFlow(HomeViewState())
     val state = _state.asStateFlow()
 
