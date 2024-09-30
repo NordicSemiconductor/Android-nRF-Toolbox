@@ -18,12 +18,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.HTSServiceData
-import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceData
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewModel
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceData
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DisconnectEvent
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.NavigateUp
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OnRetryClicked
-import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OpenLoggerEvent
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.ProfileAppBar
 import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
@@ -49,7 +50,7 @@ internal fun DeviceConnectionScreen(deviceAddress: String) {
                 title = R.string.hts_title,
                 navigateUp = { onClickEvent(NavigateUp) },
                 disconnect = { onClickEvent(DisconnectEvent(deviceAddress)) },
-                openLogger = { }
+                openLogger = { onClickEvent(OpenLoggerEvent) }
             )
         },
     ) { paddingValues ->

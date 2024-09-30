@@ -15,6 +15,8 @@ dependencies {
     implementation(libs.nordic.navigation)
     implementation(libs.nordic.ui)
     implementation(libs.nordic.permissions.ble)
+    implementation(libs.nordic.logger)
+    implementation(libs.nordic.log.timber)
 
     implementation(libs.slf4j.timber)
     implementation(libs.androidx.lifecycle.service)
