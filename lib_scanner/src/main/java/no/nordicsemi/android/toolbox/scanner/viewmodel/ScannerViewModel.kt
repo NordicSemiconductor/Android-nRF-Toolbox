@@ -123,6 +123,13 @@ internal class ScannerViewModel @Inject constructor(
     }
 
     /**
+     * Navigates back to the previous screen.
+     */
+    fun navigateBack() {
+        navigator.navigateUp()
+    }
+
+    /**
      * Refresh the scanning process.
      */
     fun refreshScanning() {
@@ -135,12 +142,5 @@ internal class ScannerViewModel @Inject constructor(
         _uiState.value = ScannerUiState()
         viewModelScope.cancel()
         connectionProvider.close()
-    }
-
-    /**
-     * Navigates back to the previous screen.
-     */
-    fun navigateBack() {
-        navigator.navigateUp()
     }
 }

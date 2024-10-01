@@ -53,5 +53,4 @@ dependencies {
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.slf4j.timber)
 
-
 }
