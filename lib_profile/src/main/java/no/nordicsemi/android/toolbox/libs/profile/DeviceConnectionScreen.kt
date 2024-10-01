@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.libs.profile.view
+package no.nordicsemi.android.toolbox.libs.profile
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,6 +18,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.HTSServiceData
+import no.nordicsemi.android.toolbox.libs.profile.view.HTSScreen
+import no.nordicsemi.android.toolbox.libs.profile.view.LoadingView
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewModel
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceData
@@ -27,6 +29,7 @@ import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OnRetryClicked
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OpenLoggerEvent
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.ProfileAppBar
+import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
 import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.core.ConnectionState
@@ -63,8 +66,12 @@ internal fun DeviceConnectionScreen(deviceAddress: String) {
                     .padding(paddingValues),
             ) {
                 when (val s = deviceData.connectionState) {
+                    ConnectionState.Connecting -> DeviceConnectingView(
+                        modifier = Modifier.padding(16.dp)
+                    )
+
                     ConnectionState.Connected -> DeviceConnectedView(deviceData, onClickEvent)
-                    ConnectionState.Connecting, ConnectionState.Disconnecting -> LoadingView()
+                    ConnectionState.Disconnecting -> LoadingView()
                     is ConnectionState.Disconnected -> {
                         s.reason?.let {
                             DeviceDisconnectedView(
@@ -114,7 +121,7 @@ internal fun DeviceConnectedView(
                             HTSScreen(
                                 htsServiceData = htsServiceData,
                             ) { onClickEvent(it) }
-                        }
+                        } ?: DeviceConnectingView()
 
                     if (clientData.batteryLevel != null) {
                         BatteryLevelView(clientData.batteryLevel)

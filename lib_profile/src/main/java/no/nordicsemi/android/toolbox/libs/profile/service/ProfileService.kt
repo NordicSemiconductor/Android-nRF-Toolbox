@@ -158,7 +158,7 @@ internal class ProfileService : NotificationService() {
             remoteServices.forEach { remoteService ->
                 val handler = ProfileHandlerFactory.createHandler(remoteService.uuid)
                 handler?.let {
-                    Timber.i("Found supported service: ${it.profile}")
+                    Timber.i("Supported service: ${it.profile}")
                     handlers.add(it)
                     lifecycleScope.launch {
                         it.handleServices(remoteService, lifecycleScope)
