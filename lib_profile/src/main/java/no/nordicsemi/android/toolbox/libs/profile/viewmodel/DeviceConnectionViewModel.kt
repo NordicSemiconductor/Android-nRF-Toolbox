@@ -162,7 +162,7 @@ open class DeviceConnectionViewModel @Inject constructor(
     private fun updateProfileData(profileHandler: ProfileHandler) {
         when (profileHandler.profile) {
             Profile.HTS -> {
-                profileHandler.observeData().onEach {
+                profileHandler.getNotification().onEach {
                     _deviceData.value = _deviceData.value.copy(
                         htsServiceData = _deviceData.value.htsServiceData.copy(
                             data = it as HtsData,
@@ -172,13 +172,20 @@ open class DeviceConnectionViewModel @Inject constructor(
             }
             // Handle the HRS profile data
             Profile.HRS -> {
-                profileHandler.observeData().onEach {
+                profileHandler.getNotification().onEach {
                     _deviceData.value = _deviceData.value.copy(
                         hrsServiceData = _deviceData.value.hrsServiceData.copy(
                             data = _deviceData.value.hrsServiceData.data + it as HRSData,
                         )
                     )
                 }.launchIn(viewModelScope)
+                profileHandler.readCharacteristic()?.let {
+                    _deviceData.value = _deviceData.value.copy(
+                        hrsServiceData = _deviceData.value.hrsServiceData.copy(
+                            bodySensorLocation = it as Int,
+                        )
+                    )
+                }
             }
             // TODO: Add more profile modules here
             else -> TODO()
