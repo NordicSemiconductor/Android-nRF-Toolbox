@@ -15,6 +15,8 @@ import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.toolbox.libs.profile.data.Profile
+import no.nordicsemi.android.toolbox.libs.profile.data.hrs.HRSData
+import no.nordicsemi.android.toolbox.libs.profile.data.hrs.HRSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.HtsData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.TemperatureUnit
@@ -31,6 +33,7 @@ data class DeviceData(
     val peripheral: Peripheral? = null,
     val connectionState: ConnectionState? = null,
     val htsServiceData: HTSServiceData = HTSServiceData(),
+    val hrsServiceData: HRSServiceData = HRSServiceData(),
     val batteryLevel: Int? = null,
     val isMissingServices: Boolean = false,
 )
@@ -167,6 +170,16 @@ open class DeviceConnectionViewModel @Inject constructor(
                     )
                 }.launchIn(viewModelScope)
             }
+            // Handle the HRS profile data
+            Profile.HRS -> {
+                profileHandler.observeData().onEach {
+                    _deviceData.value = _deviceData.value.copy(
+                        hrsServiceData = _deviceData.value.hrsServiceData.copy(
+                            data = _deviceData.value.hrsServiceData.data + it as HRSData,
+                        )
+                    )
+                }.launchIn(viewModelScope)
+            }
             // TODO: Add more profile modules here
             else -> TODO()
         }
@@ -183,7 +196,7 @@ open class DeviceConnectionViewModel @Inject constructor(
             is OnRetryClicked -> reConnectDevice(event.device)
             is OnTemperatureUnitSelected -> updateTemperatureUnit(event.value)
             OpenLoggerEvent -> openLogger()
-
+            SwitchZoomEvent -> switchZoomEvent()
         }
 
     }
@@ -242,6 +255,15 @@ open class DeviceConnectionViewModel @Inject constructor(
         _deviceData.value = _deviceData.value.copy(
             htsServiceData = _deviceData.value.htsServiceData.copy(
                 temperatureUnit = unit
+            )
+        )
+    }
+
+    /** Switch the zoom event. */
+    private fun switchZoomEvent() {
+        _deviceData.value = _deviceData.value.copy(
+            hrsServiceData = _deviceData.value.hrsServiceData.copy(
+                zoomIn = !_deviceData.value.hrsServiceData.zoomIn
             )
         )
     }

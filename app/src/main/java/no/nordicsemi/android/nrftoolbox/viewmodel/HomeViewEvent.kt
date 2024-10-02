@@ -5,9 +5,9 @@ package no.nordicsemi.android.nrftoolbox.viewmodel
  */
 sealed interface HomeViewEvent {
 
-    /**  AddDeviceClick is an event that is emitted when the user clicks on the Add Device button. */
-    data object AddDeviceClick : HomeViewEvent
+    /**  OnConnectDeviceClick is an event that is emitted when the user clicks on the Connect Device button. */
+    data object OnConnectDeviceClick : HomeViewEvent
 
-    /**  OnConnectedDeviceClick is an event that is emitted when the user clicks on a connected device. */
-    data class OnConnectedDeviceClick(val deviceAddress: String) : HomeViewEvent
+    /**  OnDeviceClick is an event that is emitted when the user clicks on a connected device. */
+    data class OnDeviceClick(val deviceAddress: String) : HomeViewEvent
 }
