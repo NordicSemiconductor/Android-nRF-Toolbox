@@ -68,13 +68,9 @@ enum class TemperatureUnitData(private val value: Int) {
  * HTS service data class that holds the HTS data.
  *
  * @param data The HTS data.
- * @param batteryLevel The battery level.
  * @param temperatureUnit The temperature unit.
- * @param isServiceRunning The service running state.
  */
 data class HTSServiceData(
     val data: HtsData = HtsData(),
-    val batteryLevel: Int? = null,
     val temperatureUnit: TemperatureUnit = TemperatureUnit.CELSIUS,
-    val isServiceRunning: Boolean = false,
 )
