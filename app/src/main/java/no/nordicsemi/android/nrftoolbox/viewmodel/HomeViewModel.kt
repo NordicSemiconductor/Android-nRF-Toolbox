@@ -44,8 +44,8 @@ internal class HomeViewModel @Inject constructor(
 
     fun onClickEvent(event: HomeViewEvent) {
         when (event) {
-            HomeViewEvent.AddDeviceClick -> navigator.navigateTo(ScannerDestinationId)
-            is HomeViewEvent.OnConnectedDeviceClick -> navigator.navigateTo(
+            HomeViewEvent.OnConnectDeviceClick -> navigator.navigateTo(ScannerDestinationId)
+            is HomeViewEvent.OnDeviceClick -> navigator.navigateTo(
                 DeviceConnectionDestinationId, event.deviceAddress
             )
         }

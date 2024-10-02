@@ -17,7 +17,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.toolbox.lib.profile.R
+import no.nordicsemi.android.toolbox.libs.profile.data.hrs.HRSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.HTSServiceData
+import no.nordicsemi.android.toolbox.libs.profile.view.HRSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HTSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.LoadingView
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
@@ -121,7 +123,13 @@ internal fun DeviceConnectedView(
                             HTSScreen(
                                 htsServiceData = htsServiceData,
                             ) { onClickEvent(it) }
-                        } ?: DeviceConnectingView()
+                        }
+                    clientData.hrsServiceData.takeIf { it != HRSServiceData() }
+                        ?.let { htsServiceData ->
+                            HRSScreen(
+                                hrsServiceData = htsServiceData,
+                            ) { onClickEvent(it) }
+                        }
 
                     if (clientData.batteryLevel != null) {
                         BatteryLevelView(clientData.batteryLevel)

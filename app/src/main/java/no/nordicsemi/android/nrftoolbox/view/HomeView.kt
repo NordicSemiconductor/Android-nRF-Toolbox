@@ -64,7 +64,7 @@ internal fun HomeView() {
     Scaffold(
         contentWindowInsets = WindowInsets.systemBars.only(WindowInsetsSides.Bottom), // Exclude top insets, keep bottom
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = { onEvent(HomeViewEvent.AddDeviceClick) }) {
+            ExtendedFloatingActionButton(onClick = { onEvent(HomeViewEvent.OnConnectDeviceClick) }) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -98,15 +98,23 @@ internal fun HomeView() {
                     )
                     state.connectedDevices.forEach { (peripheral, handlers) ->
                         handlers.forEach { handler ->
-                            if (handler.profile == Profile.HTS) {
-                                FeatureButton(
+                            when (handler.profile) {
+                                Profile.HRS -> FeatureButton(
+                                    iconId = R.drawable.ic_hrs,
+                                    profileName = R.string.hrs_module_full,
+                                    deviceName = peripheral.name,
+                                    true
+                                ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
+
+                                Profile.HTS -> FeatureButton(
                                     iconId = R.drawable.ic_hts,
                                     profileName = R.string.hts_module_full,
                                     deviceName = peripheral.name,
                                     true
-                                ) {
-                                    // Open the profile screen
-                                    onEvent(HomeViewEvent.OnConnectedDeviceClick(peripheral.address))
+                                ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
+
+                                else -> {
+                                    // TODO: Add more profiles
                                 }
                             }
                         }

@@ -8,6 +8,8 @@ internal data class OnTemperatureUnitSelected(
     val value: TemperatureUnit,
 ) : DeviceConnectionViewEvent
 
+internal data object SwitchZoomEvent : DeviceConnectionViewEvent
+
 internal data class OnRetryClicked(val device: String) : DeviceConnectionViewEvent
 
 internal data object NavigateUp : DeviceConnectionViewEvent
