@@ -29,7 +29,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.toolbox.libs.profile.parser
+package no.nordicsemi.android.toolbox.libs.profile.data.hts
 
 import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
 import no.nordicsemi.android.kotlin.ble.core.data.util.IntFormat

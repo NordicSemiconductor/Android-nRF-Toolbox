@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
-import no.nordicsemi.android.toolbox.libs.profile.parser.BatteryLevelParser
+import no.nordicsemi.android.toolbox.libs.profile.data.BatteryLevelParser
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber
 import java.util.UUID
