@@ -17,13 +17,13 @@ import java.util.UUID
 private val HTS_MEASUREMENT_CHARACTERISTIC_UUID: UUID =
     UUID.fromString("00002A1C-0000-1000-8000-00805f9b34fb")
 
-class HtsHandler : ProfileHandler() {
+class HtsHandler : ProfileHandler<HtsData, Int>() {
     override val profile: Profile = Profile.HTS
     private val _htsData = MutableSharedFlow<HtsData>()
 
     override fun getNotification() = _htsData.asSharedFlow()
 
-    override fun readCharacteristic(): Any? = null
+    override fun readCharacteristic(): Int? = null
 
     override suspend fun handleServices(remoteService: RemoteService, scope: CoroutineScope) {
         remoteService.characteristics.firstOrNull { it.uuid == HTS_MEASUREMENT_CHARACTERISTIC_UUID }

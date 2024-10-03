@@ -159,7 +159,7 @@ open class DeviceConnectionViewModel @Inject constructor(
      * Observe and update the data from the profile handler.
      * @param profileHandler the profile handler.
      */
-    private fun updateProfileData(profileHandler: ProfileHandler) {
+    private fun <N, C> updateProfileData(profileHandler: ProfileHandler<N, C>) {
         when (profileHandler.profile) {
             Profile.HTS -> {
                 profileHandler.getNotification().onEach {

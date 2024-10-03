@@ -20,7 +20,7 @@ private val BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID: UUID =
 private val HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID: UUID =
     UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb")
 
-class HrsHandler : ProfileHandler() {
+class HrsHandler : ProfileHandler<HRSData, Int>() {
     override val profile: Profile = Profile.HRS
     private val _hrsData = MutableSharedFlow<HRSData>()
     private var _bodySensorLocation: Int? = null
