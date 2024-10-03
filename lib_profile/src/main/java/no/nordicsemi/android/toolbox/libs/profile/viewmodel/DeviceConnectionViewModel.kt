@@ -16,8 +16,6 @@ import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.toolbox.libs.profile.data.Profile
 import no.nordicsemi.android.toolbox.libs.profile.data.hrs.HRSData
-import no.nordicsemi.android.toolbox.libs.profile.data.hrs.HRSServiceData
-import no.nordicsemi.android.toolbox.libs.profile.data.hts.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.HtsData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
@@ -29,12 +27,41 @@ import no.nordicsemi.kotlin.ble.core.ConnectionState
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 
+sealed class ProfileServiceData
+
+/**
+ * HTS service data class that holds the HTS data.
+ *
+ * @param data The HTS data.
+ * @param temperatureUnit The temperature unit.
+ */
+data class HTSServiceData(
+    val data: HtsData = HtsData(),
+    val temperatureUnit: TemperatureUnit = TemperatureUnit.CELSIUS,
+) : ProfileServiceData()
+
+/**
+ * Heart Rate Service data.
+ * @param data the list of heart rate data.
+ * @param bodySensorLocation the body sensor location.
+ * @param zoomIn true if the chart is zoomed in.
+ */
+data class HRSServiceData(
+    val data: List<HRSData> = emptyList(),
+    val bodySensorLocation: Int? = null,
+    val zoomIn: Boolean = false,
+) : ProfileServiceData() {
+    val heartRates = data.map { it.heartRate }
+}
+
+data class BatteryServiceData(
+    val batteryLevel: Int? = null,
+) : ProfileServiceData()
+
 data class DeviceData(
     val peripheral: Peripheral? = null,
     val connectionState: ConnectionState? = null,
-    val htsServiceData: HTSServiceData = HTSServiceData(),
-    val hrsServiceData: HRSServiceData = HRSServiceData(),
-    val batteryLevel: Int? = null,
+    val serviceData: List<ProfileServiceData> = emptyList(),
     val isMissingServices: Boolean = false,
 )
 
@@ -145,9 +172,21 @@ open class DeviceConnectionViewModel @Inject constructor(
                 peripheralProfileMap[device]?.forEach { profileHandler ->
                     updateProfileData(profileHandler)
                     // Update the battery level, if any.
-                    api.batteryLevel.onEach {
-                        _deviceData.value = _deviceData.value.copy(
-                            batteryLevel = it,
+                    api.batteryLevel.onEach { batteryLevel ->
+                        if (_deviceData.value.serviceData.any { it is BatteryServiceData }) {
+                            _deviceData.value = _deviceData.value.copy(
+                                serviceData = _deviceData.value.serviceData.map {
+                                    if (it is BatteryServiceData) {
+                                        it.copy(batteryLevel = batteryLevel)
+                                    } else {
+                                        it
+                                    }
+                                }
+                            )
+                        } else _deviceData.value = _deviceData.value.copy(
+                            serviceData = _deviceData.value.serviceData + BatteryServiceData(
+                                batteryLevel = batteryLevel
+                            )
                         )
                     }.launchIn(viewModelScope)
                 }
@@ -162,29 +201,57 @@ open class DeviceConnectionViewModel @Inject constructor(
     private fun <N, C> updateProfileData(profileHandler: ProfileHandler<N, C>) {
         when (profileHandler.profile) {
             Profile.HTS -> {
-                profileHandler.getNotification().onEach {
-                    _deviceData.value = _deviceData.value.copy(
-                        htsServiceData = _deviceData.value.htsServiceData.copy(
-                            data = it as HtsData,
+                profileHandler.getNotification().onEach { notificationData ->
+                    // Find if it already includes the HTS data.
+                    if (_deviceData.value.serviceData.any { it is HTSServiceData }) {
+                        _deviceData.value = _deviceData.value.copy(
+                            serviceData = _deviceData.value.serviceData.map {
+                                if (it is HTSServiceData) {
+                                    it.copy(data = notificationData as HtsData)
+                                } else {
+                                    it
+                                }
+                            }
                         )
+                    } else _deviceData.value = _deviceData.value.copy(
+                        serviceData = _deviceData.value.serviceData + HTSServiceData(data = notificationData as HtsData)
                     )
                 }.launchIn(viewModelScope)
             }
-            // Handle the HRS profile data
+
             Profile.HRS -> {
-                profileHandler.getNotification().onEach {
-                    _deviceData.value = _deviceData.value.copy(
-                        hrsServiceData = _deviceData.value.hrsServiceData.copy(
-                            data = _deviceData.value.hrsServiceData.data + it as HRSData,
+                profileHandler.getNotification().onEach { notificationData ->
+                    if (_deviceData.value.serviceData.any { it is HRSServiceData }) {
+                        _deviceData.value = _deviceData.value.copy(
+                            serviceData = _deviceData.value.serviceData.map {
+                                if (it is HRSServiceData) {
+                                    it.copy(data = it.data + (notificationData as HRSData))
+                                } else {
+                                    it
+                                }
+                            }
+                        )
+                    } else _deviceData.value = _deviceData.value.copy(
+                        serviceData = _deviceData.value.serviceData + HRSServiceData(
+                            data = listOf(
+                                notificationData as HRSData
+                            )
                         )
                     )
                 }.launchIn(viewModelScope)
-                profileHandler.readCharacteristic()?.let {
-                    _deviceData.value = _deviceData.value.copy(
-                        hrsServiceData = _deviceData.value.hrsServiceData.copy(
-                            bodySensorLocation = it as Int,
+
+                profileHandler.readCharacteristic()?.let { characteristicData ->
+                    if (characteristicData is Int) {
+                        _deviceData.value = _deviceData.value.copy(
+                            serviceData = _deviceData.value.serviceData.map { service ->
+                                if (service is HRSServiceData) {
+                                    service.copy(bodySensorLocation = characteristicData)
+                                } else {
+                                    service
+                                }
+                            }
                         )
-                    )
+                    }
                 }
             }
             // TODO: Add more profile modules here
@@ -220,6 +287,8 @@ open class DeviceConnectionViewModel @Inject constructor(
      * @param address the address of the device to reconnect to.
      */
     private fun reConnectDevice(address: String) = viewModelScope.launch {
+        // Clear the flags and state.
+        _deviceData.value = DeviceData()
         getServiceApi()?.let {
             connectToPeripheral(address)
         }
@@ -260,18 +329,26 @@ open class DeviceConnectionViewModel @Inject constructor(
     private fun updateTemperatureUnit(unit: TemperatureUnit) {
         // Handle temperature unit selection
         _deviceData.value = _deviceData.value.copy(
-            htsServiceData = _deviceData.value.htsServiceData.copy(
-                temperatureUnit = unit
-            )
+            serviceData = _deviceData.value.serviceData.map { service ->
+                if (service is HTSServiceData) {
+                    service.copy(temperatureUnit = unit)
+                } else {
+                    service
+                }
+            }
         )
     }
 
     /** Switch the zoom event. */
     private fun switchZoomEvent() {
         _deviceData.value = _deviceData.value.copy(
-            hrsServiceData = _deviceData.value.hrsServiceData.copy(
-                zoomIn = !_deviceData.value.hrsServiceData.zoomIn
-            )
+            serviceData = _deviceData.value.serviceData.map { service ->
+                if (service is HRSServiceData) {
+                    service.copy(zoomIn = !service.zoomIn)
+                } else {
+                    service
+                }
+            }
         )
     }
 

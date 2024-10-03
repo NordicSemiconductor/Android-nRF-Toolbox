@@ -63,14 +63,3 @@ enum class TemperatureUnitData(private val value: Int) {
         }
     }
 }
-
-/**
- * HTS service data class that holds the HTS data.
- *
- * @param data The HTS data.
- * @param temperatureUnit The temperature unit.
- */
-data class HTSServiceData(
-    val data: HtsData = HtsData(),
-    val temperatureUnit: TemperatureUnit = TemperatureUnit.CELSIUS,
-)
