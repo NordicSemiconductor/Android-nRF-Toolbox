@@ -17,15 +17,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.toolbox.lib.profile.R
-import no.nordicsemi.android.toolbox.libs.profile.data.hrs.HRSServiceData
-import no.nordicsemi.android.toolbox.libs.profile.data.hts.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.view.HRSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HTSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.LoadingView
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.BatteryServiceData
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewModel
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceData
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DisconnectEvent
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.HRSServiceData
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.NavigateUp
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OnRetryClicked
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OpenLoggerEvent
@@ -119,21 +120,21 @@ internal fun DeviceConnectedView(
                 }
 
                 false -> {
-                    deviceData.htsServiceData.takeIf { it != HTSServiceData() }
-                        ?.let { htsServiceData ->
-                            HTSScreen(
-                                htsServiceData = htsServiceData,
+                    deviceData.serviceData.forEach { serviceData ->
+                        when (serviceData) {
+                            is HRSServiceData -> HRSScreen(
+                                hrsServiceData = serviceData,
                             ) { onClickEvent(it) }
-                        }
-                    deviceData.hrsServiceData.takeIf { it != HRSServiceData() }
-                        ?.let { htsServiceData ->
-                            HRSScreen(
-                                hrsServiceData = htsServiceData,
-                            ) { onClickEvent(it) }
-                        }
 
-                    if (deviceData.batteryLevel != null) {
-                        BatteryLevelView(deviceData.batteryLevel)
+                            is HTSServiceData -> HTSScreen(
+                                htsServiceData = serviceData,
+                            ) { onClickEvent(it) }
+
+                            // Add Battery level at the end of the view.
+                            is BatteryServiceData -> serviceData.batteryLevel?.let {
+                                BatteryLevelView(it)
+                            }
+                        }
                     }
                 }
             }
