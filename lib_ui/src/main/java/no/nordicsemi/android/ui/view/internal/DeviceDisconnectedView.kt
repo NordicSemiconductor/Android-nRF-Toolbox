@@ -72,7 +72,6 @@ private fun DeviceDisconnectedView(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
             .then(modifier),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
