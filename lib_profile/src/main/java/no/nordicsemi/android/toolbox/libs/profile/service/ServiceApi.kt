@@ -6,7 +6,7 @@ import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 
 interface ServiceApi {
-    val connectedDevices: Flow<Map<Peripheral, List<ProfileHandler>>>
+    val connectedDevices: Flow<Map<Peripheral, List<ProfileHandler<*, *>>>>
     val isMissingServices: Flow<Boolean>
     val batteryLevel: Flow<Int?>
     fun getPeripheralById(address: String?): Peripheral?
