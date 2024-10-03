@@ -78,6 +78,7 @@ internal fun DeviceConnectionScreen(deviceAddress: String) {
                         s.reason?.let {
                             DeviceDisconnectedView(
                                 reason = it,
+                                modifier = Modifier.padding(16.dp),
                                 content = { paddingValues ->
                                     Button(
                                         modifier = Modifier.padding(paddingValues),
