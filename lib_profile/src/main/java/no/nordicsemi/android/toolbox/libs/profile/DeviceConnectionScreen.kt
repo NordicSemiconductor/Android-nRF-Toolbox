@@ -101,16 +101,16 @@ internal fun DeviceConnectionScreen(deviceAddress: String) {
 
 @Composable
 internal fun DeviceConnectedView(
-    clientData: DeviceData,
+    deviceData: DeviceData,
     onClickEvent: (DeviceConnectionViewEvent) -> Unit,
 ) {
-    if (clientData.peripheral != null) {
+    if (deviceData.peripheral != null) {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .padding(16.dp)
         ) {
-            when (clientData.isMissingServices) {
+            when (deviceData.isMissingServices) {
                 true -> {
                     DeviceDisconnectedView(
                         reason = DisconnectReason.MISSING_SERVICE,
@@ -118,21 +118,21 @@ internal fun DeviceConnectedView(
                 }
 
                 false -> {
-                    clientData.htsServiceData.takeIf { it != HTSServiceData() }
+                    deviceData.htsServiceData.takeIf { it != HTSServiceData() }
                         ?.let { htsServiceData ->
                             HTSScreen(
                                 htsServiceData = htsServiceData,
                             ) { onClickEvent(it) }
                         }
-                    clientData.hrsServiceData.takeIf { it != HRSServiceData() }
+                    deviceData.hrsServiceData.takeIf { it != HRSServiceData() }
                         ?.let { htsServiceData ->
                             HRSScreen(
                                 hrsServiceData = htsServiceData,
                             ) { onClickEvent(it) }
                         }
 
-                    if (clientData.batteryLevel != null) {
-                        BatteryLevelView(clientData.batteryLevel)
+                    if (deviceData.batteryLevel != null) {
+                        BatteryLevelView(deviceData.batteryLevel)
                     }
                 }
             }
