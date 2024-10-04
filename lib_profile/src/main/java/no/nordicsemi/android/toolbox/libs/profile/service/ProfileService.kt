@@ -15,11 +15,8 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.NotificationService
 import no.nordicsemi.android.toolbox.lib.profile.R
-import no.nordicsemi.android.toolbox.libs.profile.handler.BatteryHandler
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandlerFactory
-import no.nordicsemi.android.toolbox.libs.profile.spec.BATTERY_SERVICE_UUID
-import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.CentralManager.ConnectionOptions
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
@@ -39,7 +36,7 @@ internal class ProfileService : NotificationService() {
     private val binder = LocalBinder()
 
     private val _connectedDevices =
-        MutableStateFlow<Map<Peripheral, List<ProfileHandler<*,*>>>>(emptyMap())
+        MutableStateFlow<Map<Peripheral, List<ProfileHandler>>>(emptyMap())
     private val _batteryLevel = MutableStateFlow<Int?>(null)
     private val _isMissingServices = MutableStateFlow(false)
 
@@ -58,14 +55,11 @@ internal class ProfileService : NotificationService() {
     }
 
     inner class LocalBinder : Binder(), ServiceApi {
-        override val connectedDevices: Flow<Map<Peripheral, List<ProfileHandler<*,*>>>>
+        override val connectedDevices: Flow<Map<Peripheral, List<ProfileHandler>>>
             get() = _connectedDevices.asSharedFlow()
 
         override val isMissingServices: Flow<Boolean>
             get() = _isMissingServices.asStateFlow()
-
-        override val batteryLevel: Flow<Int?>
-            get() = _batteryLevel.asStateFlow()
 
         /**
          * Get the peripheral by its address.
@@ -154,7 +148,7 @@ internal class ProfileService : NotificationService() {
      */
     private fun handleConnectedState(peripheral: Peripheral) {
         peripheral.services().onEach { remoteServices ->
-            val handlers = mutableListOf<ProfileHandler<*, *>>()
+            val handlers = mutableListOf<ProfileHandler>()
             remoteServices.forEach { remoteService ->
                 val handler = ProfileHandlerFactory.createHandler(remoteService.uuid)
                 handler?.let {
@@ -171,24 +165,8 @@ internal class ProfileService : NotificationService() {
                 _isMissingServices.tryEmit(true)
             } else if (handlers.isNotEmpty()) {
                 updateConnectedDevices(peripheral, handlers)
-                observeBatteryService(remoteServices)
             }
         }.launchIn(lifecycleScope)
-    }
-
-    /**
-     * Observe the battery service and handle the battery level data.
-     * @param services the list of remote services.
-     */
-    private fun observeBatteryService(services: List<RemoteService>) {
-        services.firstOrNull { it.uuid == BATTERY_SERVICE_UUID }?.let { batteryService ->
-            BatteryHandler().apply {
-                lifecycleScope.launch {
-                    handleServices(batteryService, lifecycleScope)
-                    batteryLevelData.onEach { _batteryLevel.emit(it) }.launchIn(lifecycleScope)
-                }
-            }
-        }
     }
 
     /**
@@ -218,7 +196,7 @@ internal class ProfileService : NotificationService() {
 
     private fun updateConnectedDevices(
         peripheral: Peripheral,
-        handlers: List<ProfileHandler<*,*>>
+        handlers: List<ProfileHandler>
     ) {
         val currentDevices = _connectedDevices.replayCache.firstOrNull() ?: emptyMap()
         val updatedDevices = currentDevices.toMutableMap().apply {

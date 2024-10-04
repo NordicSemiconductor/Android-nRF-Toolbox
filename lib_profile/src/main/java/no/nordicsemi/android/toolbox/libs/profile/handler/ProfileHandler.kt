@@ -5,9 +5,9 @@ import kotlinx.coroutines.flow.Flow
 import no.nordicsemi.android.toolbox.libs.profile.data.Profile
 import no.nordicsemi.kotlin.ble.client.RemoteService
 
-abstract class ProfileHandler<N, C> {
+abstract class ProfileHandler {
     abstract val profile: Profile
-    abstract fun getNotification(): Flow<N>
-    abstract fun readCharacteristic(): C?
+    abstract fun getNotification(): Flow<Any>
+    abstract fun readCharacteristic(): Any?
     abstract suspend fun handleServices(remoteService: RemoteService, scope: CoroutineScope)
 }
