@@ -171,24 +171,6 @@ open class DeviceConnectionViewModel @Inject constructor(
                 // Update the profile data
                 peripheralProfileMap[device]?.forEach { profileHandler ->
                     updateProfileData(profileHandler)
-                    // Update the battery level, if any.
-                    api.batteryLevel.onEach { batteryLevel ->
-                        if (_deviceData.value.serviceData.any { it is BatteryServiceData }) {
-                            _deviceData.value = _deviceData.value.copy(
-                                serviceData = _deviceData.value.serviceData.map {
-                                    if (it is BatteryServiceData) {
-                                        it.copy(batteryLevel = batteryLevel)
-                                    } else {
-                                        it
-                                    }
-                                }
-                            )
-                        } else _deviceData.value = _deviceData.value.copy(
-                            serviceData = _deviceData.value.serviceData + BatteryServiceData(
-                                batteryLevel = batteryLevel
-                            )
-                        )
-                    }.launchIn(viewModelScope)
                 }
             }
         }.launchIn(viewModelScope)
@@ -198,7 +180,7 @@ open class DeviceConnectionViewModel @Inject constructor(
      * Observe and update the data from the profile handler.
      * @param profileHandler the profile handler.
      */
-    private fun <N, C> updateProfileData(profileHandler: ProfileHandler<N, C>) {
+    private fun updateProfileData(profileHandler: ProfileHandler) {
         when (profileHandler.profile) {
             Profile.HTS -> {
                 profileHandler.getNotification().onEach { notificationData ->
@@ -253,6 +235,26 @@ open class DeviceConnectionViewModel @Inject constructor(
                         )
                     }
                 }
+            }
+
+            Profile.BATTERY -> {
+                profileHandler.getNotification().onEach { notificationData ->
+                    if (_deviceData.value.serviceData.any { it is BatteryServiceData }) {
+                        _deviceData.value = _deviceData.value.copy(
+                            serviceData = _deviceData.value.serviceData.map {
+                                if (it is BatteryServiceData) {
+                                    it.copy(batteryLevel = notificationData as Int)
+                                } else {
+                                    it
+                                }
+                            }
+                        )
+                    } else _deviceData.value = _deviceData.value.copy(
+                        serviceData = _deviceData.value.serviceData + BatteryServiceData(
+                            batteryLevel = notificationData as Int
+                        )
+                    )
+                }.launchIn(viewModelScope)
             }
             // TODO: Add more profile modules here
             else -> TODO()
