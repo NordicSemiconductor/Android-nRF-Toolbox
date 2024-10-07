@@ -1,6 +1,7 @@
 package no.nordicsemi.android.toolbox.libs.profile.handler
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
@@ -23,7 +24,7 @@ class BatteryHandler: ProfileHandler() {
 
     override fun getNotification() = _batteryLevel.asSharedFlow()
 
-    override fun readCharacteristic(): Any? =null
+    override fun readCharacteristic(): Flow<Any>? = null
 
     override suspend fun handleServices(remoteService: RemoteService, scope: CoroutineScope) {
         remoteService.characteristics.firstOrNull { it.uuid == BATTERY_LEVEL_CHARACTERISTIC_UUID }

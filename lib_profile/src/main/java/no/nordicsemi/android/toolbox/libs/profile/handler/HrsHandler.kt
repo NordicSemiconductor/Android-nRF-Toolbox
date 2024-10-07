@@ -23,18 +23,18 @@ private val HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID: UUID =
 class HrsHandler : ProfileHandler() {
     override val profile: Profile = Profile.HRS
     private val _hrsData = MutableSharedFlow<HRSData>()
-    private var _bodySensorLocation: Int? = null
+    private var _bodySensorLocation = MutableSharedFlow<Int>()
 
     override fun getNotification() = _hrsData.asSharedFlow()
 
-    override fun readCharacteristic() = _bodySensorLocation
+    override fun readCharacteristic() = _bodySensorLocation.asSharedFlow()
 
     override suspend fun handleServices(remoteService: RemoteService, scope: CoroutineScope) {
         remoteService.characteristics.firstOrNull { it.uuid == HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID }
             ?.subscribe()
             ?.mapNotNull { HRSDataParser.parse(it) }
             ?.onEach { data ->
-                _hrsData.emit(data) // Emit the data to the flow
+                _hrsData.emit(data)
             }
             ?.catch { e ->
                 // Handle the error
@@ -46,9 +46,7 @@ class HrsHandler : ProfileHandler() {
             ?.read()
             ?.let { BodySensorLocationParser.parse(it) }
             ?.let { bodySensorLocation ->
-                // Handle the body sensor location
-                _bodySensorLocation = bodySensorLocation
-
+                _bodySensorLocation.emit(bodySensorLocation)
             }
     }
 }

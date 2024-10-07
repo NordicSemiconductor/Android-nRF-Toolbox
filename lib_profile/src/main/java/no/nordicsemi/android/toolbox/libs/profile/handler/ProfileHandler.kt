@@ -8,6 +8,6 @@ import no.nordicsemi.kotlin.ble.client.RemoteService
 abstract class ProfileHandler {
     abstract val profile: Profile
     abstract fun getNotification(): Flow<Any>
-    abstract fun readCharacteristic(): Any?
+    abstract fun readCharacteristic(): Flow<Any>? // This should be nullable
     abstract suspend fun handleServices(remoteService: RemoteService, scope: CoroutineScope)
 }
