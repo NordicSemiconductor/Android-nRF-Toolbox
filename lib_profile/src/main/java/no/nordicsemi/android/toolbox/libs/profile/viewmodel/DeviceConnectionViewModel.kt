@@ -108,6 +108,22 @@ open class DeviceConnectionViewModel @Inject constructor(
     }
 
     /**
+     * Handle click events from the view.
+     */
+    fun onClickEvent(event: DeviceConnectionViewEvent) {
+        // Handle click events
+        when (event) {
+            is DisconnectEvent -> disconnectAndNavigate(event.device)
+            NavigateUp -> disconnectIfNeededAndNavigate()
+            is OnRetryClicked -> reConnectDevice(event.device)
+            is OnTemperatureUnitSelected -> updateTemperatureUnit(event.value)
+            OpenLoggerEvent -> openLogger()
+            SwitchZoomEvent -> switchZoomEvent()
+        }
+
+    }
+
+    /**
      * Connect to the peripheral with the given address. Before connecting, the service must be bound.
      * The service will be started if not already running.
      * @param deviceAddress the address of the peripheral to connect to.
@@ -184,97 +200,71 @@ open class DeviceConnectionViewModel @Inject constructor(
         when (profileHandler.profile) {
             Profile.HTS -> {
                 profileHandler.getNotification().onEach { notificationData ->
-                    // Find if it already includes the HTS data.
-                    if (_deviceData.value.serviceData.any { it is HTSServiceData }) {
-                        _deviceData.value = _deviceData.value.copy(
-                            serviceData = _deviceData.value.serviceData.map {
-                                if (it is HTSServiceData) {
-                                    it.copy(data = notificationData as HtsData)
-                                } else {
-                                    it
-                                }
-                            }
-                        )
-                    } else _deviceData.value = _deviceData.value.copy(
-                        serviceData = _deviceData.value.serviceData + HTSServiceData(data = notificationData as HtsData)
-                    )
+                    val htsData = notificationData as HtsData
+                    _deviceData.updateOrAddDataFlow(
+                        HTSServiceData(data = htsData)
+                    ) { existingServiceData ->
+                        existingServiceData.copy(data = htsData)
+                    }
                 }.launchIn(viewModelScope)
             }
 
             Profile.HRS -> {
                 profileHandler.getNotification().onEach { notificationData ->
-                    if (_deviceData.value.serviceData.any { it is HRSServiceData }) {
-                        _deviceData.value = _deviceData.value.copy(
-                            serviceData = _deviceData.value.serviceData.map {
-                                if (it is HRSServiceData) {
-                                    it.copy(data = it.data + (notificationData as HRSData))
-                                } else {
-                                    it
-                                }
-                            }
-                        )
-                    } else _deviceData.value = _deviceData.value.copy(
-                        serviceData = _deviceData.value.serviceData + HRSServiceData(
-                            data = listOf(
-                                notificationData as HRSData
-                            )
-                        )
-                    )
+                    val hrsData = notificationData as HRSData
+                    _deviceData.updateOrAddDataFlow(
+                        HRSServiceData(data = listOf(hrsData))
+                    ) { existingServiceData ->
+                        existingServiceData.copy(data = existingServiceData.data + hrsData)
+                    }
                 }.launchIn(viewModelScope)
 
-                profileHandler.readCharacteristic()?.let { characteristicData ->
-                    if (characteristicData is Int) {
-                        _deviceData.value = _deviceData.value.copy(
-                            serviceData = _deviceData.value.serviceData.map { service ->
-                                if (service is HRSServiceData) {
-                                    service.copy(bodySensorLocation = characteristicData)
-                                } else {
-                                    service
-                                }
-                            }
-                        )
+                profileHandler.readCharacteristic()?.onEach {
+                    val characteristicData = it as Int
+                    _deviceData.updateOrAddDataFlow(
+                        HRSServiceData(bodySensorLocation = characteristicData)
+                    ) { existingServiceData ->
+                        existingServiceData.copy(bodySensorLocation = characteristicData)
                     }
-                }
+                }?.launchIn(viewModelScope)
             }
 
             Profile.BATTERY -> {
                 profileHandler.getNotification().onEach { notificationData ->
-                    if (_deviceData.value.serviceData.any { it is BatteryServiceData }) {
-                        _deviceData.value = _deviceData.value.copy(
-                            serviceData = _deviceData.value.serviceData.map {
-                                if (it is BatteryServiceData) {
-                                    it.copy(batteryLevel = notificationData as Int)
-                                } else {
-                                    it
-                                }
-                            }
-                        )
-                    } else _deviceData.value = _deviceData.value.copy(
-                        serviceData = _deviceData.value.serviceData + BatteryServiceData(
-                            batteryLevel = notificationData as Int
-                        )
-                    )
+                    val batteryLevel = notificationData as Int
+                    _deviceData.updateOrAddDataFlow(
+                        BatteryServiceData(batteryLevel = batteryLevel)
+                    ) { existingServiceData ->
+                        existingServiceData.copy(batteryLevel = batteryLevel)
+                    }
                 }.launchIn(viewModelScope)
             }
+
             // TODO: Add more profile modules here
             else -> TODO()
         }
     }
 
     /**
-     * Handle click events from the view.
+     * Update or add the profile service notification data.
+     * @param newData the new data to update or add.
+     * @param update the update function.
      */
-    fun onClickEvent(event: DeviceConnectionViewEvent) {
-        // Handle click events
-        when (event) {
-            is DisconnectEvent -> disconnectAndNavigate(event.device)
-            NavigateUp -> disconnectIfNeededAndNavigate()
-            is OnRetryClicked -> reConnectDevice(event.device)
-            is OnTemperatureUnitSelected -> updateTemperatureUnit(event.value)
-            OpenLoggerEvent -> openLogger()
-            SwitchZoomEvent -> switchZoomEvent()
+    private inline fun <reified T : ProfileServiceData> MutableStateFlow<DeviceData>.updateOrAddDataFlow(
+        newData: T,
+        crossinline update: (T) -> T
+    ) {
+        value = if (value.serviceData.any { it is T }) {
+            value.copy(
+                serviceData = value.serviceData.map {
+                    if (it is T) update(it) else it
+                }
+            )
+        } else {
+            value.copy(
+                serviceData = value.serviceData + newData
+            )
         }
-
     }
 
     /**
