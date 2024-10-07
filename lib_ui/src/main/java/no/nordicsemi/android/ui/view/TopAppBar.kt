@@ -53,7 +53,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.ui.R
-import no.nordicsemi.kotlin.ble.core.ConnectionState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -187,18 +186,13 @@ fun LoggerIconAppBar(
 @Composable
 fun ProfileAppBar(
     deviceName: String?,
-    connectionState: ConnectionState?,
     @StringRes title: Int,
     navigateUp: () -> Unit,
     disconnect: () -> Unit,
     openLogger: () -> Unit
 ) {
     if (deviceName?.isNotBlank() == true) {
-        if (connectionState == ConnectionState.Disconnecting || connectionState == ConnectionState.Disconnected()) {
-            LoggerBackIconAppBar(deviceName, openLogger)
-        } else {
-            LoggerIconAppBar(deviceName, navigateUp, disconnect, openLogger)
-        }
+        LoggerIconAppBar(deviceName, navigateUp, disconnect, openLogger)
     } else {
         BackIconAppBar(stringResource(id = title), navigateUp)
     }
