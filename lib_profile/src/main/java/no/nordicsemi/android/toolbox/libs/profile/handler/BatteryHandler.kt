@@ -13,6 +13,8 @@ import no.nordicsemi.android.toolbox.libs.profile.data.battery.BatteryLevelParse
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber
 import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.toKotlinUuid
 
 val BATTERY_LEVEL_CHARACTERISTIC_UUID: UUID =
     UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
@@ -26,8 +28,9 @@ class BatteryHandler: ProfileHandler() {
 
     override fun readCharacteristic(): Flow<Any>? = null
 
+    @OptIn(ExperimentalUuidApi::class)
     override suspend fun handleServices(remoteService: RemoteService, scope: CoroutineScope) {
-        remoteService.characteristics.firstOrNull { it.uuid == BATTERY_LEVEL_CHARACTERISTIC_UUID }
+        remoteService.characteristics.firstOrNull { it.uuid == BATTERY_LEVEL_CHARACTERISTIC_UUID.toKotlinUuid() }
             ?.subscribe()
             ?.mapNotNull { BatteryLevelParser.parse(it) }
             ?.onEach { batteryLevel ->

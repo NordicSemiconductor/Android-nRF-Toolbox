@@ -14,6 +14,8 @@ import no.nordicsemi.android.toolbox.libs.profile.data.hrs.HRSDataParser
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber
 import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.toKotlinUuid
 
 private val BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID: UUID =
     UUID.fromString("00002A38-0000-1000-8000-00805f9b34fb")
@@ -29,8 +31,9 @@ class HrsHandler : ProfileHandler() {
 
     override fun readCharacteristic() = _bodySensorLocation.asSharedFlow()
 
+    @OptIn(ExperimentalUuidApi::class)
     override suspend fun handleServices(remoteService: RemoteService, scope: CoroutineScope) {
-        remoteService.characteristics.firstOrNull { it.uuid == HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID }
+        remoteService.characteristics.firstOrNull { it.uuid == HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID.toKotlinUuid() }
             ?.subscribe()
             ?.mapNotNull { HRSDataParser.parse(it) }
             ?.onEach { data ->
@@ -42,7 +45,7 @@ class HrsHandler : ProfileHandler() {
                 Timber.e(e)
             }?.launchIn(scope)
 
-        remoteService.characteristics.firstOrNull { it.uuid == BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID }
+        remoteService.characteristics.firstOrNull { it.uuid == BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID.toKotlinUuid() }
             ?.read()
             ?.let { BodySensorLocationParser.parse(it) }
             ?.let { bodySensorLocation ->

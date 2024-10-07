@@ -14,6 +14,8 @@ import no.nordicsemi.android.toolbox.libs.profile.data.hts.HtsData
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber
 import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.toKotlinUuid
 
 private val HTS_MEASUREMENT_CHARACTERISTIC_UUID: UUID =
     UUID.fromString("00002A1C-0000-1000-8000-00805f9b34fb")
@@ -26,8 +28,9 @@ class HtsHandler : ProfileHandler() {
 
     override fun readCharacteristic(): Flow<Any>? = null
 
+    @OptIn(ExperimentalUuidApi::class)
     override suspend fun handleServices(remoteService: RemoteService, scope: CoroutineScope) {
-        remoteService.characteristics.firstOrNull { it.uuid == HTS_MEASUREMENT_CHARACTERISTIC_UUID }
+        remoteService.characteristics.firstOrNull { it.uuid == HTS_MEASUREMENT_CHARACTERISTIC_UUID.toKotlinUuid() }
             ?.subscribe()
             ?.mapNotNull { HTSDataParser.parse(it) }
             ?.onEach { htsData ->

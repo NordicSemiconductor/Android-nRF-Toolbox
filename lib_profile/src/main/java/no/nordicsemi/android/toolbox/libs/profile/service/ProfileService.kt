@@ -23,6 +23,7 @@ import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.uuid.ExperimentalUuidApi
 
 @AndroidEntryPoint
 internal class ProfileService : NotificationService() {
@@ -146,6 +147,7 @@ internal class ProfileService : NotificationService() {
      * Observe the peripheral services and observe the flow of data on each service.
      * @param peripheral the connected peripheral.
      */
+    @OptIn(ExperimentalUuidApi::class)
     private fun handleConnectedState(peripheral: Peripheral) {
         peripheral.services().onEach { remoteServices ->
             val handlers = mutableListOf<ProfileHandler>()
