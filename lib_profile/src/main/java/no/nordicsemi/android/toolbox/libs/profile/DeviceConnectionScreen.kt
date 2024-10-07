@@ -120,20 +120,33 @@ internal fun DeviceConnectedView(
                 }
 
                 false -> {
-                    deviceData.serviceData.forEach { serviceData ->
-                        when (serviceData) {
-                            is HRSServiceData -> HRSScreen(
-                                hrsServiceData = serviceData,
-                            ) { onClickEvent(it) }
+                    if (deviceData.serviceData.isEmpty()) {
+                        DeviceConnectingView()
+                    } else {
+                        deviceData.serviceData.forEach { serviceData ->
+                            when (serviceData) {
+                                is HRSServiceData -> HRSScreen(
+                                    hrsServiceData = serviceData,
+                                ) { onClickEvent(it) }
 
-                            is HTSServiceData -> HTSScreen(
-                                htsServiceData = serviceData,
-                            ) { onClickEvent(it) }
+                                is HTSServiceData -> HTSScreen(
+                                    htsServiceData = serviceData,
+                                ) { onClickEvent(it) }
 
-                            // Add Battery level at the end of the view.
-                            is BatteryServiceData -> serviceData.batteryLevel?.let {
-                                BatteryLevelView(it)
+                                is BatteryServiceData -> {
+                                    // Battery level will be added at the end.
+                                    // Do nothing here.
+                                }
                             }
+                        }
+                        // Battery level will be added at the end.
+                        if (deviceData.serviceData.any { it is BatteryServiceData }) {
+                            deviceData.serviceData.filterIsInstance<BatteryServiceData>()
+                                .forEach { batteryServiceData ->
+                                    batteryServiceData.batteryLevel?.let {
+                                        BatteryLevelView(it)
+                                    }
+                                }
                         }
                     }
                 }
