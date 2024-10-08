@@ -20,7 +20,7 @@ import kotlin.uuid.toKotlinUuid
 private val HTS_MEASUREMENT_CHARACTERISTIC_UUID: UUID =
     UUID.fromString("00002A1C-0000-1000-8000-00805f9b34fb")
 
-class HtsHandler : ProfileHandler() {
+internal class HtsHandler : ProfileHandler() {
     override val profile: Profile = Profile.HTS
     private val _htsData = MutableSharedFlow<HtsData>()
 
