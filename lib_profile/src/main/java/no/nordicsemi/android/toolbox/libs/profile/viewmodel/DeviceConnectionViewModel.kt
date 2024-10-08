@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -63,6 +64,7 @@ data class DeviceData(
     val connectionState: ConnectionState? = null,
     val serviceData: List<ProfileServiceData> = emptyList(),
     val isMissingServices: Boolean = false,
+    val disconnectionReason: ConnectionState.Disconnected.Reason? = null,
 )
 
 @HiltViewModel
@@ -74,10 +76,9 @@ open class DeviceConnectionViewModel @Inject constructor(
 ) : ViewModel() {
     private var address: String? = null
     private val _deviceData = MutableStateFlow(DeviceData())
+    val deviceData = _deviceData.asStateFlow()
 
     private var logger: nRFLoggerTree? = null
-
-    val deviceData = _deviceData.asStateFlow()
     private var serviceApi: WeakReference<ServiceApi>? = null
 
     /**
@@ -134,10 +135,11 @@ open class DeviceConnectionViewModel @Inject constructor(
         // Connect to the peripheral
         getServiceApi()?.let { api ->
             val peripheral = api.getPeripheralById(deviceAddress)
+            val isAlreadyConnected = peripheral?.isConnected == true
             if (peripheral?.isConnected != true) {
                 serviceManager.connectToPeripheral(deviceAddress)
             }
-            updateServiceData(api, deviceAddress)
+            updateServiceData(api, deviceAddress, isAlreadyConnected)
         }
     }
 
@@ -146,31 +148,49 @@ open class DeviceConnectionViewModel @Inject constructor(
      * @param api the service API.
      * @param deviceAddress the address of the connected device.
      */
-    private fun updateServiceData(api: ServiceApi, deviceAddress: String) {
-        // Observe the handlers for the connected device
-        api.getConnectionState(deviceAddress)?.onEach { connectionState ->
-            _deviceData.value = _deviceData.value.copy(
-                connectionState = connectionState,
-            )
-            if (connectionState == ConnectionState.Connected) {
-                val peripheral = api.getPeripheralById(deviceAddress)
+    private fun updateServiceData(
+        api: ServiceApi,
+        deviceAddress: String,
+        isAlreadyConnected: Boolean
+    ) {
+        // Drop the first default state (Closed) before connection.
+        api.getConnectionState(deviceAddress)
+            ?.drop(if (isAlreadyConnected) 0 else 1)
+            ?.onEach { connectionState ->
                 _deviceData.value = _deviceData.value.copy(
-                    peripheral = peripheral,
+                    connectionState = connectionState,
                 )
-                api.isMissingServices.onEach { isMissing ->
-                    _deviceData.value = _deviceData.value.copy(
-                        isMissingServices = isMissing,
-                    )
-                    if (!isMissing) {
-                        // Observe the data from the connected device
-                        updateConnectedData(api, peripheral)
+                when (connectionState) {
+                    is ConnectionState.Disconnected -> {
+                        // Save the reason to show in the ui.
+                        _deviceData.value = _deviceData.value.copy(
+                            disconnectionReason = connectionState.reason,
+                        )
+                        // unbind the service
+                        unbindService()
                     }
-                }.launchIn(viewModelScope)
-            } else if (connectionState is ConnectionState.Disconnected) {
-                // unbind the service
-                unbindService()
-            }
-        }?.launchIn(viewModelScope)
+
+                    ConnectionState.Connected -> {
+                        val peripheral = api.getPeripheralById(deviceAddress)
+                        _deviceData.value = _deviceData.value.copy(
+                            peripheral = peripheral,
+                        )
+                        api.isMissingServices.onEach { isMissing ->
+                            _deviceData.value = _deviceData.value.copy(
+                                isMissingServices = isMissing,
+                            )
+                            if (!isMissing) {
+                                // Observe the data from the connected device
+                                updateConnectedData(api, peripheral)
+                            }
+                        }.launchIn(viewModelScope)
+                    }
+
+                    else -> {
+                        // Do nothing.
+                    }
+                }
+            }?.launchIn(viewModelScope)
     }
 
     /**

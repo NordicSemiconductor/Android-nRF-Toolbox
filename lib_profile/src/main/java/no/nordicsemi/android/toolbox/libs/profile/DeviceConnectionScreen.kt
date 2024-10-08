@@ -30,6 +30,7 @@ import no.nordicsemi.android.toolbox.libs.profile.viewmodel.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.NavigateUp
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OnRetryClicked
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OpenLoggerEvent
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.ProfileServiceData
 import no.nordicsemi.android.ui.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.ProfileAppBar
 import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
@@ -52,7 +53,6 @@ internal fun DeviceConnectionScreen(deviceAddress: String) {
         topBar = {
             ProfileAppBar(
                 deviceName = deviceData.peripheral?.name ?: deviceAddress,
-                connectionState = deviceData.connectionState,
                 title = R.string.hts_title,
                 navigateUp = { onClickEvent(NavigateUp) },
                 disconnect = { onClickEvent(DisconnectEvent(deviceAddress)) },
@@ -68,33 +68,22 @@ internal fun DeviceConnectionScreen(deviceAddress: String) {
                     .fillMaxSize()
                     .padding(paddingValues),
             ) {
-                when (val s = deviceData.connectionState) {
-                    ConnectionState.Connecting -> DeviceConnectingView(
-                        modifier = Modifier.padding(16.dp)
-                    )
-
+                when (val connectionState = deviceData.connectionState) {
                     ConnectionState.Connected -> DeviceConnectedView(deviceData, onClickEvent)
                     ConnectionState.Disconnecting -> LoadingView()
-                    is ConnectionState.Disconnected -> {
-                        s.reason?.let {
-                            DeviceDisconnectedView(
-                                reason = it,
-                                modifier = Modifier.padding(16.dp),
-                                content = { paddingValues ->
-                                    Button(
-                                        modifier = Modifier.padding(paddingValues),
-                                        onClick = { onClickEvent(OnRetryClicked(deviceAddress)) },
-                                    ) {
-                                        Text(text = "Reconnect")
-                                    }
-                                }
-                            )
-                        }
+                    is ConnectionState.Disconnected -> ReconnectDevice(
+                        reason = connectionState.reason,
+                        deviceAddress = deviceAddress,
+                        onClickEvent
+                    )
+
+                    ConnectionState.Closed -> {
+                        ReconnectDevice(deviceData.disconnectionReason, deviceAddress, onClickEvent)
                     }
 
-                    null -> {
-                        Text("Connecting to $deviceAddress")
-                    }
+                    else -> DeviceConnectingView(
+                        modifier = Modifier.padding(16.dp)
+                    )
                 }
             }
         }
@@ -102,55 +91,70 @@ internal fun DeviceConnectionScreen(deviceAddress: String) {
 }
 
 @Composable
-internal fun DeviceConnectedView(
+private fun ReconnectDevice(
+    reason: ConnectionState.Disconnected.Reason?,
+    deviceAddress: String,
+    onClickEvent: (DeviceConnectionViewEvent) -> Unit
+) {
+    DeviceDisconnectedView(
+        reason = reason ?: ConnectionState.Disconnected.Reason.Unknown(0),
+        modifier = Modifier.padding(16.dp)
+    ) {
+        Button(
+            onClick = { onClickEvent(OnRetryClicked(deviceAddress)) },
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(text = "Reconnect")
+        }
+    }
+}
+
+@Composable
+private fun DeviceConnectedView(
     deviceData: DeviceData,
     onClickEvent: (DeviceConnectionViewEvent) -> Unit,
 ) {
-    if (deviceData.peripheral != null) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier
-                .padding(16.dp)
-        ) {
-            when (deviceData.isMissingServices) {
-                true -> {
-                    DeviceDisconnectedView(
-                        reason = DisconnectReason.MISSING_SERVICE,
-                    )
-                }
+    deviceData.peripheral?.let {
+        when {
+            deviceData.isMissingServices -> {
+                DeviceDisconnectedView(
+                    reason = DisconnectReason.MISSING_SERVICE,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
 
-                false -> {
-                    if (deviceData.serviceData.isEmpty()) {
-                        DeviceConnectingView()
-                    } else {
-                        deviceData.serviceData.forEach { serviceData ->
-                            when (serviceData) {
-                                is HRSServiceData -> HRSScreen(
-                                    hrsServiceData = serviceData,
-                                ) { onClickEvent(it) }
+            deviceData.serviceData.isEmpty() -> {
+                DeviceConnectingView(modifier = Modifier.padding(16.dp))
+            }
 
-                                is HTSServiceData -> HTSScreen(
-                                    htsServiceData = serviceData,
-                                ) { onClickEvent(it) }
-
-                                is BatteryServiceData -> {
-                                    // Battery level will be added at the end.
-                                    // Do nothing here.
-                                }
+            else -> {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    deviceData.serviceData.forEach { serviceData ->
+                        when (serviceData) {
+                            is HRSServiceData -> HRSScreen(serviceData, onClickEvent)
+                            is HTSServiceData -> HTSScreen(serviceData, onClickEvent)
+                            is BatteryServiceData -> {
+                                // Battery level will be added at the end.
+                                // Do nothing here.
                             }
                         }
-                        // Battery level will be added at the end.
-                        if (deviceData.serviceData.any { it is BatteryServiceData }) {
-                            deviceData.serviceData.filterIsInstance<BatteryServiceData>()
-                                .forEach { batteryServiceData ->
-                                    batteryServiceData.batteryLevel?.let {
-                                        BatteryLevelView(it)
-                                    }
-                                }
-                        }
                     }
+                    // Battery level will be added at the end.
+                    DisplayBatteryLevel(deviceData.serviceData)
                 }
             }
+
         }
     }
+}
+
+@Composable
+private fun DisplayBatteryLevel(serviceData: List<ProfileServiceData>) {
+    serviceData
+        .filterIsInstance<BatteryServiceData>()
+        .firstOrNull { it.batteryLevel != null }
+        ?.batteryLevel?.let { BatteryLevelView(it) }
 }
