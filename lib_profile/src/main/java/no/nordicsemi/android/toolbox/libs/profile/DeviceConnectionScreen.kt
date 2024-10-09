@@ -17,9 +17,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.toolbox.lib.profile.R
+import no.nordicsemi.android.toolbox.libs.profile.data.Profile
+import no.nordicsemi.android.toolbox.libs.profile.view.BPSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HRSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HTSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.LoadingView
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.BPSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.BatteryServiceData
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewModel
@@ -133,13 +136,16 @@ private fun DeviceConnectedView(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     deviceData.serviceData.forEach { serviceData ->
-                        when (serviceData) {
-                            is HRSServiceData -> HRSScreen(serviceData, onClickEvent)
-                            is HTSServiceData -> HTSScreen(serviceData, onClickEvent)
-                            is BatteryServiceData -> {
+                        when (serviceData.profile) {
+                            Profile.BPS -> BPSScreen(serviceData as BPSServiceData)
+                            Profile.HTS -> HTSScreen(serviceData as HTSServiceData, onClickEvent)
+                            Profile.HRS -> HRSScreen(serviceData as HRSServiceData, onClickEvent)
+                            Profile.BATTERY -> {
                                 // Battery level will be added at the end.
                                 // Do nothing here.
                             }
+
+                            else -> TODO()
                         }
                     }
                     // Battery level will be added at the end.
