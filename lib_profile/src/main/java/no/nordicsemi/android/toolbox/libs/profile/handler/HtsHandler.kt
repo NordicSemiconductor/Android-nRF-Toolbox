@@ -26,7 +26,7 @@ internal class HtsHandler : ProfileHandler() {
 
     override fun getNotification() = _htsData.asSharedFlow()
 
-    override fun readCharacteristic(): Flow<Any>? = null
+    override fun readCharacteristic(): Flow<Nothing>? = null
 
     @OptIn(ExperimentalUuidApi::class)
     override suspend fun handleServices(remoteService: RemoteService, scope: CoroutineScope) {
