@@ -16,6 +16,9 @@ import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.toolbox.libs.profile.data.Profile
+import no.nordicsemi.android.toolbox.libs.profile.data.bps.BPSData
+import no.nordicsemi.android.toolbox.libs.profile.data.bps.BloodPressureMeasurementData
+import no.nordicsemi.android.toolbox.libs.profile.data.bps.IntermediateCuffPressureData
 import no.nordicsemi.android.toolbox.libs.profile.data.hrs.HRSData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.HtsData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.TemperatureUnit
@@ -28,7 +31,9 @@ import no.nordicsemi.kotlin.ble.core.ConnectionState
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 
-sealed class ProfileServiceData
+sealed class ProfileServiceData {
+    abstract val profile: Profile
+}
 
 /**
  * HTS service data class that holds the HTS data.
@@ -37,6 +42,7 @@ sealed class ProfileServiceData
  * @param temperatureUnit The temperature unit.
  */
 data class HTSServiceData(
+    override val profile: Profile = Profile.HTS,
     val data: HtsData = HtsData(),
     val temperatureUnit: TemperatureUnit = TemperatureUnit.CELSIUS,
 ) : ProfileServiceData()
@@ -48,6 +54,7 @@ data class HTSServiceData(
  * @param zoomIn true if the chart is zoomed in.
  */
 data class HRSServiceData(
+    override val profile: Profile = Profile.HRS,
     val data: List<HRSData> = emptyList(),
     val bodySensorLocation: Int? = null,
     val zoomIn: Boolean = false,
@@ -56,7 +63,15 @@ data class HRSServiceData(
 }
 
 data class BatteryServiceData(
+    override val profile: Profile = Profile.BATTERY,
     val batteryLevel: Int? = null,
+) : ProfileServiceData()
+
+
+data class BPSServiceData(
+    override val profile: Profile = Profile.BPS,
+    val bloodPressureMeasurement: BloodPressureMeasurementData? = null,
+    val intermediateCuffPressure: IntermediateCuffPressureData? = null,
 ) : ProfileServiceData()
 
 data class DeviceData(
@@ -218,51 +233,85 @@ open class DeviceConnectionViewModel @Inject constructor(
      */
     private fun updateProfileData(profileHandler: ProfileHandler) {
         when (profileHandler.profile) {
-            Profile.HTS -> {
-                profileHandler.getNotification().onEach { notificationData ->
-                    val htsData = notificationData as HtsData
-                    _deviceData.updateOrAddDataFlow(
-                        HTSServiceData(data = htsData)
-                    ) { existingServiceData ->
-                        existingServiceData.copy(data = htsData)
-                    }
-                }.launchIn(viewModelScope)
-            }
-
-            Profile.HRS -> {
-                profileHandler.getNotification().onEach { notificationData ->
-                    val hrsData = notificationData as HRSData
-                    _deviceData.updateOrAddDataFlow(
-                        HRSServiceData(data = listOf(hrsData))
-                    ) { existingServiceData ->
-                        existingServiceData.copy(data = existingServiceData.data + hrsData)
-                    }
-                }.launchIn(viewModelScope)
-
-                profileHandler.readCharacteristic()?.onEach {
-                    val characteristicData = it as Int
-                    _deviceData.updateOrAddDataFlow(
-                        HRSServiceData(bodySensorLocation = characteristicData)
-                    ) { existingServiceData ->
-                        existingServiceData.copy(bodySensorLocation = characteristicData)
-                    }
-                }?.launchIn(viewModelScope)
-            }
-
-            Profile.BATTERY -> {
-                profileHandler.getNotification().onEach { notificationData ->
-                    val batteryLevel = notificationData as Int
-                    _deviceData.updateOrAddDataFlow(
-                        BatteryServiceData(batteryLevel = batteryLevel)
-                    ) { existingServiceData ->
-                        existingServiceData.copy(batteryLevel = batteryLevel)
-                    }
-                }.launchIn(viewModelScope)
+            Profile.HTS -> getHTSData(profileHandler)
+            Profile.HRS -> getHRSData(profileHandler)
+            Profile.BATTERY -> getBatteryLevelData(profileHandler)
+            Profile.BPS -> {
+                _deviceData.value = _deviceData.value.copy(
+                    serviceData = _deviceData.value.serviceData + BPSServiceData()
+                )
+                getBPSData(profileHandler)
             }
 
             // TODO: Add more profile modules here
             else -> TODO()
         }
+    }
+
+    private fun getHTSData(profileHandler: ProfileHandler) {
+        profileHandler.getNotification().onEach { notificationData ->
+            val htsData = notificationData as HtsData
+            _deviceData.updateOrAddDataFlow(
+                HTSServiceData(data = htsData)
+            ) { existingServiceData ->
+                existingServiceData.copy(data = htsData)
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    private fun getHRSData(profileHandler: ProfileHandler) {
+        profileHandler.getNotification().onEach { notificationData ->
+            val hrsData = notificationData as HRSData
+            _deviceData.updateOrAddDataFlow(
+                HRSServiceData(data = listOf(hrsData))
+            ) { existingServiceData ->
+                existingServiceData.copy(data = existingServiceData.data + hrsData)
+            }
+        }.launchIn(viewModelScope)
+
+        profileHandler.readCharacteristic()?.onEach {
+            val characteristicData = it as Int
+            _deviceData.updateOrAddDataFlow(
+                HRSServiceData(bodySensorLocation = characteristicData)
+            ) { existingServiceData ->
+                existingServiceData.copy(bodySensorLocation = characteristicData)
+            }
+        }?.launchIn(viewModelScope)
+    }
+
+    private fun getBatteryLevelData(profileHandler: ProfileHandler) {
+        profileHandler.getNotification().onEach { notificationData ->
+            val batteryLevel = notificationData as Int
+            _deviceData.updateOrAddDataFlow(
+                BatteryServiceData(batteryLevel = batteryLevel)
+            ) { existingServiceData ->
+                existingServiceData.copy(batteryLevel = batteryLevel)
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    private fun getBPSData(profileHandler: ProfileHandler) {
+        profileHandler.getNotification().onEach { notificationData ->
+            val bpsData = notificationData as BPSData
+
+            // Observe the blood pressure measurement data
+            bpsData.bloodPressureMeasurement?.let { bpmData ->
+                _deviceData.updateOrAddDataFlow(
+                    BPSServiceData(bloodPressureMeasurement = bpmData)
+                ) { existingServiceData ->
+                    existingServiceData.copy(bloodPressureMeasurement = bpmData)
+                }
+            }
+
+            // Observe the intermediate cuff pressure data
+            bpsData.intermediateCuffPressure?.let { icpData ->
+                _deviceData.updateOrAddDataFlow(
+                    BPSServiceData(intermediateCuffPressure = icpData)
+                ) { existingServiceData ->
+                    existingServiceData.copy(intermediateCuffPressure = icpData)
+                }
+            }
+        }.launchIn(viewModelScope)
     }
 
     /**
