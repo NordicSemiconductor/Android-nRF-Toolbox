@@ -17,62 +17,22 @@ import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.toolbox.libs.profile.data.Profile
 import no.nordicsemi.android.toolbox.libs.profile.data.bps.BPSData
-import no.nordicsemi.android.toolbox.libs.profile.data.bps.BloodPressureMeasurementData
-import no.nordicsemi.android.toolbox.libs.profile.data.bps.IntermediateCuffPressureData
 import no.nordicsemi.android.toolbox.libs.profile.data.hrs.HRSData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.HtsData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
+import no.nordicsemi.android.toolbox.libs.profile.service.BPSServiceData
+import no.nordicsemi.android.toolbox.libs.profile.service.BatteryServiceData
+import no.nordicsemi.android.toolbox.libs.profile.service.HRSServiceData
+import no.nordicsemi.android.toolbox.libs.profile.service.HTSServiceData
+import no.nordicsemi.android.toolbox.libs.profile.service.ProfileServiceData
 import no.nordicsemi.android.toolbox.libs.profile.service.ServiceApi
 import no.nordicsemi.android.toolbox.libs.profile.service.ServiceManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import java.lang.ref.WeakReference
 import javax.inject.Inject
-
-sealed class ProfileServiceData {
-    abstract val profile: Profile
-}
-
-/**
- * HTS service data class that holds the HTS data.
- *
- * @param data The HTS data.
- * @param temperatureUnit The temperature unit.
- */
-data class HTSServiceData(
-    override val profile: Profile = Profile.HTS,
-    val data: HtsData = HtsData(),
-    val temperatureUnit: TemperatureUnit = TemperatureUnit.CELSIUS,
-) : ProfileServiceData()
-
-/**
- * Heart Rate Service data.
- * @param data the list of heart rate data.
- * @param bodySensorLocation the body sensor location.
- * @param zoomIn true if the chart is zoomed in.
- */
-data class HRSServiceData(
-    override val profile: Profile = Profile.HRS,
-    val data: List<HRSData> = emptyList(),
-    val bodySensorLocation: Int? = null,
-    val zoomIn: Boolean = false,
-) : ProfileServiceData() {
-    val heartRates = data.map { it.heartRate }
-}
-
-data class BatteryServiceData(
-    override val profile: Profile = Profile.BATTERY,
-    val batteryLevel: Int? = null,
-) : ProfileServiceData()
-
-
-data class BPSServiceData(
-    override val profile: Profile = Profile.BPS,
-    val bloodPressureMeasurement: BloodPressureMeasurementData? = null,
-    val intermediateCuffPressure: IntermediateCuffPressureData? = null,
-) : ProfileServiceData()
 
 data class DeviceData(
     val peripheral: Peripheral? = null,
