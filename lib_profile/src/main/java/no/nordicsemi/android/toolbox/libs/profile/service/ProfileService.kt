@@ -38,7 +38,6 @@ internal class ProfileService : NotificationService() {
 
     private val _connectedDevices =
         MutableStateFlow<Map<Peripheral, List<ProfileHandler>>>(emptyMap())
-    private val _batteryLevel = MutableStateFlow<Int?>(null)
     private val _isMissingServices = MutableStateFlow(false)
 
     override fun onBind(intent: Intent): IBinder {
@@ -230,7 +229,6 @@ internal class ProfileService : NotificationService() {
      */
     private fun clearFlags() {
         _isMissingServices.tryEmit(false)
-        _batteryLevel.tryEmit(null)
         uprootLogger()
     }
 
