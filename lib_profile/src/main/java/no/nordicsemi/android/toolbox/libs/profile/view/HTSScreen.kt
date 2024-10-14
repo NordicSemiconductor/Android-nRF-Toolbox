@@ -16,8 +16,8 @@ import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.displayTemperature
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.temperatureSettingsItems
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.toTemperatureUnit
+import no.nordicsemi.android.toolbox.libs.profile.service.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
-import no.nordicsemi.android.toolbox.libs.profile.viewmodel.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OnTemperatureUnitSelected
 import no.nordicsemi.android.ui.view.KeyValueField
 import no.nordicsemi.android.ui.view.ScreenSection
