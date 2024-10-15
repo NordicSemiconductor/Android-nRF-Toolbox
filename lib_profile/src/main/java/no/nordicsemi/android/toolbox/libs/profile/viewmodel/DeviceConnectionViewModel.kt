@@ -140,6 +140,14 @@ open class DeviceConnectionViewModel @Inject constructor(
                         // Save the reason to show in the ui.
                         _deviceData.value = _deviceData.value.copy(
                             disconnectionReason = connectionState.reason,
+                            serviceData = emptyList(),
+                        )
+                        // unbind the service
+                        unbindService()
+                    }
+                    ConnectionState.Closed -> {
+                        _deviceData.value = _deviceData.value.copy(
+                            serviceData = emptyList(),
                         )
                         // unbind the service
                         unbindService()
@@ -197,9 +205,6 @@ open class DeviceConnectionViewModel @Inject constructor(
             Profile.HRS -> getHRSData(profileHandler)
             Profile.BATTERY -> getBatteryLevelData(profileHandler)
             Profile.BPS -> {
-                _deviceData.value = _deviceData.value.copy(
-                    serviceData = _deviceData.value.serviceData + BPSServiceData()
-                )
                 getBPSData(profileHandler)
             }
 
@@ -251,6 +256,12 @@ open class DeviceConnectionViewModel @Inject constructor(
     }
 
     private fun getBPSData(profileHandler: ProfileHandler) {
+        // Update Profile data
+        _deviceData.updateOrAddDataFlow(
+            BPSServiceData(profile = profileHandler.profile)
+        ) { existingServiceData ->
+            existingServiceData.copy(profile = profileHandler.profile)
+        }
         profileHandler.getNotification().onEach { notificationData ->
             val bpsData = notificationData as BPSData
 

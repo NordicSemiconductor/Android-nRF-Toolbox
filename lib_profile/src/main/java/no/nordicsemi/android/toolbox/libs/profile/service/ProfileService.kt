@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.NotificationService
@@ -127,17 +128,25 @@ internal class ProfileService : NotificationService() {
         peripheral: Peripheral,
     ) {
         peripheral.state.onEach { state ->
-            if (state is ConnectionState.Connected) {
-                // Handle the connected state
-                handleConnectedState(peripheral)
-            } else if (state is ConnectionState.Disconnected) {
-                // Generally the peripheral is disconnected by clicking the disconnect button, but it can also be disconnected by the device itself.
-                // Remove the device from the connected devices map
-                removeDevice(peripheral)
-                // Clear the flags
-                clearFlags()
-                // Stop the service if no devices are connected
-                stopServiceIfNoDevices()
+            when (state) {
+                is ConnectionState.Connected -> {
+                    // Handle the connected state
+                    handleConnectedState(peripheral)
+                }
+
+                is ConnectionState.Disconnected -> {
+                    // Generally the peripheral is disconnected by clicking the disconnect button, but it can also be disconnected by the device itself.
+                    // Remove the device from the connected devices map
+                    removeDevice(peripheral)
+                    // Clear the flags
+                    clearFlags()
+                    // Stop the service if no devices are connected
+                    stopServiceIfNoDevices()
+                }
+
+                else -> {
+                    // Do nothing
+                }
             }
         }.launchIn(lifecycleScope)
     }
@@ -147,9 +156,9 @@ internal class ProfileService : NotificationService() {
      * @param peripheral the connected peripheral.
      */
     @OptIn(ExperimentalUuidApi::class)
-    private fun handleConnectedState(peripheral: Peripheral) {
+    private suspend fun handleConnectedState(peripheral: Peripheral) {
+        val handlers = mutableListOf<ProfileHandler>()
         peripheral.services().onEach { remoteServices ->
-            val handlers = mutableListOf<ProfileHandler>()
             remoteServices.forEach { remoteService ->
                 val handler = ProfileHandlerFactory.createHandler(remoteService.uuid)
                 handler?.let {
@@ -161,11 +170,15 @@ internal class ProfileService : NotificationService() {
                 }
             }
 
-            // Check if no supported service is found.
-            if (handlers.isEmpty() && remoteServices.isNotEmpty()) {
+            if (remoteServices.isNotEmpty() && handlers.isEmpty())
                 _isMissingServices.tryEmit(true)
-            } else if (handlers.isNotEmpty()) {
-                updateConnectedDevices(peripheral, handlers)
+            else if (handlers.isNotEmpty()) {
+                _isMissingServices.tryEmit(false)
+                _connectedDevices.update {
+                    it.toMutableMap().apply {
+                        this[peripheral] = handlers
+                    }
+                }
             }
         }.launchIn(lifecycleScope)
     }
@@ -188,22 +201,11 @@ internal class ProfileService : NotificationService() {
         peripheral: Peripheral
     ) {
         // Remove the device from the connected devices map before updating the missing services flag.
-        val currentDevices = _connectedDevices.replayCache.firstOrNull() ?: emptyMap()
-        val updatedDevices = currentDevices.toMutableMap().apply {
-            remove(peripheral)
+        _connectedDevices.update {
+            it.toMutableMap().apply {
+                this.remove(peripheral)
+            }
         }
-        _connectedDevices.tryEmit(updatedDevices)
-    }
-
-    private fun updateConnectedDevices(
-        peripheral: Peripheral,
-        handlers: List<ProfileHandler>
-    ) {
-        val currentDevices = _connectedDevices.replayCache.firstOrNull() ?: emptyMap()
-        val updatedDevices = currentDevices.toMutableMap().apply {
-            this[peripheral] = handlers
-        }
-        _connectedDevices.tryEmit(updatedDevices)
     }
 
     /**
