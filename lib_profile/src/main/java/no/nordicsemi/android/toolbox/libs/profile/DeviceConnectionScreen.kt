@@ -71,14 +71,9 @@ internal fun DeviceConnectionScreen(deviceAddress: String) {
                     .fillMaxSize()
                     .padding(paddingValues),
             ) {
-                when (val connectionState = deviceData.connectionState) {
+                when (deviceData.connectionState) {
                     ConnectionState.Connected -> DeviceConnectedView(deviceData, onClickEvent)
-                    ConnectionState.Disconnecting -> LoadingView()
-                    is ConnectionState.Disconnected -> ReconnectDevice(
-                        reason = connectionState.reason,
-                        deviceAddress = deviceAddress,
-                        onClickEvent
-                    )
+                    is ConnectionState.Disconnected, ConnectionState.Disconnecting -> LoadingView()
 
                     ConnectionState.Closed -> {
                         ReconnectDevice(deviceData.disconnectionReason, deviceAddress, onClickEvent)
