@@ -5,6 +5,7 @@ import android.os.Binder
 import android.os.IBinder
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -120,6 +121,7 @@ internal class ProfileService : NotificationService() {
         }
     }
 
+    private var job: Job? = null
     /**
      * Observe the peripheral state and handle the connected state.
      * @param peripheral the peripheral to observe.
@@ -127,16 +129,22 @@ internal class ProfileService : NotificationService() {
     private fun observePeripheralState(
         peripheral: Peripheral,
     ) {
-        peripheral.state.onEach { state ->
+        job = peripheral.state.onEach { state ->
             when (state) {
                 is ConnectionState.Connected -> {
                     // Handle the connected state
                     handleConnectedState(peripheral)
                 }
+                is ConnectionState.Closed -> {
+                    job?.cancel()
+                    anotherJob?.cancel()
+                }
 
                 is ConnectionState.Disconnected -> {
                     // Generally the peripheral is disconnected by clicking the disconnect button, but it can also be disconnected by the device itself.
                     // Remove the device from the connected devices map
+                    job?.cancel()
+                    anotherJob?.cancel()
                     removeDevice(peripheral)
                     // Clear the flags
                     clearFlags()
@@ -151,14 +159,15 @@ internal class ProfileService : NotificationService() {
         }.launchIn(lifecycleScope)
     }
 
+    private var anotherJob: Job? = null
     /**
      * Observe the peripheral services and observe the flow of data on each service.
      * @param peripheral the connected peripheral.
      */
     @OptIn(ExperimentalUuidApi::class)
-    private suspend fun handleConnectedState(peripheral: Peripheral) {
+    private fun handleConnectedState(peripheral: Peripheral) {
         val handlers = mutableListOf<ProfileHandler>()
-        peripheral.services().onEach { remoteServices ->
+        anotherJob = peripheral.services().onEach { remoteServices ->
             remoteServices.forEach { remoteService ->
                 val handler = ProfileHandlerFactory.createHandler(remoteService.uuid)
                 handler?.let {
@@ -172,11 +181,11 @@ internal class ProfileService : NotificationService() {
 
             if (remoteServices.isNotEmpty() && handlers.isEmpty())
                 _isMissingServices.tryEmit(true)
-            else if (handlers.isNotEmpty()) {
+            else if (handlers.isNotEmpty() && peripheral.isConnected) {
                 _isMissingServices.tryEmit(false)
                 _connectedDevices.update {
                     it.toMutableMap().apply {
-                        this[peripheral] = handlers
+                        this[peripheral.address] = peripheral to handlers
                     }
                 }
             }
@@ -203,7 +212,7 @@ internal class ProfileService : NotificationService() {
         // Remove the device from the connected devices map before updating the missing services flag.
         _connectedDevices.update {
             it.toMutableMap().apply {
-                this.remove(peripheral)
+                this.remove(peripheral.address)
             }
         }
     }
