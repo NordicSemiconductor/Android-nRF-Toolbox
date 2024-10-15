@@ -38,7 +38,7 @@ internal class ProfileService : NotificationService() {
     private val binder = LocalBinder()
 
     private val _connectedDevices =
-        MutableStateFlow<Map<Peripheral, List<ProfileHandler>>>(emptyMap())
+        MutableStateFlow<Map<String, Pair<Peripheral, List<ProfileHandler>>>>(emptyMap())
     private val _isMissingServices = MutableStateFlow(false)
 
     override fun onBind(intent: Intent): IBinder {
@@ -56,7 +56,7 @@ internal class ProfileService : NotificationService() {
     }
 
     inner class LocalBinder : Binder(), ServiceApi {
-        override val connectedDevices: Flow<Map<Peripheral, List<ProfileHandler>>>
+        override val connectedDevices: Flow<Map<String, Pair<Peripheral, List<ProfileHandler>>>>
             get() = _connectedDevices.asSharedFlow()
 
         override val isMissingServices: Flow<Boolean>

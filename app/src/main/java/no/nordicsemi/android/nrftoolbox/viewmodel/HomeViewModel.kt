@@ -20,7 +20,7 @@ import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import javax.inject.Inject
 
 data class HomeViewState(
-    val connectedDevices: Map<Peripheral, List<ProfileHandler>> = emptyMap(),
+    val connectedDevices: Map<String, Pair<Peripheral, List<ProfileHandler>>> = emptyMap(),
 )
 
 @HiltViewModel
