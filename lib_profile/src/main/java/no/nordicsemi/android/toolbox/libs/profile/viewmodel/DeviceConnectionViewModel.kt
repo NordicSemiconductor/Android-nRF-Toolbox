@@ -188,7 +188,7 @@ open class DeviceConnectionViewModel @Inject constructor(
         api.connectedDevices.onEach { peripheralProfileMap ->
             peripheral?.let { device ->
                 // Update the profile data
-                peripheralProfileMap[device]?.forEach { profileHandler ->
+                peripheralProfileMap[device.address]?.second?.forEach { profileHandler ->
                     updateProfileData(profileHandler)
                 }
             }

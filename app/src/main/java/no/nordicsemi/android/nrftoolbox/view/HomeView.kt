@@ -96,7 +96,7 @@ internal fun HomeView() {
                         text = "Connected devices",
                         style = MaterialTheme.typography.titleLarge,
                     )
-                    state.connectedDevices.forEach { (peripheral, handlers) ->
+                    state.connectedDevices.values.forEach { (peripheral, handlers) ->
                         handlers.forEach { handler ->
                             when (handler.profile) {
                                 Profile.HRS -> FeatureButton(
