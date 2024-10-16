@@ -27,6 +27,7 @@ import no.nordicsemi.android.toolbox.libs.profile.view.BPSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HRSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HTSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.LoadingView
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionState
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewModel
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceData
@@ -44,7 +45,7 @@ import no.nordicsemi.kotlin.ble.core.ConnectionState
 @Composable
 internal fun DeviceConnectionScreen(deviceAddress: String) {
     val deviceConnectionViewModel: DeviceConnectionViewModel = hiltViewModel()
-    val deviceData by deviceConnectionViewModel.deviceData.collectAsStateWithLifecycle()
+    val deviceDataState by deviceConnectionViewModel.deviceData.collectAsStateWithLifecycle()
     val onClickEvent: (DeviceConnectionViewEvent) -> Unit =
         { deviceConnectionViewModel.onClickEvent(it) }
 
@@ -55,7 +56,12 @@ internal fun DeviceConnectionScreen(deviceAddress: String) {
     Scaffold(
         topBar = {
             ProfileAppBar(
-                deviceName = deviceData.peripheral?.name ?: deviceAddress,
+                deviceName = when (val state = deviceDataState) {
+                    is DeviceConnectionState.Connected -> state.data.peripheral?.name
+                        ?: deviceAddress
+
+                    else -> deviceAddress
+                },
                 title = R.string.hts_title,
                 navigateUp = { onClickEvent(NavigateUp) },
                 disconnect = { onClickEvent(DisconnectEvent(deviceAddress)) },
@@ -71,21 +77,35 @@ internal fun DeviceConnectionScreen(deviceAddress: String) {
                     .fillMaxSize()
                     .padding(paddingValues),
             ) {
-                when (deviceData.connectionState) {
-                    ConnectionState.Connected -> DeviceConnectedView(deviceData, onClickEvent)
-                    is ConnectionState.Disconnected, ConnectionState.Disconnecting -> LoadingView()
-
-                    ConnectionState.Closed -> {
-                        ReconnectDevice(deviceData.disconnectionReason, deviceAddress, onClickEvent)
+                when (val state = deviceDataState) {
+                    is DeviceConnectionState.Connected -> {
+                        DeviceConnectedView(
+                            state.data,
+                            onClickEvent
+                        )
                     }
 
-                    else -> DeviceConnectingView(
+                    DeviceConnectionState.Connecting -> DeviceConnectingView(
                         modifier = Modifier.padding(16.dp)
                     )
+
+                    is DeviceConnectionState.Disconnected -> ReconnectDevice(
+                        state.reason,
+                        deviceAddress,
+                        onClickEvent
+                    )
+
+                    is DeviceConnectionState.Error -> ErrorView(state.message, onClickEvent)
+                    DeviceConnectionState.Idle -> LoadingView()
                 }
             }
         }
     }
+}
+
+@Composable
+fun ErrorView(message: String, onClickEvent: (DeviceConnectionViewEvent) -> Unit) {
+    TODO("Not yet implemented")
 }
 
 @Composable
