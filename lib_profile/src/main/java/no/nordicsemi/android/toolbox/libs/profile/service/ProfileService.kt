@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -32,15 +33,15 @@ internal class ProfileService : NotificationService() {
 
     @Inject
     lateinit var centralManager: CentralManager
-
     private var logger: nRFLoggerTree? = null
-
-    // Binder to expose methods to the client
     private val binder = LocalBinder()
 
     private val _connectedDevices =
         MutableStateFlow<Map<String, Pair<Peripheral, List<ProfileHandler>>>>(emptyMap())
     private val _isMissingServices = MutableStateFlow(false)
+
+    private var connectionJob: Job? = null
+    private var serviceHandlingJob: Job? = null
 
     override fun onBind(intent: Intent): IBinder {
         super.onBind(intent)
@@ -51,7 +52,7 @@ internal class ProfileService : NotificationService() {
         super.onStartCommand(intent, flags, startId)
         intent?.getStringExtra(DEVICE_ADDRESS)?.let { deviceAddress ->
             initLogger(deviceAddress)
-            connectToPeripheral(deviceAddress)
+            initiateConnection(deviceAddress)
         }
         return START_REDELIVER_INTENT
     }
@@ -63,65 +64,50 @@ internal class ProfileService : NotificationService() {
         override val isMissingServices: Flow<Boolean>
             get() = _isMissingServices.asStateFlow()
 
-        /**
-         * Get the peripheral by its address.
-         * @param address the device address.
-         * @return the peripheral instance.
-         */
         override fun getPeripheralById(address: String?): Peripheral? {
             return address?.let { centralManager.getPeripheralById(it) }
         }
 
-        /**
-         * Disconnect the device with the given address.
-         * @param deviceAddress the device address to disconnect.
-         */
         override fun disconnect(deviceAddress: String) {
-            val peripheral = centralManager.getPeripheralById(deviceAddress)
-            lifecycleScope.launch {
-                peripheral?.let { peripheral ->
-                    if (peripheral.isConnected) peripheral.disconnect()
-                    removeDevice(peripheral)
-                    // clear the flags
-                    clearFlags()
-                    stopServiceIfNoDevices()
+            try {
+                lifecycleScope.launch {
+                    centralManager.getPeripheralById(deviceAddress)
+                        ?.let { peripheral ->
+                            if (peripheral.isConnected) peripheral.disconnect()
+                            handleDisconnection(peripheral)
+                        }
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Timber.e(e, "Could not disconnect from the $deviceAddress")
             }
         }
 
-        /**
-         * Get the connection state of the device with the given address.
-         * @param address the device address.
-         * @return the connection state flow.
-         */
         override fun getConnectionState(address: String): Flow<ConnectionState>? {
             return getPeripheralById(address)?.state
         }
     }
 
     /**
-     * Connect to the peripheral with the given address.
-     * @param deviceAddress the device address.
+     * Connect to the peripheral and observe its state.
      */
-    private fun connectToPeripheral(deviceAddress: String) {
+    private fun initiateConnection(deviceAddress: String) {
         centralManager.getPeripheralById(deviceAddress)?.let {
             lifecycleScope.launch {
                 try {
                     centralManager.connect(it, options = ConnectionOptions.Direct())
+                    // Observe the peripheral state
+                    observePeripheralState(it)
                 } catch (e: Exception) {
-                    e.printStackTrace()
                     // Could not connect to the device
                     // Since service is started with the device address, stop the service
                     stopForegroundService() // Remove notification from the foreground service
-                    Timber.e(e)
+                    Timber.e(e, "Could not connect to the $deviceAddress")
                 }
-                // Observe the peripheral state
-                observePeripheralState(it)
             }
         }
     }
 
-    private var job: Job? = null
     /**
      * Observe the peripheral state and handle the connected state.
      * @param peripheral the peripheral to observe.
@@ -129,37 +115,19 @@ internal class ProfileService : NotificationService() {
     private fun observePeripheralState(
         peripheral: Peripheral,
     ) {
-        job = peripheral.state.onEach { state ->
+        connectionJob = peripheral.state.onEach { state ->
             when (state) {
-                is ConnectionState.Connected -> {
-                    // Handle the connected state
-                    handleConnectedState(peripheral)
-                }
-                is ConnectionState.Closed -> {
-                    job?.cancel()
-                    anotherJob?.cancel()
-                }
-
-                is ConnectionState.Disconnected -> {
-                    // Generally the peripheral is disconnected by clicking the disconnect button, but it can also be disconnected by the device itself.
-                    // Remove the device from the connected devices map
-                    job?.cancel()
-                    anotherJob?.cancel()
-                    removeDevice(peripheral)
-                    // Clear the flags
-                    clearFlags()
-                    // Stop the service if no devices are connected
-                    stopServiceIfNoDevices()
-                }
-
-                else -> {
-                    // Do nothing
+                is ConnectionState.Connected -> handleConnectedState(peripheral)
+                is ConnectionState.Closed -> clearJobs()
+                is ConnectionState.Disconnected -> handleDisconnection(peripheral)
+                else -> { /* No action needed for other states */
                 }
             }
-        }.launchIn(lifecycleScope)
+        }
+            .onCompletion { connectionJob?.cancel() }
+            .launchIn(lifecycleScope)
     }
 
-    private var anotherJob: Job? = null
     /**
      * Observe the peripheral services and observe the flow of data on each service.
      * @param peripheral the connected peripheral.
@@ -167,7 +135,7 @@ internal class ProfileService : NotificationService() {
     @OptIn(ExperimentalUuidApi::class)
     private fun handleConnectedState(peripheral: Peripheral) {
         val handlers = mutableListOf<ProfileHandler>()
-        anotherJob = peripheral.services().onEach { remoteServices ->
+        serviceHandlingJob = peripheral.services().onEach { remoteServices ->
             remoteServices.forEach { remoteService ->
                 val handler = ProfileHandlerFactory.createHandler(remoteService.uuid)
                 handler?.let {
@@ -183,13 +151,39 @@ internal class ProfileService : NotificationService() {
                 _isMissingServices.tryEmit(true)
             else if (handlers.isNotEmpty() && peripheral.isConnected) {
                 _isMissingServices.tryEmit(false)
-                _connectedDevices.update {
-                    it.toMutableMap().apply {
-                        this[peripheral.address] = peripheral to handlers
-                    }
-                }
+                updateConnectedDevices(peripheral, handlers)
             }
-        }.launchIn(lifecycleScope)
+        }
+            .onCompletion { serviceHandlingJob?.cancel() }
+            .launchIn(lifecycleScope)
+    }
+
+    /**
+     * Update the connected devices with the latest state.
+     */
+    private fun updateConnectedDevices(peripheral: Peripheral, handlers: List<ProfileHandler>) {
+        _connectedDevices.update {
+            it.toMutableMap().apply { this[peripheral.address] = peripheral to handlers }
+        }
+    }
+
+    /**
+     * Handle disconnection and cleanup for the given peripheral.
+     */
+    private fun handleDisconnection(peripheral: Peripheral) {
+        _connectedDevices.update { currentDevices ->
+            currentDevices.toMutableMap().apply { remove(peripheral.address) }
+        }
+        clearFlags()
+        stopServiceIfNoDevices()
+    }
+
+    /**
+     * Clear any active jobs for connection and service handling.
+     */
+    private fun clearJobs() {
+        connectionJob?.cancel()
+        serviceHandlingJob?.cancel()
     }
 
     /**
@@ -203,23 +197,7 @@ internal class ProfileService : NotificationService() {
     }
 
     /**
-     * Update the connected devices map.
-     * @param peripheral the connected peripheral.
-     */
-    private fun removeDevice(
-        peripheral: Peripheral
-    ) {
-        // Remove the device from the connected devices map before updating the missing services flag.
-        _connectedDevices.update {
-            it.toMutableMap().apply {
-                this.remove(peripheral.address)
-            }
-        }
-    }
-
-    /**
-     * Initialize the logger with the device address and plant the logger.
-     * @param device the device address.
+     * Initialize the logger for the specified device.
      */
     private fun initLogger(device: String) {
         logger?.let { Timber.uproot(it) }
