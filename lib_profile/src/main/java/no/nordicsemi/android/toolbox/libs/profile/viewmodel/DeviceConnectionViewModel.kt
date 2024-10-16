@@ -1,6 +1,7 @@
 package no.nordicsemi.android.toolbox.libs.profile.viewmodel
 
 import android.content.Context
+import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,6 +43,16 @@ data class DeviceData(
     val disconnectionReason: ConnectionState.Disconnected.Reason? = null,
 )
 
+sealed class DeviceConnectionState {
+    data object Idle : DeviceConnectionState()
+    data object Connecting : DeviceConnectionState()
+    data class Connected(val data: DeviceData) : DeviceConnectionState()
+    data class Disconnected(val reason: ConnectionState.Disconnected.Reason?) :
+        DeviceConnectionState()
+
+    data class Error(val message: String) : DeviceConnectionState()
+}
+
 @HiltViewModel
 open class DeviceConnectionViewModel @Inject constructor(
     private val serviceManager: ServiceManager,
@@ -50,7 +61,7 @@ open class DeviceConnectionViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
     private var address: String? = null
-    private val _deviceData = MutableStateFlow(DeviceData())
+    private val _deviceData = MutableStateFlow<DeviceConnectionState>(DeviceConnectionState.Idle)
     val deviceData = _deviceData.asStateFlow()
 
     private var logger: nRFLoggerTree? = null
@@ -67,36 +78,16 @@ open class DeviceConnectionViewModel @Inject constructor(
     }
 
     init {
-        viewModelScope.launch {
-            getServiceApi()?.connectedDevices?.onEach { peripheralProfileMap ->
-                deviceRepository.updateConnectedDevices(peripheralProfileMap)
-            }?.launchIn(viewModelScope)
-
-        }
+        observeConnectedDevices()
     }
 
     /**
-     * Unbind the service.
+     * Observe connected devices and update the repository.
      */
-    fun unbindService() {
-        serviceApi?.let { serviceManager.unbindService() }
-        serviceApi = null
-    }
-
-    /**
-     * Handle click events from the view.
-     */
-    fun onClickEvent(event: DeviceConnectionViewEvent) {
-        // Handle click events
-        when (event) {
-            is DisconnectEvent -> disconnectAndNavigate(event.device)
-            NavigateUp -> disconnectIfNeededAndNavigate()
-            is OnRetryClicked -> reConnectDevice(event.device)
-            is OnTemperatureUnitSelected -> updateTemperatureUnit(event.value)
-            OpenLoggerEvent -> openLogger()
-            SwitchZoomEvent -> switchZoomEvent()
-        }
-
+    private fun observeConnectedDevices() = viewModelScope.launch {
+        getServiceApi()?.connectedDevices?.onEach { peripheralProfileMap ->
+            deviceRepository.updateConnectedDevices(peripheralProfileMap)
+        }?.launchIn(viewModelScope)
     }
 
     /**
@@ -110,11 +101,10 @@ open class DeviceConnectionViewModel @Inject constructor(
         // Connect to the peripheral
         getServiceApi()?.let { api ->
             val peripheral = api.getPeripheralById(deviceAddress)
-            val isAlreadyConnected = peripheral?.isConnected == true
             if (peripheral?.isConnected != true) {
                 serviceManager.connectToPeripheral(deviceAddress)
             }
-            updateServiceData(api, deviceAddress, isAlreadyConnected)
+            updateConnectionState(api, deviceAddress, peripheral?.isConnected == true)
         }
     }
 
@@ -123,7 +113,7 @@ open class DeviceConnectionViewModel @Inject constructor(
      * @param api the service API.
      * @param deviceAddress the address of the connected device.
      */
-    private fun updateServiceData(
+    private fun updateConnectionState(
         api: ServiceApi,
         deviceAddress: String,
         isAlreadyConnected: Boolean
@@ -132,48 +122,52 @@ open class DeviceConnectionViewModel @Inject constructor(
         api.getConnectionState(deviceAddress)
             ?.drop(if (isAlreadyConnected) 0 else 1)
             ?.onEach { connectionState ->
-                _deviceData.value = _deviceData.value.copy(
-                    connectionState = connectionState,
-                )
                 when (connectionState) {
-                    is ConnectionState.Disconnected -> {
-                        // Save the reason to show in the ui.
-                        _deviceData.value = _deviceData.value.copy(
-                            disconnectionReason = connectionState.reason,
-                            serviceData = emptyList(),
-                        )
-                        // unbind the service
-                        unbindService()
-                    }
-                    ConnectionState.Closed -> {
-                        _deviceData.value = _deviceData.value.copy(
-                            serviceData = emptyList(),
-                        )
-                        // unbind the service
-                        unbindService()
-                    }
-
                     ConnectionState.Connected -> {
                         val peripheral = api.getPeripheralById(deviceAddress)
-                        _deviceData.value = _deviceData.value.copy(
-                            peripheral = peripheral,
-                        )
-                        api.isMissingServices.onEach { isMissing ->
-                            _deviceData.value = _deviceData.value.copy(
-                                isMissingServices = isMissing,
+                        _deviceData.value = DeviceConnectionState.Connected(
+                            DeviceData(
+                                peripheral = peripheral
                             )
-                            if (!isMissing) {
-                                // Observe the data from the connected device
-                                updateConnectedData(api, peripheral)
-                            }
-                        }.launchIn(viewModelScope)
+                        ).apply { checkForMissingServices(api, peripheral) }
                     }
 
-                    else -> {
-                        // Do nothing.
+                    is ConnectionState.Disconnected ->
+                        _deviceData.value =
+                            DeviceConnectionState.Disconnected(connectionState.reason)
+
+                    ConnectionState.Closed -> {
+                        unbindService()
+                        _deviceData.value = DeviceConnectionState.Disconnected(null)
                     }
+
+                    ConnectionState.Connecting -> _deviceData.value =
+                        DeviceConnectionState.Connecting
+
+                    ConnectionState.Disconnecting -> _deviceData.value =
+                        DeviceConnectionState.Disconnected(null)
                 }
             }?.launchIn(viewModelScope)
+    }
+
+    private fun checkForMissingServices(api: ServiceApi, peripheral: Peripheral?) {
+        api.isMissingServices.onEach { isMissing ->
+            (_deviceData.value as? DeviceConnectionState.Connected)?.let { connectedState ->
+                _deviceData.value = connectedState.copy(
+                    data = connectedState.data.copy(isMissingServices = isMissing)
+                )
+            }
+            if (!isMissing) {
+                api.connectedDevices.onEach { peripheralProfileMap ->
+                    peripheral?.let { device ->
+                        // Update the profile data
+                        peripheralProfileMap[device.address]?.second?.forEach { profileHandler ->
+                            updateProfileData(profileHandler)
+                        }
+                    }
+                }.launchIn(viewModelScope)
+            }
+        }.launchIn(viewModelScope)
     }
 
     /**
@@ -181,7 +175,7 @@ open class DeviceConnectionViewModel @Inject constructor(
      * @param api the service API.
      * @param peripheral the address of the connected device.
      */
-    private fun updateConnectedData(
+    private fun updateConnectedProfile(
         api: ServiceApi,
         peripheral: Peripheral?
     ) {
@@ -201,89 +195,89 @@ open class DeviceConnectionViewModel @Inject constructor(
      */
     private fun updateProfileData(profileHandler: ProfileHandler) {
         when (profileHandler.profile) {
-            Profile.HTS -> getHTSData(profileHandler)
+            Profile.HTS -> updateHTS(profileHandler)
             Profile.HRS -> getHRSData(profileHandler)
             Profile.BATTERY -> getBatteryLevelData(profileHandler)
-            Profile.BPS -> {
-                getBPSData(profileHandler)
+            Profile.BPS -> getBPSData(profileHandler)
+            else -> { /* TODO: Add more profile modules here */
             }
-
-            // TODO: Add more profile modules here
-            else -> TODO()
         }
     }
 
-    private fun getHTSData(profileHandler: ProfileHandler) {
-        profileHandler.getNotification().onEach { notificationData ->
-            val htsData = notificationData as HtsData
-            _deviceData.updateOrAddDataFlow(
-                HTSServiceData(data = htsData)
-            ) { existingServiceData ->
-                existingServiceData.copy(data = htsData)
-            }
+    private fun updateHTS(profileHandler: ProfileHandler) {
+        profileHandler.getNotification().onEach {
+            val htsData = it as HtsData
+            updateDeviceData(
+                HTSServiceData(
+                    data = htsData,
+                    temperatureUnit = (_deviceData.value as DeviceConnectionState.Connected).data.serviceData
+                        .filterIsInstance<HTSServiceData>()
+                        .firstOrNull()?.temperatureUnit ?: TemperatureUnit.CELSIUS
+                )
+            )
         }.launchIn(viewModelScope)
     }
 
     private fun getHRSData(profileHandler: ProfileHandler) {
-        profileHandler.getNotification().onEach { notificationData ->
-            val hrsData = notificationData as HRSData
-            _deviceData.updateOrAddDataFlow(
-                HRSServiceData(data = listOf(hrsData))
-            ) { existingServiceData ->
-                existingServiceData.copy(data = existingServiceData.data + hrsData)
-            }
+        val zoomInData = (_deviceData.value as DeviceConnectionState.Connected).data.serviceData
+            .filterIsInstance<HRSServiceData>()
+            .firstOrNull()?.zoomIn ?: false
+        profileHandler.getNotification().onEach {
+            val hrsData = it as HRSData
+            updateDeviceData(
+                HRSServiceData(
+                    data = listOf(hrsData),
+                    zoomIn = zoomInData
+                )
+            )
         }.launchIn(viewModelScope)
-
         profileHandler.readCharacteristic()?.onEach {
-            val characteristicData = it as Int
-            _deviceData.updateOrAddDataFlow(
-                HRSServiceData(bodySensorLocation = characteristicData)
-            ) { existingServiceData ->
-                existingServiceData.copy(bodySensorLocation = characteristicData)
-            }
+            val bodySensorLocation = it as Int
+            updateDeviceData(
+                HRSServiceData(
+                    bodySensorLocation = bodySensorLocation,
+                    zoomIn = zoomInData
+                )
+            )
         }?.launchIn(viewModelScope)
     }
 
     private fun getBatteryLevelData(profileHandler: ProfileHandler) {
-        profileHandler.getNotification().onEach { notificationData ->
-            val batteryLevel = notificationData as Int
-            _deviceData.updateOrAddDataFlow(
-                BatteryServiceData(batteryLevel = batteryLevel)
-            ) { existingServiceData ->
-                existingServiceData.copy(batteryLevel = batteryLevel)
-            }
+        profileHandler.getNotification().onEach {
+            val batteryLevel = it as Int
+            updateDeviceData(BatteryServiceData(batteryLevel = batteryLevel))
         }.launchIn(viewModelScope)
     }
 
     private fun getBPSData(profileHandler: ProfileHandler) {
-        // Update Profile data
-        _deviceData.updateOrAddDataFlow(
-            BPSServiceData(profile = profileHandler.profile)
-        ) { existingServiceData ->
-            existingServiceData.copy(profile = profileHandler.profile)
-        }
-        profileHandler.getNotification().onEach { notificationData ->
-            val bpsData = notificationData as BPSData
-
-            // Observe the blood pressure measurement data
-            bpsData.bloodPressureMeasurement?.let { bpmData ->
-                _deviceData.updateOrAddDataFlow(
-                    BPSServiceData(bloodPressureMeasurement = bpmData)
-                ) { existingServiceData ->
-                    existingServiceData.copy(bloodPressureMeasurement = bpmData)
-                }
-            }
-
-            // Observe the intermediate cuff pressure data
-            bpsData.intermediateCuffPressure?.let { icpData ->
-                _deviceData.updateOrAddDataFlow(
-                    BPSServiceData(intermediateCuffPressure = icpData)
-                ) { existingServiceData ->
-                    existingServiceData.copy(intermediateCuffPressure = icpData)
-                }
-            }
+        updateDeviceData(BPSServiceData(profile = profileHandler.profile))
+        profileHandler.getNotification().onEach {
+            val bpsData = it as BPSData
+            updateDeviceData(
+                BPSServiceData(
+                    bloodPressureMeasurement = bpsData.bloodPressureMeasurement,
+                    intermediateCuffPressure = bpsData.intermediateCuffPressure,
+                )
+            )
         }.launchIn(viewModelScope)
     }
+
+    private inline fun <reified T : ProfileServiceData> updateDeviceData(data: T) {
+        val updatedData = when (val state = _deviceData.value) {
+            is DeviceConnectionState.Connected -> state.data.serviceData.toMutableList().apply {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    removeIf { it is T }
+                }
+                add(data)
+            }
+
+            else -> return
+        }
+        _deviceData.value = (_deviceData.value as DeviceConnectionState.Connected).copy(
+            data = (_deviceData.value as DeviceConnectionState.Connected).data.copy(serviceData = updatedData)
+        )
+    }
+
 
     /**
      * Update or add the profile service notification data.
@@ -308,6 +302,21 @@ open class DeviceConnectionViewModel @Inject constructor(
     }
 
     /**
+     * Handle click events from the view.
+     */
+    fun onClickEvent(event: DeviceConnectionViewEvent) {
+        // Handle click events
+        when (event) {
+            is DisconnectEvent -> disconnectAndNavigate(event.device)
+            NavigateUp -> disconnectIfNeededAndNavigate()
+            is OnRetryClicked -> reconnectDevice(event.device)
+            is OnTemperatureUnitSelected -> updateTemperatureUnit(event.value)
+            OpenLoggerEvent -> openLogger()
+            SwitchZoomEvent -> switchZoomEvent()
+        }
+    }
+
+    /**
      * Launch the logger activity.
      */
     private fun openLogger() {
@@ -316,27 +325,21 @@ open class DeviceConnectionViewModel @Inject constructor(
 
     /**
      * Reconnect to the device with the given address.
-     * @param address the address of the device to reconnect to.
+     * @param deviceAddress the address of the device to reconnect to.
      */
-    private fun reConnectDevice(address: String) = viewModelScope.launch {
-        // Clear the flags and state.
-        _deviceData.value = DeviceData()
-        getServiceApi()?.let {
-            connectToPeripheral(address)
-        }
+    private fun reconnectDevice(deviceAddress: String) = viewModelScope.launch {
+        address = deviceAddress
+        _deviceData.value = DeviceConnectionState.Idle
+        getServiceApi()?.let { connectToPeripheral(deviceAddress) }
     }
 
     /**
      * Disconnect the device if missing services and navigate back.
      */
     private fun disconnectIfNeededAndNavigate() = viewModelScope.launch {
-        // Disconnect the peripheral if missing services.
-        if (_deviceData.value.isMissingServices) {
-            getServiceApi()?.apply {
-                address?.let { disconnect(it) }
-            }
+        if ((_deviceData.value as? DeviceConnectionState.Connected)?.data?.isMissingServices == true) {
+            getServiceApi()?.disconnect(address ?: return@launch)
         }
-        // navigate back
         navigator.navigateUp()
     }
 
@@ -345,12 +348,8 @@ open class DeviceConnectionViewModel @Inject constructor(
      * @param device the address of the device to disconnect.
      */
     private fun disconnectAndNavigate(device: String) = viewModelScope.launch {
-        getServiceApi()?.apply {
-            disconnect(device)
-            // Unbind the service.
-            unbindService()
-        }
-        // navigate back
+        getServiceApi()?.disconnect(device)
+        unbindService()
         navigator.navigateUp()
     }
 
@@ -359,29 +358,36 @@ open class DeviceConnectionViewModel @Inject constructor(
      * @param unit the temperature unit.
      */
     private fun updateTemperatureUnit(unit: TemperatureUnit) {
-        // Handle temperature unit selection
-        _deviceData.value = _deviceData.value.copy(
-            serviceData = _deviceData.value.serviceData.map { service ->
-                if (service is HTSServiceData) {
-                    service.copy(temperatureUnit = unit)
-                } else {
-                    service
-                }
-            }
-        )
+        _deviceData.value = (_deviceData.value as? DeviceConnectionState.Connected)?.let {
+            it.copy(
+                data = it.data.copy(
+                    serviceData = it.data.serviceData.map { service ->
+                        if (service is HTSServiceData) service.copy(temperatureUnit = unit) else service
+                    }
+                )
+            )
+        }!!
     }
 
     /** Switch the zoom event. */
     private fun switchZoomEvent() {
-        _deviceData.value = _deviceData.value.copy(
-            serviceData = _deviceData.value.serviceData.map { service ->
-                if (service is HRSServiceData) {
-                    service.copy(zoomIn = !service.zoomIn)
-                } else {
-                    service
-                }
-            }
-        )
+        (_deviceData.value as? DeviceConnectionState.Connected)?.let {
+            _deviceData.value = it.copy(
+                data = it.data.copy(
+                    serviceData = it.data.serviceData.map { service ->
+                        if (service is HRSServiceData) service.copy(zoomIn = !service.zoomIn) else service
+                    }
+                )
+            )
+        }
+    }
+
+    /**
+     * Unbind the service.
+     */
+    fun unbindService() {
+        serviceApi?.let { serviceManager.unbindService() }
+        serviceApi = null
     }
 
     override fun onCleared() {
