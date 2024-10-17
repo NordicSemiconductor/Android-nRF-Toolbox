@@ -31,7 +31,7 @@
 
 plugins {
     alias(libs.plugins.nordic.feature)
-    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {
@@ -41,18 +41,17 @@ android {
 dependencies {
     implementation(project(":lib_analytics"))
     implementation(project(":lib_service"))
-    implementation(project(":lib_scanner"))
     implementation(project(":lib_ui"))
-    implementation(project(":lib_utils"))
+    implementation(project(":lib_profile"))
 
     implementation(libs.nordic.blek.client)
-    implementation(libs.nordic.blek.profile)
-    implementation(libs.nordic.blek.uiscanner)
 
     implementation(libs.nordic.core)
+    implementation(libs.nordic.ui)
     implementation(libs.nordic.theme)
     implementation(libs.nordic.navigation)
-    implementation(libs.nordic.uilogger)
+    implementation(libs.nordic.permissions.ble)
+    implementation(libs.nordic.logger)
 
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.iconsExtended)
@@ -61,4 +60,10 @@ dependencies {
     implementation(libs.androidx.lifecycle.service)
 
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.accompanist.permissions)
+
+    // Timber & SLF4J
+    implementation (libs.slf4j.timber)
+    implementation(libs.nordic.log.timber)
+    implementation("no.nordicsemi.kotlin.ble:client-android")
 }

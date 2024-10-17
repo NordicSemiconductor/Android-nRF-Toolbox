@@ -34,9 +34,17 @@ package no.nordicsemi.android.ui.view
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.*
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,18 +52,16 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
-import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionStateWithStatus
 import no.nordicsemi.android.ui.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CloseIconAppBar(text: String, onClick: () -> Unit) {
-    SmallTopAppBar(
+    TopAppBar(
         title = { Text(text, maxLines = 2) },
-        colors = TopAppBarDefaults.smallTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             scrolledContainerColor = MaterialTheme.colorScheme.primary,
-            containerColor = colorResource(id = R.color.appBarColor),
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = MaterialTheme.colorScheme.onPrimary,
             actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
             navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
@@ -74,11 +80,11 @@ fun CloseIconAppBar(text: String, onClick: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoggerBackIconAppBar(text: String, onClick: () -> Unit) {
-    SmallTopAppBar(
+    TopAppBar(
         title = { Text(text, maxLines = 2) },
-        colors = TopAppBarDefaults.smallTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             scrolledContainerColor = MaterialTheme.colorScheme.primary,
-            containerColor = colorResource(id = R.color.appBarColor),
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = MaterialTheme.colorScheme.onPrimary,
             actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
             navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
@@ -86,7 +92,7 @@ fun LoggerBackIconAppBar(text: String, onClick: () -> Unit) {
         navigationIcon = {
             IconButton(onClick = { onClick() }) {
                 Icon(
-                    Icons.Default.ArrowBack,
+                    Icons.AutoMirrored.Filled.ArrowBack,
                     tint = MaterialTheme.colorScheme.onPrimary,
                     contentDescription = stringResource(id = R.string.back_screen),
                 )
@@ -108,11 +114,11 @@ fun LoggerBackIconAppBar(text: String, onClick: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackIconAppBar(text: String, onClick: () -> Unit) {
-    SmallTopAppBar(
+    TopAppBar(
         title = { Text(text, maxLines = 2) },
-        colors = TopAppBarDefaults.smallTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             scrolledContainerColor = MaterialTheme.colorScheme.primary,
-            containerColor = colorResource(id = R.color.appBarColor),
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = MaterialTheme.colorScheme.onPrimary,
             actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
             navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
@@ -120,7 +126,7 @@ fun BackIconAppBar(text: String, onClick: () -> Unit) {
         navigationIcon = {
             IconButton(onClick = { onClick() }) {
                 Icon(
-                    Icons.Default.ArrowBack,
+                    Icons.AutoMirrored.Filled.ArrowBack,
                     tint = MaterialTheme.colorScheme.onPrimary,
                     contentDescription = stringResource(id = R.string.back_screen),
                 )
@@ -131,10 +137,15 @@ fun BackIconAppBar(text: String, onClick: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoggerIconAppBar(text: String, onClick: () -> Unit, onDisconnectClick: () -> Unit, onLoggerClick: () -> Unit) {
-    SmallTopAppBar(
+fun LoggerIconAppBar(
+    text: String,
+    onClick: () -> Unit,
+    onDisconnectClick: () -> Unit,
+    onLoggerClick: () -> Unit
+) {
+    TopAppBar(
         title = { Text(text, maxLines = 2) },
-        colors = TopAppBarDefaults.smallTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             scrolledContainerColor = MaterialTheme.colorScheme.primary,
             containerColor = colorResource(id = R.color.appBarColor),
             titleContentColor = MaterialTheme.colorScheme.onPrimary,
@@ -144,7 +155,7 @@ fun LoggerIconAppBar(text: String, onClick: () -> Unit, onDisconnectClick: () ->
         navigationIcon = {
             IconButton(onClick = { onClick() }) {
                 Icon(
-                    Icons.Default.ArrowBack,
+                    Icons.AutoMirrored.Filled.ArrowBack,
                     tint = MaterialTheme.colorScheme.onPrimary,
                     contentDescription = stringResource(id = R.string.back_screen),
                 )
@@ -175,19 +186,13 @@ fun LoggerIconAppBar(text: String, onClick: () -> Unit, onDisconnectClick: () ->
 @Composable
 fun ProfileAppBar(
     deviceName: String?,
-    connectionState: GattConnectionStateWithStatus?,
-    @StringRes
-    title: Int,
+    @StringRes title: Int,
     navigateUp: () -> Unit,
     disconnect: () -> Unit,
     openLogger: () -> Unit
 ) {
     if (deviceName?.isNotBlank() == true) {
-        if (connectionState?.state == GattConnectionState.STATE_DISCONNECTING || connectionState?.state == GattConnectionState.STATE_DISCONNECTED) {
-            LoggerBackIconAppBar(deviceName, openLogger)
-        } else {
-            LoggerIconAppBar(deviceName, navigateUp, disconnect, openLogger)
-        }
+        LoggerIconAppBar(deviceName, navigateUp, disconnect, openLogger)
     } else {
         BackIconAppBar(stringResource(id = title), navigateUp)
     }
