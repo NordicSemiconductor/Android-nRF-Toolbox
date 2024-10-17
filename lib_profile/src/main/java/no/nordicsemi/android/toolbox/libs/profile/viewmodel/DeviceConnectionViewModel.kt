@@ -150,6 +150,12 @@ open class DeviceConnectionViewModel @Inject constructor(
             }?.launchIn(viewModelScope)
     }
 
+    /**
+     * Check for missing services and update the device data.
+     *
+     * @param api the service API.
+     * @param peripheral the connected peripheral.
+     */
     private fun checkForMissingServices(api: ServiceApi, peripheral: Peripheral?) {
         api.isMissingServices.onEach { isMissing ->
             (_deviceData.value as? DeviceConnectionState.Connected)?.let { connectedState ->
@@ -171,39 +177,25 @@ open class DeviceConnectionViewModel @Inject constructor(
     }
 
     /**
-     * Update the connected data, including the peripheral, profile data, and battery level.
-     * @param api the service API.
-     * @param peripheral the address of the connected device.
-     */
-    private fun updateConnectedProfile(
-        api: ServiceApi,
-        peripheral: Peripheral?
-    ) {
-        api.connectedDevices.onEach { peripheralProfileMap ->
-            peripheral?.let { device ->
-                // Update the profile data
-                peripheralProfileMap[device.address]?.second?.forEach { profileHandler ->
-                    updateProfileData(profileHandler)
-                }
-            }
-        }.launchIn(viewModelScope)
-    }
-
-    /**
      * Observe and update the data from the profile handler.
      * @param profileHandler the profile handler.
      */
     private fun updateProfileData(profileHandler: ProfileHandler) {
         when (profileHandler.profile) {
             Profile.HTS -> updateHTS(profileHandler)
-            Profile.HRS -> getHRSData(profileHandler)
-            Profile.BATTERY -> getBatteryLevelData(profileHandler)
-            Profile.BPS -> getBPSData(profileHandler)
+            Profile.HRS -> updateHRS(profileHandler)
+            Profile.BATTERY -> updateBatteryLevel(profileHandler)
+            Profile.BPS -> updateBPS(profileHandler)
             else -> { /* TODO: Add more profile modules here */
             }
         }
     }
 
+    /**
+     * Update the health thermometer service data.
+     *
+     * @param profileHandler the profile handler.
+     */
     private fun updateHTS(profileHandler: ProfileHandler) {
         profileHandler.getNotification().onEach {
             val htsData = it as HtsData
@@ -218,7 +210,12 @@ open class DeviceConnectionViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    private fun getHRSData(profileHandler: ProfileHandler) {
+    /**
+     * Update the heart rate service data.
+     *
+     * @param profileHandler the profile handler.
+     */
+    private fun updateHRS(profileHandler: ProfileHandler) {
         val zoomInData = (_deviceData.value as DeviceConnectionState.Connected).data.serviceData
             .filterIsInstance<HRSServiceData>()
             .firstOrNull()?.zoomIn ?: false
@@ -242,14 +239,24 @@ open class DeviceConnectionViewModel @Inject constructor(
         }?.launchIn(viewModelScope)
     }
 
-    private fun getBatteryLevelData(profileHandler: ProfileHandler) {
+    /**
+     * Update the battery level.
+     *
+     * @param profileHandler the profile handler.
+     */
+    private fun updateBatteryLevel(profileHandler: ProfileHandler) {
         profileHandler.getNotification().onEach {
             val batteryLevel = it as Int
             updateDeviceData(BatteryServiceData(batteryLevel = batteryLevel))
         }.launchIn(viewModelScope)
     }
 
-    private fun getBPSData(profileHandler: ProfileHandler) {
+    /**
+     * Update the blood pressure service data.
+     *
+     * @param profileHandler the profile handler.
+     */
+    private fun updateBPS(profileHandler: ProfileHandler) {
         updateDeviceData(BPSServiceData(profile = profileHandler.profile))
         profileHandler.getNotification().onEach {
             val bpsData = it as BPSData
@@ -262,6 +269,11 @@ open class DeviceConnectionViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
+    /**
+     * Update the device data with the given data.
+     *
+     * @param data the data to update.
+     */
     private inline fun <reified T : ProfileServiceData> updateDeviceData(data: T) {
         val updatedData = when (val state = _deviceData.value) {
             is DeviceConnectionState.Connected -> state.data.serviceData.toMutableList().apply {
@@ -276,29 +288,6 @@ open class DeviceConnectionViewModel @Inject constructor(
         _deviceData.value = (_deviceData.value as DeviceConnectionState.Connected).copy(
             data = (_deviceData.value as DeviceConnectionState.Connected).data.copy(serviceData = updatedData)
         )
-    }
-
-
-    /**
-     * Update or add the profile service notification data.
-     * @param newData the new data to update or add.
-     * @param update the update function.
-     */
-    private inline fun <reified T : ProfileServiceData> MutableStateFlow<DeviceData>.updateOrAddDataFlow(
-        newData: T,
-        crossinline update: (T) -> T
-    ) {
-        value = if (value.serviceData.any { it is T }) {
-            value.copy(
-                serviceData = value.serviceData.map {
-                    if (it is T) update(it) else it
-                }
-            )
-        } else {
-            value.copy(
-                serviceData = value.serviceData + newData
-            )
-        }
     }
 
     /**
@@ -325,6 +314,7 @@ open class DeviceConnectionViewModel @Inject constructor(
 
     /**
      * Reconnect to the device with the given address.
+     *
      * @param deviceAddress the address of the device to reconnect to.
      */
     private fun reconnectDevice(deviceAddress: String) = viewModelScope.launch {
@@ -358,15 +348,15 @@ open class DeviceConnectionViewModel @Inject constructor(
      * @param unit the temperature unit.
      */
     private fun updateTemperatureUnit(unit: TemperatureUnit) {
-        _deviceData.value = (_deviceData.value as? DeviceConnectionState.Connected)?.let {
-            it.copy(
+        (_deviceData.value as? DeviceConnectionState.Connected)?.let {
+            _deviceData.value = it.copy(
                 data = it.data.copy(
                     serviceData = it.data.serviceData.map { service ->
                         if (service is HTSServiceData) service.copy(temperatureUnit = unit) else service
                     }
                 )
             )
-        }!!
+        }
     }
 
     /** Switch the zoom event. */
