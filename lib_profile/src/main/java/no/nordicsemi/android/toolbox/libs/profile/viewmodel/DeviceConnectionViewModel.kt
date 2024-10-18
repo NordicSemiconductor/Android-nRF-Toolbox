@@ -2,6 +2,7 @@ package no.nordicsemi.android.toolbox.libs.profile.viewmodel
 
 import android.content.Context
 import android.os.Build
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -122,6 +123,7 @@ open class DeviceConnectionViewModel @Inject constructor(
         deviceAddress: String,
         isAlreadyConnected: Boolean
     ) {
+        val disconnectionReason = mutableStateOf<ConnectionState.Disconnected.Reason?>(null)
         // Drop the first default state (Closed) before connection.
         job = api.getConnectionState(deviceAddress)
             ?.drop(if (isAlreadyConnected) 0 else 1)
@@ -136,9 +138,11 @@ open class DeviceConnectionViewModel @Inject constructor(
                         ).apply { checkForMissingServices(api, peripheral) }
                     }
 
-                    is ConnectionState.Disconnected ->
+                    is ConnectionState.Disconnected -> {
+                        disconnectionReason.value = connectionState.reason
                         _deviceData.value =
                             DeviceConnectionState.Disconnected(connectionState.reason)
+                    }
 
                     ConnectionState.Closed -> {
                         unbindService()
@@ -147,11 +151,14 @@ open class DeviceConnectionViewModel @Inject constructor(
                         job?.cancel()
                     }
 
-                    ConnectionState.Connecting -> _deviceData.value =
-                        DeviceConnectionState.Connecting
+                    ConnectionState.Connecting -> {
+                        disconnectionReason.value = null
+                        _deviceData.value =
+                            DeviceConnectionState.Connecting
+                    }
 
                     ConnectionState.Disconnecting -> _deviceData.value =
-                        DeviceConnectionState.Disconnected(null)
+                        DeviceConnectionState.Disconnected(disconnectionReason.value)
                 }
             }?.launchIn(viewModelScope)
     }
