@@ -42,16 +42,11 @@ import no.nordicsemi.android.common.analytics.view.AnalyticsPermissionRequestDia
 import no.nordicsemi.android.common.navigation.NavigationView
 import no.nordicsemi.android.common.theme.NordicActivity
 import no.nordicsemi.android.common.theme.NordicTheme
-import no.nordicsemi.android.gls.GLSDestination
-import no.nordicsemi.android.nrftoolbox.repository.ActivitySignals
+import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestination
 import no.nordicsemi.android.toolbox.scanner.ScannerDestination
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : NordicActivity() {
-
-    @Inject
-    lateinit var activitySignals: ActivitySignals
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,7 +57,7 @@ class MainActivity : NordicActivity() {
                     color = MaterialTheme.colorScheme.surface,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    NavigationView(HomeDestinations + ProfileDestinations + ScannerDestination + GLSDestination)
+                    NavigationView(HomeDestinations + ScannerDestination + DeviceConnectionDestination)
                 }
 
                 AnalyticsPermissionRequestDialog()
@@ -70,8 +65,4 @@ class MainActivity : NordicActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        activitySignals.onResume()
-    }
 }

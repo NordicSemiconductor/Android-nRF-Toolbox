@@ -31,19 +31,16 @@
 
 plugins {
     alias(libs.plugins.nordic.feature)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {
     namespace = "no.nordicsemi.android.ui"
-
-    testOptions {
-        unitTests.isIncludeAndroidResources = true
-    }
 }
 
 dependencies {
-    implementation(libs.nordic.uilogger)
     implementation(libs.nordic.theme)
+    implementation(libs.nordic.ui)
     implementation(libs.nordic.logger)
 
     implementation(libs.nordic.blek.client)
@@ -52,4 +49,10 @@ dependencies {
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
+
+    // Timber & SLF4J
+    implementation (libs.slf4j.timber)
+    implementation(libs.nordic.log.timber)
+    // todo: remove this once fixed.
+    implementation("no.nordicsemi.kotlin.ble:client-android")
 }

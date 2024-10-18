@@ -70,7 +70,6 @@ internal fun UARTAddConfigurationDialog(onEvent: (UARTViewEvent) -> Unit, onDism
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NameInput(
     name: MutableState<String>,

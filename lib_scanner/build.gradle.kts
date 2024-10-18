@@ -31,6 +31,7 @@
 
 plugins {
     alias(libs.plugins.nordic.feature)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {
@@ -38,13 +39,18 @@ android {
 }
 
 dependencies {
+    implementation("no.nordicsemi.kotlin.ble:client-android")
+    implementation(project(":lib_profile"))
+    implementation(project(":lib_ui"))
+    implementation(project(":lib_service"))
+
     implementation(libs.nordic.navigation)
+    implementation(libs.nordic.permissions.ble)
+    implementation(libs.nordic.theme)
+    implementation(libs.nordic.core)
+    implementation(libs.nordic.ui)
 
-    implementation(libs.nordic.blek.uiscanner)
-    implementation(libs.nordic.blek.scanner)
-
-    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.iconsExtended)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.activity.compose)
+    implementation(libs.slf4j.timber)
+
 }

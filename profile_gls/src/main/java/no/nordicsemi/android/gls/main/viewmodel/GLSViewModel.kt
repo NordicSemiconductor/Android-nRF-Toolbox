@@ -32,10 +32,9 @@
 package no.nordicsemi.android.gls.main.viewmodel
 
 import android.annotation.SuppressLint
-import android.app.Application
 import android.content.Context
 import android.os.ParcelUuid
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -50,7 +49,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.Profile
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
-import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
+import no.nordicsemi.android.common.logger.LoggerLauncher
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.gls.GlsDetailsDestinationId
@@ -80,11 +79,13 @@ import no.nordicsemi.android.kotlin.ble.profile.gls.data.RequestStatus
 import no.nordicsemi.android.kotlin.ble.profile.gls.data.ResponseData
 import no.nordicsemi.android.kotlin.ble.profile.racp.RACPOpCode
 import no.nordicsemi.android.kotlin.ble.profile.racp.RACPResponseCode
+import no.nordicsemi.android.log.LogSession
+import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
-import no.nordicsemi.android.ui.view.NordicLoggerFactory
 import no.nordicsemi.android.ui.view.StringConst
 import no.nordicsemi.android.utils.tryOrLog
-import java.util.*
+import timber.log.Timber
+import java.util.UUID
 import javax.inject.Inject
 
 val GLS_SERVICE_UUID: UUID = UUID.fromString("00001808-0000-1000-8000-00805f9b34fb")
@@ -100,15 +101,14 @@ val BATTERY_LEVEL_CHARACTERISTIC_UUID = UUID.fromString("00002A19-0000-1000-8000
 @SuppressLint("MissingPermission")
 @HiltViewModel
 internal class GLSViewModel @Inject constructor(
-    @ApplicationContext context: Context,
+    @ApplicationContext private val context: Context,
     private val navigationManager: Navigator,
     private val analytics: AppAnalytics,
     private val stringConst: StringConst,
-    private val loggerFactory: NordicLoggerFactory
-) : AndroidViewModel(context as Application) {
+) : ViewModel() {
 
     private var client: ClientBleGatt? = null
-    private lateinit var logger: BleLoggerAndLauncher
+    private var logger: nRFLoggerTree? = null
 
     private lateinit var glucoseMeasurementCharacteristic: ClientBleGattCharacteristic
     private lateinit var recordAccessControlPointCharacteristic: ClientBleGattCharacteristic
@@ -136,7 +136,7 @@ internal class GLSViewModel @Inject constructor(
 
     fun onEvent(event: GLSScreenViewEvent) {
         when (event) {
-            OpenLoggerEvent -> logger.launch()
+            OpenLoggerEvent -> LoggerLauncher.launch(context, logger?.session as? LogSession)
             is OnWorkingModeSelected -> onEvent(event)
             is OnGLSRecordClick -> navigateToDetails(event.record)
             DisconnectEvent -> onDisconnectEvent()
@@ -167,10 +167,9 @@ internal class GLSViewModel @Inject constructor(
 
     private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
         _state.value = _state.value.copy(deviceName = device.name)
+        initLogger(device)
 
-        logger = loggerFactory.createNordicLogger(getApplication(), stringConst.APP_NAME, "GLS", device.address)
-
-        val client = ClientBleGatt.connect(getApplication(), device, viewModelScope, logger = logger)
+        val client = ClientBleGatt.connect(context, device, viewModelScope)
         this@GLSViewModel.client = client
 
         client.waitForBonding()
@@ -332,5 +331,11 @@ internal class GLSViewModel @Inject constructor(
             e.printStackTrace()
             _state.value = _state.value.copyWithNewRequestStatus(RequestStatus.FAILED)
         }
+    }
+
+    private fun initLogger(device: ServerDevice) {
+        logger?.let { Timber.uproot(it) }
+        logger = nRFLoggerTree(context, stringConst.APP_NAME, "GLS", device.address)
+            .also { Timber.plant(it) }
     }
 }

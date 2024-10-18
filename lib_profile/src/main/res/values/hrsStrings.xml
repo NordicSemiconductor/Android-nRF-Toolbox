@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hrs_title">HRS</string>
+    <string name="hrs_section_data">Data</string>
+    <string name="hrs_zoom_icon">Icon to zoom chart in or out</string>
+</resources>
