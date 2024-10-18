@@ -25,11 +25,11 @@ import no.nordicsemi.android.toolbox.libs.profile.data.hts.HtsData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
-import no.nordicsemi.android.toolbox.libs.profile.service.BPSServiceData
-import no.nordicsemi.android.toolbox.libs.profile.service.BatteryServiceData
-import no.nordicsemi.android.toolbox.libs.profile.service.HRSServiceData
-import no.nordicsemi.android.toolbox.libs.profile.service.HTSServiceData
-import no.nordicsemi.android.toolbox.libs.profile.service.ProfileServiceData
+import no.nordicsemi.android.toolbox.libs.profile.data.service.BPSServiceData
+import no.nordicsemi.android.toolbox.libs.profile.data.service.BatteryServiceData
+import no.nordicsemi.android.toolbox.libs.profile.data.service.HRSServiceData
+import no.nordicsemi.android.toolbox.libs.profile.data.service.HTSServiceData
+import no.nordicsemi.android.toolbox.libs.profile.data.service.ProfileServiceData
 import no.nordicsemi.android.toolbox.libs.profile.service.ServiceApi
 import no.nordicsemi.android.toolbox.libs.profile.service.ServiceManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral

@@ -18,11 +18,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.profile.data.Profile
-import no.nordicsemi.android.toolbox.libs.profile.service.BPSServiceData
-import no.nordicsemi.android.toolbox.libs.profile.service.BatteryServiceData
-import no.nordicsemi.android.toolbox.libs.profile.service.HRSServiceData
-import no.nordicsemi.android.toolbox.libs.profile.service.HTSServiceData
-import no.nordicsemi.android.toolbox.libs.profile.service.ProfileServiceData
+import no.nordicsemi.android.toolbox.libs.profile.data.service.BPSServiceData
+import no.nordicsemi.android.toolbox.libs.profile.data.service.BatteryServiceData
+import no.nordicsemi.android.toolbox.libs.profile.data.service.HRSServiceData
+import no.nordicsemi.android.toolbox.libs.profile.data.service.HTSServiceData
+import no.nordicsemi.android.toolbox.libs.profile.data.service.ProfileServiceData
 import no.nordicsemi.android.toolbox.libs.profile.view.BPSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HRSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HTSScreen
