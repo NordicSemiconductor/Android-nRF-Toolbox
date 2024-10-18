@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
@@ -67,6 +68,9 @@ open class DeviceConnectionViewModel @Inject constructor(
     private var logger: nRFLoggerTree? = null
     private var serviceApi: WeakReference<ServiceApi>? = null
 
+    private var job: Job? = null
+    private var connectedDeviceJob: Job? = null
+
     /**
      * Bind the service and return the API if successful.
      */
@@ -119,7 +123,7 @@ open class DeviceConnectionViewModel @Inject constructor(
         isAlreadyConnected: Boolean
     ) {
         // Drop the first default state (Closed) before connection.
-        api.getConnectionState(deviceAddress)
+        job = api.getConnectionState(deviceAddress)
             ?.drop(if (isAlreadyConnected) 0 else 1)
             ?.onEach { connectionState ->
                 when (connectionState) {
@@ -138,7 +142,9 @@ open class DeviceConnectionViewModel @Inject constructor(
 
                     ConnectionState.Closed -> {
                         unbindService()
-                        _deviceData.value = DeviceConnectionState.Disconnected(null)
+                        _deviceData.value =
+                            DeviceConnectionState.Disconnected(disconnectionReason.value)
+                        job?.cancel()
                     }
 
                     ConnectionState.Connecting -> _deviceData.value =
@@ -156,7 +162,7 @@ open class DeviceConnectionViewModel @Inject constructor(
      * @param api the service API.
      * @param peripheral the connected peripheral.
      */
-    private fun checkForMissingServices(api: ServiceApi, peripheral: Peripheral?) {
+    private fun checkForMissingServices(api: ServiceApi, peripheral: Peripheral?) =
         api.isMissingServices.onEach { isMissing ->
             (_deviceData.value as? DeviceConnectionState.Connected)?.let { connectedState ->
                 _deviceData.value = connectedState.copy(
@@ -164,7 +170,8 @@ open class DeviceConnectionViewModel @Inject constructor(
                 )
             }
             if (!isMissing) {
-                api.connectedDevices.onEach { peripheralProfileMap ->
+                connectedDeviceJob?.cancel()
+                connectedDeviceJob = api.connectedDevices.onEach { peripheralProfileMap ->
                     peripheral?.let { device ->
                         // Update the profile data
                         peripheralProfileMap[device.address]?.second?.forEach { profileHandler ->
@@ -174,7 +181,6 @@ open class DeviceConnectionViewModel @Inject constructor(
                 }.launchIn(viewModelScope)
             }
         }.launchIn(viewModelScope)
-    }
 
     /**
      * Observe and update the data from the profile handler.
