@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.logger.LoggerLauncher
 import no.nordicsemi.android.common.navigation.Navigator
@@ -23,13 +24,13 @@ import no.nordicsemi.android.toolbox.libs.profile.data.bps.BPSData
 import no.nordicsemi.android.toolbox.libs.profile.data.hrs.HRSData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.HtsData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.TemperatureUnit
-import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
-import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
 import no.nordicsemi.android.toolbox.libs.profile.data.service.BPSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.service.BatteryServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.service.HRSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.service.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.service.ProfileServiceData
+import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
+import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
 import no.nordicsemi.android.toolbox.libs.profile.service.ServiceApi
 import no.nordicsemi.android.toolbox.libs.profile.service.ServiceManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
@@ -131,34 +132,40 @@ open class DeviceConnectionViewModel @Inject constructor(
                 when (connectionState) {
                     ConnectionState.Connected -> {
                         val peripheral = api.getPeripheralById(deviceAddress)
-                        _deviceData.value = DeviceConnectionState.Connected(
-                            DeviceData(
-                                peripheral = peripheral
+                        _deviceData.update {
+                            DeviceConnectionState.Connected(
+                                DeviceData(
+                                    peripheral = peripheral
+                                )
                             )
-                        ).apply { checkForMissingServices(api, peripheral) }
+                        }.apply { checkForMissingServices(api, peripheral) }
                     }
 
                     is ConnectionState.Disconnected -> {
                         disconnectionReason.value = connectionState.reason
-                        _deviceData.value =
+                        _deviceData.update {
                             DeviceConnectionState.Disconnected(connectionState.reason)
+                        }
                     }
 
                     ConnectionState.Closed -> {
                         unbindService()
-                        _deviceData.value =
+                        _deviceData.update {
                             DeviceConnectionState.Disconnected(disconnectionReason.value)
+                        }
                         job?.cancel()
                     }
 
                     ConnectionState.Connecting -> {
                         disconnectionReason.value = null
-                        _deviceData.value =
+                        _deviceData.update {
                             DeviceConnectionState.Connecting
+                        }
                     }
 
-                    ConnectionState.Disconnecting -> _deviceData.value =
+                    ConnectionState.Disconnecting -> _deviceData.update {
                         DeviceConnectionState.Disconnected(disconnectionReason.value)
+                    }
                 }
             }?.launchIn(viewModelScope)
     }
@@ -172,9 +179,11 @@ open class DeviceConnectionViewModel @Inject constructor(
     private fun checkForMissingServices(api: ServiceApi, peripheral: Peripheral?) =
         api.isMissingServices.onEach { isMissing ->
             (_deviceData.value as? DeviceConnectionState.Connected)?.let { connectedState ->
-                _deviceData.value = connectedState.copy(
-                    data = connectedState.data.copy(isMissingServices = isMissing)
-                )
+                _deviceData.update {
+                    connectedState.copy(
+                        data = connectedState.data.copy(isMissingServices = isMissing)
+                    )
+                }
             }
             if (!isMissing) {
                 connectedDeviceJob?.cancel()
@@ -298,9 +307,11 @@ open class DeviceConnectionViewModel @Inject constructor(
 
             else -> return
         }
-        _deviceData.value = (_deviceData.value as DeviceConnectionState.Connected).copy(
-            data = (_deviceData.value as DeviceConnectionState.Connected).data.copy(serviceData = updatedData)
-        )
+        _deviceData.update {
+            (_deviceData.value as DeviceConnectionState.Connected).copy(
+                data = (_deviceData.value as DeviceConnectionState.Connected).data.copy(serviceData = updatedData)
+            )
+        }
     }
 
     /**
@@ -332,7 +343,9 @@ open class DeviceConnectionViewModel @Inject constructor(
      */
     private fun reconnectDevice(deviceAddress: String) = viewModelScope.launch {
         address = deviceAddress
-        _deviceData.value = DeviceConnectionState.Idle
+        _deviceData.update {
+            DeviceConnectionState.Idle
+        }
         getServiceApi()?.let { connectToPeripheral(deviceAddress) }
     }
 
