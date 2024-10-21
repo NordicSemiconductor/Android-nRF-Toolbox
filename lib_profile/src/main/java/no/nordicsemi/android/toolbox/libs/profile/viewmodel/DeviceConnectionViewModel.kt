@@ -238,14 +238,21 @@ open class DeviceConnectionViewModel @Inject constructor(
      * @param profileHandler the profile handler.
      */
     private fun updateHRS(profileHandler: ProfileHandler) {
-        val zoomInData = (_deviceData.value as DeviceConnectionState.Connected).data.serviceData
+        val hrsServiceData = (_deviceData.value as DeviceConnectionState.Connected).data.serviceData
             .filterIsInstance<HRSServiceData>()
-            .firstOrNull()?.zoomIn ?: false
+            .firstOrNull()
+
+        var hrsDataList = hrsServiceData?.data ?: emptyList()
+        val zoomInData = hrsServiceData?.zoomIn ?: false
+
         profileHandler.getNotification().onEach {
             val hrsData = it as HRSData
+            // Update the previous data with the new data
+            hrsDataList = hrsDataList + hrsData
+
             updateDeviceData(
                 HRSServiceData(
-                    data = listOf(hrsData),
+                    data = hrsDataList,
                     zoomIn = zoomInData
                 )
             )
