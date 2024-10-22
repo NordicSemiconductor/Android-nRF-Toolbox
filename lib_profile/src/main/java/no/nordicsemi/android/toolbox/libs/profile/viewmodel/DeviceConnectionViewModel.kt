@@ -31,8 +31,10 @@ import no.nordicsemi.android.toolbox.libs.profile.data.service.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.service.ProfileServiceData
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
+import no.nordicsemi.android.toolbox.libs.profile.service.DeviceDisconnectionReason
 import no.nordicsemi.android.toolbox.libs.profile.service.ServiceApi
 import no.nordicsemi.android.toolbox.libs.profile.service.ServiceManager
+import no.nordicsemi.android.toolbox.libs.profile.service.StateReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import java.lang.ref.WeakReference
@@ -50,8 +52,6 @@ sealed class DeviceConnectionState {
     data object Idle : DeviceConnectionState()
     data object Connecting : DeviceConnectionState()
     data class Connected(val data: DeviceData) : DeviceConnectionState()
-    data class Disconnected(val reason: ConnectionState.Disconnected.Reason?) :
-        DeviceConnectionState()
 
     data class Error(val message: String) : DeviceConnectionState()
 }
@@ -124,7 +124,6 @@ open class DeviceConnectionViewModel @Inject constructor(
         deviceAddress: String,
         isAlreadyConnected: Boolean
     ) {
-        val disconnectionReason = mutableStateOf<ConnectionState.Disconnected.Reason?>(null)
         // Drop the first default state (Closed) before connection.
         job = api.getConnectionState(deviceAddress)
             ?.drop(if (isAlreadyConnected) 0 else 1)
@@ -142,29 +141,27 @@ open class DeviceConnectionViewModel @Inject constructor(
                     }
 
                     is ConnectionState.Disconnected -> {
-                        disconnectionReason.value = connectionState.reason
                         _deviceData.update {
-                            DeviceConnectionState.Disconnected(connectionState.reason)
+                            DeviceConnectionState.Disconnected(StateReason(connectionState.reason))
                         }
                     }
 
-                    ConnectionState.Closed -> {
+                    ConnectionState.Disconnecting, ConnectionState.Closed -> {
                         unbindService()
-                        _deviceData.update {
-                            DeviceConnectionState.Disconnected(disconnectionReason.value)
-                        }
+                        api.disconnectionReason.onEach { reason ->
+                            if (reason != null) {
+                                _deviceData.update {
+                                    DeviceConnectionState.Disconnected(reason)
+                                }
+                            }
+                        }.launchIn(viewModelScope)
                         job?.cancel()
                     }
 
                     ConnectionState.Connecting -> {
-                        disconnectionReason.value = null
                         _deviceData.update {
                             DeviceConnectionState.Connecting
                         }
-                    }
-
-                    ConnectionState.Disconnecting -> _deviceData.update {
-                        DeviceConnectionState.Disconnected(disconnectionReason.value)
                     }
                 }
             }?.launchIn(viewModelScope)

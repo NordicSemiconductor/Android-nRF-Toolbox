@@ -20,10 +20,12 @@ import no.nordicsemi.android.service.NotificationService
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandlerFactory
+import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.CentralManager.ConnectionOptions
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
+import no.nordicsemi.kotlin.ble.core.Manager
 import timber.log.Timber
 import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
@@ -39,6 +41,7 @@ internal class ProfileService : NotificationService() {
     private val _connectedDevices =
         MutableStateFlow<Map<String, Pair<Peripheral, List<ProfileHandler>>>>(emptyMap())
     private val _isMissingServices = MutableStateFlow(false)
+    private val _disconnectionReason = MutableStateFlow<DeviceDisconnectionReason?>(null)
 
     private var connectionJob: Job? = null
     private var serviceHandlingJob: Job? = null
@@ -84,8 +87,19 @@ internal class ProfileService : NotificationService() {
         }
 
         override fun getConnectionState(address: String): Flow<ConnectionState>? {
-            return getPeripheralById(address)?.state
+            val state = getPeripheralById(address)?.state
+            state?.onEach { s ->
+                if (s is ConnectionState.Disconnected) {
+                    _disconnectionReason.tryEmit(StateReason(s.reason))
+                } else if (s is ConnectionState.Connecting) {
+                    _disconnectionReason.tryEmit(null)
+                }
+            }?.launchIn(lifecycleScope)
+            return state
         }
+
+        override val disconnectionReason: Flow<DeviceDisconnectionReason?>
+            get() = _disconnectionReason.asStateFlow()
     }
 
     /**
