@@ -1,9 +1,8 @@
 package no.nordicsemi.android.nrftoolbox.viewmodel
 
-import android.content.Context
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -13,23 +12,19 @@ import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestinationId
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
-import no.nordicsemi.android.toolbox.libs.profile.service.ServiceManager
-import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewModel
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import javax.inject.Inject
 
-data class HomeViewState(
+internal data class HomeViewState(
     val connectedDevices: Map<String, Pair<Peripheral, List<ProfileHandler>>> = emptyMap(),
 )
 
 @HiltViewModel
 internal class HomeViewModel @Inject constructor(
-    serviceManager: ServiceManager,
     private val navigator: Navigator,
     deviceRepository: DeviceRepository,
-    @ApplicationContext context: Context,
-) : DeviceConnectionViewModel(serviceManager, navigator, deviceRepository, context) {
+) : ViewModel() {
     private val _state = MutableStateFlow(HomeViewState())
     val state = _state.asStateFlow()
 
@@ -49,11 +44,6 @@ internal class HomeViewModel @Inject constructor(
                 DeviceConnectionDestinationId, event.deviceAddress
             )
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        unbindService()
     }
 
 }
