@@ -44,7 +44,7 @@ fun DeviceDisconnectedView(
 }
 
 enum class DisconnectReason {
-    USER, UNKNOWN, LINK_LOSS, MISSING_SERVICE
+    USER, UNKNOWN, LINK_LOSS, MISSING_SERVICE, BLUETOOTH_OFF
 }
 
 @Composable
@@ -58,6 +58,7 @@ fun DeviceDisconnectedView(
         DisconnectReason.UNKNOWN -> "Device disconnected with unknown reason."
         DisconnectReason.LINK_LOSS -> ">Device signal has been lost."
         DisconnectReason.MISSING_SERVICE -> "Device was disconnected, because required services are missing."
+        DisconnectReason.BLUETOOTH_OFF -> "Bluetooth adapter is turned off."
     }
 
     DeviceDisconnectedView(disconnectedReason = disconnectedReason, modifier, content)
