@@ -33,8 +33,8 @@ package no.nordicsemi.android.nrftoolbox
 
 import no.nordicsemi.android.common.navigation.createSimpleDestination
 import no.nordicsemi.android.common.navigation.defineDestination
-import no.nordicsemi.android.nrftoolbox.view.HomeScreen
+import no.nordicsemi.android.nrftoolbox.view.HomeView
 
 val HomeDestinationId = createSimpleDestination("home-destination")
 
-val HomeDestinations = defineDestination(HomeDestinationId) { HomeScreen() }
+val HomeDestinations = defineDestination(HomeDestinationId) { HomeView() }

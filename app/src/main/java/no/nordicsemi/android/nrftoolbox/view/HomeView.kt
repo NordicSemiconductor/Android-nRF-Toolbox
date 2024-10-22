@@ -3,18 +3,13 @@ package no.nordicsemi.android.nrftoolbox.view
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +25,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.common.permissions.notification.RequestNotificationPermission
-import no.nordicsemi.android.common.ui.view.NordicAppBar
 import no.nordicsemi.android.nrftoolbox.R
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewEvent
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewModel
@@ -42,19 +36,6 @@ private const val DFU_LINK =
 
 private const val LOGGER_PACKAGE_NAME = "no.nordicsemi.android.log"
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-internal fun HomeScreen() {
-    Column {
-        NordicAppBar(title = { TitleAppBar(stringResource(id = R.string.app_name), false) })
-        RequireBluetooth {
-            RequestNotificationPermission {
-                HomeView()
-            }
-        }
-    }
-}
-
 @Composable
 internal fun HomeView() {
     val viewModel = hiltViewModel<HomeViewModel>()
@@ -62,7 +43,7 @@ internal fun HomeView() {
     val onEvent: (HomeViewEvent) -> Unit = { viewModel.onClickEvent(it) }
 
     Scaffold(
-        contentWindowInsets = WindowInsets.systemBars.only(WindowInsetsSides.Bottom), // Exclude top insets, keep bottom
+        topBar = { TitleAppBar(stringResource(id = R.string.app_name), false) },
         floatingActionButton = {
             ExtendedFloatingActionButton(onClick = { onEvent(HomeViewEvent.OnConnectDeviceClick) }) {
                 Row(
@@ -85,50 +66,54 @@ internal fun HomeView() {
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
-            if (state.connectedDevices.isNotEmpty()) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    Text(
-                        text = "Connected devices",
-                        style = MaterialTheme.typography.titleLarge,
-                    )
-                    state.connectedDevices.values.forEach { (peripheral, handlers) ->
-                        handlers.forEach { handler ->
-                            when (handler.profile) {
-                                Profile.HRS -> FeatureButton(
-                                    iconId = R.drawable.ic_hrs,
-                                    profileName = R.string.hrs_module_full,
-                                    deviceName = peripheral.name,
-                                    true
-                                ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
+            RequireBluetooth {
+                RequestNotificationPermission {
+                    if (state.connectedDevices.isNotEmpty()) {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            Text(
+                                text = "Connected devices",
+                                style = MaterialTheme.typography.titleLarge,
+                            )
+                            state.connectedDevices.values.forEach { (peripheral, handlers) ->
+                                handlers.forEach { handler ->
+                                    when (handler.profile) {
+                                        Profile.HRS -> FeatureButton(
+                                            iconId = R.drawable.ic_hrs,
+                                            profileName = R.string.hrs_module_full,
+                                            deviceName = peripheral.name,
+                                            true
+                                        ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
 
-                                Profile.HTS -> FeatureButton(
-                                    iconId = R.drawable.ic_hts,
-                                    profileName = R.string.hts_module_full,
-                                    deviceName = peripheral.name,
-                                    true
-                                ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
+                                        Profile.HTS -> FeatureButton(
+                                            iconId = R.drawable.ic_hts,
+                                            profileName = R.string.hts_module_full,
+                                            deviceName = peripheral.name,
+                                            true
+                                        ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
 
-                                Profile.BPS -> FeatureButton(
-                                    iconId = R.drawable.ic_bps,
-                                    profileName = R.string.bps_module_full,
-                                    deviceName = peripheral.name,
-                                    true
-                                ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
+                                        Profile.BPS -> FeatureButton(
+                                            iconId = R.drawable.ic_bps,
+                                            profileName = R.string.bps_module_full,
+                                            deviceName = peripheral.name,
+                                            true
+                                        ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
 
-                                else -> {
-                                    // TODO: Add more profiles
+                                        else -> {
+                                            // TODO: Add more profiles
+                                        }
+                                    }
                                 }
                             }
                         }
+                    } else {
+                        NoConnectedDeviceView()
                     }
                 }
-            } else {
-                NoConnectedDeviceView()
             }
         }
     }

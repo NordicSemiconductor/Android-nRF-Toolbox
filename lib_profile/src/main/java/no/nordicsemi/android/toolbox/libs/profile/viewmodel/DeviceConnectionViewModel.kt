@@ -39,7 +39,7 @@ import no.nordicsemi.kotlin.ble.core.ConnectionState
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 
-data class DeviceData(
+internal data class DeviceData(
     val peripheral: Peripheral? = null,
     val connectionState: ConnectionState? = null,
     val serviceData: List<ProfileServiceData> = emptyList(),
@@ -47,7 +47,7 @@ data class DeviceData(
     val disconnectionReason: ConnectionState.Disconnected.Reason? = null,
 )
 
-sealed class DeviceConnectionState {
+internal sealed class DeviceConnectionState {
     data object Idle : DeviceConnectionState()
     data object Connecting : DeviceConnectionState()
     data class Connected(val data: DeviceData) : DeviceConnectionState()
@@ -55,7 +55,7 @@ sealed class DeviceConnectionState {
 }
 
 @HiltViewModel
-open class DeviceConnectionViewModel @Inject constructor(
+internal class DeviceConnectionViewModel @Inject constructor(
     private val serviceManager: ServiceManager,
     private val navigator: Navigator,
     private val deviceRepository: DeviceRepository,
