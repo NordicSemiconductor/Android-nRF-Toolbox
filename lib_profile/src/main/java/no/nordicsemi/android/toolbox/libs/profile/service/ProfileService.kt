@@ -51,6 +51,17 @@ internal class ProfileService : NotificationService() {
         return binder
     }
 
+    override fun onCreate() {
+        super.onCreate()
+        // Observe the Bluetooth state
+        centralManager.state.onEach { state ->
+            if (state == Manager.State.POWERED_OFF) {
+                _disconnectionReason.tryEmit(CustomReason(DisconnectReason.BLUETOOTH_OFF))
+            }
+        }.launchIn(lifecycleScope)
+    }
+
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         intent?.getStringExtra(DEVICE_ADDRESS)?.let { deviceAddress ->
