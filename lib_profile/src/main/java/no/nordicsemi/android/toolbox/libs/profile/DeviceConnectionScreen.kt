@@ -43,7 +43,6 @@ import no.nordicsemi.android.ui.view.ProfileAppBar
 import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
 import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
-import no.nordicsemi.kotlin.ble.core.ConnectionState
 
 @Composable
 internal fun DeviceConnectionScreen(deviceAddress: String) {
@@ -103,17 +102,11 @@ internal fun DeviceConnectionScreen(deviceAddress: String) {
                         }
                     }
 
-                    is DeviceConnectionState.Error -> ErrorView(state.message, onClickEvent)
                     DeviceConnectionState.Idle -> LoadingView()
                 }
             }
         }
     }
-}
-
-@Composable
-fun ErrorView(message: String, onClickEvent: (DeviceConnectionViewEvent) -> Unit) {
-    TODO("Not yet implemented")
 }
 
 @Composable

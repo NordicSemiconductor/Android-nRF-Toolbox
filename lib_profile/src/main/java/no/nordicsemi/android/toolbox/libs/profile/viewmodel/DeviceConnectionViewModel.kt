@@ -2,7 +2,6 @@ package no.nordicsemi.android.toolbox.libs.profile.viewmodel
 
 import android.content.Context
 import android.os.Build
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -52,8 +51,7 @@ sealed class DeviceConnectionState {
     data object Idle : DeviceConnectionState()
     data object Connecting : DeviceConnectionState()
     data class Connected(val data: DeviceData) : DeviceConnectionState()
-
-    data class Error(val message: String) : DeviceConnectionState()
+    data class Disconnected(val reason: DeviceDisconnectionReason?) : DeviceConnectionState()
 }
 
 @HiltViewModel
@@ -405,7 +403,7 @@ open class DeviceConnectionViewModel @Inject constructor(
     /**
      * Unbind the service.
      */
-    fun unbindService() {
+    private fun unbindService() {
         serviceApi?.let { serviceManager.unbindService() }
         serviceApi = null
     }
