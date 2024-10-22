@@ -23,6 +23,9 @@ import no.nordicsemi.android.toolbox.libs.profile.data.service.BatteryServiceDat
 import no.nordicsemi.android.toolbox.libs.profile.data.service.HRSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.service.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.service.ProfileServiceData
+import no.nordicsemi.android.toolbox.libs.profile.service.CustomReason
+import no.nordicsemi.android.toolbox.libs.profile.service.DeviceDisconnectionReason
+import no.nordicsemi.android.toolbox.libs.profile.service.StateReason
 import no.nordicsemi.android.toolbox.libs.profile.view.BPSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HRSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HTSScreen
@@ -89,11 +92,16 @@ internal fun DeviceConnectionScreen(deviceAddress: String) {
                         modifier = Modifier.padding(16.dp)
                     )
 
-                    is DeviceConnectionState.Disconnected -> ReconnectDevice(
-                        state.reason,
-                        deviceAddress,
-                        onClickEvent
-                    )
+                    is DeviceConnectionState.Disconnected -> {
+
+                        state.reason?.let {
+                            DeviceDisconnectedView(
+                                it,
+                                deviceAddress,
+                                onClickEvent
+                            )
+                        }
+                    }
 
                     is DeviceConnectionState.Error -> ErrorView(state.message, onClickEvent)
                     DeviceConnectionState.Idle -> LoadingView()
@@ -109,20 +117,38 @@ fun ErrorView(message: String, onClickEvent: (DeviceConnectionViewEvent) -> Unit
 }
 
 @Composable
-private fun ReconnectDevice(
-    reason: ConnectionState.Disconnected.Reason?,
+private fun DeviceDisconnectedView(
+    reason: DeviceDisconnectionReason,
     deviceAddress: String,
     onClickEvent: (DeviceConnectionViewEvent) -> Unit
 ) {
-    DeviceDisconnectedView(
-        reason = reason ?: ConnectionState.Disconnected.Reason.Unknown(0),
-        modifier = Modifier.padding(16.dp)
-    ) {
-        Button(
-            onClick = { onClickEvent(OnRetryClicked(deviceAddress)) },
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(text = "Reconnect")
+    when (reason) {
+        is CustomReason -> {
+            DeviceDisconnectedView(
+                reason = reason.reason,
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Button(
+                    onClick = { onClickEvent(OnRetryClicked(deviceAddress)) },
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(text = "Reconnect")
+                }
+            }
+        }
+
+        is StateReason -> {
+            DeviceDisconnectedView(
+                reason = reason.reason,
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Button(
+                    onClick = { onClickEvent(OnRetryClicked(deviceAddress)) },
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(text = "Reconnect")
+                }
+            }
         }
     }
 }
