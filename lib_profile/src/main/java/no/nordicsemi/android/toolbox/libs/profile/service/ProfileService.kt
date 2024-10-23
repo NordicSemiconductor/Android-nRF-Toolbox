@@ -146,8 +146,7 @@ internal class ProfileService : NotificationService() {
     }
 
     /**
-     * Observe the peripheral services and observe the flow of data on each service.
-     * @param peripheral the connected peripheral.
+     * Discover services and characteristics for the connected [peripheral].
      */
     @OptIn(ExperimentalUuidApi::class)
     private fun handleConnectedState(peripheral: Peripheral) {
