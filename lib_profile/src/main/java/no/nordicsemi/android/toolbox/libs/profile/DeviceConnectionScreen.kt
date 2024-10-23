@@ -43,6 +43,7 @@ import no.nordicsemi.android.ui.view.ProfileAppBar
 import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
 import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
+import no.nordicsemi.android.ui.view.internal.ServiceDiscoveryView
 
 @Composable
 internal fun DeviceConnectionScreen(deviceAddress: String) {
@@ -92,7 +93,6 @@ internal fun DeviceConnectionScreen(deviceAddress: String) {
                     )
 
                     is DeviceConnectionState.Disconnected -> {
-
                         state.reason?.let {
                             DeviceDisconnectedView(
                                 it,
@@ -151,7 +151,7 @@ private fun DeviceConnectedView(
     deviceData: DeviceData,
     onClickEvent: (DeviceConnectionViewEvent) -> Unit,
 ) {
-    deviceData.peripheral?.let {
+    deviceData.peripheral?.let { peripheral ->
         when {
             deviceData.isMissingServices -> {
                 DeviceDisconnectedView(
@@ -161,7 +161,16 @@ private fun DeviceConnectedView(
             }
 
             deviceData.serviceData.isEmpty() -> {
-                DeviceConnectingView(modifier = Modifier.padding(16.dp))
+                ServiceDiscoveryView(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Button(
+                        onClick = { onClickEvent(DisconnectEvent(peripheral.address)) },
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(text = "Cancel")
+                    }
+                }
             }
 
             else -> {
