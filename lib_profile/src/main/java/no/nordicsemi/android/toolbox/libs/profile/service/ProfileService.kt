@@ -78,6 +78,9 @@ internal class ProfileService : NotificationService() {
         override val isMissingServices: Flow<Boolean>
             get() = _isMissingServices.asStateFlow()
 
+        override val disconnectionReason: Flow<DeviceDisconnectionReason?>
+            get() = _disconnectionReason.asStateFlow()
+
         override fun getPeripheralById(address: String?): Peripheral? {
             return address?.let { centralManager.getPeripheralById(it) }
         }
@@ -98,19 +101,29 @@ internal class ProfileService : NotificationService() {
         }
 
         override fun getConnectionState(address: String): Flow<ConnectionState>? {
-            val state = getPeripheralById(address)?.state
-            state?.onEach { s ->
-                if (s is ConnectionState.Disconnected) {
-                    _disconnectionReason.tryEmit(StateReason(s.reason))
-                } else if (s is ConnectionState.Connecting) {
-                    _disconnectionReason.tryEmit(null)
-                }
-            }?.launchIn(lifecycleScope)
-            return state
+            val peripheral = getPeripheralById(address) ?: return null
+            return peripheral.state.also { stateFlow ->
+                // Cancel the previous state observation if any
+                connectionJob?.cancel()
+
+                // Start a new observation and store the job reference
+                connectionJob = stateFlow.onEach { s ->
+                    when (s) {
+                        ConnectionState.Connected -> handleConnectedState(peripheral)
+                        ConnectionState.Connecting -> _disconnectionReason.tryEmit(null)
+                        is ConnectionState.Disconnected -> {
+                            _disconnectionReason.tryEmit(StateReason(s.reason))
+                            handleDisconnection(peripheral)
+                            clearJobs()
+                        }
+
+                        else -> { /* No action needed for other states */
+                        }
+                    }
+                }.launchIn(lifecycleScope)
+            }
         }
 
-        override val disconnectionReason: Flow<DeviceDisconnectionReason?>
-            get() = _disconnectionReason.asStateFlow()
     }
 
     /**
@@ -121,8 +134,6 @@ internal class ProfileService : NotificationService() {
             lifecycleScope.launch {
                 try {
                     centralManager.connect(it, options = ConnectionOptions.Direct())
-                    // Observe the peripheral state
-                    observePeripheralState(it)
                 } catch (e: Exception) {
                     // Could not connect to the device
                     // Since service is started with the device address, stop the service
@@ -131,26 +142,6 @@ internal class ProfileService : NotificationService() {
                 }
             }
         }
-    }
-
-    /**
-     * Observe the peripheral state and handle the connected state.
-     * @param peripheral the peripheral to observe.
-     */
-    private fun observePeripheralState(
-        peripheral: Peripheral,
-    ) {
-        connectionJob = peripheral.state.onEach { state ->
-            when (state) {
-                is ConnectionState.Connected -> handleConnectedState(peripheral)
-                is ConnectionState.Closed -> clearJobs()
-                is ConnectionState.Disconnected -> handleDisconnection(peripheral)
-                else -> { /* No action needed for other states */
-                }
-            }
-        }
-            .onCompletion { connectionJob?.cancel() }
-            .launchIn(lifecycleScope)
     }
 
     /**
