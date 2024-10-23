@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.NotificationService
 import no.nordicsemi.android.toolbox.lib.profile.R
+import no.nordicsemi.android.toolbox.libs.profile.data.Profile
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandlerFactory
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
@@ -163,15 +164,23 @@ internal class ProfileService : NotificationService() {
                 }
             }
 
-            if (remoteServices.isNotEmpty() && handlers.isEmpty())
-                _isMissingServices.tryEmit(true)
-            else if (handlers.isNotEmpty() && peripheral.isConnected) {
-                _isMissingServices.tryEmit(false)
-                updateConnectedDevices(peripheral, handlers)
+            when {
+                handlers.size == 1 && handlers.first().profile == Profile.BATTERY -> {
+                    _isMissingServices.tryEmit(true)
+                    return@onEach
+                }
+
+                handlers.isEmpty() -> {
+                    _isMissingServices.tryEmit(true)
+                    return@onEach
+                }
+
+                peripheral.isConnected -> {
+                    _isMissingServices.tryEmit(false)
+                    updateConnectedDevices(peripheral, handlers)
+                }
             }
-        }
-            .onCompletion { serviceHandlingJob?.cancel() }
-            .launchIn(lifecycleScope)
+        }.onCompletion { serviceHandlingJob?.cancel() }.launchIn(lifecycleScope)
     }
 
     /**
