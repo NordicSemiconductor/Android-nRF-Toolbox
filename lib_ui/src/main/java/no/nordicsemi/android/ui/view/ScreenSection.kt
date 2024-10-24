@@ -1,5 +1,6 @@
 package no.nordicsemi.android.ui.view
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.OutlinedCard
@@ -10,7 +11,10 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ScreenSection(content: @Composable () -> Unit) {
     OutlinedCard {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(16.dp)
+        ) {
             content()
         }
     }

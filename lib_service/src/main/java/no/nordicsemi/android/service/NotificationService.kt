@@ -54,9 +54,17 @@ abstract class NotificationService : LifecycleService() {
 
     override fun onDestroy() {
         // when user has disconnected from the sensor, we have to cancel the notification that we've created some milliseconds before using unbindService
-        cancelNotification()
         stopForegroundService()
+        stopSelf()
         super.onDestroy()
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        // This method is called when user removed the app from recent app list.
+        // By default, the service will be killed and recreated immediately after that.
+        // However, all managed devices will be lost and devices will be disconnected.
+        stopSelf()
     }
 
     /**
@@ -77,7 +85,7 @@ abstract class NotificationService : LifecycleService() {
     /**
      * Stops the service as a foreground service
      */
-    private fun stopForegroundService() {
+    fun stopForegroundService() {
         // when the activity rebinds to the service, remove the notification and stop the foreground service
         // on devices running Android 8.0 (Oreo) or above
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -85,6 +93,7 @@ abstract class NotificationService : LifecycleService() {
         } else {
             cancelNotification()
         }
+        stopSelf() // Ensure the service stops when it's no longer needed
     }
 
     /**
@@ -102,9 +111,9 @@ abstract class NotificationService : LifecycleService() {
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(getString(R.string.app_name))
             .setContentText(getString(messageResId, "Device"))
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setColor(ContextCompat.getColor(this, R.color.md_theme_primary))
             .setContentIntent(pendingIntent)
             .build()

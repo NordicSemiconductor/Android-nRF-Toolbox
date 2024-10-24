@@ -55,7 +55,7 @@ enum class MacroIcon(public val index: Int) {
 
     companion object {
         fun create(index: Int): MacroIcon {
-            return values().firstOrNull { it.index == index }
+            return entries.firstOrNull { it.index == index }
                 ?: throw IllegalArgumentException("Cannot create MacroIcon for index: $index")
         }
     }

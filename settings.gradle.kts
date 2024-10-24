@@ -50,7 +50,7 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("libs") {
-            from("no.nordicsemi.android.gradle:version-catalog:1.11.1")
+            from("no.nordicsemi.android.gradle:version-catalog:2.4-1")
         }
     }
 }
@@ -58,22 +58,10 @@ dependencyResolutionManagement {
 rootProject.name = "Android-nRF-Toolbox"
 
 include(":app")
-
-include(":profile_bps")
-include(":profile_cgms")
-include(":profile_csc")
-include(":profile_gls")
-include(":profile_hrs")
-include(":profile_hts")
-include(":profile_prx")
-include(":profile_rscs")
-include(":profile_uart")
-
 include(":lib_analytics")
 include(":lib_scanner")
 include(":lib_service")
 include(":lib_ui")
-include(":lib_utils")
 
 //if (file("../Android-Common-Libraries").exists()) {
 //    includeBuild("../Android-Common-Libraries")
@@ -82,3 +70,4 @@ include(":lib_utils")
 if (file("../Kotlin-BLE-Library").exists()) {
     includeBuild("../Kotlin-BLE-Library")
 }
+include(":lib_profile")
