@@ -32,10 +32,12 @@ import no.nordicsemi.android.toolbox.libs.profile.data.service.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.service.ProfileServiceData
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
+import no.nordicsemi.android.toolbox.libs.profile.service.CustomReason
 import no.nordicsemi.android.toolbox.libs.profile.service.DeviceDisconnectionReason
 import no.nordicsemi.android.toolbox.libs.profile.service.ServiceApi
 import no.nordicsemi.android.toolbox.libs.profile.service.ServiceManager
 import no.nordicsemi.android.toolbox.libs.profile.service.StateReason
+import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import java.lang.ref.WeakReference
@@ -148,7 +150,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
                                     peripheral = peripheral
                                 )
                             )
-                        }.apply { checkForMissingServices(api, peripheral) }
+                        }.apply { checkForMissingServices(api) }
                     }
 
                     is ConnectionState.Disconnected -> {
@@ -163,6 +165,10 @@ internal class DeviceConnectionViewModel @Inject constructor(
                             if (reason != null) {
                                 _deviceData.update {
                                     DeviceConnectionState.Disconnected(reason)
+                                }
+                            } else {
+                                _deviceData.update {
+                                    DeviceConnectionState.Disconnected(CustomReason(DisconnectReason.UNKNOWN))
                                 }
                             }
                         }.launchIn(viewModelScope)
@@ -179,12 +185,9 @@ internal class DeviceConnectionViewModel @Inject constructor(
     }
 
     /**
-     * Check for missing services and update the device data.
-     *
-     * @param api the service API.
-     * @param peripheral the connected peripheral.
+     * Check for missing services.
      */
-    private fun checkForMissingServices(api: ServiceApi, peripheral: Peripheral?) =
+    private fun checkForMissingServices(api: ServiceApi) =
         api.isMissingServices.onEach { isMissing ->
             (_deviceData.value as? DeviceConnectionState.Connected)?.let { connectedState ->
                 _deviceData.update {
@@ -362,7 +365,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
      */
     private fun disconnectIfNeededAndNavigate() = viewModelScope.launch {
         if ((_deviceData.value as? DeviceConnectionState.Connected)?.data?.isMissingServices == true) {
-            getServiceApi()?.disconnect(address ?: return@launch)
+            getServiceApi()?.disconnect(address)
         }
         navigator.navigateUp()
     }
