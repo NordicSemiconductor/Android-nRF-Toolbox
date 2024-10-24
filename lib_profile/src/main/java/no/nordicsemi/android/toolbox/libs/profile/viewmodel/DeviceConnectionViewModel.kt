@@ -2,7 +2,7 @@ package no.nordicsemi.android.toolbox.libs.profile.viewmodel
 
 import android.content.Context
 import android.os.Build
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -16,8 +16,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.logger.LoggerLauncher
 import no.nordicsemi.android.common.navigation.Navigator
+import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
 import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.timber.nRFLoggerTree
+import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestinationId
 import no.nordicsemi.android.toolbox.libs.profile.data.Profile
 import no.nordicsemi.android.toolbox.libs.profile.data.bps.BPSData
 import no.nordicsemi.android.toolbox.libs.profile.data.hrs.HRSData
@@ -60,8 +62,9 @@ internal class DeviceConnectionViewModel @Inject constructor(
     private val navigator: Navigator,
     private val deviceRepository: DeviceRepository,
     @ApplicationContext private val context: Context,
-) : ViewModel() {
-    private var address: String? = null
+    savedStateHandle: SavedStateHandle,
+) : SimpleNavigationViewModel(navigator, savedStateHandle) {
+    val address: String = parameterOf(DeviceConnectionDestinationId)
     private val _deviceData = MutableStateFlow<DeviceConnectionState>(DeviceConnectionState.Idle)
     val deviceData = _deviceData.asStateFlow()
 
@@ -83,15 +86,28 @@ internal class DeviceConnectionViewModel @Inject constructor(
 
     init {
         observeConnectedDevices()
+        connectToPeripheral(address)
     }
 
     /**
      * Observe connected devices and update the repository.
      */
     private fun observeConnectedDevices() = viewModelScope.launch {
-        getServiceApi()?.connectedDevices?.onEach { peripheralProfileMap ->
-            deviceRepository.updateConnectedDevices(peripheralProfileMap)
-        }?.launchIn(viewModelScope)
+        getServiceApi()?.let {
+            val peripheral = it.getPeripheralById(address)
+            connectedDeviceJob = it.connectedDevices
+                .onEach { peripheralProfileMap ->
+                    deviceRepository.updateConnectedDevices(peripheralProfileMap)
+                }
+                .onEach { peripheralProfileMap ->
+                    peripheralProfileMap[peripheral?.address]?.second?.forEach { profileHandler ->
+                        updateProfileData(profileHandler)
+                    }
+                }.launchIn(viewModelScope)
+                .apply {
+                    updateConnectionState(it, address, peripheral?.isConnected == true)
+                }
+        }
     }
 
     /**
@@ -99,16 +115,13 @@ internal class DeviceConnectionViewModel @Inject constructor(
      * The service will be started if not already running.
      * @param deviceAddress the address of the peripheral to connect to.
      */
-    fun connectToPeripheral(deviceAddress: String) = viewModelScope.launch {
-        // Update the device address
-        address = deviceAddress
+    private fun connectToPeripheral(deviceAddress: String) = viewModelScope.launch {
         // Connect to the peripheral
         getServiceApi()?.let { api ->
             val peripheral = api.getPeripheralById(deviceAddress)
             if (peripheral?.isConnected != true) {
                 serviceManager.connectToPeripheral(deviceAddress)
             }
-            updateConnectionState(api, deviceAddress, peripheral?.isConnected == true)
         }
     }
 
@@ -180,17 +193,6 @@ internal class DeviceConnectionViewModel @Inject constructor(
                     )
                 }
             }
-            if (!isMissing) {
-                connectedDeviceJob?.cancel()
-                connectedDeviceJob = api.connectedDevices.onEach { peripheralProfileMap ->
-                    peripheral?.let { device ->
-                        // Update the profile data
-                        peripheralProfileMap[device.address]?.second?.forEach { profileHandler ->
-                            updateProfileData(profileHandler)
-                        }
-                    }
-                }.launchIn(viewModelScope)
-            }
         }.launchIn(viewModelScope)
 
     /**
@@ -233,6 +235,8 @@ internal class DeviceConnectionViewModel @Inject constructor(
      * @param profileHandler the profile handler.
      */
     private fun updateHRS(profileHandler: ProfileHandler) {
+        if (_deviceData.value !is DeviceConnectionState.Connected) return
+
         val hrsServiceData = (_deviceData.value as DeviceConnectionState.Connected).data.serviceData
             .filterIsInstance<HRSServiceData>()
             .firstOrNull()
@@ -344,11 +348,13 @@ internal class DeviceConnectionViewModel @Inject constructor(
      * @param deviceAddress the address of the device to reconnect to.
      */
     private fun reconnectDevice(deviceAddress: String) = viewModelScope.launch {
-        address = deviceAddress
         _deviceData.update {
             DeviceConnectionState.Idle
         }
-        getServiceApi()?.let { connectToPeripheral(deviceAddress) }
+        getServiceApi()?.let {
+            connectToPeripheral(deviceAddress)
+            updateConnectionState(it, deviceAddress, false)
+        }
     }
 
     /**

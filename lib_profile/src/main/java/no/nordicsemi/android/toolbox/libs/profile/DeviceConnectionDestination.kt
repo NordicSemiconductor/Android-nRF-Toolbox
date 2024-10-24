@@ -7,7 +7,5 @@ import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewMod
 
 val DeviceConnectionDestinationId = createDestination<String, Unit>("connect-device-destination")
 val DeviceConnectionDestination = defineDestination(DeviceConnectionDestinationId) {
-    val simpleNavigationViewModel: SimpleNavigationViewModel = hiltViewModel()
-    val deviceAddress = simpleNavigationViewModel.parameterOf(DeviceConnectionDestinationId)
-    DeviceConnectionScreen(deviceAddress)
+    DeviceConnectionScreen()
 }
