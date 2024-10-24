@@ -8,7 +8,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,15 +45,12 @@ import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.android.ui.view.internal.ServiceDiscoveryView
 
 @Composable
-internal fun DeviceConnectionScreen(deviceAddress: String) {
+internal fun DeviceConnectionScreen() {
     val deviceConnectionViewModel: DeviceConnectionViewModel = hiltViewModel()
     val deviceDataState by deviceConnectionViewModel.deviceData.collectAsStateWithLifecycle()
+    val deviceAddress = deviceConnectionViewModel.address
     val onClickEvent: (DeviceConnectionViewEvent) -> Unit =
         { deviceConnectionViewModel.onClickEvent(it) }
-
-    LaunchedEffect(deviceAddress) {
-        deviceConnectionViewModel.connectToPeripheral(deviceAddress)
-    }
 
     Scaffold(
         topBar = {
