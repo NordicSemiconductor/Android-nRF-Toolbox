@@ -82,22 +82,20 @@ internal class ProfileService : NotificationService() {
         override val disconnectionReason: Flow<DeviceDisconnectionReason?>
             get() = _disconnectionReason.asStateFlow()
 
-        override fun getPeripheralById(address: String?): Peripheral? {
-            return address?.let { centralManager.getPeripheralById(it) }
-        }
+        override fun getPeripheralById(address: String?): Peripheral? =
+            address?.let { centralManager.getPeripheralById(it) }
 
         override fun disconnect(deviceAddress: String) {
-            try {
-                lifecycleScope.launch {
+            lifecycleScope.launch {
+                runCatching {
                     centralManager.getPeripheralById(deviceAddress)
                         ?.let { peripheral ->
                             if (peripheral.isConnected) peripheral.disconnect()
                             handleDisconnection(peripheral)
                         }
+                }.onFailure { e ->
+                    Timber.e(e, "Couldn't disconnect from the $deviceAddress")
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Timber.e(e, "Could not disconnect from the $deviceAddress")
             }
         }
 
@@ -108,17 +106,17 @@ internal class ProfileService : NotificationService() {
                 connectionJob?.cancel()
 
                 // Start a new observation and store the job reference
-                connectionJob = stateFlow.onEach { s ->
-                    when (s) {
+                connectionJob = stateFlow.onEach { state ->
+                    when (state) {
                         ConnectionState.Connected -> handleConnectedState(peripheral)
                         ConnectionState.Connecting -> _disconnectionReason.tryEmit(null)
                         is ConnectionState.Disconnected -> {
-                            _disconnectionReason.tryEmit(StateReason(s.reason))
+                            _disconnectionReason.tryEmit(StateReason(state.reason))
                             handleDisconnection(peripheral)
                             clearJobs()
                         }
 
-                        else -> { /* No action needed for other states */
+                        else -> { /* Handle other states if necessary. */
                         }
                     }
                 }.launchIn(lifecycleScope)
