@@ -196,6 +196,7 @@ internal class ProfileService : NotificationService() {
         _connectedDevices.update { currentDevices ->
             currentDevices.toMutableMap().apply { remove(peripheral.address) }
         }
+        clearJobs()
         clearFlags()
         stopServiceIfNoDevices()
     }
