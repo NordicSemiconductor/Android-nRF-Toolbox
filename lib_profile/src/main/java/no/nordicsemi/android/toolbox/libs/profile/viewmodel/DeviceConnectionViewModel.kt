@@ -22,7 +22,6 @@ import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestinationId
 import no.nordicsemi.android.toolbox.libs.profile.data.Profile
 import no.nordicsemi.android.toolbox.libs.profile.data.bps.BPSData
-import no.nordicsemi.android.toolbox.libs.profile.data.hrs.HRSData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.HtsData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.profile.data.service.BPSServiceData
@@ -32,6 +31,7 @@ import no.nordicsemi.android.toolbox.libs.profile.data.service.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.service.ProfileServiceData
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
+import no.nordicsemi.android.toolbox.libs.profile.repository.HRSRepository
 import no.nordicsemi.android.toolbox.libs.profile.service.CustomReason
 import no.nordicsemi.android.toolbox.libs.profile.service.DeviceDisconnectionReason
 import no.nordicsemi.android.toolbox.libs.profile.service.ServiceApi
@@ -74,7 +74,6 @@ internal class DeviceConnectionViewModel @Inject constructor(
     private var serviceApi: WeakReference<ServiceApi>? = null
 
     private var job: Job? = null
-    private var connectedDeviceJob: Job? = null
 
     /**
      * Bind the service and return the API if successful.
@@ -97,7 +96,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
     private fun observeConnectedDevices() = viewModelScope.launch {
         getServiceApi()?.let {
             val peripheral = it.getPeripheralById(address)
-            connectedDeviceJob = it.connectedDevices
+            it.connectedDevices
                 .onEach { peripheralProfileMap ->
                     deviceRepository.updateConnectedDevices(peripheralProfileMap)
                 }
@@ -203,9 +202,10 @@ internal class DeviceConnectionViewModel @Inject constructor(
      * @param profileHandler the profile handler.
      */
     private fun updateProfileData(profileHandler: ProfileHandler) {
+        if (_deviceData.value !is DeviceConnectionState.Connected) return
         when (profileHandler.profile) {
             Profile.HTS -> updateHTS(profileHandler)
-            Profile.HRS -> updateHRS(profileHandler)
+            Profile.HRS -> updateHRS()
             Profile.BATTERY -> updateBatteryLevel(profileHandler)
             Profile.BPS -> updateBPS(profileHandler)
             else -> { /* TODO: Add more profile modules here */
@@ -234,41 +234,18 @@ internal class DeviceConnectionViewModel @Inject constructor(
 
     /**
      * Update the heart rate service data.
-     *
-     * @param profileHandler the profile handler.
      */
-    private fun updateHRS(profileHandler: ProfileHandler) {
-        if (_deviceData.value !is DeviceConnectionState.Connected) return
-
-        val hrsServiceData = (_deviceData.value as DeviceConnectionState.Connected).data.serviceData
-            .filterIsInstance<HRSServiceData>()
-            .firstOrNull()
-
-        var hrsDataList = hrsServiceData?.data ?: emptyList()
-        val zoomInData = hrsServiceData?.zoomIn ?: false
-
-        profileHandler.getNotification().onEach {
-            val hrsData = it as HRSData
-            // Update the previous data with the new data
-            hrsDataList = hrsDataList + hrsData
-
-            updateDeviceData(
-                HRSServiceData(
-                    data = hrsDataList,
-                    zoomIn = zoomInData
-                )
+    private fun updateHRS() = HRSRepository.data.onEach {
+        updateDeviceData(
+            HRSServiceData(
+                profile = Profile.HRS,
+                data = it.data,
+                bodySensorLocation = it.bodySensorLocation,
+                zoomIn = it.zoomIn
             )
-        }.launchIn(viewModelScope)
-        profileHandler.readCharacteristic()?.onEach {
-            val bodySensorLocation = it as Int
-            updateDeviceData(
-                HRSServiceData(
-                    bodySensorLocation = bodySensorLocation,
-                    zoomIn = zoomInData
-                )
-            )
-        }?.launchIn(viewModelScope)
-    }
+        )
+    }.launchIn(viewModelScope)
+
 
     /**
      * Update the battery level.
@@ -375,6 +352,8 @@ internal class DeviceConnectionViewModel @Inject constructor(
      * @param device the address of the device to disconnect.
      */
     private fun disconnectAndNavigate(device: String) = viewModelScope.launch {
+        // clear the data.
+        HRSRepository.clear()
         getServiceApi()?.disconnect(device)
         unbindService()
         navigator.navigateUp()
@@ -398,15 +377,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
 
     /** Switch the zoom event. */
     private fun switchZoomEvent() {
-        (_deviceData.value as? DeviceConnectionState.Connected)?.let {
-            _deviceData.value = it.copy(
-                data = it.data.copy(
-                    serviceData = it.data.serviceData.map { service ->
-                        if (service is HRSServiceData) service.copy(zoomIn = !service.zoomIn) else service
-                    }
-                )
-            )
-        }
+        HRSRepository.updateZoomIn()
     }
 
     /**
