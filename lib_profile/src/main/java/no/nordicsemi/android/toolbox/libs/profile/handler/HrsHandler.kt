@@ -11,6 +11,7 @@ import no.nordicsemi.android.toolbox.libs.profile.data.Profile
 import no.nordicsemi.android.toolbox.libs.profile.data.hrs.BodySensorLocationParser
 import no.nordicsemi.android.toolbox.libs.profile.data.hrs.HRSData
 import no.nordicsemi.android.toolbox.libs.profile.data.hrs.HRSDataParser
+import no.nordicsemi.android.toolbox.libs.profile.repository.HRSRepository
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber
 import java.util.UUID
@@ -37,7 +38,7 @@ internal class HrsHandler : ProfileHandler() {
             ?.subscribe()
             ?.mapNotNull { HRSDataParser.parse(it) }
             ?.onEach { data ->
-                _hrsData.emit(data)
+                HRSRepository.updateHRSData(data)
             }
             ?.catch { e ->
                 // Handle the error
@@ -49,7 +50,7 @@ internal class HrsHandler : ProfileHandler() {
             ?.read()
             ?.let { BodySensorLocationParser.parse(it) }
             ?.let { bodySensorLocation ->
-                _bodySensorLocation.emit(bodySensorLocation)
+                HRSRepository.updateBodySensorLocation(bodySensorLocation)
             }
     }
 }
