@@ -229,18 +229,10 @@ internal class DeviceConnectionViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    /**
-     * Update the heart rate service data.
-     */
-    private fun updateHRS() = HRSRepository.data.onEach {
-        updateDeviceData(
-            HRSServiceData(
-                profile = Profile.HRS,
-                data = it.data,
-                bodySensorLocation = it.bodySensorLocation,
-                zoomIn = it.zoomIn
-            )
-        )
+
+    /** Update the heart rate service data. */
+    private fun updateHRS() = HRSRepository.getData(address).onEach {
+        updateDeviceData(it)
     }.launchIn(viewModelScope)
 
 
@@ -372,7 +364,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
 
     /** Switch the zoom event. */
     private fun switchZoomEvent() {
-        HRSRepository.updateZoomIn()
+        HRSRepository.updateZoomIn(address)
     }
 
     /**

@@ -161,7 +161,7 @@ internal class ProfileService : NotificationService() {
                     Timber.i("Supported service: ${it.profile}")
                     handlers.add(it)
                     lifecycleScope.launch {
-                        it.handleServices(remoteService, lifecycleScope)
+                        it.handleServices(peripheral.address, remoteService, lifecycleScope)
                     }
                 }
             }

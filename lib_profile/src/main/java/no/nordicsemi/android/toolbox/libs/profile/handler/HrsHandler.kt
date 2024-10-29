@@ -34,14 +34,18 @@ internal class HrsHandler : ProfileHandler() {
     override fun readCharacteristic() = _bodySensorLocation.asSharedFlow()
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun handleServices(remoteService: RemoteService, scope: CoroutineScope) {
+    override suspend fun handleServices(
+        deviceId: String,
+        remoteService: RemoteService,
+        scope: CoroutineScope
+    ) {
         remoteService.characteristics.firstOrNull { it.uuid == HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID.toKotlinUuid() }
             ?.subscribe()
             ?.mapNotNull { HRSDataParser.parse(it) }
             ?.onEach { data ->
-                HRSRepository.updateHRSData(data)
+                HRSRepository.updateHRSData(deviceId, data)
             }
-            ?.onCompletion { HRSRepository.clear() }
+            ?.onCompletion { HRSRepository.clear(deviceId) }
             ?.catch { e ->
                 // Handle the error
                 e.printStackTrace()
@@ -52,7 +56,7 @@ internal class HrsHandler : ProfileHandler() {
             ?.read()
             ?.let { BodySensorLocationParser.parse(it) }
             ?.let { bodySensorLocation ->
-                HRSRepository.updateBodySensorLocation(bodySensorLocation)
+                HRSRepository.updateBodySensorLocation(deviceId, bodySensorLocation)
             }
     }
 }
