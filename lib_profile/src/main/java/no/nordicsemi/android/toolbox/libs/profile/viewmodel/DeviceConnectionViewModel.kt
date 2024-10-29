@@ -24,9 +24,9 @@ import no.nordicsemi.android.toolbox.libs.profile.data.Profile
 import no.nordicsemi.android.toolbox.libs.profile.data.bps.BPSData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.profile.data.service.BPSServiceData
-import no.nordicsemi.android.toolbox.libs.profile.data.service.BatteryServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.service.ProfileServiceData
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
+import no.nordicsemi.android.toolbox.libs.profile.repository.BatteryRepository
 import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
 import no.nordicsemi.android.toolbox.libs.profile.repository.HRSRepository
 import no.nordicsemi.android.toolbox.libs.profile.repository.HTSRepository
@@ -201,7 +201,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
         when (profileHandler.profile) {
             Profile.HTS -> updateHTS()
             Profile.HRS -> updateHRS()
-            Profile.BATTERY -> updateBatteryLevel(profileHandler)
+            Profile.BATTERY -> updateBatteryLevel()
             Profile.BPS -> updateBPS(profileHandler)
             else -> { /* TODO: Add more profile modules here */
             }
@@ -220,17 +220,10 @@ internal class DeviceConnectionViewModel @Inject constructor(
     }.launchIn(viewModelScope)
 
 
-    /**
-     * Update the battery level.
-     *
-     * @param profileHandler the profile handler.
-     */
-    private fun updateBatteryLevel(profileHandler: ProfileHandler) {
-        profileHandler.getNotification().onEach {
-            val batteryLevel = it as Int
-            updateDeviceData(BatteryServiceData(batteryLevel = batteryLevel))
-        }.launchIn(viewModelScope)
-    }
+    /** Update the battery level. */
+    private fun updateBatteryLevel() = BatteryRepository.getData(address).onEach {
+        updateDeviceData(it)
+    }.launchIn(viewModelScope)
 
     /**
      * Update the blood pressure service data.
