@@ -349,8 +349,6 @@ internal class DeviceConnectionViewModel @Inject constructor(
      * @param device the address of the device to disconnect.
      */
     private fun disconnectAndNavigate(device: String) = viewModelScope.launch {
-        // clear the data.
-        HRSRepository.clear()
         getServiceApi()?.disconnect(device)
         unbindService()
         navigator.navigateUp()

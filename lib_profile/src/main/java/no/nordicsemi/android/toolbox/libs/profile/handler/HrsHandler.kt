@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.toolbox.libs.profile.data.Profile
 import no.nordicsemi.android.toolbox.libs.profile.data.hrs.BodySensorLocationParser
@@ -40,6 +41,7 @@ internal class HrsHandler : ProfileHandler() {
             ?.onEach { data ->
                 HRSRepository.updateHRSData(data)
             }
+            ?.onCompletion { HRSRepository.clear() }
             ?.catch { e ->
                 // Handle the error
                 e.printStackTrace()
