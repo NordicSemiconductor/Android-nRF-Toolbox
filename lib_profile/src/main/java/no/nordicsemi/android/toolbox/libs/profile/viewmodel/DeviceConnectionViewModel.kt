@@ -22,16 +22,14 @@ import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestinationId
 import no.nordicsemi.android.toolbox.libs.profile.data.Profile
 import no.nordicsemi.android.toolbox.libs.profile.data.bps.BPSData
-import no.nordicsemi.android.toolbox.libs.profile.data.hts.HtsData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.profile.data.service.BPSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.service.BatteryServiceData
-import no.nordicsemi.android.toolbox.libs.profile.data.service.HRSServiceData
-import no.nordicsemi.android.toolbox.libs.profile.data.service.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.service.ProfileServiceData
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
 import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
 import no.nordicsemi.android.toolbox.libs.profile.repository.HRSRepository
+import no.nordicsemi.android.toolbox.libs.profile.repository.HTSRepository
 import no.nordicsemi.android.toolbox.libs.profile.service.CustomReason
 import no.nordicsemi.android.toolbox.libs.profile.service.DeviceDisconnectionReason
 import no.nordicsemi.android.toolbox.libs.profile.service.ServiceApi
@@ -201,7 +199,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
      */
     private fun updateProfileData(profileHandler: ProfileHandler) {
         when (profileHandler.profile) {
-            Profile.HTS -> updateHTS(profileHandler)
+            Profile.HTS -> updateHTS()
             Profile.HRS -> updateHRS()
             Profile.BATTERY -> updateBatteryLevel(profileHandler)
             Profile.BPS -> updateBPS(profileHandler)
@@ -210,24 +208,10 @@ internal class DeviceConnectionViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Update the health thermometer service data.
-     *
-     * @param profileHandler the profile handler.
-     */
-    private fun updateHTS(profileHandler: ProfileHandler) {
-        profileHandler.getNotification().onEach {
-            val htsData = it as HtsData
-            updateDeviceData(
-                HTSServiceData(
-                    data = htsData,
-                    temperatureUnit = (_deviceData.value as DeviceConnectionState.Connected).data.serviceData
-                        .filterIsInstance<HTSServiceData>()
-                        .firstOrNull()?.temperatureUnit ?: TemperatureUnit.CELSIUS
-                )
-            )
-        }.launchIn(viewModelScope)
-    }
+    /** Update the health thermometer service data. */
+    private fun updateHTS() = HTSRepository.getData(address).onEach {
+        updateDeviceData(it)
+    }.launchIn(viewModelScope)
 
 
     /** Update the heart rate service data. */
@@ -351,15 +335,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
      * @param unit the temperature unit.
      */
     private fun updateTemperatureUnit(unit: TemperatureUnit) {
-        (_deviceData.value as? DeviceConnectionState.Connected)?.let {
-            _deviceData.value = it.copy(
-                data = it.data.copy(
-                    serviceData = it.data.serviceData.map { service ->
-                        if (service is HTSServiceData) service.copy(temperatureUnit = unit) else service
-                    }
-                )
-            )
-        }
+        HTSRepository.onTemperatureUnitChange(address, unit)
     }
 
     /** Switch the zoom event. */
