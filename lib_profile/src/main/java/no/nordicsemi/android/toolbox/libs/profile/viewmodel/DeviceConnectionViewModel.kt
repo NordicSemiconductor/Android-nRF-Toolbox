@@ -99,8 +99,6 @@ internal class DeviceConnectionViewModel @Inject constructor(
             it.connectedDevices
                 .onEach { peripheralProfileMap ->
                     deviceRepository.updateConnectedDevices(peripheralProfileMap)
-                }
-                .onEach { peripheralProfileMap ->
                     peripheralProfileMap[peripheral?.address]?.second?.forEach { profileHandler ->
                         updateProfileData(profileHandler)
                     }
@@ -202,7 +200,6 @@ internal class DeviceConnectionViewModel @Inject constructor(
      * @param profileHandler the profile handler.
      */
     private fun updateProfileData(profileHandler: ProfileHandler) {
-        if (_deviceData.value !is DeviceConnectionState.Connected) return
         when (profileHandler.profile) {
             Profile.HTS -> updateHTS(profileHandler)
             Profile.HRS -> updateHRS()

@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
@@ -87,13 +88,13 @@ internal class ProfileService : NotificationService() {
 
         override fun disconnect(deviceAddress: String) {
             lifecycleScope.launch {
-                runCatching {
+                try {
                     centralManager.getPeripheralById(deviceAddress)
                         ?.let { peripheral ->
                             if (peripheral.isConnected) peripheral.disconnect()
-                            handleDisconnection(peripheral)
+                            handleDisconnection(deviceAddress)
                         }
-                }.onFailure { e ->
+                } catch (e: Exception) {
                     Timber.e(e, "Couldn't disconnect from the $deviceAddress")
                 }
             }
@@ -102,20 +103,24 @@ internal class ProfileService : NotificationService() {
         override fun getConnectionState(address: String): Flow<ConnectionState>? {
             val peripheral = getPeripheralById(address) ?: return null
             return peripheral.state.also { stateFlow ->
-                // Cancel the previous state observation if any
+                // Cancel the previous state observation if any.
                 connectionJob?.cancel()
-
-                // Start a new observation and store the job reference
-                connectionJob = stateFlow.onEach { state ->
+                // Since the initial state is Gatt closed, drop the first state.
+                connectionJob = stateFlow.drop(1).onEach { state ->
                     when (state) {
-                        ConnectionState.Connected -> handleConnectedState(peripheral)
+                        ConnectionState.Connected -> {
+                            // Discover services if not already discovered
+                            if (_connectedDevices.value[address] == null) {
+                                discoverServices(peripheral)
+                            }
+                        }
+
                         ConnectionState.Connecting -> _disconnectionReason.tryEmit(null)
                         is ConnectionState.Disconnected -> {
                             _disconnectionReason.tryEmit(StateReason(state.reason))
-                            handleDisconnection(peripheral)
-                            clearJobs()
                         }
 
+                        ConnectionState.Closed -> handleDisconnection(address)
                         else -> { /* Handle other states if necessary. */
                         }
                     }
@@ -147,7 +152,7 @@ internal class ProfileService : NotificationService() {
      * Discover services and characteristics for the connected [peripheral].
      */
     @OptIn(ExperimentalUuidApi::class)
-    private fun handleConnectedState(peripheral: Peripheral) {
+    private fun discoverServices(peripheral: Peripheral) {
         val handlers = mutableListOf<ProfileHandler>()
         serviceHandlingJob = peripheral.services().onEach { remoteServices ->
             remoteServices.forEach { remoteService ->
@@ -192,9 +197,11 @@ internal class ProfileService : NotificationService() {
     /**
      * Handle disconnection and cleanup for the given peripheral.
      */
-    private fun handleDisconnection(peripheral: Peripheral) {
-        _connectedDevices.update { currentDevices ->
-            currentDevices.toMutableMap().apply { remove(peripheral.address) }
+    private fun handleDisconnection(peripheral: String) {
+        val currentDevices = _connectedDevices.value.toMutableMap()
+        currentDevices[peripheral]?.let {
+            currentDevices.remove(peripheral)
+            _connectedDevices.tryEmit(currentDevices)
         }
         clearJobs()
         clearFlags()
