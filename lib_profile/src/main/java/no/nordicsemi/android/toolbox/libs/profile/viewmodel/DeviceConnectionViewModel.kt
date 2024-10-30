@@ -21,11 +21,10 @@ import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestinationId
 import no.nordicsemi.android.toolbox.libs.profile.data.Profile
-import no.nordicsemi.android.toolbox.libs.profile.data.bps.BPSData
 import no.nordicsemi.android.toolbox.libs.profile.data.hts.TemperatureUnit
-import no.nordicsemi.android.toolbox.libs.profile.data.service.BPSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.service.ProfileServiceData
 import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
+import no.nordicsemi.android.toolbox.libs.profile.repository.BPSRepository
 import no.nordicsemi.android.toolbox.libs.profile.repository.BatteryRepository
 import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
 import no.nordicsemi.android.toolbox.libs.profile.repository.HRSRepository
@@ -202,7 +201,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
             Profile.HTS -> updateHTS()
             Profile.HRS -> updateHRS()
             Profile.BATTERY -> updateBatteryLevel()
-            Profile.BPS -> updateBPS(profileHandler)
+            Profile.BPS -> updateBPS()
             else -> { /* TODO: Add more profile modules here */
             }
         }
@@ -225,23 +224,10 @@ internal class DeviceConnectionViewModel @Inject constructor(
         updateDeviceData(it)
     }.launchIn(viewModelScope)
 
-    /**
-     * Update the blood pressure service data.
-     *
-     * @param profileHandler the profile handler.
-     */
-    private fun updateBPS(profileHandler: ProfileHandler) {
-        updateDeviceData(BPSServiceData(profile = profileHandler.profile))
-        profileHandler.getNotification().onEach {
-            val bpsData = it as BPSData
-            updateDeviceData(
-                BPSServiceData(
-                    bloodPressureMeasurement = bpsData.bloodPressureMeasurement,
-                    intermediateCuffPressure = bpsData.intermediateCuffPressure,
-                )
-            )
-        }.launchIn(viewModelScope)
-    }
+    /** Update the blood pressure service data. */
+    private fun updateBPS() = BPSRepository.getData(address).onEach {
+        updateDeviceData(it)
+    }.launchIn(viewModelScope)
 
     /**
      * Update the device data with the given data.
