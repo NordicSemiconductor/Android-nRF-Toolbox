@@ -1,9 +1,6 @@
 package no.nordicsemi.android.toolbox.libs.profile.handler
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
@@ -22,13 +19,7 @@ val BATTERY_LEVEL_CHARACTERISTIC_UUID: UUID =
     UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
 
 internal class BatteryHandler : ProfileHandler() {
-    private val _batteryLevel = MutableSharedFlow<Int>()
-    override val profile: Profile
-        get() = Profile.BATTERY
-
-    override fun getNotification() = _batteryLevel.asSharedFlow()
-
-    override fun readCharacteristic(): Flow<Nothing>? = null
+    override val profile: Profile = Profile.BATTERY
 
     @OptIn(ExperimentalUuidApi::class)
     override suspend fun handleServices(
