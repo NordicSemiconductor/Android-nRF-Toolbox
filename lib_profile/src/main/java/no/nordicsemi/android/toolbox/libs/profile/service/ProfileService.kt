@@ -109,6 +109,7 @@ internal class ProfileService : NotificationService() {
                 connectionJob = stateFlow.drop(1).onEach { state ->
                     when (state) {
                         ConnectionState.Connected -> {
+                            _isMissingServices.tryEmit(false)
                             // Discover services if not already discovered
                             if (_connectedDevices.value[address] == null) {
                                 discoverServices(peripheral)
@@ -165,7 +166,6 @@ internal class ProfileService : NotificationService() {
                     }
                 }
             }
-
             when {
                 handlers.size == 1 && handlers.first().profile == Profile.BATTERY -> {
                     _isMissingServices.tryEmit(true)
