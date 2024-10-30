@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.toolbox.libs.profile.data.Profile
 import no.nordicsemi.android.toolbox.libs.profile.data.prx.AlarmLevel
 import no.nordicsemi.android.toolbox.libs.profile.data.prx.AlarmLevelParser
-import no.nordicsemi.android.toolbox.libs.profile.data.prx.PRXData
+import no.nordicsemi.android.toolbox.libs.profile.repository.PRXRepository
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber
 import java.util.UUID
@@ -37,19 +37,20 @@ internal class PRXHandler : ProfileHandler() {
     override fun readCharacteristic(): Flow<Nothing>? = null
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun handleServices(remoteService: RemoteService, scope: CoroutineScope) {
+    override suspend fun handleServices(
+        deviceId: String,
+        remoteService: RemoteService,
+        scope: CoroutineScope
+    ) {
         val linkLossService = remoteService.includedServices
             .firstOrNull { it.uuid == LINK_LOSS_SERVICE_UUID.toKotlinUuid() }
 
         remoteService.characteristics.firstOrNull { it.uuid == ALERT_LEVEL_CHARACTERISTIC_UUID.toKotlinUuid() }
             ?.subscribe()
             ?.mapNotNull { AlarmLevelParser.parse(it) }
-            ?.onEach { alarmLevel ->
-                // Send the data to the repository
-                _prxCharacteristic.emit(alarmLevel)
-                _prxData.value = _prxData.value?.copy(localAlarmLevel = alarmLevel)
-                    ?: PRXData(localAlarmLevel = alarmLevel)
-            }?.catch { e ->
+            ?.onEach { PRXRepository.updatePRXData(deviceId, it) }
+            ?.onCompletion { PRXRepository.clear(deviceId) }
+            ?.catch { e ->
                 e.printStackTrace()
                 Timber.e(e)
             }?.launchIn(scope)
@@ -57,12 +58,9 @@ internal class PRXHandler : ProfileHandler() {
         linkLossService?.characteristics?.firstOrNull { it.uuid == ALERT_LEVEL_CHARACTERISTIC_UUID.toKotlinUuid() }
             ?.subscribe()
             ?.mapNotNull { AlarmLevelParser.parse(it) }
-            ?.onEach { alarmLevel ->
-                // Send the data to the repository
-                _linkLossAlarmLevel.emit(alarmLevel)
-                _prxData.value = _prxData.value?.copy(linkLossAlarmLevel = alarmLevel)
-                    ?: PRXData(linkLossAlarmLevel = alarmLevel)
-            }?.catch { e ->
+            ?.onEach { PRXRepository.updateLinkLossAlarmLevelData(deviceId, it) }
+            ?.onCompletion { PRXRepository.clear(deviceId) }
+            ?.catch { e ->
                 e.printStackTrace()
                 Timber.e(e)
             }?.launchIn(scope)
