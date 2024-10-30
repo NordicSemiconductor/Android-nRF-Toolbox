@@ -21,11 +21,11 @@ private val BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID: UUID =
 private val HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID: UUID =
     UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb")
 
-internal class HrsHandler : ProfileHandler() {
+internal class HrsHandler : ServiceHandler() {
     override val profile: Profile = Profile.HRS
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun handleServices(
+    override suspend fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope

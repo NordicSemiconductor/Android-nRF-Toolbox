@@ -19,11 +19,11 @@ import kotlin.uuid.toKotlinUuid
 private val BPM_CHARACTERISTIC_UUID = UUID.fromString("00002A35-0000-1000-8000-00805f9b34fb")
 private val ICP_CHARACTERISTIC_UUID = UUID.fromString("00002A36-0000-1000-8000-00805f9b34fb")
 
-internal class BPSHandler : ProfileHandler() {
+internal class BPSHandler : ServiceHandler() {
     override val profile: Profile = Profile.BPS
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun handleServices(
+    override suspend fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope

@@ -18,11 +18,11 @@ import kotlin.uuid.toKotlinUuid
 val BATTERY_LEVEL_CHARACTERISTIC_UUID: UUID =
     UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
 
-internal class BatteryHandler : ProfileHandler() {
+internal class BatteryHandler : ServiceHandler() {
     override val profile: Profile = Profile.BATTERY
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun handleServices(
+    override suspend fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope

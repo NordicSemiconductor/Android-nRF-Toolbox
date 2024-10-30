@@ -20,11 +20,11 @@ private val LINK_LOSS_SERVICE_UUID = UUID.fromString("00001803-0000-1000-8000-00
 private val ALERT_LEVEL_CHARACTERISTIC_UUID =
     UUID.fromString("00002A06-0000-1000-8000-00805f9b34fb")
 
-internal class PRXHandler : ProfileHandler() {
+internal class PRXHandler : ServiceHandler() {
     override val profile: Profile = Profile.PRX
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun handleServices(
+    override suspend fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope

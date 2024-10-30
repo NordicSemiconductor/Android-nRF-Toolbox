@@ -18,11 +18,11 @@ import kotlin.uuid.toKotlinUuid
 private val HTS_MEASUREMENT_CHARACTERISTIC_UUID: UUID =
     UUID.fromString("00002A1C-0000-1000-8000-00805f9b34fb")
 
-internal class HtsHandler : ProfileHandler() {
+internal class HtsHandler : ServiceHandler() {
     override val profile: Profile = Profile.HTS
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun handleServices(
+    override suspend fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope
