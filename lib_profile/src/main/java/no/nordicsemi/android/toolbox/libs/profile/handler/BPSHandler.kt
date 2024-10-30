@@ -1,16 +1,12 @@
 package no.nordicsemi.android.toolbox.libs.profile.handler
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.toolbox.libs.profile.data.Profile
-import no.nordicsemi.android.toolbox.libs.profile.data.bps.BPSData
 import no.nordicsemi.android.toolbox.libs.profile.data.bps.BloodPressureMeasurementParser
 import no.nordicsemi.android.toolbox.libs.profile.data.bps.IntermediateCuffPressureParser
 import no.nordicsemi.android.toolbox.libs.profile.repository.BPSRepository
@@ -25,14 +21,6 @@ private val ICP_CHARACTERISTIC_UUID = UUID.fromString("00002A36-0000-1000-8000-0
 
 internal class BPSHandler : ProfileHandler() {
     override val profile: Profile = Profile.BPS
-
-    private val _bpsData =
-        MutableStateFlow<BPSData?>(null)
-
-    override fun getNotification(): Flow<BPSData> =
-        _bpsData.filterNotNull() // Only emit non-null updates
-
-    override fun readCharacteristic(): Flow<Nothing>? = null
 
     @OptIn(ExperimentalUuidApi::class)
     override suspend fun handleServices(
