@@ -62,6 +62,8 @@ include(":lib_analytics")
 include(":lib_scanner")
 include(":lib_service")
 include(":lib_ui")
+include(":lib_profile")
+include(":lib_core")
 
 //if (file("../Android-Common-Libraries").exists()) {
 //    includeBuild("../Android-Common-Libraries")
@@ -70,4 +72,3 @@ include(":lib_ui")
 if (file("../Kotlin-BLE-Library").exists()) {
     includeBuild("../Kotlin-BLE-Library")
 }
-include(":lib_profile")

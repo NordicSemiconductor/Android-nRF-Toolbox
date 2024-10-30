@@ -2,7 +2,7 @@ package no.nordicsemi.android.toolbox.libs.profile.repository
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import no.nordicsemi.android.toolbox.libs.profile.handler.ProfileHandler
+import no.nordicsemi.android.service.handler.ProfileHandler
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import javax.inject.Inject
 import javax.inject.Singleton

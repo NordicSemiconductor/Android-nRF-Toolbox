@@ -39,10 +39,17 @@ android {
 }
 
 dependencies {
+    implementation(project(":lib_core"))
     implementation(project(":lib_ui"))
+
+    implementation(libs.nordic.logger)
+    implementation(libs.nordic.log.timber)
+
     implementation("no.nordicsemi.kotlin.ble:client-android")
 
     implementation(libs.androidx.lifecycle.service)
     implementation(libs.androidx.localbroadcastmanager)
     implementation(libs.androidx.core)
+
+    implementation(libs.slf4j.timber)
 }
