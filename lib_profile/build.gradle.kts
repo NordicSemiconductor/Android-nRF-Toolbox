@@ -8,6 +8,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":lib_core"))
     implementation(project(":lib_ui"))
     implementation(project(":lib_service"))
 

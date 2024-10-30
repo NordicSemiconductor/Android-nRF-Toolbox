@@ -28,7 +28,7 @@ import no.nordicsemi.android.common.permissions.notification.RequestNotification
 import no.nordicsemi.android.nrftoolbox.R
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewEvent
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewModel
-import no.nordicsemi.android.toolbox.libs.profile.data.Profile
+import no.nordicsemi.android.toolbox.libs.core.data.Profile
 
 private const val DFU_PACKAGE_NAME = "no.nordicsemi.android.dfu"
 private const val DFU_LINK =
