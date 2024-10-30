@@ -19,7 +19,7 @@ import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
 import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.timber.nRFLoggerTree
-import no.nordicsemi.android.service.handler.ProfileHandler
+import no.nordicsemi.android.service.handler.ServiceHandler
 import no.nordicsemi.android.service.profile.CustomReason
 import no.nordicsemi.android.service.profile.DeviceDisconnectionReason
 import no.nordicsemi.android.service.profile.ServiceApi
@@ -196,7 +196,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
      * Observe and update the data from the profile handler.
      * @param profileHandler the profile handler.
      */
-    private fun updateProfileData(profileHandler: ProfileHandler) {
+    private fun updateProfileData(profileHandler: ServiceHandler) {
         when (profileHandler.profile) {
             Profile.HTS -> updateHTS()
             Profile.HRS -> updateHRS()

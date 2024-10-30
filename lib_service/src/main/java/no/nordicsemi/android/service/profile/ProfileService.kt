@@ -20,7 +20,7 @@ import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.NotificationService
 import no.nordicsemi.android.service.R
 import no.nordicsemi.android.toolbox.libs.core.data.Profile
-import no.nordicsemi.android.service.handler.ProfileHandler
+import no.nordicsemi.android.service.handler.ServiceHandler
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.CentralManager.ConnectionOptions
@@ -40,7 +40,7 @@ internal class ProfileService : NotificationService() {
     private val binder = LocalBinder()
 
     private val _connectedDevices =
-        MutableStateFlow<Map<String, Pair<Peripheral, List<ProfileHandler>>>>(emptyMap())
+        MutableStateFlow<Map<String, Pair<Peripheral, List<ServiceHandler>>>>(emptyMap())
     private val _isMissingServices = MutableStateFlow(false)
     private val _disconnectionReason = MutableStateFlow<DeviceDisconnectionReason?>(null)
 
@@ -73,7 +73,7 @@ internal class ProfileService : NotificationService() {
     }
 
     inner class LocalBinder : Binder(), ServiceApi {
-        override val connectedDevices: Flow<Map<String, Pair<Peripheral, List<ProfileHandler>>>>
+        override val connectedDevices: Flow<Map<String, Pair<Peripheral, List<ServiceHandler>>>>
             get() = _connectedDevices.asSharedFlow()
 
         override val isMissingServices: Flow<Boolean>
@@ -153,15 +153,15 @@ internal class ProfileService : NotificationService() {
      */
     @OptIn(ExperimentalUuidApi::class)
     private fun discoverServices(peripheral: Peripheral) {
-        val handlers = mutableListOf<ProfileHandler>()
+        val handlers = mutableListOf<ServiceHandler>()
         serviceHandlingJob = peripheral.services().onEach { remoteServices ->
             remoteServices.forEach { remoteService ->
-                val handler = ProfileHandlerFactory.create(remoteService.uuid)
+                val handler = ServiceHandlerFactory.createHandler(remoteService.uuid)
                 handler?.let {
                     Timber.i("Supported service: ${it.profile}")
                     handlers.add(it)
                     lifecycleScope.launch {
-                        it.handleServices(peripheral.address, remoteService, lifecycleScope)
+                        it.observeServiceInteractions(peripheral.address, remoteService, lifecycleScope)
                     }
                 }
             }
@@ -187,7 +187,7 @@ internal class ProfileService : NotificationService() {
     /**
      * Update the connected devices with the latest state.
      */
-    private fun updateConnectedDevices(peripheral: Peripheral, handlers: List<ProfileHandler>) {
+    private fun updateConnectedDevices(peripheral: Peripheral, handlers: List<ServiceHandler>) {
         _connectedDevices.update {
             it.toMutableMap().apply { this[peripheral.address] = peripheral to handlers }
         }
