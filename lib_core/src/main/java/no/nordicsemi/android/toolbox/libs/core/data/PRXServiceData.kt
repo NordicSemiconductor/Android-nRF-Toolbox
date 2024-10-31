@@ -1,6 +1,6 @@
-package no.nordicsemi.android.toolbox.libs.core.repository.data
+package no.nordicsemi.android.toolbox.libs.core.data
 
-import no.nordicsemi.android.toolbox.libs.core.data.Profile
+import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.prx.AlarmLevel
 
 /**

@@ -13,7 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.common.ui.view.RadioButtonGroup
 import no.nordicsemi.android.toolbox.lib.profile.R
-import no.nordicsemi.android.toolbox.libs.core.repository.data.HTSServiceData
+import no.nordicsemi.android.toolbox.libs.core.data.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.data.displayTemperature
 import no.nordicsemi.android.toolbox.libs.profile.data.temperatureSettingsItems
 import no.nordicsemi.android.toolbox.libs.profile.data.toTemperatureUnit

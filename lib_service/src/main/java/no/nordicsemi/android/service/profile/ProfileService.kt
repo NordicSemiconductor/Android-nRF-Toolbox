@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.NotificationService
 import no.nordicsemi.android.service.R
-import no.nordicsemi.android.toolbox.libs.core.data.Profile
+import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.service.handler.ServiceHandler
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.CentralManager

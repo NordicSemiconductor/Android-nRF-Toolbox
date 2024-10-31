@@ -1,10 +1,10 @@
-package no.nordicsemi.android.toolbox.libs.core.repository
+package no.nordicsemi.android.service.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.toolbox.libs.core.data.hrs.HRSData
-import no.nordicsemi.android.toolbox.libs.core.repository.data.HRSServiceData
+import no.nordicsemi.android.toolbox.libs.core.data.HRSServiceData
 
 object HRSRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<HRSServiceData>>()

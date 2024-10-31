@@ -1,6 +1,6 @@
-package no.nordicsemi.android.toolbox.libs.core.repository.data
+package no.nordicsemi.android.toolbox.libs.core.data
 
-import no.nordicsemi.android.toolbox.libs.core.data.Profile
+import no.nordicsemi.android.toolbox.libs.core.Profile
 
 /**
  * Profile service data class that holds the profile and the service data.
