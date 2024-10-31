@@ -1,9 +1,9 @@
-package no.nordicsemi.android.toolbox.libs.core.repository
+package no.nordicsemi.android.service.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import no.nordicsemi.android.toolbox.libs.core.repository.data.BatteryServiceData
+import no.nordicsemi.android.toolbox.libs.core.data.BatteryServiceData
 
 object BatteryRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<BatteryServiceData>>()

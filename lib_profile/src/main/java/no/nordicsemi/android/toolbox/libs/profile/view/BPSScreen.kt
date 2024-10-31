@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.core.data.bps.BloodPressureMeasurementData
 import no.nordicsemi.android.toolbox.libs.core.data.bps.IntermediateCuffPressureData
-import no.nordicsemi.android.toolbox.libs.core.repository.data.BPSServiceData
+import no.nordicsemi.android.toolbox.libs.core.data.BPSServiceData
 import no.nordicsemi.android.ui.view.KeyValueField
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle

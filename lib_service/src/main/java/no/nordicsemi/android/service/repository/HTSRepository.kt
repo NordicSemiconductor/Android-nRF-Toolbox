@@ -1,11 +1,11 @@
-package no.nordicsemi.android.toolbox.libs.core.repository
+package no.nordicsemi.android.service.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.toolbox.libs.core.data.hts.HtsData
 import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit
-import no.nordicsemi.android.toolbox.libs.core.repository.data.HTSServiceData
+import no.nordicsemi.android.toolbox.libs.core.data.HTSServiceData
 
 object HTSRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<HTSServiceData>>()

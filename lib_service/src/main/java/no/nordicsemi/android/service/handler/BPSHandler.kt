@@ -6,10 +6,10 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import no.nordicsemi.android.toolbox.libs.core.data.Profile
+import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.bps.BloodPressureMeasurementParser
 import no.nordicsemi.android.toolbox.libs.core.data.bps.IntermediateCuffPressureParser
-import no.nordicsemi.android.toolbox.libs.core.repository.BPSRepository
+import no.nordicsemi.android.service.repository.BPSRepository
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber
 import java.util.UUID

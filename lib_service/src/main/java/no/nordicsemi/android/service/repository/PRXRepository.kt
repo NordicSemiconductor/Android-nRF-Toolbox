@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.libs.core.repository
+package no.nordicsemi.android.service.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
