@@ -103,6 +103,13 @@ internal fun HomeView() {
                                             true
                                         ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
 
+                                        Profile.GLS -> FeatureButton(
+                                            iconId = R.drawable.ic_gls,
+                                            profileName = R.string.gls_module_full,
+                                            deviceName = peripheral.name,
+                                            true
+                                        ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
+
                                         else -> {
                                             // TODO: Add more profiles
                                         }

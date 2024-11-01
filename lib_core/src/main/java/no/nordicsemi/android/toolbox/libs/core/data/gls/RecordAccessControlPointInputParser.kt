@@ -21,16 +21,16 @@ object RecordAccessControlPointInputParser {
     private const val OPERATOR_FIRST_RECORD: Byte = 5
     private const val OPERATOR_LAST_RECORD: Byte = 6
 
-    fun reportAllStoredRecords(): DataByteArray {
-        return create(OP_CODE_REPORT_STORED_RECORDS, OPERATOR_ALL_RECORDS)
+    fun reportAllStoredRecords(): ByteArray {
+        return create(OP_CODE_REPORT_STORED_RECORDS, OPERATOR_ALL_RECORDS).value
     }
 
-    fun reportFirstStoredRecord(): DataByteArray {
-        return create(OP_CODE_REPORT_STORED_RECORDS, OPERATOR_FIRST_RECORD)
+    fun reportFirstStoredRecord(): ByteArray {
+        return create(OP_CODE_REPORT_STORED_RECORDS, OPERATOR_FIRST_RECORD).value
     }
 
-    fun reportLastStoredRecord(): DataByteArray {
-        return create(OP_CODE_REPORT_STORED_RECORDS, OPERATOR_LAST_RECORD)
+    fun reportLastStoredRecord(): ByteArray {
+        return create(OP_CODE_REPORT_STORED_RECORDS, OPERATOR_LAST_RECORD).value
     }
 
     fun reportStoredRecordsLessThenOrEqualTo(
@@ -65,14 +65,14 @@ object RecordAccessControlPointInputParser {
         )
     }
 
-    fun reportStoredRecordsGreaterThenOrEqualTo(@IntRange(from = 0) sequenceNumber: Int): DataByteArray {
+    fun reportStoredRecordsGreaterThenOrEqualTo(@IntRange(from = 0) sequenceNumber: Int): ByteArray {
         return create(
             OP_CODE_REPORT_STORED_RECORDS,
             OPERATOR_GREATER_THEN_OR_EQUAL,
             FilterType.SEQUENCE_NUMBER,
             IntFormat.FORMAT_UINT16_LE,
             sequenceNumber
-        )
+        ).value
     }
 
     fun reportStoredRecordsFromRange(
@@ -156,8 +156,8 @@ object RecordAccessControlPointInputParser {
         )
     }
 
-    fun reportNumberOfAllStoredRecords(): DataByteArray {
-        return create(OP_CODE_REPORT_NUMBER_OF_RECORDS, OPERATOR_ALL_RECORDS)
+    fun reportNumberOfAllStoredRecords(): ByteArray {
+        return create(OP_CODE_REPORT_NUMBER_OF_RECORDS, OPERATOR_ALL_RECORDS).value
     }
 
     fun reportNumberOfStoredRecordsLessThenOrEqualTo(

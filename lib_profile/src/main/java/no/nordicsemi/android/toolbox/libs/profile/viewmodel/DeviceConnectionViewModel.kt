@@ -25,18 +25,25 @@ import no.nordicsemi.android.service.profile.DeviceDisconnectionReason
 import no.nordicsemi.android.service.profile.ServiceApi
 import no.nordicsemi.android.service.profile.ServiceManager
 import no.nordicsemi.android.service.profile.StateReason
-import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit
-import no.nordicsemi.android.toolbox.libs.core.data.ProfileServiceData
 import no.nordicsemi.android.service.repository.BPSRepository
 import no.nordicsemi.android.service.repository.BatteryRepository
+import no.nordicsemi.android.service.repository.GLSRepository
 import no.nordicsemi.android.service.repository.HRSRepository
 import no.nordicsemi.android.service.repository.HTSRepository
+import no.nordicsemi.android.toolbox.libs.core.Profile
+import no.nordicsemi.android.toolbox.libs.core.data.ProfileServiceData
+import no.nordicsemi.android.toolbox.libs.core.data.gls.RecordAccessControlPointInputParser
+import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementContext
+import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
+import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
+import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestinationId
+import no.nordicsemi.android.toolbox.libs.profile.gls.GlsDetailsDestinationId
 import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
+import no.nordicsemi.kotlin.ble.core.WriteType
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 
@@ -202,6 +209,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
             Profile.HRS -> updateHRS()
             Profile.BATTERY -> updateBatteryLevel()
             Profile.BPS -> updateBPS()
+            Profile.GLS -> updateGLS()
             else -> { /* TODO: Add more profile modules here */
             }
         }
@@ -226,6 +234,10 @@ internal class DeviceConnectionViewModel @Inject constructor(
 
     /** Update the blood pressure service data. */
     private fun updateBPS() = BPSRepository.getData(address).onEach {
+        updateDeviceData(it)
+    }.launchIn(viewModelScope)
+
+    private fun updateGLS() = GLSRepository.getData(address).onEach {
         updateDeviceData(it)
     }.launchIn(viewModelScope)
 
@@ -264,8 +276,68 @@ internal class DeviceConnectionViewModel @Inject constructor(
             is OnTemperatureUnitSelected -> updateTemperatureUnit(event.value)
             OpenLoggerEvent -> openLogger()
             SwitchZoomEvent -> switchZoomEvent()
+            is OnWorkingModeSelected -> onGLSWorkingModeSelectedEvent(event.workingMode)
+            is OnGLSRecordClick -> navigateToGLSDetailsPage(event.record, event.gleContext)
         }
     }
+
+    private fun navigateToGLSDetailsPage(record: GLSRecord, gleContext: GLSMeasurementContext?) {
+        navigator.navigateTo(GlsDetailsDestinationId, record to gleContext)
+    }
+
+    private fun onGLSWorkingModeSelectedEvent(workingMode: WorkingMode) = viewModelScope.launch {
+        when (workingMode) {
+            WorkingMode.ALL -> requestAllRecords()
+            WorkingMode.LAST -> requestLastRecord()
+            WorkingMode.FIRST -> requestFirstRecord()
+        }
+    }
+
+    private suspend fun requestLastRecord() {
+        GLSRepository.clearState(address)
+        GLSRepository.updateNewRequestStatus(address, RequestStatus.PENDING)
+        try {
+            // Write to the characteristics.
+            GLSRepository.recordAccessControlPointCharacteristic?.write(
+                RecordAccessControlPointInputParser.reportLastStoredRecord(),
+                WriteType.WITHOUT_RESPONSE
+            )
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            GLSRepository.updateNewRequestStatus(address, RequestStatus.FAILED)
+        }
+    }
+
+    private suspend fun requestFirstRecord() {
+        GLSRepository.clearState(address)
+        GLSRepository.updateNewRequestStatus(address, RequestStatus.PENDING)
+        try {
+            GLSRepository.recordAccessControlPointCharacteristic?.write(
+                RecordAccessControlPointInputParser.reportFirstStoredRecord(),
+                WriteType.WITHOUT_RESPONSE
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            GLSRepository.updateNewRequestStatus(address, RequestStatus.FAILED)
+        }
+    }
+
+    private suspend fun requestAllRecords() {
+        GLSRepository.clearState(address)
+        GLSRepository.updateNewRequestStatus(address, RequestStatus.PENDING)
+        try {
+            GLSRepository.recordAccessControlPointCharacteristic?.write(
+                RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords(),
+                WriteType.WITHOUT_RESPONSE
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            GLSRepository.clearState(address)
+            GLSRepository.updateNewRequestStatus(address, RequestStatus.FAILED)
+        }
+    }
+
 
     /**
      * Launch the logger activity.

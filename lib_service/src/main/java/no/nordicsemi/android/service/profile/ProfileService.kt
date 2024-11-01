@@ -19,8 +19,8 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.NotificationService
 import no.nordicsemi.android.service.R
-import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.service.handler.ServiceHandler
+import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.CentralManager.ConnectionOptions
@@ -138,6 +138,12 @@ internal class ProfileService : NotificationService() {
             lifecycleScope.launch {
                 try {
                     centralManager.connect(it, options = ConnectionOptions.Direct())
+                    try {
+                        it.createBond()
+                    } catch (e: Exception) {
+                        stopForegroundService()
+                        Timber.e(e, "Bonding failed with $it")
+                    }
                 } catch (e: Exception) {
                     // Could not connect to the device
                     // Since service is started with the device address, stop the service
@@ -161,7 +167,11 @@ internal class ProfileService : NotificationService() {
                     Timber.i("Supported service: ${it.profile}")
                     handlers.add(it)
                     lifecycleScope.launch {
-                        it.observeServiceInteractions(peripheral.address, remoteService, lifecycleScope)
+                        it.observeServiceInteractions(
+                            peripheral.address,
+                            remoteService,
+                            lifecycleScope
+                        )
                     }
                 }
             }

@@ -22,10 +22,12 @@ import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.BPSServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.BatteryServiceData
+import no.nordicsemi.android.toolbox.libs.core.data.GLSServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.HRSServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.ProfileServiceData
 import no.nordicsemi.android.toolbox.libs.profile.view.BPSScreen
+import no.nordicsemi.android.toolbox.libs.profile.view.GLSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HRSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HTSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.LoadingView
@@ -183,6 +185,8 @@ private fun DeviceConnectedView(
                                 // Battery level will be added at the end.
                                 // Do nothing here.
                             }
+
+                            Profile.GLS -> GLSScreen(serviceData as GLSServiceData, onClickEvent)
 
                             else -> TODO()
                         }
