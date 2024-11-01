@@ -13,7 +13,8 @@ import java.util.Calendar
 
 object GlucoseMeasurementParser {
 
-    fun parse(bytes: DataByteArray): GLSRecord? {
+    fun parse(data: ByteArray): GLSRecord? {
+        val bytes = DataByteArray(data)
 
         if (bytes.size < 10) {
             return null

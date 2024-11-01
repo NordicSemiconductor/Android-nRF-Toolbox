@@ -13,7 +13,8 @@ object RecordAccessControlPointParser {
     private const val OP_CODE_RESPONSE_CODE = 6
     private const val OPERATOR_NULL = 0
 
-    fun parse(bytes: DataByteArray): RecordAccessControlPointData? {
+    fun parse(data: ByteArray): RecordAccessControlPointData? {
+        val bytes = DataByteArray(data)
 
         if (bytes.size < 3) {
             return null

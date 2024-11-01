@@ -13,7 +13,8 @@ import no.nordicsemi.android.toolbox.libs.core.data.gls.data.Tester
 
 object GlucoseMeasurementContextParser {
 
-    fun parse(bytes: DataByteArray): GLSMeasurementContext? {
+    fun parse(data: ByteArray): GLSMeasurementContext? {
+        val bytes = DataByteArray(data)
 
         if (bytes.size < 3) {
             return null
