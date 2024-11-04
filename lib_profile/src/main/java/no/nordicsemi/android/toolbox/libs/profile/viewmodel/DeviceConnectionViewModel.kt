@@ -32,10 +32,9 @@ import no.nordicsemi.android.service.repository.HRSRepository
 import no.nordicsemi.android.service.repository.HTSRepository
 import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.ProfileServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.gls.RecordAccessControlPointInputParser
+import no.nordicsemi.android.toolbox.libs.core.data.gls.WorkingMode
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementContext
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
 import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestinationId
 import no.nordicsemi.android.toolbox.libs.profile.gls.GlsDetailsDestinationId
@@ -43,7 +42,6 @@ import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
-import no.nordicsemi.kotlin.ble.core.WriteType
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 
@@ -286,56 +284,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
     }
 
     private fun onGLSWorkingModeSelectedEvent(workingMode: WorkingMode) = viewModelScope.launch {
-        when (workingMode) {
-            WorkingMode.ALL -> requestAllRecords()
-            WorkingMode.LAST -> requestLastRecord()
-            WorkingMode.FIRST -> requestFirstRecord()
-        }
-    }
-
-    private suspend fun requestLastRecord() {
-        GLSRepository.clearState(address)
-        GLSRepository.updateNewRequestStatus(address, RequestStatus.PENDING)
-        try {
-            // Write to the characteristics.
-            GLSRepository.recordAccessControlPointCharacteristic?.write(
-                RecordAccessControlPointInputParser.reportLastStoredRecord(),
-                WriteType.WITHOUT_RESPONSE
-            )
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-            GLSRepository.updateNewRequestStatus(address, RequestStatus.FAILED)
-        }
-    }
-
-    private suspend fun requestFirstRecord() {
-        GLSRepository.clearState(address)
-        GLSRepository.updateNewRequestStatus(address, RequestStatus.PENDING)
-        try {
-            GLSRepository.recordAccessControlPointCharacteristic?.write(
-                RecordAccessControlPointInputParser.reportFirstStoredRecord(),
-                WriteType.WITHOUT_RESPONSE
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-            GLSRepository.updateNewRequestStatus(address, RequestStatus.FAILED)
-        }
-    }
-
-    private suspend fun requestAllRecords() {
-        GLSRepository.clearState(address)
-        GLSRepository.updateNewRequestStatus(address, RequestStatus.PENDING)
-        try {
-            GLSRepository.recordAccessControlPointCharacteristic?.write(
-                RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords(),
-                WriteType.WITHOUT_RESPONSE
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-            GLSRepository.clearState(address)
-            GLSRepository.updateNewRequestStatus(address, RequestStatus.FAILED)
-        }
+        GLSRepository.writeRecord(address, workingMode)
     }
 
 
