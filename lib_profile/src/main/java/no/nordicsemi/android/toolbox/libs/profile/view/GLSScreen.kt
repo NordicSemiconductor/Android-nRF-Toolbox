@@ -35,7 +35,7 @@ import no.nordicsemi.android.toolbox.libs.profile.data.toDisplayString
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OnGLSRecordClick
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OnWorkingModeSelected
-import no.nordicsemi.android.toolbox.libs.profile.viewmodel.WorkingMode
+import no.nordicsemi.android.toolbox.libs.core.data.gls.WorkingMode
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 

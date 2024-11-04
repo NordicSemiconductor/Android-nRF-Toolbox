@@ -134,23 +134,37 @@ internal class ProfileService : NotificationService() {
      * Connect to the peripheral and observe its state.
      */
     private fun initiateConnection(deviceAddress: String) {
-        centralManager.getPeripheralById(deviceAddress)?.let {
+        centralManager.getPeripheralById(deviceAddress)?.let { peripheral ->
             lifecycleScope.launch {
-                try {
-                    centralManager.connect(it, options = ConnectionOptions.Direct())
-                    try {
-                        it.createBond()
-                    } catch (e: Exception) {
-                        stopForegroundService()
-                        Timber.e(e, "Bonding failed with $it")
-                    }
-                } catch (e: Exception) {
-                    // Could not connect to the device
-                    // Since service is started with the device address, stop the service
-                    stopForegroundService() // Remove notification from the foreground service
-                    Timber.e(e, "Could not connect to the $deviceAddress")
-                }
+                connectPeripheral(peripheral)
             }
+        }
+    }
+
+    private suspend fun connectPeripheral(peripheral: Peripheral) {
+        runCatching {
+            centralManager.connect(peripheral, options = ConnectionOptions.Direct())
+            var job: Job? = null
+            job = peripheral.bondState.onEach {
+            }
+                .onCompletion {
+                    job?.cancel()
+                }
+                .launchIn(lifecycleScope)
+        }.onSuccess {
+            ensureBond(peripheral)
+        }.onFailure { exception ->
+            Timber.e(exception, "Could not connect to the ${peripheral.address}")
+            stopForegroundService() // Stop service if connection fails
+        }
+    }
+
+    private suspend fun ensureBond(peripheral: Peripheral) {
+        if (peripheral.hasBondInformation) return
+        runCatching {
+            peripheral.createBond()
+        }.onFailure { exception ->
+            Timber.e(exception, "Bonding failed with $peripheral")
         }
     }
 
@@ -164,14 +178,20 @@ internal class ProfileService : NotificationService() {
             remoteServices.forEach { remoteService ->
                 val handler = ServiceHandlerFactory.createHandler(remoteService.uuid)
                 handler?.let {
-                    Timber.i("Supported service: ${it.profile}")
+                    Timber.tag("DiscoverServices").i("Supported service: ${it.profile}")
                     handlers.add(it)
                     lifecycleScope.launch {
-                        it.observeServiceInteractions(
-                            peripheral.address,
-                            remoteService,
-                            lifecycleScope
-                        )
+                        try {
+                            it.observeServiceInteractions(
+                                peripheral.address,
+                                remoteService,
+                                lifecycleScope
+                            )
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            Timber.tag("ObserveServices").e(e)
+                            handleDisconnection(peripheral.address)
+                        }
                     }
                 }
             }

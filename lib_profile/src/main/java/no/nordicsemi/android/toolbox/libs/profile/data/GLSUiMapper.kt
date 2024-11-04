@@ -6,7 +6,7 @@ import androidx.compose.ui.res.stringResource
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.ConcentrationUnit
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RecordType
-import no.nordicsemi.android.toolbox.libs.profile.viewmodel.WorkingMode
+import no.nordicsemi.android.toolbox.libs.core.data.gls.WorkingMode
 
 @Composable
 internal fun RecordType?.toDisplayString(): String {

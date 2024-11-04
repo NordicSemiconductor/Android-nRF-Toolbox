@@ -65,7 +65,7 @@ internal class GLSHandler : ServiceHandler() {
             ?.launchIn(scope)
 
         remoteService.characteristics.firstOrNull { it.uuid == RACP_CHARACTERISTIC.toKotlinUuid() }
-            ?.apply { GLSRepository.recordAccessControlPointCharacteristic = this }
+            ?.apply { GLSRepository.updateRACPCharacteristics(this) }
             ?.subscribe()
             ?.mapNotNull { RecordAccessControlPointParser.parse(it) }
             ?.onEach { onAccessControlPointDataReceived(deviceId, it, scope, remoteService) }
@@ -74,7 +74,6 @@ internal class GLSHandler : ServiceHandler() {
                 Timber.e(it)
             }
             ?.launchIn(scope)
-
 
     }
 
