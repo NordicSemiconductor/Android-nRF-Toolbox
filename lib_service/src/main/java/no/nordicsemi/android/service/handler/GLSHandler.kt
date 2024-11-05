@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.service.repository.GLSRepository
+import no.nordicsemi.android.service.repository.GLSRepository.updateNewRequestStatus
 import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.gls.GlucoseMeasurementContextParser
 import no.nordicsemi.android.toolbox.libs.core.data.gls.GlucoseMeasurementParser
@@ -19,6 +20,7 @@ import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.ResponseData
 import no.nordicsemi.android.toolbox.libs.core.data.racp.RACPOpCode
 import no.nordicsemi.android.toolbox.libs.core.data.racp.RACPResponseCode
+import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.core.WriteType
 import timber.log.Timber
@@ -42,38 +44,44 @@ internal class GLSHandler : ServiceHandler() {
         remoteService: RemoteService,
         scope: CoroutineScope
     ) {
-        remoteService.characteristics.firstOrNull { it.uuid == GLUCOSE_MEASUREMENT_CHARACTERISTIC.toKotlinUuid() }
-            ?.subscribe()
-            ?.mapNotNull { GlucoseMeasurementParser.parse(it) }
-            ?.onEach { GLSRepository.updateNewRecord(deviceId, it) }
-            ?.onCompletion { GLSRepository.clear(deviceId) }
-            ?.catch {
-                it.printStackTrace()
-                Timber.e(it)
-            }
-            ?.launchIn(scope)
+        scope.launch {
+            remoteService.characteristics.firstOrNull { it.uuid == GLUCOSE_MEASUREMENT_CHARACTERISTIC.toKotlinUuid() }
+                ?.subscribe()
+                ?.mapNotNull { GlucoseMeasurementParser.parse(it) }
+                ?.onEach { GLSRepository.updateNewRecord(deviceId, it) }
+                ?.onCompletion { GLSRepository.clear(deviceId) }
+                ?.catch {
+                    it.printStackTrace()
+                    Timber.e(it)
+                }
+                ?.launchIn(scope)
+        }
+        scope.launch {
+            remoteService.characteristics.firstOrNull { it.uuid == GLUCOSE_MEASUREMENT_CONTEXT_CHARACTERISTIC.toKotlinUuid() }
+                ?.subscribe()
+                ?.mapNotNull { GlucoseMeasurementContextParser.parse(it) }
+                ?.onEach { GLSRepository.updateWithNewContext(deviceId, it) }
+                ?.onCompletion { GLSRepository.clear(deviceId) }
+                ?.catch {
+                    it.printStackTrace()
+                    Timber.e(it)
+                }
+                ?.launchIn(scope)
+        }
 
-        remoteService.characteristics.firstOrNull { it.uuid == GLUCOSE_MEASUREMENT_CONTEXT_CHARACTERISTIC.toKotlinUuid() }
-            ?.subscribe()
-            ?.mapNotNull { GlucoseMeasurementContextParser.parse(it) }
-            ?.onEach { GLSRepository.updateWithNewContext(deviceId, it) }
-            ?.onCompletion { GLSRepository.clear(deviceId) }
-            ?.catch {
-                it.printStackTrace()
-                Timber.e(it)
-            }
-            ?.launchIn(scope)
+        scope.launch {
+            remoteService.characteristics.firstOrNull { it.uuid == RACP_CHARACTERISTIC.toKotlinUuid() }
+                ?.apply { recordAccessControlPointCharacteristic = this }
+                ?.subscribe()
+                ?.mapNotNull { RecordAccessControlPointParser.parse(it) }
+                ?.onEach { onAccessControlPointDataReceived(deviceId, it, scope, remoteService) }
+                ?.catch {
+                    it.printStackTrace()
+                    Timber.e(it)
+                }
+                ?.launchIn(scope)
+        }
 
-        remoteService.characteristics.firstOrNull { it.uuid == RACP_CHARACTERISTIC.toKotlinUuid() }
-            ?.apply { GLSRepository.updateRACPCharacteristics(this) }
-            ?.subscribe()
-            ?.mapNotNull { RecordAccessControlPointParser.parse(it) }
-            ?.onEach { onAccessControlPointDataReceived(deviceId, it, scope, remoteService) }
-            ?.catch {
-                it.printStackTrace()
-                Timber.e(it)
-            }
-            ?.launchIn(scope)
 
     }
 
@@ -111,9 +119,9 @@ internal class GLSHandler : ServiceHandler() {
 
     private fun onRecordAccessOperationError(deviceId: String, responseCode: RACPResponseCode) {
         if (responseCode == RACPResponseCode.RACP_ERROR_OP_CODE_NOT_SUPPORTED) {
-            GLSRepository.updateNewRequestStatus(deviceId, RequestStatus.NOT_SUPPORTED)
+            updateNewRequestStatus(deviceId, RequestStatus.NOT_SUPPORTED)
         } else {
-            GLSRepository.updateNewRequestStatus(deviceId, RequestStatus.FAILED)
+            updateNewRequestStatus(deviceId, RequestStatus.FAILED)
         }
     }
 
@@ -123,12 +131,12 @@ internal class GLSHandler : ServiceHandler() {
             else -> RequestStatus.SUCCESS
         }
 
-        GLSRepository.updateNewRequestStatus(deviceId, status)
+        updateNewRequestStatus(deviceId, status)
 
     }
 
     private fun onRecordAccessOperationCompletedWithNoRecordsFound(deviceId: String) {
-        GLSRepository.updateNewRequestStatus(deviceId, RequestStatus.SUCCESS)
+        updateNewRequestStatus(deviceId, RequestStatus.SUCCESS)
     }
 
     @OptIn(ExperimentalUuidApi::class)
@@ -150,7 +158,7 @@ internal class GLSHandler : ServiceHandler() {
                                 RecordAccessControlPointInputParser.reportStoredRecordsGreaterThenOrEqualTo(
                                     highestSequenceNumber
                                 ),
-                                WriteType.WITHOUT_RESPONSE // TODO: Confirm this.
+                                WriteType.WITH_RESPONSE
                             )
                     }
                 } else {
@@ -158,7 +166,7 @@ internal class GLSHandler : ServiceHandler() {
                         remoteService.characteristics.firstOrNull { it.uuid == RACP_CHARACTERISTIC.toKotlinUuid() }
                             ?.write(
                                 RecordAccessControlPointInputParser.reportAllStoredRecords(),
-                                WriteType.WITHOUT_RESPONSE // TODO: Confirm this.
+                                WriteType.WITH_RESPONSE
                             )
                     }
                 }
@@ -166,7 +174,50 @@ internal class GLSHandler : ServiceHandler() {
                 e.printStackTrace()
             }
         }
-        GLSRepository.updateNewRequestStatus(deviceId, RequestStatus.SUCCESS)
+        updateNewRequestStatus(deviceId, RequestStatus.SUCCESS)
+    }
+
+    companion object {
+        private lateinit var recordAccessControlPointCharacteristic: RemoteCharacteristic
+
+        suspend fun writeLastRecord(deviceId: String) {
+            try {
+                // Write to the characteristics.
+                recordAccessControlPointCharacteristic.write(
+                    RecordAccessControlPointInputParser.reportLastStoredRecord(),
+                    WriteType.WITH_RESPONSE
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+                updateNewRequestStatus(deviceId, RequestStatus.FAILED)
+            }
+
+        }
+
+        suspend fun writeFirstRecord(deviceId: String) {
+
+            try {
+                recordAccessControlPointCharacteristic.write(
+                    RecordAccessControlPointInputParser.reportFirstStoredRecord(),
+                    WriteType.WITH_RESPONSE
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+                updateNewRequestStatus(deviceId, RequestStatus.FAILED)
+            }
+        }
+
+        suspend fun writeAllRecords(deviceId: String) {
+            try {
+                recordAccessControlPointCharacteristic.write(
+                    RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords(),
+                    WriteType.WITH_RESPONSE
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+                updateNewRequestStatus(deviceId, RequestStatus.FAILED)
+            }
+        }
     }
 }
 
