@@ -6,9 +6,10 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import no.nordicsemi.android.service.repository.HTSRepository
 import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.hts.HTSDataParser
-import no.nordicsemi.android.service.repository.HTSRepository
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber
 import java.util.UUID
@@ -22,21 +23,23 @@ internal class HtsHandler : ServiceHandler() {
     override val profile: Profile = Profile.HTS
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun observeServiceInteractions(
+    override fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope
     ) {
-        remoteService.characteristics.firstOrNull { it.uuid == HTS_MEASUREMENT_CHARACTERISTIC_UUID.toKotlinUuid() }
-            ?.subscribe()
-            ?.mapNotNull { HTSDataParser.parse(it) }
-            ?.onEach { htsData ->
-                HTSRepository.updateHTSData(deviceId, htsData)
-            }
-            ?.onCompletion { HTSRepository.clear(deviceId) }
-            ?.catch { e ->
-                Timber.e(e)
-            }?.launchIn(scope)
+        scope.launch {
+            remoteService.characteristics.firstOrNull { it.uuid == HTS_MEASUREMENT_CHARACTERISTIC_UUID.toKotlinUuid() }
+                ?.subscribe()
+                ?.mapNotNull { HTSDataParser.parse(it) }
+                ?.onEach { htsData ->
+                    HTSRepository.updateHTSData(deviceId, htsData)
+                }
+                ?.onCompletion { HTSRepository.clear(deviceId) }
+                ?.catch { e ->
+                    Timber.e(e)
+                }?.launchIn(scope)
+        }
 
     }
 }

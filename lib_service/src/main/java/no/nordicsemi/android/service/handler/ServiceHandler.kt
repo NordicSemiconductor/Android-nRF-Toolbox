@@ -6,7 +6,7 @@ import no.nordicsemi.kotlin.ble.client.RemoteService
 
 abstract class ServiceHandler {
     abstract val profile: Profile
-    abstract suspend fun observeServiceInteractions(
+    abstract fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope

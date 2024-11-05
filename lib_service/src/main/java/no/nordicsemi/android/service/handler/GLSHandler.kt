@@ -39,7 +39,7 @@ internal class GLSHandler : ServiceHandler() {
     override val profile: Profile = Profile.GLS
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun observeServiceInteractions(
+    override fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope
