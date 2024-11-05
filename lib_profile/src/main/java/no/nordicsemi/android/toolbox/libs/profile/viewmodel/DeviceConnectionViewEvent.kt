@@ -26,6 +26,7 @@ internal class OnWorkingModeSelected(
 ) : DeviceConnectionViewEvent
 
 internal data class OnGLSRecordClick(
+    val device: String,
     val record: GLSRecord,
     val gleContext: GLSMeasurementContext?,
-    ) : DeviceConnectionViewEvent
+) : DeviceConnectionViewEvent
