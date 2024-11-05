@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -76,6 +78,7 @@ internal fun DeviceConnectionScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
                     .padding(paddingValues),
             ) {
                 when (val state = deviceDataState) {
@@ -181,12 +184,12 @@ private fun DeviceConnectedView(
                             Profile.BPS -> BPSScreen(serviceData as BPSServiceData)
                             Profile.HTS -> HTSScreen(serviceData as HTSServiceData, onClickEvent)
                             Profile.HRS -> HRSScreen(serviceData as HRSServiceData, onClickEvent)
+                            Profile.GLS -> GLSScreen(serviceData as GLSServiceData, onClickEvent)
                             Profile.BATTERY -> {
                                 // Battery level will be added at the end.
                                 // Do nothing here.
                             }
 
-                            Profile.GLS -> GLSScreen(serviceData as GLSServiceData, onClickEvent)
 
                             else -> TODO()
                         }
