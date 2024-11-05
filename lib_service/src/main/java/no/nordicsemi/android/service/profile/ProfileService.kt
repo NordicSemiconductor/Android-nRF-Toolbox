@@ -144,20 +144,9 @@ internal class ProfileService : NotificationService() {
     private suspend fun connectPeripheral(peripheral: Peripheral) {
         runCatching {
             centralManager.connect(peripheral, options = ConnectionOptions.Direct())
-        }.onSuccess {
-            ensureBond(peripheral)
         }.onFailure { exception ->
             Timber.e(exception, "Could not connect to the ${peripheral.address}")
             stopForegroundService() // Stop service if connection fails
-        }
-    }
-
-    private suspend fun ensureBond(peripheral: Peripheral) {
-        if (peripheral.hasBondInformation) return
-        runCatching {
-            peripheral.createBond()
-        }.onFailure { exception ->
-            Timber.e(exception, "Bonding failed with $peripheral")
         }
     }
 
