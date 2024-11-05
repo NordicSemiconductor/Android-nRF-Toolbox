@@ -40,6 +40,7 @@ import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
 internal fun GLSScreen(
+    device: String,
     glsServiceData: GLSServiceData,
     onClickEvent: (DeviceConnectionViewEvent) -> Unit
 ) {
@@ -52,7 +53,7 @@ internal fun GLSScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        RecordsView(glsServiceData, onClickEvent)
+        RecordsView(device, glsServiceData, onClickEvent)
 
     }
 }
@@ -82,12 +83,16 @@ private fun SettingsView(state: GLSServiceData, onEvent: (DeviceConnectionViewEv
 }
 
 @Composable
-private fun RecordsView(state: GLSServiceData, onClickEvent: (DeviceConnectionViewEvent) -> Unit) {
+private fun RecordsView(
+    device: String,
+    state: GLSServiceData,
+    onClickEvent: (DeviceConnectionViewEvent) -> Unit
+) {
     ScreenSection {
         if (state.records.isEmpty()) {
             RecordsViewWithoutData()
         } else {
-            RecordsViewWithData(state, onClickEvent)
+            RecordsViewWithData(device, state, onClickEvent)
         }
 
     }
@@ -95,6 +100,7 @@ private fun RecordsView(state: GLSServiceData, onClickEvent: (DeviceConnectionVi
 
 @Composable
 private fun RecordsViewWithData(
+    device: String,
     state: GLSServiceData,
     onClickEvent: (DeviceConnectionViewEvent) -> Unit
 ) {
@@ -104,7 +110,7 @@ private fun RecordsViewWithData(
         Spacer(modifier = Modifier.height(16.dp))
 
         state.records.keys.forEachIndexed { i, it ->
-            RecordItem(it, state.records[it], onClickEvent)
+            RecordItem(device, it, state.records[it], onClickEvent)
 
             if (i < state.records.size - 1) {
                 Spacer(modifier = Modifier.size(8.dp))
@@ -115,6 +121,7 @@ private fun RecordsViewWithData(
 
 @Composable
 private fun RecordItem(
+    device: String,
     record: GLSRecord,
     gleContext: GLSMeasurementContext?,
     onEvent: (DeviceConnectionViewEvent) -> Unit
@@ -124,7 +131,7 @@ private fun RecordItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .clip(RoundedCornerShape(10.dp))
-            .clickable { onEvent(OnGLSRecordClick(record, gleContext)) }
+            .clickable { onEvent(OnGLSRecordClick(device, record, gleContext)) }
             .padding(8.dp)
     ) {
         Column(
@@ -191,6 +198,7 @@ private fun RecordsViewWithoutDataPreview() {
 @Composable
 private fun RecordsViewWithDataPreview() {
     RecordsViewWithData(
+        device = "RecordsViewWithData",
         state = GLSServiceData()
     ) {}
 }

@@ -37,6 +37,7 @@ import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementConte
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
 import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestinationId
+import no.nordicsemi.android.toolbox.libs.profile.gls.GlsDetailsDestinationArgs
 import no.nordicsemi.android.toolbox.libs.profile.gls.GlsDetailsDestinationId
 import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
@@ -275,12 +276,24 @@ internal class DeviceConnectionViewModel @Inject constructor(
             OpenLoggerEvent -> openLogger()
             SwitchZoomEvent -> switchZoomEvent()
             is OnWorkingModeSelected -> onGLSWorkingModeSelectedEvent(event.workingMode)
-            is OnGLSRecordClick -> navigateToGLSDetailsPage(event.record, event.gleContext)
+            is OnGLSRecordClick -> navigateToGLSDetailsPage(
+                event.device,
+                event.record,
+                event.gleContext
+            )
         }
     }
 
-    private fun navigateToGLSDetailsPage(record: GLSRecord, gleContext: GLSMeasurementContext?) {
-        navigator.navigateTo(GlsDetailsDestinationId, record to gleContext)
+    private fun navigateToGLSDetailsPage(
+        device: String,
+        record: GLSRecord, gleContext: GLSMeasurementContext?
+    ) {
+        navigator.navigateTo(
+            GlsDetailsDestinationId, GlsDetailsDestinationArgs(
+                deviceId = device,
+                data = record to gleContext
+            )
+        )
     }
 
     private fun onGLSWorkingModeSelectedEvent(workingMode: WorkingMode) = viewModelScope.launch {

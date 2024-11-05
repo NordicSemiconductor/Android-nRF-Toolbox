@@ -184,7 +184,11 @@ private fun DeviceConnectedView(
                             Profile.BPS -> BPSScreen(serviceData as BPSServiceData)
                             Profile.HTS -> HTSScreen(serviceData as HTSServiceData, onClickEvent)
                             Profile.HRS -> HRSScreen(serviceData as HRSServiceData, onClickEvent)
-                            Profile.GLS -> GLSScreen(serviceData as GLSServiceData, onClickEvent)
+                            Profile.GLS -> GLSScreen(
+                                device = peripheral.name ?: peripheral.address,
+                                glsServiceData = serviceData as GLSServiceData,
+                            ) { onClickEvent(it) }
+
                             Profile.BATTERY -> {
                                 // Battery level will be added at the end.
                                 // Do nothing here.
