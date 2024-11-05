@@ -3,19 +3,15 @@ package no.nordicsemi.android.service.repository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import no.nordicsemi.android.service.handler.GLSHandler
 import no.nordicsemi.android.toolbox.libs.core.data.GLSServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.gls.RecordAccessControlPointInputParser
 import no.nordicsemi.android.toolbox.libs.core.data.gls.WorkingMode
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementContext
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
-import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
-import no.nordicsemi.kotlin.ble.core.WriteType
 
 object GLSRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<GLSServiceData>>()
-
-    private lateinit var recordAccessControlPointCharacteristic: RemoteCharacteristic
 
     fun getData(deviceId: String): StateFlow<GLSServiceData> = _dataMap.getOrPut(deviceId) {
         MutableStateFlow(GLSServiceData())
@@ -31,10 +27,6 @@ object GLSRepository {
                 )
             }
         }
-    }
-
-    fun updateRACPCharacteristics(remoteCharacteristic: RemoteCharacteristic) {
-        recordAccessControlPointCharacteristic = remoteCharacteristic
     }
 
     fun updateWithNewContext(deviceId: String, context: GLSMeasurementContext) {
@@ -53,56 +45,12 @@ object GLSRepository {
     }
 
     suspend fun writeRecord(deviceId: String, workingMode: WorkingMode) {
+        clearState(deviceId)
+        updateNewRequestStatus(deviceId, RequestStatus.PENDING)
         when (workingMode) {
-            WorkingMode.ALL -> requestAllRecords(deviceId)
-            WorkingMode.LAST -> requestLastRecord(deviceId)
-            WorkingMode.FIRST -> requestFirstRecord(deviceId)
-        }
-    }
-
-    private suspend fun requestLastRecord(deviceId: String) {
-        clearState(deviceId)
-        updateNewRequestStatus(deviceId, RequestStatus.PENDING)
-        try {
-            // Write to the characteristics.
-            recordAccessControlPointCharacteristic.write(
-                RecordAccessControlPointInputParser.reportLastStoredRecord(),
-                WriteType.WITHOUT_RESPONSE
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-            updateNewRequestStatus(deviceId, RequestStatus.FAILED)
-        }
-    }
-
-    private suspend fun requestFirstRecord(deviceId: String) {
-        clearState(deviceId)
-        updateNewRequestStatus(deviceId, RequestStatus.PENDING)
-        try {
-            recordAccessControlPointCharacteristic.write(
-                RecordAccessControlPointInputParser.reportFirstStoredRecord(),
-                WriteType.WITHOUT_RESPONSE
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-            clearState(deviceId)
-            updateNewRequestStatus(deviceId, RequestStatus.FAILED)
-        }
-    }
-
-    private suspend fun requestAllRecords(deviceId: String) {
-        clearState(deviceId)
-        clearState(deviceId)
-        updateNewRequestStatus(deviceId, RequestStatus.PENDING)
-        try {
-            recordAccessControlPointCharacteristic.write(
-                RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords(),
-                WriteType.WITHOUT_RESPONSE
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-            clearState(deviceId)
-            updateNewRequestStatus(deviceId, RequestStatus.FAILED)
+            WorkingMode.ALL -> GLSHandler.writeAllRecords(deviceId)
+            WorkingMode.LAST -> GLSHandler.writeLastRecord(deviceId)
+            WorkingMode.FIRST -> GLSHandler.writeFirstRecord(deviceId)
         }
     }
 

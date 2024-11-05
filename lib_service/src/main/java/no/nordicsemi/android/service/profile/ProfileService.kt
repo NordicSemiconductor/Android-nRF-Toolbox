@@ -144,13 +144,6 @@ internal class ProfileService : NotificationService() {
     private suspend fun connectPeripheral(peripheral: Peripheral) {
         runCatching {
             centralManager.connect(peripheral, options = ConnectionOptions.Direct())
-            var job: Job? = null
-            job = peripheral.bondState.onEach {
-            }
-                .onCompletion {
-                    job?.cancel()
-                }
-                .launchIn(lifecycleScope)
         }.onSuccess {
             ensureBond(peripheral)
         }.onFailure { exception ->
