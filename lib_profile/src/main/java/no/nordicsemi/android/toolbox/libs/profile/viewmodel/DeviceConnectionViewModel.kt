@@ -37,9 +37,9 @@ import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementConte
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
 import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestinationId
+import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
 import no.nordicsemi.android.toolbox.libs.profile.view.gls.GlsDetailsDestinationArgs
 import no.nordicsemi.android.toolbox.libs.profile.view.gls.GlsDetailsDestinationId
-import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
@@ -246,20 +246,20 @@ internal class DeviceConnectionViewModel @Inject constructor(
      * @param data the data to update.
      */
     private inline fun <reified T : ProfileServiceData> updateDeviceData(data: T) {
-        val updatedData = when (val state = _deviceData.value) {
-            is DeviceConnectionState.Connected -> state.data.serviceData.toMutableList().apply {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    removeIf { it is T }
+        val state = _deviceData.value as? DeviceConnectionState.Connected ?: return
+        val updatedServiceData = state.data.serviceData.toMutableList().apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                removeIf { it is T }
+            } else {
+                val iterator = iterator()
+                while (iterator.hasNext()) {
+                    if (iterator.next() is T) iterator.remove()
                 }
-                add(data)
             }
-
-            else -> return
+            add(data)
         }
         _deviceData.update {
-            (_deviceData.value as DeviceConnectionState.Connected).copy(
-                data = (_deviceData.value as DeviceConnectionState.Connected).data.copy(serviceData = updatedData)
-            )
+            state.copy(data = state.data.copy(serviceData = updatedServiceData))
         }
     }
 
