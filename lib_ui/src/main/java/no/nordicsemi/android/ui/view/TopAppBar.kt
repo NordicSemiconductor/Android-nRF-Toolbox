@@ -51,8 +51,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.common.theme.NordicTheme
 import no.nordicsemi.android.ui.R
+
+private const val TOP_APP_BAR_TITLE = "Nordic_Appbar"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,6 +79,14 @@ fun CloseIconAppBar(text: String, onClick: () -> Unit) {
             }
         }
     )
+}
+
+@Preview
+@Composable
+private fun CloseIconAppBarPreview() {
+    NordicTheme {
+        CloseIconAppBar(TOP_APP_BAR_TITLE) {}
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -111,6 +123,14 @@ fun LoggerBackIconAppBar(text: String, onClick: () -> Unit) {
     )
 }
 
+@Preview
+@Composable
+private fun LoggerBackIconAppBarPreview() {
+    NordicTheme {
+        LoggerBackIconAppBar(TOP_APP_BAR_TITLE) {}
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackIconAppBar(text: String, onClick: () -> Unit) {
@@ -133,6 +153,14 @@ fun BackIconAppBar(text: String, onClick: () -> Unit) {
             }
         },
     )
+}
+
+@Preview
+@Composable
+private fun BackIconAppBarPreview() {
+    NordicTheme {
+        BackIconAppBar(TOP_APP_BAR_TITLE) {}
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -183,6 +211,14 @@ fun LoggerIconAppBar(
     )
 }
 
+@Preview
+@Composable
+private fun LoggerIconAppBarPreview() {
+    NordicTheme {
+        LoggerIconAppBar(TOP_APP_BAR_TITLE, {}, {}) {}
+    }
+}
+
 @Composable
 fun ProfileAppBar(
     deviceName: String?,
@@ -195,5 +231,13 @@ fun ProfileAppBar(
         LoggerIconAppBar(deviceName, navigateUp, disconnect, openLogger)
     } else {
         BackIconAppBar(stringResource(id = title), navigateUp)
+    }
+}
+
+@Preview
+@Composable
+private fun ProfileAppBarPreview() {
+    NordicTheme {
+        ProfileAppBar("", R.string.app_name, {}, {}) {}
     }
 }
