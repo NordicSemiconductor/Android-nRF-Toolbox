@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.libs.profile.gls.details.view
+package no.nordicsemi.android.toolbox.libs.profile.view.gls.details
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource

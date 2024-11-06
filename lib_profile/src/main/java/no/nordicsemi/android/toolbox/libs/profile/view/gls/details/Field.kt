@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.libs.profile.gls.details.view
+package no.nordicsemi.android.toolbox.libs.profile.view.gls.details
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
