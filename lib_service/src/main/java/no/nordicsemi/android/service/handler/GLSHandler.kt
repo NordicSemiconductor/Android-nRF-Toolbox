@@ -130,7 +130,6 @@ internal class GLSHandler : ServiceHandler() {
             RACPOpCode.RACP_OP_CODE_ABORT_OPERATION -> RequestStatus.ABORTED
             else -> RequestStatus.SUCCESS
         }
-
         updateNewRequestStatus(deviceId, status)
 
     }
@@ -181,43 +180,44 @@ internal class GLSHandler : ServiceHandler() {
         private lateinit var recordAccessControlPointCharacteristic: RemoteCharacteristic
 
         suspend fun writeLastRecord(deviceId: String) {
-            try {
-                // Write to the characteristics.
+            writeOrSetStatusFailed(deviceId) {
                 recordAccessControlPointCharacteristic.write(
                     RecordAccessControlPointInputParser.reportLastStoredRecord(),
                     WriteType.WITH_RESPONSE
                 )
-            } catch (e: Exception) {
-                e.printStackTrace()
-                updateNewRequestStatus(deviceId, RequestStatus.FAILED)
             }
-
         }
 
         suspend fun writeFirstRecord(deviceId: String) {
-
-            try {
+            writeOrSetStatusFailed(deviceId) {
                 recordAccessControlPointCharacteristic.write(
                     RecordAccessControlPointInputParser.reportFirstStoredRecord(),
                     WriteType.WITH_RESPONSE
                 )
-            } catch (e: Exception) {
-                e.printStackTrace()
-                updateNewRequestStatus(deviceId, RequestStatus.FAILED)
             }
         }
 
         suspend fun writeAllRecords(deviceId: String) {
-            try {
+            writeOrSetStatusFailed(deviceId) {
                 recordAccessControlPointCharacteristic.write(
                     RecordAccessControlPointInputParser.reportNumberOfAllStoredRecords(),
                     WriteType.WITH_RESPONSE
                 )
-            } catch (e: Exception) {
-                e.printStackTrace()
-                updateNewRequestStatus(deviceId, RequestStatus.FAILED)
             }
         }
+    }
+}
+
+suspend fun writeOrSetStatusFailed(
+    deviceId: String,
+    block: suspend () -> Unit
+) {
+    try {
+        block()
+
+    } catch (e: Exception) {
+        e.printStackTrace()
+        updateNewRequestStatus(deviceId, RequestStatus.FAILED)
     }
 }
 
