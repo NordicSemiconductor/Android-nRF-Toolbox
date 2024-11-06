@@ -37,8 +37,8 @@ import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementConte
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
 import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestinationId
-import no.nordicsemi.android.toolbox.libs.profile.gls.GlsDetailsDestinationArgs
-import no.nordicsemi.android.toolbox.libs.profile.gls.GlsDetailsDestinationId
+import no.nordicsemi.android.toolbox.libs.profile.view.gls.GlsDetailsDestinationArgs
+import no.nordicsemi.android.toolbox.libs.profile.view.gls.GlsDetailsDestinationId
 import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
