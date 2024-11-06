@@ -51,8 +51,6 @@ internal fun GLSScreen(
     ) {
         SettingsView(glsServiceData, onClickEvent)
 
-        Spacer(modifier = Modifier.height(16.dp))
-
         RecordsView(device, glsServiceData, onClickEvent)
 
     }
@@ -62,8 +60,6 @@ internal fun GLSScreen(
 private fun SettingsView(state: GLSServiceData, onEvent: (DeviceConnectionViewEvent) -> Unit) {
     ScreenSection {
         SectionTitle(icon = Icons.Default.Settings, title = "Request items")
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -126,7 +122,6 @@ private fun RecordItem(
     gleContext: GLSMeasurementContext?,
     onEvent: (DeviceConnectionViewEvent) -> Unit
 ) {
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -135,6 +130,7 @@ private fun RecordItem(
             .padding(8.dp)
     ) {
         Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
@@ -145,8 +141,6 @@ private fun RecordItem(
                     style = MaterialTheme.typography.titleMedium
                 )
             }
-
-            Spacer(modifier = Modifier.size(4.dp))
 
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -175,11 +169,10 @@ private fun RecordItem(
 private fun RecordsViewWithoutData() {
     Column(
         modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         SectionTitle(icon = Icons.Default.Search, title = "No items")
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
             text = stringResource(id = R.string.gls_no_records_info),
