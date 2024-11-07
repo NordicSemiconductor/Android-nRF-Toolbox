@@ -41,6 +41,7 @@ android {
 dependencies {
     implementation(project(":lib_core"))
     implementation(project(":lib_ui"))
+    implementation(project(":lib_utils"))
 
     implementation(libs.nordic.logger)
     implementation(libs.nordic.log.timber)
