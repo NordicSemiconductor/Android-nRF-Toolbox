@@ -43,34 +43,31 @@ import no.nordicsemi.android.common.theme.NordicTheme
 import no.nordicsemi.android.common.ui.view.CircularIcon
 import no.nordicsemi.android.common.ui.view.NordicAppBar
 import no.nordicsemi.android.toolbox.scanner.repository.ScanningState
+import no.nordicsemi.android.toolbox.scanner.viewmodel.OnBackClick
+import no.nordicsemi.android.toolbox.scanner.viewmodel.OnDeviceSelection
+import no.nordicsemi.android.toolbox.scanner.viewmodel.OnRefreshScan
 import no.nordicsemi.android.toolbox.scanner.viewmodel.ScannerViewModel
+import no.nordicsemi.android.toolbox.scanner.viewmodel.UiClickEvent
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 
 @Composable
-internal fun ScannerScreen() {
-    val viewModel: ScannerViewModel = hiltViewModel()
-
-    ScannerView(onDeviceSelected = { viewModel.onDeviceSelected(it) })
-}
-
-@Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun ScannerView(onDeviceSelected: (Peripheral) -> Unit) {
+internal fun ScannerScreen() {
     val viewModel: ScannerViewModel = hiltViewModel()
     val pullToRefreshState = rememberPullToRefreshState()
     val scanningState by viewModel.uiState.collectAsStateWithLifecycle()
+    val onEvent: (UiClickEvent) -> Unit = { viewModel.onEvent(it) }
     val scope = rememberCoroutineScope()
 
     // Handle back button press
-    BackHandler {
-        viewModel.navigateBack()
-    }
+    BackHandler { onEvent(OnBackClick) }
+
     Scaffold(
         topBar = {
             ScannerAppBar(
                 { Text(text = "Scanner") },
                 showProgress = scanningState.isScanning,
-                onNavigationButtonClick = { viewModel.navigateBack() }
+                onNavigationButtonClick = { onEvent(OnBackClick) }
             )
         }
     ) { paddingValues ->
@@ -91,7 +88,7 @@ private fun ScannerView(onDeviceSelected: (Peripheral) -> Unit) {
                         PullToRefreshBox(
                             isRefreshing = scanningState.scanningState is ScanningState.Loading,
                             onRefresh = {
-                                viewModel.refreshScanning()
+                                onEvent(OnRefreshScan)
                                 scope.launch {
                                     pullToRefreshState.animateToHidden()
                                 }
@@ -102,9 +99,7 @@ private fun ScannerView(onDeviceSelected: (Peripheral) -> Unit) {
                                     isLocationRequiredAndDisabled = isLocationRequiredAndDisabled,
                                     bleState = scanningState.scanningState,
                                     modifier = Modifier.fillMaxSize(),
-                                    onClick = {
-                                        onDeviceSelected(it)
-                                    },
+                                    onClick = { onEvent(OnDeviceSelection(it)) },
                                 )
                             }
                         )

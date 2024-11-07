@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.cancellable
@@ -12,12 +11,12 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.toolbox.scanner.repository.ConnectionProvider
+import no.nordicsemi.android.toolbox.lib.utils.logAndReport
 import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestinationId
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
+import no.nordicsemi.android.toolbox.scanner.repository.Scanner
 import no.nordicsemi.android.toolbox.scanner.repository.ScanningState
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import timber.log.Timber
@@ -28,12 +27,10 @@ import javax.inject.Inject
  *
  * @param isScanning True if the scanner is scanning.
  * @param scanningState The current scanning state.
- * @param isDeviceSelected True if a device is selected.
  */
 internal data class ScannerUiState(
     val isScanning: Boolean = false,
     val scanningState: ScanningState = ScanningState.Loading,
-    val isDeviceSelected: Boolean = false,
 )
 
 @HiltViewModel
@@ -50,16 +47,7 @@ internal class ScannerViewModel @Inject constructor(
      */
     fun startScanning() {
         job?.cancel()
-            .onStart {
-                // Clear the previous devices list, useful in case of refreshing.
-                _uiState.update {
-                    it.copy(
-                        isScanning = true,
-                        scanningState = ScanningState.DevicesDiscovered(emptyList()),
-                        isDeviceSelected = false
-                    )
-                }
-            }
+        job = scanner.scan()
             .onEach { peripheral ->
                 val devices =
                     _uiState.value.scanningState.let { state ->
@@ -78,17 +66,12 @@ internal class ScannerViewModel @Inject constructor(
             }
             // Update the scanning state when the scan is completed.
             .onCompletion {
-                _uiState.update {
-                    it.copy(
-                        isScanning = false
-                    )
-                }
+                _uiState.update { it.copy(isScanning = false) }
                 job?.cancel()
             }
             .cancellable()
             .catch { e ->
-                Timber.e(e)
-                // Update the scanning state when an error occurs.
+                e.logAndReport()
                 _uiState.update {
                     it.copy(
                         isScanning = false,
@@ -99,16 +82,22 @@ internal class ScannerViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
+    fun onEvent(event: UiClickEvent) {
+        when (event) {
+            OnBackClick -> navigator.navigateUp()
+            is OnDeviceSelection -> onDeviceSelected(event.peripheral)
+            OnRefreshScan -> refreshScanning()
+        }
+    }
+
     /**
      * Callback when a device is selected.
      *
      * @param peripheral The selected peripheral.
      */
-    fun onDeviceSelected(peripheral: Peripheral) {
-        job?.cancel()
+    private fun onDeviceSelected(peripheral: Peripheral) {
         try {
-            _uiState.update { it.copy(isDeviceSelected = true) }
-            onCleared()
+            clearStates()
             navigator.navigateTo(DeviceConnectionDestinationId, peripheral.address)
             {
                 popUpTo(ScannerDestinationId.toString()) {
@@ -122,16 +111,15 @@ internal class ScannerViewModel @Inject constructor(
     }
 
     /**
-     * Navigates back to the previous screen.
-     */
-    fun navigateBack() {
-        navigator.navigateUp()
-    }
-
-    /**
      * Refresh the scanning process.
      */
-    fun refreshScanning() {
+    private fun refreshScanning() {
+        _uiState.update {
+            it.copy(
+                isScanning = true,
+                scanningState = ScanningState.DevicesDiscovered(emptyList()),
+            )
+        }
         startScanning()
     }
 
@@ -142,9 +130,7 @@ internal class ScannerViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        job?.cancel()
-        _uiState.value = ScannerUiState()
-        viewModelScope.cancel()
-        connectionProvider.close()
+        clearStates()
     }
+
 }
