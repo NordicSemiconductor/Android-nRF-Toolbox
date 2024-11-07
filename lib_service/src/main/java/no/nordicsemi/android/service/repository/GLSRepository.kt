@@ -47,11 +47,7 @@ object GLSRepository {
     suspend fun writeRecord(deviceId: String, workingMode: WorkingMode) {
         clearState(deviceId)
         updateNewRequestStatus(deviceId, RequestStatus.PENDING)
-        when (workingMode) {
-            WorkingMode.ALL -> GLSHandler.writeAllRecords(deviceId)
-            WorkingMode.LAST -> GLSHandler.writeLastRecord(deviceId)
-            WorkingMode.FIRST -> GLSHandler.writeFirstRecord(deviceId)
-        }
+        GLSHandler.writeRecord(deviceId, workingMode)
     }
 
     fun updateNewRequestStatus(deviceId: String, requestStatus: RequestStatus) {
