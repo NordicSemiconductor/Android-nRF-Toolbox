@@ -16,7 +16,7 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
 @ViewModelScoped
-internal class ConnectionProvider @Inject constructor(
+internal class Scanner @Inject constructor(
     private val centralManager: CentralManager,
 ) {
     /**
@@ -24,7 +24,7 @@ internal class ConnectionProvider @Inject constructor(
      *
      * @return A flow of [Peripheral] devices.
      */
-    fun startScanning(): Flow<Peripheral> {
+    fun scan(): Flow<Peripheral> {
         return centralManager.scan(2000.milliseconds)
             .filter { it.isConnectable }
             .distinctByPeripheral()

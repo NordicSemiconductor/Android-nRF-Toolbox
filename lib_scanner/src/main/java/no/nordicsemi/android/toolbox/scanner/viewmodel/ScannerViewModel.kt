@@ -38,7 +38,7 @@ internal data class ScannerUiState(
 
 @HiltViewModel
 internal class ScannerViewModel @Inject constructor(
-    private val connectionProvider: ConnectionProvider,
+    private val scanner: Scanner,
     private val navigator: Navigator,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ScannerUiState())
@@ -50,7 +50,6 @@ internal class ScannerViewModel @Inject constructor(
      */
     fun startScanning() {
         job?.cancel()
-        job = connectionProvider.startScanning()
             .onStart {
                 // Clear the previous devices list, useful in case of refreshing.
                 _uiState.update {
@@ -134,6 +133,11 @@ internal class ScannerViewModel @Inject constructor(
      */
     fun refreshScanning() {
         startScanning()
+    }
+
+    private fun clearStates() {
+        job?.cancel()
+        scanner.close()
     }
 
     override fun onCleared() {
