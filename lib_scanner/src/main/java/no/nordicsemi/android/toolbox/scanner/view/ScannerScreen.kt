@@ -42,11 +42,11 @@ import no.nordicsemi.android.common.permissions.ble.RequireLocation
 import no.nordicsemi.android.common.theme.NordicTheme
 import no.nordicsemi.android.common.ui.view.CircularIcon
 import no.nordicsemi.android.common.ui.view.NordicAppBar
-import no.nordicsemi.android.toolbox.scanner.repository.ScanningState
 import no.nordicsemi.android.toolbox.scanner.viewmodel.OnBackClick
 import no.nordicsemi.android.toolbox.scanner.viewmodel.OnDeviceSelection
 import no.nordicsemi.android.toolbox.scanner.viewmodel.OnRefreshScan
 import no.nordicsemi.android.toolbox.scanner.viewmodel.ScannerViewModel
+import no.nordicsemi.android.toolbox.scanner.viewmodel.ScanningState
 import no.nordicsemi.android.toolbox.scanner.viewmodel.UiClickEvent
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 
@@ -159,6 +159,7 @@ internal fun LazyListScope.DeviceListItems(
 
 @Composable
 private fun DeviceListItem(
+    peripheralIcon: ImageVector = Icons.Default.Bluetooth,
     name: String?,
     address: String,
 ) {
@@ -167,7 +168,7 @@ private fun DeviceListItem(
         verticalAlignment = Alignment.CenterVertically
     )
     {
-        CircularIcon(Icons.Default.Bluetooth)
+        CircularIcon(peripheralIcon)
 
         Spacer(modifier = Modifier.width(16.dp))
 

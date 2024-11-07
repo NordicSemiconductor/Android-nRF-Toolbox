@@ -17,7 +17,6 @@ import no.nordicsemi.android.toolbox.lib.utils.logAndReport
 import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestinationId
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import no.nordicsemi.android.toolbox.scanner.repository.Scanner
-import no.nordicsemi.android.toolbox.scanner.repository.ScanningState
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import timber.log.Timber
 import javax.inject.Inject
