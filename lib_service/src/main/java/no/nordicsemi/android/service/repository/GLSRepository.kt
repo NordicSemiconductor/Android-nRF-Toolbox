@@ -44,10 +44,10 @@ object GLSRepository {
 
     }
 
-    suspend fun writeRecord(deviceId: String, workingMode: WorkingMode) {
+    suspend fun requestRecord(deviceId: String, workingMode: WorkingMode) {
         clearState(deviceId)
         updateNewRequestStatus(deviceId, RequestStatus.PENDING)
-        GLSHandler.writeRecord(deviceId, workingMode)
+        GLSHandler.requestRecord(deviceId, workingMode)
     }
 
     fun updateNewRequestStatus(deviceId: String, requestStatus: RequestStatus) {

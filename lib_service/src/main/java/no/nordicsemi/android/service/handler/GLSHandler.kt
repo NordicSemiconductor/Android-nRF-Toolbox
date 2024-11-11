@@ -157,7 +157,7 @@ internal class GLSHandler : ServiceHandler() {
     companion object {
         private lateinit var recordAccessControlPointCharacteristic: RemoteCharacteristic
 
-        suspend fun writeRecord(deviceId: String, workingMode: WorkingMode) {
+        suspend fun requestRecord(deviceId: String, workingMode: WorkingMode) {
             writeOrSetStatusFailed(deviceId) {
                 recordAccessControlPointCharacteristic.write(
                     when (workingMode) {
