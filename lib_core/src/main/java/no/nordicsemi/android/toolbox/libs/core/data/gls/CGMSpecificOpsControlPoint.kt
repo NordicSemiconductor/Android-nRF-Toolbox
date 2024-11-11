@@ -50,11 +50,11 @@ object CGMSpecificOpsControlPointDataParser {
     private const val OP_CODE_START_SESSION: Byte = 26
     private const val OP_CODE_STOP_SESSION: Byte = 27
 
-    fun startSession(secure: Boolean): DataByteArray {
+    fun startSession(secure: Boolean): ByteArray {
         return create(
             OP_CODE_START_SESSION,
             secure
-        ).toByteData()
+        ).toByteData().value
     }
 
     private fun create(opCode: Byte, secure: Boolean): MutableData {

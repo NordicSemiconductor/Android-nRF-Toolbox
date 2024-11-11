@@ -1,0 +1,19 @@
+package no.nordicsemi.android.toolbox.libs.profile.data
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import no.nordicsemi.android.toolbox.lib.profile.R
+import no.nordicsemi.android.toolbox.libs.core.data.CGMRecordWithSequenceNumber
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+internal fun CGMRecordWithSequenceNumber.formattedTime(): String {
+    val timeFormat = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.US)
+    return timeFormat.format(Date(timestamp))
+}
+
+@Composable
+internal fun CGMRecordWithSequenceNumber.glucoseConcentration(): String {
+    return stringResource(id = R.string.cgms_value_unit, record.glucoseConcentration)
+}

@@ -1,5 +1,6 @@
 package no.nordicsemi.android.toolbox.libs.profile.viewmodel
 
+import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.gls.WorkingMode
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementContext
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
@@ -22,6 +23,7 @@ internal data class DisconnectEvent(val device: String) : DeviceConnectionViewEv
 internal data object OpenLoggerEvent : DeviceConnectionViewEvent
 
 internal class OnWorkingModeSelected(
+    val profile: Profile,
     val workingMode: WorkingMode,
 ) : DeviceConnectionViewEvent
 
