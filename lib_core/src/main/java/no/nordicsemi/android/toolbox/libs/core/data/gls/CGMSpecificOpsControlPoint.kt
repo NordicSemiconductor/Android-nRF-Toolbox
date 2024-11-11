@@ -1,6 +1,5 @@
 package no.nordicsemi.android.toolbox.libs.core.data.gls
 
-import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
 import no.nordicsemi.android.kotlin.ble.core.data.util.IntFormat
 import no.nordicsemi.android.toolbox.libs.core.data.common.CRC16
 import no.nordicsemi.android.toolbox.libs.core.data.common.MutableData
