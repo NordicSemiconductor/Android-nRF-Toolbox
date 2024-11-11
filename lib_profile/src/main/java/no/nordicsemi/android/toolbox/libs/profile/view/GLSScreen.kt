@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.lib.profile.R
+import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.GLSServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.gls.WorkingMode
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementContext
@@ -69,7 +70,7 @@ private fun SettingsView(state: GLSServiceData, onEvent: (DeviceConnectionViewEv
                 CircularProgressIndicator()
             } else {
                 WorkingMode.entries.forEach {
-                    Button(onClick = { onEvent(OnWorkingModeSelected(it)) }) {
+                    Button(onClick = { onEvent(OnWorkingModeSelected(Profile.GLS, it)) }) {
                         Text(it.toDisplayString())
                     }
                 }
