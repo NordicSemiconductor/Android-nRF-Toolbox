@@ -97,7 +97,7 @@ internal fun ScannerScreen() {
                             content = {
                                 DeviceListView(
                                     isLocationRequiredAndDisabled = isLocationRequiredAndDisabled,
-                                    bleState = scanningState.scanningState,
+                                    scanningState = scanningState.scanningState,
                                     modifier = Modifier.fillMaxSize(),
                                     onClick = { onEvent(OnDeviceSelection(it)) },
                                 )
@@ -113,22 +113,23 @@ internal fun ScannerScreen() {
 @Composable
 internal fun DeviceListView(
     isLocationRequiredAndDisabled: Boolean,
-    bleState: ScanningState,
-    modifier: Modifier,
+    scanningState: ScanningState,
+    modifier: Modifier = Modifier,
     onClick: (Peripheral) -> Unit,
 ) {
     LazyColumn(modifier = modifier) {
-        when (bleState) {
+        when (scanningState) {
+            is ScanningState.Loading -> item { ScanEmptyView(isLocationRequiredAndDisabled) }
+
             is ScanningState.DevicesDiscovered -> {
-                if (bleState.devices.isEmpty()) {
+                if (scanningState.devices.isEmpty()) {
                     item { ScanEmptyView(isLocationRequiredAndDisabled) }
                 } else {
-                    DeviceListItems(bleState.devices, onClick)
+                    DeviceListItems(scanningState.devices, onClick)
                 }
             }
 
-            is ScanningState.Error -> item { ScanErrorView(bleState.error) }
-            ScanningState.Loading -> item { ScanEmptyView(isLocationRequiredAndDisabled) }
+            is ScanningState.Error -> item { ScanErrorView(scanningState.error) }
         }
     }
 
