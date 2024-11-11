@@ -27,14 +27,14 @@ internal fun ScanEmptyView(locationRequiredAndDisabled: Boolean) {
             .fillMaxWidth()
             .padding(16.dp),
         imageVector = Icons.AutoMirrored.Filled.BluetoothSearching,
-        title = "CAN\\'T SEE YOUR DEVICE?",
+        title = "CAN\'T SEE YOUR DEVICE?",
         hint = "1. Make sure the device is turned on and is connected to a power source." +
-                "\\n\\n2. Make sure the appropriate firmware and SoftDevice are flashed.\n" +
+                "\n\n2. Make sure the appropriate firmware and SoftDevice are flashed.\n" +
                 "   " + if (locationRequiredAndDisabled) {
             "\n\n" + "3. Location is turned off. Most Android phones " +
                     " require it in order to scan for Bluetooth LE devices. If you are sure your " +
-                    " device is advertising and it doesn\\'t show up here, click the button below to " +
-                    " enable Location"
+                    " device is advertising and it doesn\'t show up here, click the button below to " +
+                    " enable Location."
         } else {
             ""
         }.parseBold(),
