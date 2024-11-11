@@ -169,18 +169,19 @@ internal class GLSHandler : ServiceHandler() {
                 )
             }
         }
-    }
-}
 
-suspend fun writeOrSetStatusFailed(
-    deviceId: String,
-    block: suspend () -> Unit
-) {
-    try {
-        block()
+        private suspend fun writeOrSetStatusFailed(
+            deviceId: String,
+            block: suspend () -> Unit
+        ) {
+            try {
+                block()
 
-    } catch (e: Exception) {
-        e.printStackTrace()
-        updateNewRequestStatus(deviceId, RequestStatus.FAILED)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                updateNewRequestStatus(deviceId, RequestStatus.FAILED)
+            }
+        }
+
     }
 }
