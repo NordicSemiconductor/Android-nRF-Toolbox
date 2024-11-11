@@ -27,6 +27,7 @@ import no.nordicsemi.android.service.profile.ServiceManager
 import no.nordicsemi.android.service.profile.StateReason
 import no.nordicsemi.android.service.repository.BPSRepository
 import no.nordicsemi.android.service.repository.BatteryRepository
+import no.nordicsemi.android.service.repository.CGMRepository
 import no.nordicsemi.android.service.repository.GLSRepository
 import no.nordicsemi.android.service.repository.HRSRepository
 import no.nordicsemi.android.service.repository.HTSRepository
@@ -204,15 +205,20 @@ internal class DeviceConnectionViewModel @Inject constructor(
      */
     private fun updateProfileData(profileHandler: ServiceHandler) {
         when (profileHandler.profile) {
-            Profile.HTS -> updateHTS()
-            Profile.HRS -> updateHRS()
             Profile.BATTERY -> updateBatteryLevel()
             Profile.BPS -> updateBPS()
+            Profile.CGM -> updateCGM()
             Profile.GLS -> updateGLS()
+            Profile.HRS -> updateHRS()
+            Profile.HTS -> updateHTS()
             else -> { /* TODO: Add more profile modules here */
             }
         }
     }
+
+    private fun updateCGM() = CGMRepository.getData(address).onEach {
+        updateDeviceData(it)
+    }.launchIn(viewModelScope)
 
     /** Update the health thermometer service data. */
     private fun updateHTS() = HTSRepository.getData(address).onEach {
@@ -275,7 +281,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
             is OnTemperatureUnitSelected -> updateTemperatureUnit(event.value)
             OpenLoggerEvent -> openLogger()
             SwitchZoomEvent -> switchZoomEvent()
-            is OnWorkingModeSelected -> onGLSWorkingModeSelectedEvent(event.workingMode)
+            is OnWorkingModeSelected -> onWorkingModeSelected(event.profile, event.workingMode)
             is OnGLSRecordClick -> navigateToGLSDetailsPage(
                 event.device,
                 event.record,
@@ -296,9 +302,16 @@ internal class DeviceConnectionViewModel @Inject constructor(
         )
     }
 
-    private fun onGLSWorkingModeSelectedEvent(workingMode: WorkingMode) = viewModelScope.launch {
-        GLSRepository.writeRecord(address, workingMode)
-    }
+    private fun onWorkingModeSelected(profile: Profile, workingMode: WorkingMode) =
+        viewModelScope.launch {
+            when (profile) {
+                Profile.CGM -> CGMRepository.requestRecord(address, workingMode)
+                Profile.GLS -> GLSRepository.requestRecord(address, workingMode)
+                else -> {
+                    // TODO: Show Error.
+                }
+            }
+        }
 
 
     /**

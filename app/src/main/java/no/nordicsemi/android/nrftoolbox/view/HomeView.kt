@@ -110,6 +110,13 @@ internal fun HomeView() {
                                             true
                                         ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
 
+                                        Profile.CGM -> FeatureButton(
+                                            iconId = R.drawable.ic_cgm,
+                                            profileName = R.string.cgm_module_full,
+                                            deviceName = peripheral.name,
+                                            true
+                                        ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
+
                                         else -> {
                                             // TODO: Add more profiles
                                         }
