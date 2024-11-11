@@ -1,4 +1,4 @@
-package no.nordicsemi.android.service.spec
+package no.nordicsemi.android.toolbox.lib.utils.spec
 
 import java.util.UUID
 
