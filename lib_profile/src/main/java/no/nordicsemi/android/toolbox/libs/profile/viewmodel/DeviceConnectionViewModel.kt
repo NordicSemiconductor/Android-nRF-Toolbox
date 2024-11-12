@@ -73,6 +73,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
     val address: String = parameterOf(DeviceConnectionDestinationId)
     private val _deviceData = MutableStateFlow<DeviceConnectionState>(DeviceConnectionState.Idle)
     val deviceData = _deviceData.asStateFlow()
+    private var peripheral: Peripheral? = null
 
     private var logger: nRFLoggerTree? = null
     private var serviceApi: WeakReference<ServiceApi>? = null
@@ -99,7 +100,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
      */
     private fun observeConnectedDevices() = viewModelScope.launch {
         getServiceApi()?.let {
-            val peripheral = it.getPeripheralById(address)
+            peripheral = it.getPeripheralById(address)
             it.connectedDevices
                 .onEach { peripheralProfileMap ->
                     deviceRepository.updateConnectedDevices(peripheralProfileMap)
@@ -120,8 +121,8 @@ internal class DeviceConnectionViewModel @Inject constructor(
      */
     private fun connectToPeripheral(deviceAddress: String) = viewModelScope.launch {
         // Connect to the peripheral
-        getServiceApi()?.let { api ->
-            val peripheral = api.getPeripheralById(deviceAddress)
+        getServiceApi()?.let {
+            if (peripheral == null) peripheral = it.getPeripheralById(address)
             if (peripheral?.isConnected != true) {
                 serviceManager.connectToPeripheral(deviceAddress)
             }
@@ -144,7 +145,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
             ?.onEach { connectionState ->
                 when (connectionState) {
                     ConnectionState.Connected -> {
-                        val peripheral = api.getPeripheralById(deviceAddress)
+                        if (peripheral == null) peripheral = api.getPeripheralById(address)
                         _deviceData.update {
                             DeviceConnectionState.Connected(
                                 DeviceData(
