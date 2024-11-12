@@ -11,17 +11,17 @@ import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
 import no.nordicsemi.android.toolbox.libs.profile.view.gls.details.GLSDetailsScreen
 
 @Parcelize
-data class GlsDetailsDestinationArgs(
+data class GLSDetailsDestinationArgs(
     val deviceId: String,
     val data: Pair<GLSRecord, GLSMeasurementContext?>
 ) : Parcelable
 
-internal val GlsDetailsDestinationId =
-    createDestination<GlsDetailsDestinationArgs, Unit>("gls-details-screen")
+internal val GLSDetailsDestinationId =
+    createDestination<GLSDetailsDestinationArgs, Unit>("gls-details-screen")
 
-internal val GLSDestination = defineDestination(GlsDetailsDestinationId) {
+internal val GLSDetailsDestination = defineDestination(GLSDetailsDestinationId) {
     val simpleNavigationViewModel: SimpleNavigationViewModel = hiltViewModel()
-    val params = simpleNavigationViewModel.parameterOf(GlsDetailsDestinationId)
+    val params = simpleNavigationViewModel.parameterOf(GLSDetailsDestinationId)
 
     GLSDetailsScreen(
         deviceId = params.deviceId,
