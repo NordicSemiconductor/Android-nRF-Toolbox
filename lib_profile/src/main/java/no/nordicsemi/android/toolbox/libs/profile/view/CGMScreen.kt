@@ -23,7 +23,7 @@ import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.toolbox.libs.core.data.CGMServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.gls.WorkingMode
+import no.nordicsemi.android.toolbox.libs.core.data.common.WorkingMode
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
 import no.nordicsemi.android.toolbox.libs.profile.data.formattedTime
 import no.nordicsemi.android.toolbox.libs.profile.data.glucoseConcentration

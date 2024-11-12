@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.service.handler.CGMHandler
 import no.nordicsemi.android.toolbox.libs.core.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.toolbox.libs.core.data.CGMServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.gls.WorkingMode
+import no.nordicsemi.android.toolbox.libs.core.data.common.WorkingMode
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
 
 object CGMRepository {

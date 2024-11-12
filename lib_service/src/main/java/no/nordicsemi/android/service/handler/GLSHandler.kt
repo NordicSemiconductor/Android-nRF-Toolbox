@@ -16,7 +16,7 @@ import no.nordicsemi.android.toolbox.libs.core.data.gls.GlucoseMeasurementContex
 import no.nordicsemi.android.toolbox.libs.core.data.gls.GlucoseMeasurementParser
 import no.nordicsemi.android.toolbox.libs.core.data.gls.RecordAccessControlPointInputParser
 import no.nordicsemi.android.toolbox.libs.core.data.gls.RecordAccessControlPointParser
-import no.nordicsemi.android.toolbox.libs.core.data.gls.WorkingMode
+import no.nordicsemi.android.toolbox.libs.core.data.common.WorkingMode
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.NumberOfRecordsData
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RecordAccessControlPointData
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
