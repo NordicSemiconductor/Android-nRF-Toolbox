@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.GLSServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.gls.WorkingMode
+import no.nordicsemi.android.toolbox.libs.core.data.common.WorkingMode
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementContext
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus

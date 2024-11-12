@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.service.handler.GLSHandler
 import no.nordicsemi.android.toolbox.libs.core.data.GLSServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.gls.WorkingMode
+import no.nordicsemi.android.toolbox.libs.core.data.common.WorkingMode
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementContext
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
