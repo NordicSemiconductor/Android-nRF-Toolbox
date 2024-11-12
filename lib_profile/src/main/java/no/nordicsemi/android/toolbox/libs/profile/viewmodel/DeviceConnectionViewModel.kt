@@ -39,8 +39,8 @@ import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
 import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestinationId
 import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
-import no.nordicsemi.android.toolbox.libs.profile.view.gls.GlsDetailsDestinationArgs
-import no.nordicsemi.android.toolbox.libs.profile.view.gls.GlsDetailsDestinationId
+import no.nordicsemi.android.toolbox.libs.profile.view.gls.GLSDetailsDestinationArgs
+import no.nordicsemi.android.toolbox.libs.profile.view.gls.GLSDetailsDestinationId
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
@@ -295,7 +295,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
         record: GLSRecord, gleContext: GLSMeasurementContext?
     ) {
         navigator.navigateTo(
-            GlsDetailsDestinationId, GlsDetailsDestinationArgs(
+            GLSDetailsDestinationId, GLSDetailsDestinationArgs(
                 deviceId = device,
                 data = record to gleContext
             )
