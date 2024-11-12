@@ -12,7 +12,7 @@ fun Throwable.logAndReport() {
 }
 
 private val exceptionHandler = CoroutineExceptionHandler { _, t ->
-    Timber.e("COROUTINE-EXCEPTION", "Uncaught exception", t)
+    t.logAndReport()
 }
 
 fun CoroutineScope.launchWithCatch(block: suspend CoroutineScope.() -> Unit) =

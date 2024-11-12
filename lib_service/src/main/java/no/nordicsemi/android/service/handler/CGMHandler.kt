@@ -31,7 +31,9 @@ import no.nordicsemi.android.toolbox.libs.core.data.racp.RACPOpCode
 import no.nordicsemi.android.toolbox.libs.core.data.racp.RACPResponseCode
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
+import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
 import no.nordicsemi.kotlin.ble.core.WriteType
+import timber.log.Timber
 import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.toKotlinUuid
@@ -112,23 +114,35 @@ internal class CGMHandler : ServiceHandler() {
         }
 
         scope.launchWithCatch {
-            remoteService.characteristics
+            val featureCharacteristics = remoteService.characteristics
                 .firstOrNull { it.uuid == CGM_FEATURE_UUID.toKotlinUuid() }
-                ?.read()
-                ?.let { CGMFeatureParser.parse(it) }
-                ?.apply { CGMHandler.secured = this.features.e2eCrcSupported }
+            val isReadPropertyAvailable = featureCharacteristics
+                ?.properties?.contains(CharacteristicProperty.READ)
+            if (isReadPropertyAvailable == true) {
+                featureCharacteristics
+                    .read()
+                    .let { CGMFeatureParser.parse(it) }
+                    ?.apply { CGMHandler.secured = this.features.e2eCrcSupported }
+            } else
+                Timber.e("Characteristic Property READ is not available for $featureCharacteristics")
         }
 
         scope.launchWithCatch {
-            remoteService.characteristics
+            val statusCharacteristics = remoteService.characteristics
                 .firstOrNull { it.uuid == CGM_STATUS_UUID.toKotlinUuid() }
-                ?.read()
-                ?.let { CGMStatusParser.parse(it) }
-                ?.apply {
-                    if (!this.status.sessionStopped) {
-                        sessionStartTime = System.currentTimeMillis() - this.timeOffset * 60000L
+            val isReadPropertyAvailable = statusCharacteristics
+                ?.properties?.contains(CharacteristicProperty.READ)
+            if (isReadPropertyAvailable == true) {
+                statusCharacteristics
+                    .read()
+                    .let { CGMStatusParser.parse(it) }
+                    ?.apply {
+                        if (!this.status.sessionStopped) {
+                            sessionStartTime = System.currentTimeMillis() - this.timeOffset * 60000L
+                        }
                     }
-                }
+            } else
+                Timber.e("Characteristic Property READ is not available for $statusCharacteristics")
         }
 
         if (sessionStartTime == 0L) {
