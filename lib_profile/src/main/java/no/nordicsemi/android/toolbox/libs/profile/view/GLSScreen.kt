@@ -34,8 +34,8 @@ import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
 import no.nordicsemi.android.toolbox.libs.profile.data.glucoseConcentrationDisplayValue
 import no.nordicsemi.android.toolbox.libs.profile.data.toDisplayString
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
-import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OnGLSRecordClick
-import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OnWorkingModeSelected
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.GLSViewEvent.OnGLSRecordClick
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.GLSViewEvent.OnWorkingModeSelected
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
