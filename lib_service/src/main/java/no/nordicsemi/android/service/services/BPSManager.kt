@@ -1,4 +1,4 @@
-package no.nordicsemi.android.service.handler
+package no.nordicsemi.android.service.services
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.catch
@@ -20,7 +20,7 @@ import kotlin.uuid.toKotlinUuid
 private val BPM_CHARACTERISTIC_UUID = UUID.fromString("00002A35-0000-1000-8000-00805f9b34fb")
 private val ICP_CHARACTERISTIC_UUID = UUID.fromString("00002A36-0000-1000-8000-00805f9b34fb")
 
-internal class BPSHandler : ServiceHandler() {
+internal class BPSManager : ServiceManager {
     override val profile: Profile = Profile.BPS
 
     @OptIn(ExperimentalUuidApi::class)

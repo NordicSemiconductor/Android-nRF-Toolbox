@@ -1,7 +1,7 @@
 package no.nordicsemi.android.service.profile
 
 import kotlinx.coroutines.flow.Flow
-import no.nordicsemi.android.service.handler.ServiceHandler
+import no.nordicsemi.android.service.services.ServiceManager
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
@@ -19,7 +19,7 @@ data class CustomReason(val reason: DisconnectReason) :
 interface ServiceApi {
 
     /** Flow of connected devices. */
-    val connectedDevices: Flow<Map<String, Pair<Peripheral, List<ServiceHandler>>>>
+    val connectedDevices: Flow<Map<String, Pair<Peripheral, List<ServiceManager>>>>
 
     /** Missing services flag. */
     val isMissingServices: Flow<Boolean>

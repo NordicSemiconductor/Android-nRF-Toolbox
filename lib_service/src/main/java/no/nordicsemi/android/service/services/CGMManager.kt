@@ -1,4 +1,4 @@
-package no.nordicsemi.android.service.handler
+package no.nordicsemi.android.service.services
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.catch
@@ -45,7 +45,7 @@ private val CGM_OPS_CONTROL_POINT_UUID = UUID.fromString("00002AAC-0000-1000-800
 
 private val RACP_UUID = UUID.fromString("00002A52-0000-1000-8000-00805f9b34fb")
 
-internal class CGMHandler : ServiceHandler() {
+internal class CGMManager : ServiceManager {
     override val profile: Profile
         get() = Profile.CGM
 
@@ -122,7 +122,7 @@ internal class CGMHandler : ServiceHandler() {
                 featureCharacteristics
                     .read()
                     .let { CGMFeatureParser.parse(it) }
-                    ?.apply { CGMHandler.secured = this.features.e2eCrcSupported }
+                    ?.apply { CGMManager.secured = this.features.e2eCrcSupported }
             } else
                 Timber.e("Characteristic Property READ is not available for $featureCharacteristics")
         }

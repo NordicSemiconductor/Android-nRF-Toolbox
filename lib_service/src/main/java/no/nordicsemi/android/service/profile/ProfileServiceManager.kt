@@ -12,15 +12,15 @@ import kotlin.coroutines.resumeWithException
 
 const val DEVICE_ADDRESS = "deviceAddress"
 
-sealed interface ServiceManager {
+sealed interface ProfileServiceManager {
     suspend fun bindService(): ServiceApi
     fun unbindService()
     fun connectToPeripheral(deviceAddress: String)
 }
 
-internal class ServiceManagerImp @Inject constructor(
+internal class ProfileServiceManagerImp @Inject constructor(
     @ApplicationContext private val context: Context,
-) : ServiceManager {
+) : ProfileServiceManager {
     private var serviceConnection: ServiceConnection? = null
     private var api: ServiceApi? = null
 

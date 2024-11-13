@@ -1,4 +1,4 @@
-package no.nordicsemi.android.service.handler
+package no.nordicsemi.android.service.services
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.catch
@@ -7,20 +7,20 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.service.repository.BatteryRepository
+import no.nordicsemi.android.service.repository.HTSRepository
 import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.battery.BatteryLevelParser
+import no.nordicsemi.android.toolbox.libs.core.data.hts.HTSDataParser
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber
 import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.toKotlinUuid
 
-val BATTERY_LEVEL_CHARACTERISTIC_UUID: UUID =
-    UUID.fromString("00002A19-0000-1000-8000-00805f9b34fb")
+private val HTS_MEASUREMENT_CHARACTERISTIC_UUID: UUID =
+    UUID.fromString("00002A1C-0000-1000-8000-00805f9b34fb")
 
-internal class BatteryHandler : ServiceHandler() {
-    override val profile: Profile = Profile.BATTERY
+internal class HTSManager : ServiceManager {
+    override val profile: Profile = Profile.HTS
 
     @OptIn(ExperimentalUuidApi::class)
     override fun observeServiceInteractions(
@@ -29,16 +29,17 @@ internal class BatteryHandler : ServiceHandler() {
         scope: CoroutineScope
     ) {
         scope.launch {
-            remoteService.characteristics.firstOrNull { it.uuid == BATTERY_LEVEL_CHARACTERISTIC_UUID.toKotlinUuid() }
+            remoteService.characteristics.firstOrNull { it.uuid == HTS_MEASUREMENT_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.subscribe()
-                ?.mapNotNull { BatteryLevelParser.parse(it) }
-                ?.onEach { batteryLevel ->
-                    BatteryRepository.updateBatteryLevel(deviceId, batteryLevel)
+                ?.mapNotNull { HTSDataParser.parse(it) }
+                ?.onEach { htsData ->
+                    HTSRepository.updateHTSData(deviceId, htsData)
                 }
-                ?.onCompletion { BatteryRepository.clear(deviceId) }
+                ?.onCompletion { HTSRepository.clear(deviceId) }
                 ?.catch { e ->
                     Timber.e(e)
                 }?.launchIn(scope)
         }
+
     }
 }

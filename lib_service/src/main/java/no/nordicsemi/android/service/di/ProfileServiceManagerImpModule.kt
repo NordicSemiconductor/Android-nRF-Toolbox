@@ -6,16 +6,16 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import no.nordicsemi.android.service.profile.ServiceManager
-import no.nordicsemi.android.service.profile.ServiceManagerImp
+import no.nordicsemi.android.service.profile.ProfileServiceManager
+import no.nordicsemi.android.service.profile.ProfileServiceManagerImp
 
 @Module
 @InstallIn(SingletonComponent::class)
-object ServiceManagerImpModule {
+object ProfileServiceManagerImpModule {
 
     @Provides
     fun provideServiceManager(
         @ApplicationContext context: Context
-    ): ServiceManager = ServiceManagerImp(context)
+    ): ProfileServiceManager = ProfileServiceManagerImp(context)
 
 }
