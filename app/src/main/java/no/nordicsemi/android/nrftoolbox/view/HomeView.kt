@@ -117,6 +117,13 @@ internal fun HomeView() {
                                             true
                                         ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
 
+                                        Profile.RSCS -> FeatureButton(
+                                            iconId = R.drawable.ic_rscs,
+                                            profileName = R.string.rscs_module_full,
+                                            deviceName = peripheral.name,
+                                            true
+                                        ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
+
                                         else -> {
                                             // TODO: Add more profiles
                                         }
