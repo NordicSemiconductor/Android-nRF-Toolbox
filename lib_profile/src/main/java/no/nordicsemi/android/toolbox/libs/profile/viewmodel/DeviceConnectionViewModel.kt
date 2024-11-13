@@ -19,11 +19,10 @@ import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
 import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.timber.nRFLoggerTree
-import no.nordicsemi.android.service.services.ServiceManager
 import no.nordicsemi.android.service.profile.CustomReason
 import no.nordicsemi.android.service.profile.DeviceDisconnectionReason
-import no.nordicsemi.android.service.profile.ServiceApi
 import no.nordicsemi.android.service.profile.ProfileServiceManager
+import no.nordicsemi.android.service.profile.ServiceApi
 import no.nordicsemi.android.service.profile.StateReason
 import no.nordicsemi.android.service.repository.BPSRepository
 import no.nordicsemi.android.service.repository.BatteryRepository
@@ -31,6 +30,8 @@ import no.nordicsemi.android.service.repository.CGMRepository
 import no.nordicsemi.android.service.repository.GLSRepository
 import no.nordicsemi.android.service.repository.HRSRepository
 import no.nordicsemi.android.service.repository.HTSRepository
+import no.nordicsemi.android.service.repository.RSCSRepository
+import no.nordicsemi.android.service.services.ServiceManager
 import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.ProfileServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.common.WorkingMode
@@ -212,10 +213,15 @@ internal class DeviceConnectionViewModel @Inject constructor(
             Profile.GLS -> updateGLS()
             Profile.HRS -> updateHRS()
             Profile.HTS -> updateHTS()
+            Profile.RSCS -> updateRSCS()
             else -> { /* TODO: Add more profile modules here */
             }
         }
     }
+
+    private fun updateRSCS() = RSCSRepository.getData(address).onEach {
+        updateDeviceData(it)
+    }.launchIn(viewModelScope)
 
     private fun updateCGM() = CGMRepository.getData(address).onEach {
         updateDeviceData(it)

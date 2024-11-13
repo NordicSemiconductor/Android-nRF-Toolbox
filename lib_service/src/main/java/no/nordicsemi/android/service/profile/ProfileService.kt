@@ -158,8 +158,8 @@ internal class ProfileService : NotificationService() {
         val discoveredServices = mutableListOf<ServiceManager>()
         serviceHandlingJob = peripheral.services().onEach { remoteServices ->
             remoteServices.forEach { remoteService ->
-                val handler = ServiceManagerFactory.createServiceManager(remoteService.uuid)
-                handler?.let {
+                val serviceManager = ServiceManagerFactory.createServiceManager(remoteService.uuid)
+                serviceManager?.let {
                     Timber.tag("DiscoverServices").i("Supported service: ${it.profile}")
                     discoveredServices.add(it)
                     lifecycleScope.launch {
