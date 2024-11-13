@@ -1,4 +1,4 @@
-package no.nordicsemi.android.service.handler
+package no.nordicsemi.android.service.services
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.catch
@@ -37,7 +37,7 @@ private val GLUCOSE_MEASUREMENT_CONTEXT_CHARACTERISTIC =
 private val GLUCOSE_FEATURE_CHARACTERISTIC = UUID.fromString("00002A51-0000-1000-8000-00805f9b34fb")
 private val RACP_CHARACTERISTIC = UUID.fromString("00002A52-0000-1000-8000-00805f9b34fb")
 
-internal class GLSHandler : ServiceHandler() {
+internal class GLSManager : ServiceManager {
     override val profile: Profile = Profile.GLS
 
     @OptIn(ExperimentalUuidApi::class)

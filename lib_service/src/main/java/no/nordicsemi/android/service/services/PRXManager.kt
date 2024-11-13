@@ -1,4 +1,4 @@
-package no.nordicsemi.android.service.handler
+package no.nordicsemi.android.service.services
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.catch
@@ -21,7 +21,7 @@ private val LINK_LOSS_SERVICE_UUID = UUID.fromString("00001803-0000-1000-8000-00
 private val ALERT_LEVEL_CHARACTERISTIC_UUID =
     UUID.fromString("00002A06-0000-1000-8000-00805f9b34fb")
 
-internal class PRXHandler : ServiceHandler() {
+internal class PRXManager : ServiceManager {
     override val profile: Profile = Profile.PRX
 
     @OptIn(ExperimentalUuidApi::class)

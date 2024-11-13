@@ -3,7 +3,7 @@ package no.nordicsemi.android.service.repository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import no.nordicsemi.android.service.handler.CGMHandler
+import no.nordicsemi.android.service.services.CGMManager
 import no.nordicsemi.android.toolbox.libs.core.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.toolbox.libs.core.data.CGMServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.common.WorkingMode
@@ -43,7 +43,7 @@ object CGMRepository {
     suspend fun requestRecord(deviceId: String, workingMode: WorkingMode) {
         clearState(deviceId)
         updateNewRequestStatus(deviceId, RequestStatus.PENDING)
-        CGMHandler.requestRecord(deviceId, workingMode)
+        CGMManager.requestRecord(deviceId, workingMode)
     }
 
 }

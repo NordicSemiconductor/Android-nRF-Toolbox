@@ -1,4 +1,4 @@
-package no.nordicsemi.android.service.handler
+package no.nordicsemi.android.service.services
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.catch
@@ -22,7 +22,7 @@ private val BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID: UUID =
 private val HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID: UUID =
     UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb")
 
-internal class HrsHandler : ServiceHandler() {
+internal class HRSManager : ServiceManager {
     override val profile: Profile = Profile.HRS
 
     @OptIn(ExperimentalUuidApi::class)

@@ -79,9 +79,9 @@ internal fun HomeView() {
                                 text = "Connected devices",
                                 style = MaterialTheme.typography.titleLarge,
                             )
-                            state.connectedDevices.values.forEach { (peripheral, handlers) ->
-                                handlers.forEach { handler ->
-                                    when (handler.profile) {
+                            state.connectedDevices.values.forEach { (peripheral, services) ->
+                                services.forEach { serviceManager ->
+                                    when (serviceManager.profile) {
                                         Profile.HRS -> FeatureButton(
                                             iconId = R.drawable.ic_hrs,
                                             profileName = R.string.hrs_module_full,

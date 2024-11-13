@@ -19,11 +19,11 @@ import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
 import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.timber.nRFLoggerTree
-import no.nordicsemi.android.service.handler.ServiceHandler
+import no.nordicsemi.android.service.services.ServiceManager
 import no.nordicsemi.android.service.profile.CustomReason
 import no.nordicsemi.android.service.profile.DeviceDisconnectionReason
 import no.nordicsemi.android.service.profile.ServiceApi
-import no.nordicsemi.android.service.profile.ServiceManager
+import no.nordicsemi.android.service.profile.ProfileServiceManager
 import no.nordicsemi.android.service.profile.StateReason
 import no.nordicsemi.android.service.repository.BPSRepository
 import no.nordicsemi.android.service.repository.BatteryRepository
@@ -64,7 +64,7 @@ internal sealed class DeviceConnectionState {
 
 @HiltViewModel
 internal class DeviceConnectionViewModel @Inject constructor(
-    private val serviceManager: ServiceManager,
+    private val profileServiceManager: ProfileServiceManager,
     private val navigator: Navigator,
     private val deviceRepository: DeviceRepository,
     @ApplicationContext private val context: Context,
@@ -85,7 +85,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
      */
     private suspend fun getServiceApi(): ServiceApi? {
         if (serviceApi == null) {
-            serviceApi = WeakReference(serviceManager.bindService())
+            serviceApi = WeakReference(profileServiceManager.bindService())
         }
         return serviceApi?.get()
     }
@@ -124,7 +124,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
         getServiceApi()?.let {
             if (peripheral == null) peripheral = it.getPeripheralById(address)
             if (peripheral?.isConnected != true) {
-                serviceManager.connectToPeripheral(deviceAddress)
+                profileServiceManager.connectToPeripheral(deviceAddress)
             }
         }
     }
@@ -204,7 +204,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
      * Observe and update the data from the profile handler.
      * @param profileHandler the profile handler.
      */
-    private fun updateProfileData(profileHandler: ServiceHandler) {
+    private fun updateProfileData(profileHandler: ServiceManager) {
         when (profileHandler.profile) {
             Profile.BATTERY -> updateBatteryLevel()
             Profile.BPS -> updateBPS()
@@ -374,7 +374,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
      * Unbind the service.
      */
     private fun unbindService() {
-        serviceApi?.let { serviceManager.unbindService() }
+        serviceApi?.let { profileServiceManager.unbindService() }
         serviceApi = null
     }
 

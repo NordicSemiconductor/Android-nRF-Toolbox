@@ -1,4 +1,4 @@
-package no.nordicsemi.android.service.handler
+package no.nordicsemi.android.service.services
 
 import android.content.Context
 import android.media.RingtoneManager
@@ -7,7 +7,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import no.nordicsemi.android.toolbox.libs.core.data.prx.AlarmLevel
 import javax.inject.Inject
 
-internal class AlarmHandler @Inject constructor(
+internal class AlarmManager @Inject constructor(
     @ApplicationContext
     private val context: Context
 ) {
