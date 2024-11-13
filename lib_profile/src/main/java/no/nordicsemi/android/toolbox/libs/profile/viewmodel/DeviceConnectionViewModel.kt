@@ -27,6 +27,7 @@ import no.nordicsemi.android.service.profile.StateReason
 import no.nordicsemi.android.service.repository.BPSRepository
 import no.nordicsemi.android.service.repository.BatteryRepository
 import no.nordicsemi.android.service.repository.CGMRepository
+import no.nordicsemi.android.service.repository.CSCRepository
 import no.nordicsemi.android.service.repository.GLSRepository
 import no.nordicsemi.android.service.repository.HRSRepository
 import no.nordicsemi.android.service.repository.HTSRepository
@@ -285,15 +286,17 @@ internal class DeviceConnectionViewModel @Inject constructor(
             is DisconnectEvent -> disconnectAndNavigate(event.device)
             NavigateUp -> disconnectIfNeededAndNavigate()
             is OnRetryClicked -> reconnectDevice(event.device)
-            is OnTemperatureUnitSelected -> updateTemperatureUnit(event.value)
             OpenLoggerEvent -> openLogger()
-            SwitchZoomEvent -> switchZoomEvent()
-            is OnWorkingModeSelected -> onWorkingModeSelected(event.profile, event.workingMode)
-            is OnGLSRecordClick -> navigateToGLSDetailsPage(
+            is CSCViewEvent.OnSelectedSpeedUnitSelected -> CSCRepository.setSpeedUnit(address, event.selectedSpeedUnit)
+            is CSCViewEvent.OnWheelSizeSelected -> CSCRepository.setWheelSize(address, event.wheelSize)
+            is GLSViewEvent.OnGLSRecordClick ->  navigateToGLSDetailsPage(
                 event.device,
                 event.record,
                 event.gleContext
             )
+            is GLSViewEvent.OnWorkingModeSelected -> onWorkingModeSelected(event.profile, event.workingMode)
+            HRSViewEvent.SwitchZoomEvent -> switchZoomEvent()
+            is HTSViewEvent.OnTemperatureUnitSelected -> updateTemperatureUnit(event.value)
         }
     }
 

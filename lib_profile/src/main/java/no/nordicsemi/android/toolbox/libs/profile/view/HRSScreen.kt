@@ -26,7 +26,7 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.core.data.HRSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
-import no.nordicsemi.android.toolbox.libs.profile.viewmodel.SwitchZoomEvent
+import no.nordicsemi.android.toolbox.libs.profile.viewmodel.HRSViewEvent.SwitchZoomEvent
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
