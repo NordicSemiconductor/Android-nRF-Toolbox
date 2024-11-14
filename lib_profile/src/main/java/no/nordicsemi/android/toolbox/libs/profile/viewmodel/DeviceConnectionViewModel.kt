@@ -36,6 +36,8 @@ import no.nordicsemi.android.service.services.ServiceManager
 import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.ProfileServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.common.WorkingMode
+import no.nordicsemi.android.toolbox.libs.core.data.csc.SpeedUnit
+import no.nordicsemi.android.toolbox.libs.core.data.csc.WheelSize
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementContext
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
 import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit
@@ -210,6 +212,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
         when (profileHandler.profile) {
             Profile.BATTERY -> updateBatteryLevel()
             Profile.BPS -> updateBPS()
+            Profile.CSC -> updateCSC()
             Profile.CGM -> updateCGM()
             Profile.GLS -> updateGLS()
             Profile.HRS -> updateHRS()
@@ -218,6 +221,12 @@ internal class DeviceConnectionViewModel @Inject constructor(
             else -> { /* TODO: Add more profile modules here */
             }
         }
+    }
+
+    private fun updateCSC() {
+        CSCRepository.getData(address).onEach {
+            updateDeviceData(it)
+        }.launchIn(viewModelScope)
     }
 
     private fun updateRSCS() = RSCSRepository.getData(address).onEach {
@@ -287,17 +296,31 @@ internal class DeviceConnectionViewModel @Inject constructor(
             NavigateUp -> disconnectIfNeededAndNavigate()
             is OnRetryClicked -> reconnectDevice(event.device)
             OpenLoggerEvent -> openLogger()
-            is CSCViewEvent.OnSelectedSpeedUnitSelected -> CSCRepository.setSpeedUnit(address, event.selectedSpeedUnit)
-            is CSCViewEvent.OnWheelSizeSelected -> CSCRepository.setWheelSize(address, event.wheelSize)
-            is GLSViewEvent.OnGLSRecordClick ->  navigateToGLSDetailsPage(
+            is CSCViewEvent.OnSelectedSpeedUnitSelected -> setSpeedUnit(event.selectedSpeedUnit)
+            is CSCViewEvent.OnWheelSizeSelected -> setWheelSize(event.wheelSize)
+
+            is GLSViewEvent.OnGLSRecordClick -> navigateToGLSDetailsPage(
                 event.device,
                 event.record,
                 event.gleContext
             )
-            is GLSViewEvent.OnWorkingModeSelected -> onWorkingModeSelected(event.profile, event.workingMode)
+
+            is GLSViewEvent.OnWorkingModeSelected -> onWorkingModeSelected(
+                event.profile,
+                event.workingMode
+            )
+
             HRSViewEvent.SwitchZoomEvent -> switchZoomEvent()
             is HTSViewEvent.OnTemperatureUnitSelected -> updateTemperatureUnit(event.value)
         }
+    }
+
+    private fun setSpeedUnit(selectedSpeedUnit: SpeedUnit) {
+        CSCRepository.setSpeedUnit(address, selectedSpeedUnit)
+    }
+
+    private fun setWheelSize(wheelSize: WheelSize) {
+        CSCRepository.setWheelSize(address, wheelSize)
     }
 
     private fun navigateToGLSDetailsPage(

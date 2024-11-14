@@ -25,6 +25,7 @@ import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.BPSServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.BatteryServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.CGMServiceData
+import no.nordicsemi.android.toolbox.libs.core.data.CSCServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.GLSServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.HRSServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.HTSServiceData
@@ -32,6 +33,7 @@ import no.nordicsemi.android.toolbox.libs.core.data.ProfileServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.RSCSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.view.BPSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.CGMScreen
+import no.nordicsemi.android.toolbox.libs.profile.view.CSCScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.GLSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HRSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HTSScreen
@@ -186,6 +188,7 @@ private fun DeviceConnectedView(
                     deviceData.serviceData.forEach { serviceData ->
                         when (serviceData.profile) {
                             Profile.BPS -> BPSScreen(serviceData as BPSServiceData)
+                            Profile.CSC -> CSCScreen(serviceData as CSCServiceData, onClickEvent)
                             Profile.CGM -> CGMScreen(
                                 serviceData = serviceData as CGMServiceData
                             ) { onClickEvent(it) }

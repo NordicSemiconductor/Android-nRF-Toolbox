@@ -35,4 +35,4 @@ sealed class StringListDialogResult
 
 data class ItemSelectedResult(val index: Int): StringListDialogResult()
 
-object FlowCanceled : StringListDialogResult()
+data object FlowCanceled : StringListDialogResult()
