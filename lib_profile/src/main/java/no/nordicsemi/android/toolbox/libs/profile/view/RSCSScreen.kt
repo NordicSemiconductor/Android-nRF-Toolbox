@@ -31,7 +31,7 @@ internal fun RSCSScreen(
 }
 
 @Composable
-internal fun SensorsReadingView(state: RSCSServiceData) {
+private fun SensorsReadingView(state: RSCSServiceData) {
     ScreenSection {
         SectionTitle(resId = R.drawable.ic_records, title = "Records")
         Column(
