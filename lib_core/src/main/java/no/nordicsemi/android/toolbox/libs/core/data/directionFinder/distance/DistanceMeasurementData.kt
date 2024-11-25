@@ -2,21 +2,25 @@ package no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance
 
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.PeripheralBluetoothAddress
 
-sealed class DistanceMeasurementData
+sealed interface DistanceMeasurementData {
+    val flags: Byte
+    val quality: QualityIndicator
+    val address: PeripheralBluetoothAddress
+}
 
 data class McpdMeasurementData(
-    val flags: Byte = Byte.MAX_VALUE,
-    val quality: QualityIndicator = QualityIndicator.GOOD,
-    val address: PeripheralBluetoothAddress = PeripheralBluetoothAddress.TEST,
+    override val flags: Byte = Byte.MAX_VALUE,
+    override val quality: QualityIndicator = QualityIndicator.GOOD,
+    override val address: PeripheralBluetoothAddress = PeripheralBluetoothAddress.TEST,
     val mcpd: MCPDEstimate = MCPDEstimate()
-) : DistanceMeasurementData()
+) : DistanceMeasurementData
 
 data class RttMeasurementData(
-    val flags: Byte = Byte.MAX_VALUE,
-    val quality: QualityIndicator = QualityIndicator.GOOD,
-    val address: PeripheralBluetoothAddress = PeripheralBluetoothAddress.TEST,
+    override val flags: Byte = Byte.MAX_VALUE,
+    override val quality: QualityIndicator = QualityIndicator.GOOD,
+    override val address: PeripheralBluetoothAddress = PeripheralBluetoothAddress.TEST,
     val rtt: RTTEstimate = RTTEstimate()
-) : DistanceMeasurementData()
+) : DistanceMeasurementData
 
 data class MCPDEstimate(
     val ifft: Int = 0,

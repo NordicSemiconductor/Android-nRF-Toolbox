@@ -4,6 +4,7 @@ enum class Profile {
     BPS,
     CGM,
     CSC,
+    DFS,
     GLS,
     HRS,
     HTS,

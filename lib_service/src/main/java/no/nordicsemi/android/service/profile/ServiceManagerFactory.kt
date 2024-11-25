@@ -4,6 +4,7 @@ import no.nordicsemi.android.service.services.BPSManager
 import no.nordicsemi.android.service.services.BatteryManager
 import no.nordicsemi.android.service.services.CGMManager
 import no.nordicsemi.android.service.services.CSCManager
+import no.nordicsemi.android.service.services.DFSManager
 import no.nordicsemi.android.service.services.GLSManager
 import no.nordicsemi.android.service.services.HRSManager
 import no.nordicsemi.android.service.services.HTSManager
@@ -14,6 +15,7 @@ import no.nordicsemi.android.toolbox.lib.utils.spec.BATTERY_SERVICE_UUID
 import no.nordicsemi.android.toolbox.lib.utils.spec.BPS_SERVICE_UUID
 import no.nordicsemi.android.toolbox.lib.utils.spec.CGMS_SERVICE_UUID
 import no.nordicsemi.android.toolbox.lib.utils.spec.CSC_SERVICE_UUID
+import no.nordicsemi.android.toolbox.lib.utils.spec.DF_SERVICE_UUID
 import no.nordicsemi.android.toolbox.lib.utils.spec.GLS_SERVICE_UUID
 import no.nordicsemi.android.toolbox.lib.utils.spec.HRS_SERVICE_UUID
 import no.nordicsemi.android.toolbox.lib.utils.spec.HTS_SERVICE_UUID
@@ -31,6 +33,7 @@ internal object ServiceManagerFactory {
         BPS_SERVICE_UUID to ::BPSManager,
         CSC_SERVICE_UUID to ::CSCManager,
         CGMS_SERVICE_UUID to ::CGMManager,
+        DF_SERVICE_UUID to ::DFSManager,
         GLS_SERVICE_UUID to ::GLSManager,
         HTS_SERVICE_UUID to ::HTSManager,
         HRS_SERVICE_UUID to ::HRSManager,
