@@ -6,7 +6,7 @@ import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.AddressType
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.PeripheralBluetoothAddress
 import kotlin.experimental.and
 
-class DirectionMeasurementParser {
+class DistanceMeasurementDataParser {
 
     fun parse(data: ByteArray): DistanceMeasurementData? {
         val bytes = DataByteArray(data)
