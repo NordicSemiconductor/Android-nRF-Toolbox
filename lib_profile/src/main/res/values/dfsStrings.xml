@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="navigation_item_accessibility">App bar navigation back icon.</string>
+
+    <string name="value_smoothing_info">Because of interferences the last read value can be wrong. To minimize this effect the current value is taken as middle value from cached values. The details are available on the chart below.</string>
+
+    <string name="control_panel">Control device</string>
+    <string name="distance_settings">Display settings</string>
+    <string name="azimuth_section">Azimuth</string>
+    <string name="distance_section">Distance</string>
+    <string name="elevation_section">Elevation</string>
+    <string name="measurement_details_section">Measurement details</string>
+
+    <string name="device_not_selected">Click to select a device in range.</string>
+    <string name="device_no_devices">There is no device in range.</string>
+    <string name="device_address">Address</string>
+    <string name="measured_device">Measured device</string>
+    <string name="devices">List of devices</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="check_distance_mode">Click button to check available distance modes.</string>
+    <string name="check_availability">Check availability</string>
+    <string name="distance_not_available">Distance feature is not available on this device.</string>
+    <string name="mcpd">MCPD</string>
+    <string name="rtt">RTT</string>
+    <string name="unknown">UNKNOWN</string>
+    <string name="current_mode">Current mode: </string>
+    <string name="enable_rtt">Enable RTT</string>
+    <string name="enable_mcpd">Enable MCPD</string>
+    <string name="check_mode">Check mode</string>
+    <string name="only_mcpd_available">Only MCPD feature is available on this device.</string>
+    <string name="only_rtt_available">Only RTT feature is available on this device.</string>
+
+    <string name="current_section">Current details section: %s</string>
+    <string name="select_section">Select section for displaying details.</string>
+
+    <string name="elevation_min">-90°</string>
+    <string name="elevation_medium">0°</string>
+    <string name="elevation_max">90°</string>
+
+    <string name="dm_value">%ddm</string>
+
+    <string name="rtt_label">rtt</string>
+    <string name="ifft_label">ifft</string>
+    <string name="phase_label">phase</string>
+    <string name="rssi_label">rssi</string>
+    <string name="best_label">best</string>
+
+    <string name="from">From: </string>
+    <string name="to">To: </string>
+
+    <string name="distance_range">Distance range</string>
+    <string name="measurement_details">Measurement details</string>
+</resources>
