@@ -4,6 +4,7 @@ import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.common.WorkingMode
 import no.nordicsemi.android.toolbox.libs.core.data.csc.SpeedUnit
 import no.nordicsemi.android.toolbox.libs.core.data.csc.WheelSize
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.DistanceMode
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementContext
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
 import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit
@@ -44,4 +45,17 @@ internal sealed interface GLSViewEvent : DeviceConnectionViewEvent {
 internal sealed interface CSCViewEvent : DeviceConnectionViewEvent {
     data class OnWheelSizeSelected(val wheelSize: WheelSize) : CSCViewEvent
     data class OnSelectedSpeedUnitSelected(val selectedSpeedUnit: SpeedUnit) : CSCViewEvent
+}
+
+// Direction Finder Profile Events
+internal data class Range(
+    val from: Int,
+    val to: Int
+)
+
+internal sealed interface DFSViewEvent : DeviceConnectionViewEvent {
+    data object OnAvailableFeaturesRequest : DFSViewEvent
+    data object OnCurrentDistanceModeRequest : DFSViewEvent
+    data class OnRangeChangedEvent(val range: Range): DFSViewEvent
+    data class OnDistanceModeSelected(val mode: DistanceMode) : DFSViewEvent
 }
