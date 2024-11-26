@@ -49,3 +49,48 @@ data class SensorValue<T>(
         return SensorValue(values.takeLast(maxItems - 1) + value)
     }
 }
+
+fun <T, R> SensorValue<T>?.mapValues(selector: (T) -> R): List<R>? =
+    this?.values?.map(selector)
+
+fun <T, R : Comparable<R>> SensorValue<T>?.medianValue(selector: (T) -> R): R? =
+    this?.values?.map(selector)?.sorted()?.let { it.getOrNull(it.size / 2) }
+
+fun SensorData.azimuthValues() = azimuth.mapValues { it.azimuth }
+
+fun SensorData.elevationValues() = elevation.mapValues { it.elevation }
+
+fun SensorData.ifftValues() = mcpdDistance.mapValues { it.mcpd.ifft }
+
+fun SensorData.phaseSlopeValues() = mcpdDistance.mapValues { it.mcpd.phaseSlope }
+
+fun SensorData.rssiValues() = mcpdDistance.mapValues { it.mcpd.rssi }
+
+fun SensorData.bestEffortValues() = mcpdDistance.mapValues { it.mcpd.best }
+
+fun SensorData.rttValues() = rttDistance.mapValues { it.rtt.value }
+
+fun SensorData.azimuthValue() = azimuth.medianValue { it.azimuth }
+
+fun SensorData.elevationValue() = elevation.medianValue { it.elevation }
+
+fun SensorData.ifftValue() = mcpdDistance.medianValue { it.mcpd.ifft }
+
+fun SensorData.phaseSlopeValue() = mcpdDistance.medianValue { it.mcpd.phaseSlope }
+
+fun SensorData.rssiValue() = mcpdDistance.medianValue { it.mcpd.rssi }
+
+fun SensorData.bestEffortValue() = mcpdDistance.medianValue { it.mcpd.best }
+
+fun SensorData.rttValue() = rttDistance.medianValue { it.rtt.value }
+
+fun SensorData.distanceValue() = bestEffortValue() ?: rttValue()
+
+fun SensorData.displayAzimuth() = azimuthValue()?.let { "$it°" }
+
+fun SensorData.displayDistance() = distanceValue()?.let { "${it}dm" }
+
+fun SensorData.displayElevation() = elevationValue()?.let { "$it°" }
+
+fun SensorData.isDistanceSettingsAvailable() = mcpdDistance != null || rttDistance != null
+
