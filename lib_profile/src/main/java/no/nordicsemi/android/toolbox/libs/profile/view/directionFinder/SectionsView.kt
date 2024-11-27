@@ -3,6 +3,7 @@ package no.nordicsemi.android.toolbox.libs.profile.view.directionFinder
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.core.data.DFSServiceData
+import no.nordicsemi.android.toolbox.libs.core.data.medianValue
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
@@ -60,9 +62,31 @@ internal fun AzimuthSection(data: DFSServiceData) {
                     .height(200.dp)
                     .width(200.dp)
             )
+            // TODO: Verify the param supplied to AzimuthView.
             data.data.values.forEach {
                 when {
                     it.azimuth != null -> AzimuthView(it)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun ElevationSection(data: DFSServiceData) {
+    ScreenSection {
+        SectionTitle(
+            resId = R.drawable.ic_elevation, stringResource(id = R.string.elevation_section)
+        )
+
+        Spacer(modifier = Modifier.padding(8.dp))
+
+        Row(modifier = Modifier.padding(end = 50.dp)) {
+            // TODO: Verify the param supplied to ElevationView.
+            data.data.values.forEach { sensorData ->
+                when {
+                    sensorData.elevation != null -> sensorData.elevation.medianValue { it.elevation }
+                        ?.let { it1 -> ElevationView(it1) }
                 }
             }
         }
