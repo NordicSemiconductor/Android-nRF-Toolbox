@@ -1,15 +1,12 @@
 package no.nordicsemi.android.toolbox.libs.profile.view.directionFinder
 
-import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.InfiniteTransition
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -20,11 +17,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
@@ -45,6 +42,8 @@ import no.nordicsemi.android.toolbox.libs.core.data.SensorData
 import no.nordicsemi.android.toolbox.libs.core.data.azimuthValue
 import no.nordicsemi.android.toolbox.libs.core.data.distanceValue
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.Range
+import no.nordicsemi.android.ui.view.TransitionState
+import no.nordicsemi.android.ui.view.createTransition
 
 @Composable
 internal fun AzimuthView(sensorData: SensorData) {
@@ -55,24 +54,10 @@ internal fun AzimuthView(sensorData: SensorData) {
     val radius = 100.dp
     val duration = 1000
 
-    // Animation states
     val isInAccessibilityMode = rememberSaveable { mutableStateOf(false) }
     val transition = createTransition(isInAccessibilityMode.value, duration)
-
-    // Infinite animations
-    val infiniteTransition = rememberInfiniteTransition()
-    val scale = infiniteTransition.createInfiniteFloatAnimation(1f, 1.25f, duration)
-    val alphaColor = infiniteTransition.createInfiniteFloatAnimation(1f, 0f, duration)
-    val rotationAnimatedValue = infiniteTransition.createInfiniteFloatAnimation(0f, 360f, 10_000)
-
-    val circleBorderColor = MaterialTheme.colorScheme.secondary
-    val progressWidth = calculateProgressWidth(range, distance)
-    val rotationOffset = 100.dp * (1f - progressWidth)
-    // Ensure the `dotColor` is dereferenced for `copy`
-    val alphaColorValue = transition.dotColor.value.copy(alpha = alphaColor)
-
-    // Rotation state
     val rotationValue = remember { mutableFloatStateOf(0f) }
+
     LaunchedEffect(Unit) {
         var lastFrame = 0L
         while (isActive) {
@@ -82,7 +67,7 @@ internal fun AzimuthView(sensorData: SensorData) {
                 rotationValue.value += period / 1000f
             }
             lastFrame = nextFrame
-            yield()
+            yield() //TOdo: verify this.
         }
     }
 
@@ -90,19 +75,21 @@ internal fun AzimuthView(sensorData: SensorData) {
         // Render the main canvas
         RenderAzimuthCanvas(
             radius = radius,
-            circleBorderColor = circleBorderColor,
+            circleBorderColor = MaterialTheme.colorScheme.secondary,
             transition = transition,
             distance = distance,
             isClose = isClose(sensorData, range),
-            scale = scale,
-            alphaColorValue = alphaColorValue,
-            rotationAnimatedValue = rotationAnimatedValue,
-            rotationOffset = rotationOffset
+            range = range,
+            duration = duration,
         )
 
         // Render arrow if not close
         if (!isClose(sensorData, range) || distance == null) {
-            RenderArrow(azimuthValue, transition.dotColor.value)
+            RenderArrow(
+                azimuthValue = azimuthValue,
+                dotColor = transition.dotColor.value,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
         }
     }
 }
@@ -115,11 +102,18 @@ private fun RenderAzimuthCanvas(
     transition: TransitionState,
     distance: Int?,
     isClose: Boolean,
-    scale: Float,
-    alphaColorValue: Color,
-    rotationAnimatedValue: Float,
-    rotationOffset: Dp
+    range: Range,
+    duration: Int,
 ) {
+    val infiniteTransition = rememberInfiniteTransition(label = "InfiniteTransition")
+    val scale = infiniteTransition.createInfiniteFloatAnimation(1f, 1.25f, duration)
+    val alphaColor = infiniteTransition.createInfiniteFloatAnimation(1f, 0f, duration)
+    val rotationAnimatedValue = infiniteTransition.createInfiniteFloatAnimation(0f, 360f, 10_000)
+
+    val progressWidth = calculateProgressWidth(range, distance)
+    val rotationOffset = 100.dp * (1f - progressWidth)
+    val alphaColorValue = transition.dotColor.value.copy(alpha = alphaColor)
+
     Canvas(
         modifier = Modifier
             .size(radius * 2)
@@ -211,18 +205,17 @@ private fun DrawScope.drawRotatingDots(
 }
 
 @Composable
-private fun RenderArrow(azimuthValue: Int, dotColor: Color) {
+private fun RenderArrow(azimuthValue: Int, dotColor: Color, modifier: Modifier) {
     Image(
         painter = painterResource(id = R.drawable.ic_arrow),
         contentDescription = null,
         colorFilter = ColorFilter.tint(dotColor),
         modifier = Modifier
-//            .align(Alignment.TopCenter)
             .rotate(azimuthValue.toFloat())
+            .then(modifier)
     )
 }
 
-// Extension to calculate progress width
 private fun calculateProgressWidth(range: Range, distance: Int?): Float {
     return when {
         distance == null -> 0f
@@ -232,7 +225,6 @@ private fun calculateProgressWidth(range: Range, distance: Int?): Float {
     }
 }
 
-// Extension for infinite animations
 @Composable
 private fun InfiniteTransition.createInfiniteFloatAnimation(
     initialValue: Float,
@@ -249,44 +241,6 @@ private fun InfiniteTransition.createInfiniteFloatAnimation(
     ).value
 }
 
-// Extension for transition creation
-@Composable
-private fun createTransition(
-    isInAccessibilityMode: Boolean,
-    duration: Int
-): TransitionState {
-    val transition = updateTransition(targetState = isInAccessibilityMode, label = "Transition")
-    return TransitionState(
-        dotRadius = transition.animateDp(
-            label = "Dot Radius",
-            transitionSpec = { tween(duration, easing = LinearOutSlowInEasing) }
-        ) { if (it) 10.dp else 5.dp },
-        circleWidth = transition.animateDp(
-            label = "Circle Width",
-            transitionSpec = { tween(duration, easing = LinearOutSlowInEasing) }
-        ) { if (it) 8.dp else 5.dp },
-        circleColor = transition.animateColor(
-            label = "Circle Color",
-            transitionSpec = { tween(duration, easing = LinearOutSlowInEasing) }
-        ) { if (it) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer },
-        dotColor = transition.animateColor(
-            label = "Dot Color",
-            transitionSpec = { tween(duration, easing = LinearOutSlowInEasing) }
-        ) { if (it) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary }
-    )
-}
-
-private data class TransitionState(
-    val dotRadius: State<Dp>,
-    val circleWidth: State<Dp>,
-    val circleColor: State<Color>,
-    val dotColor: State<Color>
-) {
-    fun toggleAccessibilityMode() {
-        dotRadius.value
-    }
-}
-
 private fun isClose(sensorData: SensorData, range: Range): Boolean {
     val validatedValue = sensorData.distanceValue()?.coerceIn(range.from, range.to) ?: 0
     return validatedValue <= range.from || (validatedValue - range.from) < 10
@@ -295,6 +249,6 @@ private fun isClose(sensorData: SensorData, range: Range): Boolean {
 
 @Preview(showBackground = true)
 @Composable
-private fun AzimuthViewPreview(){
+private fun AzimuthViewPreview() {
     AzimuthView(SensorData())
 }
