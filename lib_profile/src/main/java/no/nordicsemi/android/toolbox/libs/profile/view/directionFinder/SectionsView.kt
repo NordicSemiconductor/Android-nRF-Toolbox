@@ -18,7 +18,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.core.data.DFSServiceData
+import no.nordicsemi.android.toolbox.libs.core.data.SensorData
 import no.nordicsemi.android.toolbox.libs.core.data.medianValue
+import no.nordicsemi.android.toolbox.libs.core.data.selectedMeasurementSectionValues
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
@@ -90,5 +92,45 @@ internal fun ElevationSection(data: DFSServiceData) {
                 }
             }
         }
+    }
+}
+
+@Composable
+internal fun MeasuresSection(data: SensorData) {
+    ScreenSection {
+        MeasuresView(data = data)
+    }
+}
+
+@Composable
+internal fun SettingSection(serviceData: SensorData, onEvent: (DeviceConnectionViewEvent) -> Unit) {
+    ScreenSection {
+        SettingsView(data = serviceData, onEvent)
+    }
+}
+
+@Composable
+internal fun LinearDataSection(viewEntity: SensorData) {
+    ScreenSection {
+        SectionTitle(R.drawable.ic_distance, stringResource(id = R.string.distance_section))
+
+        Spacer(modifier = Modifier.padding(8.dp))
+
+        LinearDataView(viewEntity)
+    }
+}
+
+@Composable
+internal fun DataSmoothingViewSection(data: SensorData) {
+    ScreenSection {
+        SectionTitle(
+            R.drawable.ic_distance,
+            stringResource(id = R.string.measurement_details_section)
+        )
+
+        Spacer(modifier = Modifier.padding(8.dp))
+
+        data.selectedMeasurementSectionValues()?.let { DataSmoothingView(it) }
+
     }
 }

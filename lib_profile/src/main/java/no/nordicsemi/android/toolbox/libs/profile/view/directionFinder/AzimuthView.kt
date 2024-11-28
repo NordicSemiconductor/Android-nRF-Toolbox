@@ -38,12 +38,12 @@ import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.yield
 import no.nordicsemi.android.toolbox.lib.profile.R
+import no.nordicsemi.android.toolbox.libs.core.data.Range
 import no.nordicsemi.android.toolbox.libs.core.data.SensorData
 import no.nordicsemi.android.toolbox.libs.core.data.azimuthValue
 import no.nordicsemi.android.toolbox.libs.core.data.distanceValue
-import no.nordicsemi.android.toolbox.libs.profile.viewmodel.Range
-import no.nordicsemi.android.ui.view.TransitionState
-import no.nordicsemi.android.ui.view.createTransition
+import no.nordicsemi.android.ui.view.CircleTransitionState
+import no.nordicsemi.android.ui.view.createCircleTransition
 
 @Composable
 internal fun AzimuthView(sensorData: SensorData) {
@@ -55,7 +55,7 @@ internal fun AzimuthView(sensorData: SensorData) {
     val duration = 1000
 
     val isInAccessibilityMode = rememberSaveable { mutableStateOf(false) }
-    val transition = createTransition(isInAccessibilityMode.value, duration)
+    val transition = createCircleTransition(isInAccessibilityMode.value, duration)
     val rotationValue = remember { mutableFloatStateOf(0f) }
 
     LaunchedEffect(Unit) {
@@ -99,7 +99,7 @@ internal fun AzimuthView(sensorData: SensorData) {
 private fun RenderAzimuthCanvas(
     radius: Dp,
     circleBorderColor: Color,
-    transition: TransitionState,
+    transition: CircleTransitionState,
     distance: Int?,
     isClose: Boolean,
     range: Range,
