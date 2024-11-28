@@ -11,6 +11,10 @@ import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
 
 private const val MAX_STORED_ITEMS = 5
 
+// TODO: Add two parameter range and measurement section which will be changes with user interaction.
+//  For now I am hardcoding the value in the ui, but it will changes later.
+//  Which dataclass it should be added needed to be decided.
+
 data class DFSServiceData(
     override val profile: Profile = Profile.DFS,
     val requestStatus: RequestStatus = RequestStatus.IDLE,
@@ -38,7 +42,8 @@ data class SensorData(
     val elevation: SensorValue<ElevationMeasurementData>? = null,
     val mcpdDistance: SensorValue<McpdMeasurementData>? = null,
     val rttDistance: SensorValue<RttMeasurementData>? = null,
-    val distanceMode: DistanceMode? = null
+    val distanceMode: DistanceMode? = null,
+    val selectedMeasurementSection: MeasurementSection? = null
 )
 
 data class SensorValue<T>(
@@ -94,3 +99,37 @@ fun SensorData.displayElevation() = elevationValue()?.let { "$it°" }
 
 fun SensorData.isDistanceSettingsAvailable() = mcpdDistance != null || rttDistance != null
 
+fun SensorData.isMcpdSectionAvailable() =
+    rttValue() != null || rssiValue() != null || phaseSlopeValue() != null || bestEffortValue() != null
+
+enum class MeasurementSection(val displayName: String) {
+    DISTANCE_RTT("RTT"),
+    DISTANCE_MCPD_IFFT("IFFT"),
+    DISTANCE_MCPD_PHASE_SLOPE("Phase"),
+    DISTANCE_MCPD_RSSI("Rssi"),
+    DISTANCE_MCPD_BEST("Best"),
+}
+
+fun SensorData.availableSections(): List<MeasurementSection> = listOfNotNull(
+    this.rttValue()?.let { MeasurementSection.DISTANCE_RTT },
+    this.rssiValue()?.let { MeasurementSection.DISTANCE_MCPD_RSSI },
+    this.ifftValue()?.let { MeasurementSection.DISTANCE_MCPD_IFFT },
+    this.phaseSlopeValue()?.let { MeasurementSection.DISTANCE_MCPD_PHASE_SLOPE },
+    this.bestEffortValue()?.let { MeasurementSection.DISTANCE_MCPD_BEST },
+)
+
+// Direction Finder Profile Events
+data class Range(
+    val from: Int,
+    val to: Int
+)
+
+fun SensorData.selectedMeasurementSectionValues(): List<Int>? =
+    when (this.selectedMeasurementSection) {
+        MeasurementSection.DISTANCE_RTT -> this.rttValues()
+        MeasurementSection.DISTANCE_MCPD_IFFT -> this.ifftValues()
+        MeasurementSection.DISTANCE_MCPD_PHASE_SLOPE -> this.phaseSlopeValues()
+        MeasurementSection.DISTANCE_MCPD_RSSI -> this.rssiValues()
+        MeasurementSection.DISTANCE_MCPD_BEST -> this.bestEffortValues()
+        null -> null
+    }

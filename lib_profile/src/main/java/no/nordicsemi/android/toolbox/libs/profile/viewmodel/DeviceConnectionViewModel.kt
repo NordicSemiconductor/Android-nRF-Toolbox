@@ -322,6 +322,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
 
             is DFSViewEvent.OnRangeChangedEvent -> TODO()
             is DFSViewEvent.OnDistanceModeSelected -> TODO()
+            is DFSViewEvent.OnDetailsSectionParamsSelected -> TODO()
         }
     }
 

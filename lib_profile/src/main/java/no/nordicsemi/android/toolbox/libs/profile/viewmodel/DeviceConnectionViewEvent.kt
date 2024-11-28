@@ -1,6 +1,8 @@
 package no.nordicsemi.android.toolbox.libs.profile.viewmodel
 
 import no.nordicsemi.android.toolbox.libs.core.Profile
+import no.nordicsemi.android.toolbox.libs.core.data.MeasurementSection
+import no.nordicsemi.android.toolbox.libs.core.data.Range
 import no.nordicsemi.android.toolbox.libs.core.data.common.WorkingMode
 import no.nordicsemi.android.toolbox.libs.core.data.csc.SpeedUnit
 import no.nordicsemi.android.toolbox.libs.core.data.csc.WheelSize
@@ -47,15 +49,10 @@ internal sealed interface CSCViewEvent : DeviceConnectionViewEvent {
     data class OnSelectedSpeedUnitSelected(val selectedSpeedUnit: SpeedUnit) : CSCViewEvent
 }
 
-// Direction Finder Profile Events
-internal data class Range(
-    val from: Int,
-    val to: Int
-)
-
 internal sealed interface DFSViewEvent : DeviceConnectionViewEvent {
     data object OnAvailableFeaturesRequest : DFSViewEvent
     data object OnCurrentDistanceModeRequest : DFSViewEvent
-    data class OnRangeChangedEvent(val range: Range): DFSViewEvent
+    data class OnRangeChangedEvent(val range: Range) : DFSViewEvent
     data class OnDistanceModeSelected(val mode: DistanceMode) : DFSViewEvent
+    data class OnDetailsSectionParamsSelected(val section: MeasurementSection) : DFSViewEvent
 }

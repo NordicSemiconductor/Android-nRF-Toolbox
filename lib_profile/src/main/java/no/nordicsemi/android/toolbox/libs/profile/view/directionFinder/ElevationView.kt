@@ -26,15 +26,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.lib.profile.R
-import no.nordicsemi.android.ui.view.TransitionState
-import no.nordicsemi.android.ui.view.createTransition
+import no.nordicsemi.android.ui.view.CircleTransitionState
+import no.nordicsemi.android.ui.view.createCircleTransition
 
 @Composable
 internal fun ElevationView(value: Int) {
     val duration = 1000
     val radius = 100.dp
     val isInAccessibilityMode = rememberSaveable { mutableStateOf(false) }
-    val transition = createTransition(isInAccessibilityMode.value, duration)
+    val transition = createCircleTransition(isInAccessibilityMode.value, duration)
 
     Box {
         ElevationLabels()
@@ -70,7 +70,7 @@ private fun BoxScope.ElevationLabels() {
 private fun ElevationCanvas(
     radius: Dp,
     circleBorderColor: Color,
-    transition: TransitionState,
+    transition: CircleTransitionState,
     value: Int,
     onLongClick: () -> Unit
 ) {
