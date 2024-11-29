@@ -28,6 +28,7 @@ import no.nordicsemi.android.service.repository.BPSRepository
 import no.nordicsemi.android.service.repository.BatteryRepository
 import no.nordicsemi.android.service.repository.CGMRepository
 import no.nordicsemi.android.service.repository.CSCRepository
+import no.nordicsemi.android.service.repository.DFSRepository
 import no.nordicsemi.android.service.repository.GLSRepository
 import no.nordicsemi.android.service.repository.HRSRepository
 import no.nordicsemi.android.service.repository.HTSRepository
@@ -323,6 +324,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
             is DFSViewEvent.OnRangeChangedEvent -> TODO()
             is DFSViewEvent.OnDistanceModeSelected -> TODO()
             is DFSViewEvent.OnDetailsSectionParamsSelected -> TODO()
+            is DFSViewEvent.OnBluetoothDeviceSelected -> DFSRepository.updateSelectedDevice(address, event.device)
         }
     }
 

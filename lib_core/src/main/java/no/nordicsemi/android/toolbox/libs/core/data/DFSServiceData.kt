@@ -22,6 +22,10 @@ data class DFSServiceData(
     val isMcpdAvailable: Boolean? = null,
     val isRttAvailable: Boolean? = null,
     val distanceMode: DistanceMode? = null,
+    val selectedDevice: PeripheralBluetoothAddress? = null,
+    val distanceRange: Range = Range(0,50),
+    val availableMeasurementSections: List<MeasurementSection> = emptyList(),
+    val selectedMeasurementSection: MeasurementSection? = null
 ) : ProfileServiceData() {
 
     fun isDistanceAvailable(): Boolean {

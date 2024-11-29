@@ -6,6 +6,7 @@ import no.nordicsemi.android.toolbox.libs.core.data.Range
 import no.nordicsemi.android.toolbox.libs.core.data.common.WorkingMode
 import no.nordicsemi.android.toolbox.libs.core.data.csc.SpeedUnit
 import no.nordicsemi.android.toolbox.libs.core.data.csc.WheelSize
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.PeripheralBluetoothAddress
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.DistanceMode
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementContext
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
@@ -55,4 +56,5 @@ internal sealed interface DFSViewEvent : DeviceConnectionViewEvent {
     data class OnRangeChangedEvent(val range: Range) : DFSViewEvent
     data class OnDistanceModeSelected(val mode: DistanceMode) : DFSViewEvent
     data class OnDetailsSectionParamsSelected(val section: MeasurementSection) : DFSViewEvent
+    data class OnBluetoothDeviceSelected(val device: PeripheralBluetoothAddress) : DFSViewEvent
 }
