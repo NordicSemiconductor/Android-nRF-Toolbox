@@ -9,6 +9,7 @@ import no.nordicsemi.android.service.services.DFSManager
 import no.nordicsemi.android.toolbox.libs.core.data.DFSServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.SensorData
 import no.nordicsemi.android.toolbox.libs.core.data.SensorValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.PeripheralBluetoothAddress
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.azimuthal.AzimuthMeasurementData
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.controlPoint.ControlPointChangeModeError
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.controlPoint.ControlPointChangeModeSuccess
@@ -30,6 +31,10 @@ object DFSRepository {
 
     fun getData(deviceId: String): StateFlow<DFSServiceData> = _dataMap.getOrPut(deviceId) {
         MutableStateFlow(DFSServiceData())
+    }
+
+    fun updateSelectedDevice(deviceId: String, device: PeripheralBluetoothAddress) {
+        _dataMap[deviceId]?.update { it.copy(selectedDevice = device) }
     }
 
     fun addNewAzimuth(deviceId: String, azimuth: AzimuthMeasurementData) {
@@ -100,7 +105,7 @@ object DFSRepository {
     }
 
     fun addNewElevation(deviceId: String, elevation: ElevationMeasurementData) {
-        val validatedElevation = elevation.copy(elevation = elevation.elevation.coerceIn(90, -90))
+        val validatedElevation = elevation.copy(elevation = elevation.elevation.coerceIn(-90, 90))
         val key = validatedElevation.address
         val deviceDataFlow = _dataMap[deviceId]
         val currentData = deviceDataFlow?.value?.data ?: emptyMap()

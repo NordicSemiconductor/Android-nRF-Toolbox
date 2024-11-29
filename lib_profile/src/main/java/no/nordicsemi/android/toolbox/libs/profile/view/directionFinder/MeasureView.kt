@@ -27,7 +27,6 @@ import no.nordicsemi.android.toolbox.libs.core.data.displayElevation
 internal fun MeasuresView(data: SensorData) {
     Row(horizontalArrangement = Arrangement.SpaceEvenly) {
         data.displayAzimuth()?.let {
-
             MeasureItem(
                 resId = R.drawable.ic_azimuth,
                 value = data.displayAzimuth()!!,
