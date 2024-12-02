@@ -16,18 +16,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.lib.profile.R
-import no.nordicsemi.android.toolbox.libs.core.data.Range
 import no.nordicsemi.android.toolbox.libs.core.data.SensorData
-import no.nordicsemi.android.toolbox.libs.core.data.bestEffortValue
-import no.nordicsemi.android.toolbox.libs.core.data.ifftValue
-import no.nordicsemi.android.toolbox.libs.core.data.isMcpdSectionAvailable
-import no.nordicsemi.android.toolbox.libs.core.data.phaseSlopeValue
-import no.nordicsemi.android.toolbox.libs.core.data.rssiValue
-import no.nordicsemi.android.toolbox.libs.core.data.rttValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.Range
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.bestEffortValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.ifftValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.isMcpdSectionAvailable
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.phaseSlopeValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.rssiValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.rttValue
 
 @Composable
-internal fun LinearDataView(data: SensorData) {
-    val range = Range(0, 50)
+internal fun LinearDataView(
+    data: SensorData,
+    range: Range
+) {
     Column {
         data.rttValue()?.let {
             Text(stringResource(id = R.string.rtt), style = MaterialTheme.typography.titleSmall)

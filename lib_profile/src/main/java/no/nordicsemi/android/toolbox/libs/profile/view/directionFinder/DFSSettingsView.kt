@@ -38,9 +38,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.lib.profile.R
-import no.nordicsemi.android.toolbox.libs.core.data.Range
 import no.nordicsemi.android.toolbox.libs.core.data.SensorData
-import no.nordicsemi.android.toolbox.libs.core.data.availableSections
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.Range
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.availableSections
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DFSViewEvent
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.ui.view.SectionTitle
@@ -49,10 +49,10 @@ import java.util.Locale
 @Composable
 internal fun SettingsView(
     data: SensorData,
+    range: Range,
     onEvent: (DeviceConnectionViewEvent) -> Unit
 ) {
     val isExpanded = remember { mutableStateOf(false) }
-    val range = Range(0, 50)
 
     SectionTitle(
         resId = R.drawable.ic_settings,
@@ -80,7 +80,6 @@ internal fun SettingsView(
                 stringResource(R.string.distance_range),
                 style = MaterialTheme.typography.titleSmall
             )
-            // TODO: add distance range.
             RangeSlider(range) {
                 onEvent(DFSViewEvent.OnRangeChangedEvent(it))
             }

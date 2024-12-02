@@ -196,7 +196,7 @@ private fun DeviceConnectedView(
                             ) { onClickEvent(it) }
 
                             Profile.DFS -> DFSScreen(
-                                serviceData as DFSServiceData, null
+                                serviceData as DFSServiceData
                             ) { onClickEvent(it) }
 
                             Profile.GLS -> GLSScreen(

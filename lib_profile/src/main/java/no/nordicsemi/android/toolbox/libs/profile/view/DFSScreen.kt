@@ -8,11 +8,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.libs.core.data.DFSServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.availableSections
-import no.nordicsemi.android.toolbox.libs.core.data.azimuthValue
-import no.nordicsemi.android.toolbox.libs.core.data.distanceValue
-import no.nordicsemi.android.toolbox.libs.core.data.elevationValue
-import no.nordicsemi.android.toolbox.libs.core.data.selectedMeasurementSectionValues
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.availableSections
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.azimuthValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.distanceValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.elevationValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.selectedMeasurementSectionValues
 import no.nordicsemi.android.toolbox.libs.profile.view.directionFinder.AzimuthAndElevationSection
 import no.nordicsemi.android.toolbox.libs.profile.view.directionFinder.AzimuthSection
 import no.nordicsemi.android.toolbox.libs.profile.view.directionFinder.DataSmoothingViewSection
@@ -39,10 +39,18 @@ internal fun DFSScreen(
         val isAzimuthAndElevationDataAvailable =
             (data?.azimuthValue() != null) && (data.elevationValue() != null)
         if (data != null) {
-            data.distanceValue()?.let { DistanceSection(data) }
+            data.distanceValue()?.let { DistanceSection(data, serviceData.distanceRange) }
             when {
-                isAzimuthAndElevationDataAvailable -> AzimuthAndElevationSection(data)
-                !isAzimuthAndElevationDataAvailable && (data.azimuth != null) -> AzimuthSection(data)
+                isAzimuthAndElevationDataAvailable -> AzimuthAndElevationSection(
+                    data,
+                    serviceData.distanceRange
+                )
+
+                !isAzimuthAndElevationDataAvailable && (data.azimuth != null) -> AzimuthSection(
+                    data,
+                    serviceData.distanceRange
+                )
+
                 !isAzimuthAndElevationDataAvailable && data.elevation != null -> ElevationSection(
                     data
                 )
@@ -56,7 +64,7 @@ internal fun DFSScreen(
                 selectedDevice = serviceData.selectedDevice,
             ) { onClick(it) }
 
-            LinearDataSection(data)
+            LinearDataSection(data, serviceData.distanceRange)
             DistanceControlSection(serviceData) { onClick(it) }
         }
     }

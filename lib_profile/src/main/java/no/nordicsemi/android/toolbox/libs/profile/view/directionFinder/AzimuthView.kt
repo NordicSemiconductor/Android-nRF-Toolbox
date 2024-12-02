@@ -38,17 +38,19 @@ import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.yield
 import no.nordicsemi.android.toolbox.lib.profile.R
-import no.nordicsemi.android.toolbox.libs.core.data.Range
 import no.nordicsemi.android.toolbox.libs.core.data.SensorData
-import no.nordicsemi.android.toolbox.libs.core.data.azimuthValue
-import no.nordicsemi.android.toolbox.libs.core.data.distanceValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.Range
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.azimuthValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.distanceValue
 import no.nordicsemi.android.ui.view.CircleTransitionState
 import no.nordicsemi.android.ui.view.createCircleTransition
 
 @Composable
-internal fun AzimuthView(sensorData: SensorData) {
+internal fun AzimuthView(
+    sensorData: SensorData,
+    range: Range
+) {
     val azimuthValue = sensorData.azimuthValue() ?: return
-    val range = Range(0, 50) // TODO: find the range value
     val distance = sensorData.distanceValue()
 
     val radius = 100.dp
@@ -250,5 +252,5 @@ private fun isClose(sensorData: SensorData, range: Range): Boolean {
 @Preview(showBackground = true)
 @Composable
 private fun AzimuthViewPreview() {
-    AzimuthView(SensorData())
+    AzimuthView(SensorData(), Range(0, 50))
 }

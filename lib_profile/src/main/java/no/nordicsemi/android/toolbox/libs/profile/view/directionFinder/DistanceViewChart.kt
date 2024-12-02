@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.tooling.preview.Preview
-import no.nordicsemi.android.toolbox.libs.core.data.Range
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.Range
 import no.nordicsemi.android.ui.view.createLinearTransition
 
 @OptIn(ExperimentalFoundationApi::class)
