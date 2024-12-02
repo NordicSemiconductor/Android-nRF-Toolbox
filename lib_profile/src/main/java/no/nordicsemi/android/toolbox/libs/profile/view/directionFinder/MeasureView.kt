@@ -19,9 +19,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.core.data.SensorData
-import no.nordicsemi.android.toolbox.libs.core.data.displayAzimuth
-import no.nordicsemi.android.toolbox.libs.core.data.displayDistance
-import no.nordicsemi.android.toolbox.libs.core.data.displayElevation
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.displayAzimuth
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.displayDistance
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.displayElevation
 
 @Composable
 internal fun MeasuresView(data: SensorData) {
