@@ -10,7 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.toolbox.libs.core.data.Range
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.Range
 import java.util.Locale
 
 @Composable
