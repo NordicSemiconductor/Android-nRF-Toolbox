@@ -321,10 +321,21 @@ internal class DeviceConnectionViewModel @Inject constructor(
                 // TODO: Check for current distance mode from the repository.
             }
 
-            is DFSViewEvent.OnRangeChangedEvent -> TODO()
-            is DFSViewEvent.OnDistanceModeSelected -> TODO()
+            is DFSViewEvent.OnRangeChangedEvent -> {
+                DFSRepository.updateDistanceRange(address, event.range)
+            }
+
+            is DFSViewEvent.OnDistanceModeSelected -> {
+                viewModelScope.launch {
+                    DFSRepository.enableDistanceMode(address, event.mode)
+                }
+            }
+
             is DFSViewEvent.OnDetailsSectionParamsSelected -> TODO()
-            is DFSViewEvent.OnBluetoothDeviceSelected -> DFSRepository.updateSelectedDevice(address, event.device)
+            is DFSViewEvent.OnBluetoothDeviceSelected -> DFSRepository.updateSelectedDevice(
+                address,
+                event.device
+            )
         }
     }
 

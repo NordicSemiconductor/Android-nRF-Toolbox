@@ -21,25 +21,28 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.core.data.DFSServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.Range
 import no.nordicsemi.android.toolbox.libs.core.data.SensorData
-import no.nordicsemi.android.toolbox.libs.core.data.distanceValue
-import no.nordicsemi.android.toolbox.libs.core.data.elevationValue
-import no.nordicsemi.android.toolbox.libs.core.data.medianValue
-import no.nordicsemi.android.toolbox.libs.core.data.selectedMeasurementSectionValues
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.Range
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.distanceValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.elevationValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.medianValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.selectedMeasurementSectionValues
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.ui.view.ReversedSectionTitle
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
-internal fun DistanceSection(data: SensorData) {
+internal fun DistanceSection(
+    data: SensorData,
+    range: Range
+) {
     ScreenSection {
         SectionTitle(R.drawable.ic_distance, stringResource(id = R.string.distance_section))
 
         Spacer(modifier = Modifier.padding(8.dp))
 
-        data.distanceValue()?.let { DistanceView(value = it, range = Range(0, 50)) }
+        data.distanceValue()?.let { DistanceView(value = it, range = range) }
     }
 }
 
@@ -62,7 +65,7 @@ internal fun DistanceControlSection(
 }
 
 @Composable
-internal fun AzimuthSection(data: SensorData) {
+internal fun AzimuthSection(data: SensorData, distanceRange: Range) {
     ScreenSection {
         SectionTitle(
             resId = R.drawable.ic_azimuth, stringResource(id = R.string.azimuth_section)
@@ -84,7 +87,7 @@ internal fun AzimuthSection(data: SensorData) {
                     .width(200.dp)
             )
             // TODO: Verify the param supplied to AzimuthView.
-            AzimuthView(data)
+            AzimuthView(data, distanceRange)
         }
     }
 }
@@ -115,18 +118,18 @@ internal fun MeasuresSection(data: SensorData) {
 @Composable
 internal fun SettingSection(serviceData: SensorData, onEvent: (DeviceConnectionViewEvent) -> Unit) {
     ScreenSection {
-        SettingsView(data = serviceData, onEvent)
+        SettingsView(data = serviceData, Range(0, 50), onEvent)
     }
 }
 
 @Composable
-internal fun LinearDataSection(viewEntity: SensorData) {
+internal fun LinearDataSection(data: SensorData, distanceRange: Range) {
     ScreenSection {
         SectionTitle(R.drawable.ic_distance, stringResource(id = R.string.distance_section))
 
         Spacer(modifier = Modifier.padding(8.dp))
 
-        LinearDataView(viewEntity)
+        LinearDataView(data, distanceRange)
     }
 }
 
@@ -146,7 +149,7 @@ internal fun DataSmoothingViewSection(data: SensorData) {
 }
 
 @Composable
-internal fun AzimuthAndElevationSection(data: SensorData) {
+internal fun AzimuthAndElevationSection(data: SensorData, range: Range) {
     ScreenSection {
         BoxWithConstraints {
             SectionTitle(
@@ -187,7 +190,7 @@ internal fun AzimuthAndElevationSection(data: SensorData) {
                         .height(200.dp)
                         .width(200.dp)
                 )
-                AzimuthView(data)
+                AzimuthView(data, range)
             }
         }
     }

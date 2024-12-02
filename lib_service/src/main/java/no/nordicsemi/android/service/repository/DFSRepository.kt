@@ -22,9 +22,9 @@ import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.Dis
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.McpdMeasurementData
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.RttMeasurementData
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.ElevationMeasurementData
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.Range
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.toDistanceMode
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
-import timber.log.Timber
 
 object DFSRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<DFSServiceData>>()
@@ -40,10 +40,6 @@ object DFSRepository {
     fun addNewAzimuth(deviceId: String, azimuth: AzimuthMeasurementData) {
         val validatedAzimuth = azimuth.copy(azimuth = azimuth.azimuth.coerceIn(0, 359))
         val key = validatedAzimuth.address
-
-        // TODO: Check if deviceId and peripheralBluetoothAddress are the same.
-        Timber.tag("AAA").d("DeviceId: $deviceId, peripheralBluetoothAddress: ${key.address}")
-
         val deviceDataFlow = _dataMap[deviceId]
         val currentData = deviceDataFlow?.value?.data ?: emptyMap()
         val sensorData = currentData[key] ?: SensorData()
@@ -185,6 +181,10 @@ object DFSRepository {
                 }
             }
         }
+    }
+
+    fun updateDistanceRange(deviceId: String, range: Range) {
+        _dataMap[deviceId]?.update { it.copy(distanceRange = range) }
     }
 
 }

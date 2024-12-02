@@ -1,13 +1,13 @@
 package no.nordicsemi.android.toolbox.libs.profile.viewmodel
 
 import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.MeasurementSection
-import no.nordicsemi.android.toolbox.libs.core.data.Range
 import no.nordicsemi.android.toolbox.libs.core.data.common.WorkingMode
 import no.nordicsemi.android.toolbox.libs.core.data.csc.SpeedUnit
 import no.nordicsemi.android.toolbox.libs.core.data.csc.WheelSize
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.PeripheralBluetoothAddress
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.DistanceMode
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.MeasurementSection
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.Range
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementContext
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
 import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit
