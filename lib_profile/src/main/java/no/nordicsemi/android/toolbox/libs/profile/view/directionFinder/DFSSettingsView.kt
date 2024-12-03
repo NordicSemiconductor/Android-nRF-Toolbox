@@ -165,7 +165,7 @@ private fun RangeSliderViewPreview() {
 
 @Composable
 internal fun MeasurementDetailModeView(
-    viewEntity: SensorData,
+    sensorData: SensorData,
     onEvent: (DeviceConnectionViewEvent) -> Unit
 ) {
 
@@ -173,7 +173,6 @@ internal fun MeasurementDetailModeView(
     var isExpanded by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.clickable { isExpanded = true }) {
-        // TODO: Add the name of measurement section when it is selected from ui. Grab it in some state and use it here.
         val text = stringResource(R.string.select_section)
 
         Row(
@@ -205,7 +204,7 @@ internal fun MeasurementDetailModeView(
             modifier = Modifier.width(with(LocalDensity.current) { width.toDp() }),
         ) {
             Column {
-                viewEntity.availableSections().forEachIndexed { index, it ->
+                sensorData.availableSections().forEachIndexed { index, it ->
                     Text(
                         text = it.displayName,
                         modifier = Modifier
@@ -217,7 +216,7 @@ internal fun MeasurementDetailModeView(
                             }
                     )
 
-                    if (index != viewEntity.availableSections().size - 1) {
+                    if (index != sensorData.availableSections().size - 1) {
                         Spacer(modifier = Modifier.padding(8.dp))
                     }
                 }

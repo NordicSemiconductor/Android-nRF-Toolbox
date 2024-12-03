@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.core.data.DFSServiceData
@@ -39,13 +39,15 @@ internal fun DistanceSection(
 ) {
     ScreenSection {
         SectionTitle(R.drawable.ic_distance, stringResource(id = R.string.distance_section))
-
-        Spacer(modifier = Modifier.padding(8.dp))
-
         data.distanceValue()?.let { DistanceView(value = it, range = range) }
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun DistanceSectionPreview() {
+    DistanceSection(SensorData(), Range(0, 50))
+}
 
 @Composable
 internal fun DistanceControlSection(
@@ -57,11 +59,14 @@ internal fun DistanceControlSection(
             resId = R.drawable.ic_control,
             title = stringResource(id = R.string.control_panel),
         )
-
-        Spacer(modifier = Modifier.padding(8.dp))
-
         ControlView(data, onEvent)
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DistanceControlSectionPreview() {
+    DistanceControlSection(DFSServiceData()) {}
 }
 
 @Composable
@@ -70,9 +75,6 @@ internal fun AzimuthSection(data: SensorData, distanceRange: Range) {
         SectionTitle(
             resId = R.drawable.ic_azimuth, stringResource(id = R.string.azimuth_section)
         )
-
-        Spacer(modifier = Modifier.padding(8.dp))
-
         Box {
             Image(
                 painter = painterResource(id = R.drawable.ic_azimuth),
@@ -92,6 +94,12 @@ internal fun AzimuthSection(data: SensorData, distanceRange: Range) {
     }
 }
 
+@Preview
+@Composable
+private fun AzimuthSectionPreview() {
+    AzimuthSection(SensorData(), Range(0, 50))
+}
+
 @Composable
 internal fun ElevationSection(data: SensorData) {
     ScreenSection {
@@ -99,13 +107,17 @@ internal fun ElevationSection(data: SensorData) {
             resId = R.drawable.ic_elevation, stringResource(id = R.string.elevation_section)
         )
 
-        Spacer(modifier = Modifier.padding(8.dp))
-
         Row(modifier = Modifier.padding(end = 50.dp)) {
             // TODO: Verify the param supplied to ElevationView.
             data.elevation.medianValue { it.elevation }?.let { ElevationView(it) }
         }
     }
+}
+
+@Preview
+@Composable
+private fun ElevationSectionPreview() {
+    ElevationSection(SensorData())
 }
 
 @Composable
@@ -116,21 +128,34 @@ internal fun MeasuresSection(data: SensorData) {
 }
 
 @Composable
-internal fun SettingSection(serviceData: SensorData, onEvent: (DeviceConnectionViewEvent) -> Unit) {
+internal fun SettingSection(
+    serviceData: SensorData,
+    range: Range,
+    onEvent: (DeviceConnectionViewEvent) -> Unit
+) {
     ScreenSection {
-        SettingsView(data = serviceData, Range(0, 50), onEvent)
+        SettingsView(data = serviceData, range, onEvent)
     }
+}
+
+@Preview
+@Composable
+private fun SettingSectionPreview() {
+    SettingSection(SensorData(), Range(0, 50)) { }
 }
 
 @Composable
 internal fun LinearDataSection(data: SensorData, distanceRange: Range) {
     ScreenSection {
         SectionTitle(R.drawable.ic_distance, stringResource(id = R.string.distance_section))
-
-        Spacer(modifier = Modifier.padding(8.dp))
-
         LinearDataView(data, distanceRange)
     }
+}
+
+@Preview
+@Composable
+private fun LinearDataSectionPreview() {
+    LinearDataSection(SensorData(), Range(0, 50))
 }
 
 @Composable
@@ -140,12 +165,15 @@ internal fun DataSmoothingViewSection(data: SensorData) {
             R.drawable.ic_distance,
             stringResource(id = R.string.measurement_details_section)
         )
-
-        Spacer(modifier = Modifier.padding(8.dp))
-
         data.selectedMeasurementSectionValues()?.let { DataSmoothingView(it) }
 
     }
+}
+
+@Preview
+@Composable
+private fun DataSmoothingViewSectionPreview() {
+    DataSmoothingViewSection(SensorData())
 }
 
 @Composable
@@ -163,14 +191,11 @@ internal fun AzimuthAndElevationSection(data: SensorData, range: Range) {
                 stringResource(id = R.string.elevation_section)
             }
 
-
             ReversedSectionTitle(
                 R.drawable.ic_elevation,
                 elevationTitle
             )
         }
-
-        Spacer(modifier = Modifier.padding(8.dp))
 
         Box(modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.align(Alignment.TopEnd)) {

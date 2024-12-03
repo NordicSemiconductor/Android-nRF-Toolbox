@@ -124,6 +124,13 @@ internal fun HomeView() {
                                             true
                                         ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
 
+                                        Profile.DFS -> FeatureButton(
+                                            iconId = R.drawable.ic_distance,
+                                            profileName = R.string.direction_module_full,
+                                            deviceName = peripheral.name,
+                                            true
+                                        ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
+
                                         else -> {
                                             // TODO: Add more profiles
                                         }

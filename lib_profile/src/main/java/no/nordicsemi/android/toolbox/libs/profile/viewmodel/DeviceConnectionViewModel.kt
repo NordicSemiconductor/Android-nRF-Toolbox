@@ -215,6 +215,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
             Profile.BPS -> updateBPS()
             Profile.CSC -> updateCSC()
             Profile.CGM -> updateCGM()
+            Profile.DFS -> updateDFC()
             Profile.GLS -> updateGLS()
             Profile.HRS -> updateHRS()
             Profile.HTS -> updateHTS()
@@ -223,6 +224,10 @@ internal class DeviceConnectionViewModel @Inject constructor(
             }
         }
     }
+
+    private fun updateDFC() = DFSRepository.getData(address).onEach {
+        updateDeviceData(it)
+    }.launchIn(viewModelScope)
 
     private fun updateCSC() {
         CSCRepository.getData(address).onEach {
@@ -313,11 +318,11 @@ internal class DeviceConnectionViewModel @Inject constructor(
 
             HRSViewEvent.SwitchZoomEvent -> switchZoomEvent()
             is HTSViewEvent.OnTemperatureUnitSelected -> updateTemperatureUnit(event.value)
-            DFSViewEvent.OnAvailableFeaturesRequest -> {
+            DFSViewEvent.OnAvailableDistanceModeRequest -> {
                 // TODO: Check for available features from the repository.
             }
 
-            DFSViewEvent.OnCurrentDistanceModeRequest -> {
+            DFSViewEvent.OnCheckDistanceModeRequest -> {
                 // TODO: Check for current distance mode from the repository.
             }
 
@@ -331,7 +336,10 @@ internal class DeviceConnectionViewModel @Inject constructor(
                 }
             }
 
-            is DFSViewEvent.OnDetailsSectionParamsSelected -> TODO()
+            is DFSViewEvent.OnDetailsSectionParamsSelected -> {
+                DFSRepository.updateDetailsSection(address, event.section)
+            }
+
             is DFSViewEvent.OnBluetoothDeviceSelected -> DFSRepository.updateSelectedDevice(
                 address,
                 event.device

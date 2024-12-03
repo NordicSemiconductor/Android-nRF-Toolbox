@@ -248,7 +248,6 @@ private fun isClose(sensorData: SensorData, range: Range): Boolean {
     return validatedValue <= range.from || (validatedValue - range.from) < 10
 }
 
-
 @Preview(showBackground = true)
 @Composable
 private fun AzimuthViewPreview() {

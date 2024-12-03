@@ -1,6 +1,5 @@
 package no.nordicsemi.android.ui.view
 
-import android.annotation.SuppressLint
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,11 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import no.nordicsemi.android.ui.R
 
 @Composable
-@SuppressLint("ModifierParameter")
 fun ReversedSectionTitle(
     @DrawableRes resId: Int,
     title: String,
@@ -51,4 +51,10 @@ fun ReversedSectionTitle(
                 .padding(8.dp)
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ReversedSectionTitlePreview() {
+    ReversedSectionTitle(R.drawable.ic_records, "title")
 }
