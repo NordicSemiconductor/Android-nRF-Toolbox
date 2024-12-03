@@ -55,6 +55,8 @@
     <string name="logger_module">nRF Logger</string>
     <string name="logger_module_full">nRF Logger</string>
     <string name="logger_module_info">Open nRF Logger application.</string>
+    <string name="direction_module">DF</string>
+    <string name="direction_module_full">Direction Finder</string>
 
     <string name="viewmodel_profiles">ViewModel profiles</string>
     <string name="service_profiles">Service profiles</string>

@@ -51,8 +51,8 @@ internal sealed interface CSCViewEvent : DeviceConnectionViewEvent {
 }
 
 internal sealed interface DFSViewEvent : DeviceConnectionViewEvent {
-    data object OnAvailableFeaturesRequest : DFSViewEvent
-    data object OnCurrentDistanceModeRequest : DFSViewEvent
+    data object OnAvailableDistanceModeRequest : DFSViewEvent
+    data object OnCheckDistanceModeRequest : DFSViewEvent
     data class OnRangeChangedEvent(val range: Range) : DFSViewEvent
     data class OnDistanceModeSelected(val mode: DistanceMode) : DFSViewEvent
     data class OnDetailsSectionParamsSelected(val section: MeasurementSection) : DFSViewEvent

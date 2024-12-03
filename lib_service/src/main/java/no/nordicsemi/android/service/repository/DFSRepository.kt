@@ -22,6 +22,7 @@ import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.Dis
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.McpdMeasurementData
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.RttMeasurementData
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.ElevationMeasurementData
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.MeasurementSection
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.Range
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.toDistanceMode
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
@@ -95,7 +96,8 @@ object DFSRepository {
             it.copy(
                 data = currentData.toMutableMap().apply {
                     put(key, newSensorData)
-                }.toMap()
+                }.toMap(),
+                distanceMode = distanceMode
             )
         }
     }
@@ -185,6 +187,23 @@ object DFSRepository {
 
     fun updateDistanceRange(deviceId: String, range: Range) {
         _dataMap[deviceId]?.update { it.copy(distanceRange = range) }
+    }
+
+    /**
+     * Update section to the sensor data.
+     */
+    fun updateDetailsSection(deviceId: String, section: MeasurementSection) {
+        _dataMap[deviceId]?.update { serviceData ->
+            serviceData.copy(
+                data = serviceData.data.mapValues { (key, sensorData) ->
+                    if (key == serviceData.selectedDevice) {
+                        sensorData.copy(selectedMeasurementSection = section)
+                    } else {
+                        sensorData
+                    }
+                }
+            )
+        }
     }
 
 }

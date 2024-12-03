@@ -3,6 +3,7 @@ package no.nordicsemi.android.toolbox.libs.profile.view
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,6 +14,7 @@ import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.az
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.distanceValue
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.elevationValue
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.selectedMeasurementSectionValues
+import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
 import no.nordicsemi.android.toolbox.libs.profile.view.directionFinder.AzimuthAndElevationSection
 import no.nordicsemi.android.toolbox.libs.profile.view.directionFinder.AzimuthSection
 import no.nordicsemi.android.toolbox.libs.profile.view.directionFinder.DataSmoothingViewSection
@@ -35,38 +37,56 @@ internal fun DFSScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
-        val data = serviceData.data[serviceData.selectedDevice]
-        val isAzimuthAndElevationDataAvailable =
-            (data?.azimuthValue() != null) && (data.elevationValue() != null)
-        if (data != null) {
-            data.distanceValue()?.let { DistanceSection(data, serviceData.distanceRange) }
-            when {
-                isAzimuthAndElevationDataAvailable -> AzimuthAndElevationSection(
-                    data,
-                    serviceData.distanceRange
-                )
+        when (serviceData.requestStatus) {
+            RequestStatus.PENDING -> CircularProgressIndicator()
+            RequestStatus.SUCCESS -> {
+                SectionBluetoothDeviceComponent(
+                    serviceData,
+                    selectedDevice = serviceData.selectedDevice,
+                ) { onClick(it) }
 
-                !isAzimuthAndElevationDataAvailable && (data.azimuth != null) -> AzimuthSection(
-                    data,
-                    serviceData.distanceRange
-                )
+                if (serviceData.selectedDevice != null) {
+                    val data = serviceData.data[serviceData.selectedDevice]
+                    val isAzimuthAndElevationDataAvailable =
+                        (data?.azimuthValue() != null) && (data.elevationValue() != null)
+                    if (data != null) {
+                        data.distanceValue()
+                            ?.let { DistanceSection(data, serviceData.distanceRange) }
+                        when {
+                            isAzimuthAndElevationDataAvailable -> AzimuthAndElevationSection(
+                                data,
+                                serviceData.distanceRange
+                            )
 
-                !isAzimuthAndElevationDataAvailable && data.elevation != null -> ElevationSection(
-                    data
-                )
+                            !isAzimuthAndElevationDataAvailable && (data.azimuth != null) -> AzimuthSection(
+                                data,
+                                serviceData.distanceRange
+                            )
+
+                            !isAzimuthAndElevationDataAvailable && data.elevation != null -> ElevationSection(
+                                data
+                            )
+                        }
+                        MeasuresSection(data)
+                        data.selectedMeasurementSectionValues()
+                            ?.let { DataSmoothingViewSection(data) }
+                        if (data.availableSections().isNotEmpty()) SettingSection(
+                            data,
+                            serviceData.distanceRange
+                        ) { onClick(it) }
+
+
+
+                        LinearDataSection(data, serviceData.distanceRange)
+                        DistanceControlSection(serviceData) { onClick(it) }
+                    }
+                }
+
             }
-            MeasuresSection(data)
-            data.selectedMeasurementSectionValues()?.let { DataSmoothingViewSection(data) }
-            if (data.availableSections().isNotEmpty()) SettingSection(data) { onClick(it) }
 
-            SectionBluetoothDeviceComponent(
-                serviceData,
-                selectedDevice = serviceData.selectedDevice,
-            ) { onClick(it) }
-
-            LinearDataSection(data, serviceData.distanceRange)
-            DistanceControlSection(serviceData) { onClick(it) }
+            else -> {
+                // TODO: decide on other states.
+            }
         }
     }
-
 }

@@ -26,7 +26,7 @@ internal fun ControlView(viewEntity: DFSServiceData, onEvent: (DeviceConnectionV
         when {
             !viewEntity.isDistanceAvailabilityChecked() -> {
                 DistanceCheckView {
-                    onEvent(DFSViewEvent.OnAvailableFeaturesRequest)
+                    onEvent(DFSViewEvent.OnAvailableDistanceModeRequest)
                 }
             }
 
@@ -37,7 +37,7 @@ internal fun ControlView(viewEntity: DFSServiceData, onEvent: (DeviceConnectionV
             viewEntity.isDoubleModeAvailable() -> {
                 CurrentModeView(
                     distanceMode = viewEntity.distanceMode,
-                    onCheckMode = { onEvent(DFSViewEvent.OnCurrentDistanceModeRequest) },
+                    onCheckMode = { onEvent(DFSViewEvent.OnCheckDistanceModeRequest) },
                     onSwitchMode = { newMode -> onEvent(DFSViewEvent.OnDistanceModeSelected(newMode)) }
                 )
             }
