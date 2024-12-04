@@ -6,8 +6,8 @@ import no.nordicsemi.android.toolbox.libs.core.data.csc.SpeedUnit
 import no.nordicsemi.android.toolbox.libs.core.data.csc.WheelSize
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.PeripheralBluetoothAddress
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.DistanceMode
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.MeasurementSection
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.Range
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.MeasurementSection
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.Range
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementContext
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
 import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit

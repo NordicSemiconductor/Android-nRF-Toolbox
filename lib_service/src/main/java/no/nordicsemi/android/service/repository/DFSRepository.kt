@@ -9,7 +9,9 @@ import no.nordicsemi.android.service.services.DFSManager
 import no.nordicsemi.android.toolbox.libs.core.data.DFSServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.SensorData
 import no.nordicsemi.android.toolbox.libs.core.data.SensorValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.MeasurementSection
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.PeripheralBluetoothAddress
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.Range
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.azimuthal.AzimuthMeasurementData
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.controlPoint.ControlPointChangeModeError
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.controlPoint.ControlPointChangeModeSuccess
@@ -22,8 +24,6 @@ import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.Dis
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.McpdMeasurementData
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.RttMeasurementData
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.ElevationMeasurementData
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.MeasurementSection
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.Range
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.toDistanceMode
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
 
@@ -51,7 +51,9 @@ object DFSRepository {
         _dataMap[deviceId]?.update {
             it.copy(
                 data = currentData.toMutableMap().apply {
-                    put(key, updatedSensorData)
+                    if (key != null) {
+                        put(key, updatedSensorData)
+                    }
                 }.toMap()
             )
         }
@@ -95,9 +97,10 @@ object DFSRepository {
         _dataMap[deviceId]?.update {
             it.copy(
                 data = currentData.toMutableMap().apply {
-                    put(key, newSensorData)
+                    if (key != null) {
+                        put(key, newSensorData)
+                    }
                 }.toMap(),
-                distanceMode = distanceMode
             )
         }
     }
@@ -115,7 +118,9 @@ object DFSRepository {
         _dataMap[deviceId]?.update {
             it.copy(
                 data = currentData.toMutableMap().apply {
-                    put(key, updatedSensorData)
+                    if (key != null) {
+                        put(key, updatedSensorData)
+                    }
                 }.toMap()
             )
         }
@@ -125,22 +130,33 @@ object DFSRepository {
         _dataMap[deviceId]?.update { it.copy(requestStatus = requestStatus) }
     }
 
-    // TODO: Call it from viewmodel.
     suspend fun enableDistanceMode(deviceId: String, distanceMode: DistanceMode) {
         _dataMap[deviceId]?.update { it.copy(requestStatus = RequestStatus.PENDING) }
         DFSManager.enableDistanceMode(deviceId, distanceMode)
     }
 
     private fun setDistanceMode(deviceId: String, distanceMode: DistanceMode) {
-        _dataMap[deviceId]?.update { it.copy(distanceMode = distanceMode) }
+        _dataMap[deviceId]?.update { serviceData ->
+            serviceData.copy(
+                data = serviceData.data.mapValues { (key, sensorData) ->
+                    if (key == serviceData.selectedDevice) {
+                        sensorData.copy(distanceMode = distanceMode)
+                    } else {
+                        sensorData
+                    }
+                }
+            )
+        }
     }
 
     fun setAvailableDistanceModes(deviceId: String, ddfData: DDFData) {
         updateNewRequestStatus(deviceId, RequestStatus.PENDING)
         _dataMap[deviceId]?.update {
             it.copy(
-                isMcpdAvailable = ddfData.isMcpdAvailable,
-                isRttAvailable = ddfData.isRttAvailable,
+                ddfFeature = DDFData(
+                    isMcpdAvailable = ddfData.isMcpdAvailable,
+                    isRttAvailable = ddfData.isRttAvailable
+                )
             )
         }
         updateNewRequestStatus(deviceId, RequestStatus.SUCCESS)
@@ -154,24 +170,21 @@ object DFSRepository {
         when (data) {
             ControlPointChangeModeError -> {
                 scope.launch {
-                    updateNewRequestStatus(deviceId, RequestStatus.PENDING)
-                    DFSManager.checkForCurrentDistanceMode(deviceId)
+                    checkCurrentDistanceMode(deviceId)
                     updateNewRequestStatus(deviceId, RequestStatus.FAILED)
                 }
             }
 
             ControlPointChangeModeSuccess -> {
                 scope.launch {
-                    updateNewRequestStatus(deviceId, RequestStatus.PENDING)
-                    DFSManager.checkForCurrentDistanceMode(deviceId)
+                    checkCurrentDistanceMode(deviceId)
                     updateNewRequestStatus(deviceId, RequestStatus.SUCCESS)
                 }
             }
 
             ControlPointCheckModeError -> {
                 scope.launch {
-                    updateNewRequestStatus(deviceId, RequestStatus.PENDING)
-                    DFSManager.checkForCurrentDistanceMode(deviceId)
+                    checkCurrentDistanceMode(deviceId)
                     updateNewRequestStatus(deviceId, RequestStatus.FAILED)
                 }
             }
@@ -184,6 +197,13 @@ object DFSRepository {
             }
         }
     }
+
+
+    suspend fun checkCurrentDistanceMode(deviceId: String) {
+        updateNewRequestStatus(deviceId, RequestStatus.PENDING)
+        DFSManager.checkForCurrentDistanceMode(deviceId)
+    }
+
 
     fun updateDistanceRange(deviceId: String, range: Range) {
         _dataMap[deviceId]?.update { it.copy(distanceRange = range) }
@@ -204,6 +224,10 @@ object DFSRepository {
                 }
             )
         }
+    }
+
+    suspend fun checkAvailableFeatures(deviceId: String) {
+        DFSManager.checkAvailableFeatures(deviceId)
     }
 
 }

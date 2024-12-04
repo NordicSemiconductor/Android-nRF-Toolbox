@@ -22,11 +22,11 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.core.data.DFSServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.SensorData
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.Range
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.distanceValue
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.elevationValue
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.medianValue
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.selectedMeasurementSectionValues
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.Range
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distanceValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevationValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.medianValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.selectedMeasurementSectionValues
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.ui.view.ReversedSectionTitle
 import no.nordicsemi.android.ui.view.ScreenSection
@@ -52,6 +52,7 @@ private fun DistanceSectionPreview() {
 @Composable
 internal fun DistanceControlSection(
     data: DFSServiceData,
+    sensorData: SensorData,
     onEvent: (DeviceConnectionViewEvent) -> Unit
 ) {
     ScreenSection {
@@ -59,14 +60,14 @@ internal fun DistanceControlSection(
             resId = R.drawable.ic_control,
             title = stringResource(id = R.string.control_panel),
         )
-        ControlView(data, onEvent)
+        ControlView(data, sensorData, onEvent)
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun DistanceControlSectionPreview() {
-    DistanceControlSection(DFSServiceData()) {}
+    DistanceControlSection(DFSServiceData(), SensorData()) {}
 }
 
 @Composable

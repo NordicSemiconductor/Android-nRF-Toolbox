@@ -80,7 +80,6 @@ internal class DFSManager : ServiceManager {
                 ?.launchIn(scope)
         }
 
-        // TODO: Verify read characteristics.
         scope.launch {
             val ddfFeatureCharacteristics = remoteService.characteristics
                 .firstOrNull { it.uuid == DDF_FEATURE_CHARACTERISTIC_UUID.toKotlinUuid() }
@@ -111,6 +110,7 @@ internal class DFSManager : ServiceManager {
 
     companion object {
         private lateinit var controlPointCharacteristic: RemoteCharacteristic
+        private lateinit var ddfFeatureCharacteristic: RemoteCharacteristic
 
         private val MCPD_ENABLED_BYTES = byteArrayOf(0x01, 0x01)
         private val RTT_ENABLED_BYTES = byteArrayOf(0x01, 0x00)
@@ -134,6 +134,21 @@ internal class DFSManager : ServiceManager {
                     CHECK_CONFIG_BYTES,
                     writeType = WriteType.WITH_RESPONSE
                 )
+            }
+        }
+
+        suspend fun checkAvailableFeatures(deviceId: String) {
+            DFSRepository.updateNewRequestStatus(deviceId, RequestStatus.PENDING)
+            val isReadPropertyAvailable = ddfFeatureCharacteristic
+                .properties.contains(CharacteristicProperty.READ)
+            if (isReadPropertyAvailable) {
+                ddfFeatureCharacteristic.read()
+                    .let { DDFDataParser().parse(it) }
+                    ?.apply {
+                        DFSRepository.setAvailableDistanceModes(deviceId, this)
+                    }
+            } else {
+                Timber.e("Characteristic Property READ is not available for $ddfFeatureCharacteristic")
             }
         }
 

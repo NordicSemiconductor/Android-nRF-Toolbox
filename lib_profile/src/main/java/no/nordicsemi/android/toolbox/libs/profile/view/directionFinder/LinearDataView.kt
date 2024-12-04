@@ -17,13 +17,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.core.data.SensorData
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.Range
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.bestEffortValue
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.ifftValue
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.isMcpdSectionAvailable
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.phaseSlopeValue
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.rssiValue
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.rttValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.Range
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.bestEffortValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.ifftValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.isMcpdSectionAvailable
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.phaseSlopeValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.rssiValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.rttValue
 
 @Composable
 internal fun LinearDataView(

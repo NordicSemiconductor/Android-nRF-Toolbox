@@ -318,12 +318,12 @@ internal class DeviceConnectionViewModel @Inject constructor(
 
             HRSViewEvent.SwitchZoomEvent -> switchZoomEvent()
             is HTSViewEvent.OnTemperatureUnitSelected -> updateTemperatureUnit(event.value)
-            DFSViewEvent.OnAvailableDistanceModeRequest -> {
-                // TODO: Check for available features from the repository.
+            DFSViewEvent.OnAvailableDistanceModeRequest -> viewModelScope.launch {
+                DFSRepository.checkAvailableFeatures(address)
             }
 
-            DFSViewEvent.OnCheckDistanceModeRequest -> {
-                // TODO: Check for current distance mode from the repository.
+            DFSViewEvent.OnCheckDistanceModeRequest -> viewModelScope.launch {
+                DFSRepository.checkCurrentDistanceMode(address)
             }
 
             is DFSViewEvent.OnRangeChangedEvent -> {

@@ -5,20 +5,20 @@ import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.PeripheralBl
 sealed interface DistanceMeasurementData {
     val flags: Byte
     val quality: QualityIndicator
-    val address: PeripheralBluetoothAddress
+    val address: PeripheralBluetoothAddress?
 }
 
 data class McpdMeasurementData(
     override val flags: Byte = Byte.MAX_VALUE,
     override val quality: QualityIndicator = QualityIndicator.GOOD,
-    override val address: PeripheralBluetoothAddress = PeripheralBluetoothAddress.TEST,
+    override val address: PeripheralBluetoothAddress? = null,
     val mcpd: MCPDEstimate = MCPDEstimate()
 ) : DistanceMeasurementData
 
 data class RttMeasurementData(
     override val flags: Byte = Byte.MAX_VALUE,
     override val quality: QualityIndicator = QualityIndicator.GOOD,
-    override val address: PeripheralBluetoothAddress = PeripheralBluetoothAddress.TEST,
+    override val address: PeripheralBluetoothAddress? = null,
     val rtt: RTTEstimate = RTTEstimate()
 ) : DistanceMeasurementData
 

@@ -6,6 +6,6 @@ import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.Qua
 data class AzimuthMeasurementData(
     val flags: Byte = Byte.MAX_VALUE,
     val quality: QualityIndicator = QualityIndicator.GOOD,
-    val address: PeripheralBluetoothAddress = PeripheralBluetoothAddress.TEST,
+    val address: PeripheralBluetoothAddress?=null,
     val azimuth: Int = 0
 )

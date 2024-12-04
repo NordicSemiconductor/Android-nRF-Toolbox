@@ -9,11 +9,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.libs.core.data.DFSServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.availableSections
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.azimuthValue
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.distanceValue
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.elevationValue
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.selectedMeasurementSectionValues
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.availableSections
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.azimuthValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distanceValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevationValue
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.selectedMeasurementSectionValues
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
 import no.nordicsemi.android.toolbox.libs.profile.view.directionFinder.AzimuthAndElevationSection
 import no.nordicsemi.android.toolbox.libs.profile.view.directionFinder.AzimuthSection
@@ -78,7 +78,7 @@ internal fun DFSScreen(
 
 
                         LinearDataSection(data, serviceData.distanceRange)
-                        DistanceControlSection(serviceData) { onClick(it) }
+                        DistanceControlSection(serviceData, data) { onClick(it) }
                     }
                 }
 
