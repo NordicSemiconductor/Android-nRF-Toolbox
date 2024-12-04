@@ -83,6 +83,7 @@ internal class DFSManager : ServiceManager {
         scope.launch {
             val ddfFeatureCharacteristics = remoteService.characteristics
                 .firstOrNull { it.uuid == DDF_FEATURE_CHARACTERISTIC_UUID.toKotlinUuid() }
+                ?.apply { ddfFeatureCharacteristic = this }
             val isReadPropertyAvailable = ddfFeatureCharacteristics
                 ?.properties?.contains(CharacteristicProperty.READ)
             if (isReadPropertyAvailable == true) {
