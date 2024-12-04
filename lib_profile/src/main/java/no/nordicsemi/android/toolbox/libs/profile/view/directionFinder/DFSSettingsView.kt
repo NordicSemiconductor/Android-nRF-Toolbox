@@ -39,8 +39,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.core.data.SensorData
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.Range
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.availableSections
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.Range
+import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.availableSections
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DFSViewEvent
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.ui.view.SectionTitle

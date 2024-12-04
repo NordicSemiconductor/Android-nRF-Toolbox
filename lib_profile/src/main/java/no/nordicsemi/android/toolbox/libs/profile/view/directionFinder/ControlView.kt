@@ -13,12 +13,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.core.data.DFSServiceData
+import no.nordicsemi.android.toolbox.libs.core.data.SensorData
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.DistanceMode
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DFSViewEvent
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
 
 @Composable
-internal fun ControlView(viewEntity: DFSServiceData, onEvent: (DeviceConnectionViewEvent) -> Unit) {
+internal fun ControlView(
+    viewEntity: DFSServiceData,
+    sensorData: SensorData,
+    onEvent: (DeviceConnectionViewEvent) -> Unit
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -36,19 +41,19 @@ internal fun ControlView(viewEntity: DFSServiceData, onEvent: (DeviceConnectionV
 
             viewEntity.isDoubleModeAvailable() -> {
                 CurrentModeView(
-                    distanceMode = viewEntity.distanceMode,
+                    distanceMode = sensorData.distanceMode,
                     onCheckMode = { onEvent(DFSViewEvent.OnCheckDistanceModeRequest) },
                     onSwitchMode = { newMode -> onEvent(DFSViewEvent.OnDistanceModeSelected(newMode)) }
                 )
             }
 
-            viewEntity.isMcpdAvailable == true -> {
+            viewEntity.ddfFeature?.isMcpdAvailable == true -> {
                 SingleModeAvailableView(
                     isMcpdAvailable = true,
                 )
             }
 
-            viewEntity.isRttAvailable == true -> {
+            viewEntity.ddfFeature?.isRttAvailable == true -> {
                 SingleModeAvailableView(
                     isRttAvailable = true,
                 )
@@ -126,5 +131,5 @@ private fun SingleModeAvailableView(
 @Preview(showBackground = true)
 @Composable
 private fun ControlViewPreview() {
-    ControlView(DFSServiceData()) { }
+    ControlView(DFSServiceData(), SensorData()) { }
 }

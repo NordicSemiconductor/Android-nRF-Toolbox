@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation
+package no.nordicsemi.android.toolbox.libs.core.data.directionFinder
 
 import no.nordicsemi.android.toolbox.libs.core.data.SensorData
 import no.nordicsemi.android.toolbox.libs.core.data.SensorValue
