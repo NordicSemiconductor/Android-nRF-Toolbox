@@ -168,9 +168,9 @@ internal fun MeasurementDetailModeView(
     sensorData: SensorData,
     onEvent: (DeviceConnectionViewEvent) -> Unit
 ) {
-
     var width by rememberSaveable { mutableIntStateOf(0) }
     var isExpanded by remember { mutableStateOf(false) }
+    var displayText by rememberSaveable { mutableStateOf("") }
 
     Column(modifier = Modifier.clickable { isExpanded = true }) {
         val text = stringResource(R.string.select_section)
@@ -187,7 +187,7 @@ internal fun MeasurementDetailModeView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = text,
+                text = displayText.ifEmpty { text },
                 modifier = Modifier
                     .onSizeChanged { width = it.width }
                     .fillMaxWidth()
@@ -212,6 +212,7 @@ internal fun MeasurementDetailModeView(
                             .fillMaxWidth()
                             .clickable {
                                 onEvent(DFSViewEvent.OnDetailsSectionParamsSelected(it))
+                                displayText = it.displayName
                                 isExpanded = false
                             }
                     )
