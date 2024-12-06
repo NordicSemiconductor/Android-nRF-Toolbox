@@ -39,7 +39,6 @@ import no.nordicsemi.android.toolbox.libs.profile.view.DFSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.GLSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HRSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HTSScreen
-import no.nordicsemi.android.toolbox.libs.profile.view.LoadingView
 import no.nordicsemi.android.toolbox.libs.profile.view.RSCSScreen
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionState
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
@@ -54,6 +53,7 @@ import no.nordicsemi.android.ui.view.ProfileAppBar
 import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
 import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
+import no.nordicsemi.android.ui.view.internal.LoadingView
 import no.nordicsemi.android.ui.view.internal.ServiceDiscoveryView
 
 @Composable
