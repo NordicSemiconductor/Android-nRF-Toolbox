@@ -40,5 +40,13 @@ internal class BatteryManager : ServiceManager {
                     Timber.e(e)
                 }?.launchIn(scope)
         }
+        scope.launch {
+            remoteService.characteristics.firstOrNull { it.uuid == BATTERY_LEVEL_CHARACTERISTIC_UUID.toKotlinUuid() }
+                ?.read()
+                ?.let { BatteryLevelParser.parse(it) }
+                ?.let { batteryLevel ->
+                    BatteryRepository.updateBatteryLevel(deviceId, batteryLevel)
+                }
+        }
     }
 }
