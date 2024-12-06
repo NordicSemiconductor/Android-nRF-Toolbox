@@ -20,7 +20,6 @@ import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.NotificationService
 import no.nordicsemi.android.service.R
 import no.nordicsemi.android.service.services.ServiceManager
-import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.CentralManager.ConnectionOptions
@@ -178,11 +177,6 @@ internal class ProfileService : NotificationService() {
                 }
             }
             when {
-                discoveredServices.size == 1 && discoveredServices.first().profile == Profile.BATTERY -> {
-                    _isMissingServices.tryEmit(true)
-                    return@onEach
-                }
-
                 discoveredServices.isEmpty() -> {
                     _isMissingServices.tryEmit(true)
                     return@onEach
