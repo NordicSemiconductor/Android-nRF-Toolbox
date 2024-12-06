@@ -22,6 +22,7 @@ dependencies {
     implementation(libs.slf4j.timber)
     implementation(libs.androidx.lifecycle.service)
     implementation(libs.chart)
+    implementation(libs.androidx.compose.material.iconsExtended)
 
     //TODO: Remove this once profile is implemented in new BLEK.
     implementation(libs.nordic.blek.client)
