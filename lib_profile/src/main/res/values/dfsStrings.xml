@@ -13,9 +13,10 @@
 
     <string name="device_not_selected">Click to select a device in range.</string>
     <string name="device_no_devices">There is no device in range.</string>
+    <string name="device_no_devices_hint">Make sure the device is in range.</string>
     <string name="device_address">Address</string>
     <string name="measured_device">Measured device</string>
-    <string name="devices">List of devices</string>
+    <string name="devices">List of devices in range</string>
     <string name="cancel">Cancel</string>
 
     <string name="check_distance_mode">Click button to check available distance modes.</string>
