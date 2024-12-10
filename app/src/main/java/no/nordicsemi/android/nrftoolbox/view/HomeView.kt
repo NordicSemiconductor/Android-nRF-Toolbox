@@ -131,6 +131,16 @@ internal fun HomeView() {
                                             true
                                         ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
 
+                                        Profile.BATTERY -> {
+                                            if (services.size == 1)
+                                                FeatureButton(
+                                                    iconId = R.drawable.ic_battery,
+                                                    profileName = R.string.battery_module_full,
+                                                    deviceName = peripheral.name,
+                                                    true
+                                                ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
+                                        }
+
                                         else -> {
                                             // TODO: Add more profiles
                                         }
