@@ -29,7 +29,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.ui.view
+package no.nordicsemi.android.toolbox.libs.profile.view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -60,9 +60,10 @@ import androidx.compose.ui.unit.sp
 import no.nordicsemi.android.common.theme.nordicGrass
 import no.nordicsemi.android.common.theme.nordicGreen
 import no.nordicsemi.android.ui.R
+import no.nordicsemi.android.ui.view.ScreenSection
 
 @Composable
-fun BatteryLevelView(batteryLevel: Int) {
+internal fun BatteryLevelView(batteryLevel: Int) {
     ScreenSection {
         Row(
             horizontalArrangement = Arrangement.Absolute.SpaceBetween,
@@ -88,7 +89,7 @@ fun BatteryLevelView(batteryLevel: Int) {
 
 @Preview(showBackground = true)
 @Composable
-fun DynamicBatteryStatus(batteryLevel: Int = 40) {
+internal fun DynamicBatteryStatus(batteryLevel: Int = 40) {
     val (batteryIcon: ImageVector, color: Color) = when {
         batteryLevel > 95 -> {
             Icons.Outlined.BatteryFull to MaterialTheme.colorScheme.nordicGreen

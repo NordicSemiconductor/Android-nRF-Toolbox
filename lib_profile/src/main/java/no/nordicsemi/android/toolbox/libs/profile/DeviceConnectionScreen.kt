@@ -48,7 +48,7 @@ import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DisconnectEvent
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.NavigateUp
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OnRetryClicked
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OpenLoggerEvent
-import no.nordicsemi.android.ui.view.BatteryLevelView
+import no.nordicsemi.android.toolbox.libs.profile.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.ProfileAppBar
 import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
 import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
