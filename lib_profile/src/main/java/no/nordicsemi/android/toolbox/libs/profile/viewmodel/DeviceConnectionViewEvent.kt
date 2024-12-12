@@ -11,6 +11,7 @@ import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.Range
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementContext
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
 import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit
+import no.nordicsemi.android.toolbox.libs.core.data.rscs.RSCSSettingsUnit
 
 sealed interface DeviceConnectionViewEvent
 
@@ -48,6 +49,11 @@ internal sealed interface GLSViewEvent : DeviceConnectionViewEvent {
 internal sealed interface CSCViewEvent : DeviceConnectionViewEvent {
     data class OnWheelSizeSelected(val wheelSize: WheelSize) : CSCViewEvent
     data class OnSelectedSpeedUnitSelected(val selectedSpeedUnit: SpeedUnit) : CSCViewEvent
+}
+
+// RSCS Profile Events
+internal sealed interface RSCSViewEvent : DeviceConnectionViewEvent {
+    data class OnSelectedSpeedUnitSelected(val rscsUnitSettings: RSCSSettingsUnit) : RSCSViewEvent
 }
 
 internal sealed interface DFSViewEvent : DeviceConnectionViewEvent {

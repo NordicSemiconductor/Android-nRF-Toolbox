@@ -207,7 +207,7 @@ private fun DeviceConnectedView(
                             Profile.HRS -> HRSScreen(serviceData as HRSServiceData, onClickEvent)
                             Profile.HTS -> HTSScreen(serviceData as HTSServiceData, onClickEvent)
 
-                            Profile.RSCS -> RSCSScreen(serviceData as RSCSServiceData)
+                            Profile.RSCS -> RSCSScreen(serviceData as RSCSServiceData, onClickEvent)
 
                             Profile.BATTERY -> {
                                 // Battery level will be added at the end.
