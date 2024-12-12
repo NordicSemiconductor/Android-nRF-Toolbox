@@ -87,13 +87,13 @@ internal fun RSCSServiceData.displayStrideLength(): String? {
 
         RSCSSettingsUnit.UNIT_KM -> String.format(
             Locale.US,
-            "%.2f km",
+            "%.4f km",
             data.strideLength!! / 100000.0f
         )
 
         RSCSSettingsUnit.UNIT_MPH -> String.format(
             Locale.US,
-            "%.2f mile",
+            "%.4f mile",
             data.strideLength!! / 160931.23f
         )
 
