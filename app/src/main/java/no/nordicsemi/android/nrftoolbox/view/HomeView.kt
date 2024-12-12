@@ -131,6 +131,13 @@ internal fun HomeView() {
                                             true
                                         ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
 
+                                        Profile.CSC -> FeatureButton(
+                                            iconId = R.drawable.ic_csc,
+                                            profileName = R.string.cgm_module_full,
+                                            deviceName = peripheral.name,
+                                            true
+                                        ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
+
                                         Profile.BATTERY -> {
                                             if (services.size == 1)
                                                 FeatureButton(
