@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.toolbox.libs.core.data.RSCSServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.rscs.RSCSData
+import no.nordicsemi.android.toolbox.libs.core.data.rscs.RSCSSettingsUnit
 
 object RSCSRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<RSCSServiceData>>()
@@ -19,6 +20,10 @@ object RSCSRepository {
 
     fun onRSCSDataChanged(deviceId: String, data: RSCSData) {
         _dataMap[deviceId]?.update { it.copy(data = data) }
+    }
+
+    fun updateUnitSettings(deviceId: String, rscsUnitSettings: RSCSSettingsUnit) {
+        _dataMap[deviceId]?.update { it.copy(unit = rscsUnitSettings) }
     }
 
 }

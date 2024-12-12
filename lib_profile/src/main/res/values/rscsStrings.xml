@@ -12,4 +12,7 @@
     <string name="rscs_speed">%.1f min/km</string>
     <string name="rscs_rpm">%d RPM</string>
     <string name="rscs_steps">Number of Steps %d</string>
+    <string name="stride_length"> Stride Length</string>
+
+    <string name="rscs_settings_unit_title"> Stride length and speed unit</string>
 </resources>

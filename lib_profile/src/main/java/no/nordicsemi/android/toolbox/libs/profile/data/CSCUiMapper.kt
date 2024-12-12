@@ -78,14 +78,14 @@ private fun displayTemperature(unit: SpeedUnit): String {
     }
 }
 
-private fun Float.toYards(): Float {
+internal fun Float.toYards(): Float {
     return this * 1.0936f
 }
 
-private fun Float.toKilometers(): Float {
+internal fun Float.toKilometers(): Float {
     return this / 1000f
 }
 
-private fun Float.toMiles(): Float {
+internal fun Float.toMiles(): Float {
     return this * 0.0006f
 }
