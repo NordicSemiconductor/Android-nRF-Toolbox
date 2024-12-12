@@ -276,16 +276,14 @@ internal class DeviceConnectionViewModel @Inject constructor(
      */
     private inline fun <reified T : ProfileServiceData> updateDeviceData(data: T) {
         val state = _deviceData.value as? DeviceConnectionState.Connected ?: return
-        val updatedServiceData = state.data.serviceData.toMutableList().apply {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                removeIf { it is T }
-            } else {
-                val iterator = iterator()
-                while (iterator.hasNext()) {
-                    if (iterator.next() is T) iterator.remove()
-                }
-            }
-            add(data)
+        val updatedServiceData = state.data.serviceData.toMutableList()
+        val existingIndex = updatedServiceData.indexOfFirst { it is T }
+        if (existingIndex != -1) {
+            // Update the existing entry
+            updatedServiceData[existingIndex] = data
+        } else {
+            // Add a new entry
+            updatedServiceData.add(data)
         }
         _deviceData.update {
             state.copy(data = state.data.copy(serviceData = updatedServiceData))
@@ -344,6 +342,9 @@ internal class DeviceConnectionViewModel @Inject constructor(
                 address,
                 event.device
             )
+
+            is RSCSViewEvent.OnSelectedSpeedUnitSelected ->
+                RSCSRepository.updateUnitSettings(address, event.rscsUnitSettings)
         }
     }
 
