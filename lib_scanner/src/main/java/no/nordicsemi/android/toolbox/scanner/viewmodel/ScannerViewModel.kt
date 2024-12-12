@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.toolbox.lib.utils.logAndReport
 import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestinationId
@@ -96,11 +97,13 @@ internal class ScannerViewModel @Inject constructor(
      */
     private fun onDeviceSelected(peripheral: Peripheral) {
         try {
-            clearStates()
-            navigator.navigateTo(DeviceConnectionDestinationId, peripheral.address)
-            {
-                popUpTo(ScannerDestinationId.toString()) {
-                    inclusive = true
+            viewModelScope.launch {
+                scanner.close()
+                navigator.navigateTo(DeviceConnectionDestinationId, peripheral.address)
+                {
+                    popUpTo(ScannerDestinationId.toString()) {
+                        inclusive = true
+                    }
                 }
             }
 
