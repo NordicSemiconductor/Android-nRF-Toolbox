@@ -59,4 +59,6 @@ object WheelSizes {
         WheelSize(1272, "47-305")
     )
     val default = data.first()
+
+    fun getWheelSizeByName(name: String) = data.find { it.name == name } ?: default
 }
