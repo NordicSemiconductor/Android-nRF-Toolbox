@@ -162,13 +162,6 @@ private fun DeviceConnectedView(
 ) {
     deviceData.peripheral?.let { peripheral ->
         when {
-            deviceData.isMissingServices -> {
-                DeviceDisconnectedView(
-                    reason = DisconnectReason.MISSING_SERVICE,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-
             deviceData.serviceData.isEmpty() -> {
                 ServiceDiscoveryView(
                     modifier = Modifier.padding(16.dp)
@@ -180,6 +173,13 @@ private fun DeviceConnectedView(
                         Text(text = "Cancel")
                     }
                 }
+            }
+
+            deviceData.isMissingServices -> {
+                DeviceDisconnectedView(
+                    reason = DisconnectReason.MISSING_SERVICE,
+                    modifier = Modifier.padding(16.dp)
+                )
             }
 
             else -> {
@@ -213,7 +213,6 @@ private fun DeviceConnectedView(
                                 // Battery level will be added at the end.
                                 // Do nothing here.
                             }
-
 
                             else -> TODO()
                         }
