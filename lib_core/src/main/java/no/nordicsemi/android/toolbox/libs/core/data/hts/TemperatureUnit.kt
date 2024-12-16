@@ -34,5 +34,13 @@ package no.nordicsemi.android.toolbox.libs.core.data.hts
 enum class TemperatureUnit {
     CELSIUS,
     FAHRENHEIT,
-    KELVIN
+    KELVIN;
+
+    override fun toString(): String {
+        return when (this) {
+            CELSIUS -> "Celsius"
+            FAHRENHEIT -> "Fahrenheit"
+            KELVIN -> "Kelvin"
+        }
+    }
 }
