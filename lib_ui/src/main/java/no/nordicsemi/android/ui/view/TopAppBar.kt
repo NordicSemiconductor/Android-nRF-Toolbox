@@ -31,7 +31,6 @@
 
 package no.nordicsemi.android.ui.view
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -222,7 +221,7 @@ private fun LoggerIconAppBarPreview() {
 @Composable
 fun ProfileAppBar(
     deviceName: String?,
-    @StringRes title: Int,
+    title: String,
     navigateUp: () -> Unit,
     disconnect: () -> Unit,
     openLogger: () -> Unit
@@ -230,7 +229,7 @@ fun ProfileAppBar(
     if (deviceName?.isNotBlank() == true) {
         LoggerIconAppBar(deviceName, navigateUp, disconnect, openLogger)
     } else {
-        BackIconAppBar(stringResource(id = title), navigateUp)
+        BackIconAppBar(title, navigateUp)
     }
 }
 
@@ -238,6 +237,6 @@ fun ProfileAppBar(
 @Composable
 private fun ProfileAppBarPreview() {
     NordicTheme {
-        ProfileAppBar("", R.string.app_name, {}, {}) {}
+        ProfileAppBar("", "nRF Toolbox", {}, {}) {}
     }
 }

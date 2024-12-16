@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -33,6 +34,7 @@ import no.nordicsemi.android.toolbox.libs.core.data.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.ProfileServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.RSCSServiceData
 import no.nordicsemi.android.toolbox.libs.profile.view.BPSScreen
+import no.nordicsemi.android.toolbox.libs.profile.view.BatteryLevelView
 import no.nordicsemi.android.toolbox.libs.profile.view.CGMScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.CSCScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.DFSScreen
@@ -48,7 +50,6 @@ import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DisconnectEvent
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.NavigateUp
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OnRetryClicked
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OpenLoggerEvent
-import no.nordicsemi.android.toolbox.libs.profile.view.BatteryLevelView
 import no.nordicsemi.android.ui.view.ProfileAppBar
 import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
 import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
@@ -73,7 +74,7 @@ internal fun DeviceConnectionScreen() {
 
                     else -> deviceAddress
                 },
-                title = R.string.hts_title,
+                title = deviceAddress,
                 navigateUp = { onClickEvent(NavigateUp) },
                 disconnect = { onClickEvent(DisconnectEvent(deviceAddress)) },
                 openLogger = { onClickEvent(OpenLoggerEvent) }
@@ -134,7 +135,7 @@ private fun DeviceDisconnectedView(
                     onClick = { onClickEvent(OnRetryClicked(deviceAddress)) },
                     modifier = Modifier.padding(16.dp)
                 ) {
-                    Text(text = "Reconnect")
+                    Text(text = stringResource(id = R.string.reconnect))
                 }
             }
         }
@@ -148,7 +149,7 @@ private fun DeviceDisconnectedView(
                     onClick = { onClickEvent(OnRetryClicked(deviceAddress)) },
                     modifier = Modifier.padding(16.dp)
                 ) {
-                    Text(text = "Reconnect")
+                    Text(text = stringResource(id = R.string.reconnect))
                 }
             }
         }
@@ -178,7 +179,7 @@ private fun DeviceConnectedView(
                             onClick = { onClickEvent(DisconnectEvent(peripheral.address)) },
                             modifier = Modifier.padding(16.dp)
                         ) {
-                            Text(text = "Cancel")
+                            Text(text = stringResource(id = R.string.cancel))
                         }
                     }
                 } else
