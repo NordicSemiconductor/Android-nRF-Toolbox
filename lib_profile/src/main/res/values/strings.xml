@@ -1,11 +1,3 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hts_title">HTS</string>
-
-    <string name="hts_celsius">%.1f °C</string>
-    <string name="hts_fahrenheit">%.1f °F</string>
-    <string name="hts_kelvin">%.1f °K</string>
-
-    <string name="hts_temperature">Temperature</string>
-    <string name="hts_records_section">Data</string>
 </resources>
