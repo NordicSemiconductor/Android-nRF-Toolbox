@@ -178,8 +178,8 @@ internal class ProfileService : NotificationService() {
             }
             when {
                 discoveredServices.isEmpty() -> {
+                    if (remoteServices.isNotEmpty())
                     _isMissingServices.tryEmit(true)
-                    return@onEach
                 }
 
                 peripheral.isConnected -> {
