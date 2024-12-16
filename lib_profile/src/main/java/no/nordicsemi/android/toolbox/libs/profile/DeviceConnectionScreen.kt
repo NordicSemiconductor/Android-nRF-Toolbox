@@ -162,19 +162,6 @@ private fun DeviceConnectedView(
 ) {
     deviceData.peripheral?.let { peripheral ->
         when {
-            deviceData.serviceData.isEmpty() -> {
-                ServiceDiscoveryView(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Button(
-                        onClick = { onClickEvent(DisconnectEvent(peripheral.address)) },
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        Text(text = "Cancel")
-                    }
-                }
-            }
-
             deviceData.isMissingServices -> {
                 DeviceDisconnectedView(
                     reason = DisconnectReason.MISSING_SERVICE,
@@ -183,6 +170,18 @@ private fun DeviceConnectedView(
             }
 
             else -> {
+                if (deviceData.serviceData.isEmpty()) {
+                    ServiceDiscoveryView(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Button(
+                            onClick = { onClickEvent(DisconnectEvent(peripheral.address)) },
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(text = "Cancel")
+                        }
+                    }
+                } else
                 Column(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier.padding(16.dp)
