@@ -1,7 +1,6 @@
 package no.nordicsemi.android.toolbox.libs.profile.viewmodel
 
 import android.content.Context
-import android.os.Build
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -215,7 +214,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
             Profile.BPS -> updateBPS()
             Profile.CSC -> updateCSC()
             Profile.CGM -> updateCGM()
-            Profile.DFS -> updateDFC()
+            Profile.DFS -> updateDFS()
             Profile.GLS -> updateGLS()
             Profile.HRS -> updateHRS()
             Profile.HTS -> updateHTS()
@@ -225,15 +224,13 @@ internal class DeviceConnectionViewModel @Inject constructor(
         }
     }
 
-    private fun updateDFC() = DFSRepository.getData(address).onEach {
+    private fun updateDFS() = DFSRepository.getData(address).onEach {
         updateDeviceData(it)
     }.launchIn(viewModelScope)
 
-    private fun updateCSC() {
-        CSCRepository.getData(address).onEach {
-            updateDeviceData(it)
-        }.launchIn(viewModelScope)
-    }
+    private fun updateCSC() = CSCRepository.getData(address).onEach {
+        updateDeviceData(it)
+    }.launchIn(viewModelScope)
 
     private fun updateRSCS() = RSCSRepository.getData(address).onEach {
         updateDeviceData(it)
@@ -276,14 +273,11 @@ internal class DeviceConnectionViewModel @Inject constructor(
      */
     private inline fun <reified T : ProfileServiceData> updateDeviceData(data: T) {
         val state = _deviceData.value as? DeviceConnectionState.Connected ?: return
-        val updatedServiceData = state.data.serviceData.toMutableList()
-        val existingIndex = updatedServiceData.indexOfFirst { it is T }
-        if (existingIndex != -1) {
-            // Update the existing entry
-            updatedServiceData[existingIndex] = data
-        } else {
-            // Add a new entry
-            updatedServiceData.add(data)
+        val updatedServiceData = state.data.serviceData.toMutableList().apply {
+            val existingIndex = this.indexOfFirst { it is T }
+            if (existingIndex != -1) {
+                this[existingIndex] = data  // Update the existing entry
+            } else this.add(data)// Add a new entry
         }
         _deviceData.update {
             state.copy(data = state.data.copy(serviceData = updatedServiceData))
