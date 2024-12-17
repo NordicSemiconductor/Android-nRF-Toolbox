@@ -109,16 +109,12 @@ private fun createLineChartView(
 ): LineChart {
     return LineChart(context).apply {
         description.isEnabled = false
-
         legend.isEnabled = false
-
-        setTouchEnabled(false)
-
+        setTouchEnabled(true) // Enable touch gestures
         setDrawGridBackground(false)
-
         isDragEnabled = true
-        setScaleEnabled(false)
-        setPinchZoom(false)
+        setScaleEnabled(true) // Enable scaling
+        setPinchZoom(true) // Enable pinch zoom
 
         if (isDarkTheme) {
             setBackgroundColor(Color.TRANSPARENT)
@@ -135,8 +131,7 @@ private fun createLineChartView(
         }
 
         xAxis.apply {
-            xAxis.enableGridDashedLine(10f, 10f, 0f)
-
+            enableGridDashedLine(10f, 10f, 0f)
             axisMinimum = -X_AXIS_ELEMENTS_COUNT
             axisMaximum = 0f
             setAvoidFirstLastClipping(true)
