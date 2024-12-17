@@ -42,6 +42,7 @@ import no.nordicsemi.android.toolbox.libs.profile.view.GLSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HRSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HTSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.RSCSScreen
+import no.nordicsemi.android.toolbox.libs.profile.view.internal.ProfileAppBar
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionState
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewModel
@@ -50,7 +51,6 @@ import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DisconnectEvent
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.NavigateUp
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OnRetryClicked
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.OpenLoggerEvent
-import no.nordicsemi.android.ui.view.ProfileAppBar
 import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
 import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
@@ -75,6 +75,7 @@ internal fun DeviceConnectionScreen() {
                     else -> deviceAddress
                 },
                 title = deviceAddress,
+                connectionState = deviceDataState,
                 navigateUp = { onClickEvent(NavigateUp) },
                 disconnect = { onClickEvent(DisconnectEvent(deviceAddress)) },
                 openLogger = { onClickEvent(OpenLoggerEvent) }
