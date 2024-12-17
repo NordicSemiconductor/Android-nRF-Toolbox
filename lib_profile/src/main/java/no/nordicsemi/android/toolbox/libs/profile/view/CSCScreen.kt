@@ -7,10 +7,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Settings
@@ -23,6 +23,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -48,7 +49,10 @@ import no.nordicsemi.android.toolbox.libs.profile.data.displaySpeed
 import no.nordicsemi.android.toolbox.libs.profile.data.displayTotalDistance
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.CSCViewEvent
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
+import no.nordicsemi.android.ui.view.KeyValueColumn
+import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
+import no.nordicsemi.android.ui.view.SectionRow
 
 @Composable
 internal fun CSCScreen(
@@ -65,7 +69,7 @@ internal fun CSCScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Cycling" + "\uD83D\uDEB4",
+                    text = "\uD83D\uDEB4" + " Cycling",
                     textAlign = TextAlign.Center,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
@@ -129,22 +133,15 @@ private fun WheelSizeDropDown(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Column {
-                    Text(
-                        text = stringResource(id = R.string.csc_field_wheel_size),
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                    Text(
-                        text = state.data.wheelSize.name,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-
+                Text(
+                    text = stringResource(id = R.string.csc_field_wheel_size),
+                )
                 Icon(Icons.Default.ArrowDropDown, contentDescription = "")
             }
         }
         if (isWheelSizeClicked)
             WheelSizeDialog(
+                state = state,
                 wheelSizeEntries = wheelEntries,
                 onDismiss = onDismiss,
             ) {
@@ -156,19 +153,29 @@ private fun WheelSizeDropDown(
 
 @Composable
 private fun WheelSizeDialog(
+    state: CSCServiceData,
     wheelSizeEntries: List<String>,
     onDismiss: () -> Unit,
     onWheelSizeSelected: (String) -> Unit,
 ) {
+    val listState = rememberLazyListState()
+    val selectedIndex = wheelSizeEntries.indexOf(state.data.wheelSize.name)
+
+    LaunchedEffect(selectedIndex) {
+        if (selectedIndex >= 0) {
+            listState.scrollToItem(selectedIndex)
+        }
+    }
+
     AlertDialog(
         onDismissRequest = { onDismiss() },
         title = { Text(text = stringResource(id = R.string.csc_dialog_title)) },
         text = {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
+            LazyColumn(
+                state = listState
             ) {
-                wheelSizeEntries.forEach { entry ->
+                items(wheelSizeEntries.size) { index ->
+                    val entry = wheelSizeEntries[index]
                     Row(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
@@ -181,7 +188,10 @@ private fun WheelSizeDialog(
                         Text(
                             text = entry,
                             modifier = Modifier.fillMaxWidth(),
-                            style = MaterialTheme.typography.titleLarge
+                            style = MaterialTheme.typography.titleLarge,
+                            color = if (state.data.wheelSize.name == entry)
+                                MaterialTheme.colorScheme.primary else
+                                MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
