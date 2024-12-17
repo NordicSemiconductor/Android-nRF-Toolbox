@@ -217,26 +217,3 @@ private fun LoggerIconAppBarPreview() {
         LoggerIconAppBar(TOP_APP_BAR_TITLE, {}, {}) {}
     }
 }
-
-@Composable
-fun ProfileAppBar(
-    deviceName: String?,
-    title: String,
-    navigateUp: () -> Unit,
-    disconnect: () -> Unit,
-    openLogger: () -> Unit
-) {
-    if (deviceName?.isNotBlank() == true) {
-        LoggerIconAppBar(deviceName, navigateUp, disconnect, openLogger)
-    } else {
-        BackIconAppBar(title, navigateUp)
-    }
-}
-
-@Preview
-@Composable
-private fun ProfileAppBarPreview() {
-    NordicTheme {
-        ProfileAppBar("", "nRF Toolbox", {}, {}) {}
-    }
-}
