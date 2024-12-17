@@ -252,11 +252,7 @@ private fun SensorsReadingView(state: CSCServiceData, speedUnit: SpeedUnit) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        SectionRow {
             KeyValueColumn(
                 stringResource(id = R.string.csc_field_speed),
                 csc.displaySpeed(speedUnit)
@@ -266,11 +262,7 @@ private fun SensorsReadingView(state: CSCServiceData, speedUnit: SpeedUnit) {
                 csc.displayCadence()
             )
         }
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        SectionRow {
             KeyValueColumn(
                 stringResource(id = R.string.csc_field_distance),
                 csc.displayDistance(speedUnit)

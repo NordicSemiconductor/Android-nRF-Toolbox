@@ -3,7 +3,6 @@ package no.nordicsemi.android.toolbox.libs.profile.view
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,11 +19,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.AbsoluteAlignment
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,7 +37,10 @@ import no.nordicsemi.android.toolbox.libs.profile.data.displaySpeed
 import no.nordicsemi.android.toolbox.libs.profile.data.displayStrideLength
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.RSCSViewEvent
+import no.nordicsemi.android.ui.view.KeyValueColumn
+import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
+import no.nordicsemi.android.ui.view.SectionRow
 
 @Composable
 internal fun RSCSScreen(
@@ -64,10 +63,7 @@ private fun SensorsReadingView(
     var isDropdownExpanded by rememberSaveable { mutableStateOf(false) }
 
     ScreenSection {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
+        SectionRow {
             Text(
                 text = "Running/Walking",
                 textAlign = TextAlign.Center,
@@ -86,11 +82,7 @@ private fun SensorsReadingView(
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            SectionRow {
                 KeyValueColumn(stringResource(id = R.string.rscs_cadence), state.displayPace())
                 KeyValueColumnReverse(
                     value = stringResource(id = R.string.rscs_activity),
@@ -99,11 +91,7 @@ private fun SensorsReadingView(
                         "\uD83D\uDEB6 ${state.displayActivity()}"
                 )
             }
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            SectionRow {
                 KeyValueColumn("Speed", "${state.displaySpeed()}")
                 state.displayNumberOfSteps()?.let {
                     KeyValueColumnReverse(
@@ -122,50 +110,8 @@ private fun SensorsReadingView(
 
 @Preview(showBackground = true)
 @Composable
-internal fun KeyValueColumn(
-    value: String = "String",
-    key: String = "Key",
-    icon: ImageVector? = null
-) {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = AbsoluteAlignment.Left
-    ) {
-        Text(
-            color = MaterialTheme.colorScheme.onBackground,
-            text = value,
-            style = MaterialTheme.typography.labelMedium
-        )
-        Text(
-            text = key,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
-
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-internal fun KeyValueColumnReverse(
-    value: String = "String Reverse",
-    key: String = "Key Reverse",
-    icon: ImageVector? = null
-) {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = AbsoluteAlignment.Right
-    ) {
-        Text(
-            color = MaterialTheme.colorScheme.onBackground,
-            text = value,
-            style = MaterialTheme.typography.labelMedium
-        )
-        Text(
-            text = key,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
-
-    }
+private fun RSCSScreenPreview() {
+    RSCSScreen(RSCSServiceData()) {}
 }
 
 @Composable
