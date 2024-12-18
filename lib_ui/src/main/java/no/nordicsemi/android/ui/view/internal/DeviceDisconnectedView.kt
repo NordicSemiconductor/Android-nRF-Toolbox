@@ -54,14 +54,19 @@ fun DeviceDisconnectedView(
     content: @Composable ColumnScope.(PaddingValues) -> Unit = {},
 ) {
     val disconnectedReason = when (reason) {
-        DisconnectReason.USER -> ">Device disconnected successfully."
+        DisconnectReason.USER -> "Device disconnected successfully."
         DisconnectReason.UNKNOWN -> "Device disconnected with unknown reason."
-        DisconnectReason.LINK_LOSS -> ">Device signal has been lost."
-        DisconnectReason.MISSING_SERVICE -> "Device disconnected, because required services are missing."
+        DisconnectReason.LINK_LOSS -> "Device signal has been lost."
+        DisconnectReason.MISSING_SERVICE -> "Required services are missing."
         DisconnectReason.BLUETOOTH_OFF -> "Bluetooth adapter is turned off."
     }
 
-    DeviceDisconnectedView(disconnectedReason = disconnectedReason, modifier, content)
+    DeviceDisconnectedView(
+        disconnectedReason = disconnectedReason,
+        modifier = modifier,
+        content = content,
+        isMissingService = reason == DisconnectReason.MISSING_SERVICE
+    )
 }
 
 @Composable
@@ -69,6 +74,7 @@ private fun DeviceDisconnectedView(
     disconnectedReason: String,
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.(PaddingValues) -> Unit = {},
+    isMissingService: Boolean = false,
 ) {
     Column(
         modifier = Modifier
@@ -90,7 +96,7 @@ private fun DeviceDisconnectedView(
                 CircularIcon(imageVector = Icons.Default.HighlightOff)
 
                 Text(
-                    text = "Device disconnected",
+                    text = if (isMissingService) "Missing services" else "Device disconnected",
                     style = MaterialTheme.typography.titleMedium
                 )
 
