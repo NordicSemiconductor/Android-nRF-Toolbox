@@ -72,6 +72,8 @@ internal fun DeviceConnectionScreen() {
                     is DeviceConnectionState.Connected -> state.data.peripheral?.name
                         ?: deviceAddress
 
+                    is DeviceConnectionState.Disconnected -> state.device?.name ?: deviceAddress
+
                     else -> deviceAddress
                 },
                 title = deviceAddress,

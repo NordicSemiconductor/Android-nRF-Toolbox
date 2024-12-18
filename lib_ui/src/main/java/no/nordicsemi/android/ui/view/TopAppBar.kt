@@ -90,7 +90,11 @@ private fun CloseIconAppBarPreview() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoggerBackIconAppBar(text: String, onClick: () -> Unit) {
+fun LoggerBackIconAppBar(
+    text: String,
+    onBackClick: () -> Unit,
+    onLoggerClick: () -> Unit
+) {
     TopAppBar(
         title = { Text(text, maxLines = 2) },
         colors = TopAppBarDefaults.topAppBarColors(
@@ -101,7 +105,7 @@ fun LoggerBackIconAppBar(text: String, onClick: () -> Unit) {
             navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
         ),
         navigationIcon = {
-            IconButton(onClick = { onClick() }) {
+            IconButton(onClick = { onBackClick() }) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
                     tint = MaterialTheme.colorScheme.onPrimary,
@@ -110,7 +114,7 @@ fun LoggerBackIconAppBar(text: String, onClick: () -> Unit) {
             }
         },
         actions = {
-            IconButton(onClick = { onClick() }) {
+            IconButton(onClick = { onLoggerClick() }) {
                 Icon(
                     painterResource(id = R.drawable.ic_logger),
                     contentDescription = stringResource(id = R.string.open_logger),
@@ -126,7 +130,7 @@ fun LoggerBackIconAppBar(text: String, onClick: () -> Unit) {
 @Composable
 private fun LoggerBackIconAppBarPreview() {
     NordicTheme {
-        LoggerBackIconAppBar(TOP_APP_BAR_TITLE) {}
+        LoggerBackIconAppBar(TOP_APP_BAR_TITLE, {}) {}
     }
 }
 
