@@ -63,7 +63,9 @@ internal sealed class DeviceConnectionState {
     data object Idle : DeviceConnectionState()
     data object Connecting : DeviceConnectionState()
     data class Connected(val data: DeviceData) : DeviceConnectionState()
-    data class Disconnected(val reason: DeviceDisconnectionReason?) : DeviceConnectionState()
+    data class Disconnected(
+        val device: Peripheral?=null,
+        val reason: DeviceDisconnectionReason?) : DeviceConnectionState()
 }
 
 @HiltViewModel
@@ -147,9 +149,9 @@ internal class DeviceConnectionViewModel @Inject constructor(
         job = api.getConnectionState(deviceAddress)
             ?.drop(if (isAlreadyConnected) 0 else 1)
             ?.onEach { connectionState ->
+                if (peripheral == null) peripheral = api.getPeripheralById(address)
                 when (connectionState) {
                     ConnectionState.Connected -> {
-                        if (peripheral == null) peripheral = api.getPeripheralById(address)
                         _deviceData.update {
                             DeviceConnectionState.Connected(
                                 DeviceData(
@@ -161,7 +163,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
 
                     is ConnectionState.Disconnected -> {
                         _deviceData.update {
-                            DeviceConnectionState.Disconnected(StateReason(connectionState.reason))
+                            DeviceConnectionState.Disconnected(peripheral, StateReason(connectionState.reason))
                         }
                     }
 
@@ -170,11 +172,11 @@ internal class DeviceConnectionViewModel @Inject constructor(
                         api.disconnectionReason.onEach { reason ->
                             if (reason != null) {
                                 _deviceData.update {
-                                    DeviceConnectionState.Disconnected(reason)
+                                    DeviceConnectionState.Disconnected(peripheral, reason)
                                 }
                             } else {
                                 _deviceData.update {
-                                    DeviceConnectionState.Disconnected(CustomReason(DisconnectReason.UNKNOWN))
+                                    DeviceConnectionState.Disconnected(peripheral, CustomReason(DisconnectReason.UNKNOWN))
                                 }
                             }
                         }.launchIn(viewModelScope)

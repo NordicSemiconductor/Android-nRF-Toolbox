@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementContext
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
-import no.nordicsemi.android.ui.view.LoggerBackIconAppBar
+import no.nordicsemi.android.ui.view.BackIconAppBar
 
 @Composable
 internal fun GLSDetailsScreen(
@@ -13,9 +13,7 @@ internal fun GLSDetailsScreen(
     onBackClick: () -> Unit
 ) {
     Column {
-        LoggerBackIconAppBar(deviceId) {
-            onBackClick()
-        }
+        BackIconAppBar(deviceId, onBackClick)
 
         GLSDetailsContentView(
             recordDetails.first,

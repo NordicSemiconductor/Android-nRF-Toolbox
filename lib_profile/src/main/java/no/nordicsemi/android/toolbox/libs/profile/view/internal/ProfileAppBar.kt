@@ -20,7 +20,7 @@ internal fun ProfileAppBar(
     if (deviceName?.isNotBlank() == true) {
         if (connectionState !is DeviceConnectionState.Disconnected)
             LoggerIconAppBar(deviceName, navigateUp, disconnect, openLogger)
-        else LoggerBackIconAppBar(deviceName) {navigateUp() }
+        else LoggerBackIconAppBar(deviceName, navigateUp) { openLogger() }
     } else {
         BackIconAppBar(title, navigateUp)
     }
