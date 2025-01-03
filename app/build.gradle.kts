@@ -49,6 +49,7 @@ dependencies {
     implementation(project(":lib_scanner"))
     implementation(project(":lib_profile"))
     implementation(project(":lib_core"))
+    implementation(project(":lib_ui"))
 
     implementation(libs.nordic.navigation)
     implementation(libs.nordic.theme)
