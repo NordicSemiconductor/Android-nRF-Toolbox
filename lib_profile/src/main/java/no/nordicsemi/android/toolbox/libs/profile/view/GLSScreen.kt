@@ -9,15 +9,26 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +51,92 @@ import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
+fun WorkingModeDropDown(
+    isWorkingModeSelected: Boolean,
+    onExpand: () -> Unit,
+    onDismiss: () -> Unit,
+    onClickEvent: (DeviceConnectionViewEvent) -> Unit
+) {
+    Column {
+        OutlinedButton(onClick = { onExpand() }) {
+            Row(
+                modifier = Modifier.fillMaxWidth(0.5f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Working Mode",
+                )
+                Icon(Icons.Default.ArrowDropDown, contentDescription = "")
+            }
+        }
+        if (isWorkingModeSelected)
+            WorkingModeDialog(
+                onDismiss = onDismiss,
+            ) {
+                onClickEvent(it)
+                onDismiss()
+            }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun WorkingModeDropDownPreview() {
+    WorkingModeDropDown(false, {}, {}, {})
+}
+
+@Composable
+private fun WorkingModeDialog(
+    onDismiss: () -> Unit,
+    onWorkingModeSelected: (DeviceConnectionViewEvent) -> Unit,
+) {
+    val listState = rememberLazyListState()
+    val workingModeEntries = WorkingMode.entries.map { it }
+
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        title = { Text(text = stringResource(id = R.string.csc_dialog_title)) },
+        text = {
+
+            LazyColumn(
+                state = listState
+            ) {
+                items(workingModeEntries.size) { index ->
+                    val entry = workingModeEntries[index]
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable {
+                                onWorkingModeSelected(OnWorkingModeSelected(Profile.GLS, entry))
+                            }
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = entry.toDisplayString(),
+                            modifier = Modifier.fillMaxWidth(),
+                            style = MaterialTheme.typography.titleLarge,
+//                            color = if (state.data.wheelSize.name == entry)
+//                                MaterialTheme.colorScheme.primary else
+//                                MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onDismiss() }) {
+                Text(
+                    text = stringResource(id = no.nordicsemi.android.ui.R.string.cancel),
+                )
+            }
+        }
+    )
+}
+
+
+@Composable
 internal fun GLSScreen(
     device: String,
     glsServiceData: GLSServiceData,
@@ -54,6 +151,41 @@ internal fun GLSScreen(
 
         RecordsView(device, glsServiceData, onClickEvent)
 
+    }
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        ScreenSection {
+            SectionTitle(
+                resId = R.drawable.ic_gls,
+                title = "Glucose Level",
+                menu = {
+                    var isWorkingModeClicked by rememberSaveable { mutableStateOf(false) }
+                    WorkingModeDropDown(
+                        isWorkingModeSelected = isWorkingModeClicked,
+                        onExpand = { isWorkingModeClicked = true },
+                        onDismiss = { isWorkingModeClicked = false },
+                        onClickEvent = { onClickEvent(it) }
+                    )
+                }
+            )
+
+//            SectionRow {
+//                KeyValueColumn(
+//                    stringResource(id = R.string.hts_temperature),
+//                    displayTemperature(
+//                        htsServiceData.data.temperature,
+//                        htsServiceData.temperatureUnit
+//                    )
+//                )
+//                KeyValueColumnReverse(
+//                    stringResource(id = R.string.hts_temperature_unit_title),
+//                    "${htsServiceData.temperatureUnit}"
+//                )
+//            }
+        }
     }
 }
 
@@ -77,6 +209,12 @@ private fun SettingsView(state: GLSServiceData, onEvent: (DeviceConnectionViewEv
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SettingsViewPreview() {
+    SettingsView(GLSServiceData()) {}
 }
 
 @Composable
@@ -182,13 +320,13 @@ private fun RecordsViewWithoutData() {
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun RecordsViewWithoutDataPreview() {
     RecordsViewWithoutData()
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun RecordsViewWithDataPreview() {
     RecordsViewWithData(
