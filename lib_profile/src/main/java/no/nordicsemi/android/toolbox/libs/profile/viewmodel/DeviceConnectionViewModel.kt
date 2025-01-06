@@ -38,13 +38,9 @@ import no.nordicsemi.android.toolbox.libs.core.data.ProfileServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.common.WorkingMode
 import no.nordicsemi.android.toolbox.libs.core.data.csc.SpeedUnit
 import no.nordicsemi.android.toolbox.libs.core.data.csc.WheelSize
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementContext
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
 import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestinationId
 import no.nordicsemi.android.toolbox.libs.profile.repository.DeviceRepository
-import no.nordicsemi.android.toolbox.libs.profile.view.gls.GLSDetailsDestinationArgs
-import no.nordicsemi.android.toolbox.libs.profile.view.gls.GLSDetailsDestinationId
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
@@ -64,8 +60,9 @@ internal sealed class DeviceConnectionState {
     data object Connecting : DeviceConnectionState()
     data class Connected(val data: DeviceData) : DeviceConnectionState()
     data class Disconnected(
-        val device: Peripheral?=null,
-        val reason: DeviceDisconnectionReason?) : DeviceConnectionState()
+        val device: Peripheral? = null,
+        val reason: DeviceDisconnectionReason?
+    ) : DeviceConnectionState()
 }
 
 @HiltViewModel
@@ -163,7 +160,10 @@ internal class DeviceConnectionViewModel @Inject constructor(
 
                     is ConnectionState.Disconnected -> {
                         _deviceData.update {
-                            DeviceConnectionState.Disconnected(peripheral, StateReason(connectionState.reason))
+                            DeviceConnectionState.Disconnected(
+                                peripheral,
+                                StateReason(connectionState.reason)
+                            )
                         }
                     }
 
@@ -176,7 +176,10 @@ internal class DeviceConnectionViewModel @Inject constructor(
                                 }
                             } else {
                                 _deviceData.update {
-                                    DeviceConnectionState.Disconnected(peripheral, CustomReason(DisconnectReason.UNKNOWN))
+                                    DeviceConnectionState.Disconnected(
+                                        peripheral,
+                                        CustomReason(DisconnectReason.UNKNOWN)
+                                    )
                                 }
                             }
                         }.launchIn(viewModelScope)
@@ -299,12 +302,6 @@ internal class DeviceConnectionViewModel @Inject constructor(
             is CSCViewEvent.OnSelectedSpeedUnitSelected -> setSpeedUnit(event.selectedSpeedUnit)
             is CSCViewEvent.OnWheelSizeSelected -> setWheelSize(event.wheelSize)
 
-            is GLSViewEvent.OnGLSRecordClick -> navigateToGLSDetailsPage(
-                event.device,
-                event.record,
-                event.gleContext
-            )
-
             is GLSViewEvent.OnWorkingModeSelected -> onWorkingModeSelected(
                 event.profile,
                 event.workingMode
@@ -350,18 +347,6 @@ internal class DeviceConnectionViewModel @Inject constructor(
 
     private fun setWheelSize(wheelSize: WheelSize) {
         CSCRepository.setWheelSize(address, wheelSize)
-    }
-
-    private fun navigateToGLSDetailsPage(
-        device: String,
-        record: GLSRecord, gleContext: GLSMeasurementContext?
-    ) {
-        navigator.navigateTo(
-            GLSDetailsDestinationId, GLSDetailsDestinationArgs(
-                deviceId = device,
-                data = record to gleContext
-            )
-        )
     }
 
     private fun onWorkingModeSelected(profile: Profile, workingMode: WorkingMode) =

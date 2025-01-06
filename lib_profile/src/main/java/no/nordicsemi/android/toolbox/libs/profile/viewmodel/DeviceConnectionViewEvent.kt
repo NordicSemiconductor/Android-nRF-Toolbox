@@ -8,8 +8,6 @@ import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.PeripheralBl
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.DistanceMode
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.MeasurementSection
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.Range
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementContext
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
 import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.core.data.rscs.RSCSSettingsUnit
 
@@ -35,14 +33,11 @@ internal data object OpenLoggerEvent : DeviceConnectionViewEvent
 
 // GLS/CGM Profile Events
 internal sealed interface GLSViewEvent : DeviceConnectionViewEvent {
-    data class OnWorkingModeSelected(val profile: Profile, val workingMode: WorkingMode) :
-        GLSViewEvent
-
-    data class OnGLSRecordClick(
-        val device: String,
-        val record: GLSRecord,
-        val gleContext: GLSMeasurementContext?
+    data class OnWorkingModeSelected(
+        val profile: Profile,
+        val workingMode: WorkingMode
     ) : GLSViewEvent
+
 }
 
 // CSC Profile Events

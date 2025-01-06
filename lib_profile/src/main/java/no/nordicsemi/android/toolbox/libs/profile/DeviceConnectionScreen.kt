@@ -203,7 +203,6 @@ private fun DeviceConnectedView(
                             ) { onClickEvent(it) }
 
                             Profile.GLS -> GLSScreen(
-                                device = peripheral.name ?: peripheral.address,
                                 glsServiceData = serviceData as GLSServiceData,
                             ) { onClickEvent(it) }
 
