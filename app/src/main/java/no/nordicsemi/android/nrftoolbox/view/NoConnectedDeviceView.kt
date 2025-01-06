@@ -19,7 +19,7 @@ internal fun NoConnectedDeviceView() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        painterResource = painterResource(id = R.drawable.ic_launcher_foreground),
+        painterResource = painterResource(id = R.drawable.ic_notification_icon),
         title = "CAN'T SEE CONNECTED DEVICES?",
         hint = "1. Make sure the device is turned on and is connected to a power source.\n\n" +
                 "2. Make sure the device is in the range of your phone.\n\n".parseBold(),
