@@ -38,3 +38,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 fun String.toAnnotatedString() = buildAnnotatedString {
     append(this@toAnnotatedString)
 }
+
+@Composable
+fun Boolean.toBooleanText(): String =  if (this) "YES" else "NO"

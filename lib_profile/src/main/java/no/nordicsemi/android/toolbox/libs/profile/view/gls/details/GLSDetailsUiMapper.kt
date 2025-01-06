@@ -24,14 +24,6 @@ internal fun SampleLocation.toDisplayString(): String {
 }
 
 @Composable
-internal fun ConcentrationUnit.toDisplayString(): String {
-    return when (this) {
-        ConcentrationUnit.UNIT_KGPL -> stringResource(id = R.string.gls_sample_location_kg_l)
-        ConcentrationUnit.UNIT_MOLPL -> stringResource(id = R.string.gls_sample_location_mol_l)
-    }
-}
-
-@Composable
 internal fun MedicationUnit.toDisplayString(): String {
     return when (this) {
         MedicationUnit.UNIT_MG -> stringResource(id = R.string.gls_sample_location_kg)
