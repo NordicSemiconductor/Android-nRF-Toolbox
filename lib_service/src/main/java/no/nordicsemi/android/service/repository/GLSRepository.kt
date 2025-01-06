@@ -47,6 +47,7 @@ object GLSRepository {
     suspend fun requestRecord(deviceId: String, workingMode: WorkingMode) {
         clearState(deviceId)
         updateNewRequestStatus(deviceId, RequestStatus.PENDING)
+        _dataMap[deviceId]?.update { it.copy(workingMode = workingMode) }
         GLSManager.requestRecord(deviceId, workingMode)
     }
 
