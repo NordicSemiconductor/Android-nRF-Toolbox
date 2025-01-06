@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.Carbohydrate
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.ConcentrationUnit
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.Health
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.Meal
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.Medication
