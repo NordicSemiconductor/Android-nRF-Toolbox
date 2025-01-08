@@ -38,38 +38,119 @@ internal fun CGMScreen(
     serviceData: CGMServiceData,
     onClickEvent: (DeviceConnectionViewEvent) -> Unit
 ) {
+    var isWorkingModeClicked by rememberSaveable { mutableStateOf(false) }
+
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        SettingsView(serviceData, onClickEvent)
-
+        ScreenSection {
+            SectionTitle(
+                resId = R.drawable.ic_cgm,
+                title = "Continuous glucose monitoring",
+                menu = {
+                    WorkingModeDropDown(
+                        cgmState = serviceData,
+                        isWorkingModeSelected = isWorkingModeClicked,
+                        onExpand = { isWorkingModeClicked = true },
+                        onDismiss = { isWorkingModeClicked = false },
+                        onClickEvent = { onClickEvent(it) }
+                    )
+                }
+            )
+        }
         RecordsView(serviceData)
     }
-
 }
 
 @Composable
-private fun SettingsView(state: CGMServiceData, onEvent: (DeviceConnectionViewEvent) -> Unit) {
-    ScreenSection {
-        SectionTitle(icon = Icons.Default.Settings, title = "Request items")
+private fun WorkingModeDropDown(
+    cgmState: CGMServiceData,
+    isWorkingModeSelected: Boolean,
+    onExpand: () -> Unit,
+    onDismiss: () -> Unit,
+    onClickEvent: (DeviceConnectionViewEvent) -> Unit
+) {
+    if (cgmState.requestStatus == RequestStatus.PENDING) {
+        CircularProgressIndicator()
+    } else {
+        Column {
+            OutlinedButton(onClick = { onExpand() }) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = "Working mode")
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = "")
+                }
+            }
+            if (isWorkingModeSelected)
+                WorkingModeDialog(
+                    cgmState = cgmState,
+                    onDismiss = onDismiss,
+                ) {
+                    onClickEvent(it)
+                    onDismiss()
+                }
+        }
+    }
+}
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            if (state.requestStatus == RequestStatus.PENDING) {
-                CircularProgressIndicator()
-            } else {
-                WorkingMode.entries.forEach {
-                    Button(onClick = { onEvent(OnWorkingModeSelected(Profile.CGM, it)) }) {
-                        Text(it.toDisplayString())
+@Preview(showBackground = true)
+@Composable
+private fun WorkingModeDropDownPreview() {
+    WorkingModeDropDown(CGMServiceData(), false, {}, {}, {})
+}
+
+@Composable
+private fun WorkingModeDialog(
+    cgmState: CGMServiceData,
+    onDismiss: () -> Unit,
+    onWorkingModeSelected: (DeviceConnectionViewEvent) -> Unit,
+) {
+    val listState = rememberLazyListState()
+    val workingModeEntries = WorkingMode.entries.map { it }
+    val selectedIndex = workingModeEntries.indexOf(cgmState.workingMode)
+
+    LaunchedEffect(selectedIndex) {
+        if (selectedIndex >= 0) {
+            listState.scrollToItem(selectedIndex)
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        title = { Text(text = "Select working mode") },
+        text = {
+            LazyColumn(
+                state = listState
+            ) {
+                items(workingModeEntries.size) { index ->
+                    val entry = workingModeEntries[index]
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable {
+                                onWorkingModeSelected(OnWorkingModeSelected(Profile.CGM, entry))
+                            }
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = entry.toDisplayString(),
+                            modifier = Modifier.fillMaxWidth(),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = if ((cgmState.workingMode == entry) && cgmState.records.isNotEmpty()) {
+                                MaterialTheme.colorScheme.primary
+                            } else
+                                MaterialTheme.colorScheme.onBackground
+                        )
                     }
                 }
             }
-        }
-    }
+        },
+        confirmButton = {}
+    )
 }
 
 @Composable

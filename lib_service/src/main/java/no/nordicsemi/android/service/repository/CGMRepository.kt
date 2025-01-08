@@ -43,6 +43,7 @@ object CGMRepository {
     suspend fun requestRecord(deviceId: String, workingMode: WorkingMode) {
         clearState(deviceId)
         updateNewRequestStatus(deviceId, RequestStatus.PENDING)
+        _dataMap[deviceId]?.update { it.copy(workingMode = workingMode) }
         CGMManager.requestRecord(deviceId, workingMode)
     }
 
