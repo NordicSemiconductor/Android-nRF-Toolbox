@@ -106,7 +106,7 @@ private fun GLSScreenPreview() {
 }
 
 @Composable
-internal fun WorkingModeDropDown(
+private fun WorkingModeDropDown(
     glsState: GLSServiceData,
     isWorkingModeSelected: Boolean,
     onExpand: () -> Unit,
@@ -122,7 +122,7 @@ internal fun WorkingModeDropDown(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "Working mode")
+                    Text(text = "Request")
                     Icon(Icons.Default.ArrowDropDown, contentDescription = "")
                 }
             }
@@ -220,8 +220,6 @@ private fun RecordsViewWithData(
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         SectionTitle(resId = R.drawable.ic_records, title = "Records")
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         state.records.keys.forEachIndexed { i, it ->
             RecordItem(it, state.records[it])
