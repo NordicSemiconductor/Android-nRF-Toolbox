@@ -182,8 +182,9 @@ private fun WorkingModeDialog(
                             text = entry.toDisplayString(),
                             modifier = Modifier.fillMaxWidth(),
                             style = MaterialTheme.typography.titleLarge,
-                            color = if (glsState.workingMode == entry)
-                                MaterialTheme.colorScheme.primary else
+                            color = if ((glsState.workingMode == entry) && glsState.records.isNotEmpty()) {
+                                MaterialTheme.colorScheme.primary
+                            } else
                                 MaterialTheme.colorScheme.onBackground
                         )
                     }
