@@ -97,6 +97,14 @@ internal fun GLSScreen(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun GLSScreenPreview() {
+    GLSScreen(
+        glsServiceData = GLSServiceData()
+    ) {}
+}
+
 @Composable
 internal fun WorkingModeDropDown(
     glsState: GLSServiceData,
@@ -192,15 +200,6 @@ private fun WorkingModeDialogPreview() {
     WorkingModeDialog(GLSServiceData(workingMode = WorkingMode.ALL), {}) {}
 }
 
-
-@Preview(showBackground = true)
-@Composable
-private fun GLSScreenPreview() {
-    GLSScreen(
-        glsServiceData = GLSServiceData()
-    ) {}
-}
-
 @Composable
 private fun RecordsView(
     state: GLSServiceData
@@ -277,13 +276,13 @@ private fun RecordItem(
     }
 
     if (showBottomSheet) {
-        GlsDetailsBottomSheet(record, gleContext) { showBottomSheet = false }
+        GLSDetailsBottomSheet(record, gleContext) { showBottomSheet = false }
     }
 }
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun GlsDetailsBottomSheet(
+private fun GLSDetailsBottomSheet(
     record: GLSRecord,
     context: GLSMeasurementContext?,
     onDismiss: () -> Unit
