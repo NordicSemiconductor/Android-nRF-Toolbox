@@ -9,17 +9,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-@Preview(showBackground = true)
 @Composable
 fun KeyValueColumn(
-    value: String = "String",
-    key: String = "Key",
-    icon: ImageVector? = null,
+    value: String,
+    key: String,
 ) {
     Box(
         modifier = Modifier
@@ -46,12 +42,10 @@ fun KeyValueColumn(
     }
 }
 
-@Preview(showBackground = true)
 @Composable
 fun KeyValueColumnReverse(
-    value: String = "String Reverse",
-    key: String = "Key Reverse",
-    icon: ImageVector? = null,
+    value: String,
+    key: String,
 ) {
     Box(
         modifier = Modifier
