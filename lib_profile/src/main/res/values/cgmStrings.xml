@@ -2,6 +2,6 @@
 <resources>
     <string name="cgms_no_records_info">There is no data available. Every record is created once a minute or longer. Please wait.</string>
 
-    <string name="cgms_sequence_number">Sequence number: %d</string>
+    <string name="cgms_sequence_number">Sequence number</string>
     <string name="cgms_value_unit">%.2f mg/dL</string>
 </resources>
