@@ -4,10 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,6 +35,8 @@ import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.toolbox.libs.core.data.CGMServiceData
+import no.nordicsemi.android.toolbox.libs.core.data.cgms.data.CGMRecord
+import no.nordicsemi.android.toolbox.libs.core.data.cgms.data.CGMStatus
 import no.nordicsemi.android.toolbox.libs.core.data.common.WorkingMode
 import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
 import no.nordicsemi.android.toolbox.libs.profile.data.formattedTime
@@ -49,6 +49,7 @@ import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionRow
 import no.nordicsemi.android.ui.view.SectionTitle
+import java.util.Calendar
 
 @Composable
 internal fun CGMScreen(
@@ -207,9 +208,11 @@ private fun RecordsViewWithoutDataPreview() {
 @Composable
 private fun RecordsViewWithData(state: CGMServiceData) {
     Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
         SectionTitle(resId = R.drawable.ic_records, title = "Records")
+
         val newRecord = when (state.workingMode) {
             WorkingMode.ALL -> state.records
             WorkingMode.LAST -> listOf(state.records.last())
@@ -222,7 +225,6 @@ private fun RecordsViewWithData(state: CGMServiceData) {
 
             if (i < newRecord.size - 1) {
                 HorizontalDivider()
-                Spacer(modifier = Modifier.size(8.dp))
             }
         }
     }
@@ -267,6 +269,34 @@ private fun RecordItem(record: CGMRecordWithSequenceNumber) {
 @Composable
 private fun RecordsViewWithDataPreview() {
     RecordsViewWithData(
-        state = CGMServiceData()
-    )
+        state = CGMServiceData(
+            records = listOf(
+                CGMRecordWithSequenceNumber(
+                    sequenceNumber = 12,
+                    record = CGMRecord(
+                        glucoseConcentration = 0.5f,
+                        trend = 2.05f,
+                        quality = 0.5f,
+                        status = CGMStatus(2, 3, 5),
+                        timeOffset = 2,
+                        crcPresent = true
+                    ),
+                    timestamp = Calendar.TUESDAY.toLong()
+                ),
+                CGMRecordWithSequenceNumber(
+                    sequenceNumber = 13,
+                    record = CGMRecord(
+                        glucoseConcentration = 0.5f,
+                        trend = 2.05f,
+                        quality = 0.5f,
+                        status = CGMStatus(2, 3, 5),
+                        timeOffset = 2,
+                        crcPresent = true
+                    ),
+                    timestamp = Calendar.TUESDAY.toLong()
+                )
+            )
+            )
+
+        )
 }

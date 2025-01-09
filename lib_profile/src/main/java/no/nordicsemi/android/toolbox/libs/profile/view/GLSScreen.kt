@@ -6,11 +6,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -218,7 +216,10 @@ private fun RecordsView(
 private fun RecordsViewWithData(
     state: GLSServiceData
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
         SectionTitle(resId = R.drawable.ic_records, title = "Records")
 
         state.records.keys.forEachIndexed { i, it ->
@@ -226,7 +227,6 @@ private fun RecordsViewWithData(
 
             if (i < state.records.size - 1) {
                 HorizontalDivider()
-                Spacer(modifier = Modifier.size(8.dp))
             }
         }
     }
@@ -266,7 +266,7 @@ private fun RecordItem(
                 }
                 record.time?.let {
                     KeyValueColumnReverse(
-                        value = "Time",
+                        value = "Date/Time",
                         key = stringResource(R.string.gls_timestamp, it)
                     )
                 }
