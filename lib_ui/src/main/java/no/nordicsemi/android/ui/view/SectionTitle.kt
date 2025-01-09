@@ -58,11 +58,9 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import no.nordicsemi.android.ui.R
 
 @Composable
@@ -87,13 +85,13 @@ fun SectionTitle(
                     shape = CircleShape
                 )
                 .padding(8.dp)
+                .size(16.dp)
         )
         Spacer(modifier = Modifier.size(8.dp))
         Text(
             text = title,
             textAlign = TextAlign.Start,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.weight(1f)
         )
         menu?.invoke()
@@ -123,13 +121,13 @@ fun SectionTitle(
                     shape = CircleShape
                 )
                 .padding(8.dp)
+                .size(16.dp)
         )
         Spacer(modifier = Modifier.padding(8.dp))
         Text(
             text = title,
             textAlign = TextAlign.Center,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
+            style = MaterialTheme.typography.titleMedium,
         )
         rotateArrow?.let {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
@@ -153,7 +151,7 @@ private fun SectionTitle_Preview() {
         title = stringResource(id = R.string.back_screen),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {  },
+            .clickable { },
         rotateArrow = 0f
     )
 }
@@ -179,13 +177,13 @@ fun SectionTitle(
                     shape = CircleShape
                 )
                 .padding(8.dp)
+                .size(16.dp)
         )
         Spacer(modifier = Modifier.size(8.dp))
         Text(
             text = title,
             textAlign = TextAlign.Center,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
+            style = MaterialTheme.typography.titleMedium,
         )
     }
 }

@@ -53,10 +53,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.sp
 import no.nordicsemi.android.common.theme.nordicGrass
 import no.nordicsemi.android.common.theme.nordicGreen
 import no.nordicsemi.android.ui.R
@@ -73,8 +71,7 @@ internal fun BatteryLevelView(batteryLevel: Int) {
             Text(
                 text = stringResource(id = R.string.field_battery),
                 textAlign = TextAlign.Center,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.titleMedium,
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
