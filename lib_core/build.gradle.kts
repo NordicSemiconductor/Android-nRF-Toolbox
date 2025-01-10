@@ -12,4 +12,11 @@ dependencies {
 
     // TODO: This will be removed once the new BLEK library is implemented.
     implementation(libs.nordic.blek.client)
+
+    implementation("no.nordicsemi.kotlin:data:0.3.0")
+
+    // Unit test dependencies
+    testImplementation(libs.junit4)
+    testImplementation(libs.kotlin.junit)
+    testImplementation(libs.testng)
 }
