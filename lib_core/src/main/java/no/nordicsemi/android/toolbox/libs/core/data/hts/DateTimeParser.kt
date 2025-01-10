@@ -31,21 +31,23 @@
 
 package no.nordicsemi.android.toolbox.libs.core.data.hts
 
-import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
-import no.nordicsemi.android.kotlin.ble.core.data.util.IntFormat
+import no.nordicsemi.kotlin.data.IntFormat
+import no.nordicsemi.kotlin.data.getInt
+import java.nio.ByteOrder
 import java.util.Calendar
 
 internal object DateTimeParser {
 
-    fun parse(bytes: DataByteArray, offset: Int): Calendar? {
-        if (bytes.size < offset + 7) return null
+    fun parse(byte: ByteArray, offset: Int): Calendar? {
+        if (byte.size < offset + 7) return null
+
         val calendar = Calendar.getInstance()
-        val year: Int = bytes.getIntValue(IntFormat.FORMAT_UINT16_LE, offset) ?: return null
-        val month: Int = bytes.getIntValue(IntFormat.FORMAT_UINT8, offset + 2) ?: return null
-        val day: Int = bytes.getIntValue(IntFormat.FORMAT_UINT8, offset + 3) ?: return null
-        val hourOfDay: Int = bytes.getIntValue(IntFormat.FORMAT_UINT8, offset + 4) ?: return null
-        val minute: Int = bytes.getIntValue(IntFormat.FORMAT_UINT8, offset + 5) ?: return null
-        val second: Int = bytes.getIntValue(IntFormat.FORMAT_UINT8, offset + 6) ?: return null
+        val year = byte.getInt(offset, IntFormat.UINT16, ByteOrder.LITTLE_ENDIAN)
+        val month = byte.getInt(offset + 2, IntFormat.UINT8, ByteOrder.LITTLE_ENDIAN)
+        val day = byte.getInt(offset + 3, IntFormat.UINT8, ByteOrder.LITTLE_ENDIAN)
+        val hourOfDay = byte.getInt(offset + 4, IntFormat.UINT8, ByteOrder.LITTLE_ENDIAN)
+        val minute = byte.getInt(offset + 5, IntFormat.UINT8, ByteOrder.LITTLE_ENDIAN)
+        val second = byte.getInt(offset + 6, IntFormat.UINT8, ByteOrder.LITTLE_ENDIAN)
 
         if (year > 0) {
             calendar[Calendar.YEAR] = year
