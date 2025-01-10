@@ -1,17 +1,14 @@
 package no.nordicsemi.android.toolbox.libs.core.data.hrs
 
-import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
-import no.nordicsemi.android.kotlin.ble.core.data.util.IntFormat
+import no.nordicsemi.kotlin.data.IntFormat
+import no.nordicsemi.kotlin.data.getInt
+import java.nio.ByteOrder
 
 object BodySensorLocationParser {
 
     fun parse(bytes: ByteArray): Int? {
-        val data = DataByteArray(bytes)
+        if (bytes.isEmpty()) return null
 
-        if (data.size < 1) {
-            return null
-        }
-
-        return data.getIntValue(IntFormat.FORMAT_UINT8, 0)
+        return bytes.getInt(0, IntFormat.UINT8, ByteOrder.LITTLE_ENDIAN)
     }
 }
