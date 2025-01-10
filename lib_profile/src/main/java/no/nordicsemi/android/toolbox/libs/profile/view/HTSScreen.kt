@@ -67,10 +67,9 @@ internal fun HTSScreen(
             SectionRow {
                 KeyValueColumn(
                     stringResource(id = R.string.hts_temperature),
-                    displayTemperature(
-                        htsServiceData.data.temperature,
-                        htsServiceData.temperatureUnit
-                    )
+                    htsServiceData.data?.temperature?.let {
+                        displayTemperature(it, htsServiceData.temperatureUnit)
+                    } ?: run { "__" }
                 )
                 KeyValueColumnReverse(
                     stringResource(id = R.string.hts_temperature_unit_title),

@@ -41,7 +41,7 @@ import java.util.Calendar
  * @param timestamp The timestamp of the measurement.
  * @param type The type of the measurement.
  */
-data class HtsData(
+data class HTSData(
     val temperature: Float = 0f,
     val unit: TemperatureUnitData = TemperatureUnitData.CELSIUS,
     val timestamp: Calendar? = null,
@@ -50,16 +50,17 @@ data class HtsData(
 
 /**
  * The temperature unit data class.
- *
- * @param value The value of the temperature unit.
  */
-enum class TemperatureUnitData(private val value: Int) {
-    CELSIUS(0),
-    FAHRENHEIT(1);
+enum class TemperatureUnitData {
+    CELSIUS, FAHRENHEIT;
 
     companion object {
-        fun create(value: Int): TemperatureUnitData? {
-            return entries.firstOrNull { it.value == value }
+        fun create(flag: Int): TemperatureUnitData? {
+            return when (flag) {
+                0 -> CELSIUS
+                1 -> FAHRENHEIT
+                else -> null
+            }
         }
     }
 }
