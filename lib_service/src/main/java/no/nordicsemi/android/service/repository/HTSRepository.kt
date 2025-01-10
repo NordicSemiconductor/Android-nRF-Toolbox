@@ -3,7 +3,7 @@ package no.nordicsemi.android.service.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import no.nordicsemi.android.toolbox.libs.core.data.hts.HtsData
+import no.nordicsemi.android.toolbox.libs.core.data.hts.HTSData
 import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit
 import no.nordicsemi.android.toolbox.libs.core.data.HTSServiceData
 
@@ -14,7 +14,7 @@ object HTSRepository {
         return _dataMap.getOrPut(deviceId) { MutableStateFlow(HTSServiceData()) }
     }
 
-    fun updateHTSData(deviceId: String, data: HtsData) {
+    fun updateHTSData(deviceId: String, data: HTSData) {
         _dataMap[deviceId]?.update { it.copy(data = data) }
     }
 

@@ -1,7 +1,7 @@
 package no.nordicsemi.android.toolbox.libs.core.data
 
 import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.hts.HtsData
+import no.nordicsemi.android.toolbox.libs.core.data.hts.HTSData
 import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit
 
 /**
@@ -13,6 +13,6 @@ import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit
  */
 data class HTSServiceData(
     override val profile: Profile = Profile.HTS,
-    val data: HtsData = HtsData(),
+    val data: HTSData? = null,
     val temperatureUnit: TemperatureUnit = TemperatureUnit.CELSIUS,
 ) : ProfileServiceData()
