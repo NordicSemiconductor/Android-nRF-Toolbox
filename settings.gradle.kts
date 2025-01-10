@@ -73,3 +73,7 @@ include(":lib_utils")
 if (file("../Kotlin-BLE-Library").exists()) {
     includeBuild("../Kotlin-BLE-Library")
 }
+
+if (file("../Kotlin-Util-Library").exists()) {
+    includeBuild("../Kotlin-Util-Library")
+}
