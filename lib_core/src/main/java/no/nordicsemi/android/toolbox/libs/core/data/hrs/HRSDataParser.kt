@@ -1,53 +1,46 @@
 package no.nordicsemi.android.toolbox.libs.core.data.hrs
 
-import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
-import no.nordicsemi.android.kotlin.ble.core.data.util.IntFormat
+import no.nordicsemi.kotlin.data.IntFormat
+import no.nordicsemi.kotlin.data.getInt
+import java.nio.ByteOrder
 
 object HRSDataParser {
 
-    fun parse(data: ByteArray): HRSData? {
-        val bytes = DataByteArray(data)
+    fun parse(data: ByteArray, byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN): HRSData? {
+        if (data.size < 2) return null
 
-        if (bytes.size < 2) {
-            return null
-        }
-        // Read flags
         var offset = 0
-        val flags: Int = bytes.getIntValue(IntFormat.FORMAT_UINT8, offset) ?: return null
-        val hearRateType: IntFormat = if (flags and 0x01 == 0) {
-            IntFormat.FORMAT_UINT8
-        } else {
-            IntFormat.FORMAT_UINT16_LE
-        }
-        val sensorContactStatus = flags and 0x06 shr 1
+        val flag = data.getInt(offset, IntFormat.UINT8, byteOrder)
+        val heartRateType = if (flag and 0x01 == 0) IntFormat.UINT8 else IntFormat.UINT16
+
+        val sensorContactStatus = flag and 0x06 shr 1
         val sensorContactSupported = sensorContactStatus == 2 || sensorContactStatus == 3
         val sensorContactDetected = sensorContactStatus == 3
-        val energyExpandedPresent = flags and 0x08 != 0
-        val rrIntervalsPresent = flags and 0x10 != 0
+        val energyExpandedPresent = flag and 0x08 != 0
+        val rrIntervalsPresent = flag and 0x10 != 0
         offset += 1
 
         // Validate packet length
-        if (bytes.size < (1 + (hearRateType.value and 0x0F) + (if (energyExpandedPresent) 2 else 0) + if (rrIntervalsPresent) 2 else 0)) {
+        if (data.size < (1 + (heartRateType.length) + (if (energyExpandedPresent) 2 else 0) + if (rrIntervalsPresent) 2 else 0)) {
             return null
         }
-
         // Prepare data
         val sensorContact = if (sensorContactSupported) sensorContactDetected else false
 
-        val heartRate: Int = bytes.getIntValue(hearRateType, offset) ?: return null
-        offset += hearRateType.value and 0xF
+        val heartRate: Int = data.getInt(offset, heartRateType, byteOrder)
+        offset += heartRateType.length
 
         var energyExpanded: Int? = null
         if (energyExpandedPresent) {
-            energyExpanded = bytes.getIntValue(IntFormat.FORMAT_UINT16_LE, offset)
+            energyExpanded = data.getInt(offset, IntFormat.UINT16, byteOrder)
             offset += 2
         }
 
         val rrIntervals = if (rrIntervalsPresent) {
-            val count: Int = (bytes.size - offset) / 2
+            val count: Int = (data.size - offset) / 2
             val intervals: MutableList<Int> = ArrayList(count)
             for (i in 0 until count) {
-                intervals.add(bytes.getIntValue(IntFormat.FORMAT_UINT16_LE, offset)!!)
+                intervals.add(data.getInt(offset, IntFormat.UINT16, byteOrder))
                 offset += 2
             }
             intervals.toList()
