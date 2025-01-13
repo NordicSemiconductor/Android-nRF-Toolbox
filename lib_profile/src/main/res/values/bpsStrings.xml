@@ -12,5 +12,6 @@
     <string name="bps_pulse">Heart rate</string>
     <string name="bps_time_data">Time and Date</string>
 
-    <string name="bps_blood_pressure">%.0f kPa</string>
+    <string name="bps_blood_pressure">%.0f %s</string>
+    <string name="bps_timestamp">%1$te %1$tb %1$tY at %1$tT</string>
 </resources>
