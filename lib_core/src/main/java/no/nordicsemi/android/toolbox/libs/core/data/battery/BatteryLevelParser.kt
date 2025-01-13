@@ -31,16 +31,8 @@
 
 package no.nordicsemi.android.toolbox.libs.core.data.battery
 
-import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
-import no.nordicsemi.android.kotlin.ble.core.data.util.IntFormat
-
 object BatteryLevelParser {
 
-    fun parse(byte: ByteArray): Int? {
-        val bytes = DataByteArray(byte)
-        if (bytes.size == 1) {
-            return bytes.getIntValue(IntFormat.FORMAT_UINT8, 0)
-        }
-        return null
-    }
+    fun parse(data: ByteArray): Int? =
+        if (data.size == 1) data[0].toInt() and 0xFF else null
 }
