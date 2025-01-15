@@ -1,45 +1,51 @@
 package no.nordicsemi.android.toolbox.libs.core.data.rscs
 
-import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
-import no.nordicsemi.android.kotlin.ble.core.data.util.IntFormat
-import no.nordicsemi.android.kotlin.ble.core.data.util.LongFormat
+import no.nordicsemi.kotlin.data.IntFormat
+import no.nordicsemi.kotlin.data.getInt
+import java.nio.ByteOrder
 
 object RSCSDataParser {
 
-    fun parse(data: ByteArray): RSCSData? {
-        val bytes = DataByteArray(data)
-        if (bytes.size < 4) {
-            return null
-        }
+    fun parse(data: ByteArray, byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN): RSCSData? {
+        if (data.size < 4) return null
 
         var offset = 0
-        val flags: Int = bytes.getIntValue(IntFormat.FORMAT_UINT8, offset) ?: return null
+
+        // Flag
+        val flags: Int = data.getInt(offset, IntFormat.UINT8).also { offset += 1 }
         val instantaneousStrideLengthPresent = flags and 0x01 != 0
         val totalDistancePresent = flags and 0x02 != 0
         val statusRunning = flags and 0x04 != 0
-        offset += 1
 
-        val speed = bytes.getIntValue(IntFormat.FORMAT_UINT16_LE, offset)?.toFloat()?.let {
-            it / 256f // [m/s]
-        } ?: return null
+        // Speed
+        val speed = data.getInt(offset, IntFormat.UINT16, byteOrder)
+            .toFloat()
+            .let {
+                it / 256f // [m/s]
+            }.also { offset += 2 }
 
-        offset += 2
-        val cadence: Int = bytes.getIntValue(IntFormat.FORMAT_UINT8, offset) ?: return null
-        offset += 1
+        // Cadence
+        val cadence: Int = data.getInt(offset, IntFormat.UINT8)
+            .also { offset += 1 }
 
-        if (bytes.size < (4 + (if (instantaneousStrideLengthPresent) 2 else 0) + if (totalDistancePresent) 4 else 0)) {
+        // Check if the data size is correct.
+        if (data.size < (4 + (if (instantaneousStrideLengthPresent) 2 else 0) + if (totalDistancePresent) 4 else 0)) {
             return null
         }
 
+        // Stride length
         var strideLength: Int? = null
         if (instantaneousStrideLengthPresent) {
-            strideLength = bytes.getIntValue(IntFormat.FORMAT_UINT16_LE, offset)
-            offset += 2
+            strideLength =
+                data.getInt(offset, IntFormat.UINT16, byteOrder)
+                    .also { offset += 2 }
         }
 
+        // Total distance
         var totalDistance: Long? = null
         if (totalDistancePresent) {
-            totalDistance = bytes.getLongValue(LongFormat.FORMAT_UINT32_LE, offset)
+            totalDistance =
+                data.getInt(offset, IntFormat.UINT32, byteOrder).toLong()
             // offset += 4;
         }
 
