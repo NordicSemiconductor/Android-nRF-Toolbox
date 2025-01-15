@@ -3,30 +3,31 @@ package no.nordicsemi.android.toolbox.libs.profile.view
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import no.nordicsemi.android.toolbox.lib.profile.R
 import no.nordicsemi.android.toolbox.libs.core.data.RSCSServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.rscs.RSCSSettingsUnit
@@ -41,6 +42,7 @@ import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionRow
+import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
 internal fun RSCSScreen(
@@ -51,57 +53,39 @@ internal fun RSCSScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        SensorsReadingView(state = serviceData, onClickEvent)
-    }
-}
-
-@Composable
-private fun SensorsReadingView(
-    state: RSCSServiceData,
-    onClickEvent: (DeviceConnectionViewEvent) -> Unit,
-) {
-    var isDropdownExpanded by rememberSaveable { mutableStateOf(false) }
-
-    ScreenSection {
-        SectionRow {
-            Text(
-                text = "Running/Walking",
-                textAlign = TextAlign.Center,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
+        ScreenSection {
+            SectionTitle(
+                resId = R.drawable.ic_rscs,
+                title = if (serviceData.data.running) "Running" else "Walking",
+                menu = { RSCSSettingsDropdown(serviceData, onClickEvent) }
             )
-            Spacer(modifier = Modifier.weight(1f))
-            RSCSSettingsFilterDropdown(
-                state,
-                isDropdownExpanded = isDropdownExpanded,
-                onExpand = { isDropdownExpanded = true },
-                onDismiss = { isDropdownExpanded = false },
-                onClickEvent = onClickEvent
-            )
-        }
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            SectionRow {
-                KeyValueColumn(stringResource(id = R.string.rscs_cadence), state.displayPace())
-                KeyValueColumnReverse(
-                    value = stringResource(id = R.string.rscs_activity),
-                    key = if (state.data.running)
-                        "\uD83C\uDFC3 ${state.displayActivity()}" else
-                        "\uD83D\uDEB6 ${state.displayActivity()}"
-                )
-            }
-            SectionRow {
-                KeyValueColumn("Speed", "${state.displaySpeed()}")
-                state.displayNumberOfSteps()?.let {
-                    KeyValueColumnReverse(
-                        stringResource(id = R.string.rscs_number_of_steps),
-                        it
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                SectionRow {
+                    KeyValueColumn(
+                        stringResource(id = R.string.rscs_cadence),
+                        serviceData.displayPace()
                     )
-                } ?: state.displayStrideLength()?.let {
                     KeyValueColumnReverse(
-                        stringResource(id = R.string.stride_length), it
+                        value = stringResource(id = R.string.rscs_activity),
+                        key = if (serviceData.data.running)
+                            "\uD83C\uDFC3 ${serviceData.displayActivity()}" else
+                            "\uD83D\uDEB6 ${serviceData.displayActivity()}"
                     )
+                }
+                SectionRow {
+                    KeyValueColumn("Speed", "${serviceData.displaySpeed()}")
+                    serviceData.displayNumberOfSteps()?.let {
+                        KeyValueColumnReverse(
+                            stringResource(id = R.string.rscs_number_of_steps),
+                            it
+                        )
+                    } ?: serviceData.displayStrideLength()?.let {
+                        KeyValueColumnReverse(
+                            stringResource(id = R.string.stride_length), it
+                        )
+                    }
                 }
             }
         }
@@ -115,49 +99,82 @@ private fun RSCSScreenPreview() {
 }
 
 @Composable
-private fun RSCSSettingsFilterDropdown(
+private fun RSCSSettingsDropdown(
     state: RSCSServiceData,
-    isDropdownExpanded: Boolean,
-    onExpand: () -> Unit,
-    onDismiss: () -> Unit,
     onClickEvent: (DeviceConnectionViewEvent) -> Unit
 ) {
+    var openSettingsDialog by rememberSaveable { mutableStateOf(false) }
+
     Column {
         Icon(
             imageVector = Icons.Default.Settings,
             contentDescription = "display settings",
             modifier = Modifier
                 .clip(CircleShape)
-                .clickable { onExpand() }
+                .clickable { openSettingsDialog = true }
                 .padding(8.dp)
         )
 
-        DropdownMenu(
-            expanded = isDropdownExpanded,
-            onDismissRequest = onDismiss,
-        ) {
-            Column {
-                Text(
-                    stringResource(R.string.rscs_settings_unit_title),
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-                HorizontalDivider()
-                RSCSSettingsUnit.entries.forEach {
-                    Text(
-                        text = it.toString(),
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .fillMaxWidth()
-                            .clickable {
-                                onClickEvent(RSCSViewEvent.OnSelectedSpeedUnitSelected(it))
-                                onDismiss()
-                            },
-                        color = if (state.unit == it)
-                            MaterialTheme.colorScheme.primary else
-                            MaterialTheme.colorScheme.onBackground
-                    )
-                }
-            }
+        if (openSettingsDialog) {
+            RSCSSettingsDialog(state, { openSettingsDialog = false }, onClickEvent)
         }
     }
 }
+
+@Composable
+fun RSCSSettingsDialog(
+    state: RSCSServiceData,
+    onDismiss: () -> Unit,
+    onSpeedUnitSelected: (DeviceConnectionViewEvent) -> Unit
+) {
+    val listState = rememberLazyListState()
+    val speedUnitEntries = RSCSSettingsUnit.entries.map { it }
+    val selectedIndex = speedUnitEntries.indexOf(state.unit)
+
+    LaunchedEffect(selectedIndex) {
+        if (selectedIndex >= 0) {
+            listState.scrollToItem(selectedIndex)
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        title = { Text(text = stringResource(R.string.rscs_settings_unit_title)) },
+        text = {
+            LazyColumn(
+                state = listState
+            ) {
+                items(speedUnitEntries.size) { index ->
+                    val entry = speedUnitEntries[index]
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable {
+                                onSpeedUnitSelected(RSCSViewEvent.OnSelectedSpeedUnitSelected(entry))
+                            }
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = entry.toString(),
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .fillMaxWidth()
+                                .clickable {
+                                    onSpeedUnitSelected(
+                                        RSCSViewEvent.OnSelectedSpeedUnitSelected(entry)
+                                    )
+                                    onDismiss()
+                                },
+                            color = if (state.unit == entry)
+                                MaterialTheme.colorScheme.primary else
+                                MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {}
+    )
+}
+
