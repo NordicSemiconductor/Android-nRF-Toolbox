@@ -18,5 +18,4 @@ dependencies {
     // Unit test dependencies
     testImplementation(libs.junit4)
     testImplementation(libs.kotlin.junit)
-    testImplementation(libs.testng)
 }

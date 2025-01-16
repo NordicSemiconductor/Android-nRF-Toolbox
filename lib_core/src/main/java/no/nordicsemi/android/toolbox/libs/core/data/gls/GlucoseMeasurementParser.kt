@@ -38,7 +38,7 @@ object GlucoseMeasurementParser {
         // Required fields
         val sequenceNumber: Int = bytes.getIntValue(IntFormat.FORMAT_UINT16_LE, offset) ?: return null
         offset += 2
-        val baseTime: Calendar = DateTimeParser.parse(bytes, 3) ?: return null
+        val baseTime: Calendar = DateTimeParser.parse(bytes.value, 3) ?: return null
         offset += 7
 
         // Optional fields
