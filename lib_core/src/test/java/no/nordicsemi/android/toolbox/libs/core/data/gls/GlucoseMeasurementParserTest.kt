@@ -1,0 +1,133 @@
+package no.nordicsemi.android.toolbox.libs.core.data.gls
+
+import no.nordicsemi.android.toolbox.libs.core.data.gls.data.ConcentrationUnit
+import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GlucoseStatus
+import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RecordType
+import no.nordicsemi.android.toolbox.libs.core.data.gls.data.SampleLocation
+import java.nio.ByteOrder
+import java.util.Calendar
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+
+class GlucoseMeasurementParserNewTest {
+
+    @Test
+    fun `parse should return null for data size less than 10`() {
+        val data = ByteArray(9) { 0x00.toByte() }
+        val result = GlucoseMeasurementParser.parse(data)
+        assertNull(result, "Expected null for data size less than 10")
+    }
+
+    @Test
+    fun `parse should parse record with only required fields`() {
+        val data = byteArrayOf(
+            0x00.toByte(), // Flags: No optional fields
+            0x01.toByte(), 0x00.toByte(), // Sequence Number
+            0xE4.toByte(), 0x07.toByte(), // Year: 2020 (little-endian)
+            0x05.toByte(),               // Month: May
+            0x15.toByte(),               // Day: 21
+            0x0A.toByte(),               // Hour: 10
+            0x1E.toByte(),               // Minute: 30
+            0x2D.toByte()                // Second: 45
+        )
+        val expectedBaseTime = Calendar.getInstance().apply {
+            set(2020, Calendar.MAY, 21, 10, 30, 45)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        val result = GlucoseMeasurementParser.parse(data)
+
+        assertEquals(1, result?.sequenceNumber, "Incorrect sequence number")
+        assertEquals(expectedBaseTime, result?.time, "Incorrect base time")
+        assertNull(result?.glucoseConcentration, "Expected null glucose concentration")
+        assertNull(result?.unit, "Expected null unit")
+        assertNull(result?.status, "Expected null status")
+        assertNull(result?.type, "Expected null type")
+        assertNull(result?.sampleLocation, "Expected null sample location")
+        assertEquals(false, result?.contextInformationFollows, "Incorrect context information flag")
+    }
+
+    @Test
+    fun `parse should parse record with all optional fields`() {
+        val data = byteArrayOf(
+            0x1F, // Flags: All optional fields present
+            0x02, 0x00, // Sequence Number
+            0xE4.toByte(), 0x07.toByte(), // Year: 2020 (little-endian)
+            0x05.toByte(),               // Month: May
+            0x15.toByte(),               // Day: 21
+            0x0A.toByte(),               // Hour: 10
+            0x1E.toByte(),               // Minute: 30
+            0x2D.toByte() ,               // Second: 45
+            0x05, 0x00, // Time Offset: 5 minutes
+            0xCD.toByte(), 0xCC.toByte(), 0x4C.toByte(), // Glucose concentration (IEEE 11073 format) and type/sample location
+            0x04.toByte(), 0x01.toByte(), // Sensor Status Annunciation
+        )
+        val expectedBaseTime = Calendar.getInstance().apply {
+            set(2020, Calendar.MAY, 21, 10, 30, 45)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        val result = GlucoseMeasurementParser.parse(data)
+
+        assertEquals(2, result?.sequenceNumber, "Incorrect sequence number")
+        assertEquals(expectedBaseTime, result?.time, "Incorrect base time")
+        result?.glucoseConcentration?.let {
+            assertEquals(2.2f,
+                it, 0.01f, "Incorrect glucose concentration")
+        }
+        assertEquals(ConcentrationUnit.UNIT_MOLPL, result?.unit, "Incorrect unit")
+        assertEquals(RecordType.VENOUS_PLASMA, result?.type, "Incorrect type")
+        assertEquals(SampleLocation.FINGER, result?.sampleLocation, "Incorrect sample location")
+        assertEquals(GlucoseStatus(260), result?.status, "Incorrect sensor status annunciation")
+        assertEquals(true, result?.contextInformationFollows, "Incorrect context information flag")
+    }
+
+    @Test
+    fun `parse should return null for incomplete optional fields`() {
+        val data = byteArrayOf(
+            0x0F, // Flags: All optional fields except context present
+            0x03, 0x00, // Sequence Number
+            0xE4.toByte(), 0x07.toByte(), // Year: 2020 (little-endian)
+            0x05.toByte(),               // Month: May
+            0x15.toByte(),               // Day: 21
+            0x0A.toByte(),               // Hour: 10
+            0x1E.toByte(),               // Minute: 30
+            0x2D.toByte() ,               // Second: 45
+            0x05, 0x00, // Time Offset
+            0xCD.toByte(), 0xCC.toByte() // Incomplete glucose concentration field
+        )
+        val result = GlucoseMeasurementParser.parse(data)
+        assertNull(result, "Expected null for incomplete optional fields")
+    }
+
+    @Test
+    fun `parse should handle little endian and big endian byte orders`() {
+        val littleEndianData = byteArrayOf(
+            0x00, // Flags
+            0x01, 0x00, // Sequence Number (Little Endian: 1)
+            0xE4.toByte(), 0x07.toByte(), // Year: 2020 (little-endian)
+            0x05.toByte(),               // Month: May
+            0x15.toByte(),               // Day: 21
+            0x0A.toByte(),               // Hour: 10
+            0x1E.toByte(),               // Minute: 30
+            0x2D.toByte() ,               // Second: 45
+        )
+        val bigEndianData = byteArrayOf(
+            0x00, // Flags
+            0x00, 0x01, // Sequence Number (Big Endian: 1)
+            0xE4.toByte(), 0x07.toByte(), // Year: 2020 (little-endian)
+            0x05.toByte(),               // Month: May
+            0x15.toByte(),               // Day: 21
+            0x0A.toByte(),               // Hour: 10
+            0x1E.toByte(),               // Minute: 30
+            0x2D.toByte() ,               // Second: 45
+        )
+
+        val littleEndianResult = GlucoseMeasurementParser.parse(littleEndianData, ByteOrder.LITTLE_ENDIAN)
+        val bigEndianResult = GlucoseMeasurementParser.parse(bigEndianData, ByteOrder.BIG_ENDIAN)
+
+        assertEquals(1, littleEndianResult?.sequenceNumber, "Incorrect sequence number for little endian")
+        assertEquals(1, bigEndianResult?.sequenceNumber, "Incorrect sequence number for big endian")
+    }
+}
