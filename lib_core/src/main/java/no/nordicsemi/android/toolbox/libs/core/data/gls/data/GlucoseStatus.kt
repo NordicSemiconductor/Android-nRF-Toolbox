@@ -33,4 +33,13 @@ class GlucoseStatus(
         generalDeviceFault = value and 0x0400 != 0,
         timeFault = value and 0x0800 != 0
     )
+
+    override fun toString(): String {
+        return "GlucoseStatus(deviceBatteryLow=$deviceBatteryLow, sensorMalfunction=$sensorMalfunction, " +
+                "sampleSizeInsufficient=$sampleSizeInsufficient, stripInsertionError=$stripInsertionError, " +
+                "stripTypeIncorrect=$stripTypeIncorrect, sensorResultLowerThenDeviceCanProcess=$sensorResultLowerThenDeviceCanProcess, " +
+                "sensorResultHigherThenDeviceCanProcess=$sensorResultHigherThenDeviceCanProcess, sensorTemperatureTooHigh=$sensorTemperatureTooHigh, " +
+                "sensorTemperatureTooLow=$sensorTemperatureTooLow, sensorReadInterrupted=$sensorReadInterrupted, " +
+                "generalDeviceFault=$generalDeviceFault, timeFault=$timeFault)"
+    }
 }
