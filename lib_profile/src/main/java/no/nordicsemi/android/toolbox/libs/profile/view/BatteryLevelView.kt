@@ -55,8 +55,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import no.nordicsemi.android.common.theme.nordicGrass
-import no.nordicsemi.android.common.theme.nordicGreen
 import no.nordicsemi.android.ui.R
 import no.nordicsemi.android.ui.view.ScreenSection
 
@@ -89,25 +87,25 @@ internal fun BatteryLevelView(batteryLevel: Int) {
 internal fun DynamicBatteryStatus(batteryLevel: Int = 40) {
     val (batteryIcon: ImageVector, color: Color) = when {
         batteryLevel > 95 -> {
-            Icons.Outlined.BatteryFull to MaterialTheme.colorScheme.nordicGreen
+            Icons.Outlined.BatteryFull to Color.Green
         } // Full Battery
         batteryLevel > 80 -> {
-            Icons.Outlined.Battery6Bar to MaterialTheme.colorScheme.nordicGreen
+            Icons.Outlined.Battery6Bar to Color.Green
         }
 
         batteryLevel > 70 -> {
-            Icons.Outlined.Battery5Bar to MaterialTheme.colorScheme.nordicGreen
+            Icons.Outlined.Battery5Bar to Color.Green
         } // Moderate Battery
         batteryLevel > 55 -> {
-            Icons.Outlined.Battery4Bar to MaterialTheme.colorScheme.nordicGreen
+            Icons.Outlined.Battery4Bar to Color.Green
         } // Moderate Battery
 
         batteryLevel > 40 -> {
-            Icons.Outlined.Battery3Bar to MaterialTheme.colorScheme.nordicGreen
+            Icons.Outlined.Battery3Bar to Color.Green
         } // Moderate Battery
 
         batteryLevel > 25 -> {
-            Icons.Outlined.Battery2Bar to MaterialTheme.colorScheme.nordicGrass
+            Icons.Outlined.Battery2Bar to Color(0xFFD0DF00) // MaterialTheme.colorScheme.nordicGreen
         } // Low Battery
 
         batteryLevel > 10 -> {
