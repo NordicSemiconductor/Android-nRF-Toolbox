@@ -33,7 +33,7 @@ internal class CSCManager : ServiceManager {
                 .firstOrNull { it.uuid == CSC_MEASUREMENT_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.subscribe()
                 ?.mapNotNull {
-                    CSCDataParser().parse(it, CSCRepository.getData(deviceId).value.data.wheelSize)
+                    CSCDataParser.parse(it, CSCRepository.getData(deviceId).value.data.wheelSize)
                 }
                 ?.onEach { CSCRepository.onCSCDataChanged(deviceId, it) }
                 ?.catch { it.printStackTrace() }
