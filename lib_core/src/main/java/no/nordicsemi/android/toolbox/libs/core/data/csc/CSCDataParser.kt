@@ -5,7 +5,7 @@ import no.nordicsemi.kotlin.data.getInt
 import java.nio.ByteOrder
 import kotlin.experimental.and
 
-class CSCDataParser {
+object CSCDataParser {
 
     private var previousData: CSCDataSnapshot = CSCDataSnapshot()
 
@@ -81,7 +81,8 @@ class CSCDataParser {
         wheelCircumference: Float,
         previous: CSCDataSnapshot
     ): Float {
-        return (wheelRevolutions - previous.wheelRevolutions).toFloat() * wheelCircumference / 1000.0f // [m]
+        val difference = wheelRevolutions - previous.wheelRevolutions
+        return difference.toFloat() * wheelCircumference / 1000.0f // [m]
     }
 
     /**
