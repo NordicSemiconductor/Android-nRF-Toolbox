@@ -1,8 +1,8 @@
 package no.nordicsemi.android.toolbox.libs.core.data.csc
 
 internal data class CSCDataSnapshot(
-    val wheelRevolutions: Long = -1,
-    val wheelEventTime: Int = -1,
-    val crankRevolutions: Long = -1,
-    val crankEventTime: Int = -1
+    val wheelRevolutions: Long? = null,
+    val wheelEventTime: Int? = null,
+    val crankRevolutions: Long? = null,
+    val crankEventTime: Int? = null,
 )
