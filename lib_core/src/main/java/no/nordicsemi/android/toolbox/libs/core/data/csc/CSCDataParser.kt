@@ -7,12 +7,12 @@ import kotlin.experimental.and
 
 object CSCDataParser {
 
-    private var previousData: CSCDataSnapshot = CSCDataSnapshot()
+    internal var previousData: CSCDataSnapshot = CSCDataSnapshot()
 
-    private var wheelRevolutions: Long = -1
-    private var wheelEventTime: Int = -1
-    private var crankRevolutions: Long = -1
-    private var crankEventTime: Int = -1
+    internal var wheelRevolutions: Long = -1
+    internal var wheelEventTime: Int = -1
+    internal var crankRevolutions: Long = -1
+    internal var crankEventTime: Int = -1
 
     fun parse(
         data: ByteArray,
@@ -81,8 +81,8 @@ object CSCDataParser {
         wheelCircumference: Float,
         previous: CSCDataSnapshot
     ): Float {
-        val difference = wheelRevolutions - previous.wheelRevolutions
-        return difference.toFloat() * wheelCircumference / 1000.0f // [m]
+        val difference = previous.wheelRevolutions?.let { wheelRevolutions - it }
+        return (difference?.toFloat() ?: 0f) * wheelCircumference / 1000.0f // [m]
     }
 
     /**
@@ -96,12 +96,17 @@ object CSCDataParser {
         wheelCircumference: Float,
         previous: CSCDataSnapshot
     ): Float {
-        val timeDifference: Float = if (wheelEventTime < previous.wheelEventTime) {
-            (65535 + wheelEventTime - previous.wheelEventTime) / 1024.0f
-        } else {
-            (wheelEventTime - previous.wheelEventTime) / 1024.0f
-        } // [s]
-        return getDistance(wheelCircumference, previous) / timeDifference // [m/s]
+        return previous.wheelEventTime?.let {
+            val timeDifference: Float = if (wheelEventTime < it) {
+                (65535 + wheelEventTime - it) / 1024.0f
+            } else {
+                (wheelEventTime - it) / 1024.0f
+            } // [s]
+
+            getDistance(wheelCircumference, previous) / timeDifference // [m/s]
+        } ?: run {
+            0f
+        }
     }
 
     /**
@@ -111,17 +116,21 @@ object CSCDataParser {
      * @return wheel cadence in revolutions per minute.
      */
     private fun getWheelCadence(previous: CSCDataSnapshot): Float {
-        val timeDifference: Float = if (wheelEventTime < previous.wheelEventTime) {
-            (65535 + wheelEventTime - previous.wheelEventTime) / 1024.0f
-        } else {
-            (wheelEventTime - previous.wheelEventTime) / 1024.0f
-        } // [s]
-        return if (timeDifference == 0f) {
+        return previous.wheelRevolutions?.let { previousWheelRevolutions ->
+            previous.wheelEventTime?.let {
+                val timeDifference: Float = if (wheelEventTime < it) {
+                    (65535 + wheelEventTime - it) / 1024.0f
+                } else (wheelEventTime - it) / 1024.0f // [s]
+
+                if (timeDifference == 0f) {
+                    0.0f
+                } else {
+                    (wheelRevolutions - previousWheelRevolutions) * 60.0f / timeDifference
+                }
+            }
+        } ?: run {
             0.0f
-        } else {
-            (wheelRevolutions - previous.wheelRevolutions) * 60.0f / timeDifference
         }
-        // [revolutions/minute];
     }
 
     /**
@@ -131,17 +140,23 @@ object CSCDataParser {
      * @return crank cadence in revolutions per minute.
      */
     private fun getCrankCadence(previous: CSCDataSnapshot): Float {
-        val timeDifference: Float = if (crankEventTime < previous.crankEventTime) {
-            (65535 + crankEventTime - previous.crankEventTime) / 1024.0f // [s]
-        } else {
-            (crankEventTime - previous.crankEventTime) / 1024.0f
-        } // [s]
-        return if (timeDifference == 0f) {
+        return previous.crankRevolutions?.let { previousCrankRevolution ->
+            previous.crankEventTime?.let {
+                val timeDifference: Float = if (crankEventTime < it) {
+                    (65535 + crankEventTime - it) / 1024.0f // [s]
+                } else {
+                    (crankEventTime - it) / 1024.0f
+                } // [s]
+                if (timeDifference == 0f) {
+                    0.0f
+                } else {
+                    (crankRevolutions - previousCrankRevolution) * 60.0f / timeDifference
+                }
+                // [revolutions/minute];
+            }
+        } ?: run {
             0.0f
-        } else {
-            (crankRevolutions - previous.crankRevolutions) * 60.0f / timeDifference
         }
-        // [revolutions/minute];
     }
 
     /**
