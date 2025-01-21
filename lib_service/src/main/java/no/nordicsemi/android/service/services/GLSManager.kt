@@ -143,7 +143,7 @@ internal class GLSManager : ServiceManager {
                     .write(
                         if (state.value.records.isNotEmpty()) {
                             RecordAccessControlPointInputParser.reportStoredRecordsGreaterThenOrEqualTo(
-                                highestSequenceNumber
+                                highestSequenceNumber.toShort()
                             )
                         } else {
                             RecordAccessControlPointInputParser.reportAllStoredRecords()

@@ -1,8 +1,7 @@
 package no.nordicsemi.android.toolbox.libs.core.data.gls
 
-import no.nordicsemi.android.kotlin.ble.core.data.util.IntFormat
 import no.nordicsemi.android.toolbox.libs.core.data.common.CRC16
-import no.nordicsemi.android.toolbox.libs.core.data.common.MutableData
+import java.nio.ByteBuffer
 
 /*
 * Copyright (c) 2018, Nordic Semiconductor
@@ -53,30 +52,16 @@ object CGMSpecificOpsControlPointDataParser {
         return create(
             OP_CODE_START_SESSION,
             secure
-        ).toByteData().value
-    }
-
-    private fun create(opCode: Byte, secure: Boolean): MutableData {
-        val data: MutableData =
-            MutableData(
-                ByteArray(1 + if (secure) 2 else 0)
-            )
-        data.setByte(opCode.toInt(), 0)
-        return appendCrc(
-            data,
-            secure
         )
     }
 
-    private fun appendCrc(
-        data: MutableData,
-        secure: Boolean,
-    ): MutableData {
+    private fun create(opCode: Byte, secure: Boolean): ByteArray {
+        val data = ByteArray(1 + if (secure) 2 else 0)
+        val buffer = ByteBuffer.wrap(data).put(opCode)
         if (secure) {
-            val length: Int = data.size - 2
-            val crc: Int = CRC16.MCRF4XX(data.value, 0, length)
-            data.setValue(crc, IntFormat.FORMAT_UINT16_LE, length)
+            val crc = CRC16.MCRF4XX(buffer.array(), 0, data.size).toShort()
+            buffer.putShort(crc)
         }
-        return data
+        return buffer.array()
     }
 }
