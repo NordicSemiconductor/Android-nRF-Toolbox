@@ -1,28 +1,29 @@
 package no.nordicsemi.android.toolbox.libs.core.data.cgms
 
-import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
-import no.nordicsemi.android.kotlin.ble.core.data.util.IntFormat
 import no.nordicsemi.android.toolbox.libs.core.data.cgms.data.CGMStatus
 import no.nordicsemi.android.toolbox.libs.core.data.cgms.data.CGMStatusEnvelope
 import no.nordicsemi.android.toolbox.libs.core.data.common.CRC16
+import no.nordicsemi.kotlin.data.IntFormat
+import no.nordicsemi.kotlin.data.getInt
+import java.nio.ByteOrder
 
 object CGMStatusParser {
 
-    fun parse(data: ByteArray): CGMStatusEnvelope? {
-        val bytes = DataByteArray(data)
-        if (bytes.size != 5 && bytes.size != 7) {
-            return null
-        }
+    fun parse(
+        data: ByteArray,
+        byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN
+    ): CGMStatusEnvelope? {
+        if (data.size != 5 && data.size != 7) return null
 
-        val timeOffset: Int = bytes.getIntValue(IntFormat.FORMAT_UINT16_LE, 0) ?: return null
-        val warningStatus: Int = bytes.getIntValue(IntFormat.FORMAT_UINT8, 2) ?: return null
-        val calibrationTempStatus: Int = bytes.getIntValue(IntFormat.FORMAT_UINT8, 3) ?: return null
-        val sensorStatus: Int = bytes.getIntValue(IntFormat.FORMAT_UINT8, 4) ?: return null
+        val timeOffset: Int = data.getInt(0, IntFormat.UINT16, byteOrder)
+        val warningStatus: Int = data.getInt(2, IntFormat.UINT8)
+        val calibrationTempStatus: Int = data.getInt(3, IntFormat.UINT8)
+        val sensorStatus: Int = data.getInt(4, IntFormat.UINT8)
 
-        val crcPresent = bytes.size == 7
+        val crcPresent = data.size == 7
         if (crcPresent) {
-            val actualCrc: Int = CRC16.MCRF4XX(bytes.value, 0, 5)
-            val expectedCrc: Int = bytes.getIntValue(IntFormat.FORMAT_UINT16_LE, 5) ?: return null
+            val actualCrc: Int = CRC16.MCRF4XX(data, 0, 5)
+            val expectedCrc: Int = data.getInt(5, IntFormat.UINT16, byteOrder)
             if (actualCrc != expectedCrc) {
                 return null
             }
