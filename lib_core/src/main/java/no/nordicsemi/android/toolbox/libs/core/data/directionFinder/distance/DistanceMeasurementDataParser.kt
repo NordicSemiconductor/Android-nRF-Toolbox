@@ -1,71 +1,62 @@
 package no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance
 
-import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
-import no.nordicsemi.android.kotlin.ble.core.data.util.IntFormat
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.AddressType
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.PeripheralBluetoothAddress
+import no.nordicsemi.kotlin.data.IntFormat
+import no.nordicsemi.kotlin.data.getInt
+import java.nio.ByteOrder
 import kotlin.experimental.and
 
 class DistanceMeasurementDataParser {
 
-    fun parse(data: ByteArray): DistanceMeasurementData? {
-        val bytes = DataByteArray(data)
-
-        if (bytes.size < 10) return null
+    fun parse(
+        data: ByteArray,
+        byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN
+    ): DistanceMeasurementData? {
+        if (data.size < 10) return null
 
         var offset = 0
-        val flags = bytes.getByte(offset).also { offset++ }
-            ?: throw IllegalArgumentException("Byte at offset $offset is null")
+        val flags = data[offset].also { offset++ }
         val isRTTPresent = flags and 0x01 > 0
         val isMCPDPresent = flags and 0x02 > 0
-        val qualityIndicator = bytes.getIntValue(IntFormat.FORMAT_UINT8, offset).also { offset++ }
+        val qualityIndicator = data.getInt(offset++, IntFormat.UINT8)
 
         val address = StringBuilder().apply {
             for (i in 0..5) {
-                bytes.getIntValue(IntFormat.FORMAT_UINT8, offset++)?.let {
+                data.getInt(offset++, IntFormat.UINT8).let {
                     insert(0, Integer.toHexString(it))
                     if (i != 5) insert(0, ":")
                 }
             }
         }.toString()
 
-        val addressType = bytes.getIntValue(IntFormat.FORMAT_UINT8, offset).also { offset++ }
-
+        val addressType = data.getInt(offset++, IntFormat.UINT8)
 
         val rtt = if (isRTTPresent) {
-            RTTEstimate(
-                bytes.getIntValue(
-                    IntFormat.FORMAT_UINT16_LE,
-                    offset
-                )!!
-            ).also { offset += 2 }
-        } else {
-            null
-        }
+            RTTEstimate(data.getInt(offset, IntFormat.UINT16, byteOrder)).also { offset += 2 }
+        } else null
 
         val mcpd = if (isMCPDPresent) {
             MCPDEstimate(
-                bytes.getIntValue(IntFormat.FORMAT_UINT16_LE, offset)!!.also { offset += 2 },
-                bytes.getIntValue(IntFormat.FORMAT_UINT16_LE, offset)!!.also { offset += 2 },
-                bytes.getIntValue(IntFormat.FORMAT_UINT16_LE, offset)!!.also { offset += 2 },
-                bytes.getIntValue(IntFormat.FORMAT_UINT16_LE, offset)!!.also { offset += 2 },
+                data.getInt(offset, IntFormat.UINT16, byteOrder).also { offset += 2 },
+                data.getInt(offset, IntFormat.UINT16, byteOrder).also { offset += 2 },
+                data.getInt(offset, IntFormat.UINT16, byteOrder).also { offset += 2 },
+                data.getInt(offset, IntFormat.UINT16, byteOrder).also { offset += 2 },
             )
-        } else {
-            null
-        }
+        } else null
 
         val result = if (isRTTPresent) {
             RttMeasurementData(
                 flags,
-                QualityIndicator.create(qualityIndicator!!),
-                PeripheralBluetoothAddress(AddressType.create(addressType!!), address),
+                QualityIndicator.create(qualityIndicator),
+                PeripheralBluetoothAddress(AddressType.create(addressType), address),
                 rtt!!
             )
         } else {
             McpdMeasurementData(
                 flags,
-                QualityIndicator.create(qualityIndicator!!),
-                PeripheralBluetoothAddress(AddressType.create(addressType!!), address),
+                QualityIndicator.create(qualityIndicator),
+                PeripheralBluetoothAddress(AddressType.create(addressType), address),
                 mcpd!!,
             )
         }
