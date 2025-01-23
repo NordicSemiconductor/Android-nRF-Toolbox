@@ -123,7 +123,7 @@ internal class ProfileService : NotificationService() {
                         else -> { /* Handle other states if necessary. */
                         }
                     }
-                }.launchIn(lifecycleScope)
+                }.onCompletion { connectionJob?.cancel() }.launchIn(lifecycleScope)
             }
         }
 
@@ -179,7 +179,7 @@ internal class ProfileService : NotificationService() {
             when {
                 discoveredServices.isEmpty() -> {
                     if (remoteServices.isNotEmpty())
-                    _isMissingServices.tryEmit(true)
+                        _isMissingServices.tryEmit(true)
                 }
 
                 peripheral.isConnected -> {
