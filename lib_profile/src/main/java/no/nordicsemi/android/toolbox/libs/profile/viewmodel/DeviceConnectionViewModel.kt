@@ -32,6 +32,7 @@ import no.nordicsemi.android.service.repository.GLSRepository
 import no.nordicsemi.android.service.repository.HRSRepository
 import no.nordicsemi.android.service.repository.HTSRepository
 import no.nordicsemi.android.service.repository.RSCSRepository
+import no.nordicsemi.android.service.repository.ThroughputRepository
 import no.nordicsemi.android.service.services.ServiceManager
 import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.ProfileServiceData
@@ -224,10 +225,15 @@ internal class DeviceConnectionViewModel @Inject constructor(
             Profile.HRS -> updateHRS()
             Profile.HTS -> updateHTS()
             Profile.RSCS -> updateRSCS()
+            Profile.THROUGHPUT -> updateThroughput()
             else -> { /* TODO: Add more profile modules here */
             }
         }
     }
+
+    private fun updateThroughput() = ThroughputRepository.getData(address).onEach {
+        updateDeviceData(it)
+    }.launchIn(viewModelScope)
 
     private fun updateDFS() = DFSRepository.getData(address).onEach {
         updateDeviceData(it)
