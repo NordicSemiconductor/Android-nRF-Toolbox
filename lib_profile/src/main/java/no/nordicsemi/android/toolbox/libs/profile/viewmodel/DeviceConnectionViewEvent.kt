@@ -59,3 +59,9 @@ internal sealed interface DFSViewEvent : DeviceConnectionViewEvent {
     data class OnDetailsSectionParamsSelected(val section: MeasurementSection) : DFSViewEvent
     data class OnBluetoothDeviceSelected(val device: PeripheralBluetoothAddress) : DFSViewEvent
 }
+
+internal sealed interface ThroughputEvent: DeviceConnectionViewEvent{
+    data object OnWriteData: ThroughputEvent
+    data object OnResetClick: ThroughputEvent
+    data object RequestMtuSize: ThroughputEvent
+}

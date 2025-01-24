@@ -344,6 +344,21 @@ internal class DeviceConnectionViewModel @Inject constructor(
 
             is RSCSViewEvent.OnSelectedSpeedUnitSelected ->
                 RSCSRepository.updateUnitSettings(address, event.rscsUnitSettings)
+
+            ThroughputEvent.OnWriteData -> viewModelScope.launch {
+                ThroughputRepository.sendDataToDK(address, viewModelScope)
+            }
+
+            ThroughputEvent.OnResetClick -> viewModelScope.launch {
+                ThroughputRepository.resetData(address, viewModelScope)
+            }
+
+            is ThroughputEvent.RequestMtuSize -> {
+                // Request to change mtu
+                viewModelScope.launch {
+                    getServiceApi()?.requestMtu(address)
+                }
+            }
         }
     }
 
