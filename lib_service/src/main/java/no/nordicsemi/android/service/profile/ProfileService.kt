@@ -81,6 +81,19 @@ internal class ProfileService : NotificationService() {
         override val disconnectionReason: Flow<DeviceDisconnectionReason?>
             get() = _disconnectionReason.asStateFlow()
 
+        override suspend fun requestMtu(address: String) {
+            val peripheral = getPeripheralById(address)
+            peripheral?.let {
+                if (it.isConnected) {
+                    try {
+                        peripheral.requestHighestValueLength() // request mtu 517. dataSize = 495 bytes per packet.
+                    } catch (e: Exception) {
+                        Timber.e("Could not change mtu size $e")
+                    }
+                }
+            }
+        }
+
         override fun getPeripheralById(address: String?): Peripheral? =
             address?.let { centralManager.getPeripheralById(it) }
 
@@ -159,7 +172,7 @@ internal class ProfileService : NotificationService() {
             remoteServices.forEach { remoteService ->
                 val serviceManager = ServiceManagerFactory.createServiceManager(remoteService.uuid)
                 serviceManager?.let {
-                    Timber.tag("DiscoverServices").i("Supported service: ${it.profile}")
+                    Timber.tag("DiscoverServices").i("${it.profile}")
                     discoveredServices.add(it)
                     lifecycleScope.launch {
                         try {
@@ -169,7 +182,6 @@ internal class ProfileService : NotificationService() {
                                 lifecycleScope
                             )
                         } catch (e: Exception) {
-                            e.printStackTrace()
                             Timber.tag("ObserveServices").e(e)
                             handleDisconnection(peripheral.address)
                         }

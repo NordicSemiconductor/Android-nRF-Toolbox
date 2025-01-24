@@ -51,4 +51,10 @@ interface ServiceApi {
      * @return the disconnection reason flow.
      */
     val disconnectionReason: Flow<DeviceDisconnectionReason?>
+
+    /**
+     * Request mtu of highest possible value.
+     */
+    suspend fun requestMtu(address: String)
+
 }
