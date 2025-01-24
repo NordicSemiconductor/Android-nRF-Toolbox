@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -146,6 +147,15 @@ internal fun HomeView() {
                                                     deviceName = peripheral.name,
                                                     true
                                                 ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
+                                        }
+
+                                        Profile.THROUGHPUT -> {
+                                            FeatureButton(
+                                                iconId = Icons.Default.SyncAlt,
+                                                name = "Throughput",
+                                                isRunning = true,
+                                                description = "Throughput service"
+                                            ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
                                         }
 
                                         else -> {
