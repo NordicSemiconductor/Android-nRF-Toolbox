@@ -33,6 +33,7 @@ import no.nordicsemi.android.toolbox.libs.core.data.HRSServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.HTSServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.ProfileServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.RSCSServiceData
+import no.nordicsemi.android.toolbox.libs.core.data.ThroughputServiceData
 import no.nordicsemi.android.toolbox.libs.profile.view.BPSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.BatteryLevelView
 import no.nordicsemi.android.toolbox.libs.profile.view.CGMScreen
@@ -42,6 +43,7 @@ import no.nordicsemi.android.toolbox.libs.profile.view.GLSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HRSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.HTSScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.RSCSScreen
+import no.nordicsemi.android.toolbox.libs.profile.view.ThroughputScreen
 import no.nordicsemi.android.toolbox.libs.profile.view.internal.ProfileAppBar
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionState
 import no.nordicsemi.android.toolbox.libs.profile.viewmodel.DeviceConnectionViewEvent
@@ -186,42 +188,59 @@ private fun DeviceConnectedView(
                         }
                     }
                 } else
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    deviceData.serviceData.forEach { serviceData ->
-                        when (serviceData.profile) {
-                            Profile.BPS -> BPSScreen(serviceData as BPSServiceData)
-                            Profile.CSC -> CSCScreen(serviceData as CSCServiceData, onClickEvent)
-                            Profile.CGM -> CGMScreen(
-                                serviceData = serviceData as CGMServiceData
-                            ) { onClickEvent(it) }
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        deviceData.serviceData.forEach { serviceData ->
+                            when (serviceData.profile) {
+                                Profile.BPS -> BPSScreen(
+                                    serviceData = serviceData as BPSServiceData
+                                )
 
-                            Profile.DFS -> DFSScreen(
-                                serviceData as DFSServiceData
-                            ) { onClickEvent(it) }
+                                Profile.CSC -> CSCScreen(
+                                    serviceData = serviceData as CSCServiceData,
+                                ) { onClickEvent(it) }
 
-                            Profile.GLS -> GLSScreen(
-                                glsServiceData = serviceData as GLSServiceData,
-                            ) { onClickEvent(it) }
+                                Profile.CGM -> CGMScreen(
+                                    serviceData = serviceData as CGMServiceData
+                                ) { onClickEvent(it) }
 
-                            Profile.HRS -> HRSScreen(serviceData as HRSServiceData, onClickEvent)
-                            Profile.HTS -> HTSScreen(serviceData as HTSServiceData, onClickEvent)
+                                Profile.DFS -> DFSScreen(
+                                    serviceData = serviceData as DFSServiceData
+                                ) { onClickEvent(it) }
 
-                            Profile.RSCS -> RSCSScreen(serviceData as RSCSServiceData, onClickEvent)
+                                Profile.GLS -> GLSScreen(
+                                    glsServiceData = serviceData as GLSServiceData,
+                                ) { onClickEvent(it) }
 
-                            Profile.BATTERY -> {
-                                // Battery level will be added at the end.
-                                // Do nothing here.
+                                Profile.HRS -> HRSScreen(
+                                    hrsServiceData = serviceData as HRSServiceData,
+                                ) { onClickEvent(it) }
+
+                                Profile.HTS -> HTSScreen(
+                                    htsServiceData = serviceData as HTSServiceData,
+                                ) { onClickEvent(it) }
+
+                                Profile.RSCS -> RSCSScreen(
+                                    serviceData = serviceData as RSCSServiceData,
+                                ) { onClickEvent(it) }
+
+                                Profile.THROUGHPUT -> ThroughputScreen(
+                                    serviceData = serviceData as ThroughputServiceData,
+                                ) { onClickEvent(it) }
+
+                                Profile.BATTERY -> {
+                                    // Battery level will be added at the end.
+                                    // Do nothing here.
+                                }
+
+                                else -> TODO()
                             }
-
-                            else -> TODO()
                         }
+                        // Battery level will be added at the end.
+                        DisplayBatteryLevel(deviceData.serviceData)
                     }
-                    // Battery level will be added at the end.
-                    DisplayBatteryLevel(deviceData.serviceData)
-                }
             }
 
         }
