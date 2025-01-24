@@ -2,6 +2,7 @@ package no.nordicsemi.android.service.services
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.service.repository.ThroughputRepository
 import no.nordicsemi.android.toolbox.lib.utils.tryOrLog
 import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.throughput.ThroughputDataParser
@@ -34,7 +35,11 @@ internal class ThroughputServiceManager : ServiceManager {
     companion object {
         private lateinit var writeCharacteristicProperty: RemoteCharacteristic
 
-        fun writeRequest(scope: CoroutineScope, data: ByteArray = ByteArray(495) { 0x3D }) {
+        fun writeRequest(
+            deviceId: String,
+            scope: CoroutineScope,
+            data: ByteArray = ByteArray(495) { 0x3D }
+        ) {
             scope.launch {
                 repeat(20) {
                     tryOrLog {
@@ -46,16 +51,20 @@ internal class ThroughputServiceManager : ServiceManager {
                     }
                 }
                 Timber.tag("ThroughputService").d("Writing completed.")
-                // Read data after write operation is complete
-                val readData = writeCharacteristicProperty.read()
-                // Parse the read data
-                ThroughputDataParser.parse(data = readData)?.apply {
-                    Timber.tag("ThroughputService").d("ThroughputMetrics: $this")
-                }
+                readThroughputMetrics(deviceId)
             }
         }
 
-        fun resetData(scope: CoroutineScope) {
+        private suspend fun readThroughputMetrics(deviceId: String) {
+            // Read data after write operation is complete
+            val readData = writeCharacteristicProperty.read()
+            // Parse the read data
+            ThroughputDataParser.parse(data = readData)?.let {
+                ThroughputRepository.updateThroughput(deviceId, it)
+            }
+        }
+
+        fun resetData(deviceId: String, scope: CoroutineScope) {
             scope.launch {
                 tryOrLog {
                     writeCharacteristicProperty.write(
@@ -64,7 +73,7 @@ internal class ThroughputServiceManager : ServiceManager {
                     )
                     Timber.tag("ThroughputService").d("Reset Completed.")
                 }
-
+                readThroughputMetrics(deviceId)
             }
         }
     }
