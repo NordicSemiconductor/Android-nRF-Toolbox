@@ -1,6 +1,6 @@
 package no.nordicsemi.android.lib.profile.bps
 
-import no.nordicsemi.android.lib.profile.hts.DateTimeParser
+import no.nordicsemi.android.lib.profile.date.DateTimeParser
 import no.nordicsemi.kotlin.data.FloatFormat
 import no.nordicsemi.kotlin.data.IntFormat
 import no.nordicsemi.kotlin.data.getFloat

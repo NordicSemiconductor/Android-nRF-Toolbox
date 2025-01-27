@@ -5,7 +5,7 @@ import no.nordicsemi.android.lib.profile.csc.SpeedUnit
 import no.nordicsemi.android.lib.profile.csc.WheelSize
 import no.nordicsemi.android.lib.profile.directionFinder.PeripheralBluetoothAddress
 import no.nordicsemi.android.lib.profile.directionFinder.distance.DistanceMode
-import no.nordicsemi.android.lib.profile.hts.TemperatureUnit
+import no.nordicsemi.android.toolbox.libs.core.data.uiMapper.TemperatureUnit
 import no.nordicsemi.android.lib.profile.rscs.RSCSSettingsUnit
 import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.MeasurementSection
