@@ -5,7 +5,7 @@ import no.nordicsemi.android.lib.profile.gls.data.GLSRecord
 import no.nordicsemi.android.lib.profile.gls.data.GlucoseStatus
 import no.nordicsemi.android.lib.profile.gls.data.RecordType
 import no.nordicsemi.android.lib.profile.gls.data.SampleLocation
-import no.nordicsemi.android.lib.profile.hts.DateTimeParser
+import no.nordicsemi.android.lib.profile.date.DateTimeParser
 import no.nordicsemi.kotlin.data.FloatFormat
 import no.nordicsemi.kotlin.data.IntFormat
 import no.nordicsemi.kotlin.data.getFloat

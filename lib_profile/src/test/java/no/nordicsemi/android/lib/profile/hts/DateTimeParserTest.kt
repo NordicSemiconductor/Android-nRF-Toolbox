@@ -1,5 +1,6 @@
 package no.nordicsemi.android.lib.profile.hts
 
+import no.nordicsemi.android.lib.profile.date.DateTimeParser
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull

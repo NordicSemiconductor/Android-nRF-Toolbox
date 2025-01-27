@@ -39,6 +39,7 @@ import no.nordicsemi.android.service.repository.ThroughputRepository
 import no.nordicsemi.android.service.services.ServiceManager
 import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.ProfileServiceData
+import no.nordicsemi.android.toolbox.libs.core.data.uiMapper.TemperatureUnit
 import no.nordicsemi.android.toolbox.profile.DeviceConnectionDestinationId
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
@@ -424,7 +425,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
      * Update the temperature unit.
      * @param unit the temperature unit.
      */
-    private fun updateTemperatureUnit(unit: no.nordicsemi.android.lib.profile.hts.TemperatureUnit) {
+    private fun updateTemperatureUnit(unit: TemperatureUnit) {
         HTSRepository.onTemperatureUnitChange(address, unit)
     }
 

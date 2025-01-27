@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.libs.core.data.HTSServiceData
+import no.nordicsemi.android.toolbox.libs.core.data.uiMapper.TemperatureUnit
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.displayTemperature
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
@@ -111,7 +112,7 @@ private fun TemperatureUnitSettingsDialog(
     onClickEvent: (DeviceConnectionViewEvent) -> Unit,
 ) {
     val listState = rememberLazyListState()
-    val entries = no.nordicsemi.android.lib.profile.hts.TemperatureUnit.entries.map { it }
+    val entries = TemperatureUnit.entries.map { it }
 
     AlertDialog(
         onDismissRequest = { onDismiss() },

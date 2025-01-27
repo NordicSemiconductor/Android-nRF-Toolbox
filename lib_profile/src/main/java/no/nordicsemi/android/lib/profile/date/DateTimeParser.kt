@@ -29,7 +29,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.lib.profile.hts
+package no.nordicsemi.android.lib.profile.date
 
 import no.nordicsemi.kotlin.data.IntFormat
 import no.nordicsemi.kotlin.data.getInt
