@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.service.services.CGMManager
 import no.nordicsemi.android.toolbox.libs.core.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.toolbox.libs.core.data.CGMServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.common.WorkingMode
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
+import no.nordicsemi.android.lib.profile.common.WorkingMode
+import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
 
 object CGMRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<CGMServiceData>>()

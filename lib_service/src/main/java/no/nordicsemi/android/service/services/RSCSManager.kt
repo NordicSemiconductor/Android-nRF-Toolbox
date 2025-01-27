@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.service.repository.RSCSRepository
 import no.nordicsemi.android.toolbox.lib.utils.logAndReport
 import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.rscs.RSCSDataParser
+import no.nordicsemi.android.lib.profile.rscs.RSCSDataParser
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi

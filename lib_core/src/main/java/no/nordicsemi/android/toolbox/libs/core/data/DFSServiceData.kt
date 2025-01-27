@@ -1,16 +1,16 @@
 package no.nordicsemi.android.toolbox.libs.core.data
 
+import no.nordicsemi.android.lib.profile.directionFinder.PeripheralBluetoothAddress
+import no.nordicsemi.android.lib.profile.directionFinder.azimuthal.AzimuthMeasurementData
+import no.nordicsemi.android.lib.profile.directionFinder.ddf.DDFData
+import no.nordicsemi.android.lib.profile.directionFinder.distance.DistanceMode
+import no.nordicsemi.android.lib.profile.directionFinder.distance.McpdMeasurementData
+import no.nordicsemi.android.lib.profile.directionFinder.distance.RttMeasurementData
+import no.nordicsemi.android.lib.profile.directionFinder.elevation.ElevationMeasurementData
+import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
 import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.MeasurementSection
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.PeripheralBluetoothAddress
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.Range
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.azimuthal.AzimuthMeasurementData
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.ddf.DDFData
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.DistanceMode
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.McpdMeasurementData
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.RttMeasurementData
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.ElevationMeasurementData
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
 
 private const val MAX_STORED_ITEMS = 5
 

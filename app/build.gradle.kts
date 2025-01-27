@@ -45,6 +45,7 @@ android {
 
 dependencies {
     implementation(project(":lib_analytics"))
+    implementation(project(":lib_profile"))
     implementation(project(":lib_service"))
     implementation(project(":scanner"))
     implementation(project(":profile"))

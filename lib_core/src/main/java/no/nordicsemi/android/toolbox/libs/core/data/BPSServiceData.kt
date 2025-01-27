@@ -1,8 +1,8 @@
 package no.nordicsemi.android.toolbox.libs.core.data
 
 import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.bps.BloodPressureMeasurementData
-import no.nordicsemi.android.toolbox.libs.core.data.bps.IntermediateCuffPressureData
+import no.nordicsemi.android.lib.profile.bps.BloodPressureMeasurementData
+import no.nordicsemi.android.lib.profile.bps.IntermediateCuffPressureData
 
 /**
  * BPS service data class that holds the blood pressure measurement and intermediate cuff pressure data.

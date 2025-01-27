@@ -1,7 +1,7 @@
 package no.nordicsemi.android.toolbox.libs.core.data
 
 import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.hrs.HRSData
+import no.nordicsemi.android.lib.profile.hrs.HRSData
 
 /**
  * Heart Rate Service data.

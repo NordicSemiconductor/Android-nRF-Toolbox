@@ -38,21 +38,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.toolbox.profile.R
+import no.nordicsemi.android.lib.profile.common.WorkingMode
+import no.nordicsemi.android.lib.profile.gls.data.GLSMeasurementContext
+import no.nordicsemi.android.lib.profile.gls.data.GLSRecord
+import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
 import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.GLSServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.common.WorkingMode
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.Carbohydrate
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.ConcentrationUnit
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSMeasurementContext
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.GLSRecord
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.Health
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.Meal
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.Medication
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.MedicationUnit
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RecordType
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.Tester
+import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.glucoseConcentrationDisplayValue
 import no.nordicsemi.android.toolbox.profile.data.toDisplayString
 import no.nordicsemi.android.toolbox.profile.view.gls.details.GLSDetails
@@ -319,24 +311,24 @@ private fun RecordItemPreview() {
             sequenceNumber = 1,
             time = Calendar.getInstance(),
             glucoseConcentration = 0.5f,
-            unit = ConcentrationUnit.UNIT_KGPL,
-            type = RecordType.VENOUS_PLASMA,
+            unit = no.nordicsemi.android.lib.profile.gls.data.ConcentrationUnit.UNIT_KGPL,
+            type = no.nordicsemi.android.lib.profile.gls.data.RecordType.VENOUS_PLASMA,
             status = null,
             sampleLocation = null,
             contextInformationFollows = true
         ),
         gleContext = GLSMeasurementContext(
             sequenceNumber = 20,
-            carbohydrate = Carbohydrate.LUNCH,
+            carbohydrate = no.nordicsemi.android.lib.profile.gls.data.Carbohydrate.LUNCH,
             carbohydrateAmount = 12.5f,
-            meal = Meal.CASUAL,
-            tester = Tester.SELF,
-            health = Health.NO_HEALTH_ISSUES,
+            meal = no.nordicsemi.android.lib.profile.gls.data.Meal.CASUAL,
+            tester = no.nordicsemi.android.lib.profile.gls.data.Tester.SELF,
+            health = no.nordicsemi.android.lib.profile.gls.data.Health.NO_HEALTH_ISSUES,
             exerciseDuration = 2,
             exerciseIntensity = 1,
-            medication = Medication.PRE_MIXED_INSULIN,
+            medication = no.nordicsemi.android.lib.profile.gls.data.Medication.PRE_MIXED_INSULIN,
             medicationQuantity = .5f,
-            medicationUnit = MedicationUnit.UNIT_MG,
+            medicationUnit = no.nordicsemi.android.lib.profile.gls.data.MedicationUnit.UNIT_MG,
             HbA1c = 0.5f
         ),
     )

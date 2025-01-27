@@ -4,9 +4,9 @@ import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import no.nordicsemi.android.toolbox.profile.R
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.ConcentrationUnit
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RecordType
-import no.nordicsemi.android.toolbox.libs.core.data.common.WorkingMode
+import no.nordicsemi.android.lib.profile.gls.data.ConcentrationUnit
+import no.nordicsemi.android.lib.profile.gls.data.RecordType
+import no.nordicsemi.android.lib.profile.common.WorkingMode
 
 @Composable
 internal fun RecordType?.toDisplayString(): String {

@@ -4,7 +4,7 @@ import android.content.Context
 import android.media.RingtoneManager
 import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
-import no.nordicsemi.android.toolbox.libs.core.data.prx.AlarmLevel
+import no.nordicsemi.android.lib.profile.prx.AlarmLevel
 import javax.inject.Inject
 
 internal class AlarmManager @Inject constructor(

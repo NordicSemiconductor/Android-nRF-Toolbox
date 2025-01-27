@@ -4,9 +4,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.toolbox.libs.core.data.CSCServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.csc.CSCData
-import no.nordicsemi.android.toolbox.libs.core.data.csc.SpeedUnit
-import no.nordicsemi.android.toolbox.libs.core.data.csc.WheelSize
+import no.nordicsemi.android.lib.profile.csc.CSCData
+import no.nordicsemi.android.lib.profile.csc.SpeedUnit
+import no.nordicsemi.android.lib.profile.csc.WheelSize
 
 object CSCRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<CSCServiceData>>()

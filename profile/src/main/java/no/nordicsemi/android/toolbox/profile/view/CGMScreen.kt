@@ -31,14 +31,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.toolbox.profile.R
+import no.nordicsemi.android.lib.profile.cgms.data.CGMRecord
+import no.nordicsemi.android.lib.profile.cgms.data.CGMStatus
+import no.nordicsemi.android.lib.profile.common.WorkingMode
 import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.toolbox.libs.core.data.CGMServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.cgms.data.CGMRecord
-import no.nordicsemi.android.toolbox.libs.core.data.cgms.data.CGMStatus
-import no.nordicsemi.android.toolbox.libs.core.data.common.WorkingMode
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
+import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.formattedTime
 import no.nordicsemi.android.toolbox.profile.data.glucoseConcentration
 import no.nordicsemi.android.toolbox.profile.data.toDisplayString
@@ -89,7 +88,7 @@ private fun WorkingModeDropDown(
     onDismiss: () -> Unit,
     onClickEvent: (DeviceConnectionViewEvent) -> Unit
 ) {
-    if (cgmState.requestStatus == RequestStatus.PENDING) {
+    if (cgmState.requestStatus == no.nordicsemi.android.lib.profile.gls.data.RequestStatus.PENDING) {
         CircularProgressIndicator()
     } else {
         Column {
@@ -127,7 +126,7 @@ private fun WorkingModeDialog(
     onWorkingModeSelected: (DeviceConnectionViewEvent) -> Unit,
 ) {
     val listState = rememberLazyListState()
-    val workingModeEntries = WorkingMode.entries.map { it }
+    val workingModeEntries = no.nordicsemi.android.lib.profile.common.WorkingMode.entries.map { it }
     val selectedIndex = workingModeEntries.indexOf(cgmState.workingMode)
 
     LaunchedEffect(selectedIndex) {
