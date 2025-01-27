@@ -99,6 +99,41 @@ fun SectionTitle(
 }
 
 @Composable
+fun SectionTitle(
+    icon: ImageVector,
+    title: String,
+    menu: @Composable (() -> Unit)? = null,
+    modifier: Modifier = Modifier.fillMaxWidth()
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        Image(
+            imageVector = icon,
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary),
+            modifier = Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.secondary,
+                    shape = CircleShape
+                )
+                .padding(8.dp)
+                .size(16.dp)
+        )
+        Spacer(modifier = Modifier.size(8.dp))
+        Text(
+            text = title,
+            textAlign = TextAlign.Start,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(1f)
+        )
+        menu?.invoke()
+    }
+}
+
+@Composable
 @SuppressLint("ModifierParameter")
 fun SectionTitle(
     @DrawableRes resId: Int,
