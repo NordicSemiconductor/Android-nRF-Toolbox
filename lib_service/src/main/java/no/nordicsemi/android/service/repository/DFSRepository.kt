@@ -5,27 +5,27 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.lib.profile.directionFinder.PeripheralBluetoothAddress
+import no.nordicsemi.android.lib.profile.directionFinder.azimuthal.AzimuthMeasurementData
+import no.nordicsemi.android.lib.profile.directionFinder.controlPoint.ControlPointChangeModeError
+import no.nordicsemi.android.lib.profile.directionFinder.controlPoint.ControlPointChangeModeSuccess
+import no.nordicsemi.android.lib.profile.directionFinder.controlPoint.ControlPointCheckModeError
+import no.nordicsemi.android.lib.profile.directionFinder.controlPoint.ControlPointCheckModeSuccess
+import no.nordicsemi.android.lib.profile.directionFinder.controlPoint.ControlPointResult
+import no.nordicsemi.android.lib.profile.directionFinder.ddf.DDFData
+import no.nordicsemi.android.lib.profile.directionFinder.distance.DistanceMeasurementData
+import no.nordicsemi.android.lib.profile.directionFinder.distance.DistanceMode
+import no.nordicsemi.android.lib.profile.directionFinder.distance.McpdMeasurementData
+import no.nordicsemi.android.lib.profile.directionFinder.distance.RttMeasurementData
+import no.nordicsemi.android.lib.profile.directionFinder.elevation.ElevationMeasurementData
+import no.nordicsemi.android.lib.profile.directionFinder.toDistanceMode
+import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
 import no.nordicsemi.android.service.services.DFSManager
 import no.nordicsemi.android.toolbox.libs.core.data.DFSServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.SensorData
 import no.nordicsemi.android.toolbox.libs.core.data.SensorValue
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.MeasurementSection
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.PeripheralBluetoothAddress
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.Range
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.azimuthal.AzimuthMeasurementData
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.controlPoint.ControlPointChangeModeError
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.controlPoint.ControlPointChangeModeSuccess
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.controlPoint.ControlPointCheckModeError
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.controlPoint.ControlPointCheckModeSuccess
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.controlPoint.ControlPointResult
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.ddf.DDFData
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.DistanceMeasurementData
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.DistanceMode
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.McpdMeasurementData
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distance.RttMeasurementData
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevation.ElevationMeasurementData
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.toDistanceMode
-import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
 
 object DFSRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<DFSServiceData>>()

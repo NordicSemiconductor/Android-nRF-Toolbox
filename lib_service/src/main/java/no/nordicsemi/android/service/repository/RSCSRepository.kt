@@ -4,8 +4,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.toolbox.libs.core.data.RSCSServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.rscs.RSCSData
-import no.nordicsemi.android.toolbox.libs.core.data.rscs.RSCSSettingsUnit
+import no.nordicsemi.android.lib.profile.rscs.RSCSData
+import no.nordicsemi.android.lib.profile.rscs.RSCSSettingsUnit
 
 object RSCSRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<RSCSServiceData>>()

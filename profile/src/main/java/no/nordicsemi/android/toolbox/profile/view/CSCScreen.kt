@@ -37,11 +37,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import no.nordicsemi.android.toolbox.profile.R
+import no.nordicsemi.android.lib.profile.csc.SpeedUnit
+import no.nordicsemi.android.lib.profile.csc.WheelSizes.getWheelSizeByName
 import no.nordicsemi.android.toolbox.libs.core.data.CSCServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.csc.SpeedUnit
-import no.nordicsemi.android.toolbox.libs.core.data.csc.WheelSizes
-import no.nordicsemi.android.toolbox.libs.core.data.csc.WheelSizes.getWheelSizeByName
+import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.displayCadence
 import no.nordicsemi.android.toolbox.profile.data.displayDistance
 import no.nordicsemi.android.toolbox.profile.data.displayGearRatio
@@ -125,7 +124,7 @@ private fun WheelSizeDropDown(
     onDismiss: () -> Unit,
     onClickEvent: (DeviceConnectionViewEvent) -> Unit
 ) {
-    val wheelEntries = WheelSizes.data.map { it.name }
+    val wheelEntries = no.nordicsemi.android.lib.profile.csc.WheelSizes.data.map { it.name }
     Column {
         OutlinedButton(onClick = { onExpand() }) {
             Row(

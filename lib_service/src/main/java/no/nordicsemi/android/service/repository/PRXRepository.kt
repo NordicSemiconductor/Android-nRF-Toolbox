@@ -3,8 +3,8 @@ package no.nordicsemi.android.service.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import no.nordicsemi.android.toolbox.libs.core.data.prx.AlarmLevel
-import no.nordicsemi.android.toolbox.libs.core.data.prx.PRXData
+import no.nordicsemi.android.lib.profile.prx.AlarmLevel
+import no.nordicsemi.android.lib.profile.prx.PRXData
 
 object PRXRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<PRXData>>()

@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.service.repository.PRXRepository
 import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.prx.AlarmLevelParser
+import no.nordicsemi.android.lib.profile.prx.AlarmLevelParser
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber
 import java.util.UUID

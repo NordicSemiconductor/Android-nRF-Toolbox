@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.service.repository.CSCRepository
 import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.csc.CSCDataParser
+import no.nordicsemi.android.lib.profile.csc.CSCDataParser
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi

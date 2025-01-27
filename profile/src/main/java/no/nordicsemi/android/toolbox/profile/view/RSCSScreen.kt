@@ -28,9 +28,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.libs.core.data.RSCSServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.rscs.RSCSSettingsUnit
+import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.displayActivity
 import no.nordicsemi.android.toolbox.profile.data.displayNumberOfSteps
 import no.nordicsemi.android.toolbox.profile.data.displayPace
@@ -128,7 +127,7 @@ fun RSCSSettingsDialog(
     onSpeedUnitSelected: (DeviceConnectionViewEvent) -> Unit
 ) {
     val listState = rememberLazyListState()
-    val speedUnitEntries = RSCSSettingsUnit.entries.map { it }
+    val speedUnitEntries = no.nordicsemi.android.lib.profile.rscs.RSCSSettingsUnit.entries.map { it }
     val selectedIndex = speedUnitEntries.indexOf(state.unit)
 
     LaunchedEffect(selectedIndex) {

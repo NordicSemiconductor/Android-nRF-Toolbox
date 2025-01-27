@@ -1,8 +1,8 @@
 package no.nordicsemi.android.toolbox.libs.core.data
 
 import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.csc.CSCData
-import no.nordicsemi.android.toolbox.libs.core.data.csc.SpeedUnit
+import no.nordicsemi.android.lib.profile.csc.CSCData
+import no.nordicsemi.android.lib.profile.csc.SpeedUnit
 
 data class CSCServiceData(
     override val profile: Profile = Profile.CSC,

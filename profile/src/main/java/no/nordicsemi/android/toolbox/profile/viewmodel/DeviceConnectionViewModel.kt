@@ -16,6 +16,9 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.logger.LoggerLauncher
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
+import no.nordicsemi.android.lib.profile.common.WorkingMode
+import no.nordicsemi.android.lib.profile.csc.SpeedUnit
+import no.nordicsemi.android.lib.profile.csc.WheelSize
 import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.profile.CustomReason
@@ -36,10 +39,6 @@ import no.nordicsemi.android.service.repository.ThroughputRepository
 import no.nordicsemi.android.service.services.ServiceManager
 import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.ProfileServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.common.WorkingMode
-import no.nordicsemi.android.toolbox.libs.core.data.csc.SpeedUnit
-import no.nordicsemi.android.toolbox.libs.core.data.csc.WheelSize
-import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit
 import no.nordicsemi.android.toolbox.profile.DeviceConnectionDestinationId
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
@@ -425,7 +424,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
      * Update the temperature unit.
      * @param unit the temperature unit.
      */
-    private fun updateTemperatureUnit(unit: TemperatureUnit) {
+    private fun updateTemperatureUnit(unit: no.nordicsemi.android.lib.profile.hts.TemperatureUnit) {
         HTSRepository.onTemperatureUnitChange(address, unit)
     }
 

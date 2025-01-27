@@ -2,10 +2,10 @@ package no.nordicsemi.android.toolbox.profile.data
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import no.nordicsemi.android.toolbox.profile.R
+import no.nordicsemi.android.lib.profile.rscs.RSCSData
+import no.nordicsemi.android.lib.profile.rscs.RSCSSettingsUnit
 import no.nordicsemi.android.toolbox.libs.core.data.RSCSServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.rscs.RSCSData
-import no.nordicsemi.android.toolbox.libs.core.data.rscs.RSCSSettingsUnit
+import no.nordicsemi.android.toolbox.profile.R
 import java.util.Locale
 
 @Composable

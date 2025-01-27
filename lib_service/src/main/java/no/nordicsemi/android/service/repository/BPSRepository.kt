@@ -3,8 +3,8 @@ package no.nordicsemi.android.service.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import no.nordicsemi.android.toolbox.libs.core.data.bps.BloodPressureMeasurementData
-import no.nordicsemi.android.toolbox.libs.core.data.bps.IntermediateCuffPressureData
+import no.nordicsemi.android.lib.profile.bps.BloodPressureMeasurementData
+import no.nordicsemi.android.lib.profile.bps.IntermediateCuffPressureData
 import no.nordicsemi.android.toolbox.libs.core.data.BPSServiceData
 
 object BPSRepository {

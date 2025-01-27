@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.service.services.ThroughputServiceManager
 import no.nordicsemi.android.toolbox.libs.core.data.ThroughputServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.throughput.ThroughputMetrics
+import no.nordicsemi.android.lib.profile.throughput.ThroughputMetrics
 
 object ThroughputRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<ThroughputServiceData>>()

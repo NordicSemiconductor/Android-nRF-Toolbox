@@ -1,7 +1,7 @@
 package no.nordicsemi.android.toolbox.libs.core.data
 
 import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.prx.AlarmLevel
+import no.nordicsemi.android.lib.profile.prx.AlarmLevel
 
 /**
  * PRX service data class that holds the PRX data.

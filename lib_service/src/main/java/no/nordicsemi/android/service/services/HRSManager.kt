@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.service.repository.HRSRepository
 import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.hrs.BodySensorLocationParser
-import no.nordicsemi.android.toolbox.libs.core.data.hrs.HRSDataParser
+import no.nordicsemi.android.lib.profile.hrs.BodySensorLocationParser
+import no.nordicsemi.android.lib.profile.hrs.HRSDataParser
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber
 import java.util.UUID

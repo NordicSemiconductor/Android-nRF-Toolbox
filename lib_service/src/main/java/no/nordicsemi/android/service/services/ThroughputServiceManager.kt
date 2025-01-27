@@ -5,7 +5,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.service.repository.ThroughputRepository
 import no.nordicsemi.android.toolbox.lib.utils.tryOrLog
 import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.throughput.ThroughputDataParser
+import no.nordicsemi.android.lib.profile.throughput.ThroughputDataParser
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.core.WriteType
@@ -79,4 +79,3 @@ internal class ThroughputServiceManager : ServiceManager {
     }
 
 }
-
