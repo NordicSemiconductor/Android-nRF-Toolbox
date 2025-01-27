@@ -71,7 +71,7 @@ internal fun ThroughputScreen(
     ) {
         ScreenSection {
             SectionTitle(
-                resId = Icons.Default.SyncAlt,
+                icon = Icons.Default.SyncAlt,
                 title = "Throughput service",
                 menu = {
                     ThroughputSettings(
