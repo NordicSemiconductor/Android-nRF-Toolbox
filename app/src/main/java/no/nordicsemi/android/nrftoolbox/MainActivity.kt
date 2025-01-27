@@ -42,7 +42,7 @@ import no.nordicsemi.android.common.analytics.view.AnalyticsPermissionRequestDia
 import no.nordicsemi.android.common.navigation.NavigationView
 import no.nordicsemi.android.common.theme.NordicActivity
 import no.nordicsemi.android.common.theme.NordicTheme
-import no.nordicsemi.android.toolbox.libs.profile.DeviceConnectionDestination
+import no.nordicsemi.android.toolbox.profile.DeviceConnectionDestination
 import no.nordicsemi.android.toolbox.scanner.ScannerDestination
 
 @AndroidEntryPoint

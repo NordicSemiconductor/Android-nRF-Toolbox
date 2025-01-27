@@ -47,7 +47,7 @@ dependencies {
     implementation(project(":lib_analytics"))
     implementation(project(":lib_service"))
     implementation(project(":lib_scanner"))
-    implementation(project(":lib_profile"))
+    implementation(project(":profile"))
     implementation(project(":lib_core"))
     implementation(project(":lib_ui"))
 
