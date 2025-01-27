@@ -3,13 +3,16 @@ package no.nordicsemi.android.toolbox.libs.profile.view
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -18,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
@@ -40,8 +44,6 @@ internal fun HTSScreen(
     htsServiceData: HTSServiceData,
     onClickEvent: (DeviceConnectionViewEvent) -> Unit
 ) {
-    var isSettingsIconClicked by rememberSaveable { mutableStateOf(false) }
-
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
@@ -51,15 +53,9 @@ internal fun HTSScreen(
                 resId = R.drawable.ic_thermometer,
                 title = stringResource(id = R.string.hts_temperature),
                 menu = {
-                    TemperatureUnitDropdown(
-                        isDropdownExpanded = isSettingsIconClicked,
+                    TemperatureUnitSettings(
                         state = htsServiceData,
-                        onExpand = { isSettingsIconClicked = true },
-                        onDismiss = { isSettingsIconClicked = false },
-                        onClickEvent = {
-                            onClickEvent(it)
-                            isSettingsIconClicked = false
-                        },
+                        onClickEvent = { onClickEvent(it) },
                     )
                 }
             )
@@ -87,45 +83,68 @@ private fun HTSScreenPreview() {
 }
 
 @Composable
-private fun TemperatureUnitDropdown(
+private fun TemperatureUnitSettings(
     state: HTSServiceData,
-    isDropdownExpanded: Boolean,
-    onExpand: () -> Unit,
-    onDismiss: () -> Unit,
     onClickEvent: (DeviceConnectionViewEvent) -> Unit
 ) {
+    var openSettingsDialog by rememberSaveable { mutableStateOf(false) }
+
     Column {
         Icon(
             imageVector = Icons.Default.Settings,
             contentDescription = stringResource(id = R.string.hts_temperature_unit_des),
             modifier = Modifier
                 .clip(CircleShape)
-                .clickable { onExpand() }
+                .clickable { openSettingsDialog = true }
         )
-
-        DropdownMenu(
-            expanded = isDropdownExpanded,
-            onDismissRequest = onDismiss,
-        ) {
-            Column {
-                Text(
-                    stringResource(id = R.string.hts_temperature_unit),
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-                HorizontalDivider()
-                TemperatureUnit.entries.forEach {
-                    Text(
-                        text = it.toString(),
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .fillMaxWidth()
-                            .clickable { onClickEvent(HTSViewEvent.OnTemperatureUnitSelected(it)) },
-                        color = if (state.temperatureUnit == it)
-                            MaterialTheme.colorScheme.primary else
-                            MaterialTheme.colorScheme.onBackground
-                    )
-                }
-            }
+        if (openSettingsDialog) {
+            TemperatureUnitSettingsDialog(
+                state, { openSettingsDialog = false }
+            ) { onClickEvent(it) }
         }
     }
+}
+
+@Composable
+private fun TemperatureUnitSettingsDialog(
+    state: HTSServiceData,
+    onDismiss: () -> Unit,
+    onClickEvent: (DeviceConnectionViewEvent) -> Unit,
+) {
+    val listState = rememberLazyListState()
+    val entries = TemperatureUnit.entries.map { it }
+
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        title = { Text(stringResource(id = R.string.hts_temperature_unit)) },
+        text = {
+            LazyColumn(
+                state = listState
+            ) {
+                items(entries.size) { index ->
+                    val entry = entries[index]
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable {
+                                onClickEvent(HTSViewEvent.OnTemperatureUnitSelected(entry))
+                                onDismiss()
+                            }
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = entry.toString(),
+                            modifier = Modifier.fillMaxWidth(),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = if (state.temperatureUnit == entry)
+                                MaterialTheme.colorScheme.primary else
+                                MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {}
+    )
 }
