@@ -29,29 +29,15 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-plugins {
-    alias(libs.plugins.nordic.feature)
-    alias(libs.plugins.kotlin.parcelize)
-}
+package no.nordicsemi.android.toolbox.profile.data
 
-android {
-    namespace = "no.nordicsemi.android.toolbox.scanner"
-}
+import no.nordicsemi.android.toolbox.libs.core.data.hts.TemperatureUnit
+import java.util.Locale
 
-dependencies {
-    implementation("no.nordicsemi.kotlin.ble:client-android")
-    implementation(project(":profile"))
-    implementation(project(":lib_ui"))
-    implementation(project(":lib_service"))
-    implementation(project(":lib_utils"))
-
-    implementation(libs.nordic.navigation)
-    implementation(libs.nordic.permissions.ble)
-    implementation(libs.nordic.theme)
-    implementation(libs.nordic.core)
-    implementation(libs.nordic.ui)
-
-    implementation(libs.androidx.compose.material.iconsExtended)
-    implementation(libs.slf4j.timber)
-
+internal fun displayTemperature(value: Float, temperatureUnit: TemperatureUnit): String {
+    return when (temperatureUnit) {
+        TemperatureUnit.CELSIUS -> String.format(Locale.US, "%.1f °C", value)
+        TemperatureUnit.FAHRENHEIT -> String.format(Locale.US, "%.1f °F", value * 1.8f + 32f)
+        TemperatureUnit.KELVIN -> String.format(Locale.US, "%.1f °K", value + 273.15f)
+    }
 }
