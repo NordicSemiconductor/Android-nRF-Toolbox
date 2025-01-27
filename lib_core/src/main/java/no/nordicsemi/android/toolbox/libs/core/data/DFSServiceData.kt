@@ -14,10 +14,6 @@ import no.nordicsemi.android.toolbox.libs.core.data.gls.data.RequestStatus
 
 private const val MAX_STORED_ITEMS = 5
 
-// TODO: Add two parameter range and measurement section which will be changes with user interaction.
-//  For now I am hardcoding the value in the ui, but it will changes later.
-//  Which dataclass it should be added needed to be decided.
-
 data class DFSServiceData(
     override val profile: Profile = Profile.DFS,
     val requestStatus: RequestStatus = RequestStatus.IDLE,
