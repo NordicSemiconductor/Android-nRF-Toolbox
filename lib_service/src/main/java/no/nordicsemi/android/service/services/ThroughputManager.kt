@@ -2,10 +2,10 @@ package no.nordicsemi.android.service.services
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.lib.profile.throughput.ThroughputDataParser
 import no.nordicsemi.android.service.repository.ThroughputRepository
 import no.nordicsemi.android.toolbox.lib.utils.tryOrLog
 import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.lib.profile.throughput.ThroughputDataParser
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.core.WriteType
@@ -16,7 +16,7 @@ import kotlin.uuid.toKotlinUuid
 
 private val THROUGHPUT_CHAR_UUID = UUID.fromString("00001524-0000-1000-8000-00805F9B34FB")
 
-internal class ThroughputServiceManager : ServiceManager {
+internal class ThroughputManager : ServiceManager {
     override val profile: Profile
         get() = Profile.THROUGHPUT
 
@@ -38,19 +38,20 @@ internal class ThroughputServiceManager : ServiceManager {
         fun writeRequest(
             deviceId: String,
             scope: CoroutineScope,
-            data: ByteArray = ByteArray(495) { 0x3D }
+            isHighestMtuRequested: Boolean, // Todo: For now just a flag, later change it to mtu size.
+            data: ByteArray = ByteArray(1025) { 0x3D },
         ) {
             scope.launch {
-                repeat(20) {
-                    tryOrLog {
+                tryOrLog {
+                    chunkData(data, isHighestMtuRequested).forEach {
                         writeCharacteristicProperty.write(
-                            data = data,
+                            data = it,
                             writeType = WriteType.WITHOUT_RESPONSE
                         )
-                        Timber.tag("ThroughputService").d("Writing data of size ${data.size}.")
+                        Timber.tag("ThroughputService").d("Writing data of size ${it.size}.")
                     }
                 }
-                Timber.tag("ThroughputService").d("Writing completed.")
+                Timber.tag("ThroughputService").d("Writing data of ${data.size} bytes completed.")
                 readThroughputMetrics(deviceId)
             }
         }
@@ -75,6 +76,22 @@ internal class ThroughputServiceManager : ServiceManager {
                 }
                 readThroughputMetrics(deviceId)
             }
+        }
+
+        private fun chunkData(data: ByteArray, isHighestMtuRequested: Boolean = false): List<ByteArray> {
+            val mtu = if (isHighestMtuRequested) 498 else 23
+
+            val maxChunkSize = mtu - 3
+            val chunkedData = mutableListOf<ByteArray>()
+
+            var startIndex = 0
+            while (startIndex < data.size) {
+                val endIndex = (startIndex + maxChunkSize).coerceAtMost(data.size)
+                chunkedData.add(data.sliceArray(startIndex until endIndex))
+                startIndex = endIndex
+            }
+
+            return chunkedData.toList()
         }
     }
 

@@ -5,11 +5,12 @@ import no.nordicsemi.android.lib.profile.csc.SpeedUnit
 import no.nordicsemi.android.lib.profile.csc.WheelSize
 import no.nordicsemi.android.lib.profile.directionFinder.PeripheralBluetoothAddress
 import no.nordicsemi.android.lib.profile.directionFinder.distance.DistanceMode
-import no.nordicsemi.android.toolbox.libs.core.data.uiMapper.TemperatureUnit
 import no.nordicsemi.android.lib.profile.rscs.RSCSSettingsUnit
 import no.nordicsemi.android.toolbox.libs.core.Profile
+import no.nordicsemi.android.toolbox.libs.core.data.WriteDataType
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.MeasurementSection
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.Range
+import no.nordicsemi.android.toolbox.libs.core.data.uiMapper.TemperatureUnit
 
 sealed interface DeviceConnectionViewEvent
 
@@ -60,8 +61,12 @@ internal sealed interface DFSViewEvent : DeviceConnectionViewEvent {
     data class OnBluetoothDeviceSelected(val device: PeripheralBluetoothAddress) : DFSViewEvent
 }
 
-internal sealed interface ThroughputEvent: DeviceConnectionViewEvent{
-    data object OnWriteData: ThroughputEvent
-    data object OnResetClick: ThroughputEvent
-    data object RequestMtuSize: ThroughputEvent
+internal sealed interface ThroughputEvent : DeviceConnectionViewEvent {
+    data class OnWriteData(
+        val writeType: WriteDataType = WriteDataType.TEXT,
+        val data: String,
+    ) : ThroughputEvent
+
+    data object OnResetClick : ThroughputEvent
+    data object RequestMtuSize : ThroughputEvent
 }

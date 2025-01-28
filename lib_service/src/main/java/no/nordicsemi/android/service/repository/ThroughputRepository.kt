@@ -4,9 +4,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import no.nordicsemi.android.service.services.ThroughputServiceManager
-import no.nordicsemi.android.toolbox.libs.core.data.ThroughputServiceData
 import no.nordicsemi.android.lib.profile.throughput.ThroughputMetrics
+import no.nordicsemi.android.service.services.ThroughputManager
+import no.nordicsemi.android.toolbox.libs.core.data.ThroughputServiceData
 
 object ThroughputRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<ThroughputServiceData>>()
@@ -16,16 +16,27 @@ object ThroughputRepository {
 
 
     fun sendDataToDK(deviceId: String, scope: CoroutineScope) {
-        ThroughputServiceManager.writeRequest(deviceId, scope)
+        val isHighestMtuRequested = _dataMap[deviceId]?.value?.isHighestMtuRequested ?: false
+        ThroughputManager.writeRequest(
+            deviceId = deviceId,
+            scope = scope,
+            isHighestMtuRequested = isHighestMtuRequested
+        )
     }
 
     fun resetData(deviceId: String, scope: CoroutineScope) {
-        ThroughputServiceManager.resetData(deviceId, scope)
+        ThroughputManager.resetData(deviceId, scope)
     }
 
     fun updateThroughput(deviceId: String, throughputMetrics: ThroughputMetrics) {
         _dataMap[deviceId]?.update {
             it.copy(throughputData = throughputMetrics)
+        }
+    }
+
+    fun mtuRequested(address: String) {
+        _dataMap[address]?.update {
+            it.copy(isHighestMtuRequested = true)
         }
     }
 
