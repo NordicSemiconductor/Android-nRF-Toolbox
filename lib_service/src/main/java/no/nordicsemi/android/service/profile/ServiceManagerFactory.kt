@@ -11,7 +11,7 @@ import no.nordicsemi.android.service.services.HTSManager
 import no.nordicsemi.android.service.services.PRXManager
 import no.nordicsemi.android.service.services.RSCSManager
 import no.nordicsemi.android.service.services.ServiceManager
-import no.nordicsemi.android.service.services.ThroughputServiceManager
+import no.nordicsemi.android.service.services.ThroughputManager
 import no.nordicsemi.android.toolbox.lib.utils.spec.BATTERY_SERVICE_UUID
 import no.nordicsemi.android.toolbox.lib.utils.spec.BPS_SERVICE_UUID
 import no.nordicsemi.android.toolbox.lib.utils.spec.CGMS_SERVICE_UUID
@@ -41,7 +41,7 @@ internal object ServiceManagerFactory {
         HRS_SERVICE_UUID to ::HRSManager,
         PRX_SERVICE_UUID to ::PRXManager,
         RSCS_SERVICE_UUID to ::RSCSManager,
-        THROUGHPUT_SERVICE_UUID to ::ThroughputServiceManager,
+        THROUGHPUT_SERVICE_UUID to ::ThroughputManager,
         // Add more service UUID-to-handler mappings as needed
     ).mapKeys { it.key.toKotlinUuid() }
 
