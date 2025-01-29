@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,6 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -37,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.libs.core.data.ThroughputServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.WriteDataType
+import no.nordicsemi.android.toolbox.libs.core.data.WritingStatus
 import no.nordicsemi.android.toolbox.profile.data.displayThroughput
 import no.nordicsemi.android.toolbox.profile.data.isValidAsciiHexString
 import no.nordicsemi.android.toolbox.profile.data.isValidHexString
@@ -104,26 +107,44 @@ internal fun ThroughputScreen(
                     }
                 }
             )
-            serviceData.throughputData?.let {
-                SectionRow {
-                    KeyValueColumn(
-                        "Total bytes received",
-                        it.throughputDataReceived()
-                    )
-                    KeyValueColumnReverse(
-                        "Gatt writes",
-                        it.gattWritesReceived.toString()
-                    )
+            when (serviceData.writingStatus) {
+                WritingStatus.IDEAL -> {
+                    ThroughputDataNotAvailable()
                 }
-                SectionRow {
-                    KeyValueColumn(
-                        "Throughput",
-                        "${it.throughputBitsPerSecond} bps"
-                    )
+
+                WritingStatus.IN_PROGRESS -> {
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text("Writing...")
+                        LinearProgressIndicator(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colorScheme.secondary,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
-            } ?: run {
-                ThroughputDataNotAvailable()
+
+                WritingStatus.COMPLETED -> {
+                    // Show throughput data.
+                    serviceData.throughputData?.let {
+                        SectionRow {
+                            KeyValueColumn(
+                                "Total bytes received",
+                                it.throughputDataReceived()
+                            )
+                            KeyValueColumnReverse(
+                                "Gatt writes",
+                                it.gattWritesReceived.toString()
+                            )
+                        }
+                        SectionRow {
+                            KeyValueColumn(
+                                "Throughput",
                                 it.displayThroughput()
+                            )
+                        }
+                    }
+                }
             }
         }
         if (showBottomSheet) {
@@ -135,7 +156,6 @@ internal fun ThroughputScreen(
     }
 
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

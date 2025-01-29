@@ -6,6 +6,7 @@ import no.nordicsemi.android.lib.profile.throughput.ThroughputDataParser
 import no.nordicsemi.android.service.repository.ThroughputRepository
 import no.nordicsemi.android.toolbox.lib.utils.tryOrLog
 import no.nordicsemi.android.toolbox.libs.core.Profile
+import no.nordicsemi.android.toolbox.libs.core.data.WritingStatus
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.core.WriteType
@@ -43,6 +44,7 @@ internal class ThroughputManager : ServiceManager {
         ) {
             scope.launch {
                 tryOrLog {
+                    ThroughputRepository.updateWriteStatus(deviceId, WritingStatus.IN_PROGRESS)
                     chunkData(data, isHighestMtuRequested).forEach {
                         writeCharacteristicProperty.write(
                             data = it,
@@ -53,6 +55,7 @@ internal class ThroughputManager : ServiceManager {
                 }
                 Timber.tag("ThroughputService").d("Writing data of ${data.size} bytes completed.")
                 readThroughputMetrics(deviceId)
+                ThroughputRepository.updateWriteStatus(deviceId, WritingStatus.COMPLETED)
             }
         }
 
@@ -68,6 +71,7 @@ internal class ThroughputManager : ServiceManager {
         fun resetData(deviceId: String, scope: CoroutineScope) {
             scope.launch {
                 tryOrLog {
+                    ThroughputRepository.updateWriteStatus(deviceId, WritingStatus.IN_PROGRESS)
                     writeCharacteristicProperty.write(
                         data = byteArrayOf(0x3D),
                         writeType = WriteType.WITHOUT_RESPONSE
@@ -75,6 +79,7 @@ internal class ThroughputManager : ServiceManager {
                     Timber.tag("ThroughputService").d("Reset Completed.")
                 }
                 readThroughputMetrics(deviceId)
+                ThroughputRepository.updateWriteStatus(deviceId, WritingStatus.COMPLETED)
             }
         }
 
