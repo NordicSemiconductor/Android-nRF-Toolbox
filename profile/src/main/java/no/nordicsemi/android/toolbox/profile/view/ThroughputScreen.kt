@@ -194,36 +194,29 @@ fun ThroughputWriteBottomSheet(
                 Button(
                     colors = ButtonDefaults.buttonColors(),
                     onClick = {
-                        if (data.trim().isEmpty()) {
-                            errorMessage = "Input data can't be empty."
-                            isError = true
-                            return@Button
-                        } else {
+                        val isValid = when (writeDataType) {
+                            WriteDataType.TEXT -> {
+                                true
+                            }
 
-                            val isValid = when (writeDataType) {
-                                WriteDataType.TEXT -> {
-                                    true
-                                }
-
-                                WriteDataType.HEX -> isValidHexString(data).also {
-                                    if (!it) {
-                                        errorMessage = "Invalid hex file."
-                                        isError = true
-                                    }
-                                }
-
-                                WriteDataType.ASCII -> isValidAsciiHexString(data).also {
-                                    if (!it) {
-                                        errorMessage = "Invalid ASCII hex file."
-                                        isError = true
-                                    }
+                            WriteDataType.HEX -> isValidHexString(data).also {
+                                if (!it) {
+                                    errorMessage = "Invalid hex file."
+                                    isError = true
                                 }
                             }
 
-                            if (isValid) {
-                                onClickEvent(ThroughputEvent.OnWriteData(writeDataType, data))
-                                onDismiss()
+                            WriteDataType.ASCII -> isValidAsciiHexString(data).also {
+                                if (!it) {
+                                    errorMessage = "Invalid ASCII hex file."
+                                    isError = true
+                                }
                             }
+                        }
+
+                        if (isValid) {
+                            onClickEvent(ThroughputEvent.OnWriteData(writeDataType, data))
+                            onDismiss()
                         }
                     }
                 ) {
