@@ -12,6 +12,15 @@ internal fun ThroughputMetrics.throughputDataReceived(): String {
     }
 }
 
+internal fun ThroughputMetrics.displayThroughput(): String {
+    val kbps = (this.throughputBitsPerSecond / 8f) / 1024f
+    return if (kbps > 0) {
+        "${this.throughputBitsPerSecond} bps (${String.format(Locale.US, "%.2f", kbps)} kBps)"
+    } else {
+        "${this.throughputBitsPerSecond} bps"
+    }
+}
+
 internal fun isValidHexString(hex: String): Boolean {
     // Check if the string has an even length
     if (hex.length % 2 != 0) return false
