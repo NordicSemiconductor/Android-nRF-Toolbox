@@ -11,3 +11,16 @@ internal fun ThroughputMetrics.throughputDataReceived(): String {
         "${this.totalBytesReceived} bytes"
     }
 }
+
+internal fun isValidHexString(hex: String): Boolean {
+    // Check if the string has an even length
+    if (hex.length % 2 != 0) return false
+
+    // Check if the string contains only valid hexadecimal characters
+    return hex.all { it in '0'..'9' || it in 'A'..'F' || it in 'a'..'f' }
+}
+
+internal fun isValidAsciiHexString(hexString: String): Boolean {
+    val hexPattern = Regex("^0x[0-9A-Fa-f]{2}(,0x[0-9A-Fa-f]{2})*$")
+    return hexPattern.matches(hexString.trim())
+}

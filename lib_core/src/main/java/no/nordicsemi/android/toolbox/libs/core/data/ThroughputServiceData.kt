@@ -11,5 +11,5 @@ data class ThroughputServiceData(
 
 
 enum class WriteDataType {
-    TEXT, HEX
+    TEXT, HEX, ASCII,
 }
