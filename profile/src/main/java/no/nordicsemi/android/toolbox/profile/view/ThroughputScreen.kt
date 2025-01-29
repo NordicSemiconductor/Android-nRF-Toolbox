@@ -37,6 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.libs.core.data.ThroughputServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.WriteDataType
+import no.nordicsemi.android.toolbox.profile.data.displayThroughput
 import no.nordicsemi.android.toolbox.profile.data.isValidAsciiHexString
 import no.nordicsemi.android.toolbox.profile.data.isValidHexString
 import no.nordicsemi.android.toolbox.profile.data.throughputDataReceived
@@ -122,6 +123,7 @@ internal fun ThroughputScreen(
                 }
             } ?: run {
                 ThroughputDataNotAvailable()
+                                it.displayThroughput()
             }
         }
         if (showBottomSheet) {
