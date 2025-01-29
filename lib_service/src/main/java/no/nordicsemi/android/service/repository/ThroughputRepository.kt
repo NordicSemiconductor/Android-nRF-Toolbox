@@ -8,6 +8,7 @@ import no.nordicsemi.android.lib.profile.throughput.ThroughputMetrics
 import no.nordicsemi.android.service.services.ThroughputManager
 import no.nordicsemi.android.toolbox.libs.core.data.ThroughputServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.WriteDataType
+import no.nordicsemi.android.toolbox.libs.core.data.WritingStatus
 
 object ThroughputRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<ThroughputServiceData>>()
@@ -77,6 +78,10 @@ object ThroughputRepository {
         return hexString.split(",") // Split by commas
             .map { it.trim().removePrefix("0x").toInt(16).toByte() } // Convert hex to byte
             .toByteArray()
+    }
+
+    fun updateWriteStatus(deviceId: String, status: WritingStatus) {
+        _dataMap[deviceId]?.update { it.copy(writingStatus = status) }
     }
 
 }
