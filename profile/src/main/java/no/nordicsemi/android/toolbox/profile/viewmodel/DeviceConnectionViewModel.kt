@@ -346,7 +346,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
                 RSCSRepository.updateUnitSettings(address, event.rscsUnitSettings)
 
             is ThroughputEvent.OnWriteData -> viewModelScope.launch {
-                ThroughputRepository.sendDataToDK(address, viewModelScope)
+                ThroughputRepository.sendDataToDK(address, viewModelScope, event.data, event.writeType)
             }
 
             ThroughputEvent.OnResetClick -> viewModelScope.launch {

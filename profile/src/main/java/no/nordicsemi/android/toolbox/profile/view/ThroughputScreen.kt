@@ -37,6 +37,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.libs.core.data.ThroughputServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.WriteDataType
+import no.nordicsemi.android.toolbox.profile.data.isValidAsciiHexString
+import no.nordicsemi.android.toolbox.profile.data.isValidHexString
 import no.nordicsemi.android.toolbox.profile.data.throughputDataReceived
 import no.nordicsemi.android.toolbox.profile.view.ThroughputSettingsMenu.Companion.onClick
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
@@ -48,7 +50,6 @@ import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionRow
 import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.ui.view.TextInputField
-import timber.log.Timber
 
 internal enum class ThroughputSettingsMenu {
     RequestMtu,
@@ -143,7 +144,8 @@ fun ThroughputWriteBottomSheet(
     val sheetState = rememberModalBottomSheetState()
     var writeDataType by rememberSaveable { mutableStateOf(WriteDataType.TEXT) }
     var data by rememberSaveable { mutableStateOf("") }
-    var isError by rememberSaveable { mutableStateOf(false) }
+    var isError: Boolean? by rememberSaveable { mutableStateOf(null) }
+    var errorMessage by rememberSaveable { mutableStateOf("") }
 
     ModalBottomSheet(
         onDismissRequest = { onDismiss() },
@@ -178,37 +180,51 @@ fun ThroughputWriteBottomSheet(
                 input = data,
                 label = "Input",
                 placeholder = "Enter input data here.",
-                errorMessage = "Input data can't be empty.",
-                errorState = data.trim().isEmpty() && isError,
+                errorMessage = errorMessage,
+                errorState = isError == true,
                 onUpdate = {
                     data = it
-                    if (data.trim().isEmpty()) {
-                        isError = true
-                    }
                 }
             )
             // Confirm button.
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .clickable {
-                        if (isError && data.trim().isNotEmpty()) {
-                            onClickEvent(ThroughputEvent.OnWriteData(writeDataType, data))
-                            onDismiss()
-                            Timber.tag("AAA").d("Confirm button clicked!")
-                        } else isError = true
-                    },
+                modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center,
             ) {
                 Button(
                     colors = ButtonDefaults.buttonColors(),
                     onClick = {
-                        if (isError && data.trim().isNotEmpty()) {
-                            onClickEvent(ThroughputEvent.OnWriteData(writeDataType, data))
-                            onDismiss()
-                            Timber.tag("AAA").d("Confirm button clicked!")
-                        } else isError = true
+                        if (data.trim().isEmpty()) {
+                            errorMessage = "Input data can't be empty."
+                            isError = true
+                            return@Button
+                        } else {
+
+                            val isValid = when (writeDataType) {
+                                WriteDataType.TEXT -> {
+                                    true
+                                }
+
+                                WriteDataType.HEX -> isValidHexString(data).also {
+                                    if (!it) {
+                                        errorMessage = "Invalid hex file."
+                                        isError = true
+                                    }
+                                }
+
+                                WriteDataType.ASCII -> isValidAsciiHexString(data).also {
+                                    if (!it) {
+                                        errorMessage = "Invalid ASCII hex file."
+                                        isError = true
+                                    }
+                                }
+                            }
+
+                            if (isValid) {
+                                onClickEvent(ThroughputEvent.OnWriteData(writeDataType, data))
+                                onDismiss()
+                            }
+                        }
                     }
                 ) {
                     Text(text = "Confirm")
@@ -222,7 +238,8 @@ fun ThroughputWriteBottomSheet(
 @Composable
 fun ThroughputDataNotAvailable() {
     Text(
-        "No throughput metrics to show. Please click settings to reset the metrics or request highest MTU. Click on write button to write data."
+        "No throughput metrics to show. Please click settings to reset the metrics or request highest MTU. Click on write button to write data." +
+                "\n\nPlease remember to pair the dk each time twice."
     )
 }
 
