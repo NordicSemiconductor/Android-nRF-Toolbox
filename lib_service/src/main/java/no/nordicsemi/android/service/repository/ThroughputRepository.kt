@@ -23,12 +23,20 @@ object ThroughputRepository {
         writeDataType: WriteDataType,
     ) {
         val isHighestMtuRequested = _dataMap[deviceId]?.value?.isHighestMtuRequested ?: false
-        ThroughputManager.writeRequest(
-            deviceId = deviceId,
-            scope = scope,
-            isHighestMtuRequested = isHighestMtuRequested,
-            data = convertToByteArray(data, writeDataType),
-        )
+        if (data.isNotEmpty()) {
+            ThroughputManager.writeRequest(
+                deviceId = deviceId,
+                scope = scope,
+                isHighestMtuRequested = isHighestMtuRequested,
+                data = convertToByteArray(data, writeDataType),
+            )
+        } else {
+            ThroughputManager.writeRequest(
+                deviceId = deviceId,
+                scope = scope,
+                isHighestMtuRequested = isHighestMtuRequested,
+            )
+        }
     }
 
     fun resetData(deviceId: String, scope: CoroutineScope) {
