@@ -23,9 +23,12 @@ import no.nordicsemi.android.service.services.ServiceManager
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.CentralManager.ConnectionOptions
+import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import no.nordicsemi.kotlin.ble.core.Manager
+import no.nordicsemi.kotlin.ble.core.Phy
+import no.nordicsemi.kotlin.ble.core.PhyOption
 import no.nordicsemi.kotlin.ble.core.WriteType
 import timber.log.Timber
 import javax.inject.Inject
@@ -87,6 +90,8 @@ internal class ProfileService : NotificationService() {
                 if (it.isConnected) {
                     try {
                         it.requestHighestValueLength()
+                        it.requestConnectionPriority(ConnectionPriority.HIGH)
+                        it.setPreferredPhy(Phy.PHY_LE_2M,Phy.PHY_LE_2M,PhyOption.S2)
                     } catch (e: Exception) {
                         Timber.e("Could not change mtu size $e")
                     }

@@ -1,6 +1,10 @@
 package no.nordicsemi.android.service.services
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.lib.profile.throughput.ThroughputDataParser
 import no.nordicsemi.android.service.repository.ThroughputRepository
@@ -40,18 +44,24 @@ internal class ThroughputManager : ServiceManager {
             deviceId: String,
             scope: CoroutineScope,
             maxWriteValueLength: Int,
-            data: ByteArray = ByteArray(102400) { 0x68 },
+            data: ByteArray,
         ) {
             scope.launch {
-                tryOrLog {
+                try {
                     ThroughputRepository.updateWriteStatus(deviceId, WritingStatus.IN_PROGRESS)
-                    chunkData(data, maxWriteValueLength).forEach {
-                        writeCharacteristicProperty.write(
-                            data = it,
-                            writeType = WriteType.WITHOUT_RESPONSE
-                        )
-                        Timber.tag("ThroughputService").d("Writing data of size ${it.size}.")
+                    coroutineScope {
+                        val writeJobs = chunkData(data, maxWriteValueLength).map { chunk ->
+                            async(Dispatchers.IO) {
+                                writeCharacteristicProperty.write(
+                                    data = chunk,
+                                    writeType = WriteType.WITHOUT_RESPONSE
+                                )
+                            }
+                        }
+                        writeJobs.awaitAll()
                     }
+                } catch (e: Exception) {
+                    Timber.tag("ThroughputService").e("Error ${e.message}")
                 }
                 Timber.tag("ThroughputService").d("Writing data of ${data.size} bytes completed.")
                 readThroughputMetrics(deviceId)
@@ -83,17 +93,9 @@ internal class ThroughputManager : ServiceManager {
             }
         }
 
-        private fun chunkData(data: ByteArray, maxWriteValueLength: Int): List<ByteArray> {
-            val chunkedData = mutableListOf<ByteArray>()
-
-            var startIndex = 0
-            while (startIndex < data.size) {
-                val endIndex = (startIndex + maxWriteValueLength).coerceAtMost(data.size)
-                chunkedData.add(data.sliceArray(startIndex until endIndex))
-                startIndex = endIndex
-            }
-
-            return chunkedData.toList()
+        private fun chunkData(data: ByteArray, chunkSize: Int): List<ByteArray> {
+            return data.toList()
+                .chunked(chunkSize) { it.toByteArray() } // Efficient chunking
         }
     }
 
