@@ -64,7 +64,8 @@ internal sealed interface DFSViewEvent : DeviceConnectionViewEvent {
 internal sealed interface ThroughputEvent : DeviceConnectionViewEvent {
     data class OnWriteData(
         val writeType: WriteDataType = WriteDataType.TEXT,
-        val data: String,
+        val data: String? = null,
+        val packetSize: Int? = null
     ) : ThroughputEvent
 
     data object OnResetClick : ThroughputEvent

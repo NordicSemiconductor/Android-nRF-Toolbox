@@ -12,7 +12,7 @@ data class ThroughputServiceData(
 
 
 enum class WriteDataType {
-    TEXT, HEX, ASCII,
+    TEXT, HEX, ASCII, PACKET_SIZE, DEFAULT
 }
 
 enum class WritingStatus {

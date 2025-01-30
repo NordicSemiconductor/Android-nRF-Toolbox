@@ -17,29 +17,6 @@ object ThroughputRepository {
         _dataMap.getOrPut(deviceId) { MutableStateFlow(ThroughputServiceData()) }
 
 
-    fun sendDataToDK(
-        deviceId: String,
-        scope: CoroutineScope,
-        data: String,
-        writeDataType: WriteDataType,
-    ) {
-        val maxWriteValueLength = _dataMap[deviceId]?.value?.maxWriteValueLength ?: 20
-        if (data.isNotEmpty()) {
-            ThroughputManager.writeRequest(
-                deviceId = deviceId,
-                scope = scope,
-                maxWriteValueLength = maxWriteValueLength,
-                data = convertToByteArray(data, writeDataType),
-            )
-        } else {
-            ThroughputManager.writeRequest(
-                deviceId = deviceId,
-                scope = scope,
-                maxWriteValueLength = maxWriteValueLength,
-            )
-        }
-    }
-
     fun resetData(deviceId: String, scope: CoroutineScope) {
         ThroughputManager.resetData(deviceId, scope)
     }
@@ -50,12 +27,45 @@ object ThroughputRepository {
         }
     }
 
-    private fun convertToByteArray(data: String, writeDataType: WriteDataType): ByteArray {
+    fun sendDataToDK(
+        deviceId: String,
+        scope: CoroutineScope,
+        data: String?,
+        writeDataType: WriteDataType,
+        packetSize: Int? = null,
+    ) {
+        val maxWriteValueLength = _dataMap[deviceId]?.value?.maxWriteValueLength ?: 20
+        ThroughputManager.writeRequest(
+            deviceId = deviceId,
+            scope = scope,
+            maxWriteValueLength = maxWriteValueLength,
+            data = convertToByteArray(data, writeDataType, packetSize, deviceId),
+        )
+    }
+
+    private fun convertToByteArray(
+        data: String?,
+        writeDataType: WriteDataType,
+        packetSize: Int?,
+        deviceId: String
+    ): ByteArray {
         return when (writeDataType) {
-            WriteDataType.TEXT -> stringToByteArray(data)
-            WriteDataType.HEX -> hexStringToByteArray(data)
-            WriteDataType.ASCII -> asciiStringToByteArray(data)
+            WriteDataType.TEXT -> stringToByteArray(data!!)
+            WriteDataType.HEX -> hexStringToByteArray(data!!)
+            WriteDataType.ASCII -> asciiStringToByteArray(data!!)
+            WriteDataType.PACKET_SIZE -> getPacketSizeByteArray(packetSize!!, deviceId)
+            WriteDataType.DEFAULT -> getDefaultByteArray()
         }
+    }
+
+    private fun getDefaultByteArray(): ByteArray {
+        // 100KB byteArray data
+        return ByteArray(102400) { 0x68 }
+    }
+
+    private fun getPacketSizeByteArray(packetSize: Int, deviceId: String): ByteArray {
+        val mtuSize = _dataMap[deviceId]?.value?.maxWriteValueLength ?: 0
+        return ByteArray(packetSize * mtuSize) { 0x68 }
     }
 
     private fun stringToByteArray(data: String): ByteArray = data.encodeToByteArray()
