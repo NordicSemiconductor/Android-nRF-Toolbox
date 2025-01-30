@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.AlertDialog
@@ -35,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.libs.core.data.ThroughputServiceData
@@ -171,7 +174,7 @@ fun ThroughputWriteBottomSheet(
     onClickEvent: (DeviceConnectionViewEvent) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
-    var writeDataType by rememberSaveable { mutableStateOf(WriteDataType.TEXT) }
+    var writeDataType: WriteDataType by rememberSaveable { mutableStateOf(WriteDataType.DEFAULT) }
     var data by rememberSaveable { mutableStateOf("") }
     var isError: Boolean? by rememberSaveable { mutableStateOf(null) }
     var errorMessage by rememberSaveable { mutableStateOf("") }
@@ -200,61 +203,122 @@ fun ThroughputWriteBottomSheet(
                 items = WriteDataType.entries.map { it },
                 label = "Write type",
                 placeholder = "Select write type",
-                defaultSelectedItem = WriteDataType.TEXT,
                 onItemSelected = {
                     writeDataType = it
                 }
             )
-            TextInputField(
-                input = data,
-                label = "Input",
-                placeholder = "Enter input data here.",
-                errorMessage = errorMessage,
-                errorState = isError == true,
-                onUpdate = {
-                    data = it
-                }
-            )
-            // Confirm button.
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Button(
-                    colors = ButtonDefaults.buttonColors(),
-                    onClick = {
-                        val isValid = when (writeDataType) {
-                            WriteDataType.TEXT -> {
-                                true
-                            }
-
-                            WriteDataType.HEX -> isValidHexString(data).also {
-                                if (!it) {
-                                    errorMessage = "Invalid hex file."
-                                    isError = true
-                                }
-                            }
-
-                            WriteDataType.ASCII -> isValidAsciiHexString(data).also {
-                                if (!it) {
-                                    errorMessage = "Invalid ASCII hex file."
-                                    isError = true
-                                }
-                            }
-                        }
-
-                        if (isValid) {
-                            onClickEvent(ThroughputEvent.OnWriteData(writeDataType, data))
-                            onDismiss()
-                        }
+            if (writeDataType == WriteDataType.TEXT || writeDataType == WriteDataType.HEX || writeDataType == WriteDataType.ASCII) {
+                TextInputField(
+                    input = data,
+                    label = "Input",
+                    placeholder = "Enter input data here.",
+                    errorMessage = errorMessage,
+                    errorState = isError == true,
+                    onUpdate = {
+                        data = it
                     }
+                )
+                // Confirm button.
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Text(text = if (data.isEmpty()) "Default write" else "Confirm")
+                    Button(
+                        colors = ButtonDefaults.buttonColors(),
+                        onClick = {
+                            val isValid = when (writeDataType) {
+                                WriteDataType.HEX -> isValidHexString(data).also {
+                                    if (!it) {
+                                        errorMessage = "Invalid hex file."
+                                        isError = true
+                                    }
+                                }
+
+                                WriteDataType.ASCII -> isValidAsciiHexString(data).also {
+                                    if (!it) {
+                                        errorMessage = "Invalid ASCII hex file."
+                                        isError = true
+                                    }
+                                }
+
+                                else -> true
+                            }
+
+                            if (isValid) {
+                                onClickEvent(ThroughputEvent.OnWriteData(writeDataType, data))
+                                onDismiss()
+                            }
+                        }
+                    ) {
+                        Text(text = "Confirm")
+                    }
+                }
+            } else {
+                CommonDataInputView {
+                    onClickEvent(it)
+                    onDismiss()
                 }
             }
         }
     }
 
+}
+
+@Composable
+private fun CommonDataInputView(
+    onClickEvent: (DeviceConnectionViewEvent) -> Unit
+) {
+    var packetSize by rememberSaveable { mutableStateOf("") }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Button(onClick = {
+            onClickEvent(ThroughputEvent.OnWriteData(WriteDataType.DEFAULT, ""))
+        }) {
+            Text("Default write")
+        }
+        Spacer(modifier = Modifier.width(4.dp))
+        TextInputField(
+            input = packetSize,
+            label = "Packet size",
+            placeholder = "Enter packet size.",
+            modifier = Modifier.weight(1f),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            onUpdate = { newInt ->
+                if (newInt.all { it.isDigit() }) { // Ensures only digits
+                    packetSize = newInt
+                }
+            }
+        )
+        val number = packetSize.toIntOrNull() ?: 0
+        if (number > 0) {
+            Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .clickable {
+                        onClickEvent(
+                            ThroughputEvent.OnWriteData(
+                                WriteDataType.PACKET_SIZE,
+                                packetSize = number
+                            )
+                        )
+                    }
+                    .padding(8.dp)
+            )
+        }
+
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CommonDataInputViewPreview() {
+    CommonDataInputView {}
 }
 
 @Composable

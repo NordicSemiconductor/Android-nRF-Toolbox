@@ -3,6 +3,7 @@ package no.nordicsemi.android.ui.view
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Icon
@@ -54,6 +55,7 @@ fun TextInputField(
     placeholder: String = "",
     errorMessage: String = "",
     errorState: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     onUpdate: (String) -> Unit
 ) {
     val textColor = MaterialTheme.colorScheme.onSurface.copy(
@@ -66,6 +68,7 @@ fun TextInputField(
             PlaceholderTransformation(placeholder) else VisualTransformation.None,
         modifier = modifier.fillMaxWidth(),
         label = { Text(text = label) },
+        keyboardOptions = keyboardOptions,
         placeholder = {
             Text(
                 text = placeholder,

@@ -357,6 +357,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
                     viewModelScope,
                     event.data,
                     event.writeType,
+                    event.packetSize,
                 )
             }
 
