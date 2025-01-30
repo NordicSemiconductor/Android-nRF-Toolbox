@@ -231,9 +231,15 @@ internal class DeviceConnectionViewModel @Inject constructor(
         }
     }
 
-    private fun updateThroughput() = ThroughputRepository.getData(address).onEach {
-        updateDeviceData(it)
-    }.launchIn(viewModelScope)
+    private fun updateThroughput() {
+        ThroughputRepository.getData(address).onEach {
+            updateDeviceData(it)
+        }.launchIn(viewModelScope)
+        // Update maximum write value length. Since it will be available as soon as connection is established.
+        viewModelScope.launch {
+            ThroughputRepository.updateMaxWriteValueLength(address, getServiceApi()?.getMaxWriteValue(address))
+        }
+    }
 
     private fun updateDFS() = DFSRepository.getData(address).onEach {
         updateDeviceData(it)
@@ -346,7 +352,12 @@ internal class DeviceConnectionViewModel @Inject constructor(
                 RSCSRepository.updateUnitSettings(address, event.rscsUnitSettings)
 
             is ThroughputEvent.OnWriteData -> viewModelScope.launch {
-                ThroughputRepository.sendDataToDK(address, viewModelScope, event.data, event.writeType)
+                ThroughputRepository.sendDataToDK(
+                    address,
+                    viewModelScope,
+                    event.data,
+                    event.writeType,
+                )
             }
 
             ThroughputEvent.OnResetClick -> viewModelScope.launch {
@@ -354,10 +365,12 @@ internal class DeviceConnectionViewModel @Inject constructor(
             }
 
             is ThroughputEvent.RequestMtuSize -> {
-                ThroughputRepository.mtuRequested(address)
                 // Request to change mtu
                 viewModelScope.launch {
-                    getServiceApi()?.requestMtu(address)
+                    ThroughputRepository.updateMaxWriteValueLength(
+                        address,
+                        getServiceApi()?.getMaxWriteValue(address)
+                    )
                 }
             }
         }

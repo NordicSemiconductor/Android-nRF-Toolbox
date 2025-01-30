@@ -120,7 +120,7 @@ internal fun ThroughputScreen(
                             color = MaterialTheme.colorScheme.secondary,
                             trackColor = MaterialTheme.colorScheme.surfaceVariant,
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
 
@@ -142,6 +142,13 @@ internal fun ThroughputScreen(
                                 "Throughput",
                                 it.displayThroughput()
                             )
+                            // Show mtu size
+                            serviceData.maxWriteValueLength?.let {
+                                KeyValueColumnReverse(
+                                    "Max write value",
+                                    "$it"
+                                )
+                            }
                         }
                     }
                 }
@@ -242,7 +249,7 @@ fun ThroughputWriteBottomSheet(
                         }
                     }
                 ) {
-                    Text(text = "Confirm")
+                    Text(text = if (data.isEmpty()) "Default write" else "Confirm")
                 }
             }
         }

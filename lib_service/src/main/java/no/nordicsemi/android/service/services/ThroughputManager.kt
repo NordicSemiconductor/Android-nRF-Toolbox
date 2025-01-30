@@ -39,13 +39,13 @@ internal class ThroughputManager : ServiceManager {
         fun writeRequest(
             deviceId: String,
             scope: CoroutineScope,
-            isHighestMtuRequested: Boolean, // Todo: For now just a flag, later change it to mtu size.
-            data: ByteArray = ByteArray(1025) { 0x3D },
+            maxWriteValueLength: Int,
+            data: ByteArray = ByteArray(102400) { 0x68 },
         ) {
             scope.launch {
                 tryOrLog {
                     ThroughputRepository.updateWriteStatus(deviceId, WritingStatus.IN_PROGRESS)
-                    chunkData(data, isHighestMtuRequested).forEach {
+                    chunkData(data, maxWriteValueLength).forEach {
                         writeCharacteristicProperty.write(
                             data = it,
                             writeType = WriteType.WITHOUT_RESPONSE
@@ -83,15 +83,12 @@ internal class ThroughputManager : ServiceManager {
             }
         }
 
-        private fun chunkData(data: ByteArray, isHighestMtuRequested: Boolean = false): List<ByteArray> {
-            val mtu = if (isHighestMtuRequested) 498 else 23
-
-            val maxChunkSize = mtu - 3
+        private fun chunkData(data: ByteArray, maxWriteValueLength: Int): List<ByteArray> {
             val chunkedData = mutableListOf<ByteArray>()
 
             var startIndex = 0
             while (startIndex < data.size) {
-                val endIndex = (startIndex + maxChunkSize).coerceAtMost(data.size)
+                val endIndex = (startIndex + maxWriteValueLength).coerceAtMost(data.size)
                 chunkedData.add(data.sliceArray(startIndex until endIndex))
                 startIndex = endIndex
             }
