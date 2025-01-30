@@ -23,19 +23,19 @@ object ThroughputRepository {
         data: String,
         writeDataType: WriteDataType,
     ) {
-        val isHighestMtuRequested = _dataMap[deviceId]?.value?.isHighestMtuRequested ?: false
+        val maxWriteValueLength = _dataMap[deviceId]?.value?.maxWriteValueLength ?: 20
         if (data.isNotEmpty()) {
             ThroughputManager.writeRequest(
                 deviceId = deviceId,
                 scope = scope,
-                isHighestMtuRequested = isHighestMtuRequested,
+                maxWriteValueLength = maxWriteValueLength,
                 data = convertToByteArray(data, writeDataType),
             )
         } else {
             ThroughputManager.writeRequest(
                 deviceId = deviceId,
                 scope = scope,
-                isHighestMtuRequested = isHighestMtuRequested,
+                maxWriteValueLength = maxWriteValueLength,
             )
         }
     }
@@ -47,12 +47,6 @@ object ThroughputRepository {
     fun updateThroughput(deviceId: String, throughputMetrics: ThroughputMetrics) {
         _dataMap[deviceId]?.update {
             it.copy(throughputData = throughputMetrics)
-        }
-    }
-
-    fun mtuRequested(address: String) {
-        _dataMap[address]?.update {
-            it.copy(isHighestMtuRequested = true)
         }
     }
 
@@ -82,6 +76,10 @@ object ThroughputRepository {
 
     fun updateWriteStatus(deviceId: String, status: WritingStatus) {
         _dataMap[deviceId]?.update { it.copy(writingStatus = status) }
+    }
+
+    fun updateMaxWriteValueLength(deviceId: String, mtuSize: Int?) {
+        _dataMap[deviceId]?.update { it.copy(maxWriteValueLength = mtuSize) }
     }
 
 }

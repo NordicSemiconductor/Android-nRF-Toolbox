@@ -1,13 +1,13 @@
 package no.nordicsemi.android.toolbox.libs.core.data
 
-import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.lib.profile.throughput.ThroughputMetrics
+import no.nordicsemi.android.toolbox.libs.core.Profile
 
 data class ThroughputServiceData(
     override val profile: Profile = Profile.THROUGHPUT,
     val throughputData: ThroughputMetrics? = null,
-    val isHighestMtuRequested: Boolean = false,
     val writingStatus: WritingStatus = WritingStatus.IDEAL,
+    val maxWriteValueLength: Int? = null
 ) : ProfileServiceData()
 
 

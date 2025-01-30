@@ -5,6 +5,7 @@ import no.nordicsemi.android.service.services.ServiceManager
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
+import no.nordicsemi.kotlin.ble.core.WriteType
 
 /** Device disconnection reason. */
 sealed interface DeviceDisconnectionReason
@@ -53,8 +54,12 @@ interface ServiceApi {
     val disconnectionReason: Flow<DeviceDisconnectionReason?>
 
     /**
-     * Request mtu of highest possible value.
+     * Request maximum write value length.
+     * For [WriteType.WITHOUT_RESPONSE] it is equal to *ATT MTU - 3 bytes*.
      */
-    suspend fun requestMtu(address: String)
+    suspend fun getMaxWriteValue(
+        address: String,
+        writeType: WriteType = WriteType.WITHOUT_RESPONSE
+    ): Int?
 
 }

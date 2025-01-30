@@ -26,6 +26,7 @@ import no.nordicsemi.kotlin.ble.client.android.CentralManager.ConnectionOptions
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import no.nordicsemi.kotlin.ble.core.Manager
+import no.nordicsemi.kotlin.ble.core.WriteType
 import timber.log.Timber
 import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
@@ -81,18 +82,17 @@ internal class ProfileService : NotificationService() {
         override val disconnectionReason: Flow<DeviceDisconnectionReason?>
             get() = _disconnectionReason.asStateFlow()
 
-        override suspend fun requestMtu(address: String) {
-            val peripheral = getPeripheralById(address)
-            peripheral?.let {
+        override suspend fun getMaxWriteValue(address: String, writeType: WriteType): Int? =
+            getPeripheralById(address)?.let {
                 if (it.isConnected) {
                     try {
-                        peripheral.requestHighestValueLength() // request mtu 517. dataSize = 495 bytes per packet.
+                        it.requestHighestValueLength()
                     } catch (e: Exception) {
                         Timber.e("Could not change mtu size $e")
                     }
                 }
+                it.maximumWriteValueLength(writeType)
             }
-        }
 
         override fun getPeripheralById(address: String?): Peripheral? =
             address?.let { centralManager.getPeripheralById(it) }
