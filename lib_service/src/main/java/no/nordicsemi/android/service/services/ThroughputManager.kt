@@ -2,13 +2,14 @@ package no.nordicsemi.android.service.services
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import no.nordicsemi.android.lib.profile.throughput.ThroughputDataParser
 import no.nordicsemi.android.service.repository.ThroughputRepository
-import no.nordicsemi.android.toolbox.lib.utils.tryOrLog
 import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.WritingStatus
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
@@ -39,17 +40,22 @@ internal class ThroughputManager : ServiceManager {
 
     companion object {
         private lateinit var writeCharacteristicProperty: RemoteCharacteristic
+        private val writeScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+        private fun stopAllWrites() {
+            writeScope.coroutineContext.cancelChildren() // Cancel all running writes
+        }
 
         fun writeRequest(
             deviceId: String,
-            scope: CoroutineScope,
             maxWriteValueLength: Int,
             data: ByteArray,
         ) {
-            scope.launch {
+            stopAllWrites() // Cancel previous writes before starting a new one
+            writeScope.launch {
                 try {
                     ThroughputRepository.updateWriteStatus(deviceId, WritingStatus.IN_PROGRESS)
-                    coroutineScope {
+                    supervisorScope {
                         val writeJobs = chunkData(data, maxWriteValueLength).map { chunk ->
                             async(Dispatchers.IO) {
                                 writeCharacteristicProperty.write(
@@ -62,10 +68,11 @@ internal class ThroughputManager : ServiceManager {
                     }
                 } catch (e: Exception) {
                     Timber.tag("ThroughputService").e("Error ${e.message}")
+                } finally {
+                    Timber.tag("ThroughputService").d("Writing ${data.size} bytes data completed.")
+                    readThroughputMetrics(deviceId)
+                    ThroughputRepository.updateWriteStatus(deviceId, WritingStatus.COMPLETED)
                 }
-                Timber.tag("ThroughputService").d("Writing data of ${data.size} bytes completed.")
-                readThroughputMetrics(deviceId)
-                ThroughputRepository.updateWriteStatus(deviceId, WritingStatus.COMPLETED)
             }
         }
 
@@ -78,18 +85,22 @@ internal class ThroughputManager : ServiceManager {
             }
         }
 
-        fun resetData(deviceId: String, scope: CoroutineScope) {
-            scope.launch {
-                tryOrLog {
+        fun resetData(deviceId: String) {
+            stopAllWrites() // Cancel previous writes before starting a new one
+            writeScope.launch {
+                try {
                     ThroughputRepository.updateWriteStatus(deviceId, WritingStatus.IN_PROGRESS)
                     writeCharacteristicProperty.write(
                         data = byteArrayOf(0x3D),
                         writeType = WriteType.WITHOUT_RESPONSE
                     )
+                } catch (e: Exception) {
+                    Timber.tag("ThroughputService").e("Error ${e.message}")
+                } finally {
+                    readThroughputMetrics(deviceId)
+                    ThroughputRepository.updateWriteStatus(deviceId, WritingStatus.COMPLETED)
                     Timber.tag("ThroughputService").d("Reset Completed.")
                 }
-                readThroughputMetrics(deviceId)
-                ThroughputRepository.updateWriteStatus(deviceId, WritingStatus.COMPLETED)
             }
         }
 
@@ -100,3 +111,4 @@ internal class ThroughputManager : ServiceManager {
     }
 
 }
+

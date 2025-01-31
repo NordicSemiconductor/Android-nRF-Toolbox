@@ -354,7 +354,6 @@ internal class DeviceConnectionViewModel @Inject constructor(
             is ThroughputEvent.OnWriteData -> viewModelScope.launch {
                 ThroughputRepository.sendDataToDK(
                     address,
-                    viewModelScope,
                     event.data,
                     event.writeType,
                     event.packetSize,
@@ -362,7 +361,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
             }
 
             ThroughputEvent.OnResetClick -> viewModelScope.launch {
-                ThroughputRepository.resetData(address, viewModelScope)
+                ThroughputRepository.resetData(address)
             }
 
             is ThroughputEvent.RequestMtuSize -> {
