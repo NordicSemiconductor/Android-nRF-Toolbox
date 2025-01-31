@@ -1,6 +1,5 @@
 package no.nordicsemi.android.service.repository
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -17,8 +16,8 @@ object ThroughputRepository {
         _dataMap.getOrPut(deviceId) { MutableStateFlow(ThroughputServiceData()) }
 
 
-    fun resetData(deviceId: String, scope: CoroutineScope) {
-        ThroughputManager.resetData(deviceId, scope)
+    fun resetData(deviceId: String) {
+        ThroughputManager.resetData(deviceId)
     }
 
     fun updateThroughput(deviceId: String, throughputMetrics: ThroughputMetrics) {
@@ -29,7 +28,6 @@ object ThroughputRepository {
 
     fun sendDataToDK(
         deviceId: String,
-        scope: CoroutineScope,
         data: String?,
         writeDataType: WriteDataType,
         packetSize: Int? = null,
@@ -37,7 +35,6 @@ object ThroughputRepository {
         val maxWriteValueLength = _dataMap[deviceId]?.value?.maxWriteValueLength ?: 20
         ThroughputManager.writeRequest(
             deviceId = deviceId,
-            scope = scope,
             maxWriteValueLength = maxWriteValueLength,
             data = convertToByteArray(data, writeDataType, packetSize, deviceId),
         )
