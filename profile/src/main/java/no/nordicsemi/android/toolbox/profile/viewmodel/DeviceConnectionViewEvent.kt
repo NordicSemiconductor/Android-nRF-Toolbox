@@ -7,7 +7,7 @@ import no.nordicsemi.android.lib.profile.directionFinder.PeripheralBluetoothAddr
 import no.nordicsemi.android.lib.profile.directionFinder.distance.DistanceMode
 import no.nordicsemi.android.lib.profile.rscs.RSCSSettingsUnit
 import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.WriteDataType
+import no.nordicsemi.android.toolbox.libs.core.data.ThroughputInputType
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.MeasurementSection
 import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.Range
 import no.nordicsemi.android.toolbox.libs.core.data.uiMapper.TemperatureUnit
@@ -63,11 +63,7 @@ internal sealed interface DFSViewEvent : DeviceConnectionViewEvent {
 
 internal sealed interface ThroughputEvent : DeviceConnectionViewEvent {
     data class OnWriteData(
-        val writeType: WriteDataType = WriteDataType.TEXT,
-        val data: String? = null,
-        val packetSize: Int? = null
+        val writeType: ThroughputInputType,
     ) : ThroughputEvent
 
-    data object OnResetClick : ThroughputEvent
-    data object RequestMtuSize : ThroughputEvent
 }
