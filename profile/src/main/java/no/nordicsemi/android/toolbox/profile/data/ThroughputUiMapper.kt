@@ -1,6 +1,8 @@
 package no.nordicsemi.android.toolbox.profile.data
 
 import no.nordicsemi.android.lib.profile.throughput.ThroughputMetrics
+import no.nordicsemi.android.toolbox.libs.core.data.NumberOfBytes
+import no.nordicsemi.android.toolbox.libs.core.data.NumberOfSeconds
 import java.util.Locale
 
 internal fun ThroughputMetrics.throughputDataReceived(): String {
@@ -21,15 +23,12 @@ internal fun ThroughputMetrics.displayThroughput(): String {
     }
 }
 
-internal fun isValidHexString(hex: String): Boolean {
-    // Check if the string has an even length
-    if (hex.length % 2 != 0) return false
-
-    // Check if the string contains only valid hexadecimal characters
-    return hex.all { it in '0'..'9' || it in 'A'..'F' || it in 'a'..'f' }
-}
-
-internal fun isValidAsciiHexString(hexString: String): Boolean {
-    val hexPattern = Regex("^0x[0-9A-Fa-f]{2}(,0x[0-9A-Fa-f]{2})*$")
-    return hexPattern.matches(hexString.trim())
+/**
+ * This function returns a list of Strings from the Throughput input type.
+ */
+fun getThroughputInputTypes(): List<String> {
+    return listOf(
+        NumberOfBytes.getString(),
+        NumberOfSeconds.getString()
+    )
 }

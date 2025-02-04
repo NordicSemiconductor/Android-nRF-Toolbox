@@ -1,16 +1,13 @@
 package no.nordicsemi.android.service.services
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
 import no.nordicsemi.android.lib.profile.throughput.ThroughputDataParser
 import no.nordicsemi.android.service.repository.ThroughputRepository
 import no.nordicsemi.android.toolbox.libs.core.Profile
+import no.nordicsemi.android.toolbox.libs.core.data.NumberOfBytes
+import no.nordicsemi.android.toolbox.libs.core.data.ThroughputInputType
+import no.nordicsemi.android.toolbox.libs.core.data.NumberOfSeconds
 import no.nordicsemi.android.toolbox.libs.core.data.WritingStatus
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
@@ -40,67 +37,78 @@ internal class ThroughputManager : ServiceManager {
 
     companion object {
         private lateinit var writeCharacteristicProperty: RemoteCharacteristic
-        private val writeScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-        private fun stopAllWrites() {
-            writeScope.coroutineContext.cancelChildren() // Cancel all running writes
-        }
-
-        fun writeRequest(
+        suspend fun writeRequest(
             deviceId: String,
             maxWriteValueLength: Int,
-            data: ByteArray,
+            inputType: ThroughputInputType,
         ) {
-            stopAllWrites() // Cancel previous writes before starting a new one
-            writeScope.launch {
-                try {
-                    ThroughputRepository.updateWriteStatus(deviceId, WritingStatus.IN_PROGRESS)
-                    supervisorScope {
-                        val writeJobs = chunkData(data, maxWriteValueLength).map { chunk ->
-                            async(Dispatchers.IO) {
-                                writeCharacteristicProperty.write(
-                                    data = chunk,
-                                    writeType = WriteType.WITHOUT_RESPONSE
-                                )
-                            }
-                        }
-                        writeJobs.awaitAll()
+            try {
+                ThroughputRepository.updateWriteStatus(deviceId, WritingStatus.IN_PROGRESS)
+                when (inputType) {
+                    is NumberOfBytes -> {
+                        writeBytesData(maxWriteValueLength, inputType.numberOfBytes)
                     }
-                } catch (e: Exception) {
-                    Timber.tag("ThroughputService").e("Error ${e.message}")
-                } finally {
-                    Timber.tag("ThroughputService").d("Writing ${data.size} bytes data completed.")
-                    readThroughputMetrics(deviceId)
-                    ThroughputRepository.updateWriteStatus(deviceId, WritingStatus.COMPLETED)
+
+                    is NumberOfSeconds -> {
+                        writeTimesData(maxWriteValueLength, inputType.numberOfSeconds)
+                    }
                 }
+            } catch (e: Exception) {
+                Timber.tag("ThroughputService").e("Error ${e.message}")
+            } finally {
+                readThroughputMetrics(deviceId)
+                ThroughputRepository.updateWriteStatus(deviceId, WritingStatus.COMPLETED)
+            }
+        }
+
+        private suspend fun writeBytesData(
+            maxWriteValueLength: Int,
+            numberOfBytes: Int
+        ) {
+            val array = ByteArray(numberOfBytes) { 0x3D }
+            val chunkedData = chunkData(array, maxWriteValueLength)
+            writeCharacteristicProperty.write(
+                data = byteArrayOf(0x3D),
+                writeType = WriteType.WITHOUT_RESPONSE
+            )
+            chunkedData.map {
+                writeCharacteristicProperty.write(
+                    data = it,
+                    writeType = WriteType.WITHOUT_RESPONSE
+                )
+            }
+        }
+
+        private suspend fun writeTimesData(
+            maxWriteValueLength: Int,
+            numberOfSecond: Int
+        ) {
+            val array = ByteArray(maxWriteValueLength) { 0x3D }
+            val startTime = System.currentTimeMillis()
+            writeCharacteristicProperty.write(
+                data = byteArrayOf(0x3D),
+                writeType = WriteType.WITHOUT_RESPONSE
+            )
+            while (System.currentTimeMillis() - startTime < numberOfSecond * 1000) {
+                writeCharacteristicProperty.write(
+                    data = array,
+                    writeType = WriteType.WITHOUT_RESPONSE
+                )
             }
         }
 
         private suspend fun readThroughputMetrics(deviceId: String) {
-            // Read data after write operation is complete
-            val readData = writeCharacteristicProperty.read()
-            // Parse the read data
-            ThroughputDataParser.parse(data = readData)?.let {
-                ThroughputRepository.updateThroughput(deviceId, it)
-            }
-        }
+            try {
+                // Read data after write operation is complete
+                val readData = writeCharacteristicProperty.read()
 
-        fun resetData(deviceId: String) {
-            stopAllWrites() // Cancel previous writes before starting a new one
-            writeScope.launch {
-                try {
-                    ThroughputRepository.updateWriteStatus(deviceId, WritingStatus.IN_PROGRESS)
-                    writeCharacteristicProperty.write(
-                        data = byteArrayOf(0x3D),
-                        writeType = WriteType.WITHOUT_RESPONSE
-                    )
-                } catch (e: Exception) {
-                    Timber.tag("ThroughputService").e("Error ${e.message}")
-                } finally {
-                    readThroughputMetrics(deviceId)
-                    ThroughputRepository.updateWriteStatus(deviceId, WritingStatus.COMPLETED)
-                    Timber.tag("ThroughputService").d("Reset Completed.")
+                // Parse the read data
+                ThroughputDataParser.parse(data = readData)?.let {
+                    ThroughputRepository.updateThroughput(deviceId, it)
                 }
+            } catch (e: Exception) {
+                Timber.tag("ThroughputService").e("Error ${e.message}")
             }
         }
 
