@@ -12,6 +12,7 @@ import no.nordicsemi.android.toolbox.libs.core.data.WritingStatus
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.core.WriteType
+import no.nordicsemi.kotlin.ble.core.util.chunked
 import timber.log.Timber
 import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi
@@ -67,12 +68,11 @@ internal class ThroughputManager : ServiceManager {
             numberOfBytes: Int
         ) {
             val array = ByteArray(numberOfBytes) { 0x3D }
-            val chunkedData = chunkData(array, maxWriteValueLength)
             writeCharacteristicProperty.write(
                 data = byteArrayOf(0x3D),
                 writeType = WriteType.WITHOUT_RESPONSE
             )
-            chunkedData.map {
+            array.chunked(maxWriteValueLength).map {
                 writeCharacteristicProperty.write(
                     data = it,
                     writeType = WriteType.WITHOUT_RESPONSE
@@ -111,9 +111,6 @@ internal class ThroughputManager : ServiceManager {
                 Timber.tag("ThroughputService").e("Error ${e.message}")
             }
         }
-
-        private fun chunkData(data: ByteArray, chunkSize: Int): List<ByteArray> =
-            data.toList().chunked(chunkSize) { it.toByteArray() }
 
     }
 
