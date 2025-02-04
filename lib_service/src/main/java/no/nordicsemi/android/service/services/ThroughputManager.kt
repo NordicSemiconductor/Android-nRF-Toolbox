@@ -6,8 +6,8 @@ import no.nordicsemi.android.lib.profile.throughput.ThroughputDataParser
 import no.nordicsemi.android.service.repository.ThroughputRepository
 import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.toolbox.libs.core.data.NumberOfBytes
-import no.nordicsemi.android.toolbox.libs.core.data.ThroughputInputType
 import no.nordicsemi.android.toolbox.libs.core.data.NumberOfSeconds
+import no.nordicsemi.android.toolbox.libs.core.data.ThroughputInputType
 import no.nordicsemi.android.toolbox.libs.core.data.WritingStatus
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
@@ -112,10 +112,9 @@ internal class ThroughputManager : ServiceManager {
             }
         }
 
-        private fun chunkData(data: ByteArray, chunkSize: Int): List<ByteArray> {
-            return data.toList()
-                .chunked(chunkSize) { it.toByteArray() } // Efficient chunking
-        }
+        private fun chunkData(data: ByteArray, chunkSize: Int): List<ByteArray> =
+            data.toList().chunked(chunkSize) { it.toByteArray() }
+
     }
 
 }
