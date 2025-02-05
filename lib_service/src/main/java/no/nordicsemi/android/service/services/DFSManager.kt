@@ -16,7 +16,7 @@ import no.nordicsemi.android.lib.profile.directionFinder.elevation.ElevationMeas
 import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
 import no.nordicsemi.android.service.repository.DFSRepository
 import no.nordicsemi.android.toolbox.lib.utils.logAndReport
-import no.nordicsemi.android.toolbox.libs.core.Profile
+import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.core.CharacteristicProperty

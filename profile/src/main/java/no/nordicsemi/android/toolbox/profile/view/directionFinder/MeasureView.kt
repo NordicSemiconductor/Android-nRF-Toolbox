@@ -16,12 +16,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.profile.R
-import no.nordicsemi.android.toolbox.libs.core.data.SensorData
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.displayAzimuth
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.displayDistance
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.displayElevation
+import no.nordicsemi.android.toolbox.profile.data.SensorData
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.displayAzimuth
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.displayDistance
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.displayElevation
 
 @Composable
 internal fun MeasuresView(data: SensorData) {
@@ -54,6 +55,12 @@ internal fun MeasuresView(data: SensorData) {
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun MeasuresViewPreview() {
+    MeasuresView(data = SensorData())
+}
+
 @Composable
 private fun MeasureItem(
     @DrawableRes resId: Int,
@@ -79,4 +86,14 @@ private fun MeasureItem(
 
         Text(text = title)
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MeasureItemPreview(){
+    MeasureItem(
+        resId = R.drawable.ic_elevation,
+        value = "Value",
+        title = "Title"
+    )
 }

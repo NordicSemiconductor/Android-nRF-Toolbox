@@ -4,11 +4,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.lib.profile.throughput.ThroughputDataParser
 import no.nordicsemi.android.service.repository.ThroughputRepository
-import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.NumberOfBytes
-import no.nordicsemi.android.toolbox.libs.core.data.NumberOfSeconds
-import no.nordicsemi.android.toolbox.libs.core.data.ThroughputInputType
-import no.nordicsemi.android.toolbox.libs.core.data.WritingStatus
+import no.nordicsemi.android.toolbox.profile.data.Profile
+import no.nordicsemi.android.toolbox.profile.data.NumberOfBytes
+import no.nordicsemi.android.toolbox.profile.data.NumberOfSeconds
+import no.nordicsemi.android.toolbox.profile.data.ThroughputInputType
+import no.nordicsemi.android.toolbox.profile.data.WritingStatus
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.core.WriteType

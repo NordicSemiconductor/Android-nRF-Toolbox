@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "no.nordicsemi.android.toolbox.lib.core"
+    namespace = "no.nordicsemi.android.toolbox.profile.data"
 }
 
 dependencies {

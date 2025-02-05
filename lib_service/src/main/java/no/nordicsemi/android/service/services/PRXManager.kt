@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.service.repository.PRXRepository
-import no.nordicsemi.android.toolbox.libs.core.Profile
+import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.lib.profile.prx.AlarmLevelParser
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber

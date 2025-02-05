@@ -37,10 +37,10 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.yield
-import no.nordicsemi.android.toolbox.libs.core.data.SensorData
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.Range
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.azimuthValue
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.distanceValue
+import no.nordicsemi.android.toolbox.profile.data.SensorData
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.azimuthValue
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.distanceValue
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.ui.view.CircleTransitionState
 import no.nordicsemi.android.ui.view.createCircleTransition

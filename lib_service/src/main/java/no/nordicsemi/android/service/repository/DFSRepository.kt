@@ -21,11 +21,11 @@ import no.nordicsemi.android.lib.profile.directionFinder.elevation.ElevationMeas
 import no.nordicsemi.android.lib.profile.directionFinder.toDistanceMode
 import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
 import no.nordicsemi.android.service.services.DFSManager
-import no.nordicsemi.android.toolbox.libs.core.data.DFSServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.SensorData
-import no.nordicsemi.android.toolbox.libs.core.data.SensorValue
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.MeasurementSection
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.Range
+import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
+import no.nordicsemi.android.toolbox.profile.data.SensorData
+import no.nordicsemi.android.toolbox.profile.data.SensorValue
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.MeasurementSection
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
 
 object DFSRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<DFSServiceData>>()

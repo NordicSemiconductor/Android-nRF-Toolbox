@@ -11,7 +11,7 @@ import no.nordicsemi.android.service.repository.GLSRepository
 import no.nordicsemi.android.service.repository.GLSRepository.updateNewRequestStatus
 import no.nordicsemi.android.toolbox.lib.utils.logAndReport
 import no.nordicsemi.android.toolbox.lib.utils.tryOrLog
-import no.nordicsemi.android.toolbox.libs.core.Profile
+import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.lib.profile.gls.GlucoseMeasurementContextParser
 import no.nordicsemi.android.lib.profile.gls.GlucoseMeasurementParser
 import no.nordicsemi.android.lib.profile.gls.RecordAccessControlPointInputParser

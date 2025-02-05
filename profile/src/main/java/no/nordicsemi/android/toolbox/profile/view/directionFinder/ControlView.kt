@@ -12,8 +12,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.lib.profile.directionFinder.distance.DistanceMode
-import no.nordicsemi.android.toolbox.libs.core.data.DFSServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.SensorData
+import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
+import no.nordicsemi.android.toolbox.profile.data.SensorData
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.viewmodel.DFSViewEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent

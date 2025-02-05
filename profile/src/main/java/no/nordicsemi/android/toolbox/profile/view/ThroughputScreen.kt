@@ -35,10 +35,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.toolbox.libs.core.data.NumberOfBytes
-import no.nordicsemi.android.toolbox.libs.core.data.NumberOfSeconds
-import no.nordicsemi.android.toolbox.libs.core.data.ThroughputServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.WritingStatus
+import no.nordicsemi.android.toolbox.profile.data.NumberOfBytes
+import no.nordicsemi.android.toolbox.profile.data.NumberOfSeconds
+import no.nordicsemi.android.toolbox.profile.data.ThroughputServiceData
+import no.nordicsemi.android.toolbox.profile.data.WritingStatus
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.displayThroughput
 import no.nordicsemi.android.toolbox.profile.data.getThroughputInputTypes

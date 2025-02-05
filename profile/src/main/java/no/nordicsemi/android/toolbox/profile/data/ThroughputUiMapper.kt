@@ -1,8 +1,6 @@
 package no.nordicsemi.android.toolbox.profile.data
 
 import no.nordicsemi.android.lib.profile.throughput.ThroughputMetrics
-import no.nordicsemi.android.toolbox.libs.core.data.NumberOfBytes
-import no.nordicsemi.android.toolbox.libs.core.data.NumberOfSeconds
 import java.util.Locale
 
 internal fun ThroughputMetrics.throughputDataReceived(): String {

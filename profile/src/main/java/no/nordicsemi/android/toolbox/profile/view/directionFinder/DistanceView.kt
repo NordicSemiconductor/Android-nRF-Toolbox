@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.Range
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
 import java.util.Locale
 
 @Composable

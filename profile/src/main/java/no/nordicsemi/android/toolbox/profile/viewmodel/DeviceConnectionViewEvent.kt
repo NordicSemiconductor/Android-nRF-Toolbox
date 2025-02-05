@@ -6,11 +6,11 @@ import no.nordicsemi.android.lib.profile.csc.WheelSize
 import no.nordicsemi.android.lib.profile.directionFinder.PeripheralBluetoothAddress
 import no.nordicsemi.android.lib.profile.directionFinder.distance.DistanceMode
 import no.nordicsemi.android.lib.profile.rscs.RSCSSettingsUnit
-import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.ThroughputInputType
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.MeasurementSection
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.Range
-import no.nordicsemi.android.toolbox.libs.core.data.uiMapper.TemperatureUnit
+import no.nordicsemi.android.toolbox.profile.data.Profile
+import no.nordicsemi.android.toolbox.profile.data.ThroughputInputType
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.MeasurementSection
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
+import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
 
 sealed interface DeviceConnectionViewEvent
 

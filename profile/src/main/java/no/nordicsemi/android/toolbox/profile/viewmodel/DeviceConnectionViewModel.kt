@@ -37,9 +37,9 @@ import no.nordicsemi.android.service.repository.HTSRepository
 import no.nordicsemi.android.service.repository.RSCSRepository
 import no.nordicsemi.android.service.repository.ThroughputRepository
 import no.nordicsemi.android.service.services.ServiceManager
-import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.ProfileServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.uiMapper.TemperatureUnit
+import no.nordicsemi.android.toolbox.profile.data.Profile
+import no.nordicsemi.android.toolbox.profile.data.ProfileServiceData
+import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
 import no.nordicsemi.android.toolbox.profile.DeviceConnectionDestinationId
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
 import no.nordicsemi.android.ui.view.internal.DisconnectReason

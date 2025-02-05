@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.libs.core.data
+package no.nordicsemi.android.toolbox.profile.data
 
 import no.nordicsemi.android.lib.profile.directionFinder.PeripheralBluetoothAddress
 import no.nordicsemi.android.lib.profile.directionFinder.azimuthal.AzimuthMeasurementData
@@ -8,9 +8,8 @@ import no.nordicsemi.android.lib.profile.directionFinder.distance.McpdMeasuremen
 import no.nordicsemi.android.lib.profile.directionFinder.distance.RttMeasurementData
 import no.nordicsemi.android.lib.profile.directionFinder.elevation.ElevationMeasurementData
 import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
-import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.MeasurementSection
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.Range
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.MeasurementSection
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
 
 private const val MAX_STORED_ITEMS = 5
 
