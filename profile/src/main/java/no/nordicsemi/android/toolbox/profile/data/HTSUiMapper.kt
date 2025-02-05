@@ -31,7 +31,7 @@
 
 package no.nordicsemi.android.toolbox.profile.data
 
-import no.nordicsemi.android.toolbox.libs.core.data.uiMapper.TemperatureUnit
+import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
 import java.util.Locale
 
 internal fun displayTemperature(value: Float, temperatureUnit: TemperatureUnit): String {

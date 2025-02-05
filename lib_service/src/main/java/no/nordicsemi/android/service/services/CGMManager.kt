@@ -11,8 +11,8 @@ import no.nordicsemi.android.service.repository.CGMRepository
 import no.nordicsemi.android.toolbox.lib.utils.launchWithCatch
 import no.nordicsemi.android.toolbox.lib.utils.logAndReport
 import no.nordicsemi.android.toolbox.lib.utils.tryOrLog
-import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.CGMRecordWithSequenceNumber
+import no.nordicsemi.android.toolbox.profile.data.Profile
+import no.nordicsemi.android.toolbox.profile.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.lib.profile.cgms.CGMFeatureParser
 import no.nordicsemi.android.lib.profile.cgms.CGMMeasurementParser
 import no.nordicsemi.android.lib.profile.cgms.CGMSpecificOpsControlPointParser

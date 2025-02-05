@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.sp
 import no.nordicsemi.android.lib.profile.csc.SpeedUnit
 import no.nordicsemi.android.lib.profile.csc.WheelSizes
 import no.nordicsemi.android.lib.profile.csc.WheelSizes.getWheelSizeByName
-import no.nordicsemi.android.toolbox.libs.core.data.CSCServiceData
+import no.nordicsemi.android.toolbox.profile.data.CSCServiceData
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.displayCadence
 import no.nordicsemi.android.toolbox.profile.data.displayDistance

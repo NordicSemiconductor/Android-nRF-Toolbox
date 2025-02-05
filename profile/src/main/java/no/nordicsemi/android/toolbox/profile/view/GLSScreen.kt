@@ -42,8 +42,8 @@ import no.nordicsemi.android.lib.profile.common.WorkingMode
 import no.nordicsemi.android.lib.profile.gls.data.GLSMeasurementContext
 import no.nordicsemi.android.lib.profile.gls.data.GLSRecord
 import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
-import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.GLSServiceData
+import no.nordicsemi.android.toolbox.profile.data.Profile
+import no.nordicsemi.android.toolbox.profile.data.GLSServiceData
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.glucoseConcentrationDisplayValue
 import no.nordicsemi.android.toolbox.profile.data.toDisplayString

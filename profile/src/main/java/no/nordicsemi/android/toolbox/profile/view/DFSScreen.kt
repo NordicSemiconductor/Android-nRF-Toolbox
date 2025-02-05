@@ -24,10 +24,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
-import no.nordicsemi.android.toolbox.libs.core.data.DFSServiceData
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.azimuthValue
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.elevationValue
-import no.nordicsemi.android.toolbox.libs.core.data.directionFinder.selectedMeasurementSectionValues
+import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.azimuthValue
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.elevationValue
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.selectedMeasurementSectionValues
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.view.directionFinder.DataSmoothingViewSection
 import no.nordicsemi.android.toolbox.profile.view.directionFinder.LinearDataSection

@@ -34,9 +34,9 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.lib.profile.cgms.data.CGMRecord
 import no.nordicsemi.android.lib.profile.cgms.data.CGMStatus
 import no.nordicsemi.android.lib.profile.common.WorkingMode
-import no.nordicsemi.android.toolbox.libs.core.Profile
-import no.nordicsemi.android.toolbox.libs.core.data.CGMRecordWithSequenceNumber
-import no.nordicsemi.android.toolbox.libs.core.data.CGMServiceData
+import no.nordicsemi.android.toolbox.profile.data.Profile
+import no.nordicsemi.android.toolbox.profile.data.CGMRecordWithSequenceNumber
+import no.nordicsemi.android.toolbox.profile.data.CGMServiceData
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.formattedTime
 import no.nordicsemi.android.toolbox.profile.data.glucoseConcentration

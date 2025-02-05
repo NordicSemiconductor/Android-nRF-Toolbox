@@ -1,6 +1,5 @@
-package no.nordicsemi.android.toolbox.libs.core.data
+package no.nordicsemi.android.toolbox.profile.data
 
-import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.lib.profile.cgms.data.CGMRecord
 import no.nordicsemi.android.lib.profile.common.WorkingMode
 import no.nordicsemi.android.lib.profile.gls.data.RequestStatus

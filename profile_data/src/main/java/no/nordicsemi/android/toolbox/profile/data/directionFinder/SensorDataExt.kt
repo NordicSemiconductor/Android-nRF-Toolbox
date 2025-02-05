@@ -1,7 +1,7 @@
-package no.nordicsemi.android.toolbox.libs.core.data.directionFinder
+package no.nordicsemi.android.toolbox.profile.data.directionFinder
 
-import no.nordicsemi.android.toolbox.libs.core.data.SensorData
-import no.nordicsemi.android.toolbox.libs.core.data.SensorValue
+import no.nordicsemi.android.toolbox.profile.data.SensorData
+import no.nordicsemi.android.toolbox.profile.data.SensorValue
 
 fun <T, R> SensorValue<T>?.mapValues(selector: (T) -> R): List<R>? =
     this?.values?.map(selector)
@@ -79,5 +79,5 @@ fun SensorData.selectedMeasurementSectionValues(): List<Int>? =
         MeasurementSection.DISTANCE_MCPD_PHASE_SLOPE -> this.phaseSlopeValues()
         MeasurementSection.DISTANCE_MCPD_RSSI -> this.rssiValues()
         MeasurementSection.DISTANCE_MCPD_BEST -> this.bestEffortValues()
-        null -> null
+        null -> this.bestEffortValues()
     }

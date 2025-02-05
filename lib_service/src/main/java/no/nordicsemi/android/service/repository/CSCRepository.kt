@@ -3,7 +3,7 @@ package no.nordicsemi.android.service.repository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import no.nordicsemi.android.toolbox.libs.core.data.CSCServiceData
+import no.nordicsemi.android.toolbox.profile.data.CSCServiceData
 import no.nordicsemi.android.lib.profile.csc.CSCData
 import no.nordicsemi.android.lib.profile.csc.SpeedUnit
 import no.nordicsemi.android.lib.profile.csc.WheelSize

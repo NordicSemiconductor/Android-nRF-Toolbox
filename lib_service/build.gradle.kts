@@ -39,7 +39,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":lib_core"))
+    implementation(project(":profile_data"))
     implementation(project(":lib_profile"))
     implementation(project(":lib_ui"))
     implementation(project(":lib_utils"))

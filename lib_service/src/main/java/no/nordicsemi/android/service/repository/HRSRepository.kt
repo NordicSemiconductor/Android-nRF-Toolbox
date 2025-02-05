@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.lib.profile.hrs.HRSData
-import no.nordicsemi.android.toolbox.libs.core.data.HRSServiceData
+import no.nordicsemi.android.toolbox.profile.data.HRSServiceData
 
 object HRSRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<HRSServiceData>>()

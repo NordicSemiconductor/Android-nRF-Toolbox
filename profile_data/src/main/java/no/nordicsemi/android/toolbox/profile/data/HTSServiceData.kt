@@ -1,8 +1,7 @@
-package no.nordicsemi.android.toolbox.libs.core.data
+package no.nordicsemi.android.toolbox.profile.data
 
-import no.nordicsemi.android.toolbox.libs.core.Profile
 import no.nordicsemi.android.lib.profile.hts.HTSData
-import no.nordicsemi.android.toolbox.libs.core.data.uiMapper.TemperatureUnit
+import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
 
 /**
  * HTS service data class that holds the HTS data.

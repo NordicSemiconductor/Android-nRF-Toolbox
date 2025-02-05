@@ -4,8 +4,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.service.services.CGMManager
-import no.nordicsemi.android.toolbox.libs.core.data.CGMRecordWithSequenceNumber
-import no.nordicsemi.android.toolbox.libs.core.data.CGMServiceData
+import no.nordicsemi.android.toolbox.profile.data.CGMRecordWithSequenceNumber
+import no.nordicsemi.android.toolbox.profile.data.CGMServiceData
 import no.nordicsemi.android.lib.profile.common.WorkingMode
 import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
 

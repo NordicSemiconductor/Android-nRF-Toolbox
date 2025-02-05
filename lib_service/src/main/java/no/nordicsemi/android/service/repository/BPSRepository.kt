@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.lib.profile.bps.BloodPressureMeasurementData
 import no.nordicsemi.android.lib.profile.bps.IntermediateCuffPressureData
-import no.nordicsemi.android.toolbox.libs.core.data.BPSServiceData
+import no.nordicsemi.android.toolbox.profile.data.BPSServiceData
 
 object BPSRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<BPSServiceData>>()

@@ -29,7 +29,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.toolbox.libs.core.data.uiMapper
+package no.nordicsemi.android.toolbox.profile.data.uiMapper
 
 enum class TemperatureUnit {
     CELSIUS,

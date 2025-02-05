@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.service.repository.BPSRepository
-import no.nordicsemi.android.toolbox.libs.core.Profile
+import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.lib.profile.bps.BloodPressureMeasurementParser
 import no.nordicsemi.android.lib.profile.bps.IntermediateCuffPressureParser
 import no.nordicsemi.kotlin.ble.client.RemoteService
