@@ -31,13 +31,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.libs.core.data.NumberOfBytes
-import no.nordicsemi.android.toolbox.libs.core.data.ThroughputServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.NumberOfSeconds
+import no.nordicsemi.android.toolbox.libs.core.data.ThroughputServiceData
 import no.nordicsemi.android.toolbox.libs.core.data.WritingStatus
+import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.displayThroughput
 import no.nordicsemi.android.toolbox.profile.data.getThroughputInputTypes
 import no.nordicsemi.android.toolbox.profile.data.throughputDataReceived
@@ -65,14 +67,14 @@ internal fun ThroughputScreen(
         ScreenSection {
             SectionTitle(
                 icon = Icons.Default.SyncAlt,
-                title = "Throughput service",
+                title = stringResource(id = R.string.throughput_service_name),
                 menu = {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Button(onClick = { showBottomSheet = true }) {
-                            Text("Write")
+                            Text(stringResource(id = R.string.throughput_write))
                         }
                     }
                 }
@@ -84,7 +86,7 @@ internal fun ThroughputScreen(
 
                 WritingStatus.IN_PROGRESS -> {
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Text("Writing...")
+                        Text(stringResource(id = R.string.write_inprogress))
                         LinearProgressIndicator(
                             modifier = Modifier.fillMaxWidth(),
                             color = MaterialTheme.colorScheme.secondary,
@@ -99,23 +101,23 @@ internal fun ThroughputScreen(
                     serviceData.throughputData?.let {
                         SectionRow {
                             KeyValueColumn(
-                                "Total bytes received",
+                                stringResource(id = R.string.total_bytes_received),
                                 it.throughputDataReceived()
                             )
                             KeyValueColumnReverse(
-                                "Gatt writes",
+                                stringResource(id = R.string.gatt_write_number),
                                 it.gattWritesReceived.toString()
                             )
                         }
                         SectionRow {
                             KeyValueColumn(
-                                "Throughput",
+                                stringResource(id = R.string.measured_throughput),
                                 it.displayThroughput()
                             )
                             // Show mtu size
                             serviceData.maxWriteValueLength?.let {
                                 KeyValueColumnReverse(
-                                    "Max write value",
+                                    stringResource(id = R.string.max_write_value),
                                     "$it"
                                 )
                             }
@@ -168,12 +170,16 @@ fun ThroughputWriteBottomSheet(
         ) {
             DropdownView(
                 items = getThroughputInputTypes(),
-                label = "Write type",
-                placeholder = "Select write type",
+                label = stringResource(id = R.string.throughput_input_type),
+                placeholder = stringResource(id = R.string.throughput_input_type_description),
                 isError = isError == true,
-                errorMessage = "Select one option",
+                errorMessage = stringResource(id = R.string.throughput_input_type_error),
                 onItemSelected = {
                     writeDataType = it
+                    when (it) {
+                        NumberOfBytes.getString() -> number = 102400
+                        NumberOfSeconds.getString() -> number = 20
+                    }
                 }
             )
             when (writeDataType) {
@@ -181,12 +187,12 @@ fun ThroughputWriteBottomSheet(
                     // Show bytes input
                     TextInputField(
                         input = number.toString(),
-                        label = "Number of bytes",
-                        placeholder = "Enter number of bytes",
+                        label = stringResource(id = R.string.throughput_bytes),
+                        placeholder = stringResource(id = R.string.throughput_bytes_description),
                         errorState = isNumberError == true,
-                        errorMessage = "Number cannot be zero",
+                        errorMessage = stringResource(id = R.string.throughput_bytes_error),
                         onUpdate = {
-                            number = it.toInt()
+                            number = it.toIntOrNull() ?: 0
 
                         },
                         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
@@ -197,12 +203,12 @@ fun ThroughputWriteBottomSheet(
                     // Show time input
                     TextInputField(
                         input = number.toString(),
-                        label = "Number of seconds",
-                        placeholder = "Enter number of seconds",
+                        label = stringResource(id = R.string.throughput_time),
+                        placeholder = stringResource(id = R.string.throughput_time_description),
                         errorState = isNumberError == true,
-                        errorMessage = "Number cannot be zero",
+                        errorMessage = stringResource(id = R.string.throughput_time_error),
                         onUpdate = {
-                            number = it.toInt()
+                            number = it.toIntOrNull() ?: 0
                         },
                         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
                     )
@@ -234,7 +240,7 @@ fun ThroughputWriteBottomSheet(
                         }
                     }
                 ) {
-                    Text(text = "Confirm")
+                    Text(text = stringResource(id = R.string.throughput_start))
                 }
             }
         }
@@ -243,10 +249,7 @@ fun ThroughputWriteBottomSheet(
 
 @Composable
 fun ThroughputDataNotAvailable() {
-    Text(
-        "No throughput metrics to show. Click on write button to write data." +
-                "\n\nPlease remember to pair dk each time twice."
-    )
+    Text(stringResource(id = R.string.throughput_data_not_available))
 }
 
 @Preview
