@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.profile.view
+package no.nordicsemi.android.toolbox.profile.view.directionFinder
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,9 +29,6 @@ import no.nordicsemi.android.toolbox.profile.data.directionFinder.azimuthValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.elevationValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.selectedMeasurementSectionValues
 import no.nordicsemi.android.toolbox.profile.R
-import no.nordicsemi.android.toolbox.profile.view.directionFinder.DataSmoothingViewSection
-import no.nordicsemi.android.toolbox.profile.view.directionFinder.LinearDataSection
-import no.nordicsemi.android.toolbox.profile.view.directionFinder.SectionBluetoothDeviceComponent
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle

@@ -29,7 +29,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.toolbox.profile.view
+package no.nordicsemi.android.toolbox.profile.view.battery
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

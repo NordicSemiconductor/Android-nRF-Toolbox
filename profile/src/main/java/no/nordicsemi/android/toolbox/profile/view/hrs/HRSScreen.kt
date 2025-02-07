@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.profile.view
+package no.nordicsemi.android.toolbox.profile.view.hrs
 
 import android.content.Context
 import android.graphics.Color
