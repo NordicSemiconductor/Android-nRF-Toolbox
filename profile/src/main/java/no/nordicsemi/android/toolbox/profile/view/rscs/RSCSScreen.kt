@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.profile.view
+package no.nordicsemi.android.toolbox.profile.view.rscs
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

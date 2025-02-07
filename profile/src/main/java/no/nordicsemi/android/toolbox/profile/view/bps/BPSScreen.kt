@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.profile.view
+package no.nordicsemi.android.toolbox.profile.view.bps
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
