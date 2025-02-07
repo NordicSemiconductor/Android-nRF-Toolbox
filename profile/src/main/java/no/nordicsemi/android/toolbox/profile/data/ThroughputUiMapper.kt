@@ -5,10 +5,20 @@ import java.util.Locale
 
 internal fun ThroughputMetrics.throughputDataReceived(): String {
     val kilobytes = this.totalBytesReceived / 1024f
-    return if (kilobytes > 0) {
-        "${this.totalBytesReceived} bytes (${String.format(Locale.US, "%.2f", kilobytes)} KB)"
-    } else {
-        "${this.totalBytesReceived} bytes"
+    val megabytes = kilobytes / 1024f
+
+    return when {
+        megabytes >= 1 -> {
+            "${this.totalBytesReceived} bytes (${String.format(Locale.US, "%.2f", megabytes)} MB)"
+        }
+
+        kilobytes > 0 -> {
+            "${this.totalBytesReceived} bytes (${String.format(Locale.US, "%.2f", kilobytes)} KB)"
+        }
+
+        else -> {
+            "${this.totalBytesReceived} bytes"
+        }
     }
 }
 

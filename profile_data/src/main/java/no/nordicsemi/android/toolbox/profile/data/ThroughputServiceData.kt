@@ -16,7 +16,7 @@ data class NumberOfBytes(
 ) : ThroughputInputType {
 
     companion object {
-        private const val DISPLAY_NAME = "Number of bytes"
+        private const val DISPLAY_NAME = "Number of Kilobytes"
         fun getString(): String = DISPLAY_NAME
     }
 }
