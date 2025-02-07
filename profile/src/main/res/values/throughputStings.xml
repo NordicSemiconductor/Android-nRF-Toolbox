@@ -14,7 +14,7 @@
     <string name="throughput_input_type_description">Select the input type for the throughput test</string>
     <string name="throughput_input_type_error">Select one option</string>
 
-    <string name="throughput_bytes">Number of bytes</string>
+    <string name="throughput_bytes">Number of Kilobytes</string>
     <string name="throughput_bytes_description">Enter the number of bytes to be sent in the throughput test</string>
     <string name="throughput_bytes_error">Enter the number of bytes</string>
 
