@@ -35,6 +35,7 @@ import no.nordicsemi.android.toolbox.profile.data.NumberOfSeconds
 import no.nordicsemi.android.toolbox.profile.data.ThroughputServiceData
 import no.nordicsemi.android.toolbox.profile.data.WritingStatus
 import no.nordicsemi.android.toolbox.profile.data.displayThroughput
+import no.nordicsemi.android.toolbox.profile.data.getThroughputInputTypes
 import no.nordicsemi.android.toolbox.profile.data.throughputDataReceived
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.ThroughputEvent
@@ -185,20 +186,18 @@ private fun WriteDropdown(
 
                 else -> {
                     // Show throughput input type
-                    DropdownMenuItem(
-                        text = { Text(NumberOfBytes.getString()) },
-                        onClick = {
-                            onDropdownMenuSelected(NumberOfBytes.getString())
-                            onNumberUpdate(100)
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(NumberOfSeconds.getString()) },
-                        onClick = {
-                            onDropdownMenuSelected(NumberOfSeconds.getString())
-                            onNumberUpdate(20)
-                        }
-                    )
+                    getThroughputInputTypes().forEach {
+                        DropdownMenuItem(
+                            text = { Text(it) },
+                            onClick = {
+                                onDropdownMenuSelected(it)
+                                when (it) {
+                                    NumberOfBytes.getString() -> onNumberUpdate(100)
+                                    NumberOfSeconds.getString() -> onNumberUpdate(20)
+                                }
+                            }
+                        )
+                    }
                 }
             }
             // Run button.
