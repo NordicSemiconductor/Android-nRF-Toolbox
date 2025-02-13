@@ -65,7 +65,6 @@ internal fun OutputSection(
                     }
                 }
             }
-
         }
     }
 }
@@ -133,10 +132,11 @@ private fun MessageItemOutput(record: UARTRecord) {
             modifier = Modifier
                 .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp, bottomEnd = 10.dp))
                 .background(MaterialTheme.colorScheme.primary)
-                .padding(8.dp)
+                .padding(8.dp),
+            horizontalAlignment = Alignment.Start
         ) {
             Text(
-                text = record.text,
+                text = record.text.trimEnd(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimary
             )
