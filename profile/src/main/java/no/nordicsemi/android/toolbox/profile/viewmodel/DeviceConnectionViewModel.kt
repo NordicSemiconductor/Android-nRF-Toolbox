@@ -36,12 +36,16 @@ import no.nordicsemi.android.service.repository.HRSRepository
 import no.nordicsemi.android.service.repository.HTSRepository
 import no.nordicsemi.android.service.repository.RSCSRepository
 import no.nordicsemi.android.service.repository.ThroughputRepository
+import no.nordicsemi.android.service.repository.UartRepository
 import no.nordicsemi.android.service.services.ServiceManager
+import no.nordicsemi.android.toolbox.profile.DeviceConnectionDestinationId
 import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.data.ProfileServiceData
+import no.nordicsemi.android.toolbox.profile.data.uart.MacroEol
 import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
-import no.nordicsemi.android.toolbox.profile.DeviceConnectionDestinationId
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
+import no.nordicsemi.android.toolbox.profile.repository.UARTPersistentDataSource
+import no.nordicsemi.android.toolbox.profile.repository.UartConfigurationDataRepository
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
@@ -72,6 +76,8 @@ internal class DeviceConnectionViewModel @Inject constructor(
     private val navigator: Navigator,
     private val deviceRepository: DeviceRepository,
     @ApplicationContext private val context: Context,
+    private val uartConfigurationRepository: UartConfigurationDataRepository,
+    private val dataSource: UARTPersistentDataSource,
     savedStateHandle: SavedStateHandle,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
     val address: String = parameterOf(DeviceConnectionDestinationId)
@@ -226,9 +232,31 @@ internal class DeviceConnectionViewModel @Inject constructor(
             Profile.HTS -> updateHTS()
             Profile.RSCS -> updateRSCS()
             Profile.THROUGHPUT -> updateThroughput()
-            else -> { /* TODO: Add more profile modules here */
+            Profile.UART -> updateUART()
+            Profile.PRX -> {
+                TODO()
             }
         }
+    }
+
+    private fun updateUART() {
+        UartRepository.getData(address).onEach {
+            updateDeviceData(it)
+        }.launchIn(viewModelScope)
+
+        // Update maximum write value length. Since it will be available as soon as connection is established.
+        viewModelScope.launch {
+            getServiceApi()?.getMaxWriteValue(address)
+                ?.let { UartRepository.updateMaxWriteLength(address, it) }
+        }
+        dataSource.getConfigurations(address).onEach {
+            UartRepository.updateConfiguration(address, it)
+        }.launchIn(viewModelScope)
+
+        uartConfigurationRepository.lastConfigurationName.onEach {
+            UartRepository.updateSelectedConfigurationName(address, it)
+        }.launchIn(viewModelScope)
+
     }
 
     private fun updateThroughput() {
@@ -354,7 +382,29 @@ internal class DeviceConnectionViewModel @Inject constructor(
             is ThroughputEvent.OnWriteData -> viewModelScope.launch {
                 ThroughputRepository.sendDataToDK(address, event.writeType)
             }
+
+            // UART events.
+            UARTEvent.ClearOutputItems -> TODO()
+            UARTEvent.MacroInputSwitchClicked -> TODO()
+            is UARTEvent.OnAddConfiguration -> TODO()
+            is UARTEvent.OnConfigurationSelected -> TODO()
+            is UARTEvent.OnCreateMacro -> TODO()
+            UARTEvent.OnDeleteConfiguration -> TODO()
+            UARTEvent.OnDeleteMacro -> TODO()
+            UARTEvent.OnEditConfiguration -> TODO()
+            UARTEvent.OnEditFinished -> TODO()
+            is UARTEvent.OnEditMacro -> TODO()
+            is UARTEvent.OnRunInput -> {
+                sendText(event.text, event.newLineChar)
+            }
+
+            is UARTEvent.OnRunMacro -> TODO()
         }
+    }
+
+    private fun sendText(text: String, newLineChar: MacroEol) = viewModelScope.launch {
+        UartRepository.sendText(address, text, newLineChar)
+        //todo: log event in the analytics.
     }
 
     private fun setSpeedUnit(selectedSpeedUnit: SpeedUnit) {

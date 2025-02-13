@@ -1,0 +1,82 @@
+package no.nordicsemi.android.service.repository
+
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+import no.nordicsemi.android.service.services.UARTManager
+import no.nordicsemi.android.toolbox.profile.data.UARTRecord
+import no.nordicsemi.android.toolbox.profile.data.UARTRecordType
+import no.nordicsemi.android.toolbox.profile.data.UARTServiceData
+import no.nordicsemi.android.toolbox.profile.data.uart.MacroEol
+import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
+import no.nordicsemi.android.toolbox.profile.data.uart.UARTMacro
+import no.nordicsemi.android.toolbox.profile.data.uart.parseWithNewLineChar
+
+object UartRepository {
+    private val _dataMap = mutableMapOf<String, MutableStateFlow<UARTServiceData>>()
+
+    fun getData(deviceId: String): Flow<UARTServiceData> {
+        return _dataMap.getOrPut(deviceId) { MutableStateFlow(UARTServiceData()) }
+    }
+
+    fun updateMaxWriteLength(deviceId: String, maxWriteLength: Int) {
+        _dataMap[deviceId]?.update {
+            it.copy(maxWriteLength = maxWriteLength)
+        }
+    }
+
+    fun onNewMessageReceived(deviceId: String, message: String) {
+        _dataMap[deviceId]?.value?.let { data ->
+            data.copy(messages = data.messages + UARTRecord(message, UARTRecordType.OUTPUT))
+        }
+    }
+
+    fun getMaxWriteLength(deviceId: String): Int {
+        return _dataMap[deviceId]?.value?.maxWriteLength ?: 20
+    }
+
+    fun onNewMessageSent(deviceId: String, message: String) {
+        _dataMap[deviceId]?.update {
+            it.copy(messages = it.messages + UARTRecord(message, UARTRecordType.INPUT))
+        }
+    }
+
+    suspend fun sendText(deviceId: String, text: String, newLineChar: MacroEol) {
+        if (_dataMap.containsKey(deviceId)) {
+            UARTManager.sendText(deviceId, text, _dataMap[deviceId]?.value?.maxWriteLength!!)
+        }
+        _dataMap[deviceId]?.update {
+            it.copy(command = text.parseWithNewLineChar(newLineChar))
+        }
+    }
+
+    fun runMacro(deviceId: String, macro: UARTMacro) {
+        if (macro.command == null) return
+        // Send the command to the device and update the command message
+        _dataMap[deviceId]?.update {
+            it.copy(command = macro.command!!.parseWithNewLineChar(macro.newLineChar))
+        }
+    }
+
+    fun clear(deviceId: String) {
+        _dataMap.remove(deviceId)
+    }
+
+    fun clearMessages(deviceId: String) {
+        _dataMap[deviceId]?.update {
+            it.copy(messages = emptyList())
+        }
+    }
+
+    fun updateConfiguration(address: String, configurations: List<UARTConfiguration>) {
+        _dataMap[address]?.update {
+            it.copy(uartViewState = it.uartViewState.copy(configurations = configurations))
+        }
+    }
+
+    fun updateSelectedConfigurationName(address: String, configurationName: String?) {
+        _dataMap[address]?.update {
+            it.copy(uartViewState = it.uartViewState.copy(selectedConfigurationName = configurationName))
+        }
+    }
+}

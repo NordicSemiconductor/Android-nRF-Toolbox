@@ -158,6 +158,15 @@ internal fun HomeView() {
                                             ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
                                         }
 
+                                        Profile.UART -> {
+                                            FeatureButton(
+                                                iconId = R.drawable.ic_uart,
+                                                profileName = R.string.uart_module_full,
+                                                deviceName = peripheral.name,
+                                                true
+                                            ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
+                                        }
+
                                         else -> {
                                             // TODO: Add more profiles
                                         }
