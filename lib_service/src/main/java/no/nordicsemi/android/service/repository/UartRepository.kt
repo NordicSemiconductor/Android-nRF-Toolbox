@@ -26,12 +26,12 @@ object UartRepository {
     }
 
     fun onNewMessageReceived(deviceId: String, message: String) {
-        _dataMap[deviceId]?.value?.let { data ->
-            data.copy(messages = data.messages + UARTRecord(message, UARTRecordType.OUTPUT))
+        _dataMap[deviceId]?.update {
+            it.copy(messages = it.messages + UARTRecord(message, UARTRecordType.OUTPUT))
         }
     }
 
-    fun getMaxWriteLength(deviceId: String): Int {
+    private fun getMaxWriteLength(deviceId: String): Int {
         return _dataMap[deviceId]?.value?.maxWriteLength ?: 20
     }
 
@@ -43,7 +43,7 @@ object UartRepository {
 
     suspend fun sendText(deviceId: String, text: String, newLineChar: MacroEol) {
         if (_dataMap.containsKey(deviceId)) {
-            UARTManager.sendText(deviceId, text, _dataMap[deviceId]?.value?.maxWriteLength!!)
+            UARTManager.sendText(deviceId, text, getMaxWriteLength(deviceId))
         }
         _dataMap[deviceId]?.update {
             it.copy(command = text.parseWithNewLineChar(newLineChar))
