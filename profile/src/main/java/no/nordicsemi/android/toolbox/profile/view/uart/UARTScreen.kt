@@ -23,6 +23,7 @@ internal fun UARTScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         UARTContentView(state, onEvent)
+        Spacer(modifier = Modifier.weight(1f))
         MacroSection(state.uartViewState, onEvent)
 
     }
