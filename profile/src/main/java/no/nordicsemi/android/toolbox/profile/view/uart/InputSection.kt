@@ -3,13 +3,14 @@ package no.nordicsemi.android.toolbox.profile.view.uart
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imeNestedScroll
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Icon
@@ -20,7 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -29,7 +29,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.ui.view.RadioButtonGroup
 import no.nordicsemi.android.common.ui.view.RadioButtonItem
 import no.nordicsemi.android.common.ui.view.RadioGroupViewEntity
@@ -40,6 +39,7 @@ import no.nordicsemi.android.toolbox.profile.viewmodel.UARTEvent
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun InputSection(onEvent: (DeviceConnectionViewEvent) -> Unit) {
     var text by rememberSaveable { mutableStateOf("") }
@@ -48,24 +48,20 @@ internal fun InputSection(onEvent: (DeviceConnectionViewEvent) -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .imePadding() // Pushes up when keyboard appears
+            .imeNestedScroll()
+            .padding(horizontal = 4.dp, vertical = 16.dp) // Extra padding for spacing,
     ) {
         Box(modifier = Modifier.weight(1f)) {
-
-            val scope = rememberCoroutineScope()
-            val scrollState = rememberScrollState()
-
             OutlinedTextField(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 65.dp)
-                    .verticalScroll(scrollState),
+                    .fillMaxWidth(),
                 value = text,
                 label = { Text(stringResource(id = R.string.uart_input_hint)) },
                 onValueChange = { newValue: String ->
                     text = newValue
-                    scope.launch {
-                        scrollState.scrollTo(Int.MAX_VALUE)
-                    }
                 }
             )
         }
