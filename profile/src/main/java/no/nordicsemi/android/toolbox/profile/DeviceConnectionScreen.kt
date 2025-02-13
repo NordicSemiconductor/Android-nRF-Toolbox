@@ -21,7 +21,6 @@ import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.service.profile.CustomReason
 import no.nordicsemi.android.service.profile.DeviceDisconnectionReason
 import no.nordicsemi.android.service.profile.StateReason
-import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.data.BPSServiceData
 import no.nordicsemi.android.toolbox.profile.data.BatteryServiceData
 import no.nordicsemi.android.toolbox.profile.data.CGMServiceData
@@ -30,20 +29,23 @@ import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
 import no.nordicsemi.android.toolbox.profile.data.GLSServiceData
 import no.nordicsemi.android.toolbox.profile.data.HRSServiceData
 import no.nordicsemi.android.toolbox.profile.data.HTSServiceData
+import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.data.ProfileServiceData
 import no.nordicsemi.android.toolbox.profile.data.RSCSServiceData
 import no.nordicsemi.android.toolbox.profile.data.ThroughputServiceData
-import no.nordicsemi.android.toolbox.profile.view.bps.BPSScreen
+import no.nordicsemi.android.toolbox.profile.data.UARTServiceData
 import no.nordicsemi.android.toolbox.profile.view.battery.BatteryLevelView
+import no.nordicsemi.android.toolbox.profile.view.bps.BPSScreen
 import no.nordicsemi.android.toolbox.profile.view.cgms.CGMScreen
 import no.nordicsemi.android.toolbox.profile.view.cscs.CSCScreen
 import no.nordicsemi.android.toolbox.profile.view.directionFinder.DFSScreen
 import no.nordicsemi.android.toolbox.profile.view.gls.GLSScreen
 import no.nordicsemi.android.toolbox.profile.view.hrs.HRSScreen
 import no.nordicsemi.android.toolbox.profile.view.hts.HTSScreen
+import no.nordicsemi.android.toolbox.profile.view.internal.ProfileAppBar
 import no.nordicsemi.android.toolbox.profile.view.rscs.RSCSScreen
 import no.nordicsemi.android.toolbox.profile.view.throughput.ThroughputScreen
-import no.nordicsemi.android.toolbox.profile.view.internal.ProfileAppBar
+import no.nordicsemi.android.toolbox.profile.view.uart.UARTScreen
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionState
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewModel
@@ -88,11 +90,11 @@ internal fun DeviceConnectionScreen() {
         RequireBluetooth {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .fillMaxSize()
                     .verticalScroll(rememberScrollState())
+                    .fillMaxSize()
                     .padding(paddingValues),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 when (val state = deviceDataState) {
                     is DeviceConnectionState.Connected -> {
@@ -232,6 +234,12 @@ private fun DeviceConnectedView(
                                 Profile.BATTERY -> {
                                     // Battery level will be added at the end.
                                     // Do nothing here.
+                                }
+
+                                Profile.UART -> {
+                                    UARTScreen(
+                                        state = serviceData as UARTServiceData,
+                                    ) { onClickEvent(it) }
                                 }
 
                                 else -> TODO()

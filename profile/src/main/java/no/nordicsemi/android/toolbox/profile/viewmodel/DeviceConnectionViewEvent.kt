@@ -10,6 +10,9 @@ import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.data.ThroughputInputType
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.MeasurementSection
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
+import no.nordicsemi.android.toolbox.profile.data.uart.MacroEol
+import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
+import no.nordicsemi.android.toolbox.profile.data.uart.UARTMacro
 import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
 
 sealed interface DeviceConnectionViewEvent
@@ -65,5 +68,43 @@ internal sealed interface ThroughputEvent : DeviceConnectionViewEvent {
     data class OnWriteData(
         val writeType: ThroughputInputType,
     ) : ThroughputEvent
+
+}
+
+// UART Profile events.
+internal sealed interface UARTEvent : DeviceConnectionViewEvent {
+    data class OnCreateMacro(
+        val macroName: UARTMacro,
+    ) : UARTEvent
+
+    data class OnEditMacro(
+        val position: Int,
+    ) : UARTEvent
+
+    data object OnEditFinished : UARTEvent
+    data object OnDeleteMacro : UARTEvent
+
+    data class OnRunMacro(
+        val macro: UARTMacro,
+    ) : UARTEvent
+
+    data class OnConfigurationSelected(
+        val configuration: UARTConfiguration,
+    ) : UARTEvent
+
+    data class OnAddConfiguration(
+        val name: String,
+    ) : UARTEvent
+
+    data object OnEditConfiguration : UARTEvent
+    data object OnDeleteConfiguration : UARTEvent
+
+    data class OnRunInput(
+        val text: String,
+        val newLineChar: MacroEol,
+    ) : UARTEvent
+
+    data object ClearOutputItems : UARTEvent
+    data object MacroInputSwitchClicked : UARTEvent
 
 }
