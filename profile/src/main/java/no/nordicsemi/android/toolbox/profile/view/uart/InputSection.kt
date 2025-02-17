@@ -17,6 +17,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -63,6 +64,8 @@ internal fun InputSection(onEvent: (DeviceConnectionViewEvent) -> Unit) {
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
 
+    var isEmptyText: Boolean by rememberSaveable { mutableStateOf(false) }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -87,15 +90,32 @@ internal fun InputSection(onEvent: (DeviceConnectionViewEvent) -> Unit) {
                 textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
                 onValueChange = { newValue ->
                     text = newValue
+                    isEmptyText = false
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             )
-            if (text.isEmpty()) {
+            if (text.isEmpty() && !isEmptyText) {
                 Text(
                     modifier = Modifier
                         .align(Alignment.CenterStart),
                     text = stringResource(id = R.string.uart_input_hint),
                 )
+            } else if (isEmptyText) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Icon(
+                        Icons.Default.Error,
+                        contentDescription = "Error",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                    Text(
+                        text = "Input cannot be empty",
+                        style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.error)
+                    )
+                }
+
             }
         }
         Icon(
@@ -108,6 +128,8 @@ internal fun InputSection(onEvent: (DeviceConnectionViewEvent) -> Unit) {
                         onEvent(UARTEvent.OnRunInput(text, checkedItem))
                         focusManager.clearFocus()
                         text = ""
+                    } else {
+                        isEmptyText = true
                     }
                 }
                 .padding(8.dp)
