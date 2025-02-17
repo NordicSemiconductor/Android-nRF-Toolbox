@@ -62,7 +62,7 @@ object UartRepository {
         _dataMap.remove(deviceId)
     }
 
-    fun clearMessages(deviceId: String) {
+    fun clearOutputItems(deviceId: String) {
         _dataMap[deviceId]?.update {
             it.copy(messages = emptyList())
         }
