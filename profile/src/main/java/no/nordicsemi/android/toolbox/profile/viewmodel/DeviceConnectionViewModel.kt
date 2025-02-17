@@ -265,7 +265,10 @@ internal class DeviceConnectionViewModel @Inject constructor(
         }.launchIn(viewModelScope)
         // Update maximum write value length. Since it will be available as soon as connection is established.
         viewModelScope.launch {
-            ThroughputRepository.updateMaxWriteValueLength(address, getServiceApi()?.getMaxWriteValue(address))
+            ThroughputRepository.updateMaxWriteValueLength(
+                address,
+                getServiceApi()?.getMaxWriteValue(address)
+            )
         }
     }
 
@@ -384,7 +387,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
             }
 
             // UART events.
-            UARTEvent.ClearOutputItems -> TODO()
+            UARTEvent.ClearOutputItems -> UartRepository.clearOutputItems(address)
             UARTEvent.MacroInputSwitchClicked -> TODO()
             is UARTEvent.OnAddConfiguration -> TODO()
             is UARTEvent.OnConfigurationSelected -> TODO()
