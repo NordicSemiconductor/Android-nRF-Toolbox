@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -11,7 +13,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.profile.data.UARTServiceData
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
-import no.nordicsemi.android.ui.view.ScreenSection
 
 @Composable
 internal fun UARTScreen(
@@ -23,9 +24,9 @@ internal fun UARTScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
     ) {
-        UARTContentView(state, onEvent)
-        Spacer(modifier = Modifier.weight(1f))
         MacroSection(state.uartViewState, onEvent)
+        Spacer(modifier = Modifier.weight(1f))
+        UARTContentView(state, onEvent)
 
     }
 }
@@ -46,11 +47,12 @@ private fun UARTContentView(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        ScreenSection {
+        OutlinedCard {
+            InputSection(onEvent = onEvent)
+            HorizontalDivider()
             OutputSection(state.messages) {
                 onEvent(it)
             }
-            InputSection(onEvent = onEvent)
         }
     }
 }
