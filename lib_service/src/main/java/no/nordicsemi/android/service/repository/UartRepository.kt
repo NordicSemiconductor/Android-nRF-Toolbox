@@ -92,4 +92,10 @@ object UartRepository {
             it.copy(uartViewState = it.uartViewState.copy(selectedConfigurationName = null))
         }
     }
+
+    fun onEditConfiguration(address: String) {
+        _dataMap[address]?.update {
+            it.copy(uartViewState = it.uartViewState.copy(isConfigurationEdited = !it.uartViewState.isConfigurationEdited))
+        }
+    }
 }

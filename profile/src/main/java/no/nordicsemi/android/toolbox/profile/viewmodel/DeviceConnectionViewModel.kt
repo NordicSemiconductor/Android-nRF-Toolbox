@@ -44,6 +44,7 @@ import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.data.ProfileServiceData
 import no.nordicsemi.android.toolbox.profile.data.uart.MacroEol
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
+import no.nordicsemi.android.toolbox.profile.data.uart.UARTMacro
 import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
@@ -395,17 +396,25 @@ internal class DeviceConnectionViewModel @Inject constructor(
             is UARTEvent.OnCreateMacro -> TODO()
             is UARTEvent.OnDeleteConfiguration -> deleteConfiguration(event.configuration)
             UARTEvent.OnDeleteMacro -> TODO()
-            UARTEvent.OnEditConfiguration -> TODO()
+            is UARTEvent.OnEditConfiguration -> onEditConfiguration()
             UARTEvent.OnEditFinished -> TODO()
             is UARTEvent.OnEditMacro -> TODO()
             is UARTEvent.OnRunInput -> {
                 sendText(event.text, event.newLineChar)
             }
 
-            is UARTEvent.OnRunMacro -> TODO()
+            is UARTEvent.OnRunMacro ->  runMacro(event.macro)
         }
     }
 
+    private fun onEditConfiguration() = viewModelScope.launch {
+        // Update the configuration in the UART repository.
+        UartRepository.onEditConfiguration(address)
+    }
+
+    private fun runMacro(macro: UARTMacro) = viewModelScope.launch {
+        UartRepository.runMacro(address, macro)
+    }
     private fun onAddConfiguration(name: String) = viewModelScope.launch(Dispatchers.IO) {
         // Update the configuration in the UART repository.
         UartRepository.updateSelectedConfigurationName(address, name)
