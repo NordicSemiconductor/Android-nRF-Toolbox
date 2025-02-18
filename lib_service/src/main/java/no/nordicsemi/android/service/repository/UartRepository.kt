@@ -68,15 +68,28 @@ object UartRepository {
         }
     }
 
-    fun updateConfiguration(address: String, configurations: List<UARTConfiguration>) {
+    fun deleteConfiguration(deviceId: String, configuration: UARTConfiguration) {
+        _dataMap[deviceId]?.update {
+            it.copy(uartViewState = it.uartViewState.copy(configurations = it.uartViewState.configurations - configuration))
+        }
+    }
+
+    fun addConfiguration(address: String, configuration: UARTConfiguration) {
+        // Add the new configuration to the list
         _dataMap[address]?.update {
-            it.copy(uartViewState = it.uartViewState.copy(configurations = configurations))
+            it.copy(uartViewState = it.uartViewState.copy(configurations = it.uartViewState.configurations + configuration))
         }
     }
 
     fun updateSelectedConfigurationName(address: String, configurationName: String) {
         _dataMap[address]?.update {
             it.copy(uartViewState = it.uartViewState.copy(selectedConfigurationName = configurationName))
+        }
+    }
+
+    fun removeSelectedConfiguration(address: String) {
+        _dataMap[address]?.update {
+            it.copy(uartViewState = it.uartViewState.copy(selectedConfigurationName = null))
         }
     }
 }
