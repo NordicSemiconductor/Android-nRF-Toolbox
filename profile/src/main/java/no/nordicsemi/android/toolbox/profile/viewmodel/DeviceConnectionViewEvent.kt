@@ -97,7 +97,9 @@ internal sealed interface UARTEvent : DeviceConnectionViewEvent {
     ) : UARTEvent
 
     data object OnEditConfiguration : UARTEvent
-    data object OnDeleteConfiguration : UARTEvent
+    data class OnDeleteConfiguration(
+        val configuration: UARTConfiguration,
+    ) : UARTEvent
 
     data class OnRunInput(
         val text: String,

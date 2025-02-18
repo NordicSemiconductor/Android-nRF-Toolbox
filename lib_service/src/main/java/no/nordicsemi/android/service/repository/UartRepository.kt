@@ -74,7 +74,7 @@ object UartRepository {
         }
     }
 
-    fun updateSelectedConfigurationName(address: String, configurationName: String?) {
+    fun updateSelectedConfigurationName(address: String, configurationName: String) {
         _dataMap[address]?.update {
             it.copy(uartViewState = it.uartViewState.copy(selectedConfigurationName = configurationName))
         }

@@ -62,14 +62,16 @@ internal fun UARTConfigurationButton(configuration: UARTConfiguration?, onClick:
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            val title =
+                configuration?.name ?: stringResource(id = R.string.uart_configuration_picker_hint)
             Column {
                 Text(
-                    text = stringResource(id = R.string.uart_configuration_picker_hint),
+                    text = title,
                     style = MaterialTheme.typography.labelSmall
                 )
-                val text = configuration?.name
-                    ?: stringResource(id = R.string.uart_configuration_picker_not_selected)
-                Text(text = text, style = MaterialTheme.typography.bodyMedium)
+                /* val text = configuration?.name
+                     ?: stringResource(id = R.string.uart_configuration_picker_not_selected)
+                 Text(text = text, style = MaterialTheme.typography.bodyMedium)*/
             }
 
             Icon(Icons.Default.ArrowDropDown, contentDescription = "")
