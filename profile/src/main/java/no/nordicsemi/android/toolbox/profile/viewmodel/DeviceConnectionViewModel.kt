@@ -46,8 +46,6 @@ import no.nordicsemi.android.toolbox.profile.data.uart.MacroEol
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
 import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
-import no.nordicsemi.android.toolbox.profile.repository.UARTPersistentDataSource
-import no.nordicsemi.android.toolbox.profile.repository.UartConfigurationDataRepository
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
@@ -78,8 +76,6 @@ internal class DeviceConnectionViewModel @Inject constructor(
     private val navigator: Navigator,
     private val deviceRepository: DeviceRepository,
     @ApplicationContext private val context: Context,
-    private val uartConfigurationRepository: UartConfigurationDataRepository,
-    private val uartDatabase: UARTPersistentDataSource,
     savedStateHandle: SavedStateHandle,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
     val address: String = parameterOf(DeviceConnectionDestinationId)
@@ -251,7 +247,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
             getServiceApi()?.getMaxWriteValue(address)
                 ?.let { UartRepository.updateMaxWriteLength(address, it) }
         }
-        uartDatabase.getConfigurations(address).onEach {
+        /*uartDatabase.getConfigurations(address).onEach {
             UartRepository.updateConfiguration(address, it)
         }.launchIn(viewModelScope)
 
@@ -259,7 +255,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
             if (it != null) {
                 UartRepository.updateSelectedConfigurationName(address, it)
             }
-        }.launchIn(viewModelScope)
+        }.launchIn(viewModelScope)*/
 
     }
 
@@ -411,27 +407,21 @@ internal class DeviceConnectionViewModel @Inject constructor(
     }
 
     private fun onAddConfiguration(name: String) = viewModelScope.launch(Dispatchers.IO) {
-        // Add the configuration to the data source which will be used to update the UI.
-        uartConfigurationRepository.saveConfigurationName(address, name)
         // Update the configuration in the UART repository.
         UartRepository.updateSelectedConfigurationName(address, name)
-        // Update the configurations in the database to be used later.
-        uartDatabase.saveConfiguration(UARTConfiguration(null, name))
+        UartRepository.addConfiguration(address, UARTConfiguration(null, name))
     }
 
     private fun onConfigurationSelected(configuration: UARTConfiguration) = viewModelScope.launch {
-        uartDatabase.saveConfiguration(configuration)
+        UartRepository.updateSelectedConfigurationName(address, configuration.name)
     }
 
     private fun deleteConfiguration(configuration: UARTConfiguration) =
         viewModelScope.launch(Dispatchers.IO) {
-            // Delete the configuration from the data source.
-            uartConfigurationRepository.lastConfigurationName.onEach {
-                it?.let {
-                    uartConfigurationRepository.deleteConfiguration(address, it)
-                }
-            }.launchIn(viewModelScope)
-            uartDatabase.deleteConfiguration(configuration)
+            // delete the configuration from the list.
+            UartRepository.deleteConfiguration(address, configuration)
+            // remove the selected configuration if it is deleted.
+            UartRepository.removeSelectedConfiguration(address)
         }
 
     private fun sendText(text: String, newLineChar: MacroEol) = viewModelScope.launch {

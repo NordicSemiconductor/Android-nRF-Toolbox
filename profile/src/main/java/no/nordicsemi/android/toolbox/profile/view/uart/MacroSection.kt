@@ -35,6 +35,7 @@ import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.UARTEvent
 import no.nordicsemi.android.ui.view.ScreenSection
+import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
 internal fun MacroSection(viewState: UARTViewState, onEvent: (DeviceConnectionViewEvent) -> Unit) {
@@ -56,63 +57,82 @@ internal fun MacroSection(viewState: UARTViewState, onEvent: (DeviceConnectionVi
     }
 
     Column {
-        Text(
-            stringResource(id = R.string.uart_macros),
-            modifier = Modifier
-                .alpha(0.5f)
-                .padding(start = 16.dp, bottom = 8.dp)
-        )
+        if (viewState.configurations.isNotEmpty()) {
+            Text(
+                stringResource(id = R.string.uart_macros),
+                modifier = Modifier
+                    .alpha(0.5f)
+                    .padding(start = 16.dp, bottom = 8.dp)
+            )
+        }
         ScreenSection {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-
-                    Box(modifier = Modifier.weight(1f)) {
-                        UARTConfigurationPicker(viewState, onEvent)
-                    }
-
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = stringResource(id = R.string.uart_configuration_add),
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .clickable { showAddDialog = true }
-                            .padding(8.dp)
-                    )
-
-                    viewState.selectedConfiguration?.let {
-                        if (!viewState.isConfigurationEdited) {
+                if (viewState.configurations.isEmpty()) {
+                    SectionTitle(
+                        resId = R.drawable.ic_macro,
+                        title = stringResource(id = R.string.uart_macros),
+                        menu = {
                             Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = stringResource(id = R.string.uart_configuration_edit),
+                                imageVector = Icons.Default.Add,
+                                contentDescription = stringResource(id = R.string.uart_configuration_add),
                                 modifier = Modifier
                                     .clip(CircleShape)
-                                    .clickable { onEvent(UARTEvent.OnEditConfiguration) }
-                                    .padding(8.dp)
-                            )
-                        } else {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_pencil_off),
-                                contentDescription = stringResource(id = R.string.uart_configuration_edit),
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .clickable { onEvent(UARTEvent.OnEditConfiguration) }
+                                    .clickable { showAddDialog = true }
                                     .padding(8.dp)
                             )
                         }
+                    )
+                } else {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+
+                        Box(modifier = Modifier.weight(1f)) {
+                            UARTConfigurationPicker(viewState, onEvent)
+                        }
+
                         Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = stringResource(id = R.string.uart_configuration_delete),
+                            imageVector = Icons.Default.Add,
+                            contentDescription = stringResource(id = R.string.uart_configuration_add),
                             modifier = Modifier
                                 .clip(CircleShape)
-                                .clickable { showDeleteDialog = true }
+                                .clickable { showAddDialog = true }
                                 .padding(8.dp)
                         )
+
+                        viewState.selectedConfiguration?.let {
+                            if (!viewState.isConfigurationEdited) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = stringResource(id = R.string.uart_configuration_edit),
+                                    modifier = Modifier
+                                        .clip(CircleShape)
+                                        .clickable { onEvent(UARTEvent.OnEditConfiguration) }
+                                        .padding(8.dp)
+                                )
+                            } else {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_pencil_off),
+                                    contentDescription = stringResource(id = R.string.uart_configuration_edit),
+                                    modifier = Modifier
+                                        .clip(CircleShape)
+                                        .clickable { onEvent(UARTEvent.OnEditConfiguration) }
+                                        .padding(8.dp)
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = stringResource(id = R.string.uart_configuration_delete),
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .clickable { showDeleteDialog = true }
+                                    .padding(8.dp)
+                            )
+                        }
                     }
                 }
 
