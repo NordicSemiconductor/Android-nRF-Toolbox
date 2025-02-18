@@ -32,4 +32,10 @@ internal class UartConfigurationDataSource @Inject constructor(
             it[LAST_CONFIGURATION] = name
         }
     }
+
+    suspend fun deleteConfiguration(name: String) {
+        context.dataStore.edit {
+            it.remove(LAST_CONFIGURATION)
+        }
+    }
 }

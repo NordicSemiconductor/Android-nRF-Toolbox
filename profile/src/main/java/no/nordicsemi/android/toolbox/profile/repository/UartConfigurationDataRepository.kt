@@ -8,8 +8,12 @@ internal class UartConfigurationDataRepository @Inject constructor(
     private val configurationDataSource: UartConfigurationDataSource
 ) {
     val lastConfigurationName= configurationDataSource.lastConfigurationName
-    suspend fun saveConfigurationName(name: String) {
+    suspend fun saveConfigurationName(deviceId: String, name: String) {
         configurationDataSource.saveConfigurationName(name)
+    }
+
+    suspend fun deleteConfiguration(deviceId: String, name: String) {
+        configurationDataSource.deleteConfiguration(name)
     }
 
 }
