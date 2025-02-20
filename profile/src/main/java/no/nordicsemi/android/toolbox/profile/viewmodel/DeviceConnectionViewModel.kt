@@ -397,7 +397,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
             is UARTEvent.OnDeleteConfiguration -> deleteConfiguration(event.configuration)
             UARTEvent.OnDeleteMacro -> onDeleteMacro()
             is UARTEvent.OnEditConfiguration -> onEditConfiguration()
-            UARTEvent.OnEditFinished -> TODO()
+            UARTEvent.OnEditFinished -> onEditFinished()
             is UARTEvent.OnEditMacro -> onEditMacro(event.position)
             is UARTEvent.OnRunInput -> {
                 sendText(event.text, event.newLineChar)
@@ -476,7 +476,6 @@ internal class DeviceConnectionViewModel @Inject constructor(
                 }
             }
         }
-
 
     /**
      * Launch the logger activity.

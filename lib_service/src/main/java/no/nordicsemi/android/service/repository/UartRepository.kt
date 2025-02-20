@@ -138,6 +138,12 @@ object UartRepository {
         }
     }
 
+    fun onEditFinished(address: String) {
+        _dataMap[address]?.update {
+            it.copy(uartViewState = it.uartViewState.copy(editedPosition = null))
+        }
+    }
+
     fun onDeleteMacro(address: String) {
         _dataMap[address]?.update {
             it.uartViewState.selectedConfiguration?.let { selectedConfiguration ->
