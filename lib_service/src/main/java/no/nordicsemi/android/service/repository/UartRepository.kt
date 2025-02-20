@@ -43,18 +43,23 @@ object UartRepository {
 
     suspend fun sendText(deviceId: String, text: String, newLineChar: MacroEol) {
         if (_dataMap.containsKey(deviceId)) {
-            UARTManager.sendText(deviceId, text, getMaxWriteLength(deviceId))
-        }
-        _dataMap[deviceId]?.update {
-            it.copy(command = text.parseWithNewLineChar(newLineChar))
+            UARTManager.sendText(
+                deviceId,
+                text.parseWithNewLineChar(newLineChar),
+                getMaxWriteLength(deviceId)
+            )
         }
     }
 
-    fun runMacro(deviceId: String, macro: UARTMacro) {
+    suspend fun runMacro(deviceId: String, macro: UARTMacro) {
         if (macro.command == null) return
-        // Send the command to the device and update the command message
-        _dataMap[deviceId]?.update {
-            it.copy(command = macro.command!!.parseWithNewLineChar(macro.newLineChar))
+        // Send the command to the device and update the command message.
+        if (_dataMap.containsKey(deviceId)) {
+            UARTManager.sendText(
+                deviceId,
+                macro.command!!.parseWithNewLineChar(macro.newLineChar),
+                getMaxWriteLength(deviceId)
+            )
         }
     }
 
