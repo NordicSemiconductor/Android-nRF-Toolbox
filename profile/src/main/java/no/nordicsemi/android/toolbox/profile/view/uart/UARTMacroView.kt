@@ -106,7 +106,7 @@ private fun MacroButton(
     onEvent: (DeviceConnectionViewEvent) -> Unit
 ) {
     Image(
-        painter = painterResource(id = macro.icon.index),
+        painter = painterResource(id = macro.icon.toResId()),
         contentDescription = stringResource(id = R.string.uart_macro_icon),
         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary),
         modifier = Modifier

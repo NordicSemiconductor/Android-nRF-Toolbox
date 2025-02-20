@@ -77,7 +77,8 @@ object UartRepository {
     fun addConfiguration(address: String, configuration: UARTConfiguration) {
         // Add the new configuration to the list
         _dataMap[address]?.update {
-            it.copy(uartViewState = it.uartViewState.copy(configurations = it.uartViewState.configurations + configuration))
+            val newConfig = configuration.copy(id = it.uartViewState.configurations.size + 1)
+            it.copy(uartViewState = it.uartViewState.copy(configurations = it.uartViewState.configurations + newConfig))
         }
     }
 
@@ -96,6 +97,39 @@ object UartRepository {
     fun onEditConfiguration(address: String) {
         _dataMap[address]?.update {
             it.copy(uartViewState = it.uartViewState.copy(isConfigurationEdited = !it.uartViewState.isConfigurationEdited))
+        }
+    }
+
+    fun onEditMacro(address: String, editPosition: Int?) {
+        _dataMap[address]?.update {
+            it.copy(uartViewState = it.uartViewState.copy(editedPosition = editPosition))
+        }
+    }
+
+    fun addOrEditMacro(address: String, macro: UARTMacro) {
+        _dataMap[address]?.update {
+            it.uartViewState.selectedConfiguration?.let { selectedConfiguration ->
+                val macros = selectedConfiguration.macros.toMutableList().apply {
+                    set(it.uartViewState.editedPosition!!, macro)
+                }
+                val newConfig = selectedConfiguration.copy(macros = macros)
+
+                // TODO: Save the configuration to the database.
+                // Save the new configuration and edited position.
+                val newConfiguration = it.uartViewState.configurations.map { config ->
+                    if (config.id == selectedConfiguration.id) {
+                        newConfig
+                    } else {
+                        config
+                    }
+                }
+                it.copy(
+                    uartViewState = it.uartViewState.copy(
+                        configurations = newConfiguration,
+                        editedPosition = null
+                    )
+                )
+            }!!
         }
     }
 }
