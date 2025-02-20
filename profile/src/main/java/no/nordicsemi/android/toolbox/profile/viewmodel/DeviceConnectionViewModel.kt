@@ -393,18 +393,27 @@ internal class DeviceConnectionViewModel @Inject constructor(
             is UARTEvent.OnAddConfiguration -> onAddConfiguration(event.name)
 
             is UARTEvent.OnConfigurationSelected -> onConfigurationSelected(event.configuration)
-            is UARTEvent.OnCreateMacro -> TODO()
+            is UARTEvent.OnCreateMacro -> addNewMacro(event.macroName)
             is UARTEvent.OnDeleteConfiguration -> deleteConfiguration(event.configuration)
             UARTEvent.OnDeleteMacro -> TODO()
             is UARTEvent.OnEditConfiguration -> onEditConfiguration()
             UARTEvent.OnEditFinished -> TODO()
-            is UARTEvent.OnEditMacro -> TODO()
+            is UARTEvent.OnEditMacro -> onEditMacro(event.position)
             is UARTEvent.OnRunInput -> {
                 sendText(event.text, event.newLineChar)
             }
 
-            is UARTEvent.OnRunMacro ->  runMacro(event.macro)
+            is UARTEvent.OnRunMacro -> runMacro(event.macro)
         }
+    }
+
+    private fun addNewMacro(macroName: UARTMacro) = viewModelScope.launch(Dispatchers.IO) {
+        UartRepository.addOrEditMacro(address, macroName)
+    }
+
+    private fun onEditMacro(position: Int) = viewModelScope.launch {
+        // Update the configuration in the UART repository.
+        UartRepository.onEditMacro(address, position)
     }
 
     private fun onEditConfiguration() = viewModelScope.launch {
@@ -415,6 +424,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
     private fun runMacro(macro: UARTMacro) = viewModelScope.launch {
         UartRepository.runMacro(address, macro)
     }
+
     private fun onAddConfiguration(name: String) = viewModelScope.launch(Dispatchers.IO) {
         // Update the configuration in the UART repository.
         UartRepository.updateSelectedConfigurationName(address, name)

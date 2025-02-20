@@ -46,8 +46,9 @@ private const val GRID_SIZE = 5
 @Composable
 internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (DeviceConnectionViewEvent) -> Unit) {
     val newLineChar = rememberSaveable { mutableStateOf(macro?.newLineChar ?: MacroEol.LF) }
-    val command = rememberSaveable { mutableStateOf(macro?.command ?:"") }
-    val selectedIcon = rememberSaveable { mutableStateOf(macro?.icon ?: MacroIcon.entries.toTypedArray()[0]) }
+    val command = rememberSaveable { mutableStateOf(macro?.command ?: "") }
+    val selectedIcon =
+        rememberSaveable { mutableStateOf(macro?.icon ?: MacroIcon.entries.toTypedArray()[0]) }
 
     AlertDialog(
         onDismissRequest = { onEvent(UARTEvent.OnEditFinished) },
@@ -103,7 +104,7 @@ internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (DeviceConnectionVie
                     }
 
                     Image(
-                        painter = painterResource(id = icon.index),
+                        painter = painterResource(id = icon.toResId()),
                         contentDescription = stringResource(id = R.string.uart_macro_icon),
                         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer),
                         modifier = Modifier
@@ -121,7 +122,13 @@ internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (DeviceConnectionVie
 @Preview(showBackground = true)
 @Composable
 private fun UARTAddMacroDialogPreview() {
-    UARTAddMacroDialog(null) {}
+    UARTAddMacroDialog(
+        UARTMacro(
+            MacroIcon.entries[0],
+            "AT+",
+            MacroEol.LF
+        )
+    ) {}
 }
 
 @Composable
