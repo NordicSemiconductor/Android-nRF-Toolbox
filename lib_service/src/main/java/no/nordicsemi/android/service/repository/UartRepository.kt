@@ -137,4 +137,30 @@ object UartRepository {
             }!!
         }
     }
+
+    fun onDeleteMacro(address: String) {
+        _dataMap[address]?.update {
+            it.uartViewState.selectedConfiguration?.let { selectedConfiguration ->
+                val macros = selectedConfiguration.macros.toMutableList().apply {
+                    set(it.uartViewState.editedPosition!!, null)
+                }
+                val newConfig = selectedConfiguration.copy(macros = macros)
+
+                // Save the new configuration and edited position.
+                val newConfiguration = it.uartViewState.configurations.map { config ->
+                    if (config.id == selectedConfiguration.id) {
+                        newConfig
+                    } else {
+                        config
+                    }
+                }
+                it.copy(
+                    uartViewState = it.uartViewState.copy(
+                        configurations = newConfiguration,
+                        editedPosition = null
+                    )
+                )
+            }!!
+        }
+    }
 }

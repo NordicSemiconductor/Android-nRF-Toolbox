@@ -395,7 +395,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
             is UARTEvent.OnConfigurationSelected -> onConfigurationSelected(event.configuration)
             is UARTEvent.OnCreateMacro -> addNewMacro(event.macroName)
             is UARTEvent.OnDeleteConfiguration -> deleteConfiguration(event.configuration)
-            UARTEvent.OnDeleteMacro -> TODO()
+            UARTEvent.OnDeleteMacro -> onDeleteMacro()
             is UARTEvent.OnEditConfiguration -> onEditConfiguration()
             UARTEvent.OnEditFinished -> TODO()
             is UARTEvent.OnEditMacro -> onEditMacro(event.position)
@@ -404,6 +404,16 @@ internal class DeviceConnectionViewModel @Inject constructor(
             }
 
             is UARTEvent.OnRunMacro -> runMacro(event.macro)
+        }
+    }
+
+    private fun onDeleteMacro() = viewModelScope.launch(Dispatchers.IO) {
+        UartRepository.onDeleteMacro(address)
+    }
+
+    private fun onEditFinished() {
+        viewModelScope.launch {
+            UartRepository.onEditFinished(address)
         }
     }
 
