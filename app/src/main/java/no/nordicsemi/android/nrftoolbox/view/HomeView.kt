@@ -154,7 +154,7 @@ internal fun HomeView() {
                                                 iconId = Icons.Default.SyncAlt,
                                                 name = "Throughput",
                                                 isRunning = true,
-                                                description = "Throughput service"
+                                                description = peripheral.name,
                                             ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
                                         }
 
