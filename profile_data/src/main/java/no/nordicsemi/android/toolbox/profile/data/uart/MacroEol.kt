@@ -4,6 +4,14 @@ enum class MacroEol {
     LF,
     CR,
     CR_LF;
+
+    override fun toString(): String {
+        return when (this) {
+            LF -> "LF"
+            CR -> "CR"
+            CR_LF -> "CR+LF"
+        }
+    }
 }
 
 fun String.parseWithNewLineChar(newLineChar: MacroEol): String {
