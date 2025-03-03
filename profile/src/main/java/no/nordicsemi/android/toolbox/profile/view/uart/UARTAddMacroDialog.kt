@@ -3,10 +3,15 @@ package no.nordicsemi.android.toolbox.profile.view.uart
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -18,12 +23,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -31,9 +38,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.common.ui.view.RadioButtonGroup
-import no.nordicsemi.android.common.ui.view.RadioButtonItem
-import no.nordicsemi.android.common.ui.view.RadioGroupViewEntity
+import no.nordicsemi.android.common.theme.NordicTheme
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.uart.MacroEol
 import no.nordicsemi.android.toolbox.profile.data.uart.MacroIcon
@@ -73,10 +78,15 @@ internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (DeviceConnectionVie
             }
         },
         title = {
-            Text(
-                text = stringResource(id = R.string.uart_macro_dialog_title),
-                style = MaterialTheme.typography.headlineSmall
-            )
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.uart_macro_dialog_title),
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
         },
         text = {
             LazyVerticalGrid(
@@ -157,21 +167,20 @@ private fun CommandInputPreview() {
 
 @Composable
 private fun NewLineCharSection(checkedItem: MacroEol, onItemClick: (MacroEol) -> Unit) {
-    val items = MacroEol.entries.map {
-        RadioButtonItem(it.toString(), it == checkedItem)
-    }
-    val viewEntity = RadioGroupViewEntity(items)
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Column(
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         Text(
-            text = stringResource(id = R.string.uart_macro_dialog_eol),
-            style = MaterialTheme.typography.labelLarge
+            text = "EOL",
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.alpha(0.5f)
         )
-
-        RadioButtonGroup(viewEntity) {
-            val i = items.indexOf(it)
-            onItemClick(MacroEol.entries[i])
-        }
+        EolTab(
+            checkedItem = checkedItem,
+            onItemClick = onItemClick
+        )
     }
 }
 
@@ -180,4 +189,57 @@ private fun NewLineCharSection(checkedItem: MacroEol, onItemClick: (MacroEol) ->
 private fun NewLineCharSectionPreview() {
     val newLineChar = rememberSaveable { mutableStateOf(MacroEol.LF) }
     NewLineCharSection(newLineChar.value) {}
+}
+
+@Composable
+private fun EolTab(
+    checkedItem: MacroEol = MacroEol.LF,
+    onItemClick: (MacroEol) -> Unit,
+) {
+    Box(
+        modifier = Modifier.clip(RoundedCornerShape(8.dp))
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            MacroEol.entries.forEachIndexed { index, it ->
+                val selected = it == checkedItem
+                val clip = if (selected) RoundedCornerShape(8.dp) else RoundedCornerShape(0.dp)
+                val (color, textColor) = if (selected) {
+                    MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
+                } else {
+                    MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.onSurface
+                }
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(clip)
+                        .background(color = color)
+                        .clickable { onItemClick(it) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        it.toString(),
+                        modifier = Modifier.padding(8.dp),
+                        color = textColor,
+                    )
+                }
+                if ((index < MacroEol.entries.size - 1) && !selected)
+                    VerticalDivider(
+                        modifier = Modifier
+                            .height(IntrinsicSize.Max)
+                            .background(MaterialTheme.colorScheme.onSurface)
+                    )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun EOLTabPreview() {
+    NordicTheme {
+        EolTab {}
+    }
 }
