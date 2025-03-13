@@ -41,4 +41,8 @@ object ThroughputRepository {
         _dataMap[deviceId]?.update { it.copy(maxWriteValueLength = mtuSize) }
     }
 
+    fun clearData(deviceId: String) {
+        _dataMap.remove(deviceId)
+    }
+
 }
