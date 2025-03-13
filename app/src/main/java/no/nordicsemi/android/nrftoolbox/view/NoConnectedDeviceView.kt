@@ -36,10 +36,10 @@ internal fun NoConnectedDeviceView() {
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
         )
 
-        Text(text = "CAN'T SEE CONNECTED DEVICES?")
+        Text(text = "NO DEVICES CONNECTED")
         Text(
-            text = "1. Make sure the device is turned on and is connected to a power source.\n\n" +
-                    "2. Make sure the device is in the range of your phone.\n\n",
+            text = "Please connect to devices first.\n" +
+                    "If you have connected to a device, please make sure it is turned on and within range.",
             textAlign = TextAlign.Justify
         )
     }
