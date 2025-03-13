@@ -3,18 +3,17 @@ package no.nordicsemi.android.toolbox.profile.view.throughput
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -65,65 +64,52 @@ internal fun ThroughputScreen(
                     var number by rememberSaveable { mutableIntStateOf(0) }
                     var writeDataType by rememberSaveable { mutableStateOf("") }
 
-                    WriteDropdown(
-                        expanded = expanded,
-                        writeDataType = writeDataType,
-                        number = number,
-                        onDropdownMenuSelected = { writeDataType = it },
-                        onNumberUpdate = { number = it },
-                        onDismiss = {
-                            expanded = false
-                            writeDataType = ""
-                            number = 0
-                        },
-                        onExpand = { expanded = true },
-                        onClickEvent = onClickEvent
-                    )
-                }
-            )
-            when (serviceData.writingStatus) {
-                WritingStatus.IDEAL -> {
-                    ThroughputDataNotAvailable()
-                }
-
-                WritingStatus.IN_PROGRESS -> {
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Text(stringResource(id = R.string.write_inprogress))
-                        LinearProgressIndicator(
-                            modifier = Modifier.fillMaxWidth(),
+                    if (serviceData.writingStatus == WritingStatus.IN_PROGRESS) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(48.dp),
                             color = MaterialTheme.colorScheme.secondary,
                             trackColor = MaterialTheme.colorScheme.surfaceVariant,
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
+                    } else
+                        WriteDropdown(
+                            expanded = expanded,
+                            writeDataType = writeDataType,
+                            number = number,
+                            onDropdownMenuSelected = { writeDataType = it },
+                            onNumberUpdate = { number = it },
+                            onDismiss = {
+                                expanded = false
+                                writeDataType = ""
+                                number = 0
+                            },
+                            onExpand = { expanded = true },
+                            onClickEvent = onClickEvent
+                        )
                 }
-
-                WritingStatus.COMPLETED -> {
-                    // Show throughput data.
-                    serviceData.throughputData?.let {
-                        SectionRow {
-                            KeyValueColumn(
-                                stringResource(id = R.string.total_bytes_received),
-                                it.throughputDataReceived()
-                            )
-                            KeyValueColumnReverse(
-                                stringResource(id = R.string.gatt_write_number),
-                                it.gattWritesReceived.toString()
-                            )
-                        }
-                        SectionRow {
-                            KeyValueColumn(
-                                stringResource(id = R.string.measured_throughput),
-                                it.displayThroughput()
-                            )
-                            // Show mtu size
-                            serviceData.maxWriteValueLength?.let {
-                                KeyValueColumnReverse(
-                                    stringResource(id = R.string.max_write_value),
-                                    "$it"
-                                )
-                            }
-                        }
+            )
+            // Show throughput data.
+            serviceData.throughputData.let {
+                SectionRow {
+                    KeyValueColumn(
+                        stringResource(id = R.string.total_bytes_received),
+                        it.throughputDataReceived()
+                    )
+                    KeyValueColumnReverse(
+                        stringResource(id = R.string.gatt_write_number),
+                        it.gattWritesReceived.toString()
+                    )
+                }
+                SectionRow {
+                    KeyValueColumn(
+                        stringResource(id = R.string.measured_throughput),
+                        it.displayThroughput()
+                    )
+                    // Show mtu size
+                    serviceData.maxWriteValueLength?.let {
+                        KeyValueColumnReverse(
+                            stringResource(id = R.string.max_write_value),
+                            "$it"
+                        )
                     }
                 }
             }

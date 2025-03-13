@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="throughput_service_name">Throughput Service</string>
+    <string name="throughput_service_name">Throughput</string>
 
-    <string name="throughput_write">Write</string>
-    <string name="write_inprogress">Writing…</string>
+    <string name="throughput_write">Start test</string>
+    <string name="write_inprogress">In progress…</string>
 
-    <string name="total_bytes_received">Total bytes received</string>
-    <string name="gatt_write_number">Gatt writes</string>
-    <string name="max_write_value">Max write value</string>
-    <string name="measured_throughput">Throughput</string>
+    <string name="total_bytes_received">Data</string>
+    <string name="gatt_write_number">Count</string>
+    <string name="max_write_value">MTU (in bytes)</string>
+    <string name="measured_throughput">Speed</string>
 
-    <string name="throughput_input_type">Throughput input type</string>
+    <string name="throughput_input_type">Test mode</string>
     <string name="throughput_input_type_description">Select the input type for the throughput test</string>
     <string name="throughput_input_type_error">Select one option</string>
 
-    <string name="throughput_bytes">Number of Kilobytes</string>
+    <string name="throughput_bytes">Test size (in kB)</string>
     <string name="throughput_bytes_description">Enter the number of bytes to be sent in the throughput test</string>
-    <string name="throughput_bytes_error">Enter the number of bytes</string>
+    <string name="throughput_bytes_error">Test size (in kB) </string>
 
-    <string name="throughput_time">Number of seconds</string>
+    <string name="throughput_time">Test in time (seconds)</string>
     <string name="throughput_time_description">Enter the number of seconds to run the throughput test</string>
-    <string name="throughput_time_error">Enter the number of seconds</string>
-    <string name="throughput_start">Start</string>
+    <string name="throughput_time_error">Test in time (seconds)</string>
+    <string name="throughput_start">Run</string>
 
     <string name="throughput_data_not_available">Write data to get throughput</string>
 

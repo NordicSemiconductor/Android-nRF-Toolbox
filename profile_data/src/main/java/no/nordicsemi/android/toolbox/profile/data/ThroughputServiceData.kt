@@ -4,7 +4,7 @@ import no.nordicsemi.android.lib.profile.throughput.ThroughputMetrics
 
 data class ThroughputServiceData(
     override val profile: Profile = Profile.THROUGHPUT,
-    val throughputData: ThroughputMetrics? = null,
+    val throughputData: ThroughputMetrics = ThroughputMetrics(),
     val writingStatus: WritingStatus = WritingStatus.IDEAL,
     val maxWriteValueLength: Int? = null
 ) : ProfileServiceData()
@@ -16,7 +16,7 @@ data class NumberOfBytes(
 ) : ThroughputInputType {
 
     companion object {
-        private const val DISPLAY_NAME = "Number of Kilobytes"
+        private const val DISPLAY_NAME = "Test in size (in kB) "
         fun getString(): String = DISPLAY_NAME
     }
 }
@@ -26,7 +26,7 @@ data class NumberOfSeconds(
 ) : ThroughputInputType {
 
     companion object {
-        private const val DISPLAY_NAME = "Number of seconds"
+        private const val DISPLAY_NAME = "Test in time (seconds)"
         fun getString(): String = DISPLAY_NAME
     }
 }
