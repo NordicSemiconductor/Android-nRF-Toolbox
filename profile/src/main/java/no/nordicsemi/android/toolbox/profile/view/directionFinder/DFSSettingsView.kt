@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -55,12 +56,12 @@ internal fun SettingsView(
     val isExpanded = remember { mutableStateOf(false) }
 
     SectionTitle(
-        resId = R.drawable.ic_settings,
+        icon = Icons.Default.Settings,
         title = stringResource(id = R.string.distance_settings),
         modifier = Modifier
             .fillMaxWidth()
             .clickable { isExpanded.value = !isExpanded.value },
-        rotateArrow = if (isExpanded.value) 180f else 0f
+//        rotateArrow = if (isExpanded.value) 180f else 0f
     )
 
     AnimatedVisibility(
