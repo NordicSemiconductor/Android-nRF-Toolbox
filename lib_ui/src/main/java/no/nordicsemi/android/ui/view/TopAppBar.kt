@@ -61,7 +61,7 @@ private const val TOP_APP_BAR_TITLE = "Nordic_Appbar"
 @Composable
 fun CloseIconAppBar(text: String, onClick: () -> Unit) {
     TopAppBar(
-        title = { Text(text, maxLines = 2) },
+        title = { Text(text, maxLines = 1) },
         colors = TopAppBarDefaults.topAppBarColors(
             scrolledContainerColor = MaterialTheme.colorScheme.primary,
             containerColor = colorResource(id = R.color.appBarColor),
@@ -96,7 +96,7 @@ fun LoggerBackIconAppBar(
     onLoggerClick: () -> Unit
 ) {
     TopAppBar(
-        title = { Text(text, maxLines = 2) },
+        title = { Text(text, maxLines = 1) },
         colors = TopAppBarDefaults.topAppBarColors(
             scrolledContainerColor = MaterialTheme.colorScheme.primary,
             containerColor = colorResource(id = R.color.appBarColor),
@@ -138,7 +138,7 @@ private fun LoggerBackIconAppBarPreview() {
 @Composable
 fun BackIconAppBar(text: String, onClick: () -> Unit) {
     TopAppBar(
-        title = { Text(text, maxLines = 2) },
+        title = { Text(text, maxLines = 1) },
         colors = TopAppBarDefaults.topAppBarColors(
             scrolledContainerColor = MaterialTheme.colorScheme.primary,
             containerColor = colorResource(id = R.color.appBarColor),
@@ -175,7 +175,7 @@ fun LoggerIconAppBar(
     onLoggerClick: () -> Unit
 ) {
     TopAppBar(
-        title = { Text(text, maxLines = 2) },
+        title = { Text(text, maxLines = 1) },
         colors = TopAppBarDefaults.topAppBarColors(
             scrolledContainerColor = MaterialTheme.colorScheme.primary,
             containerColor = colorResource(id = R.color.appBarColor),
