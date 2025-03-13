@@ -34,7 +34,7 @@ plugins {
     alias(libs.plugins.kotlin.parcelize)
 }
 
-if (getGradle().getStartParameter().getTaskRequests().toString().contains("Release")) {
+if (getGradle().startParameter.taskRequests.toString().contains("Release")) {
     apply(plugin = "com.google.gms.google-services")
     apply(plugin = "com.google.firebase.crashlytics")
 }
@@ -58,8 +58,6 @@ dependencies {
     implementation(libs.nordic.analytics)
     implementation(libs.nordic.ui)
     implementation(libs.nordic.core)
-    implementation(libs.nordic.permissions.ble)
-    implementation(libs.nordic.permissions.notification)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

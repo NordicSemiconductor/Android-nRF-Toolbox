@@ -19,6 +19,7 @@ dependencies {
     implementation(libs.nordic.ui)
     implementation(libs.nordic.theme)
     implementation(libs.nordic.permissions.ble)
+    implementation(libs.nordic.permissions.notification)
     implementation(libs.nordic.logger)
     implementation(libs.nordic.log.timber)
 
