@@ -11,7 +11,6 @@
     <string name="elevation_section">Elevation</string>
     <string name="measurement_details_section">Measurement details</string>
 
-    <string name="device_not_selected">Click to select a device in range.</string>
     <string name="device_no_devices">There is no device in range.</string>
     <string name="device_no_devices_hint">Make sure the device is in range.</string>
     <string name="device_address">Address</string>
@@ -32,7 +31,6 @@
     <string name="only_mcpd_available">Only MCPD feature is available on this device.</string>
     <string name="only_rtt_available">Only RTT feature is available on this device.</string>
 
-    <string name="current_section">Current details section: %s</string>
     <string name="select_section">Select section for displaying details.</string>
 
     <string name="elevation_min">-90°</string>
