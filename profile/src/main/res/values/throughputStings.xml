@@ -6,7 +6,7 @@
     <string name="write_inprogress">In progress…</string>
 
     <string name="total_bytes_received">Data</string>
-    <string name="gatt_write_number">Count</string>
+    <string name="gatt_write_number">Write count</string>
     <string name="max_write_value">MTU (in bytes)</string>
     <string name="measured_throughput">Speed</string>
 

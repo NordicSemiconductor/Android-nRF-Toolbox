@@ -25,7 +25,7 @@ internal fun ThroughputMetrics.throughputDataReceived(): String {
 internal fun ThroughputMetrics.displayThroughput(): String {
     val kbps = (this.throughputBitsPerSecond / 8f) / 1024f
     return if (kbps > 0) {
-        "${String.format(Locale.US, "%.2f", kbps)} kBps"
+        "${String.format(Locale.US, "%.2f", kbps)} KBps"
     } else {
         "${this.throughputBitsPerSecond} bps"
     }
