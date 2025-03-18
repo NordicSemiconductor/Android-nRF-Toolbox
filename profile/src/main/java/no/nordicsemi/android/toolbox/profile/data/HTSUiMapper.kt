@@ -38,6 +38,6 @@ internal fun displayTemperature(value: Float, temperatureUnit: TemperatureUnit):
     return when (temperatureUnit) {
         TemperatureUnit.CELSIUS -> String.format(Locale.US, "%.1f °C", value)
         TemperatureUnit.FAHRENHEIT -> String.format(Locale.US, "%.1f °F", value * 1.8f + 32f)
-        TemperatureUnit.KELVIN -> String.format(Locale.US, "%.1f °K", value + 273.15f)
+        TemperatureUnit.KELVIN -> String.format(Locale.US, "%.1f K", value + 273.15f)
     }
 }
