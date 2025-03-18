@@ -38,6 +38,7 @@ import no.nordicsemi.android.toolbox.profile.data.getThroughputInputTypes
 import no.nordicsemi.android.toolbox.profile.data.throughputDataReceived
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.ThroughputEvent
+import no.nordicsemi.android.ui.view.AnimatedThreeDots
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
@@ -65,11 +66,13 @@ internal fun ThroughputScreen(
                     var writeDataType by rememberSaveable { mutableStateOf("") }
 
                     if (serviceData.writingStatus == WritingStatus.IN_PROGRESS) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(48.dp),
-                            color = MaterialTheme.colorScheme.secondary,
-                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                        )
+                        Box(modifier = Modifier.padding(8.dp)) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(40.dp),
+                                color = MaterialTheme.colorScheme.secondary,
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                            )
+                        }
                     } else
                         WriteDropdown(
                             expanded = expanded,
@@ -88,30 +91,65 @@ internal fun ThroughputScreen(
                 }
             )
             // Show throughput data.
-            serviceData.throughputData.let {
-                SectionRow {
-                    KeyValueColumn(
-                        stringResource(id = R.string.total_bytes_received),
-                        it.throughputDataReceived()
-                    )
-                    KeyValueColumnReverse(
-                        stringResource(id = R.string.gatt_write_number),
-                        it.gattWritesReceived.toString()
-                    )
-                }
-                SectionRow {
-                    KeyValueColumn(
-                        stringResource(id = R.string.measured_throughput),
-                        it.displayThroughput()
-                    )
-                    // Show mtu size
-                    serviceData.maxWriteValueLength?.let {
-                        KeyValueColumnReverse(
-                            stringResource(id = R.string.max_write_value),
-                            "$it"
-                        )
-                    }
-                }
+            when (serviceData.writingStatus) {
+                WritingStatus.IN_PROGRESS -> ThroughputInProgress(serviceData.maxWriteValueLength) { AnimatedThreeDots() }
+                WritingStatus.IDEAL, WritingStatus.COMPLETED -> ThroughputData(serviceData)
+            }
+        }
+    }
+}
+
+@Composable
+fun ThroughputInProgress(
+    maxWriteValueLength: Int?,
+    animatedThreeDots: @Composable () -> Unit
+) {
+    SectionRow {
+        KeyValueColumn(
+            stringResource(id = R.string.total_bytes_received),
+        ) { animatedThreeDots() }
+        KeyValueColumnReverse(
+            stringResource(id = R.string.gatt_write_number)
+        ) { animatedThreeDots() }
+    }
+    SectionRow {
+        KeyValueColumn(
+            stringResource(id = R.string.measured_throughput)
+        ) { animatedThreeDots() }
+        // Show mtu size
+        maxWriteValueLength?.let {
+            KeyValueColumnReverse(
+                stringResource(id = R.string.max_write_value),
+                "$it"
+            )
+        }
+    }
+}
+
+@Composable
+private fun ThroughputData(serviceData: ThroughputServiceData) {
+    serviceData.throughputData.let {
+        SectionRow {
+            KeyValueColumn(
+                stringResource(id = R.string.total_bytes_received),
+                it.throughputDataReceived()
+            )
+            KeyValueColumnReverse(
+                stringResource(id = R.string.gatt_write_number),
+                it.gattWritesReceived.toString()
+            )
+        }
+        SectionRow {
+            KeyValueColumn(
+                stringResource(id = R.string.measured_throughput),
+                it.displayThroughput()
+            )
+            // Show mtu size
+            serviceData.maxWriteValueLength?.let {
+                KeyValueColumnReverse(
+                    stringResource(id = R.string.max_write_value),
+                    "$it"
+                )
             }
         }
     }
@@ -211,11 +249,6 @@ private fun WriteDropdown(
             }
         }
     }
-}
-
-@Composable
-private fun ThroughputDataNotAvailable() {
-    Text(stringResource(id = R.string.throughput_data_not_available))
 }
 
 @Preview
