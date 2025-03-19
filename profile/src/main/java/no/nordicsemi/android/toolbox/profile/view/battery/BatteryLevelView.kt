@@ -31,10 +31,10 @@
 
 package no.nordicsemi.android.toolbox.profile.view.battery
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.outlined.Battery0Bar
 import androidx.compose.material.icons.outlined.Battery1Bar
 import androidx.compose.material.icons.outlined.Battery2Bar
@@ -53,32 +53,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.ui.R
 import no.nordicsemi.android.ui.view.ScreenSection
+import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
 internal fun BatteryLevelView(batteryLevel: Int) {
     ScreenSection {
-        Row(
-            horizontalArrangement = Arrangement.Absolute.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = stringResource(id = R.string.field_battery),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                DynamicBatteryStatus(batteryLevel)
-                Text(text = "$batteryLevel %")
+        SectionTitle(
+            icon = Icons.Default.BatteryChargingFull,
+            title = stringResource(id = R.string.field_battery),
+            menu = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(start = 8.dp)
+                ) {
+                    DynamicBatteryStatus(batteryLevel)
+                    Text(text = "$batteryLevel %")
+                }
             }
-        }
-
+        )
     }
 }
 
