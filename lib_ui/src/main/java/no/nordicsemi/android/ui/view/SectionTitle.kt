@@ -34,7 +34,6 @@ package no.nordicsemi.android.ui.view
 import android.annotation.SuppressLint
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,7 +42,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Icon
@@ -78,14 +76,9 @@ fun SectionTitle(
         Image(
             painter = painterResource(id = resId),
             contentDescription = null,
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary),
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
             modifier = Modifier
-                .background(
-                    color = MaterialTheme.colorScheme.secondary,
-                    shape = CircleShape
-                )
-                .padding(8.dp)
-                .size(16.dp)
+                .size(28.dp)
         )
         Spacer(modifier = Modifier.size(8.dp))
         Text(
@@ -113,14 +106,9 @@ fun SectionTitle(
         Image(
             imageVector = icon,
             contentDescription = null,
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary),
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
             modifier = Modifier
-                .background(
-                    color = MaterialTheme.colorScheme.secondary,
-                    shape = CircleShape
-                )
-                .padding(8.dp)
-                .size(16.dp)
+                .size(28.dp)
         )
         Spacer(modifier = Modifier.size(8.dp))
         Text(
@@ -150,13 +138,10 @@ fun SectionTitle(
         Image(
             painter = painterResource(id = resId),
             contentDescription = null,
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
             modifier = Modifier
-                .background(
-                    color = iconBackground,
-                    shape = CircleShape
-                )
-                .padding(8.dp)
-                .size(16.dp)
+                .size(28.dp)
+
         )
         Spacer(modifier = Modifier.padding(8.dp))
         Text(
@@ -205,14 +190,9 @@ fun SectionTitle(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSecondary,
+            tint = MaterialTheme.colorScheme.secondary,
             modifier = Modifier
-                .background(
-                    color = MaterialTheme.colorScheme.secondary,
-                    shape = CircleShape
-                )
-                .padding(8.dp)
-                .size(16.dp)
+                .size(28.dp)
         )
         Spacer(modifier = Modifier.size(8.dp))
         Text(
