@@ -161,11 +161,14 @@ private fun createLineChartView(
             axisMaximum = X_AXIS_ELEMENTS_COUNT
             setAvoidFirstLastClipping(true)
             position = XAxis.XAxisPosition.BOTTOM
+//            setDrawLabels(false) // Hide X-axis labels
+//            setDrawGridLines(false) // Hide vertical grid lines
         }
         axisLeft.apply {
             enableGridDashedLine(10f, 10f, 0f)
             axisMaximum = points.getMax(zoomIn)
             axisMinimum = points.getMin(zoomIn)
+//            setDrawGridLines(true) // Show horizontal grid lines
         }
         axisRight.isEnabled = false
 
