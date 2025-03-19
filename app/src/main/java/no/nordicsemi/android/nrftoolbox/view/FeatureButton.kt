@@ -62,7 +62,7 @@ internal fun FeatureButton(
                     .size(64.dp)
                     .clip(CircleShape)
                     .background(color)
-                    .padding(16.dp)
+                    .padding(8.dp)
             )
 
             Spacer(modifier = Modifier.size(16.dp))
@@ -139,7 +139,7 @@ internal fun FeatureButton(
                     .size(64.dp)
                     .clip(CircleShape)
                     .background(color)
-                    .padding(16.dp)
+                    .padding(8.dp)
             )
 
             Spacer(modifier = Modifier.size(16.dp))
