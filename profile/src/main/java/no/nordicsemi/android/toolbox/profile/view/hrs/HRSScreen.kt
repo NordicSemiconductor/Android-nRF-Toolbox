@@ -47,6 +47,19 @@ internal fun HRSScreen(
             )
 
             LineChartView(hrsServiceData, hrsServiceData.zoomIn)
+            hrsServiceData.heartRate?.let {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    Text(
+                        text = it.displayHeartRate(),
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
         }
     }
 

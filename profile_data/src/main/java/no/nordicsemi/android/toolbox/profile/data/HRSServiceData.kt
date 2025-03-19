@@ -12,6 +12,7 @@ import no.nordicsemi.android.lib.profile.hrs.HRSData
  */
 data class HRSServiceData(
     override val profile: Profile = Profile.HRS,
+    val heartRate: Int? = null,
     val data: List<HRSData> = emptyList(),
     val bodySensorLocation: Int? = null,
     val zoomIn: Boolean = false,
