@@ -44,7 +44,7 @@ internal fun HTSScreen(
     ) {
         ScreenSection {
             SectionTitle(
-                resId = R.drawable.ic_thermometer,
+                resId = R.drawable.ic_hts,
                 title = stringResource(id = R.string.hts_temperature),
                 menu = {
                     TemperatureUnitSettings(
@@ -58,7 +58,7 @@ internal fun HTSScreen(
                     displayTemperature(it, htsServiceData.temperatureUnit)
                 } ?: run { "__" },
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(top = 8.dp)
+                modifier = Modifier.padding(top = 8.dp, start = 8.dp)
             )
         }
     }
