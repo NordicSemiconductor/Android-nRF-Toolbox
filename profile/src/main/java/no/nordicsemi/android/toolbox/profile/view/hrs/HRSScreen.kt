@@ -3,15 +3,24 @@ package no.nordicsemi.android.toolbox.profile.view.hrs
 import android.content.Context
 import android.graphics.Color
 import android.graphics.DashPathEffect
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,9 +50,11 @@ internal fun HRSScreen(
     ) {
         ScreenSection {
             SectionTitle(
-                resId = R.drawable.ic_chart_line,
+                icon = Icons.Default.MonitorHeart,
                 title = stringResource(id = R.string.hrs_section_data),
-                menu = { Menu(hrsServiceData.zoomIn) { onClickEvent(it) } }
+                menu = {
+                    MagnifyingGlass(hrsServiceData.zoomIn) { onClickEvent(it) }
+                }
             )
 
             LineChartView(hrsServiceData, hrsServiceData.zoomIn)
@@ -66,17 +77,19 @@ internal fun HRSScreen(
 }
 
 @Composable
-private fun Menu(zoomIn: Boolean, onEvent: (DeviceConnectionViewEvent) -> Unit) {
+private fun MagnifyingGlass(zoomIn: Boolean, onEvent: (DeviceConnectionViewEvent) -> Unit) {
     val icon = when (zoomIn) {
         true -> R.drawable.ic_zoom_out
         false -> R.drawable.ic_zoom_in
     }
-    IconButton(onClick = { onEvent(SwitchZoomEvent) }) {
-        Icon(
-            painter = painterResource(id = icon),
-            contentDescription = stringResource(id = R.string.hrs_zoom_icon)
-        )
-    }
+    Icon(
+        painter = painterResource(id = icon),
+        contentDescription = stringResource(id = R.string.hrs_zoom_icon),
+        modifier = Modifier
+            .clip(CircleShape)
+            .clickable { onEvent(SwitchZoomEvent) }
+            .padding(8.dp)
+    )
 }
 
 @Preview
