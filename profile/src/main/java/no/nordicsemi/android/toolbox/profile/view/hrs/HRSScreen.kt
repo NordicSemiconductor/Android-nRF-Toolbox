@@ -2,7 +2,6 @@ package no.nordicsemi.android.toolbox.profile.view.hrs
 
 import android.content.Context
 import android.graphics.Color
-import android.graphics.DashPathEffect
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -116,14 +115,14 @@ private const val AXIS_MAX = 300
 
 @Composable
 private fun LineChartView(state: HRSServiceData, zoomIn: Boolean) {
-    val items = state.heartRates.takeLast(X_AXIS_ELEMENTS_COUNT.toInt()).reversed()
+    val items = state.heartRates.takeLast(state.heartRates.size)
     val isSystemInDarkTheme = isSystemInDarkTheme()
     AndroidView(
         modifier = Modifier
             .fillMaxWidth()
             .height(300.dp),
         factory = { createLineChartView(isSystemInDarkTheme, it, items, zoomIn) },
-        update = { updateData(items, it, zoomIn) }
+        update = { updateData(isSystemInDarkTheme, items, it, zoomIn) }
     )
 }
 
@@ -170,7 +169,7 @@ private fun createLineChartView(
         }
         axisRight.isEnabled = false
 
-        val entries = points.reversed().mapIndexed { i, v ->
+        val entries = points.mapIndexed { i, v ->
             Entry(i.toFloat(), v.toFloat())
         }
         // create a dataset and give it a type
@@ -186,17 +185,12 @@ private fun createLineChartView(
             set1.setDrawIcons(false)
             set1.setDrawValues(false)
 
-            // draw dashed line
-            set1.enableDashedLine(10f, 5f, 0f)
+            // solid line
+            set1.enableDashedLine(0f, 0f, 0f)
 
-            // black lines and points
-            if (isDarkTheme) {
-                set1.color = Color.WHITE
-                set1.setCircleColor(Color.WHITE)
-            } else {
-                set1.color = Color.BLACK
-                set1.setCircleColor(Color.BLACK)
-            }
+            // red line and points
+            set1.color = Color.RED
+            set1.setCircleColor(Color.RED)
 
             // line thickness and point size
             set1.lineWidth = 1f
@@ -207,14 +201,10 @@ private fun createLineChartView(
 
             // customize legend entry
             set1.formLineWidth = 1f
-            set1.formLineDashEffect = DashPathEffect(floatArrayOf(10f, 5f), 0f)
             set1.formSize = 15f
 
             // text size of values
             set1.valueTextSize = 9f
-
-            // draw selection line as dashed
-            set1.enableDashedHighlightLine(10f, 5f, 0f)
 
             val dataSets = ArrayList<ILineDataSet>()
             dataSets.add(set1) // add the data sets
@@ -224,12 +214,14 @@ private fun createLineChartView(
 
             // set data
             setData(data)
+            setVisibleXRangeMaximum(10f)
+            moveViewToX(0f)
         }
     }
 }
 
-private fun updateData(points: List<Int>, chart: LineChart, zoomIn: Boolean) {
-    val entries = points.reversed().mapIndexed { i, v ->
+private fun updateData(isDarkTheme: Boolean, points: List<Int>, chart: LineChart, zoomIn: Boolean) {
+    val entries = points.mapIndexed { i, v ->
         Entry(i.toFloat(), v.toFloat())
     }
 
@@ -238,6 +230,7 @@ private fun updateData(points: List<Int>, chart: LineChart, zoomIn: Boolean) {
             axisMaximum = points.getMax(zoomIn)
             axisMinimum = points.getMin(zoomIn)
         }
+        xAxis.axisMaximum = points.size.toFloat() // Update axisMaximum to the size of heart rates
         if (data != null && data.dataSetCount > 0) {
             val set1 = data!!.getDataSetByIndex(0) as LineDataSet
             set1.values = entries
@@ -245,7 +238,26 @@ private fun updateData(points: List<Int>, chart: LineChart, zoomIn: Boolean) {
             data!!.notifyDataChanged()
             notifyDataSetChanged()
             invalidate()
+        } else {
+            val set1 = LineDataSet(entries, "DataSet 1")
+            set1.setDrawIcons(false)
+            set1.setDrawValues(false)
+            set1.enableDashedLine(10f, 5f, 0f)
+            set1.color = if (isDarkTheme) Color.WHITE else Color.BLACK
+            set1.setCircleColor(if (isDarkTheme) Color.WHITE else Color.BLACK)
+            set1.lineWidth = 1f
+            set1.circleRadius = 2f
+            set1.setDrawCircleHole(false)
+            set1.formLineWidth = 1f
+            set1.formSize = 15f
+            set1.valueTextSize = 9f
+
+            val dataSets = ArrayList<ILineDataSet>().apply { add(set1) }
+            val data = LineData(dataSets)
+            setData(data)
         }
+        setVisibleXRangeMaximum(40f)
+        moveViewToX(entries.size.toFloat())
     }
 }
 
