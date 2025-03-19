@@ -158,23 +158,21 @@ private fun createLineChartView(
 
         xAxis.apply {
             enableGridDashedLine(10f, 10f, 0f)
-            axisMinimum = -X_AXIS_ELEMENTS_COUNT
-            axisMaximum = 0f
+            axisMinimum = 0f
+            axisMaximum = X_AXIS_ELEMENTS_COUNT
             setAvoidFirstLastClipping(true)
             position = XAxis.XAxisPosition.BOTTOM
         }
         axisLeft.apply {
             enableGridDashedLine(10f, 10f, 0f)
-
             axisMaximum = points.getMax(zoomIn)
             axisMinimum = points.getMin(zoomIn)
         }
         axisRight.isEnabled = false
 
-        val entries = points.mapIndexed { i, v ->
-            Entry(-i.toFloat(), v.toFloat())
-        }.reversed()
-
+        val entries = points.reversed().mapIndexed { i, v ->
+            Entry(i.toFloat(), v.toFloat())
+        }
         // create a dataset and give it a type
         if (data != null && data.dataSetCount > 0) {
             val set1 = data!!.getDataSetByIndex(0) as LineDataSet
@@ -202,7 +200,7 @@ private fun createLineChartView(
 
             // line thickness and point size
             set1.lineWidth = 1f
-            set1.circleRadius = 3f
+            set1.circleRadius = 2f
 
             // draw points as solid circles
             set1.setDrawCircleHole(false)
@@ -231,9 +229,9 @@ private fun createLineChartView(
 }
 
 private fun updateData(points: List<Int>, chart: LineChart, zoomIn: Boolean) {
-    val entries = points.mapIndexed { i, v ->
-        Entry(-i.toFloat(), v.toFloat())
-    }.reversed()
+    val entries = points.reversed().mapIndexed { i, v ->
+        Entry(i.toFloat(), v.toFloat())
+    }
 
     with(chart) {
         axisLeft.apply {
