@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 fun KeyValueColumn(
     value: String,
     key: String,
+    modifier: Modifier = Modifier
 ) {
     Box(
         modifier = Modifier
@@ -23,7 +24,8 @@ fun KeyValueColumn(
     ) {
         Column(
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start
+            horizontalAlignment = Alignment.Start,
+            modifier = modifier
         ) {
             Text(
                 text = value,
@@ -45,7 +47,8 @@ fun KeyValueColumn(
 @Composable
 fun KeyValueColumn(
     value: String,
-    key: @Composable (() -> Unit),
+    modifier: Modifier = Modifier,
+    key: @Composable (() -> Unit)
 ) {
     Box(
         modifier = Modifier
@@ -53,7 +56,8 @@ fun KeyValueColumn(
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.Start
+            horizontalAlignment = Alignment.Start,
+            modifier = modifier
         ) {
             Text(
                 text = value,
@@ -71,6 +75,7 @@ fun KeyValueColumn(
 fun KeyValueColumnReverse(
     value: String,
     key: String,
+    modifier: Modifier = Modifier
 ) {
     Box(
         modifier = Modifier
@@ -79,7 +84,8 @@ fun KeyValueColumnReverse(
     ) {
         Column(
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.End
+            horizontalAlignment = Alignment.End,
+            modifier = modifier
         ) {
             Text(
                 text = value,
@@ -101,7 +107,8 @@ fun KeyValueColumnReverse(
 @Composable
 fun KeyValueColumnReverse(
     value: String,
-    key: @Composable (() -> Unit),
+    modifier: Modifier = Modifier,
+    key: @Composable (() -> Unit)
 ) {
     Box(
         modifier = Modifier
@@ -110,7 +117,8 @@ fun KeyValueColumnReverse(
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.End
+            horizontalAlignment = Alignment.End,
+            modifier = modifier
         ) {
             Text(
                 text = value,
