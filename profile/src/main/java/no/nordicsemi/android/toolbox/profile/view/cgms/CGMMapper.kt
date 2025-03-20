@@ -1,8 +1,9 @@
-package no.nordicsemi.android.toolbox.profile.data
+package no.nordicsemi.android.toolbox.profile.view.cgms
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import no.nordicsemi.android.toolbox.profile.R
+import no.nordicsemi.android.toolbox.profile.data.CGMRecordWithSequenceNumber
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
