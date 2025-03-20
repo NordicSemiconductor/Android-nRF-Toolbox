@@ -9,11 +9,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ScreenSection(content: @Composable () -> Unit) {
+fun ScreenSection(
+    modifier: Modifier = Modifier.padding(16.dp),
+    content: @Composable () -> Unit
+) {
     OutlinedCard {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.padding(16.dp)
+            modifier = modifier
         ) {
             content()
         }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MonitorHeart
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,7 +36,9 @@ import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.HRSServiceData
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.HRSViewEvent.SwitchZoomEvent
+import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.ScreenSection
+import no.nordicsemi.android.ui.view.SectionRow
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
@@ -47,26 +50,40 @@ internal fun HRSScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        ScreenSection {
-            SectionTitle(
-                icon = Icons.Default.MonitorHeart,
-                title = stringResource(id = R.string.hrs_section_data),
-                menu = {
-                    MagnifyingGlass(hrsServiceData.zoomIn) { onClickEvent(it) }
-                }
-            )
+        ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
+            Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
+                SectionTitle(
+                    icon = Icons.Default.MonitorHeart,
+                    title = stringResource(id = R.string.hrs_section_data),
+                    menu = {
+                        MagnifyingGlass(hrsServiceData.zoomIn) { onClickEvent(it) }
+                    }
+                )
 
-            LineChartView(hrsServiceData, hrsServiceData.zoomIn)
-            hrsServiceData.heartRate?.let {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    Text(
-                        text = it.displayHeartRate(),
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.align(Alignment.Center)
+                LineChartView(hrsServiceData, hrsServiceData.zoomIn)
+                hrsServiceData.heartRate?.let {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = hrsServiceData.displayHeartRate(),
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                }
+            }
+
+            HorizontalDivider()
+
+            hrsServiceData.bodySensorLocation?.let {
+                SectionRow {
+                    KeyValueColumn(
+                        stringResource(id = R.string.body_sensor_location),
+                        hrsServiceData.displayBodySensorLocation(),
+                        modifier = Modifier.padding(16.dp)
                     )
                 }
             }
