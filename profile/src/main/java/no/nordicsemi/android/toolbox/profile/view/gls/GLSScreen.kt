@@ -118,7 +118,7 @@ private fun WorkingModeDropDown(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "Request")
+                    Text(text = if (glsState.workingMode != null) glsState.workingMode!!.toDisplayString() else "Request")
                     Icon(Icons.Default.ArrowDropDown, contentDescription = "")
                 }
             }
@@ -158,7 +158,7 @@ private fun WorkingModeDialog(
 
     AlertDialog(
         onDismissRequest = { onDismiss() },
-        title = { Text(text = "Select working mode") },
+        title = { Text(text = "Request record") },
         text = {
             LazyColumn(
                 state = listState
