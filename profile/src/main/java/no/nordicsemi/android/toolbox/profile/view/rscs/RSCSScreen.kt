@@ -28,13 +28,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.toolbox.profile.data.RSCSServiceData
 import no.nordicsemi.android.toolbox.profile.R
-import no.nordicsemi.android.toolbox.profile.data.displayActivity
-import no.nordicsemi.android.toolbox.profile.data.displayNumberOfSteps
-import no.nordicsemi.android.toolbox.profile.data.displayPace
-import no.nordicsemi.android.toolbox.profile.data.displaySpeed
-import no.nordicsemi.android.toolbox.profile.data.displayStrideLength
+import no.nordicsemi.android.toolbox.profile.data.RSCSServiceData
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.RSCSViewEvent
 import no.nordicsemi.android.ui.view.KeyValueColumn

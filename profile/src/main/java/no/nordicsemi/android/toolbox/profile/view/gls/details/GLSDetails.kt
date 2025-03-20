@@ -25,7 +25,7 @@ import no.nordicsemi.android.lib.profile.gls.data.RecordType
 import no.nordicsemi.android.lib.profile.gls.data.SampleLocation
 import no.nordicsemi.android.lib.profile.gls.data.Tester
 import no.nordicsemi.android.toolbox.profile.R
-import no.nordicsemi.android.toolbox.profile.data.toDisplayString
+import no.nordicsemi.android.toolbox.profile.view.gls.toDisplayString
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.KeyValueField

@@ -26,7 +26,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.HTSServiceData
-import no.nordicsemi.android.toolbox.profile.data.displayTemperature
 import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.HTSViewEvent
@@ -55,7 +54,7 @@ internal fun HTSScreen(
             )
             Text(
                 text = htsServiceData.data?.temperature?.let {
-                    displayTemperature(it, htsServiceData.temperatureUnit)
+                    htsServiceData.temperatureUnit.displayTemperature(it)
                 } ?: run { "__" },
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(top = 8.dp, start = 8.dp)

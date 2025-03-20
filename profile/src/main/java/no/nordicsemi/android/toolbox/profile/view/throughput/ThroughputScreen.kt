@@ -33,9 +33,6 @@ import no.nordicsemi.android.toolbox.profile.data.NumberOfBytes
 import no.nordicsemi.android.toolbox.profile.data.NumberOfSeconds
 import no.nordicsemi.android.toolbox.profile.data.ThroughputServiceData
 import no.nordicsemi.android.toolbox.profile.data.WritingStatus
-import no.nordicsemi.android.toolbox.profile.data.displayThroughput
-import no.nordicsemi.android.toolbox.profile.data.getThroughputInputTypes
-import no.nordicsemi.android.toolbox.profile.data.throughputDataReceived
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.ThroughputEvent
 import no.nordicsemi.android.ui.view.AnimatedThreeDots

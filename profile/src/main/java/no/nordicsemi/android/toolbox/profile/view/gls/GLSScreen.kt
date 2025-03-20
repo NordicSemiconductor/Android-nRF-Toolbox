@@ -50,11 +50,9 @@ import no.nordicsemi.android.lib.profile.gls.data.MedicationUnit
 import no.nordicsemi.android.lib.profile.gls.data.RecordType
 import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
 import no.nordicsemi.android.lib.profile.gls.data.Tester
-import no.nordicsemi.android.toolbox.profile.data.Profile
-import no.nordicsemi.android.toolbox.profile.data.GLSServiceData
 import no.nordicsemi.android.toolbox.profile.R
-import no.nordicsemi.android.toolbox.profile.data.glucoseConcentrationDisplayValue
-import no.nordicsemi.android.toolbox.profile.data.toDisplayString
+import no.nordicsemi.android.toolbox.profile.data.GLSServiceData
+import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.view.gls.details.GLSDetails
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.GLSViewEvent.OnWorkingModeSelected
