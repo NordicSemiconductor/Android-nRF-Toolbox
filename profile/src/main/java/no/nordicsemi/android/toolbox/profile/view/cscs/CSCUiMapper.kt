@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.profile.data
+package no.nordicsemi.android.toolbox.profile.view.cscs
 
 import no.nordicsemi.android.lib.profile.csc.CSCData
 import no.nordicsemi.android.lib.profile.csc.SpeedUnit
@@ -49,10 +49,10 @@ internal fun Float.toYards(): Float {
     return this * 1.0936f
 }
 
-internal fun Float.toKilometers(): Float {
+private fun Float.toKilometers(): Float {
     return this / 1000f
 }
 
-internal fun Float.toMiles(): Float {
+private fun Float.toMiles(): Float {
     return this * 0.0006f
 }

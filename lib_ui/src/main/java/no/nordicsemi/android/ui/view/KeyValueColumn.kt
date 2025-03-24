@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 fun KeyValueColumn(
     value: String,
     key: String,
+    modifier: Modifier = Modifier
 ) {
     Box(
         modifier = Modifier
@@ -23,7 +24,68 @@ fun KeyValueColumn(
     ) {
         Column(
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start
+            horizontalAlignment = Alignment.Start,
+            modifier = modifier
+        ) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = key,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+fun KeyValueColumn(
+    value: String,
+    modifier: Modifier = Modifier,
+    key: @Composable (() -> Unit)
+) {
+    Box(
+        modifier = Modifier
+            .padding(end = 8.dp)
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.Start,
+            modifier = modifier
+        ) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            key()
+        }
+    }
+}
+
+@Composable
+fun KeyValueColumnReverse(
+    value: String,
+    key: String,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = Modifier
+            .padding(start = 8.dp),
+        contentAlignment = Alignment.TopEnd,
+    ) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.End,
+            modifier = modifier
         ) {
             Text(
                 text = value,
@@ -45,7 +107,8 @@ fun KeyValueColumn(
 @Composable
 fun KeyValueColumnReverse(
     value: String,
-    key: String,
+    modifier: Modifier = Modifier,
+    key: @Composable (() -> Unit)
 ) {
     Box(
         modifier = Modifier
@@ -53,8 +116,9 @@ fun KeyValueColumnReverse(
         contentAlignment = Alignment.TopEnd,
     ) {
         Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.End
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.End,
+            modifier = modifier
         ) {
             Text(
                 text = value,
@@ -63,12 +127,7 @@ fun KeyValueColumnReverse(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-            Text(
-                text = key,
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
+            key()
         }
     }
 }

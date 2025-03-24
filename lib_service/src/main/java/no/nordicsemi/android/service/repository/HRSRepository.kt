@@ -14,7 +14,12 @@ object HRSRepository {
     }
 
     fun updateHRSData(deviceId: String, data: HRSData) {
-        _dataMap[deviceId]?.update { it.copy(data = it.data + data) }
+        _dataMap[deviceId]?.update {
+            it.copy(
+                heartRate = data.heartRate,
+                data = it.data + data
+            )
+        }
     }
 
     fun clear(deviceId: String) {

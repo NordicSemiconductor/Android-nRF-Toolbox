@@ -4,9 +4,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.lib.profile.throughput.ThroughputDataParser
 import no.nordicsemi.android.service.repository.ThroughputRepository
-import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.data.NumberOfBytes
 import no.nordicsemi.android.toolbox.profile.data.NumberOfSeconds
+import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.data.ThroughputInputType
 import no.nordicsemi.android.toolbox.profile.data.WritingStatus
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
@@ -31,8 +31,13 @@ internal class ThroughputManager : ServiceManager {
         scope: CoroutineScope
     ) {
         scope.launch {
-            remoteService.characteristics.firstOrNull { it.uuid == THROUGHPUT_CHAR_UUID.toKotlinUuid() }
-                ?.also { writeCharacteristicProperty = it }
+            try {
+                remoteService.characteristics
+                    .firstOrNull { it.uuid == THROUGHPUT_CHAR_UUID.toKotlinUuid() }
+                    ?.also { writeCharacteristicProperty = it }
+            } finally {
+                ThroughputRepository.clearData(deviceId)
+            }
         }
     }
 

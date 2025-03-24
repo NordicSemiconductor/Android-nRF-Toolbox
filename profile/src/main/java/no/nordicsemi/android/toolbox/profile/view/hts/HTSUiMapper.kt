@@ -29,15 +29,15 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package no.nordicsemi.android.toolbox.profile.data
+package no.nordicsemi.android.toolbox.profile.view.hts
 
 import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
 import java.util.Locale
 
-internal fun displayTemperature(value: Float, temperatureUnit: TemperatureUnit): String {
-    return when (temperatureUnit) {
+internal fun TemperatureUnit.displayTemperature(value: Float): String {
+    return when (this) {
         TemperatureUnit.CELSIUS -> String.format(Locale.US, "%.1f °C", value)
         TemperatureUnit.FAHRENHEIT -> String.format(Locale.US, "%.1f °F", value * 1.8f + 32f)
-        TemperatureUnit.KELVIN -> String.format(Locale.US, "%.1f °K", value + 273.15f)
+        TemperatureUnit.KELVIN -> String.format(Locale.US, "%.1f K", value + 273.15f)
     }
 }

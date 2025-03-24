@@ -1,6 +1,8 @@
-package no.nordicsemi.android.toolbox.profile.data
+package no.nordicsemi.android.toolbox.profile.view.throughput
 
 import no.nordicsemi.android.lib.profile.throughput.ThroughputMetrics
+import no.nordicsemi.android.toolbox.profile.data.NumberOfBytes
+import no.nordicsemi.android.toolbox.profile.data.NumberOfSeconds
 import java.util.Locale
 
 internal fun ThroughputMetrics.throughputDataReceived(): String {
@@ -9,11 +11,11 @@ internal fun ThroughputMetrics.throughputDataReceived(): String {
 
     return when {
         megabytes >= 1 -> {
-            "${this.totalBytesReceived} bytes (${String.format(Locale.US, "%.2f", megabytes)} MB)"
+            "${String.format(Locale.US, "%.2f", megabytes)} MB"
         }
 
         kilobytes > 0 -> {
-            "${this.totalBytesReceived} bytes (${String.format(Locale.US, "%.2f", kilobytes)} KB)"
+            "${String.format(Locale.US, "%.2f", kilobytes)} KB"
         }
 
         else -> {
@@ -25,7 +27,7 @@ internal fun ThroughputMetrics.throughputDataReceived(): String {
 internal fun ThroughputMetrics.displayThroughput(): String {
     val kbps = (this.throughputBitsPerSecond / 8f) / 1024f
     return if (kbps > 0) {
-        "${this.throughputBitsPerSecond} bps (${String.format(Locale.US, "%.2f", kbps)} kBps)"
+        "${String.format(Locale.US, "%.2f", kbps)} KBps"
     } else {
         "${this.throughputBitsPerSecond} bps"
     }

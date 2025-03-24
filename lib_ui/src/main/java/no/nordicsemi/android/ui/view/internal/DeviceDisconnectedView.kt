@@ -57,7 +57,7 @@ fun DeviceDisconnectedView(
         DisconnectReason.USER -> "Device disconnected successfully."
         DisconnectReason.UNKNOWN -> "Device disconnected with unknown reason."
         DisconnectReason.LINK_LOSS -> "Device signal has been lost."
-        DisconnectReason.MISSING_SERVICE -> "Required services are missing."
+        DisconnectReason.MISSING_SERVICE -> "Not supported services, click back to disconnect and back to home page."
         DisconnectReason.BLUETOOTH_OFF -> "Bluetooth adapter is turned off."
     }
 
@@ -96,7 +96,7 @@ private fun DeviceDisconnectedView(
                 CircularIcon(imageVector = Icons.Default.HighlightOff)
 
                 Text(
-                    text = if (isMissingService) "Missing services" else "Device disconnected",
+                    text = if (isMissingService) "No supported services" else "Device disconnected",
                     style = MaterialTheme.typography.titleMedium
                 )
 

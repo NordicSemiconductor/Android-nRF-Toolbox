@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-   <string name="hts_temperature">Temperature</string>
-   <string name="hts_temperature_unit">Temperature unit</string>
+   <string name="hts_temperature">Health temperature</string>
+   <string name="hts_temperature_unit">Select temperature unit</string>
    <string name="hts_temperature_unit_des">Temperature unit settings</string>
-   <string name="hts_temperature_unit_title">Unit</string>
 </resources>

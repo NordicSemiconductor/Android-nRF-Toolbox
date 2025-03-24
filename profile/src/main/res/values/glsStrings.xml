@@ -31,7 +31,6 @@
   -->
 
 <resources>
-    <string name="gls_title">GLS</string>
     <string name="gls_no_records_info">There is no data available. This peripheral downloads data only when requested. Please select what kind of data you want to download by clicking one from the working mode settings.</string>
 
     <string name="gls_timestamp">%1$te %1$tb %1$tY at %1$tT</string>
@@ -60,9 +59,6 @@
     <string name="gls_sample_location_earlobe">Earlobe</string>
     <string name="gls_sample_location_control_solution">Control solution</string>
     <string name="gls_sample_location_value_not_available">Value not available</string>
-
-    <string name="gls_sample_location_kg_l">kg/l</string>
-    <string name="gls_sample_location_mol_l">mol/l</string>
 
     <string name="gls_sample_location_kg">kg</string>
     <string name="gls_sample_location_l">l</string>

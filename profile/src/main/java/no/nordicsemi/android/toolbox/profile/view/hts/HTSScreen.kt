@@ -3,13 +3,11 @@ package no.nordicsemi.android.toolbox.profile.view.hts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -21,22 +19,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.HTSServiceData
 import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
-import no.nordicsemi.android.toolbox.profile.R
-import no.nordicsemi.android.toolbox.profile.data.displayTemperature
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.HTSViewEvent
-import no.nordicsemi.android.ui.view.KeyValueColumn
-import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
-import no.nordicsemi.android.ui.view.SectionRow
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
@@ -50,7 +43,7 @@ internal fun HTSScreen(
     ) {
         ScreenSection {
             SectionTitle(
-                resId = R.drawable.ic_thermometer,
+                resId = R.drawable.ic_hts,
                 title = stringResource(id = R.string.hts_temperature),
                 menu = {
                     TemperatureUnitSettings(
@@ -59,19 +52,13 @@ internal fun HTSScreen(
                     )
                 }
             )
-
-            SectionRow {
-                KeyValueColumn(
-                    stringResource(id = R.string.hts_temperature),
-                    htsServiceData.data?.temperature?.let {
-                        displayTemperature(it, htsServiceData.temperatureUnit)
-                    } ?: run { "__" }
-                )
-                KeyValueColumnReverse(
-                    stringResource(id = R.string.hts_temperature_unit_title),
-                    "${htsServiceData.temperatureUnit}"
-                )
-            }
+            Text(
+                text = htsServiceData.data?.temperature?.let {
+                    htsServiceData.temperatureUnit.displayTemperature(it)
+                } ?: run { "__" },
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = 8.dp, start = 8.dp)
+            )
         }
     }
 }
@@ -123,25 +110,20 @@ private fun TemperatureUnitSettingsDialog(
             ) {
                 items(entries.size) { index ->
                     val entry = entries[index]
-                    Row(
+                    Text(
+                        text = entry.toString(),
                         modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
+                            .fillMaxWidth()
                             .clickable {
                                 onClickEvent(HTSViewEvent.OnTemperatureUnitSelected(entry))
                                 onDismiss()
                             }
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = entry.toString(),
-                            modifier = Modifier.fillMaxWidth(),
-                            style = MaterialTheme.typography.titleLarge,
-                            color = if (state.temperatureUnit == entry)
-                                MaterialTheme.colorScheme.primary else
-                                MaterialTheme.colorScheme.onBackground
-                        )
-                    }
+                            .padding(bottom = 8.dp),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = if (state.temperatureUnit == entry)
+                            MaterialTheme.colorScheme.primary else
+                            MaterialTheme.colorScheme.onBackground
+                    )
                 }
             }
         },

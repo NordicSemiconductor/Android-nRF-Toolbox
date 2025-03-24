@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
+import no.nordicsemi.android.common.permissions.notification.RequestNotificationPermission
 import no.nordicsemi.android.service.profile.CustomReason
 import no.nordicsemi.android.service.profile.DeviceDisconnectionReason
 import no.nordicsemi.android.service.profile.StateReason
@@ -88,37 +89,39 @@ internal fun DeviceConnectionScreen() {
         },
     ) { paddingValues ->
         RequireBluetooth {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                when (val state = deviceDataState) {
-                    is DeviceConnectionState.Connected -> {
-                        DeviceConnectedView(
-                            state.data,
-                            onClickEvent
-                        )
-                    }
-
-                    DeviceConnectionState.Connecting -> DeviceConnectingView(
-                        modifier = Modifier.padding(16.dp)
-                    )
-
-                    is DeviceConnectionState.Disconnected -> {
-                        state.reason?.let {
-                            DeviceDisconnectedView(
-                                it,
-                                deviceAddress,
+            RequestNotificationPermission {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    when (val state = deviceDataState) {
+                        is DeviceConnectionState.Connected -> {
+                            DeviceConnectedView(
+                                state.data,
                                 onClickEvent
                             )
                         }
-                    }
 
-                    DeviceConnectionState.Idle -> LoadingView()
+                        DeviceConnectionState.Connecting -> DeviceConnectingView(
+                            modifier = Modifier.padding(16.dp)
+                        )
+
+                        is DeviceConnectionState.Disconnected -> {
+                            state.reason?.let {
+                                DeviceDisconnectedView(
+                                    it,
+                                    deviceAddress,
+                                    onClickEvent
+                                )
+                            }
+                        }
+
+                        DeviceConnectionState.Idle -> LoadingView()
+                    }
                 }
             }
         }

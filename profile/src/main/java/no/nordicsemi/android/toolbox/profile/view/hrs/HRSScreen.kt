@@ -2,16 +2,25 @@ package no.nordicsemi.android.toolbox.profile.view.hrs
 
 import android.content.Context
 import android.graphics.Color
-import android.graphics.DashPathEffect
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MonitorHeart
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,7 +36,9 @@ import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.HRSServiceData
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.HRSViewEvent.SwitchZoomEvent
+import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.ScreenSection
+import no.nordicsemi.android.ui.view.SectionRow
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
@@ -39,31 +50,62 @@ internal fun HRSScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        ScreenSection {
-            SectionTitle(
-                resId = R.drawable.ic_chart_line,
-                title = stringResource(id = R.string.hrs_section_data),
-                menu = { Menu(hrsServiceData.zoomIn) { onClickEvent(it) } }
-            )
+        ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
+            Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
+                SectionTitle(
+                    icon = Icons.Default.MonitorHeart,
+                    title = stringResource(id = R.string.hrs_section_data),
+                    menu = {
+                        MagnifyingGlass(hrsServiceData.zoomIn) { onClickEvent(it) }
+                    }
+                )
 
-            LineChartView(hrsServiceData, hrsServiceData.zoomIn)
+                LineChartView(hrsServiceData, hrsServiceData.zoomIn)
+                hrsServiceData.heartRate?.let {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = hrsServiceData.displayHeartRate(),
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                }
+            }
+
+            HorizontalDivider()
+
+            hrsServiceData.bodySensorLocation?.let {
+                SectionRow {
+                    KeyValueColumn(
+                        stringResource(id = R.string.body_sensor_location),
+                        hrsServiceData.displayBodySensorLocation(),
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
         }
     }
 
 }
 
 @Composable
-private fun Menu(zoomIn: Boolean, onEvent: (DeviceConnectionViewEvent) -> Unit) {
+private fun MagnifyingGlass(zoomIn: Boolean, onEvent: (DeviceConnectionViewEvent) -> Unit) {
     val icon = when (zoomIn) {
         true -> R.drawable.ic_zoom_out
         false -> R.drawable.ic_zoom_in
     }
-    IconButton(onClick = { onEvent(SwitchZoomEvent) }) {
-        Icon(
-            painter = painterResource(id = icon),
-            contentDescription = stringResource(id = R.string.hrs_zoom_icon)
-        )
-    }
+    Icon(
+        painter = painterResource(id = icon),
+        contentDescription = stringResource(id = R.string.hrs_zoom_icon),
+        modifier = Modifier
+            .clip(CircleShape)
+            .clickable { onEvent(SwitchZoomEvent) }
+            .padding(8.dp)
+    )
 }
 
 @Preview
@@ -90,14 +132,14 @@ private const val AXIS_MAX = 300
 
 @Composable
 private fun LineChartView(state: HRSServiceData, zoomIn: Boolean) {
-    val items = state.heartRates.takeLast(X_AXIS_ELEMENTS_COUNT.toInt()).reversed()
+    val items = state.heartRates.takeLast(state.heartRates.size)
     val isSystemInDarkTheme = isSystemInDarkTheme()
     AndroidView(
         modifier = Modifier
             .fillMaxWidth()
             .height(300.dp),
         factory = { createLineChartView(isSystemInDarkTheme, it, items, zoomIn) },
-        update = { updateData(items, it, zoomIn) }
+        update = { updateData(isSystemInDarkTheme, items, it, zoomIn) }
     )
 }
 
@@ -132,23 +174,24 @@ private fun createLineChartView(
 
         xAxis.apply {
             enableGridDashedLine(10f, 10f, 0f)
-            axisMinimum = -X_AXIS_ELEMENTS_COUNT
-            axisMaximum = 0f
+            axisMinimum = 0f
+            axisMaximum = X_AXIS_ELEMENTS_COUNT
             setAvoidFirstLastClipping(true)
             position = XAxis.XAxisPosition.BOTTOM
+//            setDrawLabels(false) // Hide X-axis labels
+//            setDrawGridLines(false) // Hide vertical grid lines
         }
         axisLeft.apply {
             enableGridDashedLine(10f, 10f, 0f)
-
             axisMaximum = points.getMax(zoomIn)
             axisMinimum = points.getMin(zoomIn)
+//            setDrawGridLines(true) // Show horizontal grid lines
         }
         axisRight.isEnabled = false
 
         val entries = points.mapIndexed { i, v ->
-            Entry(-i.toFloat(), v.toFloat())
-        }.reversed()
-
+            Entry(i.toFloat(), v.toFloat())
+        }
         // create a dataset and give it a type
         if (data != null && data.dataSetCount > 0) {
             val set1 = data!!.getDataSetByIndex(0) as LineDataSet
@@ -162,35 +205,26 @@ private fun createLineChartView(
             set1.setDrawIcons(false)
             set1.setDrawValues(false)
 
-            // draw dashed line
-            set1.enableDashedLine(10f, 5f, 0f)
+            // solid line
+            set1.enableDashedLine(0f, 0f, 0f)
 
-            // black lines and points
-            if (isDarkTheme) {
-                set1.color = Color.WHITE
-                set1.setCircleColor(Color.WHITE)
-            } else {
-                set1.color = Color.BLACK
-                set1.setCircleColor(Color.BLACK)
-            }
+            // red line and points
+            set1.color = Color.RED
+            set1.setCircleColor(Color.RED)
 
             // line thickness and point size
             set1.lineWidth = 1f
-            set1.circleRadius = 3f
+            set1.circleRadius = 2f
 
             // draw points as solid circles
             set1.setDrawCircleHole(false)
 
             // customize legend entry
             set1.formLineWidth = 1f
-            set1.formLineDashEffect = DashPathEffect(floatArrayOf(10f, 5f), 0f)
             set1.formSize = 15f
 
             // text size of values
             set1.valueTextSize = 9f
-
-            // draw selection line as dashed
-            set1.enableDashedHighlightLine(10f, 5f, 0f)
 
             val dataSets = ArrayList<ILineDataSet>()
             dataSets.add(set1) // add the data sets
@@ -200,20 +234,23 @@ private fun createLineChartView(
 
             // set data
             setData(data)
+            setVisibleXRangeMaximum(10f)
+            moveViewToX(0f)
         }
     }
 }
 
-private fun updateData(points: List<Int>, chart: LineChart, zoomIn: Boolean) {
+private fun updateData(isDarkTheme: Boolean, points: List<Int>, chart: LineChart, zoomIn: Boolean) {
     val entries = points.mapIndexed { i, v ->
-        Entry(-i.toFloat(), v.toFloat())
-    }.reversed()
+        Entry(i.toFloat(), v.toFloat())
+    }
 
     with(chart) {
         axisLeft.apply {
             axisMaximum = points.getMax(zoomIn)
             axisMinimum = points.getMin(zoomIn)
         }
+        xAxis.axisMaximum = points.size.toFloat() // Update axisMaximum to the size of heart rates
         if (data != null && data.dataSetCount > 0) {
             val set1 = data!!.getDataSetByIndex(0) as LineDataSet
             set1.values = entries
@@ -221,7 +258,26 @@ private fun updateData(points: List<Int>, chart: LineChart, zoomIn: Boolean) {
             data!!.notifyDataChanged()
             notifyDataSetChanged()
             invalidate()
+        } else {
+            val set1 = LineDataSet(entries, "DataSet 1")
+            set1.setDrawIcons(false)
+            set1.setDrawValues(false)
+            set1.enableDashedLine(10f, 5f, 0f)
+            set1.color = if (isDarkTheme) Color.WHITE else Color.BLACK
+            set1.setCircleColor(if (isDarkTheme) Color.WHITE else Color.BLACK)
+            set1.lineWidth = 1f
+            set1.circleRadius = 2f
+            set1.setDrawCircleHole(false)
+            set1.formLineWidth = 1f
+            set1.formSize = 15f
+            set1.valueTextSize = 9f
+
+            val dataSets = ArrayList<ILineDataSet>().apply { add(set1) }
+            val data = LineData(dataSets)
+            setData(data)
         }
+        setVisibleXRangeMaximum(40f)
+        moveViewToX(entries.size.toFloat())
     }
 }
 
