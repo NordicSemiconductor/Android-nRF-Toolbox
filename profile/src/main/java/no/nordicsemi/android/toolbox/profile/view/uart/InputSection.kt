@@ -37,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -93,6 +94,7 @@ internal fun InputSection(onEvent: (DeviceConnectionViewEvent) -> Unit) {
                     isEmptyText = false
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurfaceVariant)
             )
             if (text.isEmpty() && !isEmptyText) {
                 Text(
