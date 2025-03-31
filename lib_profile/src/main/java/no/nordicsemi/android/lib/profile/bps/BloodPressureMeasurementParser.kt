@@ -21,10 +21,10 @@ object BloodPressureMeasurementParser {
             .also { offset++ }
 
         // See UNIT_* for unit options
-        val unit: BloodPressureType = if (flags and 0x01 == BloodPressureType.UNIT_MMHG.value) {
-            BloodPressureType.UNIT_MMHG
-        } else {
+        val unit: BloodPressureType = if (flags and 0x01 == BloodPressureType.UNIT_KPA.value) {
             BloodPressureType.UNIT_KPA
+        } else {
+            BloodPressureType.UNIT_MMHG
         }
         val timestampPresent = flags and 0x02 != 0
         val pulseRatePresent = flags and 0x04 != 0
