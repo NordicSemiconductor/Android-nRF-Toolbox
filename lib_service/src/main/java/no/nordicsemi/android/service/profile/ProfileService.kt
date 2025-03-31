@@ -119,8 +119,6 @@ internal class ProfileService : NotificationService() {
         override fun getConnectionState(address: String): Flow<ConnectionState>? {
             val peripheral = getPeripheralById(address) ?: return null
             return peripheral.state.also { stateFlow ->
-                // Cancel the previous state observation if any.
-                connectionJob?.cancel()
                 // Since the initial state is Gatt closed, drop the first state.
                 connectionJob = stateFlow.drop(1).onEach { state ->
                     when (state) {
