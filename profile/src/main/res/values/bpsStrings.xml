@@ -4,9 +4,9 @@
 
     <string name="no_data_info">No data available. If you are using nRF DK\'s press button 1 to see the result.</string>
 
-    <string name="bps_systolic">Systolic</string>
-    <string name="bps_diastolic">Diastolic</string>
-    <string name="bps_mean">Mean AP</string>
+    <string name="bps_systolic">Systolic pressure</string>
+    <string name="bps_diastolic">Diastolic pressure</string>
+    <string name="bps_mean">Mean arterial pressure (AP)</string>
     <string name="bps_pulse">Heart rate</string>
 
     <string name="bps_blood_pressure">%.0f %s</string>

@@ -11,13 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.toolbox.profile.R
-import no.nordicsemi.android.toolbox.profile.data.Profile
-import no.nordicsemi.android.toolbox.profile.data.BPSServiceData
 import no.nordicsemi.android.lib.profile.bps.BPMStatus
 import no.nordicsemi.android.lib.profile.bps.BloodPressureMeasurementData
 import no.nordicsemi.android.lib.profile.bps.BloodPressureType
 import no.nordicsemi.android.lib.profile.bps.IntermediateCuffPressureData
+import no.nordicsemi.android.toolbox.profile.R
+import no.nordicsemi.android.toolbox.profile.data.BPSServiceData
+import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
@@ -96,7 +96,7 @@ private fun BPSScreenPreview() {
 @Composable
 private fun BloodPressureView(state: BloodPressureMeasurementData) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         SectionRow {
             KeyValueColumn(
@@ -115,7 +115,7 @@ private fun BloodPressureView(state: BloodPressureMeasurementData) {
             )
             state.pulseRate?.let {
                 KeyValueColumnReverse(
-                    "Pulse", state.displayPulseRate()
+                    "Heart rate", state.displayPulseRate()
                 )
             }
         }
@@ -208,4 +208,4 @@ fun BloodPressureMeasurementData.displayPulseRate(): String = pulseRate?.toStrin
 
 @Composable
 fun BloodPressureMeasurementData.displayUnit(): String =
-    if (unit == BloodPressureType.UNIT_MMHG) "mmGH" else "kPA"
+    if (unit == BloodPressureType.UNIT_MMHG) "mmHg" else "kPA"
