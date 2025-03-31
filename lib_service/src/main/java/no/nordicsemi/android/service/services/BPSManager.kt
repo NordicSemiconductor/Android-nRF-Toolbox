@@ -19,6 +19,7 @@ import kotlin.uuid.toKotlinUuid
 
 private val BPM_CHARACTERISTIC_UUID = UUID.fromString("00002A35-0000-1000-8000-00805f9b34fb")
 private val ICP_CHARACTERISTIC_UUID = UUID.fromString("00002A36-0000-1000-8000-00805f9b34fb")
+private val BPF_CHARACTERISTIC_UUID = UUID.fromString("00002A49-0000-1000-8000-00805f9b34fb")
 
 internal class BPSManager : ServiceManager {
     override val profile: Profile = Profile.BPS
@@ -51,6 +52,13 @@ internal class BPSManager : ServiceManager {
                     e.printStackTrace()
                     Timber.e(e)
                 }?.launchIn(scope)
+        }
+        scope.launch {
+            remoteService.characteristics.firstOrNull { it.uuid == BPF_CHARACTERISTIC_UUID.toKotlinUuid() }
+                ?.read()
+                .let {
+                    Timber.tag("BPSManager").d("BPF_CHARACTERISTIC_UUID found.")
+                }
         }
     }
 }
