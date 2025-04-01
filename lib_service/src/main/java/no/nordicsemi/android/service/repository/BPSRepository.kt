@@ -3,6 +3,7 @@ package no.nordicsemi.android.service.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import no.nordicsemi.android.lib.profile.bps.BloodPressureFeatureData
 import no.nordicsemi.android.lib.profile.bps.BloodPressureMeasurementData
 import no.nordicsemi.android.lib.profile.bps.IntermediateCuffPressureData
 import no.nordicsemi.android.toolbox.profile.data.BPSServiceData
@@ -24,6 +25,10 @@ object BPSRepository {
 
     fun updateICPData(deviceId: String, icpData: IntermediateCuffPressureData) {
         _dataMap[deviceId]?.update { it.copy(intermediateCuffPressure = icpData) }
+    }
+
+    fun updateBPSFeatureData(deviceId: String, bpsFeatureData: BloodPressureFeatureData) {
+        _dataMap[deviceId]?.update { it.copy(bloodPressureFeature = bpsFeatureData) }
     }
 
 }

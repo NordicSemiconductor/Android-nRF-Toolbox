@@ -7,10 +7,11 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.service.repository.BPSRepository
-import no.nordicsemi.android.toolbox.profile.data.Profile
+import no.nordicsemi.android.lib.profile.bps.BloodPressureFeatureParser
 import no.nordicsemi.android.lib.profile.bps.BloodPressureMeasurementParser
 import no.nordicsemi.android.lib.profile.bps.IntermediateCuffPressureParser
+import no.nordicsemi.android.service.repository.BPSRepository
+import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber
 import java.util.UUID
@@ -53,11 +54,14 @@ internal class BPSManager : ServiceManager {
                     Timber.e(e)
                 }?.launchIn(scope)
         }
+
         scope.launch {
             remoteService.characteristics.firstOrNull { it.uuid == BPF_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.read()
-                .let {
-                    Timber.tag("BPSManager").d("BPF_CHARACTERISTIC_UUID found.")
+                ?.let {
+                    BloodPressureFeatureParser.parse(it)
+                }?.also { featureData ->
+                    BPSRepository.updateBPSFeatureData(deviceId, featureData)
                 }
         }
     }
