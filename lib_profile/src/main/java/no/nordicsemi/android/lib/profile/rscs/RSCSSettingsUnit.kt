@@ -8,10 +8,10 @@ enum class RSCSSettingsUnit {
 
     override fun toString(): String {
         return when (this) {
-            UNIT_KM -> " kilometer [km/h]"
-            UNIT_M -> " meter [m/s]"
-            UNIT_MPH -> "miles [mph]"
-            UNIT_CM -> "centimeter [cm/s]"
+            UNIT_KM -> "Kilometer [km/h]"
+            UNIT_M -> "Meter [m/s]"
+            UNIT_MPH -> "Miles [mph]"
+            UNIT_CM -> "Centimeter [cm/s]"
         }
     }
 

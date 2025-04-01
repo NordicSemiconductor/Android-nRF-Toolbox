@@ -1,23 +1,24 @@
 package no.nordicsemi.android.toolbox.profile.view.rscs
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -25,9 +26,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.lib.profile.rscs.RSCFeatureData
+import no.nordicsemi.android.lib.profile.rscs.RSCSSettingsUnit
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.RSCSServiceData
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
@@ -47,14 +52,16 @@ internal fun RSCSScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        ScreenSection {
+        ScreenSection(modifier = Modifier.padding(bottom = 16.dp)) {
             SectionTitle(
                 resId = R.drawable.ic_rscs,
                 title = if (serviceData.data.running) "Running" else "Walking",
+                modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp),
                 menu = { RSCSSettingsDropdown(serviceData, onClickEvent) }
             )
             Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp)
             ) {
                 SectionRow {
                     KeyValueColumn(
@@ -82,14 +89,88 @@ internal fun RSCSScreen(
                     }
                 }
             }
+            serviceData.feature?.let {
+                HorizontalDivider()
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp)
+                ) {
+                    Text("Supported features", style = MaterialTheme.typography.titleMedium)
+                    if (it.instantaneousStrideLengthMeasurementSupported) {
+                        FeatureSupported(
+                            stringResource(id = R.string.instantaneous_stride_length_measurement)
+                        )
+                    }
+                    if (it.totalDistanceMeasurementSupported) {
+                        FeatureSupported(
+                            stringResource(id = R.string.total_distance_measurement)
+                        )
+                    }
+                    if (it.walkingOrRunningStatusSupported) {
+                        FeatureSupported(
+                            stringResource(id = R.string.walking_or_running_status)
+                        )
+                    }
+                    if (it.calibrationSupported) {
+                        FeatureSupported(stringResource(id = R.string.calibration))
+                    }
+                    if (it.multipleSensorLocationsSupported) {
+                        FeatureSupported(stringResource(id = R.string.multiple_sensor_location))
+                    }
+                }
+            }
         }
+    }
+}
+
+@Composable
+private fun FeatureSupported(
+    text: String,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Box(
+            modifier = Modifier.background(
+                color = Color(0xFF00796B),
+                shape = RectangleShape
+            )
+        ) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+        Text(
+            text = text,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
+        )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
+private fun FeatureSupportedPreview() {
+    FeatureSupported("Instantaneous stride length measurement supported")
+}
+
+@Preview(showBackground = true)
+@Composable
 private fun RSCSScreenPreview() {
-    RSCSScreen(RSCSServiceData()) {}
+    RSCSScreen(
+        RSCSServiceData(
+            feature = RSCFeatureData(
+                instantaneousStrideLengthMeasurementSupported = true,
+                totalDistanceMeasurementSupported = true,
+                walkingOrRunningStatusSupported = true,
+                calibrationSupported = true,
+                multipleSensorLocationsSupported = true
+            )
+        )
+    ) {}
 }
 
 @Composable
@@ -106,7 +187,6 @@ private fun RSCSSettingsDropdown(
             modifier = Modifier
                 .clip(CircleShape)
                 .clickable { openSettingsDialog = true }
-                .padding(8.dp)
         )
 
         if (openSettingsDialog) {
@@ -116,55 +196,35 @@ private fun RSCSSettingsDropdown(
 }
 
 @Composable
-fun RSCSSettingsDialog(
+private fun RSCSSettingsDialog(
     state: RSCSServiceData,
     onDismiss: () -> Unit,
     onSpeedUnitSelected: (DeviceConnectionViewEvent) -> Unit
 ) {
-    val listState = rememberLazyListState()
-    val speedUnitEntries = no.nordicsemi.android.lib.profile.rscs.RSCSSettingsUnit.entries.map { it }
-    val selectedIndex = speedUnitEntries.indexOf(state.unit)
-
-    LaunchedEffect(selectedIndex) {
-        if (selectedIndex >= 0) {
-            listState.scrollToItem(selectedIndex)
-        }
-    }
+    val speedUnitEntries = RSCSSettingsUnit.entries.map { it }
 
     AlertDialog(
         onDismissRequest = { onDismiss() },
         title = { Text(text = stringResource(R.string.rscs_settings_unit_title)) },
         text = {
-            LazyColumn(
-                state = listState
-            ) {
-                items(speedUnitEntries.size) { index ->
-                    val entry = speedUnitEntries[index]
-                    Row(
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                speedUnitEntries.forEachIndexed { _, entry ->
+                    Text(
+                        text = entry.toString(),
                         modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
+                            .fillMaxWidth()
                             .clickable {
-                                onSpeedUnitSelected(RSCSViewEvent.OnSelectedSpeedUnitSelected(entry))
-                            }
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = entry.toString(),
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .fillMaxWidth()
-                                .clickable {
-                                    onSpeedUnitSelected(
-                                        RSCSViewEvent.OnSelectedSpeedUnitSelected(entry)
+                                onSpeedUnitSelected(
+                                    RSCSViewEvent.OnSelectedSpeedUnitSelected(
+                                        entry
                                     )
-                                    onDismiss()
-                                },
-                            color = if (state.unit == entry)
-                                MaterialTheme.colorScheme.primary else
-                                MaterialTheme.colorScheme.onBackground
-                        )
-                    }
+                                )
+                                onDismiss()
+                            },
+                        color = if (state.unit == entry)
+                            MaterialTheme.colorScheme.primary else
+                            MaterialTheme.colorScheme.onBackground
+                    )
                 }
             }
         },
@@ -172,3 +232,12 @@ fun RSCSSettingsDialog(
     )
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun RSCSSettingsDialogPreview() {
+    RSCSSettingsDialog(
+        state = RSCSServiceData(),
+        onDismiss = {},
+        onSpeedUnitSelected = {}
+    )
+}
