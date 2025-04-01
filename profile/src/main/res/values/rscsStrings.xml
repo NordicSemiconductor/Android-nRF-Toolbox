@@ -14,5 +14,12 @@
     <string name="rscs_steps">Number of Steps %d</string>
     <string name="stride_length"> Stride Length</string>
 
-    <string name="rscs_settings_unit_title"> Stride length and speed unit</string>
+    <string name="rscs_settings_unit_title">Select unit</string>
+
+    <string name="supported_feature">Supported features</string>
+    <string name="instantaneous_stride_length_measurement">Instantaneous stride length measurement</string>
+    <string name="total_distance_measurement">Total distance measurement</string>
+    <string name="walking_or_running_status">Walking or running status</string>
+    <string name="calibration">Calibration</string>
+    <string name="multiple_sensor_location">Multiple sensor locations</string>
 </resources>

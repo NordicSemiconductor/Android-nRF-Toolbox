@@ -3,9 +3,10 @@ package no.nordicsemi.android.service.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import no.nordicsemi.android.toolbox.profile.data.RSCSServiceData
+import no.nordicsemi.android.lib.profile.rscs.RSCFeatureData
 import no.nordicsemi.android.lib.profile.rscs.RSCSData
 import no.nordicsemi.android.lib.profile.rscs.RSCSSettingsUnit
+import no.nordicsemi.android.toolbox.profile.data.RSCSServiceData
 
 object RSCSRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<RSCSServiceData>>()
@@ -24,6 +25,10 @@ object RSCSRepository {
 
     fun updateUnitSettings(deviceId: String, rscsUnitSettings: RSCSSettingsUnit) {
         _dataMap[deviceId]?.update { it.copy(unit = rscsUnitSettings) }
+    }
+
+    fun updateRSCSFeatureData(deviceId: String, feature: RSCFeatureData) {
+        _dataMap[deviceId]?.update { it.copy(feature = feature) }
     }
 
 }
