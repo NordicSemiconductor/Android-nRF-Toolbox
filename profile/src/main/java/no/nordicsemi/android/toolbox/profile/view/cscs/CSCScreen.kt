@@ -15,8 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -94,6 +92,7 @@ private fun CSCSettingView(
     ) {
         var isWheelSizeClicked by rememberSaveable { mutableStateOf(false) }
         var isDropdownExpanded by rememberSaveable { mutableStateOf(false) }
+
         WheelSizeDropDown(
             state = serviceData,
             isWheelSizeClicked = isWheelSizeClicked,
@@ -101,14 +100,20 @@ private fun CSCSettingView(
             onDismiss = { isWheelSizeClicked = false },
             onClickEvent = { onClickEvent(it) }
         )
-
-        CSCSpeedSettingsFilterDropdown(
-            serviceData,
-            isDropdownExpanded = isDropdownExpanded,
-            onExpand = { isDropdownExpanded = true },
-            onDismiss = { isDropdownExpanded = false },
-            onClickEvent = { onClickEvent(it) }
+        Icon(
+            imageVector = Icons.Default.Settings,
+            contentDescription = "Speed unit settings",
+            modifier = Modifier
+                .clip(CircleShape)
+                .clickable { isDropdownExpanded = true }
         )
+
+        if (isDropdownExpanded)
+            CSCSpeedSettingsFilterDropdown(
+                serviceData,
+                onDismiss = { isDropdownExpanded = false },
+                onClickEvent = { onClickEvent(it) }
+            )
     }
 }
 
@@ -205,49 +210,42 @@ private fun WheelSizeDialog(
 @Composable
 private fun CSCSpeedSettingsFilterDropdown(
     state: CSCServiceData,
-    isDropdownExpanded: Boolean,
-    onExpand: () -> Unit,
     onDismiss: () -> Unit,
     onClickEvent: (DeviceConnectionViewEvent) -> Unit
 ) {
-    Column {
-        Icon(
-            imageVector = Icons.Default.Settings,
-            contentDescription = "Speed unit settings",
-            modifier = Modifier
-                .clip(CircleShape)
-                .clickable { onExpand() }
-                .padding(8.dp)
-        )
-
-        DropdownMenu(
-            expanded = isDropdownExpanded,
-            onDismissRequest = onDismiss,
-        ) {
-            Column {
-                Text(
-                    stringResource(R.string.csc_settings),
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-                HorizontalDivider()
-                SpeedUnit.entries.forEach {
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        title = { Text(text = stringResource(R.string.csc_settings)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                SpeedUnit.entries.forEach { entry ->
                     Text(
-                        text = it.displayName,
+                        text = entry.toString(),
                         modifier = Modifier
-                            .padding(horizontal = 16.dp)
                             .fillMaxWidth()
                             .clickable {
-                                onClickEvent(CSCViewEvent.OnSelectedSpeedUnitSelected(it))
+                                onClickEvent(CSCViewEvent.OnSelectedSpeedUnitSelected(entry))
                                 onDismiss()
                             },
-                        color = if (state.speedUnit == it)
+                        color = if (state.speedUnit == entry)
                             MaterialTheme.colorScheme.primary else
                             MaterialTheme.colorScheme.onBackground
                     )
                 }
             }
-        }
-    }
+        },
+        confirmButton = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CSCSpeedSettingsFilterDropdownPreview() {
+    CSCSpeedSettingsFilterDropdown(
+        state = CSCServiceData(),
+        onDismiss = {},
+        onClickEvent = {}
+    )
 }
 
 @Composable
