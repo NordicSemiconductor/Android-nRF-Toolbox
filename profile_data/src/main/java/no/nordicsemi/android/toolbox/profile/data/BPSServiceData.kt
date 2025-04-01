@@ -1,5 +1,6 @@
 package no.nordicsemi.android.toolbox.profile.data
 
+import no.nordicsemi.android.lib.profile.bps.BloodPressureFeatureData
 import no.nordicsemi.android.lib.profile.bps.BloodPressureMeasurementData
 import no.nordicsemi.android.lib.profile.bps.IntermediateCuffPressureData
 
@@ -14,4 +15,5 @@ data class BPSServiceData(
     override val profile: Profile = Profile.BPS,
     val bloodPressureMeasurement: BloodPressureMeasurementData? = null,
     val intermediateCuffPressure: IntermediateCuffPressureData? = null,
+    val bloodPressureFeature: BloodPressureFeatureData? = null
 ) : ProfileServiceData()

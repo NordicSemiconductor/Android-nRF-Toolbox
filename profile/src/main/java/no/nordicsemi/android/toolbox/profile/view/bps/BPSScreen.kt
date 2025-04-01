@@ -3,6 +3,7 @@ package no.nordicsemi.android.toolbox.profile.view.bps
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -12,6 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.lib.profile.bps.BPMStatus
+import no.nordicsemi.android.lib.profile.bps.BloodPressureFeatureData
 import no.nordicsemi.android.lib.profile.bps.BloodPressureMeasurementData
 import no.nordicsemi.android.lib.profile.bps.BloodPressureType
 import no.nordicsemi.android.lib.profile.bps.IntermediateCuffPressureData
@@ -35,27 +37,87 @@ internal fun BPSScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        ScreenSection {
+        ScreenSection(modifier = Modifier.padding(bottom = 16.dp)) {
             SectionTitle(
                 resId = R.drawable.ic_bps,
-                title = stringResource(id = R.string.bps_title)
+                title = stringResource(id = R.string.bps_title),
+                modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
             )
-
             serviceData.bloodPressureMeasurement?.let {
                 BloodPressureView(it)
             }
-
             serviceData.intermediateCuffPressure?.displayHeartRate()?.let {
                 HorizontalDivider()
                 SectionRow {
-                    KeyValueColumn(stringResource(id = R.string.bps_pulse), it)
+                    KeyValueColumn(
+                        stringResource(id = R.string.bps_pulse),
+                        it,
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
                 }
             }
 
-            if (serviceData.intermediateCuffPressure == null && serviceData.bloodPressureMeasurement == null) {
+            serviceData.bloodPressureFeature?.let {
+                HorizontalDivider()
+                BloodPressureFeatureView(it)
+            }
+
+            if (serviceData.intermediateCuffPressure == null &&
+                serviceData.bloodPressureMeasurement == null &&
+                serviceData.bloodPressureFeature == null
+            ) {
                 Text(
                     stringResource(id = R.string.no_data_info),
                     style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BloodPressureFeatureView(it: BloodPressureFeatureData) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp)
+    ) {
+        if (it.bodyMovementDetection) {
+            SectionRow {
+                KeyValueColumn(
+                    stringResource(id = R.string.body_movement_detected),
+                    it.bodyMovementDetection.toBooleanText()
+                )
+            }
+        }
+        if (it.cuffFitDetection) {
+            SectionRow {
+                KeyValueColumn(
+                    stringResource(id = R.string.cuff_fit_detected),
+                    it.cuffFitDetection.toBooleanText()
+                )
+            }
+        }
+        if (it.irregularPulseDetection) {
+            SectionRow {
+                KeyValueColumn(
+                    stringResource(id = R.string.irregular_heart_rate_detected),
+                    it.irregularPulseDetection.toBooleanText()
+                )
+            }
+        }
+        if (it.pulseRateRangeDetection) {
+            SectionRow {
+                KeyValueColumn(
+                    stringResource(id = R.string.pulse_rate_detected),
+                    it.pulseRateRangeDetection.toBooleanText()
+                )
+            }
+        }
+        if (it.measurementPositionDetection) {
+            SectionRow {
+                KeyValueColumn(
+                    stringResource(id = R.string.measurement_position_detected),
+                    it.measurementPositionDetection.toBooleanText()
                 )
             }
         }
@@ -89,6 +151,21 @@ private fun BPSScreenPreview() {
         serviceData = BPSServiceData(
             profile = Profile.BPS,
             bloodPressureMeasurement = sampleData,
+            intermediateCuffPressure = IntermediateCuffPressureData(
+                unit = BloodPressureType.UNIT_MMHG,
+                pulseRate = 12.0f,
+                userID = 15,
+                status = sampleStatus,
+                calendar = Calendar.getInstance(),
+                cuffPressure = 25.5f
+            ),
+            bloodPressureFeature = BloodPressureFeatureData(
+                bodyMovementDetection = true,
+                cuffFitDetection = true,
+                irregularPulseDetection = true,
+                pulseRateRangeDetection = true,
+                measurementPositionDetection = true
+            )
         )
     )
 }
@@ -96,7 +173,8 @@ private fun BPSScreenPreview() {
 @Composable
 private fun BloodPressureView(state: BloodPressureMeasurementData) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp)
     ) {
         SectionRow {
             KeyValueColumn(
@@ -128,54 +206,59 @@ private fun BloodPressureView(state: BloodPressureMeasurementData) {
                     it
                 )
             }
-            state.status?.bodyMovementDetected?.let {
-                KeyValueColumnReverse(
-                    "Body movement detected",
-                    it.toBooleanText()
+        }
+    }
+    state.status?.let {
+        HorizontalDivider()
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp)
+        ) {
+            if (it.bodyMovementDetected) {
+                KeyValueColumn(
+                    stringResource(id = R.string.body_movement_detected),
+                    it.bodyMovementDetected.toBooleanText()
+                )
+            }
+            if (it.irregularPulseDetected) {
+                KeyValueColumn(
+                    stringResource(id = R.string.irregular_heart_rate_detected),
+                    it.irregularPulseDetected.toBooleanText()
+                )
+            }
+
+            if (it.cuffTooLose) {
+                KeyValueColumn(
+                    "Cuff Too Lose",
+                    it.cuffTooLose.toBooleanText()
+                )
+            }
+            if (it.pulseRateExceedsUpperLimit) {
+                KeyValueColumn(
+                    stringResource(id = R.string.pulse_rate_higher_limit),
+                    it.pulseRateExceedsUpperLimit.toBooleanText()
+                )
+            }
+            if (it.pulseRateInRange) {
+                KeyValueColumn(
+                    stringResource(id = R.string.pulse_rate_detected),
+                    it.pulseRateInRange.toBooleanText()
+                )
+            }
+            if (it.improperMeasurementPosition) {
+                KeyValueColumn(
+                    stringResource(id = R.string.improper_measurement_position),
+                    it.improperMeasurementPosition.toBooleanText()
+                )
+            }
+
+            if (it.pulseRateIsLessThenLowerLimit) {
+                KeyValueColumn(
+                    stringResource(id = R.string.pulse_rate_lower_limit),
+                    it.pulseRateIsLessThenLowerLimit.toBooleanText()
                 )
             }
         }
-
-        state.status?.irregularPulseDetected?.let {
-            KeyValueColumn(
-                "Irregular pulse detected",
-                it.toBooleanText()
-            )
-        }
-        state.status?.cuffTooLose?.let {
-            KeyValueColumn(
-                "Cuff Too Lose",
-                it.toBooleanText()
-            )
-        }
-
-
-        state.status?.pulseRateExceedsUpperLimit?.let {
-            KeyValueColumn(
-                "Pulse rate exceeds upper limit",
-                it.toBooleanText()
-            )
-        }
-        state.status?.pulseRateInRange?.let {
-            KeyValueColumn(
-                "Pulse rate in range",
-                it.toBooleanText()
-            )
-        }
-        state.status?.improperMeasurementPosition?.let {
-            KeyValueColumn(
-                "Improper measurement position",
-                it.toBooleanText()
-            )
-        }
-
-        state.status?.pulseRateIsLessThenLowerLimit?.let {
-            KeyValueColumn(
-                "Pulse rate less than lower limit",
-                it.toBooleanText()
-            )
-        }
-
     }
 }
 

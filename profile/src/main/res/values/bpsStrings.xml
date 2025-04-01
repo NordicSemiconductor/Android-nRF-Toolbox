@@ -11,4 +11,13 @@
 
     <string name="bps_blood_pressure">%.0f %s</string>
     <string name="bps_timestamp">%1$te %1$tb %1$tY at %1$tT</string>
+
+    <string name="body_movement_detected">Body movement detected</string>
+    <string name="cuff_fit_detected">Cuff fit detected</string>
+    <string name="irregular_heart_rate_detected">Irregular heart rate detected</string>
+    <string name="pulse_rate_detected">Pulse rate in range </string>
+    <string name="measurement_position_detected">Measurement position detected</string>
+    <string name="improper_measurement_position">Improper measurement position</string>
+    <string name="pulse_rate_lower_limit">Pulse rate less than lower limit</string>
+    <string name="pulse_rate_higher_limit">Pulse rate exceeds upper limit</string>
 </resources>
