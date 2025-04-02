@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -105,6 +106,7 @@ private fun CSCSettingView(
             contentDescription = "Speed unit settings",
             modifier = Modifier
                 .clip(CircleShape)
+                .size(28.dp)
                 .clickable { isDropdownExpanded = true }
         )
 
@@ -129,7 +131,6 @@ private fun WheelSizeDropDown(
     Column {
         OutlinedButton(onClick = { onExpand() }) {
             Row(
-                modifier = Modifier.fillMaxWidth(0.5f),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -220,13 +221,14 @@ private fun CSCSpeedSettingsFilterDropdown(
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 SpeedUnit.entries.forEach { entry ->
                     Text(
-                        text = entry.toString(),
+                        text = entry.displayName,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
                                 onClickEvent(CSCViewEvent.OnSelectedSpeedUnitSelected(entry))
                                 onDismiss()
                             },
+                        style = MaterialTheme.typography.bodyLarge,
                         color = if (state.speedUnit == entry)
                             MaterialTheme.colorScheme.primary else
                             MaterialTheme.colorScheme.onBackground
