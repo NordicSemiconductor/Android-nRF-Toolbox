@@ -20,6 +20,7 @@ import no.nordicsemi.android.lib.profile.bps.IntermediateCuffPressureData
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.BPSServiceData
 import no.nordicsemi.android.toolbox.profile.data.Profile
+import no.nordicsemi.android.ui.view.FeatureSupported
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
@@ -82,44 +83,19 @@ private fun BloodPressureFeatureView(it: BloodPressureFeatureData) {
         modifier = Modifier.padding(start = 16.dp, end = 16.dp)
     ) {
         if (it.bodyMovementDetection) {
-            SectionRow {
-                KeyValueColumn(
-                    stringResource(id = R.string.body_movement_detected),
-                    it.bodyMovementDetection.toBooleanText()
-                )
-            }
+            FeatureSupported(stringResource(id = R.string.body_movement_detected))
         }
         if (it.cuffFitDetection) {
-            SectionRow {
-                KeyValueColumn(
-                    stringResource(id = R.string.cuff_fit_detected),
-                    it.cuffFitDetection.toBooleanText()
-                )
-            }
+            FeatureSupported(stringResource(id = R.string.cuff_fit_detected))
         }
         if (it.irregularPulseDetection) {
-            SectionRow {
-                KeyValueColumn(
-                    stringResource(id = R.string.irregular_heart_rate_detected),
-                    it.irregularPulseDetection.toBooleanText()
-                )
-            }
+            FeatureSupported(stringResource(id = R.string.irregular_heart_rate_detected))
         }
         if (it.pulseRateRangeDetection) {
-            SectionRow {
-                KeyValueColumn(
-                    stringResource(id = R.string.pulse_rate_detected),
-                    it.pulseRateRangeDetection.toBooleanText()
-                )
-            }
+            FeatureSupported(stringResource(id = R.string.pulse_rate_detected))
         }
         if (it.measurementPositionDetection) {
-            SectionRow {
-                KeyValueColumn(
-                    stringResource(id = R.string.measurement_position_detected),
-                    it.measurementPositionDetection.toBooleanText()
-                )
-            }
+            FeatureSupported(stringResource(id = R.string.measurement_position_detected))
         }
     }
 }
