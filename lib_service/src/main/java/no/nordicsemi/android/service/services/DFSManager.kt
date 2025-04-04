@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import no.nordicsemi.android.lib.profile.directionFinder.azimuthal.AzimuthalMeasurementDataParser
 import no.nordicsemi.android.lib.profile.directionFinder.controlPoint.ControlPointDataParser
 import no.nordicsemi.android.lib.profile.directionFinder.ddf.DDFDataParser
@@ -42,12 +42,12 @@ internal class DFSManager : ServiceManager {
         get() = Profile.DFS
 
     @OptIn(ExperimentalUuidApi::class)
-    override fun observeServiceInteractions(
+    override suspend fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope
     ) {
-        scope.launch {
+        withContext(scope.coroutineContext) {
             remoteService.characteristics
                 .firstOrNull { it.uuid == AZIMUTH_MEASUREMENT_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.subscribe()
@@ -56,9 +56,7 @@ internal class DFSManager : ServiceManager {
                 ?.catch { it.logAndReport() }
                 ?.onCompletion { DFSRepository.clear(deviceId) }
                 ?.launchIn(scope)
-        }
 
-        scope.launch {
             remoteService.characteristics
                 .firstOrNull { it.uuid == DISTANCE_MEASUREMENT_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.subscribe()
@@ -67,9 +65,7 @@ internal class DFSManager : ServiceManager {
                 ?.catch { it.logAndReport() }
                 ?.onCompletion { DFSRepository.clear(deviceId) }
                 ?.launchIn(scope)
-        }
 
-        scope.launch {
             remoteService.characteristics
                 .firstOrNull { it.uuid == ELEVATION_MEASUREMENT_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.subscribe()
@@ -78,9 +74,7 @@ internal class DFSManager : ServiceManager {
                 ?.catch { it.logAndReport() }
                 ?.onCompletion { DFSRepository.clear(deviceId) }
                 ?.launchIn(scope)
-        }
 
-        scope.launch {
             val ddfFeatureCharacteristics = remoteService.characteristics
                 .firstOrNull { it.uuid == DDF_FEATURE_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.apply { ddfFeatureCharacteristic = this }
@@ -94,9 +88,7 @@ internal class DFSManager : ServiceManager {
                 Timber.e("Characteristic Property READ is not available for $ddfFeatureCharacteristics")
             }
 
-        }
 
-        scope.launch {
             remoteService.characteristics
                 .firstOrNull { it.uuid == CONTROL_POINT_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.apply { controlPointCharacteristic = this }

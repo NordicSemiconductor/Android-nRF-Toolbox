@@ -6,7 +6,7 @@ import no.nordicsemi.kotlin.ble.client.RemoteService
 
 sealed interface ServiceManager {
     val profile: Profile
-    fun observeServiceInteractions(
+    suspend fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope

@@ -6,10 +6,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import no.nordicsemi.android.lib.profile.csc.CSCDataParser
 import no.nordicsemi.android.service.repository.CSCRepository
 import no.nordicsemi.android.toolbox.profile.data.Profile
-import no.nordicsemi.android.lib.profile.csc.CSCDataParser
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi
@@ -23,23 +22,21 @@ internal class CSCManager : ServiceManager {
         get() = Profile.CSC
 
     @OptIn(ExperimentalUuidApi::class)
-    override fun observeServiceInteractions(
+    override suspend fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope
     ) {
-        scope.launch {
-            remoteService.characteristics
-                .firstOrNull { it.uuid == CSC_MEASUREMENT_CHARACTERISTIC_UUID.toKotlinUuid() }
-                ?.subscribe()
-                ?.mapNotNull {
-                    CSCDataParser.parse(it, CSCRepository.getData(deviceId).value.data.wheelSize)
-                }
-                ?.onEach { CSCRepository.onCSCDataChanged(deviceId, it) }
-                ?.catch { it.printStackTrace() }
-                ?.onCompletion { CSCRepository.clear(deviceId) }
-                ?.launchIn(scope)
-        }
+        remoteService.characteristics
+            .firstOrNull { it.uuid == CSC_MEASUREMENT_CHARACTERISTIC_UUID.toKotlinUuid() }
+            ?.subscribe()
+            ?.mapNotNull {
+                CSCDataParser.parse(it, CSCRepository.getData(deviceId).value.data.wheelSize)
+            }
+            ?.onEach { CSCRepository.onCSCDataChanged(deviceId, it) }
+            ?.catch { it.printStackTrace() }
+            ?.onCompletion { CSCRepository.clear(deviceId) }
+            ?.launchIn(scope)
     }
 
 }

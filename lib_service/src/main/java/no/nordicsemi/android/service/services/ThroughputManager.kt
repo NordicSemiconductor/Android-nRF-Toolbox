@@ -1,7 +1,6 @@
 package no.nordicsemi.android.service.services
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import no.nordicsemi.android.lib.profile.throughput.ThroughputDataParser
 import no.nordicsemi.android.service.repository.ThroughputRepository
 import no.nordicsemi.android.toolbox.profile.data.NumberOfBytes
@@ -25,19 +24,17 @@ internal class ThroughputManager : ServiceManager {
         get() = Profile.THROUGHPUT
 
     @OptIn(ExperimentalUuidApi::class)
-    override fun observeServiceInteractions(
+    override suspend fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope
     ) {
-        scope.launch {
-            try {
-                remoteService.characteristics
-                    .firstOrNull { it.uuid == THROUGHPUT_CHAR_UUID.toKotlinUuid() }
-                    ?.also { writeCharacteristicProperty = it }
-            } finally {
-                ThroughputRepository.clearData(deviceId)
-            }
+        try {
+            remoteService.characteristics
+                .firstOrNull { it.uuid == THROUGHPUT_CHAR_UUID.toKotlinUuid() }
+                ?.also { writeCharacteristicProperty = it }
+        } finally {
+            ThroughputRepository.clearData(deviceId)
         }
     }
 

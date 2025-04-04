@@ -6,10 +6,10 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import no.nordicsemi.android.lib.profile.hts.HTSDataParser
 import no.nordicsemi.android.service.repository.HTSRepository
 import no.nordicsemi.android.toolbox.profile.data.Profile
-import no.nordicsemi.android.lib.profile.hts.HTSDataParser
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber
 import java.util.UUID
@@ -23,12 +23,12 @@ internal class HTSManager : ServiceManager {
     override val profile: Profile = Profile.HTS
 
     @OptIn(ExperimentalUuidApi::class)
-    override fun observeServiceInteractions(
+    override suspend fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope
     ) {
-        scope.launch {
+        withContext(scope.coroutineContext) {
             remoteService.characteristics.firstOrNull { it.uuid == HTS_MEASUREMENT_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.subscribe()
                 ?.mapNotNull { HTSDataParser.parse(it) }

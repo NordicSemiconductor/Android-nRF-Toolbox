@@ -6,11 +6,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import no.nordicsemi.android.service.repository.HRSRepository
-import no.nordicsemi.android.toolbox.profile.data.Profile
+import kotlinx.coroutines.withContext
 import no.nordicsemi.android.lib.profile.hrs.BodySensorLocationParser
 import no.nordicsemi.android.lib.profile.hrs.HRSDataParser
+import no.nordicsemi.android.service.repository.HRSRepository
+import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber
 import java.util.UUID
@@ -26,12 +26,12 @@ internal class HRSManager : ServiceManager {
     override val profile: Profile = Profile.HRS
 
     @OptIn(ExperimentalUuidApi::class)
-    override fun observeServiceInteractions(
+    override suspend fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope
     ) {
-        scope.launch {
+        withContext(scope.coroutineContext) {
             remoteService.characteristics.firstOrNull { it.uuid == HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.subscribe()
                 ?.mapNotNull { HRSDataParser.parse(it) }
@@ -44,9 +44,7 @@ internal class HRSManager : ServiceManager {
                     e.printStackTrace()
                     Timber.e(e)
                 }?.launchIn(scope)
-        }
 
-        scope.launch {
             remoteService.characteristics.firstOrNull { it.uuid == BODY_SENSOR_LOCATION_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.read()
                 ?.let { BodySensorLocationParser.parse(it) }

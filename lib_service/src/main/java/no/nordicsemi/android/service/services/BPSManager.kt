@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import no.nordicsemi.android.lib.profile.bps.BloodPressureFeatureParser
 import no.nordicsemi.android.lib.profile.bps.BloodPressureMeasurementParser
 import no.nordicsemi.android.lib.profile.bps.IntermediateCuffPressureParser
@@ -26,12 +26,12 @@ internal class BPSManager : ServiceManager {
     override val profile: Profile = Profile.BPS
 
     @OptIn(ExperimentalUuidApi::class)
-    override fun observeServiceInteractions(
+    override suspend fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope
     ) {
-        scope.launch {
+        withContext(scope.coroutineContext) {
             remoteService.characteristics.firstOrNull { it.uuid == BPM_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.subscribe()
                 ?.mapNotNull { BloodPressureMeasurementParser.parse(it) }
@@ -41,9 +41,7 @@ internal class BPSManager : ServiceManager {
                     e.printStackTrace()
                     Timber.e(e)
                 }?.launchIn(scope)
-        }
 
-        scope.launch {
             remoteService.characteristics.firstOrNull { it.uuid == ICP_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.subscribe()
                 ?.mapNotNull { IntermediateCuffPressureParser.parse(it) }
@@ -53,9 +51,7 @@ internal class BPSManager : ServiceManager {
                     e.printStackTrace()
                     Timber.e(e)
                 }?.launchIn(scope)
-        }
 
-        scope.launch {
             remoteService.characteristics.firstOrNull { it.uuid == BPF_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.read()
                 ?.let {

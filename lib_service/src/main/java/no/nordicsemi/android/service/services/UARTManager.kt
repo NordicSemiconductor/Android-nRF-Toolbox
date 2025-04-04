@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import no.nordicsemi.android.service.repository.UartRepository
 import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
@@ -29,12 +29,12 @@ internal class UARTManager : ServiceManager {
         get() = Profile.UART
 
     @OptIn(ExperimentalUuidApi::class)
-    override fun observeServiceInteractions(
+    override suspend fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope
     ) {
-        scope.launch {
+        withContext(scope.coroutineContext) {
             remoteService.characteristics.firstOrNull { it.uuid == UART_TX_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.subscribe()
                 ?.mapNotNull { String(it) }
@@ -46,9 +46,7 @@ internal class UARTManager : ServiceManager {
                     UartRepository.clear(deviceId)
                 }
                 ?.launchIn(scope)
-        }
 
-        scope.launch {
             val writeCharacteristics =
                 remoteService.characteristics.firstOrNull { it.uuid == UART_RX_CHARACTERISTIC_UUID.toKotlinUuid() }
                     ?.also { rxCharacteristic = it }
