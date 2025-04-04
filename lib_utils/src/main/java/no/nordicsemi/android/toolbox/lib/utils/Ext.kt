@@ -7,7 +7,6 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 fun Throwable.logAndReport() {
-    this.printStackTrace()
     Timber.e(this)
 }
 
