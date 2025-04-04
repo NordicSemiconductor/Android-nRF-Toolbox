@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import no.nordicsemi.android.lib.profile.rscs.RSCSDataParser
 import no.nordicsemi.android.lib.profile.rscs.RSCSFeatureDataParser
 import no.nordicsemi.android.service.repository.RSCSRepository
@@ -27,12 +27,12 @@ internal class RSCSManager : ServiceManager {
         get() = Profile.RSCS
 
     @OptIn(ExperimentalUuidApi::class)
-    override fun observeServiceInteractions(
+    override suspend fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope
     ) {
-        scope.launch {
+        withContext(scope.coroutineContext) {
             remoteService.characteristics
                 .firstOrNull { it.uuid == RSC_MEASUREMENT_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.subscribe()
@@ -41,9 +41,7 @@ internal class RSCSManager : ServiceManager {
                 ?.catch { it.logAndReport() }
                 ?.onCompletion { RSCSRepository.clear(deviceId) }
                 ?.launchIn(scope)
-        }
 
-        scope.launch {
             remoteService.characteristics
                 .firstOrNull { it.uuid == RSC_FEATURE_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.read()

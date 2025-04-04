@@ -6,10 +6,10 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import no.nordicsemi.android.lib.profile.prx.AlarmLevelParser
 import no.nordicsemi.android.service.repository.PRXRepository
 import no.nordicsemi.android.toolbox.profile.data.Profile
-import no.nordicsemi.android.lib.profile.prx.AlarmLevelParser
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber
 import java.util.UUID
@@ -25,14 +25,14 @@ internal class PRXManager : ServiceManager {
     override val profile: Profile = Profile.PRX
 
     @OptIn(ExperimentalUuidApi::class)
-    override fun observeServiceInteractions(
+    override suspend fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope
     ) {
         val linkLossService = remoteService.includedServices
             .firstOrNull { it.uuid == LINK_LOSS_SERVICE_UUID.toKotlinUuid() }
-        scope.launch {
+        withContext(scope.coroutineContext) {
             remoteService.characteristics.firstOrNull { it.uuid == ALERT_LEVEL_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.subscribe()
                 ?.mapNotNull { AlarmLevelParser.parse(it) }
@@ -42,9 +42,7 @@ internal class PRXManager : ServiceManager {
                     e.printStackTrace()
                     Timber.e(e)
                 }?.launchIn(scope)
-        }
 
-        scope.launch {
             linkLossService?.characteristics?.firstOrNull { it.uuid == ALERT_LEVEL_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.subscribe()
                 ?.mapNotNull { AlarmLevelParser.parse(it) }

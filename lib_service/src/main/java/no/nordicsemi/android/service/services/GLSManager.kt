@@ -7,22 +7,23 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.service.repository.GLSRepository
-import no.nordicsemi.android.service.repository.GLSRepository.updateNewRequestStatus
-import no.nordicsemi.android.toolbox.lib.utils.logAndReport
-import no.nordicsemi.android.toolbox.lib.utils.tryOrLog
-import no.nordicsemi.android.toolbox.profile.data.Profile
+import kotlinx.coroutines.withContext
+import no.nordicsemi.android.lib.profile.common.WorkingMode
 import no.nordicsemi.android.lib.profile.gls.GlucoseMeasurementContextParser
 import no.nordicsemi.android.lib.profile.gls.GlucoseMeasurementParser
 import no.nordicsemi.android.lib.profile.gls.RecordAccessControlPointInputParser
 import no.nordicsemi.android.lib.profile.gls.RecordAccessControlPointParser
-import no.nordicsemi.android.lib.profile.common.WorkingMode
 import no.nordicsemi.android.lib.profile.gls.data.NumberOfRecordsData
 import no.nordicsemi.android.lib.profile.gls.data.RecordAccessControlPointData
 import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
 import no.nordicsemi.android.lib.profile.gls.data.ResponseData
 import no.nordicsemi.android.lib.profile.racp.RACPOpCode
 import no.nordicsemi.android.lib.profile.racp.RACPResponseCode
+import no.nordicsemi.android.service.repository.GLSRepository
+import no.nordicsemi.android.service.repository.GLSRepository.updateNewRequestStatus
+import no.nordicsemi.android.toolbox.lib.utils.logAndReport
+import no.nordicsemi.android.toolbox.lib.utils.tryOrLog
+import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.core.WriteType
@@ -41,12 +42,12 @@ internal class GLSManager : ServiceManager {
     override val profile: Profile = Profile.GLS
 
     @OptIn(ExperimentalUuidApi::class)
-    override fun observeServiceInteractions(
+    override suspend fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope
     ) {
-        scope.launch {
+        withContext(scope.coroutineContext) {
             remoteService.characteristics
                 .firstOrNull { it.uuid == GLUCOSE_MEASUREMENT_CHARACTERISTIC.toKotlinUuid() }
                 ?.subscribe()
@@ -55,8 +56,7 @@ internal class GLSManager : ServiceManager {
                 ?.onCompletion { GLSRepository.clear(deviceId) }
                 ?.catch { it.logAndReport() }
                 ?.launchIn(scope)
-        }
-        scope.launch {
+
             remoteService.characteristics
                 .firstOrNull { it.uuid == GLUCOSE_MEASUREMENT_CONTEXT_CHARACTERISTIC.toKotlinUuid() }
                 ?.subscribe()
@@ -65,9 +65,7 @@ internal class GLSManager : ServiceManager {
                 ?.onCompletion { GLSRepository.clear(deviceId) }
                 ?.catch { it.logAndReport() }
                 ?.launchIn(scope)
-        }
 
-        scope.launch {
             remoteService.characteristics
                 .firstOrNull { it.uuid == RACP_CHARACTERISTIC.toKotlinUuid() }
                 ?.apply { recordAccessControlPointCharacteristic = this }
@@ -77,7 +75,6 @@ internal class GLSManager : ServiceManager {
                 ?.catch { it.logAndReport() }
                 ?.launchIn(scope)
         }
-
     }
 
     private fun onAccessControlPointDataReceived(

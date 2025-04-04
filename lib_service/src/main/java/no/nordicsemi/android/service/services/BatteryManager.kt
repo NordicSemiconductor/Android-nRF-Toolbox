@@ -6,10 +6,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import no.nordicsemi.android.lib.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.service.repository.BatteryRepository
 import no.nordicsemi.android.toolbox.profile.data.Profile
-import no.nordicsemi.android.lib.profile.battery.BatteryLevelParser
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber
 import java.util.UUID
@@ -23,27 +22,32 @@ internal class BatteryManager : ServiceManager {
     override val profile: Profile = Profile.BATTERY
 
     @OptIn(ExperimentalUuidApi::class)
-    override fun observeServiceInteractions(
+    override suspend fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope
     ) {
-        scope.launch {
-            remoteService.characteristics.firstOrNull { it.uuid == BATTERY_LEVEL_CHARACTERISTIC_UUID.toKotlinUuid() }
-                ?.subscribe()
-                ?.mapNotNull { BatteryLevelParser.parse(it) }
-                ?.onEach { batteryLevel ->
+        val batteryChar = remoteService.characteristics
+            .firstOrNull { it.uuid == BATTERY_LEVEL_CHARACTERISTIC_UUID.toKotlinUuid() }
+
+        batteryChar?.let { characteristic ->
+            // Start subscription for battery level updates
+            characteristic.subscribe()
+                .mapNotNull { BatteryLevelParser.parse(it) }
+                .onEach { batteryLevel ->
                     BatteryRepository.updateBatteryLevel(deviceId, batteryLevel)
                 }
-                ?.onCompletion { BatteryRepository.clear(deviceId) }
-                ?.catch { e ->
+                .onCompletion {
+                    BatteryRepository.clear(deviceId)
+                }
+                .catch { e ->
                     Timber.e(e)
-                }?.launchIn(scope)
-        }
-        scope.launch {
-            remoteService.characteristics.firstOrNull { it.uuid == BATTERY_LEVEL_CHARACTERISTIC_UUID.toKotlinUuid() }
-                ?.read()
-                ?.let { BatteryLevelParser.parse(it) }
+                }
+                .launchIn(scope)
+
+            // Perform initial read
+            characteristic.read()
+                .let { BatteryLevelParser.parse(it) }
                 ?.let { batteryLevel ->
                     BatteryRepository.updateBatteryLevel(deviceId, batteryLevel)
                 }
