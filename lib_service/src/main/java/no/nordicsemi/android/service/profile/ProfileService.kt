@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
@@ -20,11 +22,14 @@ import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.NotificationService
 import no.nordicsemi.android.service.R
 import no.nordicsemi.android.service.services.ServiceManager
+import no.nordicsemi.android.toolbox.lib.utils.spec.CGMS_SERVICE_UUID
+import no.nordicsemi.android.toolbox.lib.utils.spec.GLS_SERVICE_UUID
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.CentralManager.ConnectionOptions
 import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
+import no.nordicsemi.kotlin.ble.core.BondState
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import no.nordicsemi.kotlin.ble.core.Manager
 import no.nordicsemi.kotlin.ble.core.Phy
@@ -33,6 +38,7 @@ import no.nordicsemi.kotlin.ble.core.WriteType
 import timber.log.Timber
 import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.toKotlinUuid
 
 @AndroidEntryPoint
 internal class ProfileService : NotificationService() {
@@ -91,7 +97,7 @@ internal class ProfileService : NotificationService() {
                     try {
                         it.requestHighestValueLength()
                         it.requestConnectionPriority(ConnectionPriority.HIGH)
-                        it.setPreferredPhy(Phy.PHY_LE_2M,Phy.PHY_LE_2M,PhyOption.S2)
+                        it.setPreferredPhy(Phy.PHY_LE_2M, Phy.PHY_LE_2M, PhyOption.S2)
                     } catch (e: Exception) {
                         Timber.e("Could not change mtu size $e")
                     }
@@ -174,15 +180,30 @@ internal class ProfileService : NotificationService() {
         serviceHandlingJob = peripheral.services().onEach { remoteServices ->
             remoteServices.forEach { remoteService ->
                 val serviceManager = ServiceManagerFactory.createServiceManager(remoteService.uuid)
-                serviceManager?.let {
-                    Timber.tag("DiscoverServices").i("${it.profile}")
-                    discoveredServices.add(it)
+                serviceManager?.let { manager ->
+                    Timber.tag("DiscoverServices").i("${manager.profile}")
+                    discoveredServices.add(manager)
                     lifecycleScope.launch {
                         try {
-                            it.observeServiceInteractions(
+                            val requiresBonding =
+                                remoteService.uuid == CGMS_SERVICE_UUID.toKotlinUuid() ||
+                                        remoteService.uuid == GLS_SERVICE_UUID.toKotlinUuid()
+
+                            if (requiresBonding) {
+                                peripheral.bondState
+                                    .onEach { state ->
+                                        if (state == BondState.NONE) {
+                                            peripheral.createBond()
+                                        }
+                                    }
+                                    .filter { it == BondState.BONDED }
+                                    .first() // suspend until bonded
+                            }
+
+                            manager.observeServiceInteractions(
                                 peripheral.address,
                                 remoteService,
-                                lifecycleScope
+                                this
                             )
                         } catch (e: Exception) {
                             Timber.tag("ObserveServices").e(e)
