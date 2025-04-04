@@ -2,13 +2,17 @@ package no.nordicsemi.android.toolbox.profile.view.cgms
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Search
@@ -206,7 +210,8 @@ private fun RecordsViewWithoutDataPreview() {
 private fun RecordsViewWithData(state: CGMServiceData) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
     ) {
         SectionTitle(resId = R.drawable.ic_records, title = "Records")
 
@@ -217,11 +222,20 @@ private fun RecordsViewWithData(state: CGMServiceData) {
             null -> state.records
         }
 
-        newRecord.forEachIndexed { i, it ->
-            RecordItem(it)
-
-            if (i < newRecord.size - 1) {
-                HorizontalDivider()
+        // Max height for the scrollable section, adjust as needed (e.g. 300.dp)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 500.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            Column {
+                newRecord.forEachIndexed { i, it ->
+                    RecordItem(it)
+                    if (i < newRecord.size - 1) {
+                        HorizontalDivider()
+                    }
+                }
             }
         }
     }
@@ -293,7 +307,7 @@ private fun RecordsViewWithDataPreview() {
                     timestamp = Calendar.TUESDAY.toLong()
                 )
             )
-            )
-
         )
+
+    )
 }
