@@ -23,7 +23,6 @@ import no.nordicsemi.android.service.NotificationService
 import no.nordicsemi.android.service.R
 import no.nordicsemi.android.service.services.ServiceManager
 import no.nordicsemi.android.toolbox.lib.utils.spec.CGMS_SERVICE_UUID
-import no.nordicsemi.android.toolbox.lib.utils.spec.GLS_SERVICE_UUID
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.CentralManager.ConnectionOptions
@@ -186,8 +185,7 @@ internal class ProfileService : NotificationService() {
                     lifecycleScope.launch {
                         try {
                             val requiresBonding =
-                                remoteService.uuid == CGMS_SERVICE_UUID.toKotlinUuid() ||
-                                        remoteService.uuid == GLS_SERVICE_UUID.toKotlinUuid()
+                                remoteService.uuid == CGMS_SERVICE_UUID.toKotlinUuid()
 
                             if (requiresBonding) {
                                 peripheral.bondState
