@@ -56,6 +56,7 @@ internal fun InputSection(onEvent: (DeviceConnectionViewEvent) -> Unit) {
     val focusManager = LocalFocusManager.current
 
     var isEmptyText: Boolean by rememberSaveable { mutableStateOf(false) }
+    var isFocused by rememberSaveable { mutableStateOf(false) }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -71,6 +72,7 @@ internal fun InputSection(onEvent: (DeviceConnectionViewEvent) -> Unit) {
                     .focusRequester(focusRequester)
                     .bringIntoViewRequester(bringIntoViewRequester)
                     .onFocusChanged {
+                        isFocused = it.isFocused
                         if (it.isFocused) {
                             coroutineScope.launch {
                                 bringIntoViewRequester.bringIntoView()
@@ -91,6 +93,7 @@ internal fun InputSection(onEvent: (DeviceConnectionViewEvent) -> Unit) {
                     modifier = Modifier
                         .align(Alignment.CenterStart),
                     text = stringResource(id = R.string.uart_input_hint),
+                    color = LocalContentColor.current.copy(alpha = if (isFocused) 0.5f else 1f)
                 )
             } else if (isEmptyText) {
                 Row(
@@ -111,7 +114,7 @@ internal fun InputSection(onEvent: (DeviceConnectionViewEvent) -> Unit) {
             }
         }
         Icon(
-            Icons.AutoMirrored.Filled.Send,
+            if (isEmptyText) Icons.Default.Error else Icons.AutoMirrored.Filled.Send,
             contentDescription = stringResource(id = R.string.uart_input_macro),
             modifier = Modifier
                 .clip(CircleShape)
@@ -124,7 +127,8 @@ internal fun InputSection(onEvent: (DeviceConnectionViewEvent) -> Unit) {
                         isEmptyText = true
                     }
                 }
-                .padding(8.dp)
+                .padding(8.dp),
+            tint = if (isEmptyText) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
