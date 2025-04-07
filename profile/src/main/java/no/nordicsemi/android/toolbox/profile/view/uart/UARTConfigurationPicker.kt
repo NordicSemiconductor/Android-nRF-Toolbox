@@ -43,7 +43,7 @@ internal fun UARTConfigurationPicker(
 
     ) {
         OutlinedButton(
-            onClick = { expanded = true },
+            onClick = { },
             modifier = Modifier.menuAnchor(PrimaryNotEditable)
         ) {
             Row(
