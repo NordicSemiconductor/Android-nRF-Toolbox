@@ -22,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.common.theme.NordicTheme
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTMacro
@@ -65,8 +66,16 @@ internal fun UARTMacroView(
                 Item(configuration, isEdited, 5, buttonSize, onEvent)
                 Item(configuration, isEdited, 6, buttonSize, onEvent)
                 Item(configuration, isEdited, 7, buttonSize, onEvent)
-//                Item(configuration, isEdited, 8, buttonSize, onEvent)
             }
+            // TODO: if the migration data has 9th item then show the previous pattern of data.
+            //  3*3 items
+
+            /* Row(
+                 verticalAlignment = Alignment.CenterVertically,
+                 horizontalArrangement = Arrangement.spacedBy(divider)
+             ) {
+                 Item(configuration, isEdited, 8, buttonSize, onEvent)
+             }*/
         }
     }
 }
@@ -143,10 +152,12 @@ private fun EmptyButton(
     )
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun EmptyButtonPreview() {
-    EmptyButton(false, 0, 80.dp) {}
+    NordicTheme {
+        EmptyButton(false, 0, 80.dp) {}
+    }
 }
 
 @Composable
