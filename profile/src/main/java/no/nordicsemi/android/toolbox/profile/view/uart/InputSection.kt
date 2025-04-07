@@ -96,21 +96,7 @@ internal fun InputSection(onEvent: (DeviceConnectionViewEvent) -> Unit) {
                     color = LocalContentColor.current.copy(alpha = if (isFocused) 0.5f else 1f)
                 )
             } else if (isEmptyText) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Icon(
-                        Icons.Default.Error,
-                        contentDescription = "Error",
-                        tint = MaterialTheme.colorScheme.error
-                    )
-                    Text(
-                        text = "Input cannot be empty",
-                        style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.error)
-                    )
-                }
-
+                Text(text = "Input cannot be empty.")
             }
         }
         Icon(
