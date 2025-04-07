@@ -163,7 +163,7 @@ private fun WriteDropdown(
     onNumberUpdate: (Int) -> Unit,
     onClickEvent: (DeviceConnectionViewEvent) -> Unit
 ) {
-    Box(modifier = Modifier.padding(8.dp)) {
+    Box {
         Button(onClick = { onExpand() }) {
             Text(stringResource(id = R.string.throughput_write))
         }
