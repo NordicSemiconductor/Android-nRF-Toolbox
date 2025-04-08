@@ -3,6 +3,7 @@ package no.nordicsemi.android.toolbox.profile.view.uart
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -41,11 +44,20 @@ internal fun UARTScreen(
     val coroutineScope = rememberCoroutineScope()
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
 
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures {
+                    focusManager.clearFocus(force = true)
+                    isMacroFocused.value = false
+                    isFocused.value = false
+                }
+            }
     ) {
         Column(
             modifier = Modifier
@@ -81,7 +93,13 @@ internal fun UARTScreen(
                     isMacroFocused.value = false
                 }
         ) {
-            UARTContentView(isFocused, state, onEvent)
+            UARTContentView(isFocused, state, onEvent) {
+                isFocused.value = it
+                if (it) {
+                    isMacroFocused.value = false
+                    coroutineScope.launch { bringIntoViewRequester.bringIntoView() }
+                }
+            }
         }
 
     }
@@ -98,6 +116,7 @@ private fun UARTContentView(
     isFocused: MutableState<Boolean>,
     state: UARTServiceData,
     onEvent: (DeviceConnectionViewEvent) -> Unit,
+    onFocusChange: (Boolean) -> Unit = {},
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -108,7 +127,7 @@ private fun UARTContentView(
                 width = 2.dp, color = MaterialTheme.colorScheme.primary
             ) else CardDefaults.outlinedCardBorder(),
         ) {
-            InputSection(isFocused, onEvent = onEvent)
+            InputSection(isFocused, onEvent = onEvent) { onFocusChange(it) }
             HorizontalDivider()
             OutputSection(state.messages) {
                 onEvent(it)
