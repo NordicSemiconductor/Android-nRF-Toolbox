@@ -1,5 +1,6 @@
 package no.nordicsemi.android.toolbox.profile.view.uart
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,11 +14,14 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EditOff
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -34,11 +38,14 @@ import no.nordicsemi.android.toolbox.profile.data.UARTViewState
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.UARTEvent
-import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
-internal fun MacroSection(viewState: UARTViewState, onEvent: (DeviceConnectionViewEvent) -> Unit) {
+internal fun MacroSection(
+    isMacroFocused: MutableState<Boolean>,
+    viewState: UARTViewState = UARTViewState(),
+    onEvent: (DeviceConnectionViewEvent) -> Unit
+) {
     var showAddDialog by rememberSaveable { mutableStateOf(false) }
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -65,8 +72,13 @@ internal fun MacroSection(viewState: UARTViewState, onEvent: (DeviceConnectionVi
                     .padding(start = 16.dp, bottom = 8.dp)
             )
         }
-        ScreenSection {
+        OutlinedCard(
+            border = if (isMacroFocused.value) BorderStroke(
+                width = 2.dp, color = MaterialTheme.colorScheme.primary
+            ) else CardDefaults.outlinedCardBorder(),
+        ) {
             Column(
+                modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
@@ -142,21 +154,6 @@ internal fun MacroSection(viewState: UARTViewState, onEvent: (DeviceConnectionVi
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun MacroSectionPreview() {
-    MacroSection(
-        UARTViewState(
-            selectedConfigurationName = "Config 1",
-            configurations = listOf(
-                UARTConfiguration(1, "Config 1"),
-                UARTConfiguration(2, "Config 2"),
-                UARTConfiguration(3, "Config 3"),
-            ),
-        )
-    ) {}
 }
 
 @Composable
