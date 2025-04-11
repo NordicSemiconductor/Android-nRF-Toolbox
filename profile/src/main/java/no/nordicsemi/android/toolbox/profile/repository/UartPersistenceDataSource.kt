@@ -4,7 +4,6 @@ import no.nordicsemi.android.toolbox.lib.storage.ConfigurationEntity
 import no.nordicsemi.android.toolbox.lib.storage.ConfigurationsDao
 import no.nordicsemi.android.toolbox.lib.storage.DeviceDao
 import no.nordicsemi.android.toolbox.lib.storage.DeviceEntity
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -27,10 +26,15 @@ internal class UARTPersistentDataSource @Inject constructor(
 
     suspend fun getAllConfigurations(address: String): List<UartConfigurationForDevice> {
         // Check if the device exists
-        return configurationDao.getAllConfigurations(deviceDao.getDeviceById(address)?.id!!).configurations.map {
-            Timber.d("Configuration: $it")
-            it.toUartConfigurationForDevice()
-        }
+        return configurationDao.getAllConfigurations(deviceDao.getDeviceById(address)?.id!!)
+            .map { deviceWithConfigurations ->
+                deviceWithConfigurations.configurations.map { configuration ->
+                    UartConfigurationForDevice(
+                        name = configuration.name
+                    )
+                }
+            }.flatten()
+
     }
 
     suspend fun insertConfiguration(deviceId: String, configurationName: String): Long {
@@ -44,14 +48,9 @@ internal class UARTPersistentDataSource @Inject constructor(
         val configuration = ConfigurationEntity(
             id = null,
             deviceId = deviceEntityId!!,
-            address = deviceId,
             name = configurationName
         )
         return configurationDao.insertConfiguration(configuration)
 
-    }
-
-    private fun ConfigurationEntity.toUartConfigurationForDevice(): UartConfigurationForDevice {
-        return UartConfigurationForDevice(name)
     }
 }

@@ -9,8 +9,8 @@ import androidx.room.Transaction
 @Dao
 interface ConfigurationsDao {
     @Transaction
-    @Query("SELECT * FROM configurations WHERE device_id = :deviceId")
-    suspend fun getAllConfigurations(deviceId: Int): DeviceWithConfigurations
+    @Query("SELECT * FROM devices WHERE device_id = :deviceId")
+    suspend fun getAllConfigurations(deviceId: Int): List<DeviceWithConfigurations>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertConfiguration(configuration: ConfigurationEntity): Long
