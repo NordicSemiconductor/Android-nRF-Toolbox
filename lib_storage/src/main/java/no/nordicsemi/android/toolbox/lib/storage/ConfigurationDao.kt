@@ -4,18 +4,15 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import kotlinx.coroutines.flow.Flow
+import androidx.room.Transaction
 
 @Dao
 interface ConfigurationsDao {
-
-    // TODO: Modify this so first it checks if the device id and then returns the configurations
-    @Query("SELECT * FROM configurations")
-    fun load(): Flow<List<Configuration>>
+    @Transaction
+    @Query("SELECT * FROM configurations WHERE device_id = :deviceId")
+    suspend fun getAllConfigurations(deviceId: Int): DeviceWithConfigurations
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(configuration: Configuration)
+    suspend fun insertConfiguration(configuration: ConfigurationEntity): Long
 
-    @Query("DELETE FROM configurations WHERE name = :name")
-    suspend fun delete(name: String)
 }

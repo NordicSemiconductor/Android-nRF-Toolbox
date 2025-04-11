@@ -7,8 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import no.nordicsemi.android.toolbox.lib.storage.ConfigurationsDatabase
-import no.nordicsemi.android.toolbox.lib.storage.MIGRATION_2_3
+import no.nordicsemi.android.toolbox.lib.storage.DeviceDatabase
 import javax.inject.Singleton
 
 @Module
@@ -17,10 +16,11 @@ class DbHiltModule {
 
     @Provides
     @Singleton
-    internal fun provideDB(@ApplicationContext context: Context): ConfigurationsDatabase {
+    internal fun provideDeviceDB(@ApplicationContext context: Context): DeviceDatabase {
         return Room.databaseBuilder(
             context,
-            ConfigurationsDatabase::class.java, "toolbox_uart.db"
-        ).addMigrations(MIGRATION_2_3).build()
+            DeviceDatabase::class.java,
+            "toolbox_uart_device.db"
+        ).build()
     }
 }

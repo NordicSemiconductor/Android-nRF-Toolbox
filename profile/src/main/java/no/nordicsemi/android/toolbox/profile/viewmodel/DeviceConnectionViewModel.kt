@@ -47,9 +47,11 @@ import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTMacro
 import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
+import no.nordicsemi.android.toolbox.profile.repository.UARTPersistentDataSource
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
+import timber.log.Timber
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 
@@ -76,6 +78,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
     private val profileServiceManager: ProfileServiceManager,
     private val navigator: Navigator,
     private val deviceRepository: DeviceRepository,
+    private val uartDataSource: UARTPersistentDataSource,
     @ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
@@ -248,16 +251,22 @@ internal class DeviceConnectionViewModel @Inject constructor(
             getServiceApi()?.getMaxWriteValue(address)
                 ?.let { UartRepository.updateMaxWriteLength(address, it) }
         }
-        /*uartDatabase.getConfigurations(address).onEach {
-            UartRepository.updateConfiguration(address, it)
-        }.launchIn(viewModelScope)
-
-        uartConfigurationRepository.lastConfigurationName.onEach {
-            if (it != null) {
-                UartRepository.updateSelectedConfigurationName(address, it)
+        // Get the deviceId from database.
+        viewModelScope.launch(Dispatchers.IO) {
+            val device = uartDataSource.getDevice(address)
+            if (device == null) {
+                val id = uartDataSource.insertDevice(address)
+                Timber.tag("AAA").d("Device inserted in the database: $id")
+            } else {
+                Timber.tag("AAA").d("Device already exists in the database: $device")
             }
-        }.launchIn(viewModelScope)*/
 
+            // Get all configurations for the device.
+
+            uartDataSource.getAllConfigurations(address).forEach {
+                Timber.tag("AAA").d("Configuration: ${it.name}")
+            }
+        }
     }
 
     private fun updateThroughput() {
@@ -388,9 +397,9 @@ internal class DeviceConnectionViewModel @Inject constructor(
             }
 
             // UART events.
-            UARTEvent.ClearOutputItems -> UartRepository.clearOutputItems(address)
-            UARTEvent.MacroInputSwitchClicked -> TODO()
-            is UARTEvent.OnAddConfiguration -> onAddConfiguration(event.name)
+            UARTEvent.ClearOutputItems -> UartRepository.clearOutputItems(address) // working.
+            UARTEvent.MacroInputSwitchClicked -> TODO() // no idea.
+            is UARTEvent.OnAddConfiguration -> onAddConfiguration(event.name) // TODO: check if it is working.
 
             is UARTEvent.OnConfigurationSelected -> onConfigurationSelected(event.configuration)
             is UARTEvent.OnCreateMacro -> addNewMacro(event.macroName)
@@ -438,6 +447,9 @@ internal class DeviceConnectionViewModel @Inject constructor(
     private fun onAddConfiguration(name: String) = viewModelScope.launch(Dispatchers.IO) {
         // Update the configuration in the UART repository.
         UartRepository.updateSelectedConfigurationName(address, name)
+        // Add configuration to the database.
+        val configurationId = uartDataSource.insertConfiguration(address, name)
+        Timber.tag("AAA").d("Configuration inserted in the database: $configurationId")
         UartRepository.addConfiguration(address, UARTConfiguration(null, name))
     }
 
