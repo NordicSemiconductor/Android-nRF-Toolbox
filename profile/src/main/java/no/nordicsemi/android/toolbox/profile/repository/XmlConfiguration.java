@@ -8,7 +8,7 @@ import org.simpleframework.xml.core.Validate;
 
 @Root
 public class XmlConfiguration {
-    public static final int COMMANDS_COUNT = 9;
+    public static final int COMMANDS_COUNT = 8;// TODO: use constant from Macro class
 
     @Attribute(required = false, empty = "Unnamed")
     private String name;

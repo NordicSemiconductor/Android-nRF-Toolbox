@@ -253,19 +253,10 @@ internal class DeviceConnectionViewModel @Inject constructor(
         }
         // Get the deviceId from database.
         viewModelScope.launch(Dispatchers.IO) {
-            val device = uartDataSource.getDevice(address)
-            if (device == null) {
-                val id = uartDataSource.insertDevice(address)
-                Timber.tag("AAA").d("Device inserted in the database: $id")
-            } else {
-                Timber.tag("AAA").d("Device already exists in the database: $device")
-            }
-
             // Get all configurations for the device.
-
-            uartDataSource.getAllConfigurations(address).forEach {
-                Timber.tag("AAA").d("Configuration: ${it.name}")
-            }
+            uartDataSource.getAllConfigurations().onEach { uartConfigurations ->
+                UartRepository.loadPreviousConfigurations(address, uartConfigurations)
+            }.launchIn(viewModelScope)
         }
     }
 
@@ -427,7 +418,10 @@ internal class DeviceConnectionViewModel @Inject constructor(
     }
 
     private fun addNewMacro(macroName: UARTMacro) = viewModelScope.launch(Dispatchers.IO) {
-        UartRepository.addOrEditMacro(address, macroName)
+        val newConfig = UartRepository.addOrEditMacro(address, macroName)
+        if (newConfig != null) {
+            uartDataSource.insertConfiguration(newConfig)
+        }
     }
 
     private fun onEditMacro(position: Int) = viewModelScope.launch {
@@ -448,9 +442,11 @@ internal class DeviceConnectionViewModel @Inject constructor(
         // Update the configuration in the UART repository.
         UartRepository.updateSelectedConfigurationName(address, name)
         // Add configuration to the database.
-        val configurationId = uartDataSource.insertConfiguration(address, name)
+        val configurationId =
+            uartDataSource.insertConfiguration(UARTConfiguration(null, name))
         Timber.tag("AAA").d("Configuration inserted in the database: $configurationId")
-        UartRepository.addConfiguration(address, UARTConfiguration(null, name))
+        if (configurationId == null) return@launch
+        UartRepository.addConfiguration(address, UARTConfiguration(configurationId.toInt(), name))
     }
 
     private fun onConfigurationSelected(configuration: UARTConfiguration) = viewModelScope.launch {
@@ -463,6 +459,8 @@ internal class DeviceConnectionViewModel @Inject constructor(
             UartRepository.deleteConfiguration(address, configuration)
             // remove the selected configuration if it is deleted.
             UartRepository.removeSelectedConfiguration(address)
+            // delete the configuration from the database.
+            uartDataSource.deleteConfiguration(configuration)
         }
 
     private fun sendText(text: String, newLineChar: MacroEol) = viewModelScope.launch {
