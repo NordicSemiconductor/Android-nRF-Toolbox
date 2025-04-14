@@ -19,7 +19,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class UARTPersistentDataSource @Inject constructor(
+internal class UartConfigurationRepository @Inject constructor(
     private val configurationDao: ConfigurationsDao,
 ) {
 

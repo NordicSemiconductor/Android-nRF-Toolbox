@@ -47,11 +47,10 @@ import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTMacro
 import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
-import no.nordicsemi.android.toolbox.profile.repository.UARTPersistentDataSource
+import no.nordicsemi.android.toolbox.profile.repository.UartConfigurationRepository
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
-import timber.log.Timber
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 
@@ -78,7 +77,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
     private val profileServiceManager: ProfileServiceManager,
     private val navigator: Navigator,
     private val deviceRepository: DeviceRepository,
-    private val uartDataSource: UARTPersistentDataSource,
+    private val uartConfigurationRepository: UartConfigurationRepository,
     @ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
