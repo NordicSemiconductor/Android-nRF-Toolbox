@@ -21,8 +21,8 @@ import javax.inject.Singleton
 @Singleton
 internal class UartConfigurationRepository @Inject constructor(
     private val configurationDao: ConfigurationsDao,
+    private val uartDataStore: UartConfigurationDataSource
 ) {
-
     // Get all uart configurations.
     fun getAllConfigurations(): Flow<List<UARTConfiguration>> =
         configurationDao.getAllConfigurations().map { configurations ->
@@ -60,8 +60,6 @@ internal class UartConfigurationRepository @Inject constructor(
 
     suspend fun insertConfiguration(configuration: UARTConfiguration): Long? {
         val configurationEntity = configuration.toConfigurationEntity()
-        Timber.tag("AAA").d("ConfigurationEntity: ${configurationEntity?.name}")
-
         return configurationEntity?.let { configurationDao.insertConfiguration(it) }
     }
 
@@ -84,7 +82,7 @@ internal class UartConfigurationRepository @Inject constructor(
                 deleted = 0
             )
         } catch (e: Exception) {
-            Timber.tag("AAA").e(e, "Error converting to ConfigurationEntity")
+            Timber.e(e, "Error converting to ConfigurationEntity")
             null
         }
 
@@ -104,5 +102,13 @@ internal class UartConfigurationRepository @Inject constructor(
         }.toTypedArray()
         xmlConfiguration.commands = commands
         return xmlConfiguration
+    }
+
+    fun getLastConfigurationName(): Flow<String?> {
+        return uartDataStore.lastConfigurationName
+    }
+
+    suspend fun saveLastConfigurationNameToDataSource(name: String) {
+        uartDataStore.saveConfigurationName(name)
     }
 }
