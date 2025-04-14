@@ -14,13 +14,10 @@ import javax.inject.Singleton
 private const val FILE = "UART_CONFIGURATION"
 private const val LAST_CONFIGURATION_KEY = "LAST_CONFIGURATION"
 
-private val LAST_CONFIGURATION = stringPreferencesKey(LAST_CONFIGURATION_KEY)
-
 @Singleton
 internal class UartConfigurationDataSource @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = FILE)
 
     val lastConfigurationName = context.dataStore.data.map {
@@ -33,9 +30,7 @@ internal class UartConfigurationDataSource @Inject constructor(
         }
     }
 
-    suspend fun deleteConfiguration(name: String) {
-        context.dataStore.edit {
-            it.remove(LAST_CONFIGURATION)
-        }
+    companion object {
+        private val LAST_CONFIGURATION = stringPreferencesKey(LAST_CONFIGURATION_KEY)
     }
 }
