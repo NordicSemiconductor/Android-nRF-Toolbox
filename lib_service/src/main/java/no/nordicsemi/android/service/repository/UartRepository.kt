@@ -93,6 +93,12 @@ object UartRepository {
         }
     }
 
+    fun loadPreviousConfigurations(address: String, configuration: List<UARTConfiguration>) {
+        _dataMap[address]?.update {
+            it.copy(uartViewState = it.uartViewState.copy(configurations = configuration))
+        }
+    }
+
     fun removeSelectedConfiguration(address: String) {
         _dataMap[address]?.update {
             it.copy(uartViewState = it.uartViewState.copy(selectedConfigurationName = null))
@@ -111,19 +117,18 @@ object UartRepository {
         }
     }
 
-    fun addOrEditMacro(address: String, macro: UARTMacro) {
+    fun addOrEditMacro(address: String, macro: UARTMacro): UARTConfiguration? {
+        var newConfig: UARTConfiguration? = null
         _dataMap[address]?.update {
             it.uartViewState.selectedConfiguration?.let { selectedConfiguration ->
                 val macros = selectedConfiguration.macros.toMutableList().apply {
                     set(it.uartViewState.editedPosition!!, macro)
                 }
-                val newConfig = selectedConfiguration.copy(macros = macros)
-
-                // TODO: Save the configuration to the database.
+                newConfig = selectedConfiguration.copy(macros = macros)
                 // Save the new configuration and edited position.
                 val newConfiguration = it.uartViewState.configurations.map { config ->
                     if (config.id == selectedConfiguration.id) {
-                        newConfig
+                        newConfig!!
                     } else {
                         config
                     }
@@ -136,6 +141,7 @@ object UartRepository {
                 )
             }!!
         }
+        return newConfig
     }
 
     fun onEditFinished(address: String) {
