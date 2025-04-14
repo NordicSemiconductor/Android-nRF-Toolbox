@@ -50,7 +50,7 @@ internal fun MacroSection(
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
 
     if (showAddDialog) {
-        UARTAddConfigurationDialog(onEvent) { showAddDialog = false }
+        UARTAddConfigurationDialog(viewState, onEvent) { showAddDialog = false }
     }
 
     if (showDeleteDialog) {

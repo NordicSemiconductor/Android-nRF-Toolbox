@@ -10,12 +10,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import no.nordicsemi.android.toolbox.profile.R
+import no.nordicsemi.android.toolbox.profile.data.UARTViewState
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.UARTEvent
 import no.nordicsemi.android.ui.view.TextInputField
 
 @Composable
 internal fun UARTAddConfigurationDialog(
+    viewState: UARTViewState,
     onEvent: (DeviceConnectionViewEvent) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -39,9 +41,9 @@ internal fun UARTAddConfigurationDialog(
         },
         confirmButton = {
             TextButton(onClick = {
-                if (isNameValid(name)) {
+                if (isNameValid(name) && viewState.isNameUnique(name)) {
                     onDismiss()
-                    onEvent(UARTEvent.OnAddConfiguration(name))
+                    onEvent(UARTEvent.OnAddConfiguration(name.trim()))
                 } else {
                     isError = true
                 }
@@ -57,4 +59,22 @@ internal fun UARTAddConfigurationDialog(
     )
 }
 
+/**
+ * Check if the name is unique.
+ * A name is unique if it does not exist in the list of configurations.
+ *
+ * @param name The name to check.
+ * @return True if the name is unique, false otherwise.
+ */
+private fun UARTViewState.isNameUnique(name: String): Boolean {
+    return configurations.none { it.name == name.trim() }
+}
+
+/**
+ * Check if the name is valid.
+ * A name is valid if it is not empty or blank.
+ *
+ * @param name The name to check.
+ * @return True if the name is valid, false otherwise.
+ */
 private fun isNameValid(name: String): Boolean = name.trim().isNotBlank()

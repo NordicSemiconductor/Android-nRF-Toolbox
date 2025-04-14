@@ -44,7 +44,7 @@
     <string name="uart_macro_error">Provided command cannot be empty.</string>
 
     <string name="uart_name">Name</string>
-    <string name="uart_name_empty">Provided name cannot be empty.</string>
+    <string name="uart_name_empty">Provided name cannot be empty or duplicate.</string>
 
     <string name="uart_macro_icon">Icon representing defined command.</string>
 
