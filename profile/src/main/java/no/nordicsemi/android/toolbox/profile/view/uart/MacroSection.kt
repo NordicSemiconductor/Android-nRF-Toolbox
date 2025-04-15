@@ -28,7 +28,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -64,14 +63,6 @@ internal fun MacroSection(
     }
 
     Column {
-        if (viewState.configurations.isNotEmpty()) {
-            Text(
-                stringResource(id = R.string.uart_macros),
-                modifier = Modifier
-                    .alpha(0.5f)
-                    .padding(start = 16.dp, bottom = 8.dp)
-            )
-        }
         OutlinedCard(
             border = if (isMacroFocused.value) BorderStroke(
                 width = 2.dp, color = MaterialTheme.colorScheme.primary
