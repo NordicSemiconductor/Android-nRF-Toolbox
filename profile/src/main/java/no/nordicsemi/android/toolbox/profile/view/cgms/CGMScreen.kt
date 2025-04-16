@@ -338,7 +338,7 @@ private const val AXIS_MAX = 50
 private fun createLineChartView(
     isDarkTheme: Boolean,
     context: Context,
-    points: List<Int>,
+    ourData: List<Pair<Int, Int>>,
     zoomIn: Boolean
 ): LineChart {
     return LineChart(context).apply {
@@ -375,14 +375,14 @@ private fun createLineChartView(
         }
         axisLeft.apply {
             enableGridDashedLine(10f, 10f, 0f)
-            axisMaximum = points.getMax(zoomIn)
-            axisMinimum = points.getMin(zoomIn)
+            axisMaximum = ourData.maxOfOrNull { it.second }?.toFloat() ?: 0f
+            axisMinimum = ourData.minOfOrNull { it.second }?.toFloat() ?: 0f
 //            setDrawGridLines(true) // Show horizontal grid lines
         }
         axisRight.isEnabled = false
 
-        val entries = points.mapIndexed { i, v ->
-            Entry(i.toFloat(), v.toFloat())
+        val entries = ourData.map {
+            Entry(it.first.toFloat(), it.second.toFloat())
         }
         // create a dataset and give it a type
         if (data != null && data.dataSetCount > 0) {
@@ -432,15 +432,15 @@ private fun createLineChartView(
     }
 }
 
-private fun updateData(isDarkTheme: Boolean, points: List<Int>, chart: LineChart, zoomIn: Boolean) {
-    val entries = points.mapIndexed { i, v ->
-        Entry(i.toFloat(), v.toFloat())
+private fun updateData(isDarkTheme: Boolean, points: List<Pair<Int, Int>>, chart: LineChart, zoomIn: Boolean) {
+    val entries = points.map {
+        Entry(it.first.toFloat(), it.second.toFloat())
     }
 
     with(chart) {
         axisLeft.apply {
-            axisMaximum = points.getMax(zoomIn)
-            axisMinimum = points.getMin(zoomIn)
+            axisMaximum = points.maxOfOrNull { it.second }?.toFloat() ?: 0f
+            axisMinimum = points.minOfOrNull { it.second }?.toFloat() ?: 0f
         }
         xAxis.axisMaximum = points.size.toFloat() // Update axisMaximum to the size of heart rates
         if (data != null && data.dataSetCount > 0) {
@@ -475,8 +475,9 @@ private fun updateData(isDarkTheme: Boolean, points: List<Int>, chart: LineChart
 
 @Composable
 private fun LineChartView(state: CGMServiceData, zoomIn: Boolean) {
-    val items = state.records.takeLast(state.records.size)
-        .map { it.record.glucoseConcentration.toInt() }
+    val items = state.records.map {
+        Pair(it.sequenceNumber, it.record.glucoseConcentration.toInt())
+    }
     val isSystemInDarkTheme = isSystemInDarkTheme()
     AndroidView(
         modifier = Modifier
@@ -485,20 +486,4 @@ private fun LineChartView(state: CGMServiceData, zoomIn: Boolean) {
         factory = { createLineChartView(isSystemInDarkTheme, it, items, zoomIn) },
         update = { updateData(isSystemInDarkTheme, items, it, zoomIn) }
     )
-}
-
-private fun List<Int>.getMin(zoomIn: Boolean): Float {
-    return if (zoomIn) {
-        minOrNull() ?: AXIS_MIN
-    } else {
-        AXIS_MIN
-    }.toFloat()
-}
-
-private fun List<Int>.getMax(zoomIn: Boolean): Float {
-    return if (zoomIn) {
-        maxOrNull() ?: AXIS_MAX
-    } else {
-        AXIS_MAX
-    }.toFloat()
 }
