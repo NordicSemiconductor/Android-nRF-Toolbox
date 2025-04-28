@@ -4,6 +4,7 @@ import no.nordicsemi.android.service.services.BPSManager
 import no.nordicsemi.android.service.services.BatteryManager
 import no.nordicsemi.android.service.services.CGMManager
 import no.nordicsemi.android.service.services.CSCManager
+import no.nordicsemi.android.service.services.ChannelSoundingManager
 import no.nordicsemi.android.service.services.DFSManager
 import no.nordicsemi.android.service.services.GLSManager
 import no.nordicsemi.android.service.services.HRSManager
@@ -16,6 +17,7 @@ import no.nordicsemi.android.service.services.UARTManager
 import no.nordicsemi.android.toolbox.lib.utils.spec.BATTERY_SERVICE_UUID
 import no.nordicsemi.android.toolbox.lib.utils.spec.BPS_SERVICE_UUID
 import no.nordicsemi.android.toolbox.lib.utils.spec.CGMS_SERVICE_UUID
+import no.nordicsemi.android.toolbox.lib.utils.spec.CHANNEL_SOUND_SERVICE_UUID
 import no.nordicsemi.android.toolbox.lib.utils.spec.CSC_SERVICE_UUID
 import no.nordicsemi.android.toolbox.lib.utils.spec.DF_SERVICE_UUID
 import no.nordicsemi.android.toolbox.lib.utils.spec.GLS_SERVICE_UUID
@@ -45,6 +47,7 @@ internal object ServiceManagerFactory {
         RSCS_SERVICE_UUID to ::RSCSManager,
         THROUGHPUT_SERVICE_UUID to ::ThroughputManager,
         UART_SERVICE_UUID to ::UARTManager,
+        CHANNEL_SOUND_SERVICE_UUID to ::ChannelSoundingManager,
         // Add more service UUIDs to handler mappings as needed
     ).mapKeys { it.key.toKotlinUuid() }
 

@@ -51,6 +51,7 @@ import no.nordicsemi.android.toolbox.profile.repository.UartConfigurationReposit
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
+import timber.log.Timber
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 
@@ -236,6 +237,10 @@ internal class DeviceConnectionViewModel @Inject constructor(
             Profile.UART -> updateUART()
             Profile.PRX -> {
                 TODO()
+            }
+
+            Profile.CHANNEL_SOUNDING -> {
+                Timber.tag("AAAAAA").d("Channel Sounding")
             }
         }
     }

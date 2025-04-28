@@ -3,6 +3,7 @@ package no.nordicsemi.android.toolbox.profile.data
 enum class Profile {
     BPS,
     CGM,
+    CHANNEL_SOUNDING,
     CSC,
     DFS,
     GLS,
