@@ -1,6 +1,7 @@
 package no.nordicsemi.android.toolbox.profile.viewmodel
 
 import android.content.Context
+import android.os.Build
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -80,6 +81,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
     private val deviceRepository: DeviceRepository,
     private val uartConfigurationRepository: UartConfigurationRepository,
     @ApplicationContext private val context: Context,
+    private val channelSoundingManager: ChannelSoundingManager,
     savedStateHandle: SavedStateHandle,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
     val address: String = parameterOf(DeviceConnectionDestinationId)
@@ -240,7 +242,15 @@ internal class DeviceConnectionViewModel @Inject constructor(
             }
 
             Profile.CHANNEL_SOUNDING -> {
-                Timber.tag("AAAAAA").d("Channel Sounding")
+                if (Build.VERSION.SDK_INT >= 36) {
+                    try {
+                        channelSoundingManager.addDeviceToRangingSession(address)
+                    } catch (e: Exception) {
+                        Timber.e(" ${e.message}")
+                    }
+                } else {
+                    Timber.tag("AAA").d("Channel Sounding is not available")
+                }
             }
         }
     }
