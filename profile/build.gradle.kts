@@ -29,8 +29,8 @@ dependencies {
     implementation(libs.androidx.compose.material.iconsExtended)
 
     // DataStore
-    implementation(libs.androidx.dataStore.core)
-    implementation(libs.androidx.dataStore.preferences)
+    implementation("androidx.datastore:datastore-preferences-core:1.1.4")
+    implementation("androidx.datastore:datastore-preferences:1.1.4")
 
     implementation("no.nordicsemi.kotlin.ble:client-android")
     // coroutine core
