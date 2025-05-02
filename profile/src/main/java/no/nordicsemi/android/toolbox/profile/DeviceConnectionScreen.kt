@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
+import no.nordicsemi.android.common.permissions.ble.RequireLocation
 import no.nordicsemi.android.common.permissions.notification.RequestNotificationPermission
 import no.nordicsemi.android.service.profile.CustomReason
 import no.nordicsemi.android.service.profile.DeviceDisconnectionReason
@@ -26,6 +27,7 @@ import no.nordicsemi.android.toolbox.profile.data.BPSServiceData
 import no.nordicsemi.android.toolbox.profile.data.BatteryServiceData
 import no.nordicsemi.android.toolbox.profile.data.CGMServiceData
 import no.nordicsemi.android.toolbox.profile.data.CSCServiceData
+import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
 import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
 import no.nordicsemi.android.toolbox.profile.data.GLSServiceData
 import no.nordicsemi.android.toolbox.profile.data.HRSServiceData
@@ -38,6 +40,7 @@ import no.nordicsemi.android.toolbox.profile.data.UARTServiceData
 import no.nordicsemi.android.toolbox.profile.view.battery.BatteryLevelView
 import no.nordicsemi.android.toolbox.profile.view.bps.BPSScreen
 import no.nordicsemi.android.toolbox.profile.view.cgms.CGMScreen
+import no.nordicsemi.android.toolbox.profile.view.channelSounding.ChannelSoundingScreen
 import no.nordicsemi.android.toolbox.profile.view.cscs.CSCScreen
 import no.nordicsemi.android.toolbox.profile.view.directionFinder.DFSScreen
 import no.nordicsemi.android.toolbox.profile.view.gls.GLSScreen
@@ -89,38 +92,40 @@ internal fun DeviceConnectionScreen() {
         },
     ) { paddingValues ->
         RequireBluetooth {
-            RequestNotificationPermission {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    when (val state = deviceDataState) {
-                        is DeviceConnectionState.Connected -> {
-                            DeviceConnectedView(
-                                state.data,
-                                onClickEvent
-                            )
-                        }
-
-                        DeviceConnectionState.Connecting -> DeviceConnectingView(
-                            modifier = Modifier.padding(16.dp)
-                        )
-
-                        is DeviceConnectionState.Disconnected -> {
-                            state.reason?.let {
-                                DeviceDisconnectedView(
-                                    it,
-                                    deviceAddress,
+            RequireLocation {
+                RequestNotificationPermission {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier
+                            .verticalScroll(rememberScrollState())
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        when (val state = deviceDataState) {
+                            is DeviceConnectionState.Connected -> {
+                                DeviceConnectedView(
+                                    state.data,
                                     onClickEvent
                                 )
                             }
-                        }
 
-                        DeviceConnectionState.Idle -> LoadingView()
+                            DeviceConnectionState.Connecting -> DeviceConnectingView(
+                                modifier = Modifier.padding(16.dp)
+                            )
+
+                            is DeviceConnectionState.Disconnected -> {
+                                state.reason?.let {
+                                    DeviceDisconnectedView(
+                                        it,
+                                        deviceAddress,
+                                        onClickEvent
+                                    )
+                                }
+                            }
+
+                            DeviceConnectionState.Idle -> LoadingView()
+                        }
                     }
                 }
             }
@@ -243,6 +248,10 @@ private fun DeviceConnectedView(
                                     UARTScreen(
                                         state = serviceData as UARTServiceData,
                                     ) { onClickEvent(it) }
+                                }
+
+                                Profile.CHANNEL_SOUNDING -> {
+                                    ChannelSoundingScreen(state = serviceData as ChannelSoundingServiceData)
                                 }
 
                                 else -> TODO()
