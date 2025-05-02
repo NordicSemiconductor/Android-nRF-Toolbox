@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":lib_profile"))
     implementation(project(":lib_service"))
     implementation(project(":lib_storage"))
+    implementation(project(":permissions-ranging"))
 
     implementation(libs.nordic.core)
     implementation(libs.nordic.navigation)
