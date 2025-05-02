@@ -32,6 +32,7 @@ import no.nordicsemi.android.service.repository.BPSRepository
 import no.nordicsemi.android.service.repository.BatteryRepository
 import no.nordicsemi.android.service.repository.CGMRepository
 import no.nordicsemi.android.service.repository.CSCRepository
+import no.nordicsemi.android.service.repository.ChannelSoundingRepository
 import no.nordicsemi.android.service.repository.DFSRepository
 import no.nordicsemi.android.service.repository.GLSRepository
 import no.nordicsemi.android.service.repository.HRSRepository
@@ -241,17 +242,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
                 TODO()
             }
 
-            Profile.CHANNEL_SOUNDING -> {
-                if (Build.VERSION.SDK_INT >= 36) {
-                    try {
-                        channelSoundingManager.addDeviceToRangingSession(address)
-                    } catch (e: Exception) {
-                        Timber.e(" ${e.message}")
-                    }
-                } else {
-                    Timber.tag("AAA").d("Channel Sounding is not available")
-                }
-            }
+            Profile.CHANNEL_SOUNDING -> updateChannelSounding()
         }
     }
 
@@ -288,6 +279,21 @@ internal class DeviceConnectionViewModel @Inject constructor(
                 address,
                 getServiceApi()?.getMaxWriteValue(address)
             )
+        }
+    }
+
+    private fun updateChannelSounding() {
+        ChannelSoundingRepository.getData(address).onEach {
+            updateDeviceData(it)
+        }.launchIn(viewModelScope)
+        if (Build.VERSION.SDK_INT >= 36) {
+            try {
+                channelSoundingManager.addDeviceToRangingSession(address)
+            } catch (e: Exception) {
+                Timber.e(" ${e.message}")
+            }
+        } else {
+            Timber.tag("AAA").d("Channel Sounding is not available")
         }
     }
 
