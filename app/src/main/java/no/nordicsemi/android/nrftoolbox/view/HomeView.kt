@@ -157,6 +157,15 @@ internal fun HomeView() {
                                     ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
                                 }
 
+                                Profile.CHANNEL_SOUNDING -> {
+                                    FeatureButton(
+                                        iconId = R.drawable.ic_distance,
+                                        profileName = R.string.channel_sounding_module,
+                                        deviceName = peripheral.name,
+                                        true
+                                    ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
+                                }
+
                                 else -> {
                                     // TODO: Add more profiles
                                 }

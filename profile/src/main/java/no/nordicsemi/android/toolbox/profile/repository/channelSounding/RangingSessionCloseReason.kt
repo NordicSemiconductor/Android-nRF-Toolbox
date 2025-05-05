@@ -3,10 +3,10 @@ package no.nordicsemi.android.toolbox.profile.repository.channelSounding
 enum class RangingSessionCloseReason(val reason: Int) {
     REASON_UNKNOWN(0),
     REASON_LOCAL_REQUEST(1),
-    REASON_NO_PEERS_FOUND(5),
     REASON_REMOTE_REQUEST(2),
+    REASON_UNSUPPORTED(3),
     REASON_SYSTEM_POLICY(4),
-    REASON_UNSUPPORTED(3), ;
+    REASON_NO_PEERS_FOUND(5), ;
 
     override fun toString(): String {
         return when (reason) {
