@@ -77,4 +77,6 @@
 
     <string name="battery_module">BATTERY</string>
     <string name="battery_module_full">Battery</string>
+
+    <string name="channel_sounding_module"> CHANNEL SOUNDING</string>
 </resources>
