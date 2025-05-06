@@ -7,12 +7,16 @@ import android.ranging.RangingData
 import android.ranging.RangingDevice
 import android.ranging.RangingManager
 import android.ranging.RangingPreference
+import android.ranging.RangingPreference.DEVICE_ROLE_INITIATOR
 import android.ranging.RangingPreference.DEVICE_ROLE_RESPONDER
 import android.ranging.RangingSession
+import android.ranging.SensorFusionParams
+import android.ranging.SessionConfig
 import android.ranging.ble.cs.BleCsRangingParams
 import android.ranging.oob.DeviceHandle
 import android.ranging.oob.OobResponderRangingConfig
 import android.ranging.oob.TransportHandle
+import android.ranging.raw.RawInitiatorRangingConfig
 import android.ranging.raw.RawRangingDevice
 import android.ranging.raw.RawResponderRangingConfig
 import androidx.annotation.RequiresApi
@@ -142,8 +146,9 @@ internal class ChannelSoundingManager @Inject constructor(
             .build()
 
         val rawRangingDevice = RawRangingDevice.Builder()
+            .setRangingDevice(rangingDevice)
             .setCsRangingParams(BleCsRangingParams.Builder(device).build())
-            .setRangingDevice(rangingDevice).build()
+            .build()
 
         val rawRangingDeviceConfig =
             RawResponderRangingConfig.Builder().setRawRangingDevice(rawRangingDevice).build()
@@ -151,7 +156,16 @@ internal class ChannelSoundingManager @Inject constructor(
         val rangingPreference = RangingPreference.Builder(
             DEVICE_ROLE_RESPONDER,
             rawRangingDeviceConfig
-        ).build()
+        )
+            .setSessionConfig(SessionConfig.Builder()
+                .setRangingMeasurementsLimit(1000)
+                .setAngleOfArrivalNeeded(true)
+                .setSensorFusionParams(SensorFusionParams.Builder()
+                    .setSensorFusionEnabled(false)
+                    .build()
+                )
+                .build())
+            .build()
 
         Timber.tag("AAA").d("rangingSessionCallback: $rangingSessionCallback")
         Timber.tag("AAA").d("rangingPreference: $rangingPreference")
