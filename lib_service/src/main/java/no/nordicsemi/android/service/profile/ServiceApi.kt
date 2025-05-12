@@ -62,4 +62,8 @@ interface ServiceApi {
         writeType: WriteType = WriteType.WITHOUT_RESPONSE
     ): Int?
 
+    suspend fun createBonding(
+        address: String
+    )
+
 }

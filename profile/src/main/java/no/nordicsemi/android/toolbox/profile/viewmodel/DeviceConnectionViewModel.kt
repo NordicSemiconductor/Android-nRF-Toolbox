@@ -288,10 +288,13 @@ internal class DeviceConnectionViewModel @Inject constructor(
             updateDeviceData(it)
         }.launchIn(viewModelScope)
         if (Build.VERSION.SDK_INT >= 36) {
-            try {
-                channelSoundingManager.addDeviceToRangingSession(address)
-            } catch (e: Exception) {
-                Timber.e(" ${e.message}")
+            viewModelScope.launch {
+                getServiceApi()?.createBonding(address)
+                try {
+                    channelSoundingManager.addDeviceToRangingSession(address)
+                } catch (e: Exception) {
+                    Timber.e(" ${e.message}")
+                }
             }
         } else {
             Timber.tag("AAA").d("Channel Sounding is not available")
