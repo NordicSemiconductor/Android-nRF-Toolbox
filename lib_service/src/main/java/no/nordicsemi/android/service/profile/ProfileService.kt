@@ -104,6 +104,18 @@ internal class ProfileService : NotificationService() {
                 it.maximumWriteValueLength(writeType)
             }
 
+        override suspend fun createBonding(address: String) {
+            val peripheral = getPeripheralById(address)
+            peripheral?.bondState
+                ?.onEach { state ->
+                    if (state == BondState.NONE) {
+                        peripheral.createBond()
+                    }
+                }
+                ?.filter { it == BondState.BONDED }
+                ?.first() // suspend until bonded
+        }
+
         override fun getPeripheralById(address: String?): Peripheral? =
             address?.let { centralManager.getPeripheralById(it) }
 
