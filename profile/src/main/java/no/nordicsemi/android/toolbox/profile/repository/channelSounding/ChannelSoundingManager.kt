@@ -7,28 +7,19 @@ import android.ranging.RangingData
 import android.ranging.RangingDevice
 import android.ranging.RangingManager
 import android.ranging.RangingPreference
-import android.ranging.RangingPreference.DEVICE_ROLE_INITIATOR
 import android.ranging.RangingPreference.DEVICE_ROLE_RESPONDER
 import android.ranging.RangingSession
 import android.ranging.SensorFusionParams
 import android.ranging.SessionConfig
 import android.ranging.ble.cs.BleCsRangingParams
-import android.ranging.oob.DeviceHandle
-import android.ranging.oob.OobResponderRangingConfig
-import android.ranging.oob.TransportHandle
-import android.ranging.raw.RawInitiatorRangingConfig
 import android.ranging.raw.RawRangingDevice
 import android.ranging.raw.RawResponderRangingConfig
 import androidx.annotation.RequiresApi
 import dagger.hilt.android.qualifiers.ApplicationContext
 import no.nordicsemi.android.toolbox.profile.repository.channelSounding.RangingSessionStartTechnology.Companion.getTechnology
 import timber.log.Timber
-import java.util.UUID
-import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
-
-val CHANNEL_SOUND_SERVICE_UUID: UUID = UUID.fromString("0000185B-0000-1000-8000-00805F9B34FB")
 
 @SuppressLint("NewApi")
 @Singleton
@@ -69,12 +60,10 @@ internal class ChannelSoundingManager @Inject constructor(
             val measurement = data.distance?.measurement
             val confidence = data.distance?.confidence
             Timber.tag("BBB").d("onResults rangingTechnology: ${data.rangingTechnology}")
-            Timber.tag("BBB").d("onResults azimuth: ${data.azimuth}")
-            Timber.tag("BBB").d("onResults elevation: ${data.elevation}")
-            Timber.tag("BBB").d("RangingManager session results with peer: ${peer.uuid}")
-            Timber.tag("BBB").d("distance ${data.distance}\n rssi: ${data.rssi} ")
-            Timber.tag("BBB").d("measurement: $measurement")
-            Timber.tag("BBB").d("confidence: $confidence")
+            Timber.tag("BBB").d(
+                "onResults azimuth: ${data.azimuth}\televation: ${data.elevation}\tpeer: ${peer.uuid}\tdistance ${data.distance}\t" +
+                        " rssi: ${data.rssi} \tmeasurement: $measurement\tconfidence: $confidence"
+            )
         }
 
         override fun onStarted(
@@ -96,24 +85,27 @@ internal class ChannelSoundingManager @Inject constructor(
         }
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun addDeviceToRangingSession(
         device: String
     ) {
         if (rangingManager == null) {
-            Timber.tag("AAA").d("RangingManager is not available")
+            // RangingManager is not supported on this device
             return
         }
-        val rangingCapabilityCallback = RangingManager.RangingCapabilitiesCallback {
-            if (it.csCapabilities != null) {
-                Timber.tag("CCC").d("CS Capabilities: ${it.csCapabilities}")
-                it.csCapabilities!!.supportedSecurityLevels
+        val rangingCapabilityCallback = RangingManager.RangingCapabilitiesCallback { capabilities ->
+            if (capabilities.csCapabilities != null) {
+                capabilities.csCapabilities!!.supportedSecurityLevels
+                    .find { it == 1 }
+                    ?.let {
+                        Timber.d("Channel Sounding supported.")
+                    }
             } else {
-                Timber.tag("CCC").d("CS Capabilities is not supported")
+                Timber.d("CS Capabilities is not supported")
             }
 
         }
+
         rangingManager.registerCapabilitiesCallback(
             context.mainExecutor,
             rangingCapabilityCallback
@@ -122,70 +114,43 @@ internal class ChannelSoundingManager @Inject constructor(
         val rangingDevice = RangingDevice.Builder()
             .build()
 
-
-        val transportHandle = object : TransportHandle {
-            override fun close() {
-                Timber.tag("AAA").d("TransportHandle close")
-            }
-
-            override fun registerReceiveCallback(
-                executor: Executor,
-                callback: TransportHandle.ReceiveCallback
-            ) {
-                Timber.tag("AAA").d("TransportHandle registerReceiveCallback")
-            }
-
-            override fun sendData(data: ByteArray) {
-                Timber.tag("AAA").d("TransportHandle sendData: ${data.toHexString()}")
-            }
-        }
-
-        val oobResponderRangingConfig = OobResponderRangingConfig.Builder(
-            DeviceHandle.Builder(rangingDevice, transportHandle).build()
-        )
+        val csRangingParams = BleCsRangingParams.Builder(device)
             .build()
 
         val rawRangingDevice = RawRangingDevice.Builder()
             .setRangingDevice(rangingDevice)
-            .setCsRangingParams(BleCsRangingParams.Builder(device).build())
+            .setCsRangingParams(csRangingParams)
             .build()
 
-        val rawRangingDeviceConfig =
-            RawResponderRangingConfig.Builder().setRawRangingDevice(rawRangingDevice).build()
+        val rawRangingDeviceConfig = RawResponderRangingConfig.Builder()
+            .setRawRangingDevice(rawRangingDevice)
+            .build()
 
         val rangingPreference = RangingPreference.Builder(
             DEVICE_ROLE_RESPONDER,
             rawRangingDeviceConfig
         )
-            .setSessionConfig(SessionConfig.Builder()
-                .setRangingMeasurementsLimit(1000)
-                .setAngleOfArrivalNeeded(true)
-                .setSensorFusionParams(SensorFusionParams.Builder()
-                    .setSensorFusionEnabled(false)
+            .setSessionConfig(
+                SessionConfig.Builder()
+                    .setRangingMeasurementsLimit(1000)
+                    .setAngleOfArrivalNeeded(true)
+                    .setSensorFusionParams(
+                        SensorFusionParams.Builder()
+                            .setSensorFusionEnabled(false)
+                            .build()
+                    )
                     .build()
-                )
-                .build())
+            )
             .build()
 
-        Timber.tag("AAA").d("rangingSessionCallback: $rangingSessionCallback")
-        Timber.tag("AAA").d("rangingPreference: $rangingPreference")
-        Timber.tag("AAA").d("rangingDevice: $rangingDevice")
-
-        if (rangingSession != null) {
-            Timber.tag("AAA").d("RangingManager session is already started")
-            return
-        }
         rangingSession = rangingManager.createRangingSession(
             context.mainExecutor,
             rangingSessionCallback
         )
-
-        if (rangingSession == null) {
-            Timber.tag("AAA").d("RangingManager session is null")
-            return
+        rangingSession?.let {
+            it.addDeviceToRangingSession(rawRangingDeviceConfig)
+            it.start(rangingPreference)
         }
-        rangingSession!!.addDeviceToRangingSession(rawRangingDeviceConfig)
-        rangingSession!!.start(rangingPreference)
     }
 
 }
