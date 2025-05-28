@@ -9,6 +9,7 @@ enum class Profile {
     GLS,
     HRS,
     HTS,
+    LBS,
     RSCS,
     PRX,
     BATTERY,
