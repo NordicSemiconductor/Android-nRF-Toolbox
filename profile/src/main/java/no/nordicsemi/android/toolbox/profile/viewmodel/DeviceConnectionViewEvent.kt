@@ -110,3 +110,9 @@ internal sealed interface UARTEvent : DeviceConnectionViewEvent {
     data object MacroInputSwitchClicked : UARTEvent
 
 }
+
+// LBS Profile events.
+internal sealed interface LBSViewEvent : DeviceConnectionViewEvent {
+    data class OnLedStateChanged(val ledState: Boolean) : LBSViewEvent
+    data class OnButtonStateChanged(val buttonState: Boolean) : LBSViewEvent
+}

@@ -37,6 +37,7 @@ import no.nordicsemi.android.service.repository.DFSRepository
 import no.nordicsemi.android.service.repository.GLSRepository
 import no.nordicsemi.android.service.repository.HRSRepository
 import no.nordicsemi.android.service.repository.HTSRepository
+import no.nordicsemi.android.service.repository.LBSRepository
 import no.nordicsemi.android.service.repository.RSCSRepository
 import no.nordicsemi.android.service.repository.ThroughputRepository
 import no.nordicsemi.android.service.repository.UartRepository
@@ -432,6 +433,15 @@ internal class DeviceConnectionViewModel @Inject constructor(
             }
 
             is UARTEvent.OnRunMacro -> runMacro(event.macro)
+            is LBSViewEvent.OnButtonStateChanged -> {
+                LBSRepository.updateButtonState(address, event.buttonState)
+            }
+
+            is LBSViewEvent.OnLedStateChanged -> {
+                viewModelScope.launch {
+                    LBSRepository.updateLedState(address, event.ledState)
+                }
+            }
         }
     }
 
