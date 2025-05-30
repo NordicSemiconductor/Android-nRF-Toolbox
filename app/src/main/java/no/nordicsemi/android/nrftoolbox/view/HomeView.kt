@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -163,6 +164,15 @@ internal fun HomeView() {
                                         profileName = R.string.channel_sounding_module,
                                         deviceName = peripheral.name,
                                         true
+                                    ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
+                                }
+
+                                Profile.LBS -> {
+                                    FeatureButton(
+                                        iconId = Icons.Default.Lightbulb,
+                                        name = "LBS",
+                                        isRunning = true,
+                                        description = peripheral.name
                                     ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
                                 }
 

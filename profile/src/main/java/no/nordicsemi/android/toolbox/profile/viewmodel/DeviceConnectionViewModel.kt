@@ -245,6 +245,13 @@ internal class DeviceConnectionViewModel @Inject constructor(
             }
 
             Profile.CHANNEL_SOUNDING -> updateChannelSounding()
+            Profile.LBS -> updateLBS()
+        }
+    }
+
+    private fun updateLBS() {
+        LBSRepository.getData(address).onEach {
+            updateDeviceData(it)
         }
     }
 
