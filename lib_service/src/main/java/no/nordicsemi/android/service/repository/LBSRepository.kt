@@ -2,6 +2,7 @@ package no.nordicsemi.android.service.repository
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import no.nordicsemi.android.service.services.LBSManager
 import no.nordicsemi.android.toolbox.profile.data.LBSServiceData
 
 data object LBSRepository {
@@ -21,7 +22,7 @@ data object LBSRepository {
      */
     fun updateLEDState(deviceId: String, ledState: Boolean) {
         _dataMap[deviceId]?.update {
-            it.copy(data = it.data?.copy(ledOn = ledState))
+            it.copy(data = it.data?.copy(ledState = ledState))
         }
     }
 
@@ -31,7 +32,7 @@ data object LBSRepository {
      */
     fun updateButtonState(deviceId: String, buttonState: Boolean) {
         _dataMap[deviceId]?.update {
-            it.copy(data = it.data?.copy(buttonPressed = buttonState))
+            it.copy(data = it.data?.copy(buttonState = buttonState))
         }
     }
 
@@ -41,5 +42,15 @@ data object LBSRepository {
      */
     fun clear(deviceId: String) {
         _dataMap.remove(deviceId)
+    }
+
+    suspend fun updateLedState(address: String, ledState: Boolean) {
+        // Update the LED state for the given device address
+        LBSManager.writeToBlinkyLED(deviceId = address, ledState)
+        _dataMap[address]?.update { currentData ->
+            // Write the led state
+            currentData.copy(data = currentData.data?.copy(ledState = ledState))
+        }
+
     }
 }

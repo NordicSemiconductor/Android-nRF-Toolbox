@@ -6,6 +6,6 @@ data class LBSServiceData(
 ) : ProfileServiceData()
 
 data class LBSData(
-    val ledOn: Boolean,
-    val buttonPressed: Boolean,
+    val ledState: Boolean,
+    val buttonState: Boolean,
 )
