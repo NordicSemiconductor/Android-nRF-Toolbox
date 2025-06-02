@@ -43,8 +43,6 @@ dependencies {
     implementation(libs.nordic.ui)
     implementation(libs.nordic.logger)
 
-    implementation(libs.nordic.blek.client)
-
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.core.ktx)
