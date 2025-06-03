@@ -240,20 +240,18 @@ internal class DeviceConnectionViewModel @Inject constructor(
             Profile.RSCS -> updateRSCS()
             Profile.THROUGHPUT -> updateThroughput()
             Profile.UART -> updateUART()
+            Profile.CHANNEL_SOUNDING -> updateChannelSounding()
+            Profile.LBS -> updateLBS()
             Profile.PRX -> {
                 TODO()
             }
 
-            Profile.CHANNEL_SOUNDING -> updateChannelSounding()
-            Profile.LBS -> updateLBS()
         }
     }
 
-    private fun updateLBS() {
-        LBSRepository.getData(address).onEach {
-            updateDeviceData(it)
-        }
-    }
+    private fun updateLBS() = LBSRepository.getData(address).onEach {
+        updateDeviceData(it)
+    }.launchIn(viewModelScope)
 
     private fun updateUART() {
         UartRepository.getData(address).onEach {
@@ -446,7 +444,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
 
             is LBSViewEvent.OnLedStateChanged -> {
                 viewModelScope.launch {
-                    LBSRepository.updateLedState(address, event.ledState)
+                    LBSRepository.writeToBlinkyLED(address, event.ledState)
                 }
             }
         }

@@ -42,21 +42,12 @@ internal class LBSManager : ServiceManager {
 
         // Subscribe to the button state changes.
         blinkyCharacteristics?.subscribe()
-            ?.mapNotNull {
-                ButtonStateParser.parse(it)
-            }
-            ?.onEach {
-                // Handle the LED state change
-                // For example, you can update a repository or notify the UI
-                LBSRepository.updateButtonState(deviceId, it)
-            }
+            ?.mapNotNull { ButtonStateParser.parse(it) }
+            ?.onEach { LBSRepository.updateButtonState(deviceId, it) }
             ?.catch {
-                // Handle the error
-                it.printStackTrace()
+                Timber.e("Error observing button state: ${it.message}")
             }
             ?.onCompletion {
-                // Handle completion, if needed
-                // For example, you can clear the repository or notify the UI
                 LBSRepository.clear(deviceId)
             }?.launchIn(scope)
 
@@ -64,16 +55,9 @@ internal class LBSManager : ServiceManager {
         try {
             blinkyCharacteristics?.read()
                 ?.let { ButtonStateParser.parse(it) }
-                ?.let {
-                    // Handle the read data, if needed
-                    // For example, you can update a repository or notify the UI
-                    LBSRepository.updateButtonState(deviceId, it)
-                }
+                ?.let { LBSRepository.updateButtonState(deviceId, it) }
         } catch (e: Exception) {
-            // Handle the error, e.g., log it or notify the user
             Timber.e("Error reading button state: ${e.message}")
-        } finally {
-            LBSRepository.clear(deviceId)
         }
     }
 
@@ -90,20 +74,16 @@ internal class LBSManager : ServiceManager {
             deviceId: String,
             ledState: Boolean
         ) {
-            val data = byteArrayOf((0x01.takeIf { ledState }
-                ?: 0x00).toByte()) // TODO: Adjust based on actual LED state representation.
+            val data = byteArrayOf((0x01.takeIf { ledState } ?: 0x00).toByte())
 
             try {
                 if (::ledWriteCharacteristics.isInitialized) {
-                    // Write the data to the LED characteristic
                     ledWriteCharacteristics.write(data, WriteType.WITHOUT_RESPONSE)
                 }
             } catch (e: Exception) {
-                // Handle the error, e.g., log it or notify the user
-                e.printStackTrace()
+                Timber.e("Error writing to Blinky LED characteristic: ${e.message}")
             } finally {
-                // Optionally, you can update the repository or notify the UI
-                LBSRepository.updateLEDState(deviceId, ledState)
+                LBSRepository.updateLedState(deviceId, ledState)
             }
         }
     }
@@ -111,7 +91,6 @@ internal class LBSManager : ServiceManager {
 
 object ButtonStateParser {
     fun parse(data: ByteArray): Boolean {
-        // Assuming the LED characteristic data is a single byte where 1 means ON and 0 means OFF
         return if (data.isNotEmpty()) {
             data[0].toInt() == 0x01
         } else {

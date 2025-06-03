@@ -170,7 +170,7 @@ internal fun HomeView() {
                                 Profile.LBS -> {
                                     FeatureButton(
                                         iconId = Icons.Default.Lightbulb,
-                                        name = "LBS",
+                                        name = "LBS/Blinky",
                                         isRunning = true,
                                         description = peripheral.name
                                     ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
