@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="light">Light</string>
+    <string name="led_guide">Switch light ON/OFF</string>
+
+    <string name="button">Button</string>
+    <string name="button_pressed">PRESSED</string>
+    <string name="button_released">RELEASED</string>
+</resources>

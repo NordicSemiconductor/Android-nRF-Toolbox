@@ -1,5 +1,6 @@
 package no.nordicsemi.android.service.repository
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.service.services.LBSManager
@@ -12,17 +13,16 @@ data object LBSRepository {
      * Returns a [MutableStateFlow] that holds the [LBSServiceData] for the given device ID.
      * If no data exists for the device ID, it initializes a new [MutableStateFlow] with an empty [LBSServiceData].
      */
-    fun getData(deviceId: String): MutableStateFlow<LBSServiceData> {
-        return _dataMap.getOrPut(deviceId) { MutableStateFlow(LBSServiceData()) }
-    }
+    fun getData(deviceId: String): Flow<LBSServiceData> =
+        _dataMap.getOrPut(deviceId) { MutableStateFlow(LBSServiceData()) }
 
     /**
      * Updates the LED state for the given device ID.
      * If the device ID does not exist, it will not perform any action.
      */
-    fun updateLEDState(deviceId: String, ledState: Boolean) {
+    fun updateLedState(deviceId: String, ledState: Boolean) {
         _dataMap[deviceId]?.update {
-            it.copy(data = it.data?.copy(ledState = ledState))
+            it.copy(data = it.data.copy(ledState = ledState))
         }
     }
 
@@ -32,7 +32,11 @@ data object LBSRepository {
      */
     fun updateButtonState(deviceId: String, buttonState: Boolean) {
         _dataMap[deviceId]?.update {
-            it.copy(data = it.data?.copy(buttonState = buttonState))
+            it.copy(
+                data = it.data.copy(
+                    buttonState = buttonState
+                )
+            )
         }
     }
 
@@ -44,13 +48,8 @@ data object LBSRepository {
         _dataMap.remove(deviceId)
     }
 
-    suspend fun updateLedState(address: String, ledState: Boolean) {
+    suspend fun writeToBlinkyLED(address: String, ledState: Boolean) {
         // Update the LED state for the given device address
         LBSManager.writeToBlinkyLED(deviceId = address, ledState)
-        _dataMap[address]?.update { currentData ->
-            // Write the led state
-            currentData.copy(data = currentData.data?.copy(ledState = ledState))
-        }
-
     }
 }

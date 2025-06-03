@@ -32,6 +32,7 @@ import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
 import no.nordicsemi.android.toolbox.profile.data.GLSServiceData
 import no.nordicsemi.android.toolbox.profile.data.HRSServiceData
 import no.nordicsemi.android.toolbox.profile.data.HTSServiceData
+import no.nordicsemi.android.toolbox.profile.data.LBSServiceData
 import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.data.ProfileServiceData
 import no.nordicsemi.android.toolbox.profile.data.RSCSServiceData
@@ -47,6 +48,7 @@ import no.nordicsemi.android.toolbox.profile.view.gls.GLSScreen
 import no.nordicsemi.android.toolbox.profile.view.hrs.HRSScreen
 import no.nordicsemi.android.toolbox.profile.view.hts.HTSScreen
 import no.nordicsemi.android.toolbox.profile.view.internal.ProfileAppBar
+import no.nordicsemi.android.toolbox.profile.view.lbs.BlinkyScreen
 import no.nordicsemi.android.toolbox.profile.view.rscs.RSCSScreen
 import no.nordicsemi.android.toolbox.profile.view.throughput.ThroughputScreen
 import no.nordicsemi.android.toolbox.profile.view.uart.UARTScreen
@@ -254,7 +256,15 @@ private fun DeviceConnectedView(
                                     ChannelSoundingScreen(state = serviceData as ChannelSoundingServiceData)
                                 }
 
-                                else -> TODO()
+                                Profile.LBS -> {
+                                    BlinkyScreen(serviceData = serviceData as LBSServiceData) {
+                                        onClickEvent(it)
+                                    }
+                                }
+
+                                Profile.PRX -> {
+                                    // todo: implement Proximity Profile
+                                }
                             }
                         }
                         // Battery level will be added at the end.

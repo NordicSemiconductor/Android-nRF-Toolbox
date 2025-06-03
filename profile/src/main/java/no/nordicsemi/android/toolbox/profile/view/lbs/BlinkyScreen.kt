@@ -18,8 +18,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.LBSData
 import no.nordicsemi.android.toolbox.profile.data.LBSServiceData
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
@@ -33,18 +35,14 @@ internal fun BlinkyScreen(
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        serviceData.data?.ledState?.let { ledState ->
-            LedControlView(
-                ledState = ledState,
-                onStateChanged = { onClickEvent(LBSViewEvent.OnLedStateChanged(it)) },
-            )
-        }
+        LedControlView(
+            ledState = serviceData.data.ledState,
+            onStateChanged = { onClickEvent(LBSViewEvent.OnLedStateChanged(it)) },
+        )
 
-        serviceData.data?.buttonState?.let { buttonState ->
-            ButtonControlView(
-                buttonState = buttonState,
-            )
-        }
+        ButtonControlView(
+            buttonState = serviceData.data.buttonState,
+        )
     }
 }
 
@@ -61,6 +59,11 @@ private fun BlinkyScreenPreview() {
 private fun ButtonControlView(
     buttonState: Boolean
 ) {
+    val (text, textColor) = if (buttonState) {
+        stringResource(id = R.string.button_pressed) to MaterialTheme.colorScheme.primary
+    } else {
+        stringResource(id = R.string.button_released) to MaterialTheme.colorScheme.onSurface
+    }
     OutlinedCard {
         Column(
             modifier = Modifier
@@ -75,10 +78,10 @@ private fun ButtonControlView(
                     imageVector = Icons.Default.RadioButtonChecked,
                     contentDescription = null,
                     modifier = Modifier.padding(end = 16.dp),
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
+                    colorFilter = ColorFilter.tint(textColor)
                 )
                 Text(
-                    text = "Button",
+                    text = stringResource(id = R.string.button),
                     style = MaterialTheme.typography.headlineMedium,
                 )
             }
@@ -89,11 +92,8 @@ private fun ButtonControlView(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Button State: ",
-                    modifier = Modifier.weight(1f)
-                )
-                Text(
-                    text = if (buttonState) "PRESSED" else "RELEASED",
+                    text = text,
+                    color = textColor,
                 )
             }
         }
@@ -114,6 +114,11 @@ private fun LedControlView(
     onStateChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colorFilter = if (ledState) {
+        ColorFilter.tint(MaterialTheme.colorScheme.primary)
+    } else {
+        ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
+    }
     OutlinedCard(
         modifier = modifier
     ) {
@@ -131,10 +136,10 @@ private fun LedControlView(
                     imageVector = Icons.Default.Lightbulb,
                     contentDescription = null,
                     modifier = Modifier.padding(end = 16.dp),
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
+                    colorFilter = colorFilter
                 )
                 Text(
-                    text = "Light",
+                    text = stringResource(id = R.string.light),
                     style = MaterialTheme.typography.headlineMedium,
                 )
             }
@@ -144,7 +149,7 @@ private fun LedControlView(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Led is ${if (ledState) "ON" else "OFF"}",
+                    text = stringResource(id = R.string.led_guide),
                     modifier = Modifier.weight(1f)
                 )
                 Switch(checked = ledState, onCheckedChange = onStateChanged)
