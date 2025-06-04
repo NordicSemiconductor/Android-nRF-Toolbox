@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -125,7 +126,7 @@ private fun MacroButton(
                     onEvent(UARTEvent.OnRunMacro(macro))
                 }
             }
-            .background(getBackground(isEdited))
+            .background(getBackground(isEdited, macro))
     )
 }
 
@@ -158,10 +159,18 @@ private fun EmptyButtonPreview() {
 }
 
 @Composable
-private fun getBackground(isEdited: Boolean): Color {
-    return if (!isEdited) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.tertiary
+private fun getBackground(isEdited: Boolean, macro: UARTMacro? = null): Color {
+    return when {
+        !isEdited && macro != null -> {
+            MaterialTheme.colorScheme.primary
+        }
+
+        macro == null -> {
+            ButtonDefaults.buttonColors().disabledContainerColor
+        }
+
+        else -> {
+            MaterialTheme.colorScheme.tertiary
+        }
     }
 }
