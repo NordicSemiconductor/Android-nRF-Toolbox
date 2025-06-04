@@ -55,27 +55,24 @@ internal fun UARTMacroView(
                 Item(configuration, isEdited, 0, buttonSize, onEvent)
                 Item(configuration, isEdited, 1, buttonSize, onEvent)
                 Item(configuration, isEdited, 2, buttonSize, onEvent)
-                Item(configuration, isEdited, 3, buttonSize, onEvent)
             }
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(divider)
             ) {
+                Item(configuration, isEdited, 3, buttonSize, onEvent)
                 Item(configuration, isEdited, 4, buttonSize, onEvent)
                 Item(configuration, isEdited, 5, buttonSize, onEvent)
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(divider)
+            ) {
                 Item(configuration, isEdited, 6, buttonSize, onEvent)
                 Item(configuration, isEdited, 7, buttonSize, onEvent)
+                Item(configuration, isEdited, 8, buttonSize, onEvent)
             }
-            // TODO: if the migration data has 9th item then show the previous pattern of data.
-            //  3*3 items
-
-            /* Row(
-                 verticalAlignment = Alignment.CenterVertically,
-                 horizontalArrangement = Arrangement.spacedBy(divider)
-             ) {
-                 Item(configuration, isEdited, 8, buttonSize, onEvent)
-             }*/
         }
     }
 }
