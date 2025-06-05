@@ -1,5 +1,6 @@
 package no.nordicsemi.android.toolbox.profile.view.uart
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,19 +46,15 @@ internal fun MacroSection(
     var showAddDialog by rememberSaveable { mutableStateOf(false) }
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
 
-    if (showAddDialog) {
-        UARTAddConfigurationDialog(viewState, onEvent) { showAddDialog = false }
-    }
-
-    if (showDeleteDialog) {
-        viewState.selectedConfiguration?.let {
-            DeleteConfigurationDialog(it, onEvent) { showDeleteDialog = false }
-        }
-    }
-
-    if (viewState.showEditDialog) {
-        UARTAddMacroDialog(viewState.selectedMacro) { onEvent(it) }
-    }
+    // Dialogs
+    MacroDialogs(
+        viewState = viewState,
+        showAddDialog = showAddDialog,
+        showDeleteDialog = showDeleteDialog,
+        onDismissAdd = { showAddDialog = false },
+        onDismissDelete = { showDeleteDialog = false },
+        onEvent = onEvent
+    )
 
     Column {
         OutlinedCard {
@@ -66,69 +64,14 @@ internal fun MacroSection(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 if (viewState.configurations.isEmpty()) {
-                    SectionTitle(
-                        resId = R.drawable.ic_macro,
-                        title = stringResource(id = R.string.uart_macros),
-                        menu = {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = stringResource(id = R.string.uart_configuration_add),
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .clickable { showAddDialog = true }
-                                    .padding(8.dp)
-                            )
-                        }
-                    )
+                    MacroSectionTitle { showAddDialog = true }
                 } else {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-
-                        Box(modifier = Modifier.weight(1f)) {
-                            UARTConfigurationPicker(viewState, onEvent)
-                        }
-
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = stringResource(id = R.string.uart_configuration_add),
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .clickable { showAddDialog = true }
-                                .padding(8.dp)
-                        )
-
-                        viewState.selectedConfiguration?.let {
-                            if (!viewState.isConfigurationEdited) {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = stringResource(id = R.string.uart_configuration_edit),
-                                    modifier = Modifier
-                                        .clip(CircleShape)
-                                        .clickable { onEvent(UARTEvent.OnEditConfiguration) }
-                                        .padding(8.dp)
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.EditOff,
-                                    contentDescription = stringResource(id = R.string.uart_configuration_edit),
-                                    modifier = Modifier
-                                        .clip(CircleShape)
-                                        .clickable { onEvent(UARTEvent.OnEditConfiguration) }
-                                        .padding(8.dp)
-                                )
-                            }
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = stringResource(id = R.string.uart_configuration_delete),
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .clickable { showDeleteDialog = true }
-                                    .padding(8.dp)
-                            )
-                        }
-                    }
+                    MacroConfigControls(
+                        viewState = viewState,
+                        onAddClick = { showAddDialog = true },
+                        onDeleteClick = { showDeleteDialog = true },
+                        onEvent = onEvent
+                    )
                 }
 
                 viewState.selectedConfiguration?.let {
@@ -137,6 +80,88 @@ internal fun MacroSection(
             }
         }
     }
+}
+
+@Composable
+private fun MacroDialogs(
+    viewState: UARTViewState,
+    showAddDialog: Boolean,
+    showDeleteDialog: Boolean,
+    onDismissAdd: () -> Unit,
+    onDismissDelete: () -> Unit,
+    onEvent: (DeviceConnectionViewEvent) -> Unit
+) {
+    if (showAddDialog) {
+        UARTAddConfigurationDialog(viewState, onEvent, onDismissAdd)
+    }
+
+    if (showDeleteDialog) {
+        viewState.selectedConfiguration?.let {
+            DeleteConfigurationDialog(it, onEvent, onDismissDelete)
+        }
+    }
+
+    if (viewState.showEditDialog) {
+        UARTAddMacroDialog(viewState.selectedMacro) { onEvent(it) }
+    }
+}
+
+@Composable
+private fun MacroSectionTitle(onAddClick: () -> Unit) {
+    SectionTitle(
+        resId = R.drawable.ic_macro,
+        title = stringResource(id = R.string.uart_macros),
+        menu = {
+            CircleIcon(Icons.Default.Add, R.string.uart_configuration_add, onAddClick)
+        }
+    )
+}
+
+@Composable
+private fun MacroConfigControls(
+    viewState: UARTViewState,
+    onAddClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    onEvent: (DeviceConnectionViewEvent) -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Box(modifier = Modifier.weight(1f)) {
+            UARTConfigurationPicker(viewState, onEvent)
+        }
+
+        CircleIcon(Icons.Default.Add, R.string.uart_configuration_add, onAddClick)
+
+        viewState.selectedConfiguration?.let {
+            val editIcon =
+                if (viewState.isConfigurationEdited) Icons.Default.EditOff else Icons.Default.Edit
+            val editDesc = R.string.uart_configuration_edit
+
+            CircleIcon(editIcon, editDesc) {
+                onEvent(UARTEvent.OnEditConfiguration)
+            }
+
+            CircleIcon(Icons.Default.Delete, R.string.uart_configuration_delete, onDeleteClick)
+        }
+    }
+}
+
+@Composable
+private fun CircleIcon(
+    imageVector: ImageVector,
+    @StringRes contentDescription: Int,
+    onClick: () -> Unit
+) {
+    Icon(
+        imageVector = imageVector,
+        contentDescription = stringResource(id = contentDescription),
+        modifier = Modifier
+            .clip(CircleShape)
+            .clickable(onClick = onClick)
+            .padding(8.dp)
+    )
 }
 
 @Composable
