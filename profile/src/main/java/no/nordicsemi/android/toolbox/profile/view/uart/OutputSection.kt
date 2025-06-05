@@ -73,7 +73,7 @@ internal fun OutputSection(
                     Text(text = stringResource(id = R.string.uart_output_placeholder))
                 } else {
                     // Display the latest messages at the start
-                    records.reversed().forEach {
+                    records.forEach {
                         when (it.type) {
                             UARTRecordType.INPUT -> MessageItemInput(record = it)
                             UARTRecordType.OUTPUT -> MessageItemOutput(record = it)

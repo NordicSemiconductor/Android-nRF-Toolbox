@@ -59,9 +59,6 @@ internal fun UARTConfigurationPicker(
                         text = title,
                         style = MaterialTheme.typography.labelSmall
                     )
-                    /* val text = configuration?.name
-                         ?: stringResource(id = R.string.uart_configuration_picker_not_selected)
-                     Text(text = text, style = MaterialTheme.typography.bodyMedium)*/
                 }
 
                 Icon(Icons.Default.ArrowDropDown, contentDescription = "")
