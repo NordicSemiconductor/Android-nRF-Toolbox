@@ -51,6 +51,4 @@ dependencies {
     // Timber & SLF4J
     implementation (libs.slf4j.timber)
     implementation(libs.nordic.log.timber)
-    // todo: remove this once fixed.
-    implementation("no.nordicsemi.kotlin.ble:client-android")
 }

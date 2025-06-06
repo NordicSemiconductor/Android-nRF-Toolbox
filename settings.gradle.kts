@@ -73,9 +73,9 @@ include(":scanner")
 //    includeBuild("../Android-Common-Libraries")
 //}
 //
-if (file("../Kotlin-BLE-Library").exists()) {
-    includeBuild("../Kotlin-BLE-Library")
-}
+//if (file("../Kotlin-BLE-Library").exists()) {
+//    includeBuild("../Kotlin-BLE-Library")
+//}
 
 if (file("../Kotlin-Util-Library").exists()) {
     includeBuild("../Kotlin-Util-Library")

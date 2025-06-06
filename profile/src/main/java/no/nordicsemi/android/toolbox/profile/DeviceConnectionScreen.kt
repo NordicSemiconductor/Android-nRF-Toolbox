@@ -38,6 +38,7 @@ import no.nordicsemi.android.toolbox.profile.data.ProfileServiceData
 import no.nordicsemi.android.toolbox.profile.data.RSCSServiceData
 import no.nordicsemi.android.toolbox.profile.data.ThroughputServiceData
 import no.nordicsemi.android.toolbox.profile.data.UARTServiceData
+import no.nordicsemi.android.toolbox.profile.data.toReason
 import no.nordicsemi.android.toolbox.profile.view.battery.BatteryLevelView
 import no.nordicsemi.android.toolbox.profile.view.bps.BPSScreen
 import no.nordicsemi.android.toolbox.profile.view.cgms.CGMScreen
@@ -158,7 +159,7 @@ private fun DeviceDisconnectedView(
 
         is StateReason -> {
             DeviceDisconnectedView(
-                reason = reason.reason,
+                disconnectedReason = toReason(reason.reason),
                 modifier = Modifier.padding(16.dp)
             ) {
                 Button(
