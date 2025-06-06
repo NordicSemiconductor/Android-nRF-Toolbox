@@ -69,6 +69,6 @@ dependencies {
     // Timber & SLF4J
     implementation (libs.slf4j.timber)
 
-    implementation("no.nordicsemi.kotlin.ble:client-android")
+    implementation(libs.nordic.blek.client.android)
     implementation("no.nordicsemi.kotlin:data")
 }

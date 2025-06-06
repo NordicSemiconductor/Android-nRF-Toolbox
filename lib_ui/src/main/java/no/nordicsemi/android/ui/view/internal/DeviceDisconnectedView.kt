@@ -21,27 +21,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.common.ui.view.CircularIcon
-import no.nordicsemi.kotlin.ble.core.ConnectionState.Disconnected.Reason
-
-@Composable
-fun DeviceDisconnectedView(
-    reason: Reason,
-    modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.(PaddingValues) -> Unit = {},
-) {
-    val disconnectedReason = when (reason) {
-        Reason.Cancelled -> "Connection was cancelled."
-        Reason.LinkLoss -> "Device signal has been lost."
-        Reason.Success -> "Device disconnected successfully."
-        Reason.TerminateLocalHost -> "Device disconnected by the local host."
-        Reason.TerminatePeerUser -> "Device disconnected by the peer user."
-        is Reason.Timeout -> "Connection attempt timed out with ${reason.duration}."
-        is Reason.Unknown -> "Device disconnected with unknown reason with status ${reason.status}."
-        Reason.UnsupportedAddress -> "Device disconnected due to unsupported address."
-    }
-
-    DeviceDisconnectedView(disconnectedReason = disconnectedReason, modifier, content)
-}
 
 enum class DisconnectReason {
     USER, UNKNOWN, LINK_LOSS, MISSING_SERVICE, BLUETOOTH_OFF
@@ -70,11 +49,11 @@ fun DeviceDisconnectedView(
 }
 
 @Composable
-private fun DeviceDisconnectedView(
+fun DeviceDisconnectedView(
     disconnectedReason: String,
     modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.(PaddingValues) -> Unit = {},
     isMissingService: Boolean = false,
+    content: @Composable ColumnScope.(PaddingValues) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -117,7 +96,7 @@ private fun DeviceDisconnectedView(
 private fun DeviceDisconnectedViewPreview() {
     MaterialTheme {
         DeviceDisconnectedView(
-            reason = Reason.LinkLoss,
+            reason = DisconnectReason.LINK_LOSS,
             content = { padding ->
                 Button(
                     onClick = {},

@@ -33,7 +33,7 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences-core:1.1.4")
     implementation("androidx.datastore:datastore-preferences:1.1.4")
 
-    implementation("no.nordicsemi.kotlin.ble:client-android")
+    implementation(libs.nordic.blek.client.android)
     // coroutine core
     implementation(libs.kotlinx.coroutines.core)
 

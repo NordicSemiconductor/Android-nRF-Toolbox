@@ -7,7 +7,7 @@ android {
 }
 
 dependencies {
-    implementation("no.nordicsemi.kotlin.ble:client-android")
+    implementation(libs.nordic.blek.client.android)
     implementation("no.nordicsemi.kotlin:data:0.3.0")
 
     // Unit test dependencies
