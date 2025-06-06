@@ -8,7 +8,7 @@ android {
 
 dependencies {
     implementation(libs.nordic.blek.client.android)
-    implementation("no.nordicsemi.kotlin:data:0.3.0")
+    implementation("no.nordicsemi.kotlin:data:0.4.0")
 
     // Unit test dependencies
     testImplementation(libs.junit4)
