@@ -42,8 +42,8 @@ import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.SensorData
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.availableSections
-import no.nordicsemi.android.toolbox.profile.viewmodel.DFSViewEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.DFSEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.ui.view.SectionTitle
 import java.util.Locale
 
@@ -51,7 +51,7 @@ import java.util.Locale
 internal fun SettingsView(
     data: SensorData,
     range: Range,
-    onEvent: (DeviceConnectionViewEvent) -> Unit
+    onEvent: (ProfileUiEvent) -> Unit
 ) {
     val isExpanded = remember { mutableStateOf(false) }
 
@@ -82,7 +82,7 @@ internal fun SettingsView(
                 style = MaterialTheme.typography.titleSmall
             )
             RangeSlider(range) {
-                onEvent(DFSViewEvent.OnRangeChangedEvent(it))
+                onEvent(DFSEvent.OnRangeChangedEvent(it))
             }
 
             Spacer(modifier = Modifier.padding(8.dp))
@@ -167,7 +167,7 @@ private fun RangeSliderViewPreview() {
 @Composable
 internal fun MeasurementDetailModeView(
     sensorData: SensorData,
-    onEvent: (DeviceConnectionViewEvent) -> Unit
+    onEvent: (ProfileUiEvent) -> Unit
 ) {
     var width by rememberSaveable { mutableIntStateOf(0) }
     var isExpanded by remember { mutableStateOf(false) }
@@ -212,7 +212,7 @@ internal fun MeasurementDetailModeView(
                             .padding(horizontal = 16.dp)
                             .fillMaxWidth()
                             .clickable {
-                                onEvent(DFSViewEvent.OnDetailsSectionParamsSelected(it))
+                                onEvent(DFSEvent.OnDetailsSectionParamsSelected(it))
                                 displayText = it.toString()
                                 isExpanded = false
                             }

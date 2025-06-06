@@ -54,8 +54,8 @@ import no.nordicsemi.android.toolbox.profile.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.toolbox.profile.data.CGMServiceData
 import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.view.gls.toDisplayString
-import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.GLSViewEvent.OnWorkingModeSelected
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.GLSEvent.OnWorkingModeSelected
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
@@ -66,7 +66,7 @@ import java.util.Calendar
 @Composable
 internal fun CGMScreen(
     serviceData: CGMServiceData,
-    onClickEvent: (DeviceConnectionViewEvent) -> Unit
+    onClickEvent: (ProfileUiEvent) -> Unit
 ) {
     var isWorkingModeClicked by rememberSaveable { mutableStateOf(false) }
 
@@ -99,7 +99,7 @@ private fun WorkingModeDropDown(
     isWorkingModeSelected: Boolean,
     onExpand: () -> Unit,
     onDismiss: () -> Unit,
-    onClickEvent: (DeviceConnectionViewEvent) -> Unit
+    onClickEvent: (ProfileUiEvent) -> Unit
 ) {
     if (cgmState.requestStatus == no.nordicsemi.android.lib.profile.gls.data.RequestStatus.PENDING) {
         CircularProgressIndicator()
@@ -136,7 +136,7 @@ private fun WorkingModeDropDownPreview() {
 private fun WorkingModeDialog(
     cgmState: CGMServiceData,
     onDismiss: () -> Unit,
-    onWorkingModeSelected: (DeviceConnectionViewEvent) -> Unit,
+    onWorkingModeSelected: (ProfileUiEvent) -> Unit,
 ) {
     val listState = rememberLazyListState()
     val workingModeEntries = no.nordicsemi.android.lib.profile.common.WorkingMode.entries.map { it }

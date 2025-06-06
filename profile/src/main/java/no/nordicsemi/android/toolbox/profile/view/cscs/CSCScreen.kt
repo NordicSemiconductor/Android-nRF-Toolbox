@@ -41,8 +41,8 @@ import no.nordicsemi.android.lib.profile.csc.WheelSizes
 import no.nordicsemi.android.lib.profile.csc.WheelSizes.getWheelSizeByName
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.CSCServiceData
-import no.nordicsemi.android.toolbox.profile.viewmodel.CSCViewEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.CSCEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
@@ -51,7 +51,7 @@ import no.nordicsemi.android.ui.view.SectionRow
 @Composable
 internal fun CSCScreen(
     serviceData: CSCServiceData,
-    onClickEvent: (DeviceConnectionViewEvent) -> Unit,
+    onClickEvent: (ProfileUiEvent) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -85,7 +85,7 @@ private fun CSCScreenPreview() {
 @Composable
 private fun CSCSettingView(
     serviceData: CSCServiceData,
-    onClickEvent: (DeviceConnectionViewEvent) -> Unit
+    onClickEvent: (ProfileUiEvent) -> Unit
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -125,7 +125,7 @@ private fun WheelSizeDropDown(
     isWheelSizeClicked: Boolean,
     onExpand: () -> Unit,
     onDismiss: () -> Unit,
-    onClickEvent: (DeviceConnectionViewEvent) -> Unit
+    onClickEvent: (ProfileUiEvent) -> Unit
 ) {
     val wheelEntries = WheelSizes.data.map { it.name }
     Column {
@@ -146,7 +146,7 @@ private fun WheelSizeDropDown(
                 wheelSizeEntries = wheelEntries,
                 onDismiss = onDismiss,
             ) {
-                onClickEvent(CSCViewEvent.OnWheelSizeSelected(getWheelSizeByName(it)))
+                onClickEvent(CSCEvent.OnWheelSizeSelected(getWheelSizeByName(it)))
                 onDismiss()
             }
     }
@@ -212,7 +212,7 @@ private fun WheelSizeDialog(
 private fun CSCSpeedSettingsFilterDropdown(
     state: CSCServiceData,
     onDismiss: () -> Unit,
-    onClickEvent: (DeviceConnectionViewEvent) -> Unit
+    onClickEvent: (ProfileUiEvent) -> Unit
 ) {
     AlertDialog(
         onDismissRequest = { onDismiss() },
@@ -225,7 +225,7 @@ private fun CSCSpeedSettingsFilterDropdown(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                onClickEvent(CSCViewEvent.OnSelectedSpeedUnitSelected(entry))
+                                onClickEvent(CSCEvent.OnSelectedSpeedUnitSelected(entry))
                                 onDismiss()
                             },
                         style = MaterialTheme.typography.bodyLarge,

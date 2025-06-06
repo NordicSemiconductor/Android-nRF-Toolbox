@@ -370,51 +370,51 @@ internal class DeviceConnectionViewModel @Inject constructor(
     /**
      * Handle click events from the view.
      */
-    fun onClickEvent(event: DeviceConnectionViewEvent) {
+    fun onClickEvent(event: ProfileUiEvent) {
         // Handle click events
         when (event) {
             is DisconnectEvent -> disconnectAndNavigate(event.device)
             NavigateUp -> disconnectIfNeededAndNavigate()
             is OnRetryClicked -> reconnectDevice(event.device)
             OpenLoggerEvent -> openLogger()
-            is CSCViewEvent.OnSelectedSpeedUnitSelected -> setSpeedUnit(event.selectedSpeedUnit)
-            is CSCViewEvent.OnWheelSizeSelected -> setWheelSize(event.wheelSize)
+            is CSCEvent.OnSelectedSpeedUnitSelected -> setSpeedUnit(event.selectedSpeedUnit)
+            is CSCEvent.OnWheelSizeSelected -> setWheelSize(event.wheelSize)
 
-            is GLSViewEvent.OnWorkingModeSelected -> onWorkingModeSelected(
+            is GLSEvent.OnWorkingModeSelected -> onWorkingModeSelected(
                 event.profile,
                 event.workingMode
             )
 
-            HRSViewEvent.SwitchZoomEvent -> switchZoomEvent()
-            is HTSViewEvent.OnTemperatureUnitSelected -> updateTemperatureUnit(event.value)
-            DFSViewEvent.OnAvailableDistanceModeRequest -> viewModelScope.launch {
+            HRSEvent.SwitchZoomEvent -> switchZoomEvent()
+            is HTSEvent.OnTemperatureUnitSelected -> updateTemperatureUnit(event.value)
+            DFSEvent.OnAvailableDistanceModeRequest -> viewModelScope.launch {
                 DFSRepository.checkAvailableFeatures(address)
             }
 
-            DFSViewEvent.OnCheckDistanceModeRequest -> viewModelScope.launch {
+            DFSEvent.OnCheckDistanceModeRequest -> viewModelScope.launch {
                 DFSRepository.checkCurrentDistanceMode(address)
             }
 
-            is DFSViewEvent.OnRangeChangedEvent -> {
+            is DFSEvent.OnRangeChangedEvent -> {
                 DFSRepository.updateDistanceRange(address, event.range)
             }
 
-            is DFSViewEvent.OnDistanceModeSelected -> {
+            is DFSEvent.OnDistanceModeSelected -> {
                 viewModelScope.launch {
                     DFSRepository.enableDistanceMode(address, event.mode)
                 }
             }
 
-            is DFSViewEvent.OnDetailsSectionParamsSelected -> {
+            is DFSEvent.OnDetailsSectionParamsSelected -> {
                 DFSRepository.updateDetailsSection(address, event.section)
             }
 
-            is DFSViewEvent.OnBluetoothDeviceSelected -> DFSRepository.updateSelectedDevice(
+            is DFSEvent.OnBluetoothDeviceSelected -> DFSRepository.updateSelectedDevice(
                 address,
                 event.device
             )
 
-            is RSCSViewEvent.OnSelectedSpeedUnitSelected ->
+            is RSCSEvent.OnSelectedSpeedUnitSelected ->
                 RSCSRepository.updateUnitSettings(address, event.rscsUnitSettings)
 
             is ThroughputEvent.OnWriteData -> viewModelScope.launch {
@@ -438,11 +438,11 @@ internal class DeviceConnectionViewModel @Inject constructor(
             }
 
             is UARTEvent.OnRunMacro -> runMacro(event.macro)
-            is LBSViewEvent.OnButtonStateChanged -> {
+            is LBSEvent.OnButtonStateChanged -> {
                 LBSRepository.updateButtonState(address, event.buttonState)
             }
 
-            is LBSViewEvent.OnLedStateChanged -> {
+            is LBSEvent.OnLedStateChanged -> {
                 viewModelScope.launch {
                     LBSRepository.writeToBlinkyLED(address, event.ledState)
                 }

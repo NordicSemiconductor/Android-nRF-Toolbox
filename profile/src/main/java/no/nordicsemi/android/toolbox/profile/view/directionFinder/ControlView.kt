@@ -15,14 +15,14 @@ import no.nordicsemi.android.lib.profile.directionFinder.distance.DistanceMode
 import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
 import no.nordicsemi.android.toolbox.profile.data.SensorData
 import no.nordicsemi.android.toolbox.profile.R
-import no.nordicsemi.android.toolbox.profile.viewmodel.DFSViewEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.DFSEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 
 @Composable
 internal fun ControlView(
     viewEntity: DFSServiceData,
     sensorData: SensorData,
-    onEvent: (DeviceConnectionViewEvent) -> Unit
+    onEvent: (ProfileUiEvent) -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -31,7 +31,7 @@ internal fun ControlView(
         when {
             !viewEntity.isDistanceAvailabilityChecked() -> {
                 DistanceCheckView {
-                    onEvent(DFSViewEvent.OnAvailableDistanceModeRequest)
+                    onEvent(DFSEvent.OnAvailableDistanceModeRequest)
                 }
             }
 
@@ -42,8 +42,8 @@ internal fun ControlView(
             viewEntity.isDoubleModeAvailable() -> {
                 CurrentModeView(
                     distanceMode = sensorData.distanceMode,
-                    onCheckMode = { onEvent(DFSViewEvent.OnCheckDistanceModeRequest) },
-                    onSwitchMode = { newMode -> onEvent(DFSViewEvent.OnDistanceModeSelected(newMode)) }
+                    onCheckMode = { onEvent(DFSEvent.OnCheckDistanceModeRequest) },
+                    onSwitchMode = { newMode -> onEvent(DFSEvent.OnDistanceModeSelected(newMode)) }
                 )
             }
 

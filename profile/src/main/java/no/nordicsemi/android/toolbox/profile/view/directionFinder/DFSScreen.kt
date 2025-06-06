@@ -29,14 +29,14 @@ import no.nordicsemi.android.toolbox.profile.data.directionFinder.azimuthValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.elevationValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.selectedMeasurementSectionValues
 import no.nordicsemi.android.toolbox.profile.R
-import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
 internal fun DFSScreen(
     serviceData: DFSServiceData,
-    onClick: (DeviceConnectionViewEvent) -> Unit,
+    onClick: (ProfileUiEvent) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),

@@ -24,20 +24,20 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.LBSData
 import no.nordicsemi.android.toolbox.profile.data.LBSServiceData
-import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.LBSViewEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.LBSEvent
 
 @Composable
 internal fun BlinkyScreen(
     serviceData: LBSServiceData,
-    onClickEvent: (DeviceConnectionViewEvent) -> Unit,
+    onClickEvent: (ProfileUiEvent) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         LedControlView(
             ledState = serviceData.data.ledState,
-            onStateChanged = { onClickEvent(LBSViewEvent.OnLedStateChanged(it)) },
+            onStateChanged = { onClickEvent(LBSEvent.OnLedStateChanged(it)) },
         )
 
         ButtonControlView(

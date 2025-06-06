@@ -38,8 +38,8 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.lib.profile.directionFinder.PeripheralBluetoothAddress
 import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
 import no.nordicsemi.android.toolbox.profile.R
-import no.nordicsemi.android.toolbox.profile.viewmodel.DFSViewEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.DFSEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.internal.EmptyView
 
@@ -47,14 +47,14 @@ import no.nordicsemi.android.ui.view.internal.EmptyView
 internal fun SectionBluetoothDeviceComponent(
     data: DFSServiceData,
     selectedDevice: PeripheralBluetoothAddress?,
-    onEvent: (DeviceConnectionViewEvent) -> Unit
+    onEvent: (ProfileUiEvent) -> Unit
 ) {
     val devices = data.data.keys.toList()
 
     when {
         selectedDevice == null && devices.isNotEmpty() -> ScreenSection {
             NotSelectedView(devices) {
-                onEvent(DFSViewEvent.OnBluetoothDeviceSelected(it))
+                onEvent(DFSEvent.OnBluetoothDeviceSelected(it))
             }
         }
 
@@ -76,7 +76,7 @@ internal fun SectionBluetoothDeviceComponent(
 private fun MeasuredDevices(
     selectedDevice: PeripheralBluetoothAddress,
     devices: List<PeripheralBluetoothAddress>,
-    onEvent: (DeviceConnectionViewEvent) -> Unit
+    onEvent: (ProfileUiEvent) -> Unit
 ) {
     var showDropdownMenu by rememberSaveable { mutableStateOf(false) }
     var width by rememberSaveable { mutableIntStateOf(0) }
@@ -145,7 +145,7 @@ private fun MeasuredDevices(
                             .padding(horizontal = 16.dp)
                             .fillMaxWidth()
                             .clickable {
-                                onEvent(DFSViewEvent.OnBluetoothDeviceSelected(it))
+                                onEvent(DFSEvent.OnBluetoothDeviceSelected(it))
                                 showDropdownMenu = false
                             }
                     )

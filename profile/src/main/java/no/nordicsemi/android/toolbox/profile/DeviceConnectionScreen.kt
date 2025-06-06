@@ -54,7 +54,7 @@ import no.nordicsemi.android.toolbox.profile.view.rscs.RSCSScreen
 import no.nordicsemi.android.toolbox.profile.view.throughput.ThroughputScreen
 import no.nordicsemi.android.toolbox.profile.view.uart.UARTScreen
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionState
-import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewModel
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceData
 import no.nordicsemi.android.toolbox.profile.viewmodel.DisconnectEvent
@@ -72,7 +72,7 @@ internal fun DeviceConnectionScreen() {
     val deviceConnectionViewModel: DeviceConnectionViewModel = hiltViewModel()
     val deviceDataState by deviceConnectionViewModel.deviceData.collectAsStateWithLifecycle()
     val deviceAddress = deviceConnectionViewModel.address
-    val onClickEvent: (DeviceConnectionViewEvent) -> Unit =
+    val onClickEvent: (ProfileUiEvent) -> Unit =
         { deviceConnectionViewModel.onClickEvent(it) }
 
     Scaffold(
@@ -140,7 +140,7 @@ internal fun DeviceConnectionScreen() {
 private fun DeviceDisconnectedView(
     reason: DeviceDisconnectionReason,
     deviceAddress: String,
-    onClickEvent: (DeviceConnectionViewEvent) -> Unit
+    onClickEvent: (ProfileUiEvent) -> Unit
 ) {
     when (reason) {
         is CustomReason -> {
@@ -176,7 +176,7 @@ private fun DeviceDisconnectedView(
 @Composable
 private fun DeviceConnectedView(
     deviceData: DeviceData,
-    onClickEvent: (DeviceConnectionViewEvent) -> Unit,
+    onClickEvent: (ProfileUiEvent) -> Unit,
 ) {
     deviceData.peripheral?.let { peripheral ->
         when {

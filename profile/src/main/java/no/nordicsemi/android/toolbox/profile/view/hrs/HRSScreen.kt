@@ -34,8 +34,8 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.HRSServiceData
-import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.HRSViewEvent.SwitchZoomEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.HRSEvent.SwitchZoomEvent
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionRow
@@ -44,7 +44,7 @@ import no.nordicsemi.android.ui.view.SectionTitle
 @Composable
 internal fun HRSScreen(
     hrsServiceData: HRSServiceData,
-    onClickEvent: (DeviceConnectionViewEvent) -> Unit
+    onClickEvent: (ProfileUiEvent) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -93,7 +93,7 @@ internal fun HRSScreen(
 }
 
 @Composable
-private fun MagnifyingGlass(zoomIn: Boolean, onEvent: (DeviceConnectionViewEvent) -> Unit) {
+private fun MagnifyingGlass(zoomIn: Boolean, onEvent: (ProfileUiEvent) -> Unit) {
     val icon = when (zoomIn) {
         true -> R.drawable.ic_zoom_out
         false -> R.drawable.ic_zoom_in
