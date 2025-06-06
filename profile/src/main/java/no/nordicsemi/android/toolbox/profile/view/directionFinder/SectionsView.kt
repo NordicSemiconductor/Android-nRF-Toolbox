@@ -27,7 +27,7 @@ import no.nordicsemi.android.toolbox.profile.data.directionFinder.distanceValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.elevationValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.medianValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.selectedMeasurementSectionValues
-import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.ui.view.ReversedSectionTitle
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
@@ -53,7 +53,7 @@ private fun DistanceSectionPreview() {
 internal fun DistanceControlSection(
     data: DFSServiceData,
     sensorData: SensorData,
-    onEvent: (DeviceConnectionViewEvent) -> Unit
+    onEvent: (ProfileUiEvent) -> Unit
 ) {
     ScreenSection {
         SectionTitle(
@@ -132,7 +132,7 @@ internal fun MeasuresSection(data: SensorData) {
 internal fun SettingSection(
     serviceData: SensorData,
     range: Range,
-    onEvent: (DeviceConnectionViewEvent) -> Unit
+    onEvent: (ProfileUiEvent) -> Unit
 ) {
     ScreenSection {
         SettingsView(data = serviceData, range, onEvent)

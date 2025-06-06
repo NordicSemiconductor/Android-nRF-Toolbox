@@ -54,8 +54,8 @@ import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.GLSServiceData
 import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.view.gls.details.GLSDetails
-import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.GLSViewEvent.OnWorkingModeSelected
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.GLSEvent.OnWorkingModeSelected
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
@@ -66,7 +66,7 @@ import java.util.Calendar
 @Composable
 internal fun GLSScreen(
     glsServiceData: GLSServiceData,
-    onClickEvent: (DeviceConnectionViewEvent) -> Unit
+    onClickEvent: (ProfileUiEvent) -> Unit
 ) {
     var isWorkingModeClicked by rememberSaveable { mutableStateOf(false) }
 
@@ -107,7 +107,7 @@ private fun WorkingModeDropDown(
     isWorkingModeSelected: Boolean,
     onExpand: () -> Unit,
     onDismiss: () -> Unit,
-    onClickEvent: (DeviceConnectionViewEvent) -> Unit
+    onClickEvent: (ProfileUiEvent) -> Unit
 ) {
     if (glsState.requestStatus == RequestStatus.PENDING) {
         CircularProgressIndicator()
@@ -144,7 +144,7 @@ private fun WorkingModeDropDownPreview() {
 private fun WorkingModeDialog(
     glsState: GLSServiceData,
     onDismiss: () -> Unit,
-    onWorkingModeSelected: (DeviceConnectionViewEvent) -> Unit,
+    onWorkingModeSelected: (ProfileUiEvent) -> Unit,
 ) {
     val listState = rememberLazyListState()
     val workingModeEntries = WorkingMode.entries.map { it }

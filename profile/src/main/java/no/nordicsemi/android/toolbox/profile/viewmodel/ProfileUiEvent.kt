@@ -15,56 +15,56 @@ import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTMacro
 import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
 
-sealed interface DeviceConnectionViewEvent
+sealed interface ProfileUiEvent
 
 // HTS Profile Events
-internal sealed interface HTSViewEvent : DeviceConnectionViewEvent {
-    data class OnTemperatureUnitSelected(val value: TemperatureUnit) : HTSViewEvent
+internal sealed interface HTSEvent : ProfileUiEvent {
+    data class OnTemperatureUnitSelected(val value: TemperatureUnit) : HTSEvent
 }
 
 // HRS Profile Events
-sealed interface HRSViewEvent : DeviceConnectionViewEvent {
-    data object SwitchZoomEvent : HRSViewEvent
+sealed interface HRSEvent : ProfileUiEvent {
+    data object SwitchZoomEvent : HRSEvent
 }
 
-internal data class OnRetryClicked(val device: String) : DeviceConnectionViewEvent
+internal data class OnRetryClicked(val device: String) : ProfileUiEvent
 
-internal data object NavigateUp : DeviceConnectionViewEvent
+internal data object NavigateUp : ProfileUiEvent
 
-internal data class DisconnectEvent(val device: String) : DeviceConnectionViewEvent
+internal data class DisconnectEvent(val device: String) : ProfileUiEvent
 
-internal data object OpenLoggerEvent : DeviceConnectionViewEvent
+internal data object OpenLoggerEvent : ProfileUiEvent
 
 // GLS/CGM Profile Events
-internal sealed interface GLSViewEvent : DeviceConnectionViewEvent {
+internal sealed interface GLSEvent : ProfileUiEvent {
     data class OnWorkingModeSelected(
         val profile: Profile,
         val workingMode: WorkingMode
-    ) : GLSViewEvent
+    ) : GLSEvent
 
 }
 
 // CSC Profile Events
-internal sealed interface CSCViewEvent : DeviceConnectionViewEvent {
-    data class OnWheelSizeSelected(val wheelSize: WheelSize) : CSCViewEvent
-    data class OnSelectedSpeedUnitSelected(val selectedSpeedUnit: SpeedUnit) : CSCViewEvent
+internal sealed interface CSCEvent : ProfileUiEvent {
+    data class OnWheelSizeSelected(val wheelSize: WheelSize) : CSCEvent
+    data class OnSelectedSpeedUnitSelected(val selectedSpeedUnit: SpeedUnit) : CSCEvent
 }
 
 // RSCS Profile Events
-internal sealed interface RSCSViewEvent : DeviceConnectionViewEvent {
-    data class OnSelectedSpeedUnitSelected(val rscsUnitSettings: RSCSSettingsUnit) : RSCSViewEvent
+internal sealed interface RSCSEvent : ProfileUiEvent {
+    data class OnSelectedSpeedUnitSelected(val rscsUnitSettings: RSCSSettingsUnit) : RSCSEvent
 }
 
-internal sealed interface DFSViewEvent : DeviceConnectionViewEvent {
-    data object OnAvailableDistanceModeRequest : DFSViewEvent
-    data object OnCheckDistanceModeRequest : DFSViewEvent
-    data class OnRangeChangedEvent(val range: Range) : DFSViewEvent
-    data class OnDistanceModeSelected(val mode: DistanceMode) : DFSViewEvent
-    data class OnDetailsSectionParamsSelected(val section: MeasurementSection) : DFSViewEvent
-    data class OnBluetoothDeviceSelected(val device: PeripheralBluetoothAddress) : DFSViewEvent
+internal sealed interface DFSEvent : ProfileUiEvent {
+    data object OnAvailableDistanceModeRequest : DFSEvent
+    data object OnCheckDistanceModeRequest : DFSEvent
+    data class OnRangeChangedEvent(val range: Range) : DFSEvent
+    data class OnDistanceModeSelected(val mode: DistanceMode) : DFSEvent
+    data class OnDetailsSectionParamsSelected(val section: MeasurementSection) : DFSEvent
+    data class OnBluetoothDeviceSelected(val device: PeripheralBluetoothAddress) : DFSEvent
 }
 
-internal sealed interface ThroughputEvent : DeviceConnectionViewEvent {
+internal sealed interface ThroughputEvent : ProfileUiEvent {
     data class OnWriteData(
         val writeType: ThroughputInputType,
     ) : ThroughputEvent
@@ -72,7 +72,7 @@ internal sealed interface ThroughputEvent : DeviceConnectionViewEvent {
 }
 
 // UART Profile events.
-internal sealed interface UARTEvent : DeviceConnectionViewEvent {
+internal sealed interface UARTEvent : ProfileUiEvent {
     data class OnCreateMacro(
         val macroName: UARTMacro,
     ) : UARTEvent
@@ -112,7 +112,7 @@ internal sealed interface UARTEvent : DeviceConnectionViewEvent {
 }
 
 // LBS Profile events.
-internal sealed interface LBSViewEvent : DeviceConnectionViewEvent {
-    data class OnLedStateChanged(val ledState: Boolean) : LBSViewEvent
-    data class OnButtonStateChanged(val buttonState: Boolean) : LBSViewEvent
+internal sealed interface LBSEvent : ProfileUiEvent {
+    data class OnLedStateChanged(val ledState: Boolean) : LBSEvent
+    data class OnButtonStateChanged(val buttonState: Boolean) : LBSEvent
 }

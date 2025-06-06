@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.UARTRecord
 import no.nordicsemi.android.toolbox.profile.data.UARTRecordType
-import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.UARTEvent
 import no.nordicsemi.android.ui.view.SectionTitle
 import java.text.SimpleDateFormat
@@ -40,7 +40,7 @@ import java.util.Locale
 @Composable
 internal fun OutputSection(
     records: List<UARTRecord>,
-    onEvent: (DeviceConnectionViewEvent) -> Unit
+    onEvent: (ProfileUiEvent) -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -172,7 +172,7 @@ private fun MessageItemOutputPreview() {
 }
 
 @Composable
-private fun Menu(onEvent: (DeviceConnectionViewEvent) -> Unit) {
+private fun Menu(onEvent: (ProfileUiEvent) -> Unit) {
     Icon(
         Icons.Default.Delete,
         contentDescription = stringResource(id = R.string.uart_clear_items),

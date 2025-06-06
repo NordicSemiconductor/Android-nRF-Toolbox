@@ -27,15 +27,15 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.HTSServiceData
 import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
-import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.HTSViewEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.HTSEvent
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
 internal fun HTSScreen(
     htsServiceData: HTSServiceData,
-    onClickEvent: (DeviceConnectionViewEvent) -> Unit
+    onClickEvent: (ProfileUiEvent) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -72,7 +72,7 @@ private fun HTSScreenPreview() {
 @Composable
 private fun TemperatureUnitSettings(
     state: HTSServiceData,
-    onClickEvent: (DeviceConnectionViewEvent) -> Unit
+    onClickEvent: (ProfileUiEvent) -> Unit
 ) {
     var openSettingsDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -96,7 +96,7 @@ private fun TemperatureUnitSettings(
 private fun TemperatureUnitSettingsDialog(
     state: HTSServiceData,
     onDismiss: () -> Unit,
-    onClickEvent: (DeviceConnectionViewEvent) -> Unit,
+    onClickEvent: (ProfileUiEvent) -> Unit,
 ) {
     val listState = rememberLazyListState()
     val entries = TemperatureUnit.entries.map { it }
@@ -115,7 +115,7 @@ private fun TemperatureUnitSettingsDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                onClickEvent(HTSViewEvent.OnTemperatureUnitSelected(entry))
+                                onClickEvent(HTSEvent.OnTemperatureUnitSelected(entry))
                                 onDismiss()
                             }
                             .padding(bottom = 8.dp),

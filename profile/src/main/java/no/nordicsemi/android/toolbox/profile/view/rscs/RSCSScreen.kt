@@ -27,8 +27,8 @@ import no.nordicsemi.android.lib.profile.rscs.RSCFeatureData
 import no.nordicsemi.android.lib.profile.rscs.RSCSSettingsUnit
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.RSCSServiceData
-import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.RSCSViewEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.RSCSEvent
 import no.nordicsemi.android.ui.view.FeatureSupported
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
@@ -39,7 +39,7 @@ import no.nordicsemi.android.ui.view.SectionTitle
 @Composable
 internal fun RSCSScreen(
     serviceData: RSCSServiceData,
-    onClickEvent: (DeviceConnectionViewEvent) -> Unit,
+    onClickEvent: (ProfileUiEvent) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -135,7 +135,7 @@ private fun RSCSScreenPreview() {
 @Composable
 private fun RSCSSettingsDropdown(
     state: RSCSServiceData,
-    onClickEvent: (DeviceConnectionViewEvent) -> Unit
+    onClickEvent: (ProfileUiEvent) -> Unit
 ) {
     var openSettingsDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -158,7 +158,7 @@ private fun RSCSSettingsDropdown(
 private fun RSCSSettingsDialog(
     state: RSCSServiceData,
     onDismiss: () -> Unit,
-    onSpeedUnitSelected: (DeviceConnectionViewEvent) -> Unit
+    onSpeedUnitSelected: (ProfileUiEvent) -> Unit
 ) {
     val speedUnitEntries = RSCSSettingsUnit.entries.map { it }
 
@@ -174,7 +174,7 @@ private fun RSCSSettingsDialog(
                             .fillMaxWidth()
                             .clickable {
                                 onSpeedUnitSelected(
-                                    RSCSViewEvent.OnSelectedSpeedUnitSelected(
+                                    RSCSEvent.OnSelectedSpeedUnitSelected(
                                         entry
                                     )
                                 )
