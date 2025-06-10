@@ -165,6 +165,10 @@ private fun getBackground(isEdited: Boolean, macro: UARTMacro? = null): Color {
             MaterialTheme.colorScheme.primary
         }
 
+        isEdited && macro == null -> {
+            MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f)
+        }
+
         macro == null -> {
             ButtonDefaults.buttonColors().disabledContainerColor
         }
