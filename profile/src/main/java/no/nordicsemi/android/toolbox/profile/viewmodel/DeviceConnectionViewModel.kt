@@ -50,7 +50,7 @@ import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTMacro
 import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
-import no.nordicsemi.android.toolbox.profile.repository.UartConfigurationRepository
+import no.nordicsemi.android.toolbox.profile.repository.uartXml.UartConfigurationRepository
 import no.nordicsemi.android.toolbox.profile.repository.channelSounding.ChannelSoundingManager
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral

@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.profile.repository;
+package no.nordicsemi.android.toolbox.profile.repository.uartXml;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementArray;
