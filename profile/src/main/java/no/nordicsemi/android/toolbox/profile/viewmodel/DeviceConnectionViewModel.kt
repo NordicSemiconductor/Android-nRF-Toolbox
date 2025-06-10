@@ -423,7 +423,6 @@ internal class DeviceConnectionViewModel @Inject constructor(
 
             // UART events.
             UARTEvent.ClearOutputItems -> UartRepository.clearOutputItems(address) // working.
-            UARTEvent.MacroInputSwitchClicked -> TODO() // no idea.
             is UARTEvent.OnAddConfiguration -> onAddConfiguration(event.name) // TODO: check if it is working.
 
             is UARTEvent.OnConfigurationSelected -> onConfigurationSelected(event.configuration)
