@@ -39,7 +39,6 @@ internal class UARTManager : ServiceManager {
                 ?.subscribe()
                 ?.mapNotNull { String(it) }
                 ?.onEach { UartRepository.onNewMessageReceived(deviceId, it) }
-                ?.onEach { Timber.log(10, "Received: $it") }
                 ?.catch { it.printStackTrace() }
                 ?.onCompletion {
                     // Clear the device resources.
