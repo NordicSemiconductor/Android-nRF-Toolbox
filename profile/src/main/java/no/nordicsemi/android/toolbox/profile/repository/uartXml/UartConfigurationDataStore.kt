@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.profile.repository
+package no.nordicsemi.android.toolbox.profile.repository.uartXml
 
 import android.content.Context
 import androidx.datastore.core.DataStore

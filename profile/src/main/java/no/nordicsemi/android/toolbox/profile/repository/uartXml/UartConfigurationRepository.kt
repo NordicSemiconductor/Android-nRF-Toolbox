@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.profile.repository
+package no.nordicsemi.android.toolbox.profile.repository.uartXml
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

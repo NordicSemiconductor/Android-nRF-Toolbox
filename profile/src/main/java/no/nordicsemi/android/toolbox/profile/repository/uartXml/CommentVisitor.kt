@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.profile.repository
+package no.nordicsemi.android.toolbox.profile.repository.uartXml
 
 import no.nordicsemi.android.toolbox.profile.data.uart.MacroIcon
 import org.simpleframework.xml.strategy.Type
