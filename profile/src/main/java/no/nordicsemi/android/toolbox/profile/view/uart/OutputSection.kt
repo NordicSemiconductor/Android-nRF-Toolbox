@@ -108,14 +108,14 @@ private fun MessageItemInput(record: UARTRecord) {
         Column(
             modifier = Modifier
                 .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp, bottomStart = 10.dp))
-                .background(MaterialTheme.colorScheme.secondary)
+                .background(MaterialTheme.colorScheme.primaryContainer)
                 .padding(8.dp),
             horizontalAlignment = Alignment.End
         ) {
             Text(
                 text = record.text,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSecondary
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
     }
