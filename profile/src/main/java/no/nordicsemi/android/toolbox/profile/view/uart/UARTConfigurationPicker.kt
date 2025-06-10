@@ -26,14 +26,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.UARTViewState
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.UARTEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun UARTConfigurationPicker(
     state: UARTViewState,
-    onEvent: (ProfileUiEvent) -> Unit
+    onEvent: (UARTEvent) -> Unit
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
 
