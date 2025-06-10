@@ -20,6 +20,7 @@
     <string name="uart_command_field">Command: %s</string>
 
     <string name="uart_run_macro_description">Run macro</string>
+    <string name="macro_expand">Edit macro</string>
     <string name="uart_delete_macro_description">Delete macro</string>
 
     <string name="uart_add_macro">Add macro</string>

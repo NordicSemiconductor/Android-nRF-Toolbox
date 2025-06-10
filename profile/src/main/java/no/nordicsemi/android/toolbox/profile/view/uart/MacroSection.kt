@@ -13,6 +13,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EditOff
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +47,7 @@ internal fun MacroSection(
 ) {
     var showAddDialog by rememberSaveable { mutableStateOf(false) }
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
+    var isExpanded by rememberSaveable { mutableStateOf(false) }
 
     // Dialogs
     MacroDialogs(
@@ -63,23 +66,46 @@ internal fun MacroSection(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                if (viewState.configurations.isEmpty()) {
-                    MacroSectionTitle { showAddDialog = true }
-                } else {
+                MacroSectionTitle(
+                    isEmptyConfiguration = viewState.configurations.isEmpty(),
+                    isExpanded = isExpanded,
+                    onAddClick = {
+                        showAddDialog = true
+                        isExpanded = true  // Expand when adding a new configuration
+                    },
+                    onExpand = { isExpanded = !isExpanded }
+                )
+
+                if (isExpanded && viewState.configurations.isNotEmpty()) {
                     MacroConfigControls(
                         viewState = viewState,
                         onAddClick = { showAddDialog = true },
                         onDeleteClick = { showDeleteDialog = true },
                         onEvent = onEvent
                     )
-                }
 
-                viewState.selectedConfiguration?.let {
-                    UARTMacroView(it, viewState.isConfigurationEdited, onEvent)
+                    viewState.selectedConfiguration?.let {
+                        UARTMacroView(it, viewState.isConfigurationEdited, onEvent)
+                    }
                 }
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MacroSectionPreview() {
+    MacroSection(
+        viewState = UARTViewState(
+            configurations = listOf(
+                UARTConfiguration(1, "Config 1"),
+                UARTConfiguration(2, "Config 2")
+            ),
+            selectedConfigurationName = "Config 1",
+            isConfigurationEdited = false
+        )
+    ) {}
 }
 
 @Composable
@@ -107,14 +133,34 @@ private fun MacroDialogs(
 }
 
 @Composable
-private fun MacroSectionTitle(onAddClick: () -> Unit) {
+private fun MacroSectionTitle(
+    isEmptyConfiguration: Boolean = false,
+    isExpanded: Boolean = false,
+    onAddClick: () -> Unit,
+    onExpand: () -> Unit = {},
+) {
     SectionTitle(
         resId = R.drawable.ic_macro,
         title = stringResource(id = R.string.uart_macros),
         menu = {
-            CircleIcon(Icons.Default.Add, R.string.uart_configuration_add, onAddClick)
+            if (isEmptyConfiguration) {
+                CircleIcon(Icons.Default.Add, R.string.uart_configuration_add, onAddClick)
+            } else {
+                CircleIcon(
+                    imageVector = if (isExpanded)
+                        Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = R.string.macro_expand,
+                ) { onExpand() }
+            }
+
         }
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MacroSectionTitlePreview() {
+    MacroSectionTitle(onAddClick = {})
 }
 
 @Composable
@@ -146,6 +192,24 @@ private fun MacroConfigControls(
             CircleIcon(Icons.Default.Delete, R.string.uart_configuration_delete, onDeleteClick)
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MacroConfigControlsPreview() {
+    MacroConfigControls(
+        viewState = UARTViewState(
+            configurations = listOf(
+                UARTConfiguration(1, "Config 1"),
+                UARTConfiguration(2, "Config 2")
+            ),
+            selectedConfigurationName = "Config 1",
+            isConfigurationEdited = false
+        ),
+        onAddClick = {},
+        onDeleteClick = {},
+        onEvent = {}
+    )
 }
 
 @Composable
