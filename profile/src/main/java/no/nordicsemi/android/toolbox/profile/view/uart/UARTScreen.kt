@@ -11,12 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.profile.data.UARTServiceData
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.UARTEvent
 
 @Composable
 internal fun UARTScreen(
     state: UARTServiceData,
-    onEvent: (ProfileUiEvent) -> Unit,
+    onEvent: (UARTEvent) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         MacroSection(state.uartViewState, onEvent)
@@ -36,7 +36,7 @@ private fun UARTScreenPreview() {
 @Composable
 private fun UARTContentView(
     state: UARTServiceData,
-    onEvent: (ProfileUiEvent) -> Unit,
+    onEvent: (UARTEvent) -> Unit,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,

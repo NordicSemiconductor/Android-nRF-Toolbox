@@ -36,14 +36,13 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.UARTViewState
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.UARTEvent
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
 internal fun MacroSection(
     viewState: UARTViewState = UARTViewState(),
-    onEvent: (ProfileUiEvent) -> Unit
+    onEvent: (UARTEvent) -> Unit
 ) {
     var showAddDialog by rememberSaveable { mutableStateOf(false) }
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
@@ -115,7 +114,7 @@ private fun MacroDialogs(
     showDeleteDialog: Boolean,
     onDismissAdd: () -> Unit,
     onDismissDelete: () -> Unit,
-    onEvent: (ProfileUiEvent) -> Unit
+    onEvent: (UARTEvent) -> Unit
 ) {
     if (showAddDialog) {
         UARTAddConfigurationDialog(viewState, onEvent, onDismissAdd)
@@ -168,7 +167,7 @@ private fun MacroConfigControls(
     viewState: UARTViewState,
     onAddClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    onEvent: (ProfileUiEvent) -> Unit
+    onEvent: (UARTEvent) -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -231,7 +230,7 @@ private fun CircleIcon(
 @Composable
 private fun DeleteConfigurationDialog(
     selectedConfiguration: UARTConfiguration,
-    onEvent: (ProfileUiEvent) -> Unit,
+    onEvent: (UARTEvent) -> Unit,
     onDismiss: () -> Unit
 ) {
     AlertDialog(

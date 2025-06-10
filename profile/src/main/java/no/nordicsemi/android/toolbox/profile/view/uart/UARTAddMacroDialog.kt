@@ -43,13 +43,15 @@ import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.uart.MacroEol
 import no.nordicsemi.android.toolbox.profile.data.uart.MacroIcon
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTMacro
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.UARTEvent
 
 private const val GRID_SIZE = 5
 
 @Composable
-internal fun UARTAddMacroDialog(macro: UARTMacro?, onEvent: (ProfileUiEvent) -> Unit) {
+internal fun UARTAddMacroDialog(
+    macro: UARTMacro?,
+    onEvent: (UARTEvent) -> Unit
+) {
     val newLineChar = rememberSaveable { mutableStateOf(macro?.newLineChar ?: MacroEol.LF) }
     val command = rememberSaveable { mutableStateOf(macro?.command ?: "") }
     val selectedIcon =

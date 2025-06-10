@@ -27,7 +27,6 @@ import no.nordicsemi.android.common.theme.NordicTheme
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTMacro
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.UARTEvent
 
 private val divider = 4.dp
@@ -36,7 +35,7 @@ private val divider = 4.dp
 internal fun UARTMacroView(
     configuration: UARTConfiguration,
     isEdited: Boolean,
-    onEvent: (ProfileUiEvent) -> Unit
+    onEvent: (UARTEvent) -> Unit
 ) {
     BoxWithConstraints {
         val buttonSize = if (maxWidth < 260.dp) {
@@ -93,7 +92,7 @@ private fun Item(
     isEdited: Boolean,
     position: Int,
     buttonSize: Dp,
-    onEvent: (ProfileUiEvent) -> Unit
+    onEvent: (UARTEvent) -> Unit
 ) {
     val macro = configuration.macros.getOrNull(position)
 
@@ -110,7 +109,7 @@ private fun MacroButton(
     position: Int,
     isEdited: Boolean,
     buttonSize: Dp,
-    onEvent: (ProfileUiEvent) -> Unit
+    onEvent: (UARTEvent) -> Unit
 ) {
     Image(
         painter = painterResource(id = macro.icon.toResId()),
@@ -135,7 +134,7 @@ private fun EmptyButton(
     isEdited: Boolean,
     position: Int,
     buttonSize: Dp,
-    onEvent: (ProfileUiEvent) -> Unit
+    onEvent: (UARTEvent) -> Unit
 ) {
     Box(
         modifier = Modifier

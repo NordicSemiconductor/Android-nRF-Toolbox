@@ -11,14 +11,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.UARTViewState
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.UARTEvent
 import no.nordicsemi.android.ui.view.TextInputField
 
 @Composable
 internal fun UARTAddConfigurationDialog(
     viewState: UARTViewState,
-    onEvent: (ProfileUiEvent) -> Unit,
+    onEvent: (UARTEvent) -> Unit,
     onDismiss: () -> Unit
 ) {
     var name by rememberSaveable { mutableStateOf("") }
