@@ -107,7 +107,6 @@ internal sealed interface UARTEvent : ProfileUiEvent {
     ) : UARTEvent
 
     data object ClearOutputItems : UARTEvent
-    data object MacroInputSwitchClicked : UARTEvent
 
 }
 
