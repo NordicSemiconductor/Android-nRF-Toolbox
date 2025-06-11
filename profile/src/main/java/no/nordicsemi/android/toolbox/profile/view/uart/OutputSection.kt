@@ -3,7 +3,6 @@ package no.nordicsemi.android.toolbox.profile.view.uart
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,16 +11,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,6 +42,13 @@ internal fun OutputSection(
     records: List<UARTRecord>,
     onEvent: (UARTEvent) -> Unit
 ) {
+    val listState = rememberLazyListState()
+
+    // Auto-scroll to the bottom when new items are added
+    LaunchedEffect(records.size) {
+        listState.animateScrollToItem(records.lastIndex.coerceAtLeast(0))
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -58,25 +66,22 @@ internal fun OutputSection(
             )
         }
 
-        Box(
+        LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = 500.dp)
-                .verticalScroll(rememberScrollState())
+                .heightIn(max = 500.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Column(
-                modifier = Modifier,
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                if (records.isEmpty()) {
+            if (records.isEmpty()) {
+                item {
                     Text(text = stringResource(id = R.string.uart_output_placeholder))
-                } else {
-                    // Display the latest messages at the start
-                    records.forEach {
-                        when (it.type) {
-                            UARTRecordType.INPUT -> MessageItemInput(record = it)
-                            UARTRecordType.OUTPUT -> MessageItemOutput(record = it)
-                        }
+                }
+            } else {
+                items(records) { record ->
+                    when (record.type) {
+                        UARTRecordType.INPUT -> MessageItemInput(record = record)
+                        UARTRecordType.OUTPUT -> MessageItemOutput(record = record)
                     }
                 }
             }
