@@ -197,7 +197,7 @@ internal class ProfileService : NotificationService() {
                     lifecycleScope.launch {
                         try {
                             val requiresBonding =
-                                remoteService.uuid == CGMS_SERVICE_UUID.toKotlinUuid()
+                                remoteService.uuid == CGMS_SERVICE_UUID.toKotlinUuid() && peripheral.hasBondInformation
 
                             if (requiresBonding) {
                                 peripheral.bondState
