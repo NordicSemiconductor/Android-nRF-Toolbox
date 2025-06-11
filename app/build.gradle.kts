@@ -70,5 +70,4 @@ dependencies {
     implementation (libs.slf4j.timber)
 
     implementation(libs.nordic.blek.client.android)
-    implementation("no.nordicsemi.kotlin:data")
 }
