@@ -84,7 +84,6 @@ internal class ProfileViewModel @Inject constructor(
     private val deviceRepository: DeviceRepository,
     private val uartConfigurationRepository: UartConfigurationRepository,
     @ApplicationContext private val context: Context,
-    private val channelSoundingManager: ChannelSoundingManager,
     savedStateHandle: SavedStateHandle,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
     val address: String = parameterOf(ProfileDestinationId)
@@ -290,6 +289,7 @@ internal class ProfileViewModel @Inject constructor(
     }
 
     private fun updateChannelSounding() {
+        Timber.tag("ChannelSounding").d("Updating Channel Sounding data for $address")
         ChannelSoundingRepository.getData(address).onEach {
             updateDeviceData(it)
         }.launchIn(viewModelScope)
@@ -297,7 +297,7 @@ internal class ProfileViewModel @Inject constructor(
             viewModelScope.launch {
                 getServiceApi()?.createBonding(address)
                 try {
-                    channelSoundingManager.addDeviceToRangingSession(address)
+                    ChannelSoundingManager.addDeviceToRangingSession(context, address)
                 } catch (e: Exception) {
                     Timber.e(" ${e.message}")
                 }

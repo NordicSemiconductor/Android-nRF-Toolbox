@@ -1,6 +1,5 @@
 package no.nordicsemi.android.toolbox.profile.repository.channelSounding
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.ranging.RangingData
@@ -15,42 +14,25 @@ import android.ranging.ble.cs.BleCsRangingParams
 import android.ranging.raw.RawRangingDevice
 import android.ranging.raw.RawResponderRangingConfig
 import androidx.annotation.RequiresApi
-import dagger.hilt.android.qualifiers.ApplicationContext
 import no.nordicsemi.android.toolbox.profile.repository.channelSounding.RangingSessionStartTechnology.Companion.getTechnology
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@SuppressLint("NewApi")
-@Singleton
-internal class ChannelSoundingManager @Inject constructor(
-    @ApplicationContext private val context: Context,
-) {
-    private val rangingManager =
-        if (Build.VERSION.SDK_INT >= 36) context.getSystemService(RangingManager::class.java) else null
+object ChannelSoundingManager {
 
     private var rangingSession: RangingSession? = null
 
-    private val rangingSessionCallback = object : RangingSession.Callback {
+    private val rangingSessionCallback = @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+    object : RangingSession.Callback {
         override fun onClosed(reason: Int) {
-            Timber.tag("BBB").d(
-                "RangingManager session closed with reason: ${
-                    RangingSessionCloseReason.getReason(reason)
-                }"
-            )
+            Timber.d("closed, reason: ${RangingSessionCloseReason.getReason(reason)}")
         }
 
         override fun onOpenFailed(reason: Int) {
-            Timber.tag("BBB")
-                .d(
-                    "RangingManager session open failed with reason: ${
-                        RangingSessionFailedReason.getReason(reason)
-                    }"
-                )
+            Timber.d("Failed, reason: ${RangingSessionFailedReason.getReason(reason)}")
         }
 
         override fun onOpened() {
-            Timber.tag("BBB").d("RangingManager session opened successfully.")
+            Timber.d("Opened successfully.")
         }
 
         override fun onResults(
@@ -59,9 +41,10 @@ internal class ChannelSoundingManager @Inject constructor(
         ) {
             val measurement = data.distance?.measurement
             val confidence = data.distance?.confidence
-            Timber.tag("BBB").d("onResults rangingTechnology: ${data.rangingTechnology}")
-            Timber.tag("BBB").d(
-                "onResults azimuth: ${data.azimuth}\televation: ${data.elevation}\tpeer: ${peer.uuid}\tdistance ${data.distance}\t" +
+            Timber.d("RangingTechnology: ${data.rangingTechnology}")
+            Timber.d(
+                "Azimuth: ${data.azimuth}\televation: " +
+                        "${data.elevation}\tpeer: ${peer.uuid} distance ${data.distance}\t" +
                         " rssi: ${data.rssi} \tmeasurement: $measurement\tconfidence: $confidence"
             )
         }
@@ -70,25 +53,29 @@ internal class ChannelSoundingManager @Inject constructor(
             peer: RangingDevice,
             technology: Int
         ) {
-            Timber.tag("BBB")
-                .d(
-                    "RangingManager session started with peer: ${peer.uuid}, " +
-                            "\ntechnology: ${getTechnology(technology)}"
-                )
+            Timber.d(
+                "Session started with peer: ${peer.uuid}, \ntechnology: ${getTechnology(technology)}"
+            )
         }
 
         override fun onStopped(
             peer: RangingDevice,
             technology: Int
         ) {
-            Timber.tag("BBB").d("RangingManager session stopped with peer: ${peer.uuid}")
+            Timber.d("Session stopped with peer: ${peer.uuid}")
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun addDeviceToRangingSession(
+        context: Context,
         device: String
     ) {
+        val rangingManager = try {
+            context.getSystemService(RangingManager::class.java)
+        } catch (e: Exception) {
+            null
+        }
         if (rangingManager == null) {
             // RangingManager is not supported on this device
             return
@@ -101,7 +88,7 @@ internal class ChannelSoundingManager @Inject constructor(
                         Timber.d("Channel Sounding supported.")
                     }
             } else {
-                Timber.d("CS Capabilities is not supported")
+                Timber.d("Channel Sounding Capabilities is not supported")
             }
 
         }
