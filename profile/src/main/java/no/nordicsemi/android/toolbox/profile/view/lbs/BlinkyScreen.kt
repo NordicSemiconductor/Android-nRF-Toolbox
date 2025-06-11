@@ -24,13 +24,12 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.LBSData
 import no.nordicsemi.android.toolbox.profile.data.LBSServiceData
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.LBSEvent
 
 @Composable
 internal fun BlinkyScreen(
     serviceData: LBSServiceData,
-    onClickEvent: (ProfileUiEvent) -> Unit,
+    onClickEvent: (LBSEvent) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),

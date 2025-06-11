@@ -54,7 +54,7 @@ import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.GLSServiceData
 import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.view.gls.details.GLSDetails
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.GLSEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.GLSEvent.OnWorkingModeSelected
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
@@ -66,7 +66,7 @@ import java.util.Calendar
 @Composable
 internal fun GLSScreen(
     glsServiceData: GLSServiceData,
-    onClickEvent: (ProfileUiEvent) -> Unit
+    onClickEvent: (GLSEvent) -> Unit
 ) {
     var isWorkingModeClicked by rememberSaveable { mutableStateOf(false) }
 
@@ -107,7 +107,7 @@ private fun WorkingModeDropDown(
     isWorkingModeSelected: Boolean,
     onExpand: () -> Unit,
     onDismiss: () -> Unit,
-    onClickEvent: (ProfileUiEvent) -> Unit
+    onClickEvent: (GLSEvent) -> Unit
 ) {
     if (glsState.requestStatus == RequestStatus.PENDING) {
         CircularProgressIndicator()
@@ -144,7 +144,7 @@ private fun WorkingModeDropDownPreview() {
 private fun WorkingModeDialog(
     glsState: GLSServiceData,
     onDismiss: () -> Unit,
-    onWorkingModeSelected: (ProfileUiEvent) -> Unit,
+    onWorkingModeSelected: (GLSEvent) -> Unit,
 ) {
     val listState = rememberLazyListState()
     val workingModeEntries = WorkingMode.entries.map { it }
