@@ -54,13 +54,13 @@ import no.nordicsemi.android.toolbox.profile.view.rscs.RSCSScreen
 import no.nordicsemi.android.toolbox.profile.view.throughput.ThroughputScreen
 import no.nordicsemi.android.toolbox.profile.view.uart.UARTScreen
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionState
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionViewModel
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceData
 import no.nordicsemi.android.toolbox.profile.viewmodel.DisconnectEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.NavigateUp
 import no.nordicsemi.android.toolbox.profile.viewmodel.OnRetryClicked
 import no.nordicsemi.android.toolbox.profile.viewmodel.OpenLoggerEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileViewModel
 import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
 import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
@@ -68,12 +68,11 @@ import no.nordicsemi.android.ui.view.internal.LoadingView
 import no.nordicsemi.android.ui.view.internal.ServiceDiscoveryView
 
 @Composable
-internal fun DeviceConnectionScreen() {
-    val deviceConnectionViewModel: DeviceConnectionViewModel = hiltViewModel()
-    val deviceDataState by deviceConnectionViewModel.deviceData.collectAsStateWithLifecycle()
-    val deviceAddress = deviceConnectionViewModel.address
-    val onClickEvent: (ProfileUiEvent) -> Unit =
-        { deviceConnectionViewModel.onClickEvent(it) }
+internal fun ProfileScreen() {
+    val profileVM: ProfileViewModel = hiltViewModel()
+    val deviceDataState by profileVM.deviceData.collectAsStateWithLifecycle()
+    val deviceAddress = profileVM.address
+    val onClickEvent: (ProfileUiEvent) -> Unit = { profileVM.onClickEvent(it) }
 
     Scaffold(
         topBar = {

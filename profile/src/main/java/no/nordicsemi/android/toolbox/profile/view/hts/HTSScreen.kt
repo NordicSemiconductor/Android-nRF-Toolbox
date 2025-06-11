@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.HTSServiceData
 import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.HTSEvent
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
@@ -35,7 +34,7 @@ import no.nordicsemi.android.ui.view.SectionTitle
 @Composable
 internal fun HTSScreen(
     htsServiceData: HTSServiceData,
-    onClickEvent: (ProfileUiEvent) -> Unit
+    onClickEvent: (HTSEvent) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -72,7 +71,7 @@ private fun HTSScreenPreview() {
 @Composable
 private fun TemperatureUnitSettings(
     state: HTSServiceData,
-    onClickEvent: (ProfileUiEvent) -> Unit
+    onClickEvent: (HTSEvent) -> Unit
 ) {
     var openSettingsDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -96,7 +95,7 @@ private fun TemperatureUnitSettings(
 private fun TemperatureUnitSettingsDialog(
     state: HTSServiceData,
     onDismiss: () -> Unit,
-    onClickEvent: (ProfileUiEvent) -> Unit,
+    onClickEvent: (HTSEvent) -> Unit,
 ) {
     val listState = rememberLazyListState()
     val entries = TemperatureUnit.entries.map { it }

@@ -42,7 +42,7 @@ import no.nordicsemi.android.service.repository.RSCSRepository
 import no.nordicsemi.android.service.repository.ThroughputRepository
 import no.nordicsemi.android.service.repository.UartRepository
 import no.nordicsemi.android.service.services.ServiceManager
-import no.nordicsemi.android.toolbox.profile.DeviceConnectionDestinationId
+import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.data.ProfileServiceData
 import no.nordicsemi.android.toolbox.profile.data.uart.MacroEol
@@ -50,8 +50,8 @@ import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTMacro
 import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
-import no.nordicsemi.android.toolbox.profile.repository.uartXml.UartConfigurationRepository
 import no.nordicsemi.android.toolbox.profile.repository.channelSounding.ChannelSoundingManager
+import no.nordicsemi.android.toolbox.profile.repository.uartXml.UartConfigurationRepository
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
@@ -78,7 +78,7 @@ internal sealed class DeviceConnectionState {
 }
 
 @HiltViewModel
-internal class DeviceConnectionViewModel @Inject constructor(
+internal class ProfileViewModel @Inject constructor(
     private val profileServiceManager: ProfileServiceManager,
     private val navigator: Navigator,
     private val deviceRepository: DeviceRepository,
@@ -87,7 +87,7 @@ internal class DeviceConnectionViewModel @Inject constructor(
     private val channelSoundingManager: ChannelSoundingManager,
     savedStateHandle: SavedStateHandle,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
-    val address: String = parameterOf(DeviceConnectionDestinationId)
+    val address: String = parameterOf(ProfileDestinationId)
     private val _deviceData = MutableStateFlow<DeviceConnectionState>(DeviceConnectionState.Idle)
     val deviceData = _deviceData.asStateFlow()
     private var peripheral: Peripheral? = null

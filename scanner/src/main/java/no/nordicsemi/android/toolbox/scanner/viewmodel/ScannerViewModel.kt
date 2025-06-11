@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.toolbox.lib.utils.logAndReport
-import no.nordicsemi.android.toolbox.profile.DeviceConnectionDestinationId
+import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import no.nordicsemi.android.toolbox.scanner.repository.Scanner
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
@@ -99,7 +99,7 @@ internal class ScannerViewModel @Inject constructor(
         try {
             viewModelScope.launch {
                 scanner.close()
-                navigator.navigateTo(DeviceConnectionDestinationId, peripheral.address)
+                navigator.navigateTo(ProfileDestinationId, peripheral.address)
                 {
                     popUpTo(ScannerDestinationId.toString()) {
                         inclusive = true

@@ -27,7 +27,6 @@ import no.nordicsemi.android.lib.profile.rscs.RSCFeatureData
 import no.nordicsemi.android.lib.profile.rscs.RSCSSettingsUnit
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.RSCSServiceData
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.RSCSEvent
 import no.nordicsemi.android.ui.view.FeatureSupported
 import no.nordicsemi.android.ui.view.KeyValueColumn
@@ -39,7 +38,7 @@ import no.nordicsemi.android.ui.view.SectionTitle
 @Composable
 internal fun RSCSScreen(
     serviceData: RSCSServiceData,
-    onClickEvent: (ProfileUiEvent) -> Unit,
+    onClickEvent: (RSCSEvent) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -135,7 +134,7 @@ private fun RSCSScreenPreview() {
 @Composable
 private fun RSCSSettingsDropdown(
     state: RSCSServiceData,
-    onClickEvent: (ProfileUiEvent) -> Unit
+    onClickEvent: (RSCSEvent) -> Unit
 ) {
     var openSettingsDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -158,7 +157,7 @@ private fun RSCSSettingsDropdown(
 private fun RSCSSettingsDialog(
     state: RSCSServiceData,
     onDismiss: () -> Unit,
-    onSpeedUnitSelected: (ProfileUiEvent) -> Unit
+    onSpeedUnitSelected: (RSCSEvent) -> Unit
 ) {
     val speedUnitEntries = RSCSSettingsUnit.entries.map { it }
 

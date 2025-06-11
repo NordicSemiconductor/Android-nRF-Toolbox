@@ -33,7 +33,6 @@ import no.nordicsemi.android.toolbox.profile.data.NumberOfBytes
 import no.nordicsemi.android.toolbox.profile.data.NumberOfSeconds
 import no.nordicsemi.android.toolbox.profile.data.ThroughputServiceData
 import no.nordicsemi.android.toolbox.profile.data.WritingStatus
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.ThroughputEvent
 import no.nordicsemi.android.ui.view.AnimatedThreeDots
 import no.nordicsemi.android.ui.view.KeyValueColumn
@@ -46,7 +45,7 @@ import no.nordicsemi.android.ui.view.TextInputField
 @Composable
 internal fun ThroughputScreen(
     serviceData: ThroughputServiceData,
-    onClickEvent: (ProfileUiEvent) -> Unit
+    onClickEvent: (ThroughputEvent) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -161,7 +160,7 @@ private fun WriteDropdown(
     onExpand: () -> Unit,
     onDropdownMenuSelected: (String) -> Unit,
     onNumberUpdate: (Int) -> Unit,
-    onClickEvent: (ProfileUiEvent) -> Unit
+    onClickEvent: (ThroughputEvent) -> Unit
 ) {
     Box {
         Button(onClick = { onExpand() }) {

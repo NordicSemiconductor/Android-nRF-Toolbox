@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.service.services.ServiceManager
-import no.nordicsemi.android.toolbox.profile.DeviceConnectionDestinationId
+import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
@@ -41,7 +41,7 @@ internal class HomeViewModel @Inject constructor(
         when (event) {
             HomeViewEvent.OnConnectDeviceClick -> navigator.navigateTo(ScannerDestinationId)
             is HomeViewEvent.OnDeviceClick -> navigator.navigateTo(
-                DeviceConnectionDestinationId, event.deviceAddress
+                ProfileDestinationId, event.deviceAddress
             )
         }
     }
