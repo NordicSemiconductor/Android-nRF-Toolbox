@@ -373,10 +373,13 @@ internal class ProfileViewModel @Inject constructor(
     fun onClickEvent(event: ProfileUiEvent) {
         // Handle click events
         when (event) {
-            is DisconnectEvent -> disconnectAndNavigate(event.device)
-            NavigateUp -> disconnectIfNeededAndNavigate()
+            // Navigation events.
+            is DisconnectEvent -> disconnect(event.device)
+            NavigateUp -> navigator.navigateUp()
             is OnRetryClicked -> reconnectDevice(event.device)
             OpenLoggerEvent -> openLogger()
+
+            // Profile events.
             is CSCEvent.OnSelectedSpeedUnitSelected -> setSpeedUnit(event.selectedSpeedUnit)
             is CSCEvent.OnWheelSizeSelected -> setWheelSize(event.wheelSize)
 
@@ -554,23 +557,21 @@ internal class ProfileViewModel @Inject constructor(
     }
 
     /**
-     * Disconnect the device if missing services and navigate back.
-     */
-    private fun disconnectIfNeededAndNavigate() = viewModelScope.launch {
-        if ((_deviceData.value as? DeviceConnectionState.Connected)?.data?.isMissingServices == true) {
-            getServiceApi()?.disconnect(address)
-        }
-        navigator.navigateUp()
-    }
-
-    /**
      * Disconnect the device with the given address and navigate back.
      * @param device the address of the device to disconnect.
      */
-    private fun disconnectAndNavigate(device: String) = viewModelScope.launch {
+    private fun disconnect(device: String) = viewModelScope.launch {
+        if ((_deviceData.value as? DeviceConnectionState.Connected)?.data?.isMissingServices == true) {
+            // update disconnection reason to missing services
+            _deviceData.update {
+                DeviceConnectionState.Disconnected(
+                    peripheral,
+                    CustomReason(DisconnectReason.MISSING_SERVICE)
+                )
+            }
+        }
         getServiceApi()?.disconnect(device)
         unbindService()
-        navigator.navigateUp()
     }
 
     /**

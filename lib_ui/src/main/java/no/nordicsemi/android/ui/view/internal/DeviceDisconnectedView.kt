@@ -36,7 +36,7 @@ fun DeviceDisconnectedView(
         DisconnectReason.USER -> "Device disconnected successfully."
         DisconnectReason.UNKNOWN -> "Device disconnected with unknown reason."
         DisconnectReason.LINK_LOSS -> "Device signal has been lost."
-        DisconnectReason.MISSING_SERVICE -> "Not supported services, click back to disconnect and back to home page."
+        DisconnectReason.MISSING_SERVICE -> "Missing required service on the device."
         DisconnectReason.BLUETOOTH_OFF -> "Bluetooth adapter is turned off."
     }
 
