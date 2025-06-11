@@ -49,13 +49,14 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import no.nordicsemi.android.lib.profile.cgms.data.CGMRecord
 import no.nordicsemi.android.lib.profile.cgms.data.CGMStatus
 import no.nordicsemi.android.lib.profile.common.WorkingMode
+import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.toolbox.profile.data.CGMServiceData
 import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.view.gls.toDisplayString
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.GLSEvent.OnWorkingModeSelected
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
@@ -101,7 +102,7 @@ private fun WorkingModeDropDown(
     onDismiss: () -> Unit,
     onClickEvent: (ProfileUiEvent) -> Unit
 ) {
-    if (cgmState.requestStatus == no.nordicsemi.android.lib.profile.gls.data.RequestStatus.PENDING) {
+    if (cgmState.requestStatus == RequestStatus.PENDING) {
         CircularProgressIndicator()
     } else {
         Column {
@@ -110,7 +111,13 @@ private fun WorkingModeDropDown(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "Request")
+                    Text(
+                        text = if (cgmState.workingMode != null) {
+                            cgmState.workingMode!!.toDisplayString()
+                        } else {
+                            "Request"
+                        }
+                    )
                     Icon(Icons.Default.ArrowDropDown, contentDescription = "")
                 }
             }
@@ -193,9 +200,14 @@ private fun RecordsView(state: CGMServiceData) {
         }
 
     }
-    /*    if (state.records.isNotEmpty()) {
-            LineChartView(state, false)
-        }*/
+
+    GlucoseChartScreen()
+//    if (state.records.isNotEmpty()) {
+////        val data = generateMockData()
+//    }
+    /*  if (state.records.isNotEmpty()) {
+          LineChartView(state, false)
+      }*/
 }
 
 @Composable
@@ -432,7 +444,12 @@ private fun createLineChartView(
     }
 }
 
-private fun updateData(isDarkTheme: Boolean, points: List<Pair<Int, Int>>, chart: LineChart, zoomIn: Boolean) {
+private fun updateData(
+    isDarkTheme: Boolean,
+    points: List<Pair<Int, Int>>,
+    chart: LineChart,
+    zoomIn: Boolean
+) {
     val entries = points.map {
         Entry(it.first.toFloat(), it.second.toFloat())
     }
