@@ -37,9 +37,12 @@ internal fun HomeView() {
     val onEvent: (HomeViewEvent) -> Unit = { viewModel.onClickEvent(it) }
 
     Scaffold(
-        topBar = { TitleAppBar(stringResource(id = R.string.app_name), false) },
+        topBar = { TitleAppBar(stringResource(id = R.string.app_name)) },
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = { onEvent(HomeViewEvent.OnConnectDeviceClick) }) {
+            ExtendedFloatingActionButton(
+                onClick = { onEvent(HomeViewEvent.OnConnectDeviceClick) },
+                modifier = Modifier.padding(8.dp)
+            ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -48,7 +51,7 @@ internal fun HomeView() {
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add device from scanner"
                     )
-                    Text(text = "Connect device")
+                    Text(text = stringResource(R.string.connect_device))
                 }
             }
         }
@@ -68,7 +71,7 @@ internal fun HomeView() {
                         .verticalScroll(rememberScrollState())
                 ) {
                     Text(
-                        text = "Connected devices",
+                        text = stringResource(R.string.connected_devices),
                         style = MaterialTheme.typography.titleLarge,
                     )
                     state.connectedDevices.values.forEach { (peripheral, services) ->
@@ -77,57 +80,49 @@ internal fun HomeView() {
                                 Profile.HRS -> FeatureButton(
                                     iconId = R.drawable.ic_hrs,
                                     profileName = R.string.hrs_module_full,
-                                    deviceName = peripheral.name,
-                                    true
+                                    deviceName = peripheral.name
                                 ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
 
                                 Profile.HTS -> FeatureButton(
                                     iconId = R.drawable.ic_hts,
                                     profileName = R.string.hts_module_full,
-                                    deviceName = peripheral.name,
-                                    true
+                                    deviceName = peripheral.name
                                 ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
 
                                 Profile.BPS -> FeatureButton(
                                     iconId = R.drawable.ic_bps,
                                     profileName = R.string.bps_module_full,
-                                    deviceName = peripheral.name,
-                                    true
+                                    deviceName = peripheral.name
                                 ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
 
                                 Profile.GLS -> FeatureButton(
                                     iconId = R.drawable.ic_gls,
                                     profileName = R.string.gls_module_full,
-                                    deviceName = peripheral.name,
-                                    true
+                                    deviceName = peripheral.name
                                 ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
 
                                 Profile.CGM -> FeatureButton(
                                     iconId = R.drawable.ic_cgm,
                                     profileName = R.string.cgm_module_full,
-                                    deviceName = peripheral.name,
-                                    true
+                                    deviceName = peripheral.name
                                 ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
 
                                 Profile.RSCS -> FeatureButton(
                                     iconId = R.drawable.ic_rscs,
                                     profileName = R.string.rscs_module_full,
-                                    deviceName = peripheral.name,
-                                    true
+                                    deviceName = peripheral.name
                                 ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
 
                                 Profile.DFS -> FeatureButton(
                                     iconId = R.drawable.ic_distance,
                                     profileName = R.string.direction_module_full,
-                                    deviceName = peripheral.name,
-                                    true
+                                    deviceName = peripheral.name
                                 ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
 
                                 Profile.CSC -> FeatureButton(
                                     iconId = R.drawable.ic_csc,
                                     profileName = R.string.cgm_module_full,
-                                    deviceName = peripheral.name,
-                                    true
+                                    deviceName = peripheral.name
                                 ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
 
                                 Profile.BATTERY -> {
@@ -135,16 +130,14 @@ internal fun HomeView() {
                                         FeatureButton(
                                             iconId = R.drawable.ic_battery,
                                             profileName = R.string.battery_module_full,
-                                            deviceName = peripheral.name,
-                                            true
+                                            deviceName = peripheral.name
                                         ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
                                 }
 
                                 Profile.THROUGHPUT -> {
                                     FeatureButton(
                                         iconId = Icons.Default.SyncAlt,
-                                        name = "Throughput",
-                                        isRunning = true,
+                                        name = stringResource(R.string.throughput_module),
                                         description = peripheral.name
                                     ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
                                 }
@@ -153,8 +146,7 @@ internal fun HomeView() {
                                     FeatureButton(
                                         iconId = R.drawable.ic_uart,
                                         profileName = R.string.uart_module_full,
-                                        deviceName = peripheral.name,
-                                        true
+                                        deviceName = peripheral.name
                                     ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
                                 }
 
@@ -162,16 +154,14 @@ internal fun HomeView() {
                                     FeatureButton(
                                         iconId = R.drawable.ic_distance,
                                         profileName = R.string.channel_sounding_module,
-                                        deviceName = peripheral.name,
-                                        true
+                                        deviceName = peripheral.name
                                     ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
                                 }
 
                                 Profile.LBS -> {
                                     FeatureButton(
                                         iconId = Icons.Default.Lightbulb,
-                                        name = "LBS/Blinky",
-                                        isRunning = true,
+                                        name = stringResource(R.string.lbs_blinky_module),
                                         description = peripheral.name
                                     ) { onEvent(HomeViewEvent.OnDeviceClick(peripheral.address)) }
                                 }
