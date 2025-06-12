@@ -31,7 +31,6 @@
 
 package no.nordicsemi.android.nrftoolbox.view
 
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,7 +43,7 @@ import no.nordicsemi.android.nrftoolbox.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TitleAppBar(text: String, isScanning: Boolean) {
+fun TitleAppBar(text: String) {
     TopAppBar(
         title = { Text(text, maxLines = 2) },
         colors = TopAppBarDefaults.topAppBarColors(
@@ -55,8 +54,6 @@ fun TitleAppBar(text: String, isScanning: Boolean) {
             navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
         ),
         actions = {
-            if (isScanning) CircularProgressIndicator()
-
             AnalyticsPermissionButton()
         }
     )

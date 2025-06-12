@@ -35,7 +35,6 @@ internal fun FeatureButton(
     @DrawableRes iconId: Int,
     @StringRes profileName: Int,
     deviceName: String? = null,
-    isRunning: Boolean? = null,
     @StringRes description: Int? = null,
     onClick: () -> Unit
 ) {
@@ -47,12 +46,6 @@ internal fun FeatureButton(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            val color = if (isRunning == true) {
-                colorResource(id = R.color.nordicGrass)
-            } else {
-                MaterialTheme.colorScheme.secondary
-            }
-
             Image(
                 painter = painterResource(iconId),
                 contentDescription = stringResource(id = profileName),
@@ -61,7 +54,7 @@ internal fun FeatureButton(
                 modifier = Modifier
                     .size(64.dp)
                     .clip(CircleShape)
-                    .background(color)
+                    .background(colorResource(id = R.color.nordicGrass))
                     .padding(8.dp)
             )
 
@@ -113,7 +106,6 @@ private fun FeatureButtonPreview() {
 internal fun FeatureButton(
     iconId: ImageVector,
     name: String,
-    isRunning: Boolean? = null,
     description: String? = null,
     onClick: () -> Unit
 ) {
@@ -125,11 +117,6 @@ internal fun FeatureButton(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            val color = if (isRunning == true) {
-                colorResource(id = R.color.nordicGrass)
-            } else {
-                MaterialTheme.colorScheme.secondary
-            }
             Image(
                 imageVector = iconId,
                 contentDescription = null,
@@ -138,7 +125,7 @@ internal fun FeatureButton(
                 modifier = Modifier
                     .size(64.dp)
                     .clip(CircleShape)
-                    .background(color)
+                    .background(colorResource(id = R.color.nordicGrass))
                     .padding(8.dp)
             )
 

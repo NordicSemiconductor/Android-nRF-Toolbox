@@ -79,4 +79,15 @@
     <string name="battery_module_full">Battery</string>
 
     <string name="channel_sounding_module"> CHANNEL SOUNDING</string>
+
+    <string name="throughput_module">Throughput</string>
+
+    <string name="lbs_blinky_module">LBS/Blinky</string>
+
+    <string name="device_not_connected_title">NO DEVICES CONNECTED</string>
+    <string name="device_not_connected_message">Please connect a device to proceed. \ \nEnsure it\'s powered on and within range.</string>
+
+    <string name="connect_device">Connect device</string>
+    <string name="connected_devices">Connected devices</string>
+
 </resources>
