@@ -1,5 +1,6 @@
 package no.nordicsemi.android.nrftoolbox.viewmodel
 
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,6 +21,9 @@ internal data class HomeViewState(
     val connectedDevices: Map<String, Pair<Peripheral, List<ServiceManager>>> = emptyMap(),
 )
 
+private const val GITHUB_REPO_URL = "https://github.com/NordicSemiconductor/Android-nRF-Toolbox.git"
+private const val NORDIC_DEV_ZONE_URL = "https://devzone.nordicsemi.com/"
+
 @HiltViewModel
 internal class HomeViewModel @Inject constructor(
     private val navigator: Navigator,
@@ -37,12 +41,15 @@ internal class HomeViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    fun onClickEvent(event: HomeViewEvent) {
+    fun onClickEvent(event: UiEvent) {
         when (event) {
-            HomeViewEvent.OnConnectDeviceClick -> navigator.navigateTo(ScannerDestinationId)
-            is HomeViewEvent.OnDeviceClick -> navigator.navigateTo(
+            UiEvent.OnConnectDeviceClick -> navigator.navigateTo(ScannerDestinationId)
+            is UiEvent.OnDeviceClick -> navigator.navigateTo(
                 ProfileDestinationId, event.deviceAddress
             )
+
+            UiEvent.OnGitHubClick -> navigator.open(GITHUB_REPO_URL.toUri())
+            UiEvent.OnNordicDevZoneClick -> navigator.open(NORDIC_DEV_ZONE_URL.toUri())
         }
     }
 
