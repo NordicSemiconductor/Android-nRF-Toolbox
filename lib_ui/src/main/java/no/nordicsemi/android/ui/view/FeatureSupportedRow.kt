@@ -28,7 +28,7 @@ fun FeatureSupported(
     ) {
         Box(
             modifier = Modifier.background(
-                color = Color(0xFF00796B),
+                color = MaterialTheme.colorScheme.primary,
                 shape = RectangleShape
             )
         ) {
