@@ -85,9 +85,14 @@
     <string name="lbs_blinky_module">LBS/Blinky</string>
 
     <string name="device_not_connected_title">NO DEVICES CONNECTED</string>
-    <string name="device_not_connected_message">Please connect a device to proceed. \ \nEnsure it\'s powered on and within range.</string>
+    <string name="device_not_connected_message">Tap Connect device button to begin.</string>
 
-    <string name="connect_device">Connect device</string>
+    <string name="connect_device">Connect Device</string>
     <string name="connected_devices">Connected devices</string>
+
+    <string name="github_repo">Source code (GitHub)</string>
+    <string name="nordic_dev_zone">Help (Nordic DevZone)</string>
+
+    <string name="links">Links</string>
 
 </resources>
