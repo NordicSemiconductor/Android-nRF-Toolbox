@@ -56,6 +56,7 @@ internal fun Links(onEvent: (UiEvent) -> Unit) {
                     Icon(
                         imageVector = Icons.Default.Code,
                         contentDescription = stringResource(R.string.github_repo),
+                        modifier = Modifier.size(40.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )
                     Text(
@@ -82,7 +83,7 @@ internal fun Links(onEvent: (UiEvent) -> Unit) {
                     Icon(
                         imageVector = Icons.Default.Language,
                         contentDescription = stringResource(R.string.nordic_dev_zone),
-                        modifier = Modifier.size(28.dp),
+                        modifier = Modifier.size(40.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )
                     Text(
