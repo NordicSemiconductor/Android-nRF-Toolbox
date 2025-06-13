@@ -21,3 +21,11 @@ fun String.parseWithNewLineChar(newLineChar: MacroEol): String {
         MacroEol.CR -> this.replace("\n", "\r")
     }
 }
+
+fun String.toMacroEolUnicodeCharDisplay(newLineChar: MacroEol): String {
+    return when (newLineChar) {
+        MacroEol.CR -> this.replace("\n", "\u240D\r\n")
+        MacroEol.LF -> this + "\u240A"
+        MacroEol.CR_LF -> this.replace("\n", "\u240A\u240D\r")
+    }
+}
