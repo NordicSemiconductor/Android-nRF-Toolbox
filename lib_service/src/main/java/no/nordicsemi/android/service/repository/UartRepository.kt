@@ -11,6 +11,7 @@ import no.nordicsemi.android.toolbox.profile.data.uart.MacroEol
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTMacro
 import no.nordicsemi.android.toolbox.profile.data.uart.parseWithNewLineChar
+import no.nordicsemi.android.toolbox.profile.data.uart.toMacroEolUnicodeCharDisplay
 
 object UartRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<UARTServiceData>>()
@@ -58,7 +59,8 @@ object UartRepository {
             UARTManager.sendText(
                 deviceId,
                 macro.command!!.parseWithNewLineChar(macro.newLineChar),
-                getMaxWriteLength(deviceId)
+                getMaxWriteLength(deviceId),
+                macro.command!!.toMacroEolUnicodeCharDisplay(macro.newLineChar)
             )
         }
     }

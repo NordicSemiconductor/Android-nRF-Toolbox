@@ -63,7 +63,12 @@ internal class UARTManager : ServiceManager {
         private lateinit var rxCharacteristic: RemoteCharacteristic
         private var rxCharacteristicWriteType: WriteType? = null
 
-        suspend fun sendText(device: String, message: String, maxWriteLength: Int) {
+        suspend fun sendText(
+            device: String,
+            message: String,
+            maxWriteLength: Int,
+            macroEolUnicodeMessage: String? = null,
+        ) {
             val messageBytes = message.toByteArray()
             try {
                 if (rxCharacteristicWriteType == null) {
@@ -77,8 +82,7 @@ internal class UARTManager : ServiceManager {
             } catch (e: Exception) {
                 Timber.tag("UARTService").e("Error ${e.message}")
             } finally {
-                Timber.d("Sent: $message")
-                UartRepository.onNewMessageSent(device, message)
+                UartRepository.onNewMessageSent(device, macroEolUnicodeMessage ?: message)
             }
         }
     }
