@@ -2,6 +2,7 @@ package no.nordicsemi.android.toolbox.profile.view.cscs
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +20,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,6 +38,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import no.nordicsemi.android.lib.profile.csc.SpeedUnit
 import no.nordicsemi.android.lib.profile.csc.WheelSizes
 import no.nordicsemi.android.lib.profile.csc.WheelSizes.getWheelSizeByName
@@ -213,30 +217,57 @@ private fun CSCSpeedSettingsFilterDropdown(
     onDismiss: () -> Unit,
     onClickEvent: (CSCEvent) -> Unit
 ) {
-    AlertDialog(
+    Dialog(
         onDismissRequest = { onDismiss() },
-        title = { Text(text = stringResource(R.string.csc_settings)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                SpeedUnit.entries.forEach { entry ->
-                    Text(
-                        text = entry.displayName,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                onClickEvent(CSCEvent.OnSelectedSpeedUnitSelected(entry))
-                                onDismiss()
-                            },
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = if (state.speedUnit == entry)
-                            MaterialTheme.colorScheme.primary else
-                            MaterialTheme.colorScheme.onBackground
-                    )
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
+        )
+    ) {
+        OutlinedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.csc_settings),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Column {
+                    SpeedUnit.entries.forEach { entry ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(4.dp))
+                                .clickable {
+                                    onClickEvent(CSCEvent.OnSelectedSpeedUnitSelected(entry))
+                                    onDismiss()
+                                },
+                        ) {
+                            Text(
+                                text = entry.displayName,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                color = if (state.speedUnit == entry)
+                                    MaterialTheme.colorScheme.primary else
+                                    MaterialTheme.colorScheme.onBackground
+                            )
+                        }
+                    }
                 }
             }
-        },
-        confirmButton = {}
-    )
+        }
+    }
 }
 
 @Preview(showBackground = true)
