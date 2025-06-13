@@ -81,6 +81,7 @@
     <string name="channel_sounding_module"> CHANNEL SOUNDING</string>
 
     <string name="throughput_module">Throughput</string>
+    <string name="unknown_device">Unknown Device</string>
 
     <string name="lbs_blinky_module">LBS/Blinky</string>
 

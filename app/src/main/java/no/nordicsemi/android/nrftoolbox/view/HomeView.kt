@@ -139,8 +139,8 @@ internal fun HomeView() {
                                     Profile.THROUGHPUT -> {
                                         FeatureButton(
                                             iconId = Icons.Default.SyncAlt,
-                                            name = stringResource(R.string.throughput_module),
-                                            description = peripheral.name
+                                            profileName = R.string.throughput_module,
+                                            deviceName = peripheral.name,
                                         ) { onEvent(UiEvent.OnDeviceClick(peripheral.address)) }
                                     }
 
@@ -163,8 +163,8 @@ internal fun HomeView() {
                                     Profile.LBS -> {
                                         FeatureButton(
                                             iconId = Icons.Default.Lightbulb,
-                                            name = stringResource(R.string.lbs_blinky_module),
-                                            description = peripheral.name
+                                            profileName = R.string.lbs_blinky_module,
+                                            deviceName = peripheral.name,
                                         ) { onEvent(UiEvent.OnDeviceClick(peripheral.address)) }
                                     }
 
