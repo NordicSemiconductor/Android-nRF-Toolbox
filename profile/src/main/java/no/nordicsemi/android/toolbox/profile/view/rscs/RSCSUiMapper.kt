@@ -27,7 +27,7 @@ fun RSCSServiceData.displayNumberOfSteps(): String? {
         return null
     }
     val numberOfSteps = data.totalDistance!! / data.strideLength!!.toLong()
-    return stringResource(id = R.string.rscs_steps, numberOfSteps)
+    return numberOfSteps.toString()
 }
 
 internal fun RSCSData.speedWithSpeedUnit(speedUnit: RSCSSettingsUnit): Float {
