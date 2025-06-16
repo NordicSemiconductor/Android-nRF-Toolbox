@@ -201,12 +201,8 @@ private fun RecordsView(state: CGMServiceData) {
 
     }
 
-    GlucoseChartScreen()
-//    if (state.records.isNotEmpty()) {
-////        val data = generateMockData()
-//    }
     /*  if (state.records.isNotEmpty()) {
-          LineChartView(state, false)
+         GlucoseChartScreen()
       }*/
 }
 
