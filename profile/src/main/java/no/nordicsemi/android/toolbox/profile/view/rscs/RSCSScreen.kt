@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import no.nordicsemi.android.lib.profile.rscs.RSCFeatureData
+import no.nordicsemi.android.lib.profile.rscs.RSCSData
 import no.nordicsemi.android.lib.profile.rscs.RSCSSettingsUnit
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.RSCSServiceData
@@ -61,7 +62,10 @@ internal fun RSCSScreen(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp)
             ) {
                 SectionRow {
-                    KeyValueColumn(stringResource(id = R.string.rscs_cadence), serviceData.displayPace())
+                    KeyValueColumn(
+                        stringResource(id = R.string.rscs_cadence),
+                        serviceData.displayPace()
+                    )
                     KeyValueColumnReverse(
                         value = stringResource(id = R.string.rscs_activity),
                         key = if (serviceData.data.running)
@@ -74,7 +78,20 @@ internal fun RSCSScreen(
                     serviceData.displayStrideLength()?.let {
                         KeyValueColumnReverse(stringResource(id = R.string.stride_length), it)
                     } ?: serviceData.displayNumberOfSteps()?.let {
-                        KeyValueColumnReverse(stringResource(id = R.string.rscs_number_of_steps), it)
+                        KeyValueColumnReverse(
+                            stringResource(id = R.string.rscs_number_of_steps),
+                            it
+                        )
+                    }
+                }
+                serviceData.data.totalDistance?.let {
+                    SectionRow {
+                        KeyValueColumn(
+                            "Total distance",
+                            serviceData.data.displayDistance(
+                                serviceData.unit ?: RSCSSettingsUnit.UNIT_M
+                            )
+                        )
                     }
                 }
             }
@@ -117,13 +134,20 @@ internal fun RSCSScreen(
 private fun RSCSScreenPreview() {
     RSCSScreen(
         RSCSServiceData(
+            data = RSCSData(
+                running = true,
+                instantaneousSpeed = 1.2f,
+                instantaneousCadence = 80,
+                strideLength = 2,
+                totalDistance = 10L,
+            ),
             feature = RSCFeatureData(
                 instantaneousStrideLengthMeasurementSupported = true,
                 totalDistanceMeasurementSupported = true,
                 walkingOrRunningStatusSupported = true,
                 calibrationSupported = true,
                 multipleSensorLocationsSupported = true
-            )
+            ),
         )
     ) {}
 }
