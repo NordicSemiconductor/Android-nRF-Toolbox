@@ -123,7 +123,7 @@ internal fun HomeView() {
 
                                     Profile.CSC -> FeatureButton(
                                         iconId = R.drawable.ic_csc,
-                                        profileName = R.string.cgm_module_full,
+                                        profileName = R.string.csc_module_full,
                                         deviceName = peripheral.name
                                     ) { onEvent(UiEvent.OnDeviceClick(peripheral.address)) }
 
