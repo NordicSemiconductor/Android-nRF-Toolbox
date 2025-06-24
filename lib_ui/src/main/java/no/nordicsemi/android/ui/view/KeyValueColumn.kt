@@ -9,14 +9,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun KeyValueColumn(
     value: String,
     key: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    keyStyle: TextStyle?= null
 ) {
     Box(
         modifier = Modifier
@@ -38,10 +41,21 @@ fun KeyValueColumn(
                 text = key,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                style = keyStyle ?: MaterialTheme.typography.bodyLarge
             )
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun KeyValueColumnPreview() {
+    KeyValueColumn(
+        value = "Sample Value",
+        key = "Sample Key",
+//        keyStyle = MaterialTheme.typography.labelLarge
+    )
 }
 
 @Composable
@@ -75,7 +89,8 @@ fun KeyValueColumn(
 fun KeyValueColumnReverse(
     value: String,
     key: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    keyStyle: TextStyle? = null,
 ) {
     Box(
         modifier = Modifier
@@ -98,7 +113,8 @@ fun KeyValueColumnReverse(
                 text = key,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                style = keyStyle ?: MaterialTheme.typography.bodyLarge
             )
         }
     }
