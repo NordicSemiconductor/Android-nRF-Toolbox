@@ -50,9 +50,9 @@
     <string name="gls_unit_mgpdl">mg/dl</string>
     <string name="gls_unit_mmolpl">mmol/l</string>
 
-    <string name="gls__working_mode__all">All</string>
-    <string name="gls__working_mode__last">Last</string>
-    <string name="gls__working_mode__first">First</string>
+    <string name="gls__working_mode__all">Read all records</string>
+    <string name="gls__working_mode__last">Request last</string>
+    <string name="gls__working_mode__first">Request first</string>
 
     <string name="gls_sample_location_finger">Finger</string>
     <string name="gls_sample_location_ast">Alternate Site Test (AST)</string>
