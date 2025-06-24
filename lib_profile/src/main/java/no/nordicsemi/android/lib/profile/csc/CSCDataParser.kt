@@ -44,7 +44,12 @@ object CSCDataParser {
             crankRevolutions = data.getInt(offset, IntFormat.UINT16, byteOrder).toLong()
             offset += 2
             crankEventTime = data.getInt(offset, IntFormat.UINT16, byteOrder)
-            // offset += 2;
+            offset += 2
+        }
+
+        if (!wheelRevPresent && !crankRevPreset) {
+            // No data to process, return null
+            return null
         }
 
         val wheelCircumference = wheelSize.value.toFloat()
@@ -67,6 +72,9 @@ object CSCDataParser {
     }
 
     private fun getTotalDistance(wheelCircumference: Float): Float {
+        if (wheelRevolutions < 0) {
+            return 0.0f
+        }
         return wheelRevolutions.toFloat() * wheelCircumference / 1000.0f // [m]
     }
 
@@ -81,8 +89,12 @@ object CSCDataParser {
         wheelCircumference: Float,
         previous: CSCDataSnapshot
     ): Float {
-        val difference = previous.wheelRevolutions.let { wheelRevolutions - it }
-        return difference.toFloat() * wheelCircumference / 1000.0f // [m]
+        if (wheelRevolutions < 0 || previous.wheelRevolutions < 0) return 0f
+
+        val difference = wheelRevolutions - previous.wheelRevolutions
+        if (difference < 0) return 0f
+
+        return difference.toFloat() * wheelCircumference / 1000.0f
     }
 
     /**
@@ -96,16 +108,25 @@ object CSCDataParser {
         wheelCircumference: Float,
         previous: CSCDataSnapshot
     ): Float {
-        return previous.wheelEventTime.let {
-            val timeDifference: Float = if (wheelEventTime < it) {
-                (65535 + wheelEventTime - it) / 1024.0f
-            } else {
-                (wheelEventTime - it) / 1024.0f
-            } // [s]
-
-            getDistance(wheelCircumference, previous) / timeDifference // [m/s]
+        // Check for valid input
+        if (wheelEventTime < 0 || previous.wheelEventTime < 0 ||
+            wheelRevolutions < 0 || previous.wheelRevolutions < 0
+        ) {
+            return 0f
         }
+
+        val timeDifference: Float = if (wheelEventTime < previous.wheelEventTime) {
+            (65536 + wheelEventTime - previous.wheelEventTime) / 1024.0f
+        } else {
+            (wheelEventTime - previous.wheelEventTime) / 1024.0f
+        }
+
+        if (timeDifference == 0f) return 0f
+
+        val distance = getDistance(wheelCircumference, previous)
+        return distance / timeDifference
     }
+
 
     /**
      * Returns average wheel cadence since the previous message was received.
@@ -114,16 +135,20 @@ object CSCDataParser {
      * @return wheel cadence in revolutions per minute.
      */
     private fun getWheelCadence(previous: CSCDataSnapshot): Float {
+        if (previous.crankEventTime < 0 || crankEventTime < 0 || crankRevolutions < 0) {
+            return 0f
+        }
         return previous.wheelRevolutions.let { previousWheelRevolutions ->
             previous.wheelEventTime.let {
                 val timeDifference: Float = if (wheelEventTime < it) {
-                    (65535 + wheelEventTime - it) / 1024.0f
+                    (65536 + wheelEventTime - it) / 1024.0f
                 } else (wheelEventTime - it) / 1024.0f // [s]
 
-                if (timeDifference == 0f) {
+                if (timeDifference <= 0f) {
                     0.0f
                 } else {
-                    (wheelRevolutions - previousWheelRevolutions) * 60.0f / timeDifference
+                    val revDiff = wheelRevolutions - previousWheelRevolutions
+                    if (revDiff < 0) 0.0f else revDiff * 60.0f / timeDifference
                 }
             }
         }
@@ -136,21 +161,25 @@ object CSCDataParser {
      * @return crank cadence in revolutions per minute.
      */
     private fun getCrankCadence(previous: CSCDataSnapshot): Float {
-        return previous.crankRevolutions.let { previousCrankRevolution ->
-            previous.crankEventTime.let {
-                val timeDifference: Float = if (crankEventTime < it) {
-                    (65535 + crankEventTime - it) / 1024.0f // [s]
-                } else {
-                    (crankEventTime - it) / 1024.0f
-                } // [s]
-                if (timeDifference == 0f) {
-                    0.0f
-                } else {
-                    (crankRevolutions - previousCrankRevolution) * 60.0f / timeDifference
-                }
-                // [revolutions/minute];
-            }
+        val newRevs = crankRevolutions
+        val newTime = crankEventTime
+        val oldRevs = previous.crankRevolutions
+        val oldTime = previous.crankEventTime
+
+        if (newRevs < 0 || oldRevs < 0 || newTime < 0 || oldTime < 0) return 0f
+
+        val revDiff = newRevs - oldRevs
+        if (revDiff <= 0) return 0f
+
+        val timeDiff: Float = if (newTime < oldTime) {
+            (65536 + newTime - oldTime) / 1024.0f
+        } else {
+            (newTime - oldTime) / 1024.0f
         }
+
+        if (timeDiff <= 0f) return 0f
+
+        return revDiff * 60.0f / timeDiff
     }
 
     /**
