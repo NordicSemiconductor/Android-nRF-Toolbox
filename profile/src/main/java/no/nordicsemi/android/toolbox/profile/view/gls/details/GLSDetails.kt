@@ -25,6 +25,7 @@ import no.nordicsemi.android.lib.profile.gls.data.RecordType
 import no.nordicsemi.android.lib.profile.gls.data.SampleLocation
 import no.nordicsemi.android.lib.profile.gls.data.Tester
 import no.nordicsemi.android.toolbox.profile.R
+import no.nordicsemi.android.toolbox.profile.view.gls.glucoseConcentrationDisplayValue
 import no.nordicsemi.android.toolbox.profile.view.gls.toDisplayString
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
@@ -81,11 +82,8 @@ internal fun GLSDetails(record: GLSRecord, context: GLSMeasurementContext?) {
                     record.unit?.let { unit ->
                         KeyValueColumn(
                             stringResource(id = R.string.gls_details_glucose_condensation_title),
-                            stringResource(
-                                id = R.string.gls_details_glucose_condensation_field,
-                                glucoseConcentration,
-                                unit.toDisplayString()
-                            )
+                            glucoseConcentrationDisplayValue(glucoseConcentration, unit),
+                            keyStyle = MaterialTheme.typography.titleMedium
                         )
                     }
                 }

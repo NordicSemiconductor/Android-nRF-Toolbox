@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -24,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -36,8 +36,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import no.nordicsemi.android.lib.profile.common.WorkingMode
 import no.nordicsemi.android.lib.profile.gls.data.Carbohydrate
 import no.nordicsemi.android.lib.profile.gls.data.ConcentrationUnit
@@ -156,39 +159,62 @@ private fun WorkingModeDialog(
         }
     }
 
-    AlertDialog(
+    Dialog(
         onDismissRequest = { onDismiss() },
-        title = { Text(text = "Request record") },
-        text = {
-            LazyColumn(
-                state = listState
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
+        )
+    ) {
+        OutlinedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
             ) {
-                items(workingModeEntries.size) { index ->
-                    val entry = workingModeEntries[index]
-                    Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .clickable {
-                                onWorkingModeSelected(OnWorkingModeSelected(Profile.GLS, entry))
-                            }
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = entry.toDisplayString(),
-                            modifier = Modifier.fillMaxWidth(),
-                            style = MaterialTheme.typography.titleLarge,
-                            color = if ((glsState.workingMode == entry) && glsState.records.isNotEmpty()) {
-                                MaterialTheme.colorScheme.primary
-                            } else
-                                MaterialTheme.colorScheme.onBackground
-                        )
+                Text(
+                    text = "Request record",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                LazyColumn(
+                    state = listState
+                ) {
+                    items(workingModeEntries.size) { index ->
+                        val entry = workingModeEntries[index]
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(4.dp))
+                                .clickable {
+                                    onWorkingModeSelected(OnWorkingModeSelected(Profile.GLS, entry))
+                                }
+                                .padding(8.dp),
+                        ) {
+                            Text(
+                                text = entry.toDisplayString(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                style = MaterialTheme.typography.titleLarge,
+                                color = if ((glsState.workingMode == entry) && glsState.records.isNotEmpty()) {
+                                    MaterialTheme.colorScheme.primary
+                                } else
+                                    MaterialTheme.colorScheme.onBackground
+                            )
+                        }
                     }
                 }
             }
-        },
-        confirmButton = {}
-    )
+        }
+    }
 }
 
 @Preview(showBackground = true)
@@ -259,12 +285,13 @@ private fun RecordItem(
                 }?.let {
                     KeyValueColumn(
                         record.type.toDisplayString(),
-                        it
+                        it,
+                        keyStyle = MaterialTheme.typography.titleMedium
                     )
                 }
                 record.time?.let {
                     KeyValueColumnReverse(
-                        value = "Date/Time",
+                        value = stringResource(id = R.string.gls_details_date_and_time),
                         key = stringResource(R.string.gls_timestamp, it)
                     )
                 }
