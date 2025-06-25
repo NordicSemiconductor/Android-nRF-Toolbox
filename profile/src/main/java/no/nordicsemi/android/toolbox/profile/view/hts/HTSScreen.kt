@@ -73,7 +73,7 @@ internal fun HTSScreen(
             if (htsServiceData.data?.type != null) {
                 SectionRow {
                     KeyValueColumn(
-                        value = "Measurement Type",
+                        value = "Temperature measurement location",
                         key = htsServiceData.data!!.type?.let {
                             HTSMeasurementType.fromValue(it).toString()
                         } ?: "Unknown",
