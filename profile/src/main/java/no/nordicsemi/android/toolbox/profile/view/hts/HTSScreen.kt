@@ -39,6 +39,7 @@ import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionRow
 import no.nordicsemi.android.ui.view.SectionTitle
+import java.util.Calendar
 
 @Composable
 internal fun HTSScreen(
@@ -81,6 +82,15 @@ internal fun HTSScreen(
                     )
                 }
             }
+            htsServiceData.data?.timestamp?.let {
+                SectionRow {
+                    KeyValueColumn(
+                        value = "Measurement time",
+                        key = it.toFormattedString(),
+                        keyStyle = MaterialTheme.typography.titleMedium
+                    )
+                }
+            }
         }
     }
 }
@@ -92,7 +102,8 @@ private fun HTSScreenPreview() {
         HTSServiceData(
             data = HTSData(
                 temperature = 36.5f,
-                type = HTSMeasurementType.TOE.value
+                type = HTSMeasurementType.TOE.value,
+                timestamp = Calendar.getInstance()
             ),
             temperatureUnit = TemperatureUnit.CELSIUS
         )

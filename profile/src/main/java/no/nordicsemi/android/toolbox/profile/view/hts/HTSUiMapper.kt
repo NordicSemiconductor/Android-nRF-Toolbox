@@ -32,6 +32,8 @@
 package no.nordicsemi.android.toolbox.profile.view.hts
 
 import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
 
 internal fun TemperatureUnit.displayTemperature(value: Float): String {
@@ -40,4 +42,9 @@ internal fun TemperatureUnit.displayTemperature(value: Float): String {
         TemperatureUnit.FAHRENHEIT -> String.format(Locale.US, "%.1f °F", value * 1.8f + 32f)
         TemperatureUnit.KELVIN -> String.format(Locale.US, "%.1f K", value + 273.15f)
     }
+}
+// Extension function to convert Calendar to a formatted String
+fun Calendar.toFormattedString(pattern: String = "dd MMM yyyy, HH:mm"): String {
+    val formatter = SimpleDateFormat(pattern, Locale.getDefault())
+    return formatter.format(this.time)
 }
