@@ -29,11 +29,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import no.nordicsemi.android.lib.profile.hts.HTSData
+import no.nordicsemi.android.lib.profile.hts.HTSMeasurementType
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.HTSServiceData
 import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
 import no.nordicsemi.android.toolbox.profile.viewmodel.HTSEvent
+import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.ScreenSection
+import no.nordicsemi.android.ui.view.SectionRow
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
@@ -56,13 +60,27 @@ internal fun HTSScreen(
                     )
                 }
             )
-            Text(
-                text = htsServiceData.data?.temperature?.let {
-                    htsServiceData.temperatureUnit.displayTemperature(it)
-                } ?: run { "Reading temperature..." },
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(top = 8.dp, start = 8.dp)
-            )
+            SectionRow {
+                KeyValueColumn(
+                    value = "Temperature",
+                    key = htsServiceData.data?.temperature?.let {
+                        htsServiceData.temperatureUnit.displayTemperature(it)
+                    } ?: run { "Reading temperature..." },
+                    keyStyle = MaterialTheme.typography.titleMedium
+
+                )
+            }
+            if (htsServiceData.data?.type != null) {
+                SectionRow {
+                    KeyValueColumn(
+                        value = "Measurement Type",
+                        key = htsServiceData.data!!.type?.let {
+                            HTSMeasurementType.fromValue(it).toString()
+                        } ?: "Unknown",
+                        keyStyle = MaterialTheme.typography.titleMedium
+                    )
+                }
+            }
         }
     }
 }
@@ -70,7 +88,15 @@ internal fun HTSScreen(
 @Preview(showBackground = true)
 @Composable
 private fun HTSScreenPreview() {
-    HTSScreen(HTSServiceData()) { }
+    HTSScreen(
+        HTSServiceData(
+            data = HTSData(
+                temperature = 36.5f,
+                type = HTSMeasurementType.TOE.value
+            ),
+            temperatureUnit = TemperatureUnit.CELSIUS
+        )
+    ) { }
 }
 
 @Composable

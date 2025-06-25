@@ -26,7 +26,7 @@ fun KeyValueColumn(
             .padding(end = 8.dp)
     ) {
         Column(
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.Start,
             modifier = modifier
         ) {
@@ -98,7 +98,7 @@ fun KeyValueColumnReverse(
         contentAlignment = Alignment.TopEnd,
     ) {
         Column(
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.End,
             modifier = modifier
         ) {
