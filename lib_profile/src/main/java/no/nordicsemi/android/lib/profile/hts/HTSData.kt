@@ -64,3 +64,41 @@ enum class TemperatureUnitData {
         }
     }
 }
+
+/**
+ * HTS measurement type enum.
+ *
+ * @property value The integer value representing the measurement type.
+ */
+enum class HTSMeasurementType(val value: Int) {
+    FUTURE_USE(0),
+    ARMPIT(1),
+    BODY(2),
+    EAR_LOBE(3),
+    FINGER(4),
+    GASTROINTESTINAL(5),
+    MOUTH(6),
+    RECTUM(7),
+    TOE(8),
+    TYMPANIC(7);
+
+    override fun toString(): String =
+        when (this) {
+            FUTURE_USE -> "Future Use"
+            ARMPIT -> "Armpit"
+            BODY -> "Body"
+            EAR_LOBE -> "Ear Lobe"
+            FINGER -> "Finger"
+            GASTROINTESTINAL -> "Gastrointestinal"
+            MOUTH -> "Mouth"
+            RECTUM -> "Rectum"
+            TOE -> "Toe"
+            TYMPANIC -> "Tympanic (Ear Drum)"
+        }
+
+    companion object {
+        fun fromValue(value: Int): HTSMeasurementType? {
+            return entries.find { it.value == value }
+        }
+    }
+}
