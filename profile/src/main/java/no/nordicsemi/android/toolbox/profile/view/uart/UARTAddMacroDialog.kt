@@ -175,7 +175,7 @@ private fun NewLineCharSection(checkedItem: MacroEol, onItemClick: (MacroEol) ->
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = "EOL",
+            text = "End of Line (EOL)",
             style = MaterialTheme.typography.labelLarge,
             modifier = Modifier.alpha(0.5f)
         )

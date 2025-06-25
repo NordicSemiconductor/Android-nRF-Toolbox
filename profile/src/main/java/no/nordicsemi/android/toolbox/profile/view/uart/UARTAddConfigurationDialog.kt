@@ -30,7 +30,7 @@ internal fun UARTAddConfigurationDialog(
             TextInputField(
                 input = name,
                 label = stringResource(id = R.string.uart_configuration_hint),
-                placeholder = "Enter configuration name",
+                placeholder = "Enter preset name",
                 errorMessage = stringResource(id = R.string.uart_name_empty),
                 errorState = isError,
             ) {
