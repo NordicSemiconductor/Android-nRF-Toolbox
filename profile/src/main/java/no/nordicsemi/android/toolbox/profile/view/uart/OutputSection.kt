@@ -183,7 +183,8 @@ private fun Menu(onEvent: (UARTEvent) -> Unit) {
         modifier = Modifier
             .clip(CircleShape)
             .clickable { onEvent(UARTEvent.ClearOutputItems) }
-            .padding(8.dp)
+            .padding(8.dp),
+        tint = MaterialTheme.colorScheme.error,
     )
 }
 
