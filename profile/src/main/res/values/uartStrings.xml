@@ -41,7 +41,7 @@
     <string name="uart_macro_dialog_cr_lf">CR + LF</string>
     <string name="uart_macro_dialog_cr">CR</string>
 
-    <string name="uart_output_placeholder">The incoming messages will be displayed here.</string>
+    <string name="uart_output_placeholder">Messages sent and received will appear here.</string>
     <string name="uart_macro_error">Provided command cannot be empty.</string>
 
     <string name="uart_name">Name</string>
