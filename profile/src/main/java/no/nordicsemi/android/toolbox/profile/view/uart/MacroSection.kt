@@ -13,8 +13,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EditOff
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -46,7 +44,6 @@ internal fun MacroSection(
 ) {
     var showAddDialog by rememberSaveable { mutableStateOf(false) }
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
-    var isExpanded by rememberSaveable { mutableStateOf(false) }
 
     // Dialogs
     MacroDialogs(
@@ -66,19 +63,12 @@ internal fun MacroSection(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 MacroSectionTitle(
-                    isEmptyConfiguration = viewState.configurations.isEmpty(),
-                    isExpanded = isExpanded,
-                    onAddClick = {
-                        showAddDialog = true
-                        isExpanded = true  // Expand when adding a new configuration
-                    },
-                    onExpand = { isExpanded = !isExpanded }
+                    onAddClick = { showAddDialog = true }
                 )
 
-                if (isExpanded && viewState.configurations.isNotEmpty()) {
+                if (viewState.configurations.isNotEmpty()) {
                     MacroConfigControls(
                         viewState = viewState,
-                        onAddClick = { showAddDialog = true },
                         onDeleteClick = { showDeleteDialog = true },
                         onEvent = onEvent
                     )
@@ -133,25 +123,13 @@ private fun MacroDialogs(
 
 @Composable
 private fun MacroSectionTitle(
-    isEmptyConfiguration: Boolean = false,
-    isExpanded: Boolean = false,
     onAddClick: () -> Unit,
-    onExpand: () -> Unit = {},
 ) {
     SectionTitle(
         resId = R.drawable.ic_macro,
         title = stringResource(id = R.string.uart_macros),
         menu = {
-            if (isEmptyConfiguration) {
-                CircleIcon(Icons.Default.Add, R.string.uart_configuration_add, onAddClick)
-            } else {
-                CircleIcon(
-                    imageVector = if (isExpanded)
-                        Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = R.string.macro_expand,
-                ) { onExpand() }
-            }
-
+            CircleIcon(Icons.Default.Add, R.string.uart_configuration_add, onAddClick)
         }
     )
 }
@@ -165,7 +143,6 @@ private fun MacroSectionTitlePreview() {
 @Composable
 private fun MacroConfigControls(
     viewState: UARTViewState,
-    onAddClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onEvent: (UARTEvent) -> Unit
 ) {
@@ -176,8 +153,6 @@ private fun MacroConfigControls(
         Box(modifier = Modifier.weight(1f)) {
             UARTConfigurationPicker(viewState, onEvent)
         }
-
-        CircleIcon(Icons.Default.Add, R.string.uart_configuration_add, onAddClick)
 
         viewState.selectedConfiguration?.let {
             val editIcon =
@@ -205,7 +180,6 @@ private fun MacroConfigControlsPreview() {
             selectedConfigurationName = "Config 1",
             isConfigurationEdited = false
         ),
-        onAddClick = {},
         onDeleteClick = {},
         onEvent = {}
     )
