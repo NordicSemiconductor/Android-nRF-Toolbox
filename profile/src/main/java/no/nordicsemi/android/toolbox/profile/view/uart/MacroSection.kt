@@ -13,8 +13,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EditOff
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -27,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -129,7 +132,7 @@ private fun MacroSectionTitle(
         resId = R.drawable.ic_macro,
         title = stringResource(id = R.string.uart_macros),
         menu = {
-            CircleIcon(Icons.Default.Add, R.string.uart_configuration_add, onAddClick)
+            CircleIcon(Icons.Default.Add, R.string.uart_configuration_add) { onAddClick() }
         }
     )
 }
@@ -163,7 +166,11 @@ private fun MacroConfigControls(
                 onEvent(UARTEvent.OnEditConfiguration)
             }
 
-            CircleIcon(Icons.Default.Delete, R.string.uart_configuration_delete, onDeleteClick)
+            CircleIcon(
+                Icons.Default.Delete,
+                R.string.uart_configuration_delete,
+                MaterialTheme.colorScheme.error
+            ) { onDeleteClick() }
         }
     }
 }
@@ -189,6 +196,7 @@ private fun MacroConfigControlsPreview() {
 private fun CircleIcon(
     imageVector: ImageVector,
     @StringRes contentDescription: Int,
+    tintColor: Color = LocalContentColor.current,
     onClick: () -> Unit
 ) {
     Icon(
@@ -197,7 +205,8 @@ private fun CircleIcon(
         modifier = Modifier
             .clip(CircleShape)
             .clickable(onClick = onClick)
-            .padding(8.dp)
+            .padding(8.dp),
+        tint = tintColor,
     )
 }
 
@@ -210,10 +219,20 @@ private fun DeleteConfigurationDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(
-                text = stringResource(id = R.string.uart_delete_dialog_title),
-                style = MaterialTheme.typography.headlineSmall
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
+                )
+                Text(
+                    text = stringResource(id = R.string.uart_delete_dialog_title),
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
         },
         text = {
             Text(text = stringResource(id = R.string.uart_delete_dialog_info))
