@@ -4,18 +4,18 @@
 
     <string name="uart_no_macros_info">Please define a preset to send command to the device.</string>
 
-    <string name="uart_configuration_add">Add</string>
-    <string name="uart_configuration_delete">Delete selected preset.</string>
-    <string name="uart_configuration_edit">Edit selected preset.</string>
+    <string name="uart_configuration_add">New configuration</string>
+    <string name="uart_configuration_delete">Delete selected configuration.</string>
+    <string name="uart_configuration_edit">Edit selected configuration.</string>
 
     <string name="uart_send">Send</string>
     <string name="uart_input">Input</string>
     <string name="uart_input_hint">Text to send</string>
     <string name="uart_macros">Preset</string>
     <string name="uart_output">Output</string>
-    <string name="uart_configuration_picker_hint">Select preset</string>
+    <string name="uart_configuration_picker_hint">Select configuration</string>
     <string name="uart_configuration_picker_not_selected">Not selected.</string>
-    <string name="uart_configuration_picker_dialog">Select preset</string>
+    <string name="uart_configuration_picker_dialog">Select configuration</string>
 
     <string name="uart_command_field">Command: %s</string>
 
@@ -26,16 +26,17 @@
     <string name="uart_add_macro">Add preset</string>
     <string name="uart_output_info">Here will be displayed read value from GATT characteristic.</string>
 
-    <string name="uart_configuration_dialog_title">Add preset</string>
-    <string name="uart_configuration_hint">Preset</string>
+    <string name="uart_configuration_dialog_title">Add configuration</string>
+    <string name="uart_configuration_hint">Configuration</string>
     <string name="uart_macro_dialog_title">Add preset</string>
+    <string name="uart_macro_dialog_title_edit">Edit preset</string>
     <string name="uart_macro_dialog_alias">Alias</string>
     <string name="uart_macro_dialog_command">Command</string>
     <string name="uart_macro_dialog_confirm">Confirm</string>
     <string name="uart_macro_dialog_dismiss">Dismiss</string>
     <string name="uart_macro_dialog_delete">Delete</string>
 
-    <string name="uart_macro_dialog_eol">End Of Line (EOL):</string>
+    <string name="uart_macro_dialog_eol">End of Line (EOL):</string>
     <string name="uart_macro_dialog_selected_eol">EOL: %s</string>
     <string name="uart_macro_dialog_lf">LF</string>
     <string name="uart_macro_dialog_cr_lf">CR + LF</string>
@@ -45,7 +46,7 @@
     <string name="uart_macro_error">Provided command cannot be empty.</string>
 
     <string name="uart_name">Name</string>
-    <string name="uart_name_empty">Provided name cannot be empty or duplicate.</string>
+    <string name="uart_name_empty">Configuration name cannot be empty or duplicate.</string>
 
     <string name="uart_macro_icon">Icon representing defined command.</string>
 
