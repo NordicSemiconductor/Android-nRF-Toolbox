@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -59,7 +60,7 @@ internal fun OutputSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             SectionTitle(
-                resId = R.drawable.ic_output,
+                icon = Icons.AutoMirrored.Filled.Chat,
                 title = "Messages",
                 modifier = Modifier.fillMaxSize(),
                 menu = { Menu(onEvent) }
