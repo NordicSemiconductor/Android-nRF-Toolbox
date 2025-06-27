@@ -206,40 +206,48 @@ private fun DeviceConnectedView(
                         deviceData.serviceData.forEach { serviceData ->
                             when (serviceData.profile) {
                                 Profile.BPS -> BPSScreen(
-                                    serviceData = serviceData as BPSServiceData
+                                    serviceData = serviceData as BPSServiceData,
                                 )
 
                                 Profile.CSC -> CSCScreen(
                                     serviceData = serviceData as CSCServiceData,
-                                ) { onClickEvent(it) }
+                                    onClickEvent = onClickEvent
+                                )
 
                                 Profile.CGM -> CGMScreen(
-                                    serviceData = serviceData as CGMServiceData
-                                ) { onClickEvent(it) }
+                                    serviceData = serviceData as CGMServiceData,
+                                    onClickEvent = onClickEvent
+                                )
 
                                 Profile.DFS -> DFSScreen(
-                                    serviceData = serviceData as DFSServiceData
-                                ) { onClickEvent(it) }
+                                    serviceData = serviceData as DFSServiceData,
+                                    onClick = onClickEvent
+                                )
 
                                 Profile.GLS -> GLSScreen(
                                     glsServiceData = serviceData as GLSServiceData,
-                                ) { onClickEvent(it) }
+                                    onClickEvent = onClickEvent
+                                )
 
                                 Profile.HRS -> HRSScreen(
                                     hrsServiceData = serviceData as HRSServiceData,
-                                ) { onClickEvent(it) }
+                                    onClickEvent = onClickEvent
+                                )
 
                                 Profile.HTS -> HTSScreen(
                                     htsServiceData = serviceData as HTSServiceData,
-                                ) { onClickEvent(it) }
+                                    onClickEvent = onClickEvent
+                                )
 
                                 Profile.RSCS -> RSCSScreen(
                                     serviceData = serviceData as RSCSServiceData,
-                                ) { onClickEvent(it) }
+                                    onClickEvent = onClickEvent
+                                )
 
                                 Profile.THROUGHPUT -> ThroughputScreen(
                                     serviceData = serviceData as ThroughputServiceData,
-                                ) { onClickEvent(it) }
+                                    onClickEvent = onClickEvent
+                                )
 
                                 Profile.BATTERY -> {
                                     // Battery level will be added at the end.
@@ -249,7 +257,8 @@ private fun DeviceConnectedView(
                                 Profile.UART -> {
                                     UARTScreen(
                                         state = serviceData as UARTServiceData,
-                                    ) { onClickEvent(it) }
+                                        onEvent = onClickEvent
+                                    )
                                 }
 
                                 Profile.CHANNEL_SOUNDING -> {
@@ -257,9 +266,10 @@ private fun DeviceConnectedView(
                                 }
 
                                 Profile.LBS -> {
-                                    BlinkyScreen(serviceData = serviceData as LBSServiceData) {
-                                        onClickEvent(it)
-                                    }
+                                    BlinkyScreen(
+                                        serviceData = serviceData as LBSServiceData,
+                                        onClickEvent = onClickEvent
+                                    )
                                 }
 
                             }
