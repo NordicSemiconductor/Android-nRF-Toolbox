@@ -53,9 +53,9 @@ import no.nordicsemi.android.lib.profile.gls.data.MedicationUnit
 import no.nordicsemi.android.lib.profile.gls.data.RecordType
 import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
 import no.nordicsemi.android.lib.profile.gls.data.Tester
+import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.GLSServiceData
-import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.view.gls.details.GLSDetails
 import no.nordicsemi.android.toolbox.profile.viewmodel.GLSEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.GLSEvent.OnWorkingModeSelected

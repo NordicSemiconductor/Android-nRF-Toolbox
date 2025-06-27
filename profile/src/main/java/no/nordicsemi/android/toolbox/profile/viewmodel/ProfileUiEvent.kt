@@ -6,7 +6,7 @@ import no.nordicsemi.android.lib.profile.csc.WheelSize
 import no.nordicsemi.android.lib.profile.directionFinder.PeripheralBluetoothAddress
 import no.nordicsemi.android.lib.profile.directionFinder.distance.DistanceMode
 import no.nordicsemi.android.lib.profile.rscs.RSCSSettingsUnit
-import no.nordicsemi.android.toolbox.profile.data.Profile
+import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.data.ThroughputInputType
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.MeasurementSection
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range

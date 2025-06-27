@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 import no.nordicsemi.android.lib.profile.hts.HTSDataParser
 import no.nordicsemi.android.service.repository.HTSRepository
-import no.nordicsemi.android.toolbox.profile.data.Profile
+import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber
 import java.util.UUID

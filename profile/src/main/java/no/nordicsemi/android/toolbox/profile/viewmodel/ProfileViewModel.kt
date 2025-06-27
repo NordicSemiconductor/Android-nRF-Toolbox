@@ -42,8 +42,8 @@ import no.nordicsemi.android.service.repository.RSCSRepository
 import no.nordicsemi.android.service.repository.ThroughputRepository
 import no.nordicsemi.android.service.repository.UartRepository
 import no.nordicsemi.android.service.services.ServiceManager
+import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
-import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.data.ProfileServiceData
 import no.nordicsemi.android.toolbox.profile.data.uart.MacroEol
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration

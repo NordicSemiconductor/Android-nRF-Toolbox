@@ -25,10 +25,10 @@ import no.nordicsemi.android.lib.profile.gls.data.ResponseData
 import no.nordicsemi.android.lib.profile.racp.RACPOpCode
 import no.nordicsemi.android.lib.profile.racp.RACPResponseCode
 import no.nordicsemi.android.service.repository.CGMRepository
+import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.lib.utils.logAndReport
 import no.nordicsemi.android.toolbox.lib.utils.tryOrLog
 import no.nordicsemi.android.toolbox.profile.data.CGMRecordWithSequenceNumber
-import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
