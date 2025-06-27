@@ -4,7 +4,7 @@
 
     <string name="uart_no_macros_info">Please define a preset to send command to the device.</string>
 
-    <string name="uart_configuration_add">New configuration</string>
+    <string name="uart_configuration_add">New preset configuration</string>
     <string name="uart_configuration_delete">Delete selected configuration.</string>
     <string name="uart_configuration_edit">Edit selected configuration.</string>
 
@@ -13,7 +13,7 @@
     <string name="uart_input_hint">Text to send</string>
     <string name="uart_macros">Preset</string>
     <string name="uart_output">Output</string>
-    <string name="uart_configuration_picker_hint">Select configuration</string>
+    <string name="uart_configuration_picker_hint">Select preset configuration</string>
     <string name="uart_configuration_picker_not_selected">Not selected.</string>
     <string name="uart_configuration_picker_dialog">Select configuration</string>
 
