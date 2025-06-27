@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 import no.nordicsemi.android.lib.profile.prx.AlarmLevelParser
 import no.nordicsemi.android.service.repository.PRXRepository
-import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber
 import java.util.UUID
@@ -21,11 +20,10 @@ private val LINK_LOSS_SERVICE_UUID = UUID.fromString("00001803-0000-1000-8000-00
 private val ALERT_LEVEL_CHARACTERISTIC_UUID =
     UUID.fromString("00002A06-0000-1000-8000-00805f9b34fb")
 
-internal class PRXManager : ServiceManager {
-    override val profile: Profile = Profile.PRX
+internal class PRXManager {
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun observeServiceInteractions(
+    suspend fun observeServiceInteractions(
         deviceId: String,
         remoteService: RemoteService,
         scope: CoroutineScope

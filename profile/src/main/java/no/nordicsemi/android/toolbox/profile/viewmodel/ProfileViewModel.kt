@@ -241,9 +241,6 @@ internal class ProfileViewModel @Inject constructor(
             Profile.UART -> updateUART()
             Profile.CHANNEL_SOUNDING -> updateChannelSounding()
             Profile.LBS -> updateLBS()
-            Profile.PRX -> {
-                TODO()
-            }
 
         }
     }
