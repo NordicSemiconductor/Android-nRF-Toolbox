@@ -372,7 +372,13 @@ internal class ProfileViewModel @Inject constructor(
         when (event) {
             // Navigation events.
             is DisconnectEvent -> disconnect(event.device)
-            NavigateUp -> navigator.navigateUp()
+            NavigateUp -> {
+                // If the device is connected and missing services, disconnect it before navigating up.
+                if ((_deviceData.value as? DeviceConnectionState.Connected)?.data?.isMissingServices == true) {
+                    disconnect(address)
+                }
+                navigator.navigateUp()
+            }
             is OnRetryClicked -> reconnectDevice(event.device)
             OpenLoggerEvent -> openLogger()
 
