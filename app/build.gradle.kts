@@ -51,6 +51,7 @@ dependencies {
     implementation(project(":profile"))
     implementation(project(":profile_data"))
     implementation(project(":lib_ui"))
+    implementation(project(":lib_utils"))
 
     implementation(libs.nordic.navigation)
     implementation(libs.nordic.theme)

@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.lib.profile.csc.CSCDataParser
 import no.nordicsemi.android.service.repository.CSCRepository
-import no.nordicsemi.android.toolbox.profile.data.Profile
+import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi

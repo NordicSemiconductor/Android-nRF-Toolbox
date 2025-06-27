@@ -10,7 +10,7 @@ import kotlinx.coroutines.withContext
 import no.nordicsemi.android.lib.profile.hrs.BodySensorLocationParser
 import no.nordicsemi.android.lib.profile.hrs.HRSDataParser
 import no.nordicsemi.android.service.repository.HRSRepository
-import no.nordicsemi.android.toolbox.profile.data.Profile
+import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import timber.log.Timber
 import java.util.UUID

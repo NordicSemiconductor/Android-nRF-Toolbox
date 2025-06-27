@@ -23,6 +23,7 @@ import no.nordicsemi.android.common.permissions.notification.RequestNotification
 import no.nordicsemi.android.service.profile.CustomReason
 import no.nordicsemi.android.service.profile.DeviceDisconnectionReason
 import no.nordicsemi.android.service.profile.StateReason
+import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.data.BPSServiceData
 import no.nordicsemi.android.toolbox.profile.data.BatteryServiceData
 import no.nordicsemi.android.toolbox.profile.data.CGMServiceData
@@ -33,7 +34,6 @@ import no.nordicsemi.android.toolbox.profile.data.GLSServiceData
 import no.nordicsemi.android.toolbox.profile.data.HRSServiceData
 import no.nordicsemi.android.toolbox.profile.data.HTSServiceData
 import no.nordicsemi.android.toolbox.profile.data.LBSServiceData
-import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.data.ProfileServiceData
 import no.nordicsemi.android.toolbox.profile.data.RSCSServiceData
 import no.nordicsemi.android.toolbox.profile.data.ThroughputServiceData

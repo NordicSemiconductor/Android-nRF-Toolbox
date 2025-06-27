@@ -42,10 +42,10 @@ import no.nordicsemi.android.lib.profile.cgms.data.CGMRecord
 import no.nordicsemi.android.lib.profile.cgms.data.CGMStatus
 import no.nordicsemi.android.lib.profile.common.WorkingMode
 import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
+import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.toolbox.profile.data.CGMServiceData
-import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.view.gls.toDisplayString
 import no.nordicsemi.android.toolbox.profile.viewmodel.GLSEvent.OnWorkingModeSelected
 import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent

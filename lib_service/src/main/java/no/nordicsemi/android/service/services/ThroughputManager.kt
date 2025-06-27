@@ -3,9 +3,9 @@ package no.nordicsemi.android.service.services
 import kotlinx.coroutines.CoroutineScope
 import no.nordicsemi.android.lib.profile.throughput.ThroughputDataParser
 import no.nordicsemi.android.service.repository.ThroughputRepository
+import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.data.NumberOfBytes
 import no.nordicsemi.android.toolbox.profile.data.NumberOfSeconds
-import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.data.ThroughputInputType
 import no.nordicsemi.android.toolbox.profile.data.WritingStatus
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic

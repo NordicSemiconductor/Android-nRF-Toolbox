@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.profile.data
+package no.nordicsemi.android.toolbox.lib.utils
 
 enum class Profile {
     BPS,
