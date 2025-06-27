@@ -262,9 +262,6 @@ private fun DeviceConnectedView(
                                     }
                                 }
 
-                                Profile.PRX -> {
-                                    // todo: implement Proximity Profile
-                                }
                             }
                         }
                         // Battery level will be added at the end.

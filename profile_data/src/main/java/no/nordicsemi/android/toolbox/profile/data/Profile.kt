@@ -11,7 +11,8 @@ enum class Profile {
     HTS,
     LBS,
     RSCS,
-    PRX,
+
+    //    PRX, TODO: PRX is not implemented yet, it will be added in the future.
     BATTERY,
     THROUGHPUT,
     UART;
