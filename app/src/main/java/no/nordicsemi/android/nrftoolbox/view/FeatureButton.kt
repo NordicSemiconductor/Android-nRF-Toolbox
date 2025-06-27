@@ -48,21 +48,21 @@ internal fun FeatureButton(
             )
 
             Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(id = profileName),
+                    text = deviceName ?: stringResource(R.string.unknown_device),
                     style = MaterialTheme.typography.titleMedium,
                 )
-
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = deviceName ?: stringResource(R.string.unknown_device),
+                    text = stringResource(id = profileName),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
 
                 description?.let {
                     Text(
@@ -112,21 +112,22 @@ internal fun FeatureButton(
             )
 
             Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(id = profileName),
+                    text = deviceName ?: stringResource(R.string.unknown_device),
                     style = MaterialTheme.typography.titleMedium,
                 )
 
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = deviceName ?: stringResource(R.string.unknown_device),
+                    text = stringResource(id = profileName),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
 
                 description?.let {
                     Text(
