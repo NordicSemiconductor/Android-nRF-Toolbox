@@ -286,7 +286,6 @@ internal class ProfileViewModel @Inject constructor(
     }
 
     private fun updateChannelSounding() {
-        Timber.tag("ChannelSounding").d("Updating Channel Sounding data for $address")
         ChannelSoundingRepository.getData(address).onEach {
             updateDeviceData(it)
         }.launchIn(viewModelScope)
@@ -300,7 +299,8 @@ internal class ProfileViewModel @Inject constructor(
                 }
             }
         } else {
-            Timber.tag("AAA").d("Channel Sounding is not available")
+            Timber.tag("Channel_Sounding")
+                .d("Channel Sounding is not available in this Android version.")
         }
     }
 
