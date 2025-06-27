@@ -76,23 +76,8 @@ class ProfileOpenEvent : FirebaseEvent {
  * Represents an event that is logged when a profile is connected.
  * This event can be created with a [Profile] or a [Link].
  */
-class ProfileConnectedEvent : FirebaseEvent {
-
-    /**
-     * Creates a new instance of [ProfileConnectedEvent] with the given profile.
-     * The profile's string representation is used as a parameter.
-     *
-     * @param profile The profile that was connected.
-     */
-    constructor(profile: Profile) : super(EVENT_NAME, createBundle(profile.toString()))
-
-    /**
-     * Creates a new instance of [ProfileConnectedEvent] with the given link.
-     * The link's display name is used as a parameter.
-     *
-     * @param link The link that was connected.
-     */
-    constructor(link: Link) : super(EVENT_NAME, createBundle(link.displayName))
+class ProfileConnectedEvent(profile: Profile) :
+    FirebaseEvent(EVENT_NAME, createBundle(profile.toString())) {
 
     companion object {
         private const val EVENT_NAME = "PROFILE_CONNECTED"

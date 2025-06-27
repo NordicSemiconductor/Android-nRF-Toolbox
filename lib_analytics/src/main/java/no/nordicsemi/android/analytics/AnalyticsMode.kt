@@ -35,7 +35,9 @@ package no.nordicsemi.android.analytics
  * Represents the different links that can be used in the application.
  */
 enum class Link(val displayName: String) {
-    LOGGER("LOGGER");
+    LOGGER("LOGGER"),
+    GITHUB("GITHUB"),
+    DEV_ACADEMY("DEV_ACADEMY"),
 }
 
 /**

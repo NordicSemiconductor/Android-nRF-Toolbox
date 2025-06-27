@@ -15,6 +15,14 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.analytics.AppAnalytics
+import no.nordicsemi.android.analytics.Link
+import no.nordicsemi.android.analytics.ProfileConnectedEvent
+import no.nordicsemi.android.analytics.ProfileOpenEvent
+import no.nordicsemi.android.analytics.UARTChangeConfiguration
+import no.nordicsemi.android.analytics.UARTCreateConfiguration
+import no.nordicsemi.android.analytics.UARTMode
+import no.nordicsemi.android.analytics.UARTSendAnalyticsEvent
 import no.nordicsemi.android.common.logger.LoggerLauncher
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
@@ -83,6 +91,7 @@ internal class ProfileViewModel @Inject constructor(
     private val navigator: Navigator,
     private val deviceRepository: DeviceRepository,
     private val uartConfigurationRepository: UartConfigurationRepository,
+    private val analytics: AppAnalytics,
     @ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
@@ -356,6 +365,8 @@ internal class ProfileViewModel @Inject constructor(
         val updatedServiceData = state.data.serviceData.toMutableList().apply {
             val existingIndex = this.indexOfFirst { it is T }
             if (existingIndex != -1) {
+                // Log an event in the analytics.
+                analytics.logEvent(ProfileConnectedEvent(data.profile))
                 this[existingIndex] = data  // Update the existing entry
             } else this.add(data)// Add a new entry
         }
@@ -379,6 +390,7 @@ internal class ProfileViewModel @Inject constructor(
                 }
                 navigator.navigateUp()
             }
+
             is OnRetryClicked -> reconnectDevice(event.device)
             OpenLoggerEvent -> openLogger()
 
@@ -484,6 +496,8 @@ internal class ProfileViewModel @Inject constructor(
 
     private fun runMacro(macro: UARTMacro) = viewModelScope.launch {
         UartRepository.runMacro(address, macro)
+        // Log the event in the analytics.
+        analytics.logEvent(UARTSendAnalyticsEvent(UARTMode.PRESET))
     }
 
     private fun onAddConfiguration(name: String) = viewModelScope.launch(Dispatchers.IO) {
@@ -498,12 +512,16 @@ internal class ProfileViewModel @Inject constructor(
 
         // Save the configuration name in the data store.
         uartConfigurationRepository.saveLastConfigurationNameToDataSource(name)
+        // Log the event in the analytics.
+        analytics.logEvent(UARTCreateConfiguration())
     }
 
     private fun onConfigurationSelected(configuration: UARTConfiguration) = viewModelScope.launch {
         UartRepository.updateSelectedConfigurationName(address, configuration.name)
         // Update the selected configuration in the datastore.
         uartConfigurationRepository.saveLastConfigurationNameToDataSource(configuration.name)
+        // Log the event in the analytics.
+        analytics.logEvent(UARTChangeConfiguration())
     }
 
     private fun deleteConfiguration(configuration: UARTConfiguration) =
@@ -518,7 +536,8 @@ internal class ProfileViewModel @Inject constructor(
 
     private fun sendText(text: String, newLineChar: MacroEol) = viewModelScope.launch {
         UartRepository.sendText(address, text, newLineChar)
-        //todo: log event in the analytics.
+        // Log the event in the analytics.
+        analytics.logEvent(UARTSendAnalyticsEvent(UARTMode.TEXT))
     }
 
     private fun setSpeedUnit(selectedSpeedUnit: SpeedUnit) {
@@ -544,6 +563,8 @@ internal class ProfileViewModel @Inject constructor(
      * Launch the logger activity.
      */
     private fun openLogger() {
+        // Log the event in the analytics.
+        analytics.logEvent(ProfileOpenEvent(Link.LOGGER))
         LoggerLauncher.launch(context, logger?.session as? LogSession)
     }
 

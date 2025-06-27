@@ -8,6 +8,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":lib_analytics"))
     implementation(project(":profile_data"))
     implementation(project(":lib_ui"))
     implementation(project(":lib_utils"))
