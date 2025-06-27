@@ -37,7 +37,7 @@ fun DeviceDisconnectedView(
         DisconnectReason.USER -> "Device disconnected successfully."
         DisconnectReason.UNKNOWN -> "Oops...! Connection went on a coffee break."
         DisconnectReason.LINK_LOSS -> "Device signal has been lost."
-        DisconnectReason.MISSING_SERVICE -> "The connected device has services that aren't supported in this version of nRF Toolbox."
+        DisconnectReason.MISSING_SERVICE -> "The peripheral has services that aren't supported in the nRF Toolbox."
         DisconnectReason.BLUETOOTH_OFF -> "Bluetooth adapter is turned off."
     }
 
