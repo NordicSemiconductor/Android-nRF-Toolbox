@@ -3,8 +3,13 @@ package no.nordicsemi.android.nrftoolbox.view
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -57,10 +62,15 @@ internal fun HomeView() {
             }
         }
     ) { paddingValues ->
+        // Get notch padding for devices with a display cutout (notch)
+        val notchPadding = WindowInsets.displayCutout
+            .only(WindowInsetsSides.Horizontal)
+            .asPaddingValues()
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .padding(paddingValues)
+                .padding(notchPadding)
                 .padding(16.dp)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
