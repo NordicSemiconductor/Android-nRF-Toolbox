@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.Link
-import no.nordicsemi.android.analytics.ProfileConnectedEvent
 import no.nordicsemi.android.analytics.ProfileOpenEvent
 import no.nordicsemi.android.analytics.UARTChangeConfiguration
 import no.nordicsemi.android.analytics.UARTCreateConfiguration
@@ -131,6 +130,8 @@ internal class ProfileViewModel @Inject constructor(
                     deviceRepository.updateConnectedDevices(peripheralProfileMap)
                     peripheralProfileMap[peripheral?.address]?.second?.forEach { profileHandler ->
                         updateProfileData(profileHandler)
+                        // Log analytics event.
+                        deviceRepository.updateAnalytics(address, profileHandler.profile)
                     }
                 }.launchIn(viewModelScope)
                 .apply {
@@ -186,10 +187,13 @@ internal class ProfileViewModel @Inject constructor(
                                 peripheral,
                                 StateReason(connectionState.reason)
                             )
+                        }.also {
+                            // Remove the analytics logged profiles for the disconnected device.
+                            deviceRepository.removeLoggedProfile(deviceAddress)
                         }
                     }
 
-                    ConnectionState.Disconnecting, ConnectionState.Closed -> {
+                    ConnectionState.Closed -> {
                         unbindService()
                         api.disconnectionReason.onEach { reason ->
                             if (reason != null) {
@@ -212,6 +216,10 @@ internal class ProfileViewModel @Inject constructor(
                         _deviceData.update {
                             DeviceConnectionState.Connecting
                         }
+                    }
+
+                    ConnectionState.Disconnecting -> {
+                        // Update the state to disconnecting.
                     }
                 }
             }?.launchIn(viewModelScope)
@@ -365,8 +373,6 @@ internal class ProfileViewModel @Inject constructor(
         val updatedServiceData = state.data.serviceData.toMutableList().apply {
             val existingIndex = this.indexOfFirst { it is T }
             if (existingIndex != -1) {
-                // Log an event in the analytics.
-                analytics.logEvent(ProfileConnectedEvent(data.profile))
                 this[existingIndex] = data  // Update the existing entry
             } else this.add(data)// Add a new entry
         }
