@@ -93,7 +93,7 @@
     <string name="gls_meal_preprandial">Preprandial</string>
     <string name="gls_meal_posprandial">Postprandial</string>
     <string name="gls_meal_fasting">Fasting</string>
-    <string name="gls_meal_casual">Casual</string>
+    <string name="gls_meal_casual">Casual (snacks, drinks, etc.)</string>
     <string name="gls_meal_bedtime">Bedtime</string>
 
     <string name="gls_available">Available</string>
@@ -125,9 +125,9 @@
     <string name="gls_context_tester">Tester</string>
     <string name="gls_context_health">Health</string>
     <string name="gls_context_exercise_title">Exercise</string>
-    <string name="gls_context_exercise_field">%d min %d %%</string>
+    <string name="gls_context_exercise_field">%d (intensity %d %%)</string>
     <string name="gls_context_medication_title">Medication</string>
-    <string name="gls_context_medication_field">%.2f %s\n%s</string>
-    <string name="gls_context_hba1c_title">HbA1c</string>
+    <string name="gls_context_medication_field">%s (%.2f %s)</string>
+    <string name="gls_context_hba1c_title">Blood glucose</string>
     <string name="gls_context_hba1c_field">%.2f %%</string>
 </resources>

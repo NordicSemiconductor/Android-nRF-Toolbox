@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -19,6 +20,7 @@ fun KeyValueColumn(
     value: String,
     key: String,
     modifier: Modifier = Modifier,
+    verticalSpacing: Dp = 8.dp,
     keyStyle: TextStyle?= null
 ) {
     Box(
@@ -26,7 +28,7 @@ fun KeyValueColumn(
             .padding(end = 8.dp)
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(verticalSpacing),
             horizontalAlignment = Alignment.Start,
             modifier = modifier
         ) {
@@ -90,6 +92,7 @@ fun KeyValueColumnReverse(
     value: String,
     key: String,
     modifier: Modifier = Modifier,
+    verticalSpacing: Dp = 8.dp,
     keyStyle: TextStyle? = null,
 ) {
     Box(
@@ -98,7 +101,7 @@ fun KeyValueColumnReverse(
         contentAlignment = Alignment.TopEnd,
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(verticalSpacing),
             horizontalAlignment = Alignment.End,
             modifier = modifier
         ) {
