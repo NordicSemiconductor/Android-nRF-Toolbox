@@ -96,6 +96,13 @@ internal fun GLSDetails(record: GLSRecord, context: GLSMeasurementContext?) {
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
+                Text(
+                    "Glucose Status",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.secondary
+                )
 
                 SectionRow {
                     KeyValueColumn(
@@ -175,19 +182,19 @@ internal fun GLSDetails(record: GLSRecord, context: GLSMeasurementContext?) {
                     color = MaterialTheme.colorScheme.secondary
                 )
                 SectionRow {
+                    KeyValueColumn(
+                        stringResource(id = R.string.gls_details_sequence_number),
+                        glsMeasurementContext.sequenceNumber.toString(),
+                        verticalSpacing = 4.dp
+                    )
                     glsMeasurementContext.carbohydrate?.let {
                         val carbohydrateAmount = glsMeasurementContext.carbohydrateAmount
-                        KeyValueColumn(
+                        KeyValueColumnReverse(
                             stringResource(id = R.string.gls_context_carbohydrate),
                             it.toDisplayString() + " ($carbohydrateAmount g)",
                             verticalSpacing = 4.dp
                         )
                     }
-                    KeyValueColumnReverse(
-                        stringResource(id = R.string.gls_details_sequence_number),
-                        glsMeasurementContext.sequenceNumber.toString(),
-                        verticalSpacing = 4.dp
-                    )
                 }
                 SectionRow {
                     glsMeasurementContext.meal?.let {
@@ -227,7 +234,6 @@ internal fun GLSDetails(record: GLSRecord, context: GLSMeasurementContext?) {
                         }
                     }
                 }
-
                 SectionRow {
                     glsMeasurementContext.medicationUnit?.let { medicationUnit ->
                         val medicationField = String.format(
@@ -242,6 +248,7 @@ internal fun GLSDetails(record: GLSRecord, context: GLSMeasurementContext?) {
                             verticalSpacing = 4.dp
                         )
                     }
+
                     glsMeasurementContext.HbA1c?.let { hbA1c ->
                         KeyValueColumnReverse(
                             stringResource(id = R.string.gls_context_hba1c_title),
@@ -250,6 +257,7 @@ internal fun GLSDetails(record: GLSRecord, context: GLSMeasurementContext?) {
                         )
                     }
                 }
+
             } ?: KeyValueField(
                 stringResource(id = R.string.gls_context_title),
                 stringResource(id = R.string.gls_unavailable)

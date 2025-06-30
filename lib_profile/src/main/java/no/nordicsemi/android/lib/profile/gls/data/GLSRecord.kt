@@ -53,8 +53,8 @@ data class GLSMeasurementContext(
 )
 
 enum class ConcentrationUnit(val id: Int) {
-    UNIT_KGPL(0),
-    UNIT_MOLPL(1);
+    UNIT_KGPL(1),
+    UNIT_MOLPL(0);
 
     companion object {
         fun create(value: Int): ConcentrationUnit {
