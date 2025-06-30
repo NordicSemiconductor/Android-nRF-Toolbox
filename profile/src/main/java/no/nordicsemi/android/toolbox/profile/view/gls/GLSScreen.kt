@@ -361,7 +361,7 @@ private fun RecordItemPreview() {
             exerciseIntensity = 1,
             medication = Medication.PRE_MIXED_INSULIN,
             medicationQuantity = .5f,
-            medicationUnit = MedicationUnit.UNIT_MG,
+            medicationUnit = MedicationUnit.UNIT_KG,
             HbA1c = 0.5f
         ),
     )

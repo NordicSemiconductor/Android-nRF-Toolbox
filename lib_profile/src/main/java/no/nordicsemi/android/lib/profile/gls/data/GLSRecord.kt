@@ -65,8 +65,8 @@ enum class ConcentrationUnit(val id: Int) {
 }
 
 enum class MedicationUnit(val id: Int) {
-    UNIT_MG(0),
-    UNIT_ML(1);
+    UNIT_KG(0),
+    UNIT_LITER(1);
 
     companion object {
         fun create(value: Int): MedicationUnit {

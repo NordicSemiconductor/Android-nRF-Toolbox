@@ -29,7 +29,7 @@ object GlucoseMeasurementContextParser {
         val testerHealthPresent = flags and 0x04 != 0
         val exercisePresent = flags and 0x08 != 0
         val medicationPresent = flags and 0x10 != 0
-        val medicationUnitLiter = flags and 0x20 != 0
+        val medicationUnitLiter = (flags and 0x20) > 0
         val HbA1cPresent = flags and 0x40 != 0
         val extendedFlagsPresent = flags and 0x80 != 0
 
@@ -72,8 +72,8 @@ object GlucoseMeasurementContextParser {
         var health: Health? = null
         if (testerHealthPresent) {
             val testerAndHealth: Int = data.getInt(offset, IntFormat.UINT8)
-            tester = Tester.create(testerAndHealth and 0x0F)
-            health = Health.create(testerAndHealth shr 4)
+            tester = Tester.create((testerAndHealth and 0xF0) shr 4)
+            health = Health.create(testerAndHealth and 0x0F)
             offset += 1
         }
 
@@ -95,7 +95,7 @@ object GlucoseMeasurementContextParser {
             medicationAmount =
                 data.getFloat(offset + 1, FloatFormat.IEEE_11073_16_BIT, byteOrder) // mg or ml
             medicationUnit =
-                if (medicationUnitLiter) MedicationUnit.UNIT_ML else MedicationUnit.UNIT_MG
+                if (medicationUnitLiter) MedicationUnit.UNIT_LITER else MedicationUnit.UNIT_KG
             offset += 3
         }
 
