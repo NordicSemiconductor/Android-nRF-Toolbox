@@ -6,8 +6,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -71,10 +76,16 @@ internal fun ScannerScreen() {
             )
         }
     ) { paddingValues ->
+        // Get notch padding for devices with a display cutout (notch)
+        val notchPadding = WindowInsets.displayCutout
+            .only(WindowInsetsSides.Horizontal)
+            .asPaddingValues()
+
         Column(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
+                .padding(notchPadding),
         ) {
             RequireBluetooth {
                 RequireLocation { isLocationRequiredAndDisabled ->
@@ -145,10 +156,11 @@ internal fun LazyListScope.DeviceListItems(
         .filter { it.name != null && it.name?.isNotEmpty() == true }
         .toList()
     items(nonNullPeripherals.size) { index ->
-        Box(modifier = Modifier
-            .clip(RoundedCornerShape(10.dp))
-            .clickable { onClick(nonNullPeripherals[index]) }
-            .padding(8.dp)
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(10.dp))
+                .clickable { onClick(nonNullPeripherals[index]) }
+                .padding(8.dp)
         ) {
             DeviceListItem(
                 name = nonNullPeripherals[index].name,

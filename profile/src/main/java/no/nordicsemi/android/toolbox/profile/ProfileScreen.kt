@@ -2,7 +2,12 @@ package no.nordicsemi.android.toolbox.profile
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -93,6 +98,11 @@ internal fun ProfileScreen() {
             )
         },
     ) { paddingValues ->
+        // Get notch padding for devices with a display cutout (notch)
+        val notchPadding = WindowInsets.displayCutout
+            .only(WindowInsetsSides.Horizontal)
+            .asPaddingValues()
+
         RequireBluetooth {
             RequireLocation {
                 RequestNotificationPermission {
@@ -101,7 +111,8 @@ internal fun ProfileScreen() {
                         modifier = Modifier
                             .verticalScroll(rememberScrollState())
                             .fillMaxSize()
-                            .padding(paddingValues),
+                            .padding(paddingValues)
+                            .padding(notchPadding),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         when (val state = deviceDataState) {
