@@ -77,6 +77,7 @@ internal data class DeviceData(
 internal sealed class DeviceConnectionState {
     data object Idle : DeviceConnectionState()
     data object Connecting : DeviceConnectionState()
+    data object Disconnecting : DeviceConnectionState()
     data class Connected(val data: DeviceData) : DeviceConnectionState()
     data class Disconnected(
         val device: Peripheral? = null,
@@ -220,6 +221,9 @@ internal class ProfileViewModel @Inject constructor(
 
                     ConnectionState.Disconnecting -> {
                         // Update the state to disconnecting.
+                        _deviceData.update {
+                            DeviceConnectionState.Disconnecting
+                        }
                     }
                 }
             }?.launchIn(viewModelScope)
