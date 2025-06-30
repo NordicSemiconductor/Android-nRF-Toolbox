@@ -137,7 +137,7 @@ internal fun ProfileScreen() {
                                 }
                             }
 
-                            DeviceConnectionState.Idle -> LoadingView()
+                            DeviceConnectionState.Idle, DeviceConnectionState.Disconnecting -> LoadingView()
                         }
                     }
                 }
