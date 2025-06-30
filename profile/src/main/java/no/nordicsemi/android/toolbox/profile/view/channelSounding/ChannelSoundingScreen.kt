@@ -49,7 +49,7 @@ internal fun ChannelSoundingScreen(state: ChannelSoundingServiceData) {
                         "Ranging permission is not granted"
                     }
                 } else {
-                    "Ranging permission is not available on this Android version."
+                    "Channel Sounding Service is not available on this Android version."
                 }
 
             Box(contentAlignment = Alignment.Center) {
