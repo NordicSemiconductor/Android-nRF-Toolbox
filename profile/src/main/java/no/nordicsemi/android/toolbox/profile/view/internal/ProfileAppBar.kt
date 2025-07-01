@@ -18,9 +18,11 @@ internal fun ProfileAppBar(
     openLogger: () -> Unit
 ) {
     if (deviceName?.isNotBlank() == true) {
-        if (connectionState !is DeviceConnectionState.Disconnected)
+        if (connectionState !is DeviceConnectionState.Disconnected) {
             LoggerIconAppBar(deviceName, navigateUp, disconnect, openLogger)
-        else LoggerBackIconAppBar(deviceName, navigateUp) { openLogger() }
+        } else {
+            LoggerBackIconAppBar(deviceName, navigateUp) { openLogger() }
+        }
     } else {
         BackIconAppBar(title, navigateUp)
     }
@@ -30,6 +32,13 @@ internal fun ProfileAppBar(
 @Composable
 private fun ProfileAppBarPreview() {
     NordicTheme {
-        ProfileAppBar("DE", "nRF Toolbox", DeviceConnectionState.Connecting, {}, {}) {}
+        ProfileAppBar(
+            deviceName = "DE",
+            title = "nRF Toolbox",
+            connectionState = DeviceConnectionState.Connecting,
+            navigateUp = {},
+            disconnect = {},
+            openLogger = {},
+        )
     }
 }
