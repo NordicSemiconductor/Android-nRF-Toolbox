@@ -112,6 +112,7 @@ internal fun HomeView() {
                                     iconId = R.drawable.ic_battery,
                                     profileName = R.string.battery_module_full,
                                     deviceName = peripheral.name,
+                                    description = peripheral.address,
                                     onClick = {
                                         onEvent(
                                             UiEvent.OnDeviceClick(
@@ -131,6 +132,7 @@ internal fun HomeView() {
                                             iconId = R.drawable.ic_hrs,
                                             profileName = R.string.hrs_module_full,
                                             deviceName = peripheral.name,
+                                            description = peripheral.address,
                                             onClick = {
                                                 onEvent(
                                                     UiEvent.OnDeviceClick(
@@ -145,6 +147,7 @@ internal fun HomeView() {
                                             iconId = R.drawable.ic_hts,
                                             profileName = R.string.hts_module_full,
                                             deviceName = peripheral.name,
+                                            description = peripheral.address,
                                             onClick = {
                                                 onEvent(
                                                     UiEvent.OnDeviceClick(
@@ -159,6 +162,7 @@ internal fun HomeView() {
                                             iconId = R.drawable.ic_bps,
                                             profileName = R.string.bps_module_full,
                                             deviceName = peripheral.name,
+                                            description = peripheral.address,
                                             onClick = {
                                                 onEvent(
                                                     UiEvent.OnDeviceClick(
@@ -173,6 +177,7 @@ internal fun HomeView() {
                                             iconId = R.drawable.ic_gls,
                                             profileName = R.string.gls_module_full,
                                             deviceName = peripheral.name,
+                                            description = peripheral.address,
                                             onClick = {
                                                 onEvent(
                                                     UiEvent.OnDeviceClick(
@@ -187,6 +192,7 @@ internal fun HomeView() {
                                             iconId = R.drawable.ic_cgm,
                                             profileName = R.string.cgm_module_full,
                                             deviceName = peripheral.name,
+                                            description = peripheral.address,
                                             onClick = {
                                                 onEvent(
                                                     UiEvent.OnDeviceClick(
@@ -201,6 +207,7 @@ internal fun HomeView() {
                                             iconId = R.drawable.ic_rscs,
                                             profileName = R.string.rscs_module_full,
                                             deviceName = peripheral.name,
+                                            description = peripheral.address,
                                             onClick = {
                                                 onEvent(
                                                     UiEvent.OnDeviceClick(
@@ -215,6 +222,7 @@ internal fun HomeView() {
                                             iconId = R.drawable.ic_distance,
                                             profileName = R.string.direction_module_full,
                                             deviceName = peripheral.name,
+                                            description = peripheral.address,
                                             onClick = {
                                                 onEvent(
                                                     UiEvent.OnDeviceClick(
@@ -229,6 +237,7 @@ internal fun HomeView() {
                                             iconId = R.drawable.ic_csc,
                                             profileName = R.string.csc_module_full,
                                             deviceName = peripheral.name,
+                                            description = peripheral.address,
                                             onClick = {
                                                 onEvent(
                                                     UiEvent.OnDeviceClick(
@@ -244,6 +253,7 @@ internal fun HomeView() {
                                                 iconId = Icons.Default.SyncAlt,
                                                 profileName = R.string.throughput_module,
                                                 deviceName = peripheral.name,
+                                                description = peripheral.address,
                                                 onClick = {
                                                     onEvent(
                                                         UiEvent.OnDeviceClick(
@@ -260,6 +270,7 @@ internal fun HomeView() {
                                                 iconId = R.drawable.ic_uart,
                                                 profileName = R.string.uart_module_full,
                                                 deviceName = peripheral.name,
+                                                description = peripheral.address,
                                                 onClick = {
                                                     onEvent(
                                                         UiEvent.OnDeviceClick(
@@ -276,6 +287,7 @@ internal fun HomeView() {
                                                 iconId = Icons.Default.SocialDistance,
                                                 profileName = R.string.channel_sounding_module,
                                                 deviceName = peripheral.name,
+                                                description = peripheral.address,
                                                 onClick = {
                                                     onEvent(
                                                         UiEvent.OnDeviceClick(
@@ -292,6 +304,7 @@ internal fun HomeView() {
                                                 iconId = Icons.Default.Lightbulb,
                                                 profileName = R.string.lbs_blinky_module,
                                                 deviceName = peripheral.name,
+                                                description = peripheral.address,
                                                 onClick = {
                                                     onEvent(
                                                         UiEvent.OnDeviceClick(

@@ -28,7 +28,7 @@ internal fun FeatureButton(
     @DrawableRes iconId: Int,
     @StringRes profileName: Int,
     deviceName: String?,
-    @StringRes description: Int? = null,
+    description: String? = null,
     onClick: () -> Unit
 ) {
     OutlinedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
@@ -67,7 +67,7 @@ internal fun FeatureButton(
                 description?.let {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(id = it),
+                        text = it,
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -84,6 +84,7 @@ private fun FeatureButtonPreview() {
         R.drawable.ic_csc,
         R.string.csc_module_full,
         "Testing peripheral",
+        description = "AA:BB:CC:DD:EE:FF",
     ) { }
 }
 
