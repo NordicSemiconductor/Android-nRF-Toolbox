@@ -27,7 +27,6 @@ import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionRow
 import no.nordicsemi.android.ui.view.SectionTitle
-import no.nordicsemi.android.ui.view.dialog.toBooleanText
 import java.util.Calendar
 
 @Composable
@@ -53,6 +52,7 @@ internal fun BPSScreen(
                     KeyValueColumn(
                         stringResource(id = R.string.bps_pulse),
                         it,
+                        verticalSpacing = 4.dp,
                         modifier = Modifier.padding(start = 16.dp)
                     )
                 }
@@ -60,6 +60,13 @@ internal fun BPSScreen(
 
             serviceData.bloodPressureFeature?.let {
                 HorizontalDivider()
+                Text(
+                    "Blood pressure features",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.secondary
+                )
                 BloodPressureFeatureView(it)
             }
 
@@ -210,53 +217,40 @@ private fun BloodPressureView(state: BloodPressureMeasurementData) {
     }
     state.status?.let {
         HorizontalDivider()
+        Text(
+            "BPM status",
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.secondary
+        )
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.padding(start = 16.dp, end = 16.dp)
         ) {
             if (it.bodyMovementDetected) {
-                KeyValueColumn(
-                    stringResource(id = R.string.body_movement_detected),
-                    it.bodyMovementDetected.toBooleanText()
-                )
+                FeatureSupported(stringResource(id = R.string.body_movement_detected))
+
             }
             if (it.irregularPulseDetected) {
-                KeyValueColumn(
-                    stringResource(id = R.string.irregular_heart_rate_detected),
-                    it.irregularPulseDetected.toBooleanText()
-                )
+                FeatureSupported(stringResource(id = R.string.irregular_heart_rate_detected))
             }
 
             if (it.cuffTooLose) {
-                KeyValueColumn(
-                    "Cuff Too Lose",
-                    it.cuffTooLose.toBooleanText()
-                )
+                FeatureSupported("Cuff Too Lose")
             }
             if (it.pulseRateExceedsUpperLimit) {
-                KeyValueColumn(
-                    stringResource(id = R.string.pulse_rate_higher_limit),
-                    it.pulseRateExceedsUpperLimit.toBooleanText()
-                )
+                FeatureSupported(stringResource(id = R.string.pulse_rate_higher_limit))
             }
             if (it.pulseRateInRange) {
-                KeyValueColumn(
-                    stringResource(id = R.string.pulse_rate_detected),
-                    it.pulseRateInRange.toBooleanText()
-                )
+                FeatureSupported(stringResource(id = R.string.pulse_rate_detected))
             }
             if (it.improperMeasurementPosition) {
-                KeyValueColumn(
-                    stringResource(id = R.string.improper_measurement_position),
-                    it.improperMeasurementPosition.toBooleanText()
-                )
+                FeatureSupported(stringResource(id = R.string.improper_measurement_position))
             }
 
             if (it.pulseRateIsLessThenLowerLimit) {
-                KeyValueColumn(
-                    stringResource(id = R.string.pulse_rate_lower_limit),
-                    it.pulseRateIsLessThenLowerLimit.toBooleanText()
-                )
+                FeatureSupported(stringResource(id = R.string.pulse_rate_lower_limit))
             }
         }
     }
