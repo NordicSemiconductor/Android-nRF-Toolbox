@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.lib.profile.bps.BPMStatus
@@ -66,14 +67,37 @@ internal fun BPSScreen(
                 serviceData.bloodPressureMeasurement == null &&
                 serviceData.bloodPressureFeature == null
             ) {
-                Text(
-                    stringResource(id = R.string.no_data_info),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp)
-                )
+                WaitingForMeasurementView()
             }
         }
     }
+}
+
+@Composable
+internal fun WaitingForMeasurementView() {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+    ) {
+        Text(
+            text = stringResource(id = R.string.no_data_info_title),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = stringResource(id = R.string.no_data_info),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun WaitingForMeasurementViewPreview() {
+    WaitingForMeasurementView()
 }
 
 @Composable
@@ -178,7 +202,7 @@ private fun BloodPressureView(state: BloodPressureMeasurementData) {
                 stringResource(R.string.bps_timestamp, it)
             }?.let {
                 KeyValueColumn(
-                    "Date/Time",
+                    "Date & Time",
                     it
                 )
             }
