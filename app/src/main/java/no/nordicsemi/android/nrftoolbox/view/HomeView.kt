@@ -96,8 +96,6 @@ internal fun HomeView() {
                         .alpha(0.5f)
                         .padding(start = 16.dp),
                 )
-            }
-            item {
                 if (state.connectedDevices.isNotEmpty()) {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -110,9 +108,9 @@ internal fun HomeView() {
                             if (services.size == 1 && services.first().profile == Profile.BATTERY) {
                                 FeatureButton(
                                     iconId = R.drawable.ic_battery,
-                                    profileName = R.string.battery_module_full,
+                                    description = R.string.battery_module_full,
                                     deviceName = peripheral.name,
-                                    description = peripheral.address,
+                                    deviceAddress = peripheral.address,
                                     onClick = {
                                         onEvent(
                                             UiEvent.OnDeviceClick(
@@ -130,9 +128,10 @@ internal fun HomeView() {
                                     when (serviceManager.profile) {
                                         Profile.HRS -> FeatureButton(
                                             iconId = R.drawable.ic_hrs,
-                                            profileName = R.string.hrs_module_full,
+                                            description = R.string.hrs_module_full,
                                             deviceName = peripheral.name,
-                                            description = peripheral.address,
+                                            profileNames = services.map { it.profile.toString() },
+                                            deviceAddress = peripheral.address,
                                             onClick = {
                                                 onEvent(
                                                     UiEvent.OnDeviceClick(
@@ -145,9 +144,10 @@ internal fun HomeView() {
 
                                         Profile.HTS -> FeatureButton(
                                             iconId = R.drawable.ic_hts,
-                                            profileName = R.string.hts_module_full,
+                                            description = R.string.hts_module_full,
                                             deviceName = peripheral.name,
-                                            description = peripheral.address,
+                                            deviceAddress = peripheral.address,
+                                            profileNames = services.map { it.profile.toString() },
                                             onClick = {
                                                 onEvent(
                                                     UiEvent.OnDeviceClick(
@@ -160,9 +160,10 @@ internal fun HomeView() {
 
                                         Profile.BPS -> FeatureButton(
                                             iconId = R.drawable.ic_bps,
-                                            profileName = R.string.bps_module_full,
+                                            description = R.string.bps_module_full,
                                             deviceName = peripheral.name,
-                                            description = peripheral.address,
+                                            deviceAddress = peripheral.address,
+                                            profileNames = services.map { it.profile.toString() },
                                             onClick = {
                                                 onEvent(
                                                     UiEvent.OnDeviceClick(
@@ -175,9 +176,10 @@ internal fun HomeView() {
 
                                         Profile.GLS -> FeatureButton(
                                             iconId = R.drawable.ic_gls,
-                                            profileName = R.string.gls_module_full,
+                                            description = R.string.gls_module_full,
                                             deviceName = peripheral.name,
-                                            description = peripheral.address,
+                                            deviceAddress = peripheral.address,
+                                            profileNames = services.map { it.profile.toString() },
                                             onClick = {
                                                 onEvent(
                                                     UiEvent.OnDeviceClick(
@@ -190,9 +192,10 @@ internal fun HomeView() {
 
                                         Profile.CGM -> FeatureButton(
                                             iconId = R.drawable.ic_cgm,
-                                            profileName = R.string.cgm_module_full,
+                                            description = R.string.cgm_module_full,
                                             deviceName = peripheral.name,
-                                            description = peripheral.address,
+                                            deviceAddress = peripheral.address,
+                                            profileNames = services.map { it.profile.toString() },
                                             onClick = {
                                                 onEvent(
                                                     UiEvent.OnDeviceClick(
@@ -205,9 +208,10 @@ internal fun HomeView() {
 
                                         Profile.RSCS -> FeatureButton(
                                             iconId = R.drawable.ic_rscs,
-                                            profileName = R.string.rscs_module_full,
+                                            description = R.string.rscs_module_full,
                                             deviceName = peripheral.name,
-                                            description = peripheral.address,
+                                            deviceAddress = peripheral.address,
+                                            profileNames = services.map { it.profile.toString() },
                                             onClick = {
                                                 onEvent(
                                                     UiEvent.OnDeviceClick(
@@ -220,9 +224,10 @@ internal fun HomeView() {
 
                                         Profile.DFS -> FeatureButton(
                                             iconId = R.drawable.ic_distance,
-                                            profileName = R.string.direction_module_full,
+                                            description = R.string.direction_module_full,
                                             deviceName = peripheral.name,
-                                            description = peripheral.address,
+                                            deviceAddress = peripheral.address,
+                                            profileNames = services.map { it.profile.toString() },
                                             onClick = {
                                                 onEvent(
                                                     UiEvent.OnDeviceClick(
@@ -235,9 +240,10 @@ internal fun HomeView() {
 
                                         Profile.CSC -> FeatureButton(
                                             iconId = R.drawable.ic_csc,
-                                            profileName = R.string.csc_module_full,
+                                            description = R.string.csc_module_full,
                                             deviceName = peripheral.name,
-                                            description = peripheral.address,
+                                            deviceAddress = peripheral.address,
+                                            profileNames = services.map { it.profile.toString() },
                                             onClick = {
                                                 onEvent(
                                                     UiEvent.OnDeviceClick(
@@ -251,9 +257,10 @@ internal fun HomeView() {
                                         Profile.THROUGHPUT -> {
                                             FeatureButton(
                                                 iconId = Icons.Default.SyncAlt,
-                                                profileName = R.string.throughput_module,
+                                                description = R.string.throughput_module,
                                                 deviceName = peripheral.name,
-                                                description = peripheral.address,
+                                                deviceAddress = peripheral.address,
+                                                profileNames = services.map { it.profile.toString() },
                                                 onClick = {
                                                     onEvent(
                                                         UiEvent.OnDeviceClick(
@@ -268,9 +275,10 @@ internal fun HomeView() {
                                         Profile.UART -> {
                                             FeatureButton(
                                                 iconId = R.drawable.ic_uart,
-                                                profileName = R.string.uart_module_full,
+                                                description = R.string.uart_module_full,
                                                 deviceName = peripheral.name,
-                                                description = peripheral.address,
+                                                deviceAddress = peripheral.address,
+                                                profileNames = services.map { it.profile.toString() },
                                                 onClick = {
                                                     onEvent(
                                                         UiEvent.OnDeviceClick(
@@ -285,9 +293,10 @@ internal fun HomeView() {
                                         Profile.CHANNEL_SOUNDING -> {
                                             FeatureButton(
                                                 iconId = Icons.Default.SocialDistance,
-                                                profileName = R.string.channel_sounding_module,
+                                                description = R.string.channel_sounding_module,
                                                 deviceName = peripheral.name,
-                                                description = peripheral.address,
+                                                deviceAddress = peripheral.address,
+                                                profileNames = services.map { it.profile.toString() },
                                                 onClick = {
                                                     onEvent(
                                                         UiEvent.OnDeviceClick(
@@ -302,9 +311,10 @@ internal fun HomeView() {
                                         Profile.LBS -> {
                                             FeatureButton(
                                                 iconId = Icons.Default.Lightbulb,
-                                                profileName = R.string.lbs_blinky_module,
+                                                description = R.string.lbs_blinky_module,
                                                 deviceName = peripheral.name,
-                                                description = peripheral.address,
+                                                deviceAddress = peripheral.address,
+                                                profileNames = services.map { it.profile.toString() },
                                                 onClick = {
                                                     onEvent(
                                                         UiEvent.OnDeviceClick(

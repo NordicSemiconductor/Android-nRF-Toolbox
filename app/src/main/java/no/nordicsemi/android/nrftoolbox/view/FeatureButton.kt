@@ -26,9 +26,10 @@ import no.nordicsemi.android.nrftoolbox.R
 @Composable
 internal fun FeatureButton(
     @DrawableRes iconId: Int,
-    @StringRes profileName: Int,
+    @StringRes description: Int,
+    profileNames: List<String> = listOf(stringResource(description)),
     deviceName: String?,
-    description: String? = null,
+    deviceAddress: String,
     onClick: () -> Unit
 ) {
     OutlinedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
@@ -41,7 +42,7 @@ internal fun FeatureButton(
         ) {
             Image(
                 painter = painterResource(iconId),
-                contentDescription = stringResource(id = profileName),
+                contentDescription = stringResource(id = description),
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                 modifier = Modifier
                     .size(40.dp)
@@ -58,20 +59,18 @@ internal fun FeatureButton(
                 )
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(id = profileName),
+                    text = profileNames.joinToString(", "),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
 
-                description?.let {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = it,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = deviceAddress,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
@@ -83,17 +82,19 @@ private fun FeatureButtonPreview() {
     FeatureButton(
         R.drawable.ic_csc,
         R.string.csc_module_full,
+        listOf("Cycling Speed and Cadence", "Cycling Speed Sensor"),
         "Testing peripheral",
-        description = "AA:BB:CC:DD:EE:FF",
+        deviceAddress = "AA:BB:CC:DD:EE:FF",
     ) { }
 }
 
 @Composable
 internal fun FeatureButton(
     iconId: ImageVector,
-    @StringRes profileName: Int,
+    @StringRes description: Int,
+    profileNames: List<String> = listOf(stringResource(description)),
     deviceName: String?,
-    description: String? = null,
+    deviceAddress: String,
     onClick: () -> Unit
 ) {
     OutlinedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
@@ -106,7 +107,7 @@ internal fun FeatureButton(
         ) {
             Image(
                 imageVector = iconId,
-                contentDescription = description,
+                contentDescription = deviceAddress,
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                 modifier = Modifier
                     .size(40.dp)
@@ -124,20 +125,17 @@ internal fun FeatureButton(
 
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(id = profileName),
+                    text = profileNames.joinToString(", "),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-
-                description?.let {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = description,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = deviceAddress,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
