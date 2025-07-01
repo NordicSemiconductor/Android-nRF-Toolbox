@@ -11,8 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lightbulb
@@ -66,22 +65,25 @@ internal fun HomeView() {
         val notchPadding = WindowInsets.displayCutout
             .only(WindowInsetsSides.Horizontal)
             .asPaddingValues()
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+
+        LazyColumn(
             modifier = Modifier
-                .padding(paddingValues)
-                .padding(notchPadding)
-                .padding(16.dp)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+                .padding(paddingValues),
+            contentPadding = notchPadding,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Column {
+            item {
+                // Show the title at the top
                 Text(
                     text = stringResource(R.string.connected_devices),
                     modifier = Modifier
                         .alpha(0.5f)
                         .padding(start = 16.dp),
                 )
+            }
+            item {
                 if (state.connectedDevices.isNotEmpty()) {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -298,9 +300,9 @@ internal fun HomeView() {
                     NoConnectedDeviceView()
                 }
             }
-
-            Links { onEvent(it) }
-
+            item {
+                Links { onEvent(it) }
+            }
         }
     }
 }
