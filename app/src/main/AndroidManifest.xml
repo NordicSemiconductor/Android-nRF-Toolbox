@@ -63,7 +63,6 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/NordicTheme.SplashScreen">
             <intent-filter>
