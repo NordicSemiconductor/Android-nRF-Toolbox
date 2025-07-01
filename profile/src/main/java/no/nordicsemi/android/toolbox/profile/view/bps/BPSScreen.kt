@@ -29,7 +29,6 @@ import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.ui.view.dialog.toBooleanText
 import java.util.Calendar
 
-
 @Composable
 internal fun BPSScreen(
     serviceData: BPSServiceData
@@ -69,7 +68,8 @@ internal fun BPSScreen(
             ) {
                 Text(
                     stringResource(id = R.string.no_data_info),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp)
                 )
             }
         }
