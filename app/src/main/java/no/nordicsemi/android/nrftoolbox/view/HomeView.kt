@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.SocialDistance
 import androidx.compose.material.icons.filled.SyncAlt
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -31,11 +32,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import no.nordicsemi.android.common.analytics.view.AnalyticsPermissionButton
+import no.nordicsemi.android.common.ui.view.NordicAppBar
 import no.nordicsemi.android.nrftoolbox.R
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewModel
 import no.nordicsemi.android.nrftoolbox.viewmodel.UiEvent
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun HomeView() {
     val viewModel = hiltViewModel<HomeViewModel>()
@@ -43,8 +47,15 @@ internal fun HomeView() {
     val onEvent: (UiEvent) -> Unit = { viewModel.onClickEvent(it) }
 
     Scaffold(
-        contentWindowInsets = WindowInsets(0,0,0,0),
-        topBar = { TitleAppBar(stringResource(id = R.string.app_name)) },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        topBar = {
+            NordicAppBar(
+                title = { Text(stringResource(id = R.string.app_name)) },
+                showBackButton = false,
+            ) {
+                AnalyticsPermissionButton()
+            }
+        },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { onEvent(UiEvent.OnConnectDeviceClick) },
