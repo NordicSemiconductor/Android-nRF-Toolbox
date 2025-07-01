@@ -53,8 +53,8 @@ data class GLSMeasurementContext(
 )
 
 enum class ConcentrationUnit(val id: Int) {
-    UNIT_KGPL(0),
-    UNIT_MOLPL(1);
+    UNIT_KGPL(1),
+    UNIT_MOLPL(0);
 
     companion object {
         fun create(value: Int): ConcentrationUnit {
@@ -65,8 +65,8 @@ enum class ConcentrationUnit(val id: Int) {
 }
 
 enum class MedicationUnit(val id: Int) {
-    UNIT_MG(0),
-    UNIT_ML(1);
+    UNIT_KG(0),
+    UNIT_LITER(1);
 
     companion object {
         fun create(value: Int): MedicationUnit {

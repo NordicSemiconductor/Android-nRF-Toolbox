@@ -32,15 +32,39 @@
 package no.nordicsemi.android.analytics
 
 import android.os.Bundle
+import no.nordicsemi.android.toolbox.lib.utils.Profile
 
+/**
+ * Base class for Firebase Analytics events.
+ */
 sealed class FirebaseEvent(val eventName: String, val params: Bundle?)
 
+/**
+ * Represents an event that is logged when the app is opened.
+ * This event does not carry any additional parameters.
+ */
 data object AppOpenEvent : FirebaseEvent("APP_OPEN", null)
 
+/**
+ * Represents an event that is logged when profile is opened.
+ * This event can be created with a [Profile] or a [Link].
+ */
 class ProfileOpenEvent : FirebaseEvent {
 
-    constructor(profile: Profile) : super(EVENT_NAME, createBundle(profile.displayName))
+    /**
+     * Creates a new instance of [ProfileOpenEvent] with the given profile.
+     * The profile's string representation is used as a parameter.
+     *
+     * @param profile The profile that was opened.
+     */
+    constructor(profile: Profile) : super(EVENT_NAME, createBundle(profile.toString()))
 
+    /**
+     * Creates a new instance of [ProfileOpenEvent] with the given link.
+     * The link's display name is used as a parameter.
+     *
+     * @param link The link that was opened.
+     */
     constructor(link: Link) : super(EVENT_NAME, createBundle(link.displayName))
 
     companion object {
@@ -48,11 +72,12 @@ class ProfileOpenEvent : FirebaseEvent {
     }
 }
 
-class ProfileConnectedEvent : FirebaseEvent {
-
-    constructor(profile: Profile) : super(EVENT_NAME, createBundle(profile.displayName))
-
-    constructor(link: Link) : super(EVENT_NAME, createBundle(link.displayName))
+/**
+ * Represents an event that is logged when a profile is connected.
+ * This event can be created with a [Profile] or a [Link].
+ */
+class ProfileConnectedEvent(profile: Profile) :
+    FirebaseEvent(EVENT_NAME, createBundle(profile.toString())) {
 
     companion object {
         private const val EVENT_NAME = "PROFILE_CONNECTED"
@@ -61,13 +86,28 @@ class ProfileConnectedEvent : FirebaseEvent {
 
 const val PROFILE_PARAM_KEY = "PROFILE_NAME"
 
+/**
+ * Creates a [Bundle] with the given profile name.
+ *
+ * @param name The name of the profile to be included in the bundle.
+ * @return A [Bundle] containing the profile name.
+ */
 private fun createBundle(name: String): Bundle {
     return Bundle().apply { putString(PROFILE_PARAM_KEY, name) }
 }
 
-sealed class UARTAnalyticsEvent(eventName: String, params: Bundle?) : FirebaseEvent(eventName, params)
+/**
+ * Represents an event related to UART (Universal Asynchronous Receiver-Transmitter) analytics.
+ */
+sealed class UARTAnalyticsEvent(eventName: String, params: Bundle?) :
+    FirebaseEvent(eventName, params)
 
-class UARTSendAnalyticsEvent(mode: UARTMode) : UARTAnalyticsEvent("UART_SEND_EVENT", createParams(mode)) {
+/**
+ * Represents an event that is logged when a UART message is send or received.
+ * This event can be created with a [UARTMode].
+ */
+class UARTSendAnalyticsEvent(mode: UARTMode) :
+    UARTAnalyticsEvent("UART_SEND_EVENT", createParams(mode)) {
 
     companion object {
         fun createParams(mode: UARTMode) = Bundle().apply {
@@ -76,6 +116,14 @@ class UARTSendAnalyticsEvent(mode: UARTMode) : UARTAnalyticsEvent("UART_SEND_EVE
     }
 }
 
+/**
+ * Represents an event that is logged when a UART preset configuration is created.
+ * This event can be created with a [UARTMode].
+ */
 class UARTCreateConfiguration : UARTAnalyticsEvent("UART_CREATE_CONF", null)
 
+/**
+ * Represents an event that is logged when a UART preset configuration is changed.
+ * This event does not carry any additional parameters.
+ */
 class UARTChangeConfiguration : UARTAnalyticsEvent("UART_CHANGE_CONF", null)

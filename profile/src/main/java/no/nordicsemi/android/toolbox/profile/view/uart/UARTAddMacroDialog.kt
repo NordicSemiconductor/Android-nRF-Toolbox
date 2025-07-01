@@ -61,7 +61,10 @@ internal fun UARTAddMacroDialog(
         onDismissRequest = { onEvent(UARTEvent.OnEditFinished) },
         dismissButton = {
             TextButton(onClick = { onEvent(UARTEvent.OnDeleteMacro) }) {
-                Text(stringResource(id = R.string.uart_macro_dialog_delete))
+                Text(
+                    stringResource(id = R.string.uart_macro_dialog_delete),
+                    color = MaterialTheme.colorScheme.error
+                )
             }
         },
         confirmButton = {
@@ -85,7 +88,9 @@ internal fun UARTAddMacroDialog(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = stringResource(id = R.string.uart_macro_dialog_title),
+                    text = macro?.command
+                        ?.let { stringResource(id = R.string.uart_macro_dialog_title_edit) }
+                        ?: stringResource(id = R.string.uart_macro_dialog_title),
                     style = MaterialTheme.typography.headlineSmall
                 )
             }
@@ -175,7 +180,7 @@ private fun NewLineCharSection(checkedItem: MacroEol, onItemClick: (MacroEol) ->
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = "EOL",
+            text = "End of Line (EOL)",
             style = MaterialTheme.typography.labelLarge,
             modifier = Modifier.alpha(0.5f)
         )

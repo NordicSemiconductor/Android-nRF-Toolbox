@@ -29,12 +29,12 @@ object GlucoseMeasurementContextParser {
         val testerHealthPresent = flags and 0x04 != 0
         val exercisePresent = flags and 0x08 != 0
         val medicationPresent = flags and 0x10 != 0
-        val medicationUnitLiter = flags and 0x20 != 0
-        val HbA1cPresent = flags and 0x40 != 0
+        val medicationUnitLiter = (flags and 0x20) > 0
+        val hbA1cPresent = flags and 0x40 != 0
         val extendedFlagsPresent = flags and 0x80 != 0
 
         if (data.size < (3 + (if (carbohydratePresent) 3 else 0) + (if (mealPresent) 1 else 0) + (if (testerHealthPresent) 1 else 0)
-                    + (if (exercisePresent) 3 else 0) + (if (medicationPresent) 3 else 0) + (if (HbA1cPresent) 2 else 0)
+                    + (if (exercisePresent) 3 else 0) + (if (medicationPresent) 3 else 0) + (if (hbA1cPresent) 2 else 0)
                     + if (extendedFlagsPresent) 1 else 0)
         ) {
             return null
@@ -72,8 +72,8 @@ object GlucoseMeasurementContextParser {
         var health: Health? = null
         if (testerHealthPresent) {
             val testerAndHealth: Int = data.getInt(offset, IntFormat.UINT8)
-            tester = Tester.create(testerAndHealth and 0x0F)
-            health = Health.create(testerAndHealth shr 4)
+            tester = Tester.create((testerAndHealth and 0xF0) shr 4)
+            health = Health.create(testerAndHealth and 0x0F)
             offset += 1
         }
 
@@ -95,13 +95,13 @@ object GlucoseMeasurementContextParser {
             medicationAmount =
                 data.getFloat(offset + 1, FloatFormat.IEEE_11073_16_BIT, byteOrder) // mg or ml
             medicationUnit =
-                if (medicationUnitLiter) MedicationUnit.UNIT_ML else MedicationUnit.UNIT_MG
+                if (medicationUnitLiter) MedicationUnit.UNIT_LITER else MedicationUnit.UNIT_KG
             offset += 3
         }
 
-        var HbA1c: Float? = null
-        if (HbA1cPresent) {
-            HbA1c = data.getFloat(offset, FloatFormat.IEEE_11073_16_BIT, byteOrder)
+        var hbA1c: Float? = null
+        if (hbA1cPresent) {
+            hbA1c = data.getFloat(offset, FloatFormat.IEEE_11073_16_BIT, byteOrder)
             // offset += 2;
         }
 
@@ -117,7 +117,7 @@ object GlucoseMeasurementContextParser {
             medication,
             medicationAmount,
             medicationUnit,
-            HbA1c
+            hbA1c
         )
     }
 }

@@ -31,24 +31,20 @@
 
 package no.nordicsemi.android.analytics
 
-enum class Profile(val displayName: String) {
-    BPS("BPS"),
-    CGMS("CGMS"),
-    CSC("CSC"),
-    GLS("GLS"),
-    HRS("HRS"),
-    HTS("HTS"),
-    PRX("PRX"),
-    RSCS("RSCS"),
-    UART("UART");
-}
-
+/**
+ * Represents the different links that can be used in the application.
+ */
 enum class Link(val displayName: String) {
-    DFU("DFU"),
-    LOGGER("LOGGER");
+    LOGGER("LOGGER"),
+    GITHUB("GITHUB"),
+    DEV_ACADEMY("DEV_ACADEMY"),
 }
 
+/**
+ * Represents the mode of the UART service.
+ * Used to determine how the UART service should behave.
+ */
 enum class UARTMode(val displayName: String) {
-    MACRO("MACRO"),
+    PRESET("PRESET"),
     TEXT("TEXT")
 }

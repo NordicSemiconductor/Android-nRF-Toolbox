@@ -2,7 +2,12 @@ package no.nordicsemi.android.toolbox.profile
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -23,6 +28,7 @@ import no.nordicsemi.android.common.permissions.notification.RequestNotification
 import no.nordicsemi.android.service.profile.CustomReason
 import no.nordicsemi.android.service.profile.DeviceDisconnectionReason
 import no.nordicsemi.android.service.profile.StateReason
+import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.data.BPSServiceData
 import no.nordicsemi.android.toolbox.profile.data.BatteryServiceData
 import no.nordicsemi.android.toolbox.profile.data.CGMServiceData
@@ -33,7 +39,6 @@ import no.nordicsemi.android.toolbox.profile.data.GLSServiceData
 import no.nordicsemi.android.toolbox.profile.data.HRSServiceData
 import no.nordicsemi.android.toolbox.profile.data.HTSServiceData
 import no.nordicsemi.android.toolbox.profile.data.LBSServiceData
-import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.data.ProfileServiceData
 import no.nordicsemi.android.toolbox.profile.data.RSCSServiceData
 import no.nordicsemi.android.toolbox.profile.data.ThroughputServiceData
@@ -93,6 +98,11 @@ internal fun ProfileScreen() {
             )
         },
     ) { paddingValues ->
+        // Get notch padding for devices with a display cutout (notch)
+        val notchPadding = WindowInsets.displayCutout
+            .only(WindowInsetsSides.Horizontal)
+            .asPaddingValues()
+
         RequireBluetooth {
             RequireLocation {
                 RequestNotificationPermission {
@@ -101,7 +111,8 @@ internal fun ProfileScreen() {
                         modifier = Modifier
                             .verticalScroll(rememberScrollState())
                             .fillMaxSize()
-                            .padding(paddingValues),
+                            .padding(paddingValues)
+                            .padding(notchPadding),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         when (val state = deviceDataState) {
@@ -126,7 +137,7 @@ internal fun ProfileScreen() {
                                 }
                             }
 
-                            DeviceConnectionState.Idle -> LoadingView()
+                            DeviceConnectionState.Idle, DeviceConnectionState.Disconnecting -> LoadingView()
                         }
                     }
                 }
@@ -206,40 +217,48 @@ private fun DeviceConnectedView(
                         deviceData.serviceData.forEach { serviceData ->
                             when (serviceData.profile) {
                                 Profile.BPS -> BPSScreen(
-                                    serviceData = serviceData as BPSServiceData
+                                    serviceData = serviceData as BPSServiceData,
                                 )
 
                                 Profile.CSC -> CSCScreen(
                                     serviceData = serviceData as CSCServiceData,
-                                ) { onClickEvent(it) }
+                                    onClickEvent = onClickEvent
+                                )
 
                                 Profile.CGM -> CGMScreen(
-                                    serviceData = serviceData as CGMServiceData
-                                ) { onClickEvent(it) }
+                                    serviceData = serviceData as CGMServiceData,
+                                    onClickEvent = onClickEvent
+                                )
 
                                 Profile.DFS -> DFSScreen(
-                                    serviceData = serviceData as DFSServiceData
-                                ) { onClickEvent(it) }
+                                    serviceData = serviceData as DFSServiceData,
+                                    onClick = onClickEvent
+                                )
 
                                 Profile.GLS -> GLSScreen(
                                     glsServiceData = serviceData as GLSServiceData,
-                                ) { onClickEvent(it) }
+                                    onClickEvent = onClickEvent
+                                )
 
                                 Profile.HRS -> HRSScreen(
                                     hrsServiceData = serviceData as HRSServiceData,
-                                ) { onClickEvent(it) }
+                                    onClickEvent = onClickEvent
+                                )
 
                                 Profile.HTS -> HTSScreen(
                                     htsServiceData = serviceData as HTSServiceData,
-                                ) { onClickEvent(it) }
+                                    onClickEvent = onClickEvent
+                                )
 
                                 Profile.RSCS -> RSCSScreen(
                                     serviceData = serviceData as RSCSServiceData,
-                                ) { onClickEvent(it) }
+                                    onClickEvent = onClickEvent
+                                )
 
                                 Profile.THROUGHPUT -> ThroughputScreen(
                                     serviceData = serviceData as ThroughputServiceData,
-                                ) { onClickEvent(it) }
+                                    onClickEvent = onClickEvent
+                                )
 
                                 Profile.BATTERY -> {
                                     // Battery level will be added at the end.
@@ -249,7 +268,8 @@ private fun DeviceConnectedView(
                                 Profile.UART -> {
                                     UARTScreen(
                                         state = serviceData as UARTServiceData,
-                                    ) { onClickEvent(it) }
+                                        onEvent = onClickEvent
+                                    )
                                 }
 
                                 Profile.CHANNEL_SOUNDING -> {
@@ -257,14 +277,12 @@ private fun DeviceConnectedView(
                                 }
 
                                 Profile.LBS -> {
-                                    BlinkyScreen(serviceData = serviceData as LBSServiceData) {
-                                        onClickEvent(it)
-                                    }
+                                    BlinkyScreen(
+                                        serviceData = serviceData as LBSServiceData,
+                                        onClickEvent = onClickEvent
+                                    )
                                 }
 
-                                Profile.PRX -> {
-                                    // todo: implement Proximity Profile
-                                }
                             }
                         }
                         // Battery level will be added at the end.

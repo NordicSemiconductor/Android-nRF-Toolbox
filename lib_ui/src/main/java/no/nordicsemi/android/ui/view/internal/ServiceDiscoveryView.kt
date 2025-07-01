@@ -50,13 +50,6 @@ fun ServiceDiscoveryView(
                     text = "Discovering services...",
                     style = MaterialTheme.typography.titleMedium
                 )
-
-                Text(
-                    text = "Peripheral connected, the mobile is trying to discover matching services.",
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
                 Text(
                     text = "Please wait...",
                     textAlign = TextAlign.Center,
@@ -73,7 +66,7 @@ fun ServiceDiscoveryView(
 @Composable
 private fun ServiceDiscoveryViewPreview() {
     MaterialTheme {
-        DeviceConnectingView(
+        ServiceDiscoveryView(
             modifier = Modifier.padding(16.dp)
         ) { padding ->
             Button(

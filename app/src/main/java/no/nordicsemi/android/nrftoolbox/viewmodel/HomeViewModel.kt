@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import no.nordicsemi.android.analytics.AppAnalytics
+import no.nordicsemi.android.analytics.Link
+import no.nordicsemi.android.analytics.ProfileOpenEvent
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.service.services.ServiceManager
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
@@ -28,6 +31,7 @@ private const val NORDIC_DEV_ZONE_URL = "https://devzone.nordicsemi.com/"
 internal class HomeViewModel @Inject constructor(
     private val navigator: Navigator,
     deviceRepository: DeviceRepository,
+    private val analytics: AppAnalytics,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeViewState())
     val state = _state.asStateFlow()
@@ -44,12 +48,26 @@ internal class HomeViewModel @Inject constructor(
     fun onClickEvent(event: UiEvent) {
         when (event) {
             UiEvent.OnConnectDeviceClick -> navigator.navigateTo(ScannerDestinationId)
-            is UiEvent.OnDeviceClick -> navigator.navigateTo(
-                ProfileDestinationId, event.deviceAddress
-            )
+            is UiEvent.OnDeviceClick -> {
+                // Log the event for analytics.
+                analytics.logEvent(ProfileOpenEvent(event.profile))
 
-            UiEvent.OnGitHubClick -> navigator.open(GITHUB_REPO_URL.toUri())
-            UiEvent.OnNordicDevZoneClick -> navigator.open(NORDIC_DEV_ZONE_URL.toUri())
+                navigator.navigateTo(
+                    ProfileDestinationId, event.deviceAddress
+                )
+            }
+
+            UiEvent.OnGitHubClick -> {
+                // Log the event for analytics.
+                analytics.logEvent(ProfileOpenEvent(Link.GITHUB))
+                navigator.open(GITHUB_REPO_URL.toUri())
+            }
+
+            UiEvent.OnNordicDevZoneClick -> {
+                // Log the event for analytics.
+                analytics.logEvent(ProfileOpenEvent(Link.DEV_ACADEMY))
+                navigator.open(NORDIC_DEV_ZONE_URL.toUri())
+            }
         }
     }
 

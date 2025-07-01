@@ -15,6 +15,13 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.analytics.AppAnalytics
+import no.nordicsemi.android.analytics.Link
+import no.nordicsemi.android.analytics.ProfileOpenEvent
+import no.nordicsemi.android.analytics.UARTChangeConfiguration
+import no.nordicsemi.android.analytics.UARTCreateConfiguration
+import no.nordicsemi.android.analytics.UARTMode
+import no.nordicsemi.android.analytics.UARTSendAnalyticsEvent
 import no.nordicsemi.android.common.logger.LoggerLauncher
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
@@ -42,8 +49,8 @@ import no.nordicsemi.android.service.repository.RSCSRepository
 import no.nordicsemi.android.service.repository.ThroughputRepository
 import no.nordicsemi.android.service.repository.UartRepository
 import no.nordicsemi.android.service.services.ServiceManager
+import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
-import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.data.ProfileServiceData
 import no.nordicsemi.android.toolbox.profile.data.uart.MacroEol
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
@@ -70,6 +77,7 @@ internal data class DeviceData(
 internal sealed class DeviceConnectionState {
     data object Idle : DeviceConnectionState()
     data object Connecting : DeviceConnectionState()
+    data object Disconnecting : DeviceConnectionState()
     data class Connected(val data: DeviceData) : DeviceConnectionState()
     data class Disconnected(
         val device: Peripheral? = null,
@@ -83,6 +91,7 @@ internal class ProfileViewModel @Inject constructor(
     private val navigator: Navigator,
     private val deviceRepository: DeviceRepository,
     private val uartConfigurationRepository: UartConfigurationRepository,
+    private val analytics: AppAnalytics,
     @ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
@@ -122,6 +131,8 @@ internal class ProfileViewModel @Inject constructor(
                     deviceRepository.updateConnectedDevices(peripheralProfileMap)
                     peripheralProfileMap[peripheral?.address]?.second?.forEach { profileHandler ->
                         updateProfileData(profileHandler)
+                        // Log analytics event.
+                        deviceRepository.updateAnalytics(address, profileHandler.profile)
                     }
                 }.launchIn(viewModelScope)
                 .apply {
@@ -177,10 +188,13 @@ internal class ProfileViewModel @Inject constructor(
                                 peripheral,
                                 StateReason(connectionState.reason)
                             )
+                        }.also {
+                            // Remove the analytics logged profiles for the disconnected device.
+                            deviceRepository.removeLoggedProfile(deviceAddress)
                         }
                     }
 
-                    ConnectionState.Disconnecting, ConnectionState.Closed -> {
+                    ConnectionState.Closed -> {
                         unbindService()
                         api.disconnectionReason.onEach { reason ->
                             if (reason != null) {
@@ -202,6 +216,13 @@ internal class ProfileViewModel @Inject constructor(
                     ConnectionState.Connecting -> {
                         _deviceData.update {
                             DeviceConnectionState.Connecting
+                        }
+                    }
+
+                    ConnectionState.Disconnecting -> {
+                        // Update the state to disconnecting.
+                        _deviceData.update {
+                            DeviceConnectionState.Disconnecting
                         }
                     }
                 }
@@ -241,9 +262,6 @@ internal class ProfileViewModel @Inject constructor(
             Profile.UART -> updateUART()
             Profile.CHANNEL_SOUNDING -> updateChannelSounding()
             Profile.LBS -> updateLBS()
-            Profile.PRX -> {
-                TODO()
-            }
 
         }
     }
@@ -289,7 +307,6 @@ internal class ProfileViewModel @Inject constructor(
     }
 
     private fun updateChannelSounding() {
-        Timber.tag("ChannelSounding").d("Updating Channel Sounding data for $address")
         ChannelSoundingRepository.getData(address).onEach {
             updateDeviceData(it)
         }.launchIn(viewModelScope)
@@ -303,7 +320,8 @@ internal class ProfileViewModel @Inject constructor(
                 }
             }
         } else {
-            Timber.tag("AAA").d("Channel Sounding is not available")
+            Timber.tag("Channel_Sounding")
+                .d("Channel Sounding is not available in this Android version.")
         }
     }
 
@@ -375,7 +393,14 @@ internal class ProfileViewModel @Inject constructor(
         when (event) {
             // Navigation events.
             is DisconnectEvent -> disconnect(event.device)
-            NavigateUp -> navigator.navigateUp()
+            NavigateUp -> {
+                // If the device is connected and missing services, disconnect it before navigating up.
+                if ((_deviceData.value as? DeviceConnectionState.Connected)?.data?.isMissingServices == true) {
+                    disconnect(address)
+                }
+                navigator.navigateUp()
+            }
+
             is OnRetryClicked -> reconnectDevice(event.device)
             OpenLoggerEvent -> openLogger()
 
@@ -481,6 +506,8 @@ internal class ProfileViewModel @Inject constructor(
 
     private fun runMacro(macro: UARTMacro) = viewModelScope.launch {
         UartRepository.runMacro(address, macro)
+        // Log the event in the analytics.
+        analytics.logEvent(UARTSendAnalyticsEvent(UARTMode.PRESET))
     }
 
     private fun onAddConfiguration(name: String) = viewModelScope.launch(Dispatchers.IO) {
@@ -495,12 +522,16 @@ internal class ProfileViewModel @Inject constructor(
 
         // Save the configuration name in the data store.
         uartConfigurationRepository.saveLastConfigurationNameToDataSource(name)
+        // Log the event in the analytics.
+        analytics.logEvent(UARTCreateConfiguration())
     }
 
     private fun onConfigurationSelected(configuration: UARTConfiguration) = viewModelScope.launch {
         UartRepository.updateSelectedConfigurationName(address, configuration.name)
         // Update the selected configuration in the datastore.
         uartConfigurationRepository.saveLastConfigurationNameToDataSource(configuration.name)
+        // Log the event in the analytics.
+        analytics.logEvent(UARTChangeConfiguration())
     }
 
     private fun deleteConfiguration(configuration: UARTConfiguration) =
@@ -515,7 +546,8 @@ internal class ProfileViewModel @Inject constructor(
 
     private fun sendText(text: String, newLineChar: MacroEol) = viewModelScope.launch {
         UartRepository.sendText(address, text, newLineChar)
-        //todo: log event in the analytics.
+        // Log the event in the analytics.
+        analytics.logEvent(UARTSendAnalyticsEvent(UARTMode.TEXT))
     }
 
     private fun setSpeedUnit(selectedSpeedUnit: SpeedUnit) {
@@ -541,6 +573,8 @@ internal class ProfileViewModel @Inject constructor(
      * Launch the logger activity.
      */
     private fun openLogger() {
+        // Log the event in the analytics.
+        analytics.logEvent(ProfileOpenEvent(Link.LOGGER))
         LoggerLauncher.launch(context, logger?.session as? LogSession)
     }
 

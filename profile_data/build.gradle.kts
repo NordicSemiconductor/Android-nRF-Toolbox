@@ -9,4 +9,5 @@ android {
 
 dependencies {
     implementation(project(":lib_profile"))
+    implementation(project(":lib_utils"))
 }

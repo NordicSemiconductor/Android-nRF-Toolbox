@@ -8,6 +8,7 @@ import no.nordicsemi.android.lib.profile.directionFinder.distance.McpdMeasuremen
 import no.nordicsemi.android.lib.profile.directionFinder.distance.RttMeasurementData
 import no.nordicsemi.android.lib.profile.directionFinder.elevation.ElevationMeasurementData
 import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
+import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.MeasurementSection
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
 

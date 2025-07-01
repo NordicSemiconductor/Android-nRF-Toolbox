@@ -11,7 +11,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
@@ -24,6 +23,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
@@ -40,7 +40,6 @@ internal fun InputSection(
 ) {
     var text by rememberSaveable { mutableStateOf("") }
     val checkedItem by rememberSaveable { mutableStateOf(MacroEol.entries[0]) }
-    var isEmptyText: Boolean by rememberSaveable { mutableStateOf(false) }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -57,39 +56,30 @@ internal fun InputSection(
                 textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
                 onValueChange = { newValue ->
                     text = newValue
-                    isEmptyText = false
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurfaceVariant)
             )
-            if (text.isEmpty() && !isEmptyText) {
+            if (text.isEmpty()) {
                 Text(
                     modifier = Modifier
-                        .align(Alignment.CenterStart),
+                        .align(Alignment.CenterStart)
+                        .alpha(0.5f),
                     text = stringResource(id = R.string.uart_input_hint),
-                )
-            } else if (isEmptyText) {
-                Text(
-                    text = "Input cannot be empty.",
-                    color = MaterialTheme.colorScheme.error,
                 )
             }
         }
         Icon(
-            if (isEmptyText) Icons.Default.Error else Icons.AutoMirrored.Filled.Send,
+            Icons.AutoMirrored.Filled.Send,
             contentDescription = stringResource(id = R.string.uart_input_macro),
             modifier = Modifier
                 .clip(CircleShape)
                 .clickable {
-                    if (text.isNotEmpty()) {
-                        onEvent(UARTEvent.OnRunInput(text, checkedItem))
-                        text = ""
-                    } else {
-                        isEmptyText = true
-                    }
+                    onEvent(UARTEvent.OnRunInput(text, checkedItem))
+                    text = ""
                 }
                 .padding(8.dp),
-            tint = if (isEmptyText) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

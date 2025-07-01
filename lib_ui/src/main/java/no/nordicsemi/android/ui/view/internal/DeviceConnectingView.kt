@@ -50,13 +50,6 @@ fun DeviceConnectingView(
                     text = "Connecting...",
                     style = MaterialTheme.typography.titleMedium
                 )
-
-                Text(
-                    text = "The mobile is trying to connect to peripheral device.",
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
                 Text(
                     text = "Please wait...",
                     textAlign = TextAlign.Center,

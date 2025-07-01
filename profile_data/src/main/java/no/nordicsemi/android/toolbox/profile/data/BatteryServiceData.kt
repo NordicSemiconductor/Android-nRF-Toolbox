@@ -1,5 +1,7 @@
 package no.nordicsemi.android.toolbox.profile.data
 
+import no.nordicsemi.android.toolbox.lib.utils.Profile
+
 /**
  * Battery Service data class that holds the battery level.
  *

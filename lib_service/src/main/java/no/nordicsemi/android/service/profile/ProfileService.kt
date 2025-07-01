@@ -90,19 +90,20 @@ internal class ProfileService : NotificationService() {
         override val disconnectionReason: Flow<DeviceDisconnectionReason?>
             get() = _disconnectionReason.asStateFlow()
 
-        override suspend fun getMaxWriteValue(address: String, writeType: WriteType): Int? =
-            getPeripheralById(address)?.let {
-                if (it.isConnected) {
-                    try {
-                        it.requestHighestValueLength()
-                        it.requestConnectionPriority(ConnectionPriority.HIGH)
-                        it.setPreferredPhy(Phy.PHY_LE_2M, Phy.PHY_LE_2M, PhyOption.S2)
-                    } catch (e: Exception) {
-                        Timber.e("Could not change mtu size $e")
-                    }
-                }
-                it.maximumWriteValueLength(writeType)
+        override suspend fun getMaxWriteValue(address: String, writeType: WriteType): Int? {
+            val peripheral = getPeripheralById(address) ?: return null
+            if (!peripheral.isConnected) return null
+
+            return try {
+                peripheral.requestHighestValueLength()
+                peripheral.requestConnectionPriority(ConnectionPriority.HIGH)
+                peripheral.setPreferredPhy(Phy.PHY_LE_2M, Phy.PHY_LE_2M, PhyOption.S2)
+                peripheral.maximumWriteValueLength(writeType)
+            } catch (e: Exception) {
+                Timber.e("Failed to configure $address for MTU change with reason: ${e.message}")
+                null
             }
+        }
 
         override suspend fun createBonding(address: String) {
             val peripheral = getPeripheralById(address)
