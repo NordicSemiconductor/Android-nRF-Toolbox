@@ -97,7 +97,7 @@ internal fun GLSDetails(record: GLSRecord, context: GLSMeasurementContext?) {
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
                 Text(
-                    "Glucose Status",
+                    "Glucose status",
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleMedium,
@@ -107,64 +107,76 @@ internal fun GLSDetails(record: GLSRecord, context: GLSMeasurementContext?) {
                 SectionRow {
                     KeyValueColumn(
                         stringResource(id = R.string.gls_details_battery_low),
-                        it.deviceBatteryLow.toBooleanText()
+                        it.deviceBatteryLow.toBooleanText(),
+                        verticalSpacing = 4.dp
                     )
                     KeyValueColumnReverse(
                         stringResource(id = R.string.gls_details_sensor_malfunction),
-                        it.sensorMalfunction.toBooleanText()
+                        it.sensorMalfunction.toBooleanText(),
+                        verticalSpacing = 4.dp
                     )
                 }
                 SectionRow {
                     KeyValueColumn(
                         stringResource(id = R.string.gls_details_insufficient_sample),
-                        it.sampleSizeInsufficient.toBooleanText()
+                        it.sampleSizeInsufficient.toBooleanText(),
+                        verticalSpacing = 4.dp
                     )
                     KeyValueColumnReverse(
                         stringResource(id = R.string.gls_details_strip_insertion_error),
-                        it.stripInsertionError.toBooleanText()
+                        it.stripInsertionError.toBooleanText(),
+                        verticalSpacing = 4.dp
                     )
                 }
                 SectionRow {
                     KeyValueColumn(
                         stringResource(id = R.string.gls_details_strip_type_incorrect),
-                        it.stripTypeIncorrect.toBooleanText()
+                        it.stripTypeIncorrect.toBooleanText(),
+                        verticalSpacing = 4.dp
                     )
                     KeyValueColumnReverse(
                         stringResource(id = R.string.gls_details_sensor_result_too_high),
-                        it.sensorResultHigherThenDeviceCanProcess.toBooleanText()
+                        it.sensorResultHigherThenDeviceCanProcess.toBooleanText(),
+                        verticalSpacing = 4.dp
                     )
                 }
 
                 SectionRow {
                     KeyValueColumn(
                         stringResource(id = R.string.gls_details_sensor_result_too_low),
-                        it.sensorResultLowerThenDeviceCanProcess.toBooleanText()
+                        it.sensorResultLowerThenDeviceCanProcess.toBooleanText(),
+                        verticalSpacing = 4.dp
                     )
                     KeyValueColumnReverse(
                         stringResource(id = R.string.gls_details_temperature_too_high),
-                        it.sensorTemperatureTooHigh.toBooleanText()
+                        it.sensorTemperatureTooHigh.toBooleanText(),
+                        verticalSpacing = 4.dp
                     )
                 }
 
                 SectionRow {
                     KeyValueColumn(
                         stringResource(id = R.string.gls_details_temperature_too_low),
-                        it.sensorTemperatureTooLow.toBooleanText()
+                        it.sensorTemperatureTooLow.toBooleanText(),
+                        verticalSpacing = 4.dp
                     )
                     KeyValueColumnReverse(
                         stringResource(id = R.string.gls_details_strip_pulled_too_soon),
-                        it.sensorReadInterrupted.toBooleanText()
+                        it.sensorReadInterrupted.toBooleanText(),
+                        verticalSpacing = 4.dp
                     )
                 }
 
                 SectionRow {
                     KeyValueColumn(
                         stringResource(id = R.string.gls_details_general_device_fault),
-                        it.generalDeviceFault.toBooleanText()
+                        it.generalDeviceFault.toBooleanText(),
+                        verticalSpacing = 4.dp
                     )
                     KeyValueColumnReverse(
                         stringResource(id = R.string.gls_details_time_fault),
-                        it.timeFault.toBooleanText()
+                        it.timeFault.toBooleanText(),
+                        verticalSpacing = 4.dp
                     )
                 }
             }
