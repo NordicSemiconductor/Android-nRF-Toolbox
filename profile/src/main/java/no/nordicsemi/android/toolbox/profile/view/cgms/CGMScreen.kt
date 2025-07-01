@@ -172,6 +172,7 @@ private fun WorkingModeDialog(
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleMedium
                 )
+                HorizontalDivider()
                 LazyColumn(
                     state = listState
                 ) {

@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -242,6 +243,7 @@ private fun CSCSpeedSettingsFilterDropdown(
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleMedium
                 )
+                HorizontalDivider()
                 Column {
                     SpeedUnit.entries.forEach { entry ->
                         Box(
@@ -258,6 +260,7 @@ private fun CSCSpeedSettingsFilterDropdown(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(8.dp),
+                                style = MaterialTheme.typography.titleLarge,
                                 color = if (state.speedUnit == entry)
                                     MaterialTheme.colorScheme.primary else
                                     MaterialTheme.colorScheme.onBackground

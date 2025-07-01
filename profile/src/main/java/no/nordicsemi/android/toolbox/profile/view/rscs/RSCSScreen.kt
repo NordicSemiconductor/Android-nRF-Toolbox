@@ -205,6 +205,7 @@ private fun RSCSSettingsDialog(
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleMedium
                 )
+                HorizontalDivider()
                 Column {
                     RSCSSettingsUnit.entries.forEach { entry ->
                         Box(
