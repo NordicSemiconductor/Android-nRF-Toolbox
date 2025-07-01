@@ -31,10 +31,16 @@
 
 package no.nordicsemi.android.ui.view
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -59,37 +65,6 @@ private const val TOP_APP_BAR_TITLE = "Nordic_Appbar"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CloseIconAppBar(text: String, onClick: () -> Unit) {
-    TopAppBar(
-        title = { Text(text, maxLines = 1) },
-        colors = TopAppBarDefaults.topAppBarColors(
-            scrolledContainerColor = MaterialTheme.colorScheme.primary,
-            containerColor = colorResource(id = R.color.appBarColor),
-            titleContentColor = MaterialTheme.colorScheme.onPrimary,
-            actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
-            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-        ),
-        navigationIcon = {
-            IconButton(onClick = { onClick() }) {
-                Icon(
-                    Icons.Default.Close,
-                    contentDescription = stringResource(id = R.string.close_app),
-                )
-            }
-        }
-    )
-}
-
-@Preview
-@Composable
-private fun CloseIconAppBarPreview() {
-    NordicTheme {
-        CloseIconAppBar(TOP_APP_BAR_TITLE) {}
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
 fun LoggerBackIconAppBar(
     text: String,
     onBackClick: () -> Unit,
@@ -104,6 +79,10 @@ fun LoggerBackIconAppBar(
             actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
             navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
         ),
+        windowInsets = WindowInsets.displayCutout
+            .union(WindowInsets.statusBars)
+            .union(WindowInsets.navigationBars)
+            .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
         navigationIcon = {
             IconButton(onClick = { onBackClick() }) {
                 Icon(
@@ -146,6 +125,10 @@ fun BackIconAppBar(text: String, onClick: () -> Unit) {
             actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
             navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
         ),
+        windowInsets = WindowInsets.displayCutout
+            .union(WindowInsets.statusBars)
+            .union(WindowInsets.navigationBars)
+            .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
         navigationIcon = {
             IconButton(onClick = { onClick() }) {
                 Icon(
@@ -183,6 +166,10 @@ fun LoggerIconAppBar(
             actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
             navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
         ),
+        windowInsets = WindowInsets.displayCutout
+            .union(WindowInsets.statusBars)
+            .union(WindowInsets.navigationBars)
+            .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
         navigationIcon = {
             IconButton(onClick = { onClick() }) {
                 Icon(

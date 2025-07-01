@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
@@ -97,22 +96,18 @@ internal fun ProfileScreen() {
                 openLogger = { onClickEvent(OpenLoggerEvent) }
             )
         },
+        contentWindowInsets = WindowInsets.displayCutout
+            .only(WindowInsetsSides.Horizontal),
     ) { paddingValues ->
-        // Get notch padding for devices with a display cutout (notch)
-        val notchPadding = WindowInsets.displayCutout
-            .only(WindowInsetsSides.Horizontal)
-            .asPaddingValues()
-
         RequireBluetooth {
             RequireLocation {
                 RequestNotificationPermission {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier
-                            .verticalScroll(rememberScrollState())
                             .fillMaxSize()
                             .padding(paddingValues)
-                            .padding(notchPadding),
+                            .verticalScroll(rememberScrollState()),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         when (val state = deviceDataState) {

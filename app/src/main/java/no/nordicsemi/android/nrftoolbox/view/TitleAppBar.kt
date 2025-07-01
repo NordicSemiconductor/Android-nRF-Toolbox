@@ -31,6 +31,13 @@
 
 package no.nordicsemi.android.nrftoolbox.view
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -53,6 +60,10 @@ fun TitleAppBar(text: String) {
             actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
             navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
         ),
+        windowInsets = WindowInsets.displayCutout
+            .union(WindowInsets.statusBars)
+            .union(WindowInsets.navigationBars)
+            .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
         actions = {
             AnalyticsPermissionButton()
         }
