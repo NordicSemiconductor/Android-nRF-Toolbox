@@ -50,9 +50,21 @@ internal fun RSCSServiceData.displaySpeed(): String? {
     }
 }
 
+/**
+ * Returns the total distance in a formatted string based on the provided speed unit.
+ *
+ * @param speedUnit The unit to display the distance in.
+ * @return A formatted string representing the total distance.
+ */
 internal fun RSCSData.displayDistance(speedUnit: RSCSSettingsUnit): String {
+    if (totalDistance == null) return ""
     return when (speedUnit) {
-        RSCSSettingsUnit.UNIT_M -> String.format(Locale.US, "%.0f m", totalDistance)
+        RSCSSettingsUnit.UNIT_M -> String.format(
+            Locale.US,
+            "%.0f m",
+            totalDistance!!.toFloat()
+        )
+
         RSCSSettingsUnit.UNIT_KM -> String.format(
             Locale.US,
             "%.0f m",
