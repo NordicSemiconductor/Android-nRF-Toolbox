@@ -302,7 +302,7 @@ private fun RecordItem(record: CGMRecordWithSequenceNumber) {
             }
             SectionRow {
                 KeyValueColumn(
-                    value = "Date/Time",
+                    value = "Date & Time",
                     key = record.formattedTime()
                 )
             }
