@@ -29,6 +29,8 @@ import no.nordicsemi.android.toolbox.profile.data.directionFinder.azimuthValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.elevationValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.selectedMeasurementSectionValues
 import no.nordicsemi.android.toolbox.profile.R
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.availableSections
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.distanceValue
 import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
@@ -50,8 +52,7 @@ internal fun DFSScreen(
                     serviceData,
                     selectedDevice = serviceData.selectedDevice,
                 ) { onClick(it) }
-
-
+                
                 if (serviceData.selectedDevice != null) {
                     var isSettingsDropdownExpanded by rememberSaveable { mutableStateOf(false) }
                     var s by rememberSaveable { mutableStateOf(DFSView.LinearDataView) }
@@ -94,7 +95,7 @@ internal fun DFSScreen(
                         }
                     }
 
-                    /*  if (data != null) {
+                      if (data != null) {
                           data.distanceValue()
                               ?.let { DistanceSection(data, serviceData.distanceRange) }
                           when {
@@ -124,7 +125,7 @@ internal fun DFSScreen(
 
                           LinearDataSection(data, serviceData.distanceRange)
                           DistanceControlSection(serviceData, data) { onClick(it) }
-                      }*/
+                      }
                 }
 
             }
