@@ -10,6 +10,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType.Companion.PrimaryNotEditable
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -56,7 +57,8 @@ internal fun UARTConfigurationPicker(
                     state.selectedConfigurationName
                         ?: stringResource(id = R.string.uart_configuration_picker_hint)
                 Text(
-                    text = title
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
                 )
                 Icon(Icons.Default.ArrowDropDown, contentDescription = "")
             }
