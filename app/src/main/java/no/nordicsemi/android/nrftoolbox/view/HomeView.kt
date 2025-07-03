@@ -59,7 +59,7 @@ internal fun HomeView() {
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { onEvent(UiEvent.OnConnectDeviceClick) },
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(top = 8.dp, bottom = 16.dp, end = 8.dp, start = 8.dp),
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
