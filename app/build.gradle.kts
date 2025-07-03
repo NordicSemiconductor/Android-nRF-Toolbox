@@ -47,11 +47,14 @@ dependencies {
     implementation(project(":lib_analytics"))
     implementation(project(":lib_profile"))
     implementation(project(":lib_service"))
-    implementation(project(":scanner"))
     implementation(project(":profile"))
     implementation(project(":profile_data"))
     implementation(project(":lib_ui"))
     implementation(project(":lib_utils"))
+
+    // Nordic scanner library from the Nordic Common repository
+    // todo: Replace it with libs once the library is published
+    implementation("no.nordicsemi.android.common:scanner")
 
     implementation(libs.nordic.navigation)
     implementation(libs.nordic.theme)

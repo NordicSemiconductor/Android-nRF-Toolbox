@@ -67,9 +67,8 @@ include(":lib_utils")
 include(":profile")
 include(":profile_data")
 include(":permissions-ranging")
-include(":scanner")
 
-//if (file("../Android-Common-Libraries").exists()) {
-//    includeBuild("../Android-Common-Libraries")
-//}
-//
+if (file("../Android-Common-Libraries").exists()) {
+    includeBuild("../Android-Common-Libraries")
+}
+

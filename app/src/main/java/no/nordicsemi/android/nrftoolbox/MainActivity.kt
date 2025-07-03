@@ -42,8 +42,8 @@ import no.nordicsemi.android.common.analytics.view.AnalyticsPermissionRequestDia
 import no.nordicsemi.android.common.navigation.NavigationView
 import no.nordicsemi.android.common.theme.NordicActivity
 import no.nordicsemi.android.common.theme.NordicTheme
+import no.nordicsemi.android.nrftoolbox.view.ScannerDestination
 import no.nordicsemi.android.toolbox.profile.ProfileDestination
-import no.nordicsemi.android.toolbox.scanner.ScannerDestination
 
 @AndroidEntryPoint
 class MainActivity : NordicActivity() {
