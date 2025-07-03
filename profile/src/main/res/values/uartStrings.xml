@@ -26,8 +26,8 @@
     <string name="uart_add_macro">Add preset</string>
     <string name="uart_output_info">Here will be displayed read value from GATT characteristic.</string>
 
-    <string name="uart_configuration_dialog_title">Add configuration</string>
-    <string name="uart_configuration_hint">Configuration</string>
+    <string name="uart_configuration_dialog_title">New preset name</string>
+    <string name="uart_configuration_hint">Name</string>
     <string name="uart_macro_dialog_title">Add preset</string>
     <string name="uart_macro_dialog_title_edit">Edit preset</string>
     <string name="uart_macro_dialog_alias">Alias</string>
