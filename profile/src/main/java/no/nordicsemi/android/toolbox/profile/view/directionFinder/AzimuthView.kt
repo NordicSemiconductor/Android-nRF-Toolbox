@@ -8,7 +8,6 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -37,11 +36,11 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.yield
+import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.SensorData
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.azimuthValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.distanceValue
-import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.ui.view.CircleTransitionState
 import no.nordicsemi.android.ui.view.createCircleTransition
 
@@ -96,7 +95,6 @@ internal fun AzimuthView(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun RenderAzimuthCanvas(
     radius: Dp,
