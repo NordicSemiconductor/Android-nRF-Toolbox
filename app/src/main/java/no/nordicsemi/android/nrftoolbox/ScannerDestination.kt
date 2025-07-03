@@ -1,4 +1,4 @@
-package no.nordicsemi.android.nrftoolbox.view
+package no.nordicsemi.android.nrftoolbox
 
 import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.common.navigation.createDestination

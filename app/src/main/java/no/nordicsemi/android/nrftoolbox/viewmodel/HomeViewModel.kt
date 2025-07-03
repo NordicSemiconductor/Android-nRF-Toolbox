@@ -13,7 +13,7 @@ import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.Link
 import no.nordicsemi.android.analytics.ProfileOpenEvent
 import no.nordicsemi.android.common.navigation.Navigator
-import no.nordicsemi.android.nrftoolbox.view.ScannerDestinationId
+import no.nordicsemi.android.nrftoolbox.ScannerDestinationId
 import no.nordicsemi.android.service.services.ServiceManager
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
