@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-   <string name="hts_temperature">Health temperature</string>
-   <string name="hts_temperature_unit">Select temperature unit</string>
-   <string name="hts_temperature_unit_des">Temperature unit settings</string>
+    <string name="hts_temperature">Health temperature</string>
+    <string name="temperature_title">Temperature</string>
+    <string name="reading_temperature_placeholder">Reading temperature</string>
+    <string name="temp_measurement_location">Measurement location</string>
+    <string name="temp_measurement_time">Measurement time</string>
+
+    <string name="hts_temperature_unit">Select temperature unit</string>
+    <string name="hts_temperature_unit_des">Temperature unit settings</string>
 </resources>

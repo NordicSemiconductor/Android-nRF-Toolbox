@@ -40,6 +40,7 @@ import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionRow
 import no.nordicsemi.android.ui.view.SectionTitle
+import no.nordicsemi.android.ui.view.TextWithAnimatedDots
 import java.util.Calendar
 
 @Composable
@@ -63,19 +64,20 @@ internal fun HTSScreen(
                 }
             )
             SectionRow {
-                KeyValueColumn(
-                    value = "Temperature",
-                    key = htsServiceData.data?.temperature?.let {
-                        htsServiceData.temperatureUnit.displayTemperature(it)
-                    } ?: run { "Reading temperature..." },
-                    keyStyle = MaterialTheme.typography.titleMedium
-
-                )
+                htsServiceData.data?.temperature?.let { temperature ->
+                    KeyValueColumn(
+                        value = stringResource(id = R.string.temperature_title),
+                        key = htsServiceData.temperatureUnit.displayTemperature(temperature),
+                        keyStyle = MaterialTheme.typography.titleMedium
+                    )
+                } ?: run {
+                    TextWithAnimatedDots(text = stringResource(id = R.string.reading_temperature_placeholder))
+                }
             }
             if (htsServiceData.data?.type != null) {
                 SectionRow {
                     KeyValueColumn(
-                        value = "Temperature measurement location",
+                        value = stringResource(id = R.string.temp_measurement_location),
                         key = htsServiceData.data!!.type?.let {
                             HTSMeasurementType.fromValue(it).toString()
                         } ?: "Unknown",
@@ -86,7 +88,7 @@ internal fun HTSScreen(
             htsServiceData.data?.timestamp?.let {
                 SectionRow {
                     KeyValueColumn(
-                        value = "Measurement time",
+                        value = stringResource(R.string.temp_measurement_time),
                         key = it.toFormattedString(),
                         keyStyle = MaterialTheme.typography.titleMedium
                     )
