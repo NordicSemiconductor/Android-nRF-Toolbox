@@ -1,19 +1,15 @@
 package no.nordicsemi.android.toolbox.profile.view.uart
 
+import android.annotation.SuppressLint
 import android.view.ViewTreeObserver
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,7 +25,6 @@ internal fun UARTScreen(
     state: UARTServiceData,
     onEvent: (UARTEvent) -> Unit,
 ) {
-//    val scrollState = rememberScrollState()
     val lazyListState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
@@ -39,13 +34,11 @@ internal fun UARTScreen(
         val listener = ViewTreeObserver.OnGlobalLayoutListener {
             val isKeyboardOpen = ViewCompat.getRootWindowInsets(view)
                 ?.isVisible(WindowInsetsCompat.Type.ime()) ?: true
-            // ... do anything you want here with `isKeyboardOpen`
 
             if (isKeyboardOpen) {
                 scope.launch {
                     lazyListState.scrollToItem(2, 2000)
                 }
-
             }
         }
 
@@ -72,22 +65,15 @@ private fun UARTScreenPreview() {
     UARTScreen(UARTServiceData()) {}
 }
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 private fun UARTContentView(
     state: UARTServiceData,
     onEvent: (UARTEvent) -> Unit,
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.imePadding()
-    ) {
-        OutlinedCard {
-            OutputSection(state.messages) {
-                onEvent(it)
-            }
-            HorizontalDivider()
-            InputSection(onEvent = onEvent)
-        }
-    }
+    OutputSection(
+        records = state.messages,
+        onEvent = onEvent
+    )
+
 }
