@@ -123,6 +123,21 @@ private fun HRSScreenPreview() {
 private fun LineChartView(state: HRSServiceData, zoomIn: Boolean) {
     val items = state.heartRates.takeLast(state.heartRates.size)
     val isSystemInDarkTheme = isSystemInDarkTheme()
+    
+    AndroidView(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp),
+        factory = { createLineChartView(isSystemInDarkTheme, it, items, zoomIn) },
+        update = { updateData(isSystemInDarkTheme, items, it, zoomIn) }
+    )
+
+}
+
+@Composable
+private fun LineChartView2(state: HRSServiceData, zoomIn: Boolean) {
+    val items = state.heartRates.takeLast(state.heartRates.size)
+    val isSystemInDarkTheme = isSystemInDarkTheme()
 
 
     Row(
