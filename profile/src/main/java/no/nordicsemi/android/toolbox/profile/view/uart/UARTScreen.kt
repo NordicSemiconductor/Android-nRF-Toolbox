@@ -8,9 +8,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.relocation.BringIntoViewRequester
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.runtime.Composable
@@ -63,7 +60,6 @@ internal fun UARTScreen(
     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), state = lazyListState) {
         item { MacroSection(state.uartViewState, onEvent) }
 
-//        Spacer(modifier = Modifier.weight(1f))
         item { Spacer(Modifier.size(16.dp)) }
 
         item { UARTContentView(state, onEvent) }
@@ -87,11 +83,11 @@ private fun UARTContentView(
         modifier = Modifier.imePadding()
     ) {
         OutlinedCard {
-            InputSection(onEvent = onEvent)
-            HorizontalDivider()
             OutputSection(state.messages) {
                 onEvent(it)
             }
+            HorizontalDivider()
+            InputSection(onEvent = onEvent)
         }
     }
 }

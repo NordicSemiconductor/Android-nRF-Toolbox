@@ -1,6 +1,5 @@
 package no.nordicsemi.android.toolbox.profile.view.uart
 
-import android.view.ViewTreeObserver
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,10 +19,10 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -34,13 +33,10 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.uart.MacroEol
@@ -53,12 +49,9 @@ internal fun InputSection(
 ) {
     var text by rememberSaveable { mutableStateOf("") }
     val checkedItem by rememberSaveable { mutableStateOf(MacroEol.entries[0]) }
-
     val focusRequester = remember { FocusRequester() }
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
-
-
-
+    val scope = rememberCoroutineScope()
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -68,20 +61,19 @@ internal fun InputSection(
             .padding(start = 16.dp, end = 16.dp)
     ) {
         Box(modifier = Modifier.weight(1f)) {
-            val scope = androidx.compose.runtime.rememberCoroutineScope()
             BasicTextField(
                 modifier = Modifier
                     .fillMaxWidth()
-//                    .bringIntoViewRequester(bringIntoViewRequester)
-//                    .focusRequester(focusRequester)
-//                    .onFocusChanged { focusState ->
-//                        if (focusState.isFocused) {
-//                            scope.launch {
-//                                bringIntoViewRequester.bringIntoView()
-//                            }
-//                        }
-//                    }
-            .padding(vertical = 32.dp),
+                    .bringIntoViewRequester(bringIntoViewRequester)
+                    .focusRequester(focusRequester)
+                    .onFocusChanged { focusState ->
+                        if (focusState.isFocused) {
+                            scope.launch {
+                                bringIntoViewRequester.bringIntoView()
+                            }
+                        }
+                    }
+                    .padding(16.dp),
                 value = text,
                 textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
                 onValueChange = { newValue ->
@@ -93,6 +85,7 @@ internal fun InputSection(
             if (text.isEmpty()) {
                 Text(
                     modifier = Modifier
+                        .padding(16.dp)
                         .align(Alignment.CenterStart)
                         .alpha(0.5f),
                     text = stringResource(id = R.string.uart_input_hint),
