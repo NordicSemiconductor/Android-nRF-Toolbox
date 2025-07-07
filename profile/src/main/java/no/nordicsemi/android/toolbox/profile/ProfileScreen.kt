@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -109,10 +110,10 @@ internal fun ProfileScreen() {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier
-                            .verticalScroll(rememberScrollState())
                             .fillMaxSize()
                             .padding(paddingValues)
-                            .padding(notchPadding),
+                            .padding(notchPadding)
+                            .imePadding(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         when (val state = deviceDataState) {
