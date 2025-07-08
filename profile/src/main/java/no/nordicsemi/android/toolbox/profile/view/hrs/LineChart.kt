@@ -2,13 +2,35 @@ package no.nordicsemi.android.toolbox.profile.view.hrs
 
 import android.content.Context
 import android.graphics.Color
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
+import no.nordicsemi.android.toolbox.profile.data.HRSServiceData
 
+@Composable
+internal fun LineChartView(state: HRSServiceData, zoomIn: Boolean) {
+    val items = state.heartRates.takeLast(state.heartRates.size)
+    val isSystemInDarkTheme = isSystemInDarkTheme()
+
+    AndroidView(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp),
+        factory = { createLineChartView(isSystemInDarkTheme, it, items, zoomIn) },
+        update = { updateData(isSystemInDarkTheme, items, it, zoomIn) }
+    )
+}
 
 /** The number of elements to display on the X axis. */
 private const val X_AXIS_ELEMENTS_COUNT = 40f
@@ -31,7 +53,7 @@ internal fun createLineChartView(
         setTouchEnabled(true) // Enable touch gestures
         setDrawGridBackground(false)
         isDragEnabled = true
-        setScaleEnabled(true) // Enable scaling
+        setScaleEnabled(false) // Enable scaling
         setPinchZoom(true) // Enable pinch zoom
 
         if (isDarkTheme) {
@@ -52,10 +74,10 @@ internal fun createLineChartView(
             enableGridDashedLine(10f, 10f, 0f)
             axisMinimum = 0f
             axisMaximum = X_AXIS_ELEMENTS_COUNT
-            setAvoidFirstLastClipping(true)
+            setAvoidFirstLastClipping(false)
             position = XAxis.XAxisPosition.BOTTOM
-            setDrawLabels(true) // Hide X-axis labels
-//            setDrawGridLines(false) // Hide vertical grid lines
+            setDrawLabels(false) // Hide X-axis labels
+            setDrawGridLines(false) // Hide vertical grid lines
         }
         axisLeft.apply {
             enableGridDashedLine(10f, 10f, 0f)
@@ -68,6 +90,14 @@ internal fun createLineChartView(
         val entries = points.mapIndexed { i, v ->
             Entry(i.toFloat(), v.toFloat())
         }
+
+        legend.apply {
+            isEnabled = true
+            textColor = if (isDarkTheme) Color.WHITE else Color.RED
+            form = Legend.LegendForm.LINE
+            horizontalAlignment = Legend.LegendHorizontalAlignment.CENTER
+            verticalAlignment = Legend.LegendVerticalAlignment.TOP
+        }
         // create a dataset and give it a type
         if (data != null && data.dataSetCount > 0) {
             val set1 = data!!.getDataSetByIndex(0) as LineDataSet
@@ -76,7 +106,7 @@ internal fun createLineChartView(
             data!!.notifyDataChanged()
             notifyDataSetChanged()
         } else {
-            val set1 = LineDataSet(entries, "Heart Rate (bpm)")
+            val set1 = LineDataSet(entries, "Heart Rate")
 
             set1.setDrawIcons(false)
             set1.setDrawValues(false)
@@ -86,11 +116,10 @@ internal fun createLineChartView(
 
             // red line and points
             set1.color = Color.RED
-            set1.setCircleColor(Color.RED)
+            set1.setDrawCircles(false)
 
             // line thickness and point size
-            set1.lineWidth = 1f
-            set1.circleRadius = 2f
+            set1.lineWidth = 2f
 
             // draw points as solid circles
             set1.setDrawCircleHole(false)
@@ -147,7 +176,6 @@ internal fun updateData(
             set1.color = if (isDarkTheme) Color.WHITE else Color.BLACK
             set1.setCircleColor(if (isDarkTheme) Color.WHITE else Color.BLACK)
             set1.lineWidth = 1f
-            set1.circleRadius = 2f
             set1.setDrawCircleHole(false)
             set1.formLineWidth = 1f
             set1.formSize = 15f

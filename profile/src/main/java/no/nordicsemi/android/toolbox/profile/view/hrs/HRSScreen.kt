@@ -1,16 +1,11 @@
 package no.nordicsemi.android.toolbox.profile.view.hrs
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MonitorHeart
@@ -22,14 +17,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.HRSServiceData
 import no.nordicsemi.android.toolbox.profile.viewmodel.HRSEvent
@@ -38,6 +29,7 @@ import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionRow
 import no.nordicsemi.android.ui.view.SectionTitle
+import no.nordicsemi.android.ui.view.animate.AnimatedHeart
 
 @Composable
 internal fun HRSScreen(
@@ -60,15 +52,17 @@ internal fun HRSScreen(
 
                 LineChartView(hrsServiceData, hrsServiceData.zoomIn)
                 hrsServiceData.heartRate?.let {
-                    Box(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
+                            .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
+                        AnimatedHeart(modifier = Modifier.padding(8.dp))
                         Text(
                             text = hrsServiceData.displayHeartRate(),
                             style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.align(Alignment.Center)
                         )
                     }
                 }
@@ -113,83 +107,9 @@ private fun HRSScreenPreview() {
         hrsServiceData = HRSServiceData(
             data = listOf(),
             bodySensorLocation = 0,
-            zoomIn = false
+            zoomIn = false,
+            heartRate = 125
         ),
         onClickEvent = {}
     )
 }
-
-@Composable
-private fun LineChartView(state: HRSServiceData, zoomIn: Boolean) {
-    val items = state.heartRates.takeLast(state.heartRates.size)
-    val isSystemInDarkTheme = isSystemInDarkTheme()
-    
-    AndroidView(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(300.dp),
-        factory = { createLineChartView(isSystemInDarkTheme, it, items, zoomIn) },
-        update = { updateData(isSystemInDarkTheme, items, it, zoomIn) }
-    )
-
-}
-
-@Composable
-private fun LineChartView2(state: HRSServiceData, zoomIn: Boolean) {
-    val items = state.heartRates.takeLast(state.heartRates.size)
-    val isSystemInDarkTheme = isSystemInDarkTheme()
-
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
-
-    ) {
-        Text(
-            text = "Heart Rate (bpm)",
-            modifier = Modifier.rotate(-90f),
-        )
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            AndroidView(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp),
-                factory = { createLineChartView(isSystemInDarkTheme, it, items, zoomIn) },
-                update = { updateData(isSystemInDarkTheme, items, it, zoomIn) }
-            )
-            Text(
-                text = "Index",
-                style = MaterialTheme.typography.labelMedium,
-            )
-        }
-    }
-
-}
-
-@Composable
-private fun ChartLabel(
-    label: String,
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Box(
-            modifier = Modifier
-                .padding(end = 8.dp)
-                .size(8.dp)
-                .clip(RectangleShape)
-                .background(Color.Red)
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-        )
-    }
-}
-
