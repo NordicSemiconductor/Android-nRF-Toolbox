@@ -3,14 +3,10 @@ package no.nordicsemi.android.toolbox.profile.view.uart
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.profile.data.UARTServiceData
@@ -21,7 +17,6 @@ internal fun UARTScreen(
     state: UARTServiceData,
     onEvent: (UARTEvent) -> Unit,
 ) {
-    val lazyListState = rememberLazyListState()
     val imeState = rememberImeState()
     val scrollState = rememberScrollState()
 
@@ -31,12 +26,11 @@ internal fun UARTScreen(
         }
     }
 
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), state = lazyListState) {
-        item { MacroSection(state.uartViewState, onEvent) }
-
-        item { Spacer(Modifier.size(16.dp)) }
-
-        item { UARTContentView(state, onEvent) }
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        MacroSection(state.uartViewState, onEvent)
+        UARTContentView(state, onEvent)
     }
 }
 

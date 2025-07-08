@@ -84,7 +84,10 @@ internal fun OutputSection(
             ) {
                 if (records.isEmpty()) {
                     item {
-                        Text(text = stringResource(id = R.string.uart_output_placeholder))
+                        Text(
+                            text = stringResource(id = R.string.uart_output_placeholder),
+                            modifier = Modifier.padding(8.dp)
+                        )
                     }
                 } else {
                     items(records) { record ->
@@ -124,7 +127,9 @@ private fun OutputSectionPreview() {
 @Composable
 private fun MessageItemInput(record: UARTRecord) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
         horizontalAlignment = Alignment.End
     ) {
         Text(
@@ -163,7 +168,9 @@ private fun MessageItemInputPreview() {
 @Composable
 private fun MessageItemOutput(record: UARTRecord) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
         horizontalAlignment = Alignment.Start
     ) {
         Text(

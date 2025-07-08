@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -123,7 +125,9 @@ internal fun ProfileScreen() {
                             }
 
                             DeviceConnectionState.Connecting -> DeviceConnectingView(
-                                modifier = Modifier.padding(16.dp)
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .verticalScroll(rememberScrollState())
                             )
 
                             is DeviceConnectionState.Disconnected -> {
@@ -155,7 +159,9 @@ private fun DeviceDisconnectedView(
         is CustomReason -> {
             DeviceDisconnectedView(
                 reason = reason.reason,
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
                 Button(
                     onClick = { onClickEvent(OnRetryClicked(deviceAddress)) },
@@ -169,7 +175,9 @@ private fun DeviceDisconnectedView(
         is StateReason -> {
             DeviceDisconnectedView(
                 disconnectedReason = toReason(reason.reason),
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
                 Button(
                     onClick = { onClickEvent(OnRetryClicked(deviceAddress)) },
@@ -192,14 +200,18 @@ private fun DeviceConnectedView(
             deviceData.isMissingServices -> {
                 DeviceDisconnectedView(
                     reason = DisconnectReason.MISSING_SERVICE,
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState())
                 )
             }
 
             else -> {
                 if (deviceData.serviceData.isEmpty()) {
                     ServiceDiscoveryView(
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .verticalScroll(rememberScrollState())
                     ) {
                         Button(
                             onClick = { onClickEvent(DisconnectEvent(peripheral.address)) },
@@ -211,7 +223,10 @@ private fun DeviceConnectedView(
                 } else
                     Column(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .verticalScroll(rememberScrollState())
+                            .imePadding()
                     ) {
                         deviceData.serviceData.forEach { serviceData ->
                             when (serviceData.profile) {
