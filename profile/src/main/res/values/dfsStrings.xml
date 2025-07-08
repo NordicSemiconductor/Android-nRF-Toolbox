@@ -39,7 +39,7 @@
 
     <string name="dm_value">%ddm</string>
 
-    <string name="rtt_label">rtt</string>
+    <string name="rtt_label">Round trip time (RTT)</string>
     <string name="ifft_label">ifft</string>
     <string name="phase_label">phase</string>
     <string name="rssi_label">rssi</string>

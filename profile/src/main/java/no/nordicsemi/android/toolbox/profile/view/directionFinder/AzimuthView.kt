@@ -65,7 +65,7 @@ internal fun AzimuthView(
             val nextFrame = awaitFrame() / 100_000L
             if (lastFrame != 0L) {
                 val period = nextFrame - lastFrame
-                rotationValue.value += period / 1000f
+                rotationValue.floatValue += period / 1000f
             }
             lastFrame = nextFrame
             yield() //TOdo: verify this.
