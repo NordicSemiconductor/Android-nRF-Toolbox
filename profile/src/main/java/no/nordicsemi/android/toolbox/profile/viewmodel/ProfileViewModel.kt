@@ -30,6 +30,7 @@ import no.nordicsemi.android.lib.profile.csc.SpeedUnit
 import no.nordicsemi.android.lib.profile.csc.WheelSize
 import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.timber.nRFLoggerTree
+import no.nordicsemi.android.service.R
 import no.nordicsemi.android.service.profile.CustomReason
 import no.nordicsemi.android.service.profile.DeviceDisconnectionReason
 import no.nordicsemi.android.service.profile.ProfileServiceManager
@@ -118,6 +119,16 @@ internal class ProfileViewModel @Inject constructor(
     init {
         observeConnectedDevices()
         connectToPeripheral(address)
+        initLogger()
+    }
+
+    /**
+     * Initialize the logger for the specified device.
+     */
+    private fun initLogger() {
+        logger?.let { Timber.uproot(it) }
+        logger = nRFLoggerTree(context, context.getString(R.string.app_name), address)
+            .also { Timber.plant(it) }
     }
 
     /**
