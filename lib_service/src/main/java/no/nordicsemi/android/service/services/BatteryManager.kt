@@ -10,6 +10,7 @@ import no.nordicsemi.android.lib.profile.battery.BatteryLevelParser
 import no.nordicsemi.android.service.repository.BatteryRepository
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.kotlin.ble.client.RemoteService
+import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
 import timber.log.Timber
 import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi
@@ -31,26 +32,31 @@ internal class BatteryManager : ServiceManager {
             .firstOrNull { it.uuid == BATTERY_LEVEL_CHARACTERISTIC_UUID.toKotlinUuid() }
 
         batteryChar?.let { characteristic ->
-            // Start subscription for battery level updates
-            characteristic.subscribe()
-                .mapNotNull { BatteryLevelParser.parse(it) }
-                .onEach { batteryLevel ->
-                    BatteryRepository.updateBatteryLevel(deviceId, batteryLevel)
-                }
-                .onCompletion {
-                    BatteryRepository.clear(deviceId)
-                }
-                .catch { e ->
-                    Timber.e(e)
-                }
-                .launchIn(scope)
+            // Check if the characteristic supports NOTIFY or INDICATE property
+            if (characteristic.properties.contains(CharacteristicProperty.NOTIFY)
+                || characteristic.properties.contains(CharacteristicProperty.INDICATE)
+            ) {
+                // Start subscription for battery level updates
+                characteristic.subscribe()
+                    .mapNotNull { BatteryLevelParser.parse(it) }
+                    .onEach { batteryLevel ->
+                        BatteryRepository.updateBatteryLevel(deviceId, batteryLevel)
+                    }
+                    .onCompletion {
+                        BatteryRepository.clear(deviceId)
+                    }
+                    .catch { e ->
+                        Timber.e(e)
+                    }
+                    .launchIn(scope)
 
-            // Perform initial read
-            characteristic.read()
-                .let { BatteryLevelParser.parse(it) }
-                ?.let { batteryLevel ->
-                    BatteryRepository.updateBatteryLevel(deviceId, batteryLevel)
-                }
+                // Perform initial read
+                characteristic.read()
+                    .let { BatteryLevelParser.parse(it) }
+                    ?.let { batteryLevel ->
+                        BatteryRepository.updateBatteryLevel(deviceId, batteryLevel)
+                    }
+            }
         }
     }
 }
