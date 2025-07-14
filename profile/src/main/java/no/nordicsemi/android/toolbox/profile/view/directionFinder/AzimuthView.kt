@@ -36,8 +36,11 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.yield
+import no.nordicsemi.android.lib.profile.directionFinder.PeripheralBluetoothAddress
+import no.nordicsemi.android.lib.profile.directionFinder.azimuthal.AzimuthMeasurementData
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.SensorData
+import no.nordicsemi.android.toolbox.profile.data.SensorValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.azimuthValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.distanceValue
@@ -249,5 +252,15 @@ private fun isClose(sensorData: SensorData, range: Range): Boolean {
 @Preview(showBackground = true)
 @Composable
 private fun AzimuthViewPreview() {
-    AzimuthView(SensorData(), Range(0, 50))
+    val sensorData = SensorData(
+        azimuth = SensorValue(
+            values = listOf(
+                AzimuthMeasurementData(
+                    azimuth = 20,
+                    address = PeripheralBluetoothAddress.TEST
+                )
+            )
+        )
+    )
+    AzimuthView(sensorData, Range(0, 50))
 }
