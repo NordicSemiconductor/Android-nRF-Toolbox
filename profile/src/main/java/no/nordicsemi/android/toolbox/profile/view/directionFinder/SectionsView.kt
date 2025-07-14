@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,11 +20,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.lib.profile.directionFinder.PeripheralBluetoothAddress
+import no.nordicsemi.android.lib.profile.directionFinder.azimuthal.AzimuthMeasurementData
+import no.nordicsemi.android.lib.profile.directionFinder.elevation.ElevationMeasurementData
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
 import no.nordicsemi.android.toolbox.profile.data.SensorData
+import no.nordicsemi.android.toolbox.profile.data.SensorValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.distanceValue
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.displayAzimuth
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.displayElevation
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.elevationValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.medianValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.selectedMeasurementSectionValues
@@ -34,19 +40,30 @@ import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
 internal fun DistanceSection(
-    data: SensorData,
+    distanceValue: Int,
     range: Range
 ) {
     ScreenSection {
         SectionTitle(R.drawable.ic_distance, stringResource(id = R.string.distance_section))
-        data.distanceValue()?.let { DistanceView(value = it, range = range) }
+        DistanceView(value = distanceValue, range = range)
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "$distanceValue dm",
+                style = MaterialTheme.typography.titleLarge,
+            )
+        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun DistanceSectionPreview() {
-    DistanceSection(SensorData(), Range(0, 50))
+    DistanceSection(15, Range(0, 50))
 }
 
 @Composable
@@ -76,7 +93,10 @@ internal fun AzimuthSection(data: SensorData, distanceRange: Range) {
         SectionTitle(
             resId = R.drawable.ic_azimuth, stringResource(id = R.string.azimuth_section)
         )
-        Box {
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_azimuth),
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.surface),
@@ -89,8 +109,20 @@ internal fun AzimuthSection(data: SensorData, distanceRange: Range) {
                     .height(200.dp)
                     .width(200.dp)
             )
-            // TODO: Verify the param supplied to AzimuthView.
             AzimuthView(data, distanceRange)
+        }
+
+        data.displayAzimuth()?.let {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.titleLarge,
+                )
+            }
         }
     }
 }
@@ -98,7 +130,17 @@ internal fun AzimuthSection(data: SensorData, distanceRange: Range) {
 @Preview
 @Composable
 private fun AzimuthSectionPreview() {
-    AzimuthSection(SensorData(), Range(0, 50))
+    val sensorData = SensorData(
+        azimuth = SensorValue(
+            values = listOf(
+                AzimuthMeasurementData(
+                    azimuth = 20,
+                    address = PeripheralBluetoothAddress.TEST
+                )
+            )
+        )
+    )
+    AzimuthSection(sensorData, Range(0, 50))
 }
 
 @Composable
@@ -109,8 +151,20 @@ internal fun ElevationSection(data: SensorData) {
         )
 
         Row(modifier = Modifier.padding(end = 50.dp)) {
-            // TODO: Verify the param supplied to ElevationView.
             data.elevation.medianValue { it.elevation }?.let { ElevationView(it) }
+
+            data.displayElevation()?.let {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                }
+            }
         }
     }
 }
@@ -118,14 +172,17 @@ internal fun ElevationSection(data: SensorData) {
 @Preview
 @Composable
 private fun ElevationSectionPreview() {
-    ElevationSection(SensorData())
-}
-
-@Composable
-internal fun MeasuresSection(data: SensorData) {
-    ScreenSection {
-        MeasuresView(data = data)
-    }
+    val sensorData = SensorData(
+        elevation = SensorValue(
+            values = listOf(
+                ElevationMeasurementData(
+                    address = PeripheralBluetoothAddress.TEST,
+                    elevation = 30
+                )
+            )
+        )
+    )
+    ElevationSection(sensorData)
 }
 
 @Composable
