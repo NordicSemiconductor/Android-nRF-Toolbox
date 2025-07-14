@@ -1,7 +1,6 @@
 package no.nordicsemi.android.toolbox.profile.view.directionFinder
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -23,6 +22,7 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.profile.R
@@ -49,6 +49,13 @@ internal fun ElevationView(value: Int) {
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun ElevationViewPreview() {
+    val value = 15 // Example elevation value
+    ElevationView(value = value)
+}
+
 @Composable
 private fun BoxScope.ElevationLabels() {
     Text(
@@ -65,7 +72,6 @@ private fun BoxScope.ElevationLabels() {
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ElevationCanvas(
     radius: Dp,
