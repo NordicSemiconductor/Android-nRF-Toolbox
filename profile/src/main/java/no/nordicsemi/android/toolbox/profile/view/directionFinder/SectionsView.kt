@@ -2,12 +2,14 @@ package no.nordicsemi.android.toolbox.profile.view.directionFinder
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -29,12 +31,11 @@ import no.nordicsemi.android.toolbox.profile.data.SensorData
 import no.nordicsemi.android.toolbox.profile.data.SensorValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.displayAzimuth
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.displayElevation
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.elevationValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.medianValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.selectedMeasurementSectionValues
+import no.nordicsemi.android.toolbox.profile.viewmodel.DFSEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
-import no.nordicsemi.android.ui.view.ReversedSectionTitle
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
@@ -64,27 +65,6 @@ internal fun DistanceSection(
 @Composable
 private fun DistanceSectionPreview() {
     DistanceSection(15, Range(0, 50))
-}
-
-@Composable
-internal fun DistanceControlSection(
-    data: DFSServiceData,
-    sensorData: SensorData,
-    onEvent: (ProfileUiEvent) -> Unit
-) {
-    ScreenSection {
-        SectionTitle(
-            resId = R.drawable.ic_control,
-            title = stringResource(id = R.string.control_panel),
-        )
-        ControlView(data, sensorData, onEvent)
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun DistanceControlSectionPreview() {
-    DistanceControlSection(DFSServiceData(), SensorData()) {}
 }
 
 @Composable
@@ -150,21 +130,12 @@ internal fun ElevationSection(data: SensorData) {
             resId = R.drawable.ic_elevation, stringResource(id = R.string.elevation_section)
         )
 
-        Row(modifier = Modifier.padding(end = 50.dp)) {
-            data.elevation.medianValue { it.elevation }?.let { ElevationView(it) }
-
-            data.displayElevation()?.let {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.titleLarge,
-                    )
-                }
-            }
+        Row(
+            modifier = Modifier.padding(end = 50.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            data.elevation.medianValue { it.elevation }?.let { ElevationView(it, data) }
         }
     }
 }
@@ -242,44 +213,74 @@ private fun DataSmoothingViewSectionPreview() {
 @Composable
 internal fun AzimuthAndElevationSection(data: SensorData, range: Range) {
     ScreenSection {
-        BoxWithConstraints {
+        SectionTitle(
+            R.drawable.ic_azimuth,
+            stringResource(id = R.string.azimuth_section)
+        )
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Box {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_azimuth),
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.surface),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .background(
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                shape = CircleShape
+                            )
+                            .size(200.dp)
+                    )
+                    AzimuthView(data, range)
+                }
+                data.displayAzimuth()?.let {
+                    Text(
+                        text = "Direction relative to North: $it",
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                }
+            }
+
             SectionTitle(
-                R.drawable.ic_azimuth,
-                stringResource(id = R.string.azimuth_section)
-            )
-
-            val elevationTitle = if (maxWidth < 300.dp) {
-                stringResource(id = R.string.elevation_section).substring(0, 4)
-            } else {
-                stringResource(id = R.string.elevation_section)
-            }
-
-            ReversedSectionTitle(
                 R.drawable.ic_elevation,
-                elevationTitle
+                stringResource(id = R.string.elevation_section)
             )
-        }
-
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Box(modifier = Modifier.align(Alignment.TopEnd)) {
-                ElevationView(value = data.elevationValue()!!)
+            Box {
+                ElevationView(value = data.elevationValue()!!, data)
             }
 
-            Box(modifier = Modifier.align(Alignment.TopStart)) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_azimuth),
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.surface),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .background(
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            shape = CircleShape
-                        )
-                        .height(200.dp)
-                        .width(200.dp)
-                )
-                AzimuthView(data, range)
-            }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AzimuthAndElevationSectionPreview() {
+    val sensorData = SensorData(
+        azimuth = SensorValue(
+            values = listOf(
+                AzimuthMeasurementData(
+                    azimuth = 50,
+                    address = PeripheralBluetoothAddress.TEST
+                )
+            )
+        ),
+        elevation = SensorValue(
+            values = listOf(
+                ElevationMeasurementData(
+                    address = PeripheralBluetoothAddress.TEST,
+                    elevation = 30
+                )
+            )
+        )
+    )
+    AzimuthAndElevationSection(sensorData, Range(0, 50))
 }

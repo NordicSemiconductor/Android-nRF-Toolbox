@@ -3,9 +3,13 @@ package no.nordicsemi.android.toolbox.profile.view.directionFinder
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,26 +29,60 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.lib.profile.directionFinder.PeripheralBluetoothAddress
+import no.nordicsemi.android.lib.profile.directionFinder.elevation.ElevationMeasurementData
 import no.nordicsemi.android.toolbox.profile.R
+import no.nordicsemi.android.toolbox.profile.data.SensorData
+import no.nordicsemi.android.toolbox.profile.data.SensorValue
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.displayElevation
 import no.nordicsemi.android.ui.view.CircleTransitionState
 import no.nordicsemi.android.ui.view.createCircleTransition
 
 @Composable
-internal fun ElevationView(value: Int) {
+internal fun ElevationView(
+    value: Int,
+    data: SensorData
+) {
     val duration = 1000
     val radius = 100.dp
     val isInAccessibilityMode = rememberSaveable { mutableStateOf(false) }
     val transition = createCircleTransition(isInAccessibilityMode.value, duration)
 
-    Box {
-        ElevationLabels()
-        ElevationCanvas(
-            radius = radius,
-            circleBorderColor = MaterialTheme.colorScheme.secondary,
-            transition = transition,
-            value = value
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier
+            .padding(8.dp)
+    ) {
+        BoxWithConstraints(
+            modifier = Modifier.padding(8.dp)
         ) {
-            isInAccessibilityMode.value = !isInAccessibilityMode.value
+            ElevationLabels(Modifier.padding(8.dp))
+            Box(
+                modifier = Modifier
+                    .size(radius * 2)
+                    .align(Alignment.Center) // force centering
+            ) {
+                ElevationCanvas(
+                    radius = radius,
+                    circleBorderColor = MaterialTheme.colorScheme.secondary,
+                    transition = transition,
+                    value = value
+                ) {
+                    isInAccessibilityMode.value = !isInAccessibilityMode.value
+                }
+            }
+        }
+        data.displayElevation()?.let {
+            Box(
+                modifier = Modifier,
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                Text(
+                    text = "Tilt Angle: $it",
+                    style = MaterialTheme.typography.titleLarge,
+                )
+            }
         }
     }
 }
@@ -53,22 +91,34 @@ internal fun ElevationView(value: Int) {
 @Composable
 private fun ElevationViewPreview() {
     val value = 15 // Example elevation value
-    ElevationView(value = value)
+    val sensorData = SensorData(
+        elevation = SensorValue(
+            values = listOf(
+                ElevationMeasurementData(
+                    address = PeripheralBluetoothAddress.TEST,
+                    elevation = 30
+                )
+            )
+        )
+    )
+    ElevationView(value = value, sensorData)
 }
 
 @Composable
-private fun BoxScope.ElevationLabels() {
+private fun BoxScope.ElevationLabels(
+    modifier: Modifier = Modifier
+) {
     Text(
         text = stringResource(id = R.string.elevation_max),
-        modifier = Modifier.align(Alignment.TopCenter)
+        modifier = modifier.align(Alignment.TopCenter)
     )
     Text(
         text = stringResource(id = R.string.elevation_medium),
-        modifier = Modifier.align(Alignment.CenterEnd)
+        modifier = modifier.align(Alignment.CenterEnd)
     )
     Text(
         text = stringResource(id = R.string.elevation_min),
-        modifier = Modifier.align(Alignment.BottomCenter)
+        modifier = modifier.align(Alignment.BottomCenter)
     )
 }
 
@@ -82,8 +132,7 @@ private fun ElevationCanvas(
 ) {
     Canvas(
         modifier = Modifier
-            .size(radius * 2)
-            .padding(30.dp)
+            .requiredSize(radius * 2)
             .combinedClickable(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() },
