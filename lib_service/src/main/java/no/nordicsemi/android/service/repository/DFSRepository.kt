@@ -39,25 +39,18 @@ object DFSRepository {
     }
 
     fun addNewAzimuth(deviceId: String, azimuth: AzimuthMeasurementData) {
-        val validatedAzimuth = azimuth.copy(azimuth = azimuth.azimuth.coerceIn(0, 359))
-        val key = validatedAzimuth.address
-        val deviceDataFlow = _dataMap[deviceId]
-        val currentData = deviceDataFlow?.value?.data ?: emptyMap()
-        val sensorData = currentData[key] ?: SensorData()
-        val updatedAzimuths = sensorData.azimuth?.copyWithNewValue(validatedAzimuth)
-            ?: SensorValue()
-        val updatedSensorData = sensorData.copy(azimuth = updatedAzimuths)
-
-        _dataMap[deviceId]?.update {
-            it.copy(
-                data = currentData.toMutableMap().apply {
-                    if (key != null) {
-                        put(key, updatedSensorData)
-                    }
-                }.toMap()
-            )
+        _dataMap[deviceId]?.update { current ->
+            val validatedAzimuth = azimuth.copy(azimuth = azimuth.azimuth.coerceIn(0, 359))
+            val key = validatedAzimuth.address
+            val sensorData = current.data[key] ?: SensorData()
+            val azimuths = sensorData.azimuth ?: SensorValue()
+            val newAzimuths = azimuths.copyWithNewValue(validatedAzimuth)
+            val newSensorData = sensorData.copy(azimuth = newAzimuths)
+            val newDevicesData = current.data.toMutableMap().apply {
+                put(key, newSensorData)
+            }.toMap()
+            current.copy(data = newDevicesData)
         }
-
     }
 
     fun addNewDistance(deviceId: String, distance: DistanceMeasurementData) {
@@ -76,53 +69,43 @@ object DFSRepository {
         distance: DistanceMeasurementData,
         distanceMode: DistanceMode,
     ) {
-        val key = distance.address
-        val deviceDataFlow = _dataMap[deviceId]
-        val currentData = deviceDataFlow?.value?.data ?: emptyMap()
-        val sensorData = currentData[key] ?: SensorData()
-        val newSensorData = when (distanceMode) {
-            DistanceMode.MCPD -> sensorData.copy(
-                mcpdDistance = sensorData.mcpdDistance
-                    ?.copyWithNewValue(distance as McpdMeasurementData) ?: SensorValue(),
-                distanceMode = distanceMode
-            )
+        _dataMap[deviceId]?.update { current ->
+            val key = distance.address
+            val sensorData = current.data[key] ?: SensorData()
+            val newSensorData = when (distanceMode) {
+                DistanceMode.MCPD -> sensorData.copy(
+                    mcpdDistance = sensorData.mcpdDistance
+                        ?.copyWithNewValue(distance as McpdMeasurementData) ?: SensorValue(),
+                    distanceMode = distanceMode
+                )
 
-            DistanceMode.RTT -> sensorData.copy(
-                rttDistance = sensorData.rttDistance
-                    ?.copyWithNewValue(distance as RttMeasurementData) ?: SensorValue(),
-                distanceMode = distanceMode
-            )
-        }
-
-        _dataMap[deviceId]?.update {
-            it.copy(
-                data = currentData.toMutableMap().apply {
-                    if (key != null) {
-                        put(key, newSensorData)
-                    }
-                }.toMap(),
-            )
+                DistanceMode.RTT -> sensorData.copy(
+                    rttDistance = sensorData.rttDistance
+                        ?.copyWithNewValue(distance as RttMeasurementData) ?: SensorValue(),
+                    distanceMode = distanceMode
+                )
+            }
+            val newDevicesData = current.data.toMutableMap().apply {
+                put(key, newSensorData)
+            }.toMap()
+            current.copy(data = newDevicesData)
         }
     }
 
     fun addNewElevation(deviceId: String, elevation: ElevationMeasurementData) {
-        val validatedElevation = elevation.copy(elevation = elevation.elevation.coerceIn(-90, 90))
-        val key = validatedElevation.address
-        val deviceDataFlow = _dataMap[deviceId]
-        val currentData = deviceDataFlow?.value?.data ?: emptyMap()
-        val sensorData = currentData[key] ?: SensorData()
-        val updatedElevations = sensorData.elevation?.copyWithNewValue(validatedElevation)
-            ?: SensorValue()
-        val updatedSensorData = sensorData.copy(elevation = updatedElevations)
+        _dataMap[deviceId]?.update { current ->
+            val validatedElevation =
+                elevation.copy(elevation = elevation.elevation.coerceIn(-90, 90))
+            val key = validatedElevation.address
+            val sensorData = current.data[key] ?: SensorData()
+            val elevations = sensorData.elevation ?: SensorValue()
+            val newElevation = elevations.copyWithNewValue(validatedElevation)
+            val newSensorData = sensorData.copy(elevation = newElevation)
+            val newDevicesData = current.data.toMutableMap().apply {
+                put(key, newSensorData)
+            }.toMap()
+            current.copy(data = newDevicesData)
 
-        _dataMap[deviceId]?.update {
-            it.copy(
-                data = currentData.toMutableMap().apply {
-                    if (key != null) {
-                        put(key, updatedSensorData)
-                    }
-                }.toMap()
-            )
         }
     }
 

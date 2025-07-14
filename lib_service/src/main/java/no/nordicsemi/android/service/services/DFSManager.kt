@@ -88,7 +88,6 @@ internal class DFSManager : ServiceManager {
                 Timber.e("Characteristic Property READ is not available for $ddfFeatureCharacteristics")
             }
 
-
             remoteService.characteristics
                 .firstOrNull { it.uuid == CONTROL_POINT_CHARACTERISTIC_UUID.toKotlinUuid() }
                 ?.apply { controlPointCharacteristic = this }
@@ -114,19 +113,26 @@ internal class DFSManager : ServiceManager {
                 DistanceMode.MCPD -> MCPD_ENABLED_BYTES
                 DistanceMode.RTT -> RTT_ENABLED_BYTES
             }
-
-            writeOrSetStatusFailed(deviceId) {
+            try {
                 controlPointCharacteristic.write(data, WriteType.WITH_RESPONSE)
+            } catch (e: Exception) {
+                DFSRepository.updateNewRequestStatus(deviceId, RequestStatus.FAILED)
+            } finally {
+                DFSRepository.updateNewRequestStatus(deviceId, RequestStatus.SUCCESS)
             }
 
         }
 
         suspend fun checkForCurrentDistanceMode(deviceId: String) {
-            writeOrSetStatusFailed(deviceId) {
+            try {
                 controlPointCharacteristic.write(
                     CHECK_CONFIG_BYTES,
                     writeType = WriteType.WITH_RESPONSE
                 )
+            } catch (e: Exception) {
+                DFSRepository.updateNewRequestStatus(deviceId, RequestStatus.FAILED)
+            } finally {
+                DFSRepository.updateNewRequestStatus(deviceId, RequestStatus.SUCCESS)
             }
         }
 
@@ -142,18 +148,6 @@ internal class DFSManager : ServiceManager {
                     }
             } else {
                 Timber.e("Characteristic Property READ is not available for $ddfFeatureCharacteristic")
-            }
-        }
-
-        private suspend fun writeOrSetStatusFailed(
-            deviceId: String,
-            block: suspend () -> Unit
-        ) {
-            try {
-                block()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                DFSRepository.updateNewRequestStatus(deviceId, RequestStatus.FAILED)
             }
         }
     }

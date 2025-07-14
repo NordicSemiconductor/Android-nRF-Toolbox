@@ -6,6 +6,6 @@ import no.nordicsemi.android.lib.profile.directionFinder.distance.QualityIndicat
 data class ElevationMeasurementData(
     val flags: Byte = Byte.MAX_VALUE,
     val quality: QualityIndicator = QualityIndicator.GOOD,
-    val address: PeripheralBluetoothAddress? = null,
+    val address: PeripheralBluetoothAddress,
     val elevation: Int = 0
 )
