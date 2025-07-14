@@ -49,6 +49,7 @@ internal fun SectionBluetoothDeviceComponent(
     onEvent: (ProfileUiEvent) -> Unit
 ) {
     val devices = data.data.keys.toList()
+        .filter { it.address.lowercase() != PeripheralBluetoothAddress.TEST.address.lowercase() } // ignore case with TEST address
 
     when {
         selectedDevice == null && devices.isNotEmpty() -> ScreenSection {
@@ -112,7 +113,7 @@ private fun MeasuredDevices(
                 }
 
                 Spacer(Modifier.weight(1f))
-                if (devices.size > 1) Icon(icon, contentDescription = "")
+                Icon(icon, contentDescription = "")
             }
 
         }
@@ -176,7 +177,7 @@ internal fun NotSelectedView(
     onClick: (PeripheralBluetoothAddress) -> Unit
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
             text = stringResource(id = R.string.devices),
