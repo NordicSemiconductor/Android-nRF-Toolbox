@@ -52,16 +52,13 @@ dependencies {
     implementation(project(":lib_ui"))
     implementation(project(":lib_utils"))
 
-    // Nordic scanner library from the Nordic Common repository
-    // todo: Replace it with libs once the library is published
-    implementation("no.nordicsemi.android.common:scanner")
-
     implementation(libs.nordic.navigation)
     implementation(libs.nordic.theme)
     implementation(libs.nordic.logger)
     implementation(libs.nordic.analytics)
     implementation(libs.nordic.ui)
     implementation(libs.nordic.core)
+    implementation(libs.nordic.scanner.ble)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

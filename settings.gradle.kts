@@ -50,7 +50,7 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("libs") {
-            from("no.nordicsemi.android.gradle:version-catalog:2.7-2")
+            from("no.nordicsemi.android.gradle:version-catalog:2.8.1")
         }
     }
 }
@@ -67,8 +67,4 @@ include(":lib_utils")
 include(":profile")
 include(":profile_data")
 include(":permissions-ranging")
-
-if (file("../Android-Common-Libraries").exists()) {
-    includeBuild("../Android-Common-Libraries")
-}
 
