@@ -9,7 +9,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
-import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.availableSections
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.azimuthValue
@@ -17,8 +16,6 @@ import no.nordicsemi.android.toolbox.profile.data.directionFinder.distanceValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.elevationValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.selectedMeasurementSectionValues
 import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
-import no.nordicsemi.android.ui.view.ScreenSection
-import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
 internal fun DFSScreen(
@@ -43,13 +40,6 @@ internal fun DFSScreen(
                     val isAzimuthAndElevationDataAvailable =
                         (data?.azimuthValue() != null) && (data.elevationValue() != null)
 
-                    ScreenSection {
-                        SectionTitle(
-                            resId = R.drawable.ic_distance,
-                            title = "Direction Finder"
-                        )
-                    }
-
                     if (data != null) {
                         data.distanceValue()
                             ?.let {
@@ -70,7 +60,6 @@ internal fun DFSScreen(
                                 data
                             )
                         }
-                        MeasuresSection(data)
 
                         if (data.availableSections().isNotEmpty()) SettingSection(
                             data,
@@ -88,7 +77,7 @@ internal fun DFSScreen(
             }
 
             else -> {
-                // TODO: decide on other states.
+                CircularProgressIndicator()
             }
         }
     }
