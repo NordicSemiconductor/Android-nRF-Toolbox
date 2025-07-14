@@ -203,9 +203,14 @@ private fun SettingSectionPreview() {
 }
 
 @Composable
-internal fun LinearDataSection(data: SensorData, distanceRange: Range) {
+internal fun LinearDataSection(
+    serviceData: DFSServiceData,
+    data: SensorData,
+    distanceRange: Range,
+    onClick: (DFSEvent) -> Unit
+) {
     ScreenSection {
-        SectionTitle(R.drawable.ic_distance, stringResource(id = R.string.distance_section))
+        ControlView(serviceData, data, onClick)
         LinearDataView(data, distanceRange)
     }
 }
@@ -213,7 +218,7 @@ internal fun LinearDataSection(data: SensorData, distanceRange: Range) {
 @Preview
 @Composable
 private fun LinearDataSectionPreview() {
-    LinearDataSection(SensorData(), Range(0, 50))
+    LinearDataSection(DFSServiceData(), SensorData(), Range(0, 50)) {}
 }
 
 @Composable

@@ -8,6 +8,8 @@ data class ControlPointCheckModeSuccess(
 
 data object ControlPointCheckModeError : ControlPointResult()
 
-data object ControlPointChangeModeSuccess : ControlPointResult()
+data class ControlPointChangeModeSuccess(
+    val mode: ControlPointMode
+) : ControlPointResult()
 
 data object ControlPointChangeModeError : ControlPointResult()

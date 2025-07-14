@@ -23,7 +23,10 @@ class ControlPointDataParser {
                     return@let
                 }
                 return when (controlPointRequestCode) {
-                    ControlPointRequestCode.CHANGE_MODE -> onChangeModeResult(result)
+                    ControlPointRequestCode.CHANGE_MODE -> onChangeModeResult(
+                        result,
+                        data.getInt(offset, IntFormat.UINT8)
+                    )
                     ControlPointRequestCode.CHECK_MODE -> {
                         onCheckModeResult(result, data.getInt(offset, IntFormat.UINT8))
                     }
@@ -32,9 +35,14 @@ class ControlPointDataParser {
         return null
     }
 
-    private fun onChangeModeResult(opCode: ControlPointResponseCodeValue): ControlPointResult {
+    private fun onChangeModeResult(
+        opCode: ControlPointResponseCodeValue,
+        value: Int
+    ): ControlPointResult {
         return when (opCode) {
-            ControlPointResponseCodeValue.SUCCESS -> ControlPointChangeModeSuccess
+            ControlPointResponseCodeValue.SUCCESS -> ControlPointChangeModeSuccess(
+                ControlPointMode.create(value) ?: return ControlPointChangeModeError
+            )
             ControlPointResponseCodeValue.OP_CODE_NOT_SUPPORTED,
             ControlPointResponseCodeValue.INVALID,
             ControlPointResponseCodeValue.FAILED -> ControlPointChangeModeError

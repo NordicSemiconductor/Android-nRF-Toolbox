@@ -158,9 +158,9 @@ object DFSRepository {
                 }
             }
 
-            ControlPointChangeModeSuccess -> {
+            is ControlPointChangeModeSuccess -> {
                 scope.launch {
-                    checkCurrentDistanceMode(deviceId)
+                    setDistanceMode(deviceId, data.mode.toDistanceMode())
                     updateNewRequestStatus(deviceId, RequestStatus.SUCCESS)
                 }
             }

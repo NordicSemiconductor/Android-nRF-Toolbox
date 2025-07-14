@@ -69,8 +69,11 @@ internal fun DFSScreen(
                         data.selectedMeasurementSectionValues()
                             ?.let { DataSmoothingViewSection(data) }
 
-                        LinearDataSection(data, serviceData.distanceRange)
-                        DistanceControlSection(serviceData, data) { onClick(it) }
+                        LinearDataSection(
+                            serviceData,
+                            data,
+                            serviceData.distanceRange
+                        ) { onClick(it) }
                     }
                 }
 

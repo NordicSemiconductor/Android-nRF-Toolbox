@@ -1,28 +1,39 @@
 package no.nordicsemi.android.toolbox.profile.view.directionFinder
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.lib.profile.directionFinder.distance.DistanceMode
+import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
 import no.nordicsemi.android.toolbox.profile.data.SensorData
-import no.nordicsemi.android.toolbox.profile.R
+import no.nordicsemi.android.toolbox.profile.data.uart.MacroEol
 import no.nordicsemi.android.toolbox.profile.viewmodel.DFSEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 
 @Composable
 internal fun ControlView(
     viewEntity: DFSServiceData,
     sensorData: SensorData,
-    onEvent: (ProfileUiEvent) -> Unit
+    onEvent: (DFSEvent) -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -70,6 +81,12 @@ private fun DistanceCheckView(onCheckAvailability: () -> Unit) {
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun DistanceCheckViewPreview() {
+    DistanceCheckView {}
+}
+
 @Composable
 private fun DistanceNotAvailableView() {
     Text(stringResource(id = R.string.distance_not_available))
@@ -81,35 +98,47 @@ private fun CurrentModeView(
     onCheckMode: () -> Unit,
     onSwitchMode: (DistanceMode) -> Unit
 ) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(stringResource(id = R.string.current_mode))
-        val modeText = when (distanceMode) {
-            DistanceMode.MCPD -> stringResource(id = R.string.mcpd)
-            DistanceMode.RTT -> stringResource(id = R.string.rtt)
-            null -> stringResource(id = R.string.unknown)
+    if (distanceMode == null) {
+        Button(onClick = onCheckMode) {
+            Text(stringResource(id = R.string.check_mode))
         }
-        Text(modeText, style = MaterialTheme.typography.titleMedium)
-    }
+    } else {
+        Box(
+            modifier = Modifier.clip(RoundedCornerShape(8.dp)),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                DistanceMode.entries.forEachIndexed { index, it ->
+                    val selected = it == distanceMode
+                    val clip = if (selected) RoundedCornerShape(8.dp) else RoundedCornerShape(0.dp)
+                    val (color, textColor) = if (selected) {
+                        MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
+                    } else {
+                        MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.onSurface
+                    }
 
-    when (distanceMode) {
-        DistanceMode.MCPD -> {
-            Button(onClick = { onSwitchMode(DistanceMode.RTT) }) {
-                Text(stringResource(id = R.string.enable_rtt))
-            }
-        }
-
-        DistanceMode.RTT -> {
-            Button(onClick = { onSwitchMode(DistanceMode.MCPD) }) {
-                Text(stringResource(id = R.string.enable_mcpd))
-            }
-        }
-
-        null -> {
-            Button(onClick = onCheckMode) {
-                Text(stringResource(id = R.string.check_mode))
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(clip)
+                            .background(color = color)
+                            .clickable { onSwitchMode(it) },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            it.toString(),
+                            modifier = Modifier.padding(8.dp),
+                            color = textColor,
+                        )
+                    }
+                    if ((index < MacroEol.entries.size - 1) && !selected)
+                        VerticalDivider(
+                            modifier = Modifier
+                                .height(IntrinsicSize.Max)
+                                .background(MaterialTheme.colorScheme.onSurface)
+                        )
+                }
             }
         }
     }
@@ -130,6 +159,13 @@ private fun SingleModeAvailableView(
 
 @Preview(showBackground = true)
 @Composable
+private fun SingleModeAvailableViewPreview() {
+    SingleModeAvailableView(false, true)
+}
+
+
+@Preview(showBackground = true)
+@Composable
 private fun ControlViewPreview() {
-    ControlView(DFSServiceData(), SensorData()) { }
+    CurrentModeView(DistanceMode.MCPD, {}) { }
 }
