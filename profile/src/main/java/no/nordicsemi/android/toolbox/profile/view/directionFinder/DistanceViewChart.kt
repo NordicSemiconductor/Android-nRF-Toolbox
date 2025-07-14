@@ -1,7 +1,6 @@
 package no.nordicsemi.android.toolbox.profile.view.directionFinder
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -20,7 +19,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
 import no.nordicsemi.android.ui.view.createLinearTransition
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun DistanceChartView(value: Int, range: Range) {
     val duration = 1000
