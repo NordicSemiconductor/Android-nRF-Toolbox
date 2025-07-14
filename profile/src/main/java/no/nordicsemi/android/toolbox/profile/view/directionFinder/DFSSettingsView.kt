@@ -99,6 +99,15 @@ internal fun SettingsView(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun SettingsViewPreview() {
+    SettingsView(
+        SensorData(),
+        Range(0, 50)
+    ) {}
+}
+
 @Composable
 internal fun RangeSlider(range: Range, onChange: (Range) -> Unit) {
     Column {
@@ -207,13 +216,13 @@ internal fun MeasurementDetailModeView(
             Column {
                 sensorData.availableSections().forEachIndexed { index, it ->
                     Text(
-                        text = it.toString(),
+                        text = it.displayName,
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                             .fillMaxWidth()
                             .clickable {
                                 onEvent(DFSEvent.OnDetailsSectionParamsSelected(it))
-                                displayText = it.toString()
+                                displayText = it.displayName
                                 isExpanded = false
                             }
                     )

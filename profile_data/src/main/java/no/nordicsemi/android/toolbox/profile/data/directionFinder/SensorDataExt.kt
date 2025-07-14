@@ -51,11 +51,11 @@ fun SensorData.isMcpdSectionAvailable() =
     rttValue() != null || rssiValue() != null || phaseSlopeValue() != null || bestEffortValue() != null
 
 enum class MeasurementSection(val displayName: String) {
-    DISTANCE_RTT("RTT"),
-    DISTANCE_MCPD_IFFT("IFFT"),
-    DISTANCE_MCPD_PHASE_SLOPE("Phase"),
+    DISTANCE_RTT("Round-Trip Time (RTT)"),
+    DISTANCE_MCPD_IFFT("Inverse Fast Fourier Transform (IFFT)"),
+    DISTANCE_MCPD_PHASE_SLOPE("Phase slope"),
     DISTANCE_MCPD_RSSI("Rssi"),
-    DISTANCE_MCPD_BEST("Best"),
+    DISTANCE_MCPD_BEST("Best effort distance estimate"),
 }
 
 fun SensorData.availableSections(): List<MeasurementSection> = listOfNotNull(

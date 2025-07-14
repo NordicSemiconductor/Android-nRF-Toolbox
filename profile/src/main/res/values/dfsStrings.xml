@@ -21,8 +21,8 @@
     <string name="check_distance_mode">Click button to check available distance modes.</string>
     <string name="check_availability">Check availability</string>
     <string name="distance_not_available">Distance feature is not available on this device.</string>
-    <string name="mcpd">MCPD</string>
-    <string name="rtt">RTT</string>
+    <string name="mcpd">Multi-carrier phase difference (MCPD)</string>
+    <string name="rtt">Round-Trip Time (RTT)</string>
     <string name="unknown">UNKNOWN</string>
     <string name="current_mode">Current mode: </string>
     <string name="enable_rtt">Enable RTT</string>
@@ -39,7 +39,7 @@
 
     <string name="dm_value">%ddm</string>
 
-    <string name="rtt_label">Round trip time (RTT)</string>
+    <string name="rtt_label">Round-Trip Time (RTT)</string>
     <string name="ifft_label">ifft</string>
     <string name="phase_label">phase</string>
     <string name="rssi_label">rssi</string>
