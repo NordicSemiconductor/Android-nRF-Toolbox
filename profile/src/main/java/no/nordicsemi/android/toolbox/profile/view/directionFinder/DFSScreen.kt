@@ -43,7 +43,8 @@ internal fun DFSScreen(
                     if (data != null) {
                         data.distanceValue()
                             ?.let {
-                                DistanceSection(it, serviceData.distanceRange)
+                                DistanceSection(it, serviceData.distanceRange,
+                                    onClick = { onClick(it) })
                             }
                         when {
                             isAzimuthAndElevationDataAvailable -> AzimuthAndElevationSection(

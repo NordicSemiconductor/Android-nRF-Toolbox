@@ -1,8 +1,5 @@
 package no.nordicsemi.android.toolbox.profile.view.directionFinder
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandIn
-import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -36,7 +33,6 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.SensorData
@@ -61,40 +57,16 @@ internal fun SettingsView(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { isExpanded.value = !isExpanded.value },
-//        rotateArrow = if (isExpanded.value) 180f else 0f
     )
 
-    AnimatedVisibility(
-        visible = isExpanded.value,
-        enter = expandIn(
-            expandFrom = Alignment.Center,
-            initialSize = { IntSize(it.width, 0) }
-        ),
-        exit = shrinkOut(
-            shrinkTowards = Alignment.Center,
-            targetSize = { IntSize(it.width, 0) })
-    ) {
-        Column {
-            Spacer(modifier = Modifier.padding(8.dp))
-
+    Column {
+        if (data.availableSections().isNotEmpty()) {
             Text(
-                stringResource(R.string.distance_range),
+                stringResource(R.string.measurement_details),
                 style = MaterialTheme.typography.titleSmall
             )
-            RangeSlider(range) {
-                onEvent(DFSEvent.OnRangeChangedEvent(it))
-            }
 
-            Spacer(modifier = Modifier.padding(8.dp))
-
-            if (data.availableSections().isNotEmpty()) {
-                Text(
-                    stringResource(R.string.measurement_details),
-                    style = MaterialTheme.typography.titleSmall
-                )
-
-                MeasurementDetailModeView(data, onEvent)
-            }
+            MeasurementDetailModeView(data, onEvent)
         }
     }
 }
@@ -159,8 +131,6 @@ fun RangeSliderView(
         valueRange = valueRange,
         steps = ((valueRange.endInclusive - valueRange.start) / step).toInt() - 1,
     )
-
-
 }
 
 private fun Range.toFloatRange(): ClosedFloatingPointRange<Float> =
@@ -183,7 +153,8 @@ internal fun MeasurementDetailModeView(
     var displayText by rememberSaveable { mutableStateOf("") }
 
     Column(modifier = Modifier.clickable { isExpanded = true }) {
-        val text = stringResource(R.string.select_section)
+        val text = sensorData.selectedMeasurementSection?.displayName
+            ?: stringResource(R.string.select_section)
 
         Row(
             modifier = Modifier

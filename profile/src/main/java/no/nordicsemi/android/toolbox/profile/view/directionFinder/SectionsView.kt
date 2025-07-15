@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.lib.profile.directionFinder.PeripheralBluetoothAddress
@@ -29,6 +30,7 @@ import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
 import no.nordicsemi.android.toolbox.profile.data.SensorData
 import no.nordicsemi.android.toolbox.profile.data.SensorValue
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.MeasurementSection
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.displayAzimuth
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.elevationValue
@@ -42,7 +44,8 @@ import no.nordicsemi.android.ui.view.SectionTitle
 @Composable
 internal fun DistanceSection(
     distanceValue: Int,
-    range: Range
+    range: Range,
+    onClick: (DFSEvent) -> Unit,
 ) {
     ScreenSection {
         SectionTitle(R.drawable.ic_distance, stringResource(id = R.string.distance_section))
@@ -58,13 +61,22 @@ internal fun DistanceSection(
                 style = MaterialTheme.typography.titleLarge,
             )
         }
+        Column {
+            Text(
+                stringResource(R.string.distance_range),
+                style = MaterialTheme.typography.titleSmall
+            )
+            RangeSlider(range) {
+                onClick(DFSEvent.OnRangeChangedEvent(it))
+            }
+        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun DistanceSectionPreview() {
-    DistanceSection(15, Range(0, 50))
+    DistanceSection(15, Range(0, 50)) {}
 }
 
 @Composable
@@ -158,12 +170,20 @@ private fun ElevationSectionPreview() {
 
 @Composable
 internal fun SettingSection(
-    serviceData: SensorData,
+    data: SensorData,
     range: Range,
     onEvent: (ProfileUiEvent) -> Unit
 ) {
-    ScreenSection {
-        SettingsView(data = serviceData, range, onEvent)
+    SettingsView(data = data, range, onEvent)
+
+    if (data.selectedMeasurementSection != null) {
+        Text(
+            text = data.selectedMeasurementSection?.displayName
+                ?: MeasurementSection.DISTANCE_MCPD_BEST.displayName,
+            textAlign = TextAlign.Start,
+            style = MaterialTheme.typography.titleMedium,
+        )
+        data.selectedMeasurementSectionValues()?.let { DataSmoothingView(it) }
     }
 }
 
@@ -195,9 +215,11 @@ private fun LinearDataSectionPreview() {
 @Composable
 internal fun DataSmoothingViewSection(data: SensorData) {
     ScreenSection {
-        SectionTitle(
-            R.drawable.ic_distance,
-            stringResource(id = R.string.measurement_details_section)
+        Text(
+            text = data.selectedMeasurementSection?.displayName
+                ?: MeasurementSection.DISTANCE_MCPD_BEST.displayName,
+            textAlign = TextAlign.Start,
+            style = MaterialTheme.typography.titleMedium,
         )
         data.selectedMeasurementSectionValues()?.let { DataSmoothingView(it) }
 

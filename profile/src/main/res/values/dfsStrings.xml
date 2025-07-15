@@ -5,7 +5,7 @@
     <string name="value_smoothing_info">Because of interferences the last read value can be wrong. To minimize this effect the current value is taken as middle value from cached values. The details are available on the chart below.</string>
 
     <string name="control_panel">Control device</string>
-    <string name="distance_settings">Display settings</string>
+    <string name="distance_settings">Measurement details</string>
     <string name="azimuth_section">Azimuth</string>
     <string name="distance_section">Distance</string>
     <string name="elevation_section">Elevation</string>
