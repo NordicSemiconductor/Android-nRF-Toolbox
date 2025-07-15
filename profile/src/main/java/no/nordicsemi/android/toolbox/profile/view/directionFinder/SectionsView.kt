@@ -30,14 +30,13 @@ import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
 import no.nordicsemi.android.toolbox.profile.data.SensorData
 import no.nordicsemi.android.toolbox.profile.data.SensorValue
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.MeasurementSection
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
+import no.nordicsemi.android.toolbox.profile.data.directionFinder.availableSections
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.displayAzimuth
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.elevationValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.medianValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.selectedMeasurementSectionValues
 import no.nordicsemi.android.toolbox.profile.viewmodel.DFSEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 
@@ -170,27 +169,23 @@ private fun ElevationSectionPreview() {
 
 @Composable
 internal fun SettingSection(
-    data: SensorData,
-    range: Range,
-    onEvent: (ProfileUiEvent) -> Unit
+    serviceData: DFSServiceData,
+    data: SensorData
 ) {
-    SettingsView(data = data, range, onEvent)
-
-    if (data.selectedMeasurementSection != null) {
+    ScreenSection {
         Text(
-            text = data.selectedMeasurementSection?.displayName
-                ?: MeasurementSection.DISTANCE_MCPD_BEST.displayName,
-            textAlign = TextAlign.Start,
+            text = stringResource(R.string.distance_settings),
+            textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleMedium,
         )
-        data.selectedMeasurementSectionValues()?.let { DataSmoothingView(it) }
+        LinearDataView(data, serviceData.distanceRange)
     }
 }
 
 @Preview
 @Composable
 private fun SettingSectionPreview() {
-    SettingSection(SensorData(), Range(0, 50)) { }
+    SettingSection(DFSServiceData(), SensorData())
 }
 
 @Composable
@@ -213,23 +208,17 @@ private fun LinearDataSectionPreview() {
 }
 
 @Composable
-internal fun DataSmoothingViewSection(data: SensorData) {
-    ScreenSection {
-        Text(
-            text = data.selectedMeasurementSection?.displayName
-                ?: MeasurementSection.DISTANCE_MCPD_BEST.displayName,
-            textAlign = TextAlign.Start,
-            style = MaterialTheme.typography.titleMedium,
-        )
-        data.selectedMeasurementSectionValues()?.let { DataSmoothingView(it) }
-
+internal fun DataSmoothingViewSection(data: SensorData, onClick: (DFSEvent) -> Unit) {
+    if (data.availableSections().isNotEmpty()) {
+        MeasurementDetailModeView(data, onClick)
     }
+    data.selectedMeasurementSectionValues()?.let { DataSmoothingView(it) }
 }
 
 @Preview
 @Composable
 private fun DataSmoothingViewSectionPreview() {
-    DataSmoothingViewSection(SensorData())
+    DataSmoothingViewSection(SensorData()) {}
 }
 
 @Composable

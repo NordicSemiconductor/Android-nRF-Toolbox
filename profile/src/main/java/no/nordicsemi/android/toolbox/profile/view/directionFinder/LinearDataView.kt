@@ -76,15 +76,24 @@ internal fun LinearDataView(
 
 @Composable
 private fun LinearDataItemView(name: String, range: Range, item: Int) {
-    val labelWidth = 40.dp
+    val labelWidth = 48.dp
 
     Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                modifier = Modifier.width(labelWidth),
-                text = name,
-                style = MaterialTheme.typography.labelSmall
-            )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Column {
+                Text(
+                    modifier = Modifier.width(labelWidth),
+                    text = name,
+                    style = MaterialTheme.typography.labelSmall
+                )
+                Text(
+                    text = "($item dm)",
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
             DistanceChartView(value = item, range = range)
         }
 
@@ -120,11 +129,11 @@ private fun LinearDataItemView(name: String, range: Range, item: Int) {
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun LinearDataItemViewPreview() {
     LinearDataItemView(
-        name = "Linear Data Item View",
+        name = "RSSI",
         range = Range(0, 50),
         item = 49
     )

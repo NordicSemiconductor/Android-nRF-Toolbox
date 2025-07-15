@@ -55,7 +55,9 @@ enum class MeasurementSection(val displayName: String) {
     DISTANCE_MCPD_IFFT("Inverse Fast Fourier Transform (IFFT)"),
     DISTANCE_MCPD_PHASE_SLOPE("Phase slope"),
     DISTANCE_MCPD_RSSI("Rssi"),
-    DISTANCE_MCPD_BEST("Best effort distance estimate"),
+    DISTANCE_MCPD_BEST("Best effort distance estimate");
+
+    override fun toString(): String = displayName
 }
 
 fun SensorData.availableSections(): List<MeasurementSection> = listOfNotNull(

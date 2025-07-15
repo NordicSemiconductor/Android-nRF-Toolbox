@@ -14,7 +14,6 @@ import no.nordicsemi.android.toolbox.profile.data.directionFinder.availableSecti
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.azimuthValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.distanceValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.elevationValue
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.selectedMeasurementSectionValues
 import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 
 @Composable
@@ -43,7 +42,8 @@ internal fun DFSScreen(
                     if (data != null) {
                         data.distanceValue()
                             ?.let {
-                                DistanceSection(it, serviceData.distanceRange,
+                                DistanceSection(
+                                    it, serviceData.distanceRange,
                                     onClick = { onClick(it) })
                             }
                         when {
@@ -63,18 +63,9 @@ internal fun DFSScreen(
                         }
 
                         if (data.availableSections().isNotEmpty()) SettingSection(
-                            data,
-                            serviceData.distanceRange
-                        ) { onClick(it) }
-
-                        data.selectedMeasurementSectionValues()
-                            ?.let { DataSmoothingViewSection(data) }
-
-                        LinearDataSection(
                             serviceData,
-                            data,
-                            serviceData.distanceRange
-                        ) { onClick(it) }
+                            data
+                        )
                     }
                 }
 
