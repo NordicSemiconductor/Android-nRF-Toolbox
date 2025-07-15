@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
@@ -27,6 +28,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -66,14 +68,14 @@ internal fun SectionBluetoothDeviceComponent(
         }
 
         else -> {
-            MeasuredDevices(selectedDevice, devices, onEvent)
+            SelectedDevices(selectedDevice, devices, onEvent)
         }
     }
 
 }
 
 @Composable
-private fun MeasuredDevices(
+private fun SelectedDevices(
     selectedDevice: PeripheralBluetoothAddress,
     devices: List<PeripheralBluetoothAddress>,
     onEvent: (ProfileUiEvent) -> Unit
@@ -84,6 +86,7 @@ private fun MeasuredDevices(
 
     OutlinedCard(
         modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
             .clickable { if (devices.size > 1) showDropdownMenu = true }
             .onSizeChanged { width = it.width }
     ) {
@@ -104,12 +107,26 @@ private fun MeasuredDevices(
                     modifier = Modifier.size(28.dp)
                 )
 
-                Column {
+                Column(
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
                     Text(
-                        text = stringResource(id = R.string.measured_device),
-                        style = MaterialTheme.typography.titleMedium
+                        text = stringResource(id = R.string.selected_device),
                     )
-                    Text(text = selectedDevice.address, style = MaterialTheme.typography.bodyMedium)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(
+                            text = selectedDevice.address.uppercase(),
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Text(
+                            text = "(${selectedDevice.type.name})",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
                 }
 
                 Spacer(Modifier.weight(1f))
@@ -153,7 +170,7 @@ private fun MeasuredDevices(
 @Preview(showBackground = true)
 @Composable
 private fun MeasuredDevicesPreview() {
-    MeasuredDevices(
+    SelectedDevices(
         PeripheralBluetoothAddress.TEST,
         devices = listOf(
             PeripheralBluetoothAddress.TEST,
@@ -224,7 +241,9 @@ internal fun BluetoothDeviceView(
     onClick: (PeripheralBluetoothAddress) -> Unit
 ) {
     Row(
-        modifier = Modifier.clickable { onClick(device) },
+        modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
+            .clickable { onClick(device) },
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

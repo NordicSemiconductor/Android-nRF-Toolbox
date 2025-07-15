@@ -189,25 +189,6 @@ private fun SettingSectionPreview() {
 }
 
 @Composable
-internal fun LinearDataSection(
-    serviceData: DFSServiceData,
-    data: SensorData,
-    distanceRange: Range,
-    onClick: (DFSEvent) -> Unit
-) {
-    ScreenSection {
-        ControlView(serviceData, data, onClick)
-        LinearDataView(data, distanceRange)
-    }
-}
-
-@Preview
-@Composable
-private fun LinearDataSectionPreview() {
-    LinearDataSection(DFSServiceData(), SensorData(), Range(0, 50)) {}
-}
-
-@Composable
 internal fun DataSmoothingViewSection(data: SensorData, onClick: (DFSEvent) -> Unit) {
     if (data.availableSections().isNotEmpty()) {
         MeasurementDetailModeView(data, onClick)

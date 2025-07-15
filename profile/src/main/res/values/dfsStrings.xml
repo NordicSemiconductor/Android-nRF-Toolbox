@@ -14,7 +14,7 @@
     <string name="device_no_devices">There is no device in range.</string>
     <string name="device_no_devices_hint">Make sure the device is in range.</string>
     <string name="device_address">Address</string>
-    <string name="measured_device">Measured device</string>
+    <string name="selected_device">Selected device</string>
     <string name="devices">List of devices in range</string>
     <string name="cancel">Cancel</string>
 

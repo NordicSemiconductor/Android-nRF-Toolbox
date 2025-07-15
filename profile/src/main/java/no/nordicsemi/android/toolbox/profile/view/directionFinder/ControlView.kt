@@ -115,7 +115,7 @@ private fun CurrentModeView(
                     val (color, textColor) = if (selected) {
                         MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
                     } else {
-                        MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.onSurface
+                        MaterialTheme.colorScheme.surfaceContainer to MaterialTheme.colorScheme.onSurface
                     }
 
                     Box(

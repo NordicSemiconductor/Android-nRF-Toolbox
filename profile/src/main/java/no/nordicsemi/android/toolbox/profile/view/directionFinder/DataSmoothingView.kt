@@ -66,7 +66,7 @@ internal fun DataSmoothingChart(
     if (data.isEmpty()) return
 
     val totalRecords = data.size
-    val averageValue = if (data.isNotEmpty()) {
+    val averageValue = if (data.size > 0) {
         data.sorted()[data.size / 2]
     } else {
         0
