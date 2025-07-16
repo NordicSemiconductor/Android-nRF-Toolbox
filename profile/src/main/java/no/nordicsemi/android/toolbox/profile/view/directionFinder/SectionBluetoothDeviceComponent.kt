@@ -129,10 +129,12 @@ private fun SelectedDevices(
                     }
                 }
 
-                Spacer(Modifier.weight(1f))
-                Icon(icon, contentDescription = "")
+                // Don't show icon if only one device is available
+                if (devices.size > 1) {
+                    Spacer(Modifier.weight(1f))
+                    Icon(icon, contentDescription = "")
+                }
             }
-
         }
 
         DropdownMenu(
@@ -201,9 +203,7 @@ internal fun NotSelectedView(
             style = MaterialTheme.typography.titleLarge
         )
 
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
+        Column {
             devices.forEach { address ->
                 BluetoothDeviceView(
                     device = address,
@@ -243,7 +243,8 @@ internal fun BluetoothDeviceView(
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(4.dp))
-            .clickable { onClick(device) },
+            .clickable { onClick(device) }
+            .padding(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
