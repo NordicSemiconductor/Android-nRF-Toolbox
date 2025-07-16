@@ -4,55 +4,19 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import no.nordicsemi.android.toolbox.profile.R
-import no.nordicsemi.android.toolbox.profile.data.SensorData
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.MeasurementSection
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.availableSections
-import no.nordicsemi.android.toolbox.profile.viewmodel.DFSEvent
-import no.nordicsemi.android.ui.view.DropdownView
-import no.nordicsemi.android.ui.view.SectionTitle
 import java.util.Locale
-
-@Composable
-internal fun SettingsView(
-    data: SensorData,
-    onEvent: (DFSEvent) -> Unit
-) {
-    SectionTitle(
-        icon = Icons.Default.Settings,
-        title = stringResource(id = R.string.distance_settings),
-        modifier = Modifier.fillMaxWidth(),
-    )
-
-    if (data.availableSections().isNotEmpty()) {
-        MeasurementDetailModeView(data, onEvent)
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun SettingsViewPreview() {
-    SettingsView(
-        SensorData()
-    ) {}
-}
 
 @Composable
 internal fun RangeSlider(range: Range, onChange: (Range) -> Unit) {
@@ -114,33 +78,4 @@ private fun Range.toFloatRange(): ClosedFloatingPointRange<Float> =
 @Composable
 private fun RangeSliderViewPreview() {
     RangeSlider(Range(0, 50)) {}
-}
-
-
-@Composable
-internal fun MeasurementDetailModeView(
-    sensorData: SensorData,
-    onEvent: (DFSEvent) -> Unit
-) {
-    var displayText by rememberSaveable { mutableStateOf("") }
-    val text = sensorData.selectedMeasurementSection?.displayName
-        ?: MeasurementSection.DISTANCE_MCPD_BEST.displayName
-
-    DropdownView(
-        items = sensorData.availableSections(),
-        label = text,
-        placeholder = displayText.ifEmpty { text },
-        onItemSelected = {
-            onEvent(DFSEvent.OnDetailsSectionParamsSelected(it))
-            displayText = it.displayName
-        }
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun MeasurementDetailModeViewPreview() {
-    MeasurementDetailModeView(
-        SensorData()
-    ) {}
 }

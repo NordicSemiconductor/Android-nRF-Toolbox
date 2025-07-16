@@ -31,52 +31,11 @@ import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
 import no.nordicsemi.android.toolbox.profile.data.SensorData
 import no.nordicsemi.android.toolbox.profile.data.SensorValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.availableSections
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.displayAzimuth
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.elevationValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.medianValue
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.selectedMeasurementSectionValues
-import no.nordicsemi.android.toolbox.profile.viewmodel.DFSEvent
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
-
-@Composable
-internal fun DistanceSection(
-    distanceValue: Int,
-    range: Range,
-    onClick: (DFSEvent) -> Unit,
-) {
-    ScreenSection {
-        SectionTitle(R.drawable.ic_distance, stringResource(id = R.string.distance_section))
-        DistanceView(value = distanceValue, range = range)
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "$distanceValue dm",
-                style = MaterialTheme.typography.titleLarge,
-            )
-        }
-        Column {
-            Text(
-                stringResource(R.string.distance_range),
-                style = MaterialTheme.typography.titleSmall
-            )
-            RangeSlider(range) {
-                onClick(DFSEvent.OnRangeChangedEvent(it))
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun DistanceSectionPreview() {
-    DistanceSection(15, Range(0, 50)) {}
-}
 
 @Composable
 internal fun AzimuthSection(data: SensorData, distanceRange: Range) {
@@ -165,41 +124,6 @@ private fun ElevationSectionPreview() {
         )
     )
     ElevationSection(sensorData)
-}
-
-@Composable
-internal fun SettingSection(
-    serviceData: DFSServiceData,
-    data: SensorData
-) {
-    ScreenSection {
-        Text(
-            text = stringResource(R.string.distance_settings),
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.titleMedium,
-        )
-        LinearDataView(data, serviceData.distanceRange)
-    }
-}
-
-@Preview
-@Composable
-private fun SettingSectionPreview() {
-    SettingSection(DFSServiceData(), SensorData())
-}
-
-@Composable
-internal fun DataSmoothingViewSection(data: SensorData, onClick: (DFSEvent) -> Unit) {
-    if (data.availableSections().isNotEmpty()) {
-        MeasurementDetailModeView(data, onClick)
-    }
-    data.selectedMeasurementSectionValues()?.let { DataSmoothingView(it) }
-}
-
-@Preview
-@Composable
-private fun DataSmoothingViewSectionPreview() {
-    DataSmoothingViewSection(SensorData()) {}
 }
 
 @Composable

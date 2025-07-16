@@ -7,7 +7,7 @@
     <string name="control_panel">Control device</string>
     <string name="distance_settings">Measurement details</string>
     <string name="azimuth_section">Azimuth</string>
-    <string name="distance_section">Distance</string>
+    <string name="distance_section">Distance in dm (decimeter)</string>
     <string name="elevation_section">Elevation</string>
     <string name="measurement_details_section">Measurement details</string>
 
@@ -37,10 +37,10 @@
     <string name="elevation_medium">0°</string>
     <string name="elevation_max">90°</string>
 
-    <string name="dm_value">%ddm</string>
+    <string name="dm_value">%d dm</string>
 
     <string name="rtt_label">Round-Trip Time (RTT)</string>
-    <string name="ifft_label">ifft</string>
+    <string name="ifft_label">ifft*</string>
     <string name="phase_label">phase</string>
     <string name="rssi_label">rssi</string>
     <string name="best_label">best</string>

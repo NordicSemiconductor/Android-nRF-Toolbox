@@ -86,7 +86,7 @@ private fun SelectedDevices(
 
     OutlinedCard(
         modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
+            .clip(RoundedCornerShape(8.dp))
             .clickable { if (devices.size > 1) showDropdownMenu = true }
             .onSizeChanged { width = it.width }
     ) {
