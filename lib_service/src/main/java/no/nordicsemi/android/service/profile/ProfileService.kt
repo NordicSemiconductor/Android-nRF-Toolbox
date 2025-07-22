@@ -190,7 +190,7 @@ internal class ProfileService : NotificationService() {
     private fun discoverServices(peripheral: Peripheral) {
         val discoveredServices = mutableListOf<ServiceManager>()
         serviceHandlingJob = peripheral.services().onEach { remoteServices ->
-            remoteServices.forEach { remoteService ->
+            remoteServices?.forEach { remoteService ->
                 val serviceManager = ServiceManagerFactory.createServiceManager(remoteService.uuid)
                 serviceManager?.let { manager ->
                     Timber.tag("DiscoverServices").i("${manager.profile}")
@@ -225,7 +225,7 @@ internal class ProfileService : NotificationService() {
             }
             when {
                 discoveredServices.isEmpty() -> {
-                    if (remoteServices.isNotEmpty())
+                    if (remoteServices?.isNotEmpty() == true)
                         _isMissingServices.tryEmit(true)
                 }
 

@@ -41,6 +41,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.lib.profile.common.WorkingMode
 import no.nordicsemi.android.lib.profile.gls.data.Carbohydrate
 import no.nordicsemi.android.lib.profile.gls.data.ConcentrationUnit
@@ -53,12 +55,12 @@ import no.nordicsemi.android.lib.profile.gls.data.MedicationUnit
 import no.nordicsemi.android.lib.profile.gls.data.RecordType
 import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
 import no.nordicsemi.android.lib.profile.gls.data.Tester
-import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.GLSServiceData
 import no.nordicsemi.android.toolbox.profile.view.gls.details.GLSDetails
 import no.nordicsemi.android.toolbox.profile.viewmodel.GLSEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.GLSEvent.OnWorkingModeSelected
+import no.nordicsemi.android.toolbox.profile.viewmodel.GLSViewModel
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
@@ -67,10 +69,10 @@ import no.nordicsemi.android.ui.view.SectionTitle
 import java.util.Calendar
 
 @Composable
-internal fun GLSScreen(
-    glsServiceData: GLSServiceData,
-    onClickEvent: (GLSEvent) -> Unit
-) {
+internal fun GLSScreen() {
+    val glsViewModel = hiltViewModel<GLSViewModel>()
+    val glsServiceData by glsViewModel.glsState.collectAsStateWithLifecycle()
+    val onClickEvent: (GLSEvent) -> Unit = { glsViewModel.onEvent(it) }
     var isWorkingModeClicked by rememberSaveable { mutableStateOf(false) }
 
     Column(
@@ -94,14 +96,6 @@ internal fun GLSScreen(
         }
         RecordsView(glsServiceData)
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun GLSScreenPreview() {
-    GLSScreen(
-        glsServiceData = GLSServiceData()
-    ) {}
 }
 
 @Composable
@@ -195,7 +189,7 @@ private fun WorkingModeDialog(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(4.dp))
                                 .clickable {
-                                    onWorkingModeSelected(OnWorkingModeSelected(Profile.GLS, entry))
+                                    onWorkingModeSelected(OnWorkingModeSelected(entry))
                                 }
                                 .padding(8.dp),
                         ) {

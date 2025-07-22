@@ -38,17 +38,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.lib.profile.cgms.data.CGMRecord
 import no.nordicsemi.android.lib.profile.cgms.data.CGMStatus
 import no.nordicsemi.android.lib.profile.common.WorkingMode
 import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
-import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.toolbox.profile.data.CGMServiceData
 import no.nordicsemi.android.toolbox.profile.view.gls.toDisplayString
-import no.nordicsemi.android.toolbox.profile.viewmodel.GLSEvent.OnWorkingModeSelected
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.CGMSEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.CGMSViewModel
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
@@ -57,11 +58,11 @@ import no.nordicsemi.android.ui.view.SectionTitle
 import java.util.Calendar
 
 @Composable
-internal fun CGMScreen(
-    serviceData: CGMServiceData,
-    onClickEvent: (ProfileUiEvent) -> Unit
-) {
+internal fun CGMScreen() {
+    val cgmVm = hiltViewModel<CGMSViewModel>()
+    val serviceData by cgmVm.channelSoundingState.collectAsStateWithLifecycle()
     var isWorkingModeClicked by rememberSaveable { mutableStateOf(false) }
+    val onClickEvent: (CGMSEvent) -> Unit = { cgmVm.onEvent(it) }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -92,7 +93,7 @@ private fun WorkingModeDropDown(
     isWorkingModeSelected: Boolean,
     onExpand: () -> Unit,
     onDismiss: () -> Unit,
-    onClickEvent: (ProfileUiEvent) -> Unit
+    onClickEvent: (CGMSEvent) -> Unit
 ) {
     if (cgmState.requestStatus == RequestStatus.PENDING) {
         CircularProgressIndicator()
@@ -135,7 +136,7 @@ private fun WorkingModeDropDownPreview() {
 private fun WorkingModeDialog(
     cgmState: CGMServiceData,
     onDismiss: () -> Unit,
-    onWorkingModeSelected: (ProfileUiEvent) -> Unit,
+    onWorkingModeSelected: (CGMSEvent) -> Unit,
 ) {
     val listState = rememberLazyListState()
     val workingModeEntries = no.nordicsemi.android.lib.profile.common.WorkingMode.entries.map { it }
@@ -183,7 +184,9 @@ private fun WorkingModeDialog(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(4.dp))
                                 .clickable {
-                                    onWorkingModeSelected(OnWorkingModeSelected(Profile.CGM, entry))
+                                    onWorkingModeSelected(
+                                        CGMSEvent.OnWorkingModeSelected(entry)
+                                    )
                                 }
                                 .padding(8.dp),
                         ) {

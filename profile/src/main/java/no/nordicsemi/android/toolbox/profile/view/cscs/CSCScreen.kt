@@ -41,22 +41,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.lib.profile.csc.SpeedUnit
 import no.nordicsemi.android.lib.profile.csc.WheelSizes
 import no.nordicsemi.android.lib.profile.csc.WheelSizes.getWheelSizeByName
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.CSCServiceData
 import no.nordicsemi.android.toolbox.profile.viewmodel.CSCEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.CSCViewModel
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionRow
 
 @Composable
-internal fun CSCScreen(
-    serviceData: CSCServiceData,
-    onClickEvent: (CSCEvent) -> Unit,
-) {
+internal fun CSCScreen() {
+    val csVM = hiltViewModel<CSCViewModel>()
+    val onClickEvent: (CSCEvent) -> Unit = { csVM.onEvent(it) }
+    val serviceData by csVM.cscState.collectAsStateWithLifecycle()
+
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
@@ -78,12 +82,6 @@ internal fun CSCScreen(
             SensorsReadingView(state = serviceData, serviceData.speedUnit)
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun CSCScreenPreview() {
-    CSCScreen(CSCServiceData()) { }
 }
 
 @Composable

@@ -18,11 +18,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import no.nordicsemi.android.permissions_ranging.RequestRangingPermission
-import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
-internal fun ChannelSoundingScreen(state: ChannelSoundingServiceData) {
+internal fun ChannelSoundingScreen() {
     RequestRangingPermission {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),

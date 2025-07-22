@@ -30,21 +30,31 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import no.nordicsemi.android.lib.profile.hts.HTSData
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.lib.profile.hts.HTSMeasurementType
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.HTSServiceData
 import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
 import no.nordicsemi.android.toolbox.profile.viewmodel.HTSEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.HTSViewModel
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionRow
 import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.ui.view.TextWithAnimatedDots
-import java.util.Calendar
 
 @Composable
-internal fun HTSScreen(
+internal fun HTSScreen() {
+    val htsViewModel = hiltViewModel<HTSViewModel>()
+    val onClickEvent: (HTSEvent) -> Unit = { htsViewModel.onEvent(it) }
+    val htsServiceData by htsViewModel.htsServiceState.collectAsStateWithLifecycle()
+
+    HTSContent(htsServiceData, onClickEvent)
+}
+
+@Composable
+private fun HTSContent(
     htsServiceData: HTSServiceData,
     onClickEvent: (HTSEvent) -> Unit
 ) {
@@ -98,21 +108,6 @@ internal fun HTSScreen(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun HTSScreenPreview() {
-    HTSScreen(
-        HTSServiceData(
-            data = HTSData(
-                temperature = 36.5f,
-                type = HTSMeasurementType.TOE.value,
-                timestamp = Calendar.getInstance()
-            ),
-            temperatureUnit = TemperatureUnit.CELSIUS
-        )
-    ) { }
-}
-
 @Composable
 private fun TemperatureUnitSettings(
     state: HTSServiceData,
@@ -130,7 +125,8 @@ private fun TemperatureUnitSettings(
         )
         if (openSettingsDialog) {
             TemperatureUnitSettingsDialog(
-                state, { openSettingsDialog = false }
+                state,
+                { openSettingsDialog = false }
             ) { onClickEvent(it) }
         }
     }
@@ -181,7 +177,9 @@ private fun TemperatureUnitSettingsDialog(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(4.dp))
                                 .clickable {
-                                    onClickEvent(HTSEvent.OnTemperatureUnitSelected(entry))
+                                    onClickEvent(
+                                        HTSEvent.OnTemperatureUnitSelected(entry)
+                                    )
                                     onDismiss()
                                 }
                                 .padding(8.dp),
@@ -190,10 +188,6 @@ private fun TemperatureUnitSettingsDialog(
                                 text = entry.toString(),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable {
-                                        onClickEvent(HTSEvent.OnTemperatureUnitSelected(entry))
-                                        onDismiss()
-                                    }
                                     .padding(8.dp),
                                 style = MaterialTheme.typography.titleLarge,
                                 color = if (state.temperatureUnit == entry)

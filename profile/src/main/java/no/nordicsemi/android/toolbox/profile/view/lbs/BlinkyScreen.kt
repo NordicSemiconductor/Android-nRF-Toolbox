@@ -15,22 +15,25 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.toolbox.profile.R
-import no.nordicsemi.android.toolbox.profile.data.LBSData
-import no.nordicsemi.android.toolbox.profile.data.LBSServiceData
 import no.nordicsemi.android.toolbox.profile.viewmodel.LBSEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.LBSViewModel
 
 @Composable
-internal fun BlinkyScreen(
-    serviceData: LBSServiceData,
-    onClickEvent: (LBSEvent) -> Unit,
-) {
+internal fun BlinkyScreen() {
+    val lbsViewModel = hiltViewModel<LBSViewModel>()
+    val onClickEvent: (LBSEvent) -> Unit = { lbsViewModel.onEvent(it) }
+    val serviceData by lbsViewModel.lbsState.collectAsStateWithLifecycle()
+
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -48,10 +51,7 @@ internal fun BlinkyScreen(
 @Preview(showBackground = true)
 @Composable
 private fun BlinkyScreenPreview() {
-    BlinkyScreen(
-        serviceData = LBSServiceData(data = LBSData(ledState = true, buttonState = false)),
-        onClickEvent = {}
-    )
+    BlinkyScreen()
 }
 
 @Composable

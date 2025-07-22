@@ -8,31 +8,32 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.lib.profile.bps.BPMStatus
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.lib.profile.bps.BloodPressureFeatureData
 import no.nordicsemi.android.lib.profile.bps.BloodPressureMeasurementData
 import no.nordicsemi.android.lib.profile.bps.BloodPressureType
 import no.nordicsemi.android.lib.profile.bps.IntermediateCuffPressureData
-import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.R
-import no.nordicsemi.android.toolbox.profile.data.BPSServiceData
+import no.nordicsemi.android.toolbox.profile.viewmodel.BPSViewModel
 import no.nordicsemi.android.ui.view.FeatureSupported
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionRow
 import no.nordicsemi.android.ui.view.SectionTitle
-import java.util.Calendar
 
 @Composable
-internal fun BPSScreen(
-    serviceData: BPSServiceData
-) {
+internal fun BPSScreen() {
+    val bpsViewModel = hiltViewModel<BPSViewModel>()
+    val serviceData by bpsViewModel.bpsServiceState.collectAsStateWithLifecycle()
+
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
@@ -108,7 +109,7 @@ private fun WaitingForMeasurementViewPreview() {
 }
 
 @Composable
-private fun BloodPressureFeatureView(it: BloodPressureFeatureData) {
+internal fun BloodPressureFeatureView(it: BloodPressureFeatureData) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.padding(start = 16.dp, end = 16.dp)
@@ -131,54 +132,8 @@ private fun BloodPressureFeatureView(it: BloodPressureFeatureData) {
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-private fun BPSScreenPreview() {
-    val sampleStatus = BPMStatus(
-        bodyMovementDetected = true,
-        cuffTooLose = false,
-        irregularPulseDetected = true,
-        pulseRateInRange = false,
-        pulseRateExceedsUpperLimit = true,
-        pulseRateIsLessThenLowerLimit = false,
-        improperMeasurementPosition = true
-    )
-
-    val sampleData = BloodPressureMeasurementData(
-        systolic = 12.0f,
-        diastolic = 15.0f,
-        meanArterialPressure = 10.0f,
-        unit = BloodPressureType.UNIT_MMHG,
-        pulseRate = 12.0f,
-        userID = 15,
-        status = sampleStatus,
-        calendar = Calendar.getInstance()
-    )
-    BPSScreen(
-        serviceData = BPSServiceData(
-            profile = Profile.BPS,
-            bloodPressureMeasurement = sampleData,
-            intermediateCuffPressure = IntermediateCuffPressureData(
-                unit = BloodPressureType.UNIT_MMHG,
-                pulseRate = 12.0f,
-                userID = 15,
-                status = sampleStatus,
-                calendar = Calendar.getInstance(),
-                cuffPressure = 25.5f
-            ),
-            bloodPressureFeature = BloodPressureFeatureData(
-                bodyMovementDetection = true,
-                cuffFitDetection = true,
-                irregularPulseDetection = true,
-                pulseRateRangeDetection = true,
-                measurementPositionDetection = true
-            )
-        )
-    )
-}
-
-@Composable
-private fun BloodPressureView(state: BloodPressureMeasurementData) {
+internal fun BloodPressureView(state: BloodPressureMeasurementData) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.padding(start = 16.dp, end = 16.dp)

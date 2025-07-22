@@ -40,7 +40,6 @@ import no.nordicsemi.android.lib.profile.directionFinder.PeripheralBluetoothAddr
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
 import no.nordicsemi.android.toolbox.profile.viewmodel.DFSEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.internal.EmptyView
 
@@ -48,7 +47,7 @@ import no.nordicsemi.android.ui.view.internal.EmptyView
 internal fun SectionBluetoothDeviceComponent(
     data: DFSServiceData,
     selectedDevice: PeripheralBluetoothAddress?,
-    onEvent: (ProfileUiEvent) -> Unit
+    onEvent: (DFSEvent) -> Unit
 ) {
     val devices = data.data.keys.toList()
         .filter { it.address.lowercase() != PeripheralBluetoothAddress.TEST.address.lowercase() } // ignore case with TEST address
@@ -78,7 +77,7 @@ internal fun SectionBluetoothDeviceComponent(
 private fun SelectedDevices(
     selectedDevice: PeripheralBluetoothAddress,
     devices: List<PeripheralBluetoothAddress>,
-    onEvent: (ProfileUiEvent) -> Unit
+    onEvent: (DFSEvent) -> Unit
 ) {
     var showDropdownMenu by rememberSaveable { mutableStateOf(false) }
     var width by rememberSaveable { mutableIntStateOf(0) }

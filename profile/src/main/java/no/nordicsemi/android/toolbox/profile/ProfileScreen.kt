@@ -30,22 +30,8 @@ import no.nordicsemi.android.service.profile.CustomReason
 import no.nordicsemi.android.service.profile.DeviceDisconnectionReason
 import no.nordicsemi.android.service.profile.StateReason
 import no.nordicsemi.android.toolbox.lib.utils.Profile
-import no.nordicsemi.android.toolbox.profile.data.BPSServiceData
-import no.nordicsemi.android.toolbox.profile.data.BatteryServiceData
-import no.nordicsemi.android.toolbox.profile.data.CGMServiceData
-import no.nordicsemi.android.toolbox.profile.data.CSCServiceData
-import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
-import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
-import no.nordicsemi.android.toolbox.profile.data.GLSServiceData
-import no.nordicsemi.android.toolbox.profile.data.HRSServiceData
-import no.nordicsemi.android.toolbox.profile.data.HTSServiceData
-import no.nordicsemi.android.toolbox.profile.data.LBSServiceData
-import no.nordicsemi.android.toolbox.profile.data.ProfileServiceData
-import no.nordicsemi.android.toolbox.profile.data.RSCSServiceData
-import no.nordicsemi.android.toolbox.profile.data.ThroughputServiceData
-import no.nordicsemi.android.toolbox.profile.data.UARTServiceData
 import no.nordicsemi.android.toolbox.profile.data.toReason
-import no.nordicsemi.android.toolbox.profile.view.battery.BatteryLevelView
+import no.nordicsemi.android.toolbox.profile.view.battery.BatteryScreen
 import no.nordicsemi.android.toolbox.profile.view.bps.BPSScreen
 import no.nordicsemi.android.toolbox.profile.view.cgms.CGMScreen
 import no.nordicsemi.android.toolbox.profile.view.channelSounding.ChannelSoundingScreen
@@ -59,27 +45,23 @@ import no.nordicsemi.android.toolbox.profile.view.lbs.BlinkyScreen
 import no.nordicsemi.android.toolbox.profile.view.rscs.RSCSScreen
 import no.nordicsemi.android.toolbox.profile.view.throughput.ThroughputScreen
 import no.nordicsemi.android.toolbox.profile.view.uart.UARTScreen
+import no.nordicsemi.android.toolbox.profile.viewmodel.ConnectionEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.ConnectionViewModel
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionState
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceData
-import no.nordicsemi.android.toolbox.profile.viewmodel.DisconnectEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.NavigateUp
-import no.nordicsemi.android.toolbox.profile.viewmodel.OnRetryClicked
-import no.nordicsemi.android.toolbox.profile.viewmodel.OpenLoggerEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileViewModel
 import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
-import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.android.ui.view.internal.LoadingView
 import no.nordicsemi.android.ui.view.internal.ServiceDiscoveryView
 
 @Composable
 internal fun ProfileScreen() {
-    val profileVM: ProfileViewModel = hiltViewModel()
-    val deviceDataState by profileVM.deviceData.collectAsStateWithLifecycle()
-    val deviceAddress = profileVM.address
-    val onClickEvent: (ProfileUiEvent) -> Unit = { profileVM.onClickEvent(it) }
-
+    val connectionViewModel: ConnectionViewModel = hiltViewModel()
+    val deviceAddress = connectionViewModel.address
+    val deviceDataState by connectionViewModel.deviceState.collectAsStateWithLifecycle()
+    val onClickEvent: (ConnectionEvent) -> Unit = { event ->
+        connectionViewModel.onConnectionEvent(event)
+    }
     Scaffold(
         topBar = {
             ProfileAppBar(
@@ -93,9 +75,9 @@ internal fun ProfileScreen() {
                 },
                 title = deviceAddress,
                 connectionState = deviceDataState,
-                navigateUp = { onClickEvent(NavigateUp) },
-                disconnect = { onClickEvent(DisconnectEvent(deviceAddress)) },
-                openLogger = { onClickEvent(OpenLoggerEvent) }
+                navigateUp = { onClickEvent(ConnectionEvent.NavigateUp) },
+                disconnect = { onClickEvent(ConnectionEvent.DisconnectEvent(deviceAddress)) },
+                openLogger = { onClickEvent(ConnectionEvent.OpenLoggerEvent) }
             )
         },
     ) { paddingValues ->
@@ -150,21 +132,21 @@ internal fun ProfileScreen() {
 }
 
 @Composable
-private fun DeviceDisconnectedView(
+internal fun DeviceDisconnectedView(
     reason: DeviceDisconnectionReason,
     deviceAddress: String,
-    onClickEvent: (ProfileUiEvent) -> Unit
+    onClickEvent: (ConnectionEvent) -> Unit
 ) {
     when (reason) {
         is CustomReason -> {
-            DeviceDisconnectedView(
+            no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView(
                 reason = reason.reason,
                 modifier = Modifier
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
                 Button(
-                    onClick = { onClickEvent(OnRetryClicked(deviceAddress)) },
+                    onClick = { onClickEvent(ConnectionEvent.OnRetryClicked(deviceAddress)) },
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(text = stringResource(id = R.string.reconnect))
@@ -173,14 +155,14 @@ private fun DeviceDisconnectedView(
         }
 
         is StateReason -> {
-            DeviceDisconnectedView(
+            no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView(
                 disconnectedReason = toReason(reason.reason),
                 modifier = Modifier
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
                 Button(
-                    onClick = { onClickEvent(OnRetryClicked(deviceAddress)) },
+                    onClick = { onClickEvent(ConnectionEvent.OnRetryClicked(deviceAddress)) },
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(text = stringResource(id = R.string.reconnect))
@@ -191,14 +173,15 @@ private fun DeviceDisconnectedView(
 }
 
 @Composable
-private fun DeviceConnectedView(
+internal fun DeviceConnectedView(
     deviceData: DeviceData,
-    onClickEvent: (ProfileUiEvent) -> Unit,
+    onClickEvent: (ConnectionEvent) -> Unit,
 ) {
+    // Is missing services?
     deviceData.peripheral?.let { peripheral ->
         when {
             deviceData.isMissingServices -> {
-                DeviceDisconnectedView(
+                no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView(
                     reason = DisconnectReason.MISSING_SERVICE,
                     modifier = Modifier
                         .padding(16.dp)
@@ -207,111 +190,56 @@ private fun DeviceConnectedView(
             }
 
             else -> {
-                if (deviceData.serviceData.isEmpty()) {
-                    ServiceDiscoveryView(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        Button(
-                            onClick = { onClickEvent(DisconnectEvent(peripheral.address)) },
-                            modifier = Modifier.padding(16.dp)
-                        ) {
-                            Text(text = stringResource(id = R.string.cancel))
-                        }
-                    }
-                } else
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .verticalScroll(rememberScrollState())
-                            .imePadding()
-                    ) {
-                        deviceData.serviceData.forEach { serviceData ->
-                            when (serviceData.profile) {
-                                Profile.BPS -> BPSScreen(
-                                    serviceData = serviceData as BPSServiceData,
-                                )
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .imePadding()
+                ) {
+                    deviceData.peripheralProfileMap[deviceData.peripheral]?.forEach { profile ->
+                        when (profile.profile) {
+                            Profile.HTS -> HTSScreen()
+                            Profile.CHANNEL_SOUNDING -> ChannelSoundingScreen()
+                            Profile.BPS -> BPSScreen()
+                            Profile.CSC -> CSCScreen()
+                            Profile.CGM -> CGMScreen()
+                            Profile.DFS -> DFSScreen()
+                            Profile.GLS -> GLSScreen()
+                            Profile.HRS -> HRSScreen()
+                            Profile.LBS -> BlinkyScreen()
+                            Profile.RSCS -> RSCSScreen()
+                            Profile.THROUGHPUT -> ThroughputScreen(deviceData.maxValueLength)
+                            Profile.UART -> UARTScreen(deviceData.maxValueLength)
 
-                                Profile.CSC -> CSCScreen(
-                                    serviceData = serviceData as CSCServiceData,
-                                    onClickEvent = onClickEvent
-                                )
-
-                                Profile.CGM -> CGMScreen(
-                                    serviceData = serviceData as CGMServiceData,
-                                    onClickEvent = onClickEvent
-                                )
-
-                                Profile.DFS -> DFSScreen(
-                                    serviceData = serviceData as DFSServiceData,
-                                    onClick = onClickEvent
-                                )
-
-                                Profile.GLS -> GLSScreen(
-                                    glsServiceData = serviceData as GLSServiceData,
-                                    onClickEvent = onClickEvent
-                                )
-
-                                Profile.HRS -> HRSScreen(
-                                    hrsServiceData = serviceData as HRSServiceData,
-                                    onClickEvent = onClickEvent
-                                )
-
-                                Profile.HTS -> HTSScreen(
-                                    htsServiceData = serviceData as HTSServiceData,
-                                    onClickEvent = onClickEvent
-                                )
-
-                                Profile.RSCS -> RSCSScreen(
-                                    serviceData = serviceData as RSCSServiceData,
-                                    onClickEvent = onClickEvent
-                                )
-
-                                Profile.THROUGHPUT -> ThroughputScreen(
-                                    serviceData = serviceData as ThroughputServiceData,
-                                    onClickEvent = onClickEvent
-                                )
-
-                                Profile.BATTERY -> {
-                                    // Battery level will be added at the end.
-                                    // Do nothing here.
-                                }
-
-                                Profile.UART -> {
-                                    UARTScreen(
-                                        state = serviceData as UARTServiceData,
-                                        onEvent = onClickEvent
-                                    )
-                                }
-
-                                Profile.CHANNEL_SOUNDING -> {
-                                    ChannelSoundingScreen(state = serviceData as ChannelSoundingServiceData)
-                                }
-
-                                Profile.LBS -> {
-                                    BlinkyScreen(
-                                        serviceData = serviceData as LBSServiceData,
-                                        onClickEvent = onClickEvent
-                                    )
-                                }
-
+                            else -> {
+                                // Do nothing.
                             }
                         }
-                        // Battery level will be added at the end.
-                        DisplayBatteryLevel(deviceData.serviceData)
+                        if (profile.profile == Profile.BATTERY) {
+                            // Battery level will be added at the end.
+                            BatteryScreen()
+                        }
+                    } ?: run {
+                        ServiceDiscoveryView(
+                            modifier = Modifier
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            Button(
+                                onClick = {
+                                    onClickEvent(
+                                        ConnectionEvent.DisconnectEvent(
+                                            peripheral.address
+                                        )
+                                    )
+                                },
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Text(text = stringResource(id = R.string.cancel))
+                            }
+                        }
                     }
+                }
             }
-
         }
     }
-}
-
-@Composable
-private fun DisplayBatteryLevel(serviceData: List<ProfileServiceData>) {
-    serviceData
-        .filterIsInstance<BatteryServiceData>()
-        .firstOrNull { it.batteryLevel != null }
-        ?.batteryLevel?.let { BatteryLevelView(it) }
 }

@@ -1,6 +1,7 @@
 package no.nordicsemi.android.toolbox.profile.repository
 
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.analytics.AppAnalytics
@@ -19,10 +20,24 @@ class DeviceRepository @Inject constructor(
         MutableStateFlow<Map<String, Pair<Peripheral, List<ServiceManager>>>>(emptyMap())
     val connectedDevices = _connectedDevices.asStateFlow()
 
+    private val _profilePeripheralPair =
+        MutableStateFlow<Map<Peripheral, List<ServiceManager>>>(emptyMap())
+    val profileHandlerFlow = _profilePeripheralPair.asSharedFlow()
+
     private val _loggedProfiles = mutableListOf<Pair<String, String>>()
 
     fun updateConnectedDevices(devices: Map<String, Pair<Peripheral, List<ServiceManager>>>) {
         _connectedDevices.update { devices }
+    }
+
+    fun updateProfilePeripheralPair(
+        peripheral: Peripheral,
+        serviceManager: List<ServiceManager>
+    ) {
+        _profilePeripheralPair.update {
+            it.toMutableMap().apply { this[peripheral] = serviceManager }
+        }
+
     }
 
     /**

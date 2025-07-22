@@ -14,17 +14,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.toolbox.profile.R
-import no.nordicsemi.android.toolbox.profile.data.HRSServiceData
 import no.nordicsemi.android.toolbox.profile.viewmodel.HRSEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.HRSEvent.SwitchZoomEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.HRSViewModel
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionRow
@@ -32,10 +34,11 @@ import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.ui.view.animate.AnimatedHeart
 
 @Composable
-internal fun HRSScreen(
-    hrsServiceData: HRSServiceData,
-    onClickEvent: (HRSEvent) -> Unit
-) {
+internal fun HRSScreen() {
+    val hrsViewModel = hiltViewModel<HRSViewModel>()
+    val hrsServiceData by hrsViewModel.hrsState.collectAsStateWithLifecycle()
+    val onClickEvent: (HRSEvent) -> Unit = { hrsViewModel.onEvent(it) }
+
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
@@ -97,19 +100,5 @@ private fun MagnifyingGlass(zoomIn: Boolean, onEvent: (HRSEvent) -> Unit) {
             .clip(CircleShape)
             .clickable { onEvent(SwitchZoomEvent) }
             .padding(8.dp)
-    )
-}
-
-@Preview
-@Composable
-private fun HRSScreenPreview() {
-    HRSScreen(
-        hrsServiceData = HRSServiceData(
-            data = listOf(),
-            bodySensorLocation = 0,
-            zoomIn = false,
-            heartRate = 125
-        ),
-        onClickEvent = {}
     )
 }
