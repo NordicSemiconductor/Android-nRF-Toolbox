@@ -161,19 +161,21 @@ internal class ConnectionViewModel @Inject constructor(
                         }
                             .apply { checkForMissingServices(api) }
                             .also {
-                                // Request maximum MTU size for the connection.
-                                val mtuSize = api.getMaxWriteValue(address)
-                                _deviceState.update { currentState ->
-                                    val currentData =
-                                        (currentState as? DeviceConnectionState.Connected)?.data
-                                    DeviceConnectionState.Connected(
-                                        currentData?.copy(
-                                            maxValueLength = mtuSize
-                                        ) ?: DeviceData(
-                                            peripheral = peripheral,
-                                            maxValueLength = mtuSize
+                                // Request maximum MTU size if it is not already set.
+                                if (!isAlreadyConnected) {
+                                    val mtuSize = api.getMaxWriteValue(address)
+                                    _deviceState.update { currentState ->
+                                        val currentData =
+                                            (currentState as? DeviceConnectionState.Connected)?.data
+                                        DeviceConnectionState.Connected(
+                                            currentData?.copy(
+                                                maxValueLength = mtuSize
+                                            ) ?: DeviceData(
+                                                peripheral = peripheral,
+                                                maxValueLength = mtuSize
+                                            )
                                         )
-                                    )
+                                    }
                                 }
                             }
                     }
