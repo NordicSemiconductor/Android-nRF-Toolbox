@@ -32,6 +32,21 @@ internal class BatteryManager : ServiceManager {
             .firstOrNull { it.uuid == BATTERY_LEVEL_CHARACTERISTIC_UUID.toKotlinUuid() }
 
         batteryChar?.let { characteristic ->
+            // If the characteristic supports READ, read the initial value
+            if (characteristic.properties.contains(CharacteristicProperty.READ)) {
+                try {
+                    characteristic.read()
+                        .let {
+                            BatteryLevelParser.parse(it)
+                        }
+                        ?.let { batteryLevel ->
+                            BatteryRepository.updateBatteryLevel(deviceId, batteryLevel)
+                        }
+
+                } catch (e: Exception) {
+                    Timber.e("Error reading battery level: ${e.message}")
+                }
+            }
             // Check if the characteristic supports NOTIFY or INDICATE property
             if (characteristic.properties.contains(CharacteristicProperty.NOTIFY)
                 || characteristic.properties.contains(CharacteristicProperty.INDICATE)
@@ -49,13 +64,6 @@ internal class BatteryManager : ServiceManager {
                         Timber.e(e)
                     }
                     .launchIn(scope)
-
-                // Perform initial read
-                characteristic.read()
-                    .let { BatteryLevelParser.parse(it) }
-                    ?.let { batteryLevel ->
-                        BatteryRepository.updateBatteryLevel(deviceId, batteryLevel)
-                    }
             }
         }
     }
