@@ -138,6 +138,7 @@ internal class ProfileService : NotificationService() {
             val peripheral = getPeripheralById(address) ?: return null
             return peripheral.state.also { stateFlow ->
                 // Since the initial state is Gatt closed, drop the first state.
+                connectionJob?.cancel()
                 connectionJob = stateFlow.drop(1).onEach { state ->
                     when (state) {
                         ConnectionState.Connected -> {
@@ -157,7 +158,10 @@ internal class ProfileService : NotificationService() {
                         else -> { /* Handle other states if necessary. */
                         }
                     }
-                }.onCompletion { connectionJob?.cancel() }.launchIn(lifecycleScope)
+                }.onCompletion {
+                    connectionJob?.cancel()
+                    connectionJob = null
+                }.launchIn(lifecycleScope)
             }
         }
 
@@ -225,8 +229,11 @@ internal class ProfileService : NotificationService() {
             }
             when {
                 discoveredServices.isEmpty() -> {
-                    if (remoteServices?.isNotEmpty() == true)
+                    if (remoteServices?.isNotEmpty() == true) {
                         _isMissingServices.tryEmit(true)
+                        serviceHandlingJob?.cancel()
+                        serviceHandlingJob = null
+                    }
                 }
 
                 peripheral.isConnected -> {
@@ -234,7 +241,12 @@ internal class ProfileService : NotificationService() {
                     updateConnectedDevices(peripheral, discoveredServices)
                 }
             }
-        }.onCompletion { serviceHandlingJob?.cancel() }.launchIn(lifecycleScope)
+        }
+            .onCompletion {
+                serviceHandlingJob?.cancel()
+                serviceHandlingJob = null
+            }
+            .launchIn(lifecycleScope)
     }
 
     /**
@@ -265,7 +277,9 @@ internal class ProfileService : NotificationService() {
      */
     private fun clearJobs() {
         connectionJob?.cancel()
+        connectionJob = null
         serviceHandlingJob?.cancel()
+        serviceHandlingJob = null
     }
 
     /**
