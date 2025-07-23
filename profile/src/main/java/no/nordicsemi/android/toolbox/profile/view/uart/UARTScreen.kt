@@ -22,7 +22,8 @@ internal fun UARTScreen(maxValueLength: Int?) {
     val scrollState = rememberScrollState()
 
     LaunchedEffect(key1 = maxValueLength != null) {
-        onEvent(UARTEvent.SetMaxValueLength(maxValueLength!!))
+        if (maxValueLength != null)
+            onEvent(UARTEvent.SetMaxValueLength(maxValueLength))
     }
 
     LaunchedEffect(key1 = imeState.value) {
