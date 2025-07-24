@@ -242,7 +242,10 @@ private fun CSCSpeedSettingsFilterDropdown(
                     style = MaterialTheme.typography.titleMedium
                 )
                 HorizontalDivider()
-                Column {
+                Column(
+                    modifier = Modifier
+                        .padding(8.dp),
+                ) {
                     SpeedUnit.entries.forEach { entry ->
                         Box(
                             modifier = Modifier
@@ -257,7 +260,7 @@ private fun CSCSpeedSettingsFilterDropdown(
                                 text = entry.displayName,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(8.dp),
+                                    .padding(16.dp),
                                 style = MaterialTheme.typography.titleLarge,
                                 color = if (state.speedUnit == entry)
                                     MaterialTheme.colorScheme.primary else
