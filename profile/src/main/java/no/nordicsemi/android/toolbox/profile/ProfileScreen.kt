@@ -54,7 +54,6 @@ import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.android.ui.view.internal.LoadingView
 import no.nordicsemi.android.ui.view.internal.ServiceDiscoveryView
-import timber.log.Timber
 
 @Composable
 internal fun ProfileScreen() {
@@ -65,7 +64,6 @@ internal fun ProfileScreen() {
         connectionViewModel.onConnectionEvent(event)
     }
 
-    Timber.tag("AAA").d("ProfileScreen deviceDataState = $deviceDataState")
     Scaffold(
         topBar = {
             ProfileAppBar(
