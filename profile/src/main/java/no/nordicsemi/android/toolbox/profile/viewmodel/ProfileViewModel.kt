@@ -45,6 +45,8 @@ internal sealed interface ConnectionEvent {
     data class DisconnectEvent(val device: String) : ConnectionEvent
 
     data object OpenLoggerEvent : ConnectionEvent
+
+    data object RequestMaxValueLength : ConnectionEvent
 }
 
 @HiltViewModel
@@ -158,26 +160,8 @@ internal class ConnectionViewModel @Inject constructor(
                                     peripheral = peripheral
                                 ) ?: DeviceData(peripheral = peripheral)
                             )
-                        }
-                            .apply { checkForMissingServices(api) }
-                            .also {
-                                // Request maximum MTU size if it is not already set.
-                                if (!isAlreadyConnected) {
-                                    val mtuSize = api.getMaxWriteValue(address)
-                                    _deviceState.update { currentState ->
-                                        val currentData =
-                                            (currentState as? DeviceConnectionState.Connected)?.data
-                                        DeviceConnectionState.Connected(
-                                            currentData?.copy(
-                                                maxValueLength = mtuSize
-                                            ) ?: DeviceData(
-                                                peripheral = peripheral,
-                                                maxValueLength = mtuSize
-                                            )
-                                        )
-                                    }
-                                }
-                            }
+
+                        }.apply { checkForMissingServices(api) }
                     }
 
                     is ConnectionState.Disconnected -> {
@@ -267,6 +251,26 @@ internal class ConnectionViewModel @Inject constructor(
 
             is ConnectionEvent.OnRetryClicked -> reconnectDevice(event.device)
             ConnectionEvent.OpenLoggerEvent -> openLogger()
+            ConnectionEvent.RequestMaxValueLength -> viewModelScope.launch {
+                // Request maximum MTU size if it is not already set.
+                val mtuSize = getServiceApi()?.getMaxWriteValue(address)
+                _deviceState.update { currentState ->
+                    val currentData =
+                        (currentState as? DeviceConnectionState.Connected)?.data
+                    if (currentData != null && currentData.maxValueLength == mtuSize) {
+                        // No need to update if the max value length is already set.
+                        return@update currentState
+                    }
+                    DeviceConnectionState.Connected(
+                        currentData?.copy(
+                            maxValueLength = mtuSize
+                        ) ?: DeviceData(
+                            peripheral = peripheral,
+                            maxValueLength = mtuSize
+                        )
+                    )
+                }
+            }
         }
     }
 

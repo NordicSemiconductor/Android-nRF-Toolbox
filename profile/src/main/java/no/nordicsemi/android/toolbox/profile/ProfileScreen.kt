@@ -16,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +54,7 @@ import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.android.ui.view.internal.LoadingView
 import no.nordicsemi.android.ui.view.internal.ServiceDiscoveryView
+import timber.log.Timber
 
 @Composable
 internal fun ProfileScreen() {
@@ -62,6 +64,8 @@ internal fun ProfileScreen() {
     val onClickEvent: (ConnectionEvent) -> Unit = { event ->
         connectionViewModel.onConnectionEvent(event)
     }
+
+    Timber.tag("AAA").d("ProfileScreen deviceDataState = $deviceDataState")
     Scaffold(
         topBar = {
             ProfileAppBar(
@@ -197,27 +201,39 @@ internal fun DeviceConnectedView(
                         .imePadding()
                 ) {
                     deviceData.peripheralProfileMap[deviceData.peripheral]?.forEach { profile ->
-                        when (profile.profile) {
-                            Profile.HTS -> HTSScreen()
-                            Profile.CHANNEL_SOUNDING -> ChannelSoundingScreen()
-                            Profile.BPS -> BPSScreen()
-                            Profile.CSC -> CSCScreen()
-                            Profile.CGM -> CGMScreen()
-                            Profile.DFS -> DFSScreen()
-                            Profile.GLS -> GLSScreen()
-                            Profile.HRS -> HRSScreen()
-                            Profile.LBS -> BlinkyScreen()
-                            Profile.RSCS -> RSCSScreen()
-                            Profile.THROUGHPUT -> ThroughputScreen(deviceData.maxValueLength)
-                            Profile.UART -> UARTScreen(deviceData.maxValueLength)
-
-                            else -> {
-                                // Do nothing.
+                        Column(
+                            modifier = Modifier
+                                .imePadding()
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            // Requires max value length to be set.
+                            LaunchedEffect(key1 = profile.profile == Profile.CHANNEL_SOUNDING || profile.profile == Profile.UART) {
+                                if (deviceData.maxValueLength == null) {
+                                    onClickEvent(ConnectionEvent.RequestMaxValueLength)
+                                }
                             }
-                        }
-                        if (profile.profile == Profile.BATTERY) {
-                            // Battery level will be added at the end.
-                            BatteryScreen()
+                            when (profile.profile) {
+                                Profile.HTS -> HTSScreen()
+                                Profile.CHANNEL_SOUNDING -> ChannelSoundingScreen()
+                                Profile.BPS -> BPSScreen()
+                                Profile.CSC -> CSCScreen()
+                                Profile.CGM -> CGMScreen()
+                                Profile.DFS -> DFSScreen()
+                                Profile.GLS -> GLSScreen()
+                                Profile.HRS -> HRSScreen()
+                                Profile.LBS -> BlinkyScreen()
+                                Profile.RSCS -> RSCSScreen()
+                                Profile.THROUGHPUT -> ThroughputScreen(deviceData.maxValueLength)
+                                Profile.UART -> UARTScreen(deviceData.maxValueLength)
+
+                                else -> {
+                                    // Do nothing.
+                                }
+                            }
+                            if (profile.profile == Profile.BATTERY) {
+                                // Battery level will be added at the end.
+                                BatteryScreen()
+                            }
                         }
                     } ?: run {
                         ServiceDiscoveryView(
