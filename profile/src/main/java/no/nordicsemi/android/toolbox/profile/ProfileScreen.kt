@@ -97,6 +97,7 @@ internal fun ProfileScreen() {
                             .fillMaxSize()
                             .padding(paddingValues)
                             .padding(notchPadding)
+                            .verticalScroll(rememberScrollState())
                             .imePadding(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
@@ -111,7 +112,6 @@ internal fun ProfileScreen() {
                             DeviceConnectionState.Connecting -> DeviceConnectingView(
                                 modifier = Modifier
                                     .padding(16.dp)
-                                    .verticalScroll(rememberScrollState())
                             )
 
                             is DeviceConnectionState.Disconnected -> {
@@ -145,7 +145,6 @@ internal fun DeviceDisconnectedView(
                 reason = reason.reason,
                 modifier = Modifier
                     .padding(16.dp)
-                    .verticalScroll(rememberScrollState())
             ) {
                 Button(
                     onClick = { onClickEvent(ConnectionEvent.OnRetryClicked(deviceAddress)) },
@@ -161,7 +160,6 @@ internal fun DeviceDisconnectedView(
                 disconnectedReason = toReason(reason.reason),
                 modifier = Modifier
                     .padding(16.dp)
-                    .verticalScroll(rememberScrollState())
             ) {
                 Button(
                     onClick = { onClickEvent(ConnectionEvent.OnRetryClicked(deviceAddress)) },
@@ -187,7 +185,6 @@ internal fun DeviceConnectedView(
                     reason = DisconnectReason.MISSING_SERVICE,
                     modifier = Modifier
                         .padding(16.dp)
-                        .verticalScroll(rememberScrollState())
                 )
             }
 
@@ -202,7 +199,6 @@ internal fun DeviceConnectedView(
                         Column(
                             modifier = Modifier
                                 .imePadding()
-                                .verticalScroll(rememberScrollState())
                         ) {
                             // Requires max value length to be set.
                             LaunchedEffect(key1 = profile.profile == Profile.CHANNEL_SOUNDING || profile.profile == Profile.UART) {
@@ -236,7 +232,6 @@ internal fun DeviceConnectedView(
                     } ?: run {
                         ServiceDiscoveryView(
                             modifier = Modifier
-                                .verticalScroll(rememberScrollState())
                         ) {
                             Button(
                                 onClick = {
