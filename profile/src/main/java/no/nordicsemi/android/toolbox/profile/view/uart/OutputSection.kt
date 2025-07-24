@@ -54,7 +54,6 @@ internal fun OutputSection(
         // Scrollable message area
         OutlinedCard(
             modifier = Modifier
-                .padding(bottom = 80.dp)
                 .fillMaxSize()
                 .imePadding(), // Set a fixed height for the message area
         ) {
@@ -77,7 +76,6 @@ internal fun OutputSection(
             LazyColumn(
                 state = listState,
                 modifier = Modifier
-                    .fillMaxSize()
                     .padding(8.dp)
                     .heightIn(max = 500.dp), // Set a fixed height for the message area
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -98,20 +96,17 @@ internal fun OutputSection(
                     }
                 }
             }
-        }
-
-        // Floating InputSection at the bottom
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
-        ) {
-            HorizontalDivider()
-            Spacer(modifier = Modifier.weight(1f))
-            InputSection(
-                onEvent = onEvent,
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surface)
+            ) {
+                Spacer(modifier = Modifier.weight(1f))
+                HorizontalDivider()
+                InputSection(
+                    onEvent = onEvent,
+                )
+            }
         }
     }
 }
