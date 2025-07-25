@@ -61,16 +61,11 @@ class ConnectionProvider @Inject constructor(
 ) {
     private val _profile = MutableStateFlow<ServiceProfile?>(null)
     var profile = _profile.asStateFlow()
-
     private val _profileState = MutableStateFlow<ProfileState>(ProfileState.Loading)
     val profileState = _profileState.asStateFlow()
-
     val bleState = centralManager.state
-
     private val _connectionState = MutableStateFlow<ConnectionState?>(null)
     val connectionState = _connectionState.asStateFlow()
-
-    var peripheral: Peripheral? = null
 
     /**
      * Scans for BLE devices.
@@ -90,19 +85,19 @@ class ConnectionProvider @Inject constructor(
     /**
      * Connects to the peripheral device and observe peripheral states.
      *
-     * @param device The peripheral to connect to.
+     * @param deviceAddress The peripheral to connect to.
      * @param autoConnect If `true`, the connection will be established using the Auto Connect feature.
      */
     suspend fun connectAndObservePeripheral(
-        device: Peripheral,
+        deviceAddress: String,
         autoConnect: Boolean = false,
         scope: CoroutineScope
     ) {
-        peripheral = device
-        if (!device.isDisconnected) return
+        val peripheral = findPeripheralByAddress(deviceAddress) ?: return
+        if (!peripheral.isDisconnected) return
         try {
             centralManager.connect(
-                peripheral = device,
+                peripheral = peripheral,
                 options = if (autoConnect) {
                     CentralManager.ConnectionOptions.AutoConnect
                 } else CentralManager.ConnectionOptions.Direct()
@@ -112,7 +107,7 @@ class ConnectionProvider @Inject constructor(
             Timber.e(e)
             return
         }
-        observerPeripheralState(device, scope)
+        observerPeripheralState(peripheral, scope)
     }
 
     private fun observerPeripheralState(
@@ -173,6 +168,16 @@ class ConnectionProvider @Inject constructor(
             }
         }.launchIn(scope)
     }
+
+    /**
+     * Find a peripheral device by its address.
+     *
+     * @param peripheralByAddress The address of the peripheral device.
+     * @return The peripheral device if found, or `null` otherwise.
+     */
+    fun findPeripheralByAddress(peripheralByAddress: String): Peripheral? =
+        centralManager.getPeripheralById(peripheralByAddress)
+
 
     /**
      * Update the ui state to loading.
