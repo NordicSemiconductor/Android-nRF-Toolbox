@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
-import no.nordicsemi.android.lib.profile.directionFinder.PeripheralBluetoothAddress
-import no.nordicsemi.android.lib.profile.directionFinder.distance.DistanceMode
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.PeripheralBluetoothAddress
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance.DistanceMode
 import no.nordicsemi.android.toolbox.profile.manager.repository.DFSRepository
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId

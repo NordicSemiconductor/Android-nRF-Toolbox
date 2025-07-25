@@ -3,9 +3,9 @@ package no.nordicsemi.android.toolbox.profile.manager.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import no.nordicsemi.android.lib.profile.rscs.RSCFeatureData
-import no.nordicsemi.android.lib.profile.rscs.RSCSData
-import no.nordicsemi.android.lib.profile.rscs.RSCSSettingsUnit
+import no.nordicsemi.android.toolbox.profile.parser.rscs.RSCFeatureData
+import no.nordicsemi.android.toolbox.profile.parser.rscs.RSCSData
+import no.nordicsemi.android.toolbox.profile.parser.rscs.RSCSSettingsUnit
 import no.nordicsemi.android.toolbox.profile.data.RSCSServiceData
 
 object RSCSRepository {

@@ -1,7 +1,7 @@
 package no.nordicsemi.android.toolbox.profile.manager
 
 import kotlinx.coroutines.CoroutineScope
-import no.nordicsemi.android.lib.profile.throughput.ThroughputDataParser
+import no.nordicsemi.android.toolbox.profile.parser.throughput.ThroughputDataParser
 import no.nordicsemi.android.toolbox.profile.manager.repository.ThroughputRepository
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.data.NumberOfBytes

@@ -40,10 +40,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import no.nordicsemi.android.lib.profile.cgms.data.CGMRecord
-import no.nordicsemi.android.lib.profile.cgms.data.CGMStatus
-import no.nordicsemi.android.lib.profile.common.WorkingMode
-import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
+import no.nordicsemi.android.toolbox.profile.parser.cgms.data.CGMRecord
+import no.nordicsemi.android.toolbox.profile.parser.cgms.data.CGMStatus
+import no.nordicsemi.android.toolbox.profile.parser.common.WorkingMode
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.RequestStatus
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.toolbox.profile.data.CGMServiceData
@@ -139,7 +139,7 @@ private fun WorkingModeDialog(
     onWorkingModeSelected: (CGMSEvent) -> Unit,
 ) {
     val listState = rememberLazyListState()
-    val workingModeEntries = no.nordicsemi.android.lib.profile.common.WorkingMode.entries.map { it }
+    val workingModeEntries = no.nordicsemi.android.toolbox.profile.parser.common.WorkingMode.entries.map { it }
     val selectedIndex = workingModeEntries.indexOf(cgmState.workingMode)
 
     LaunchedEffect(selectedIndex) {

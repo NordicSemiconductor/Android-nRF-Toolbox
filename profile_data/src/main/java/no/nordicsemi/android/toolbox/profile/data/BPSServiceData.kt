@@ -1,8 +1,8 @@
 package no.nordicsemi.android.toolbox.profile.data
 
-import no.nordicsemi.android.lib.profile.bps.BloodPressureFeatureData
-import no.nordicsemi.android.lib.profile.bps.BloodPressureMeasurementData
-import no.nordicsemi.android.lib.profile.bps.IntermediateCuffPressureData
+import no.nordicsemi.android.toolbox.profile.parser.bps.BloodPressureFeatureData
+import no.nordicsemi.android.toolbox.profile.parser.bps.BloodPressureMeasurementData
+import no.nordicsemi.android.toolbox.profile.parser.bps.IntermediateCuffPressureData
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 
 /**

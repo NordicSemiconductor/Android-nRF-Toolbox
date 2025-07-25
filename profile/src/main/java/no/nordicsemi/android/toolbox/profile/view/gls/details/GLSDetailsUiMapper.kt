@@ -2,13 +2,13 @@ package no.nordicsemi.android.toolbox.profile.view.gls.details
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import no.nordicsemi.android.lib.profile.gls.data.Carbohydrate
-import no.nordicsemi.android.lib.profile.gls.data.Health
-import no.nordicsemi.android.lib.profile.gls.data.Meal
-import no.nordicsemi.android.lib.profile.gls.data.Medication
-import no.nordicsemi.android.lib.profile.gls.data.MedicationUnit
-import no.nordicsemi.android.lib.profile.gls.data.SampleLocation
-import no.nordicsemi.android.lib.profile.gls.data.Tester
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.Carbohydrate
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.Health
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.Meal
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.Medication
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.MedicationUnit
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.SampleLocation
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.Tester
 import no.nordicsemi.android.toolbox.profile.R
 
 @Composable

@@ -47,7 +47,7 @@ import no.nordicsemi.android.toolbox.profile.view.rscs.RSCSScreen
 import no.nordicsemi.android.toolbox.profile.view.throughput.ThroughputScreen
 import no.nordicsemi.android.toolbox.profile.view.uart.UARTScreen
 import no.nordicsemi.android.toolbox.profile.viewmodel.ConnectionEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.ConnectionViewModel
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileViewModel
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionState
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceData
 import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
@@ -57,11 +57,11 @@ import no.nordicsemi.android.ui.view.internal.ServiceDiscoveryView
 
 @Composable
 internal fun ProfileScreen() {
-    val connectionViewModel: ConnectionViewModel = hiltViewModel()
-    val deviceAddress = connectionViewModel.address
-    val deviceDataState by connectionViewModel.deviceState.collectAsStateWithLifecycle()
+    val profileViewModel: ProfileViewModel = hiltViewModel()
+    val deviceAddress = profileViewModel.address
+    val deviceDataState by profileViewModel.deviceState.collectAsStateWithLifecycle()
     val onClickEvent: (ConnectionEvent) -> Unit = { event ->
-        connectionViewModel.onConnectionEvent(event)
+        profileViewModel.onConnectionEvent(event)
     }
 
     Scaffold(

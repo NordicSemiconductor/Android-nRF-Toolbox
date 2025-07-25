@@ -1,6 +1,6 @@
 package no.nordicsemi.android.toolbox.profile.data
 
-import no.nordicsemi.android.lib.profile.throughput.ThroughputMetrics
+import no.nordicsemi.android.toolbox.profile.parser.throughput.ThroughputMetrics
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 
 data class ThroughputServiceData(

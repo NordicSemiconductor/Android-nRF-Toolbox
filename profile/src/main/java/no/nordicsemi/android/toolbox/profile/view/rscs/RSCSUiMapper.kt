@@ -2,8 +2,8 @@ package no.nordicsemi.android.toolbox.profile.view.rscs
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import no.nordicsemi.android.lib.profile.rscs.RSCSData
-import no.nordicsemi.android.lib.profile.rscs.RSCSSettingsUnit
+import no.nordicsemi.android.toolbox.profile.parser.rscs.RSCSData
+import no.nordicsemi.android.toolbox.profile.parser.rscs.RSCSSettingsUnit
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.RSCSServiceData
 import java.util.Locale

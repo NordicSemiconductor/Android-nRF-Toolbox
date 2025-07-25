@@ -8,7 +8,7 @@ android {
 
 dependencies {
     implementation(project(":profile_data"))
-    implementation(project(":lib_profile"))
+    implementation(project(":profile-parsers"))
     implementation(project(":lib_utils"))
 
     implementation(libs.nordic.logger)

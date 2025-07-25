@@ -1,6 +1,6 @@
 package no.nordicsemi.android.toolbox.profile.data
 
-import no.nordicsemi.android.lib.profile.hrs.HRSData
+import no.nordicsemi.android.toolbox.profile.parser.hrs.HRSData
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 
 /**

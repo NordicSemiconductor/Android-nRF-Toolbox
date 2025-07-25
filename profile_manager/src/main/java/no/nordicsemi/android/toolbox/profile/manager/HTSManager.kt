@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
-import no.nordicsemi.android.lib.profile.hts.HTSDataParser
+import no.nordicsemi.android.toolbox.profile.parser.hts.HTSDataParser
 import no.nordicsemi.android.toolbox.profile.manager.repository.HTSRepository
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.kotlin.ble.client.RemoteService

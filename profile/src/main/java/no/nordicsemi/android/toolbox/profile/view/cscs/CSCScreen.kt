@@ -43,9 +43,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import no.nordicsemi.android.lib.profile.csc.SpeedUnit
-import no.nordicsemi.android.lib.profile.csc.WheelSizes
-import no.nordicsemi.android.lib.profile.csc.WheelSizes.getWheelSizeByName
+import no.nordicsemi.android.toolbox.profile.parser.csc.SpeedUnit
+import no.nordicsemi.android.toolbox.profile.parser.csc.WheelSizes
+import no.nordicsemi.android.toolbox.profile.parser.csc.WheelSizes.getWheelSizeByName
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.CSCServiceData
 import no.nordicsemi.android.toolbox.profile.viewmodel.CSCEvent

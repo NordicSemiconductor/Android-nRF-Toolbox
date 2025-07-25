@@ -3,7 +3,7 @@ package no.nordicsemi.android.toolbox.profile.manager.repository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import no.nordicsemi.android.lib.profile.throughput.ThroughputMetrics
+import no.nordicsemi.android.toolbox.profile.parser.throughput.ThroughputMetrics
 import no.nordicsemi.android.toolbox.profile.data.ThroughputInputType
 import no.nordicsemi.android.toolbox.profile.data.ThroughputServiceData
 import no.nordicsemi.android.toolbox.profile.data.WritingStatus

@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
-import no.nordicsemi.android.lib.profile.hrs.BodySensorLocationParser
-import no.nordicsemi.android.lib.profile.hrs.HRSDataParser
+import no.nordicsemi.android.toolbox.profile.parser.hrs.BodySensorLocationParser
+import no.nordicsemi.android.toolbox.profile.parser.hrs.HRSDataParser
 import no.nordicsemi.android.toolbox.profile.manager.repository.HRSRepository
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.kotlin.ble.client.RemoteService

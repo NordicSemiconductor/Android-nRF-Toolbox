@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
-import no.nordicsemi.android.lib.profile.rscs.RSCSDataParser
-import no.nordicsemi.android.lib.profile.rscs.RSCSFeatureDataParser
+import no.nordicsemi.android.toolbox.profile.parser.rscs.RSCSDataParser
+import no.nordicsemi.android.toolbox.profile.parser.rscs.RSCSFeatureDataParser
 import no.nordicsemi.android.toolbox.profile.manager.repository.RSCSRepository
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.lib.utils.logAndReport

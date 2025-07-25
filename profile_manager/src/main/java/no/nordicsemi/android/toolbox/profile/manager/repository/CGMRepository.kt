@@ -3,8 +3,8 @@ package no.nordicsemi.android.toolbox.profile.manager.repository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import no.nordicsemi.android.lib.profile.common.WorkingMode
-import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
+import no.nordicsemi.android.toolbox.profile.parser.common.WorkingMode
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.RequestStatus
 import no.nordicsemi.android.toolbox.profile.data.CGMRecordWithSequenceNumber
 import no.nordicsemi.android.toolbox.profile.data.CGMServiceData
 import no.nordicsemi.android.toolbox.profile.manager.CGMManager

@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import no.nordicsemi.android.lib.profile.battery.BatteryLevelParser
+import no.nordicsemi.android.toolbox.profile.parser.battery.BatteryLevelParser
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.manager.repository.BatteryRepository
 import no.nordicsemi.kotlin.ble.client.RemoteService

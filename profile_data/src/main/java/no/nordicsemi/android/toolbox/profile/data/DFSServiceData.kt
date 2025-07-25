@@ -1,13 +1,13 @@
 package no.nordicsemi.android.toolbox.profile.data
 
-import no.nordicsemi.android.lib.profile.directionFinder.PeripheralBluetoothAddress
-import no.nordicsemi.android.lib.profile.directionFinder.azimuthal.AzimuthMeasurementData
-import no.nordicsemi.android.lib.profile.directionFinder.ddf.DDFData
-import no.nordicsemi.android.lib.profile.directionFinder.distance.DistanceMode
-import no.nordicsemi.android.lib.profile.directionFinder.distance.McpdMeasurementData
-import no.nordicsemi.android.lib.profile.directionFinder.distance.RttMeasurementData
-import no.nordicsemi.android.lib.profile.directionFinder.elevation.ElevationMeasurementData
-import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.PeripheralBluetoothAddress
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.azimuthal.AzimuthMeasurementData
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.ddf.DDFData
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance.DistanceMode
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance.McpdMeasurementData
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance.RttMeasurementData
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.elevation.ElevationMeasurementData
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.RequestStatus
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.MeasurementSection
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range

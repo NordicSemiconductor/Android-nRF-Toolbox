@@ -12,7 +12,7 @@ dependencies {
     implementation(project(":profile_data"))
     implementation(project(":lib_ui"))
     implementation(project(":lib_utils"))
-    implementation(project(":lib_profile"))
+    implementation(project(":profile-parsers"))
     implementation(project(":lib_service"))
     implementation(project(":profile_manager"))
     implementation(project(":lib_storage"))

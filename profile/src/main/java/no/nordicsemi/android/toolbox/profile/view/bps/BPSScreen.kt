@@ -16,10 +16,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import no.nordicsemi.android.lib.profile.bps.BloodPressureFeatureData
-import no.nordicsemi.android.lib.profile.bps.BloodPressureMeasurementData
-import no.nordicsemi.android.lib.profile.bps.BloodPressureType
-import no.nordicsemi.android.lib.profile.bps.IntermediateCuffPressureData
+import no.nordicsemi.android.toolbox.profile.parser.bps.BloodPressureFeatureData
+import no.nordicsemi.android.toolbox.profile.parser.bps.BloodPressureMeasurementData
+import no.nordicsemi.android.toolbox.profile.parser.bps.BloodPressureType
+import no.nordicsemi.android.toolbox.profile.parser.bps.IntermediateCuffPressureData
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.viewmodel.BPSViewModel
 import no.nordicsemi.android.ui.view.FeatureSupported

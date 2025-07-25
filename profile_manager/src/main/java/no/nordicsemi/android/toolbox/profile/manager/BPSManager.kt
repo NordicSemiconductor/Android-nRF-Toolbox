@@ -7,9 +7,9 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
-import no.nordicsemi.android.lib.profile.bps.BloodPressureFeatureParser
-import no.nordicsemi.android.lib.profile.bps.BloodPressureMeasurementParser
-import no.nordicsemi.android.lib.profile.bps.IntermediateCuffPressureParser
+import no.nordicsemi.android.toolbox.profile.parser.bps.BloodPressureFeatureParser
+import no.nordicsemi.android.toolbox.profile.parser.bps.BloodPressureMeasurementParser
+import no.nordicsemi.android.toolbox.profile.parser.bps.IntermediateCuffPressureParser
 import no.nordicsemi.android.toolbox.profile.manager.repository.BPSRepository
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.kotlin.ble.client.RemoteService

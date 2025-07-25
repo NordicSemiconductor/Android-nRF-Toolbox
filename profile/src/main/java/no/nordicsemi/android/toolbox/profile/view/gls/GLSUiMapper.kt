@@ -3,9 +3,9 @@ package no.nordicsemi.android.toolbox.profile.view.gls
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import no.nordicsemi.android.lib.profile.common.WorkingMode
-import no.nordicsemi.android.lib.profile.gls.data.ConcentrationUnit
-import no.nordicsemi.android.lib.profile.gls.data.RecordType
+import no.nordicsemi.android.toolbox.profile.parser.common.WorkingMode
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.ConcentrationUnit
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.RecordType
 import no.nordicsemi.android.toolbox.profile.R
 
 @Composable
