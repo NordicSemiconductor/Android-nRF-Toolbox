@@ -43,7 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.common.theme.view.RadioButtonGroup
+import no.nordicsemi.android.common.ui.view.RadioButtonGroup
 import no.nordicsemi.android.hts.R
 import no.nordicsemi.android.hts.data.HTSServiceData
 import no.nordicsemi.android.ui.view.BatteryLevelView

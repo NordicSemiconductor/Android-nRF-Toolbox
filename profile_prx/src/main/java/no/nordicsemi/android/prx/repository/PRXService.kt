@@ -164,7 +164,6 @@ internal class PRXService : NotificationService() {
             this@PRXService,
             device,
             lifecycleScope,
-            logger = { p, s -> repository.log(p, s) },
             options = BleGattConnectOptions(autoConnect = true)
         )
         this@PRXService.client = client

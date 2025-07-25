@@ -66,7 +66,7 @@ dependencies {
     implementation(libs.nordic.theme)
     implementation(libs.nordic.navigation)
     implementation(libs.nordic.blek.uiscanner)
-    implementation(libs.nordic.uilogger)
+    implementation(libs.nordic.logger)
     implementation(libs.nordic.permissions.ble)
     implementation(libs.nordic.analytics)
     
@@ -79,4 +79,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
 
     implementation(libs.androidx.hilt.navigation.compose)
+
+    // Timber & SLF4J
+    implementation (libs.slf4j.timber)
+    implementation(libs.nordic.log.timber)
 }

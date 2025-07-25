@@ -86,7 +86,7 @@ internal class HTSService : NotificationService() {
     }
 
     private fun startGattClient(device: ServerDevice) = lifecycleScope.launch {
-        val client = ClientBleGatt.connect(this@HTSService, device, lifecycleScope, logger = { p, s -> repository.log(p, s) })
+        val client = ClientBleGatt.connect(this@HTSService, device, lifecycleScope)
         this@HTSService.client = client
 
         client.connectionStateWithStatus

@@ -53,8 +53,7 @@ import no.nordicsemi.android.bps.view.BPSViewEvent
 import no.nordicsemi.android.bps.view.BPSViewState
 import no.nordicsemi.android.bps.view.DisconnectEvent
 import no.nordicsemi.android.bps.view.OpenLoggerEvent
-import no.nordicsemi.android.common.logger.BleLoggerAndLauncher
-import no.nordicsemi.android.common.logger.DefaultBleLogger
+import no.nordicsemi.android.common.logger.LoggerLauncher
 import no.nordicsemi.android.common.navigation.NavigationResult
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
@@ -67,8 +66,11 @@ import no.nordicsemi.android.kotlin.ble.profile.bps.BloodPressureMeasurementPars
 import no.nordicsemi.android.kotlin.ble.profile.bps.IntermediateCuffPressureParser
 import no.nordicsemi.android.kotlin.ble.profile.bps.data.BloodPressureMeasurementData
 import no.nordicsemi.android.kotlin.ble.profile.bps.data.IntermediateCuffPressureData
+import no.nordicsemi.android.log.LogSession
+import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.toolbox.scanner.ScannerDestinationId
 import no.nordicsemi.android.ui.view.StringConst
+import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
 
@@ -93,7 +95,7 @@ internal class BPSViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     private var client: ClientBleGatt? = null
-    private lateinit var logger: BleLoggerAndLauncher
+    private var logger: nRFLoggerTree? = null
 
     init {
         navigationManager.navigateTo(ScannerDestinationId, ParcelUuid(BPS_SERVICE_UUID))
@@ -113,7 +115,7 @@ internal class BPSViewModel @Inject constructor(
     fun onEvent(event: BPSViewEvent) {
         when (event) {
             DisconnectEvent -> onDisconnectEvent()
-            OpenLoggerEvent -> logger.launch()
+            OpenLoggerEvent -> LoggerLauncher.launch(context, logger?.session as? LogSession)
         }
     }
 
@@ -122,12 +124,18 @@ internal class BPSViewModel @Inject constructor(
         navigationManager.navigateUp()
     }
 
+    private fun initLogger(device: ServerDevice) {
+        logger?.let { Timber.uproot(it) }
+        logger = nRFLoggerTree(context, stringConst.APP_NAME, "BPS", device.address)
+            .also { Timber.plant(it) }
+    }
+
     private fun startGattClient(device: ServerDevice) = viewModelScope.launch {
         _state.value = _state.value.copy(deviceName = device.name)
 
-        logger = DefaultBleLogger.create(context, stringConst.APP_NAME, "BPS", device.address)
+        initLogger(device)
 
-        val client = ClientBleGatt.connect(context, device, viewModelScope, logger = logger)
+        val client = ClientBleGatt.connect(context, device, viewModelScope)
         this@BPSViewModel.client = client
 
         client.connectionStateWithStatus

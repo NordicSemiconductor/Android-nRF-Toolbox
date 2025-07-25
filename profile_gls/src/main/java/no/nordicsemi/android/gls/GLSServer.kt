@@ -3,16 +3,12 @@ package no.nordicsemi.android.gls
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.ParcelUuid
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.common.core.DataByteArray
-import no.nordicsemi.android.common.logger.BleLogger
-import no.nordicsemi.android.common.logger.DefaultConsoleLogger
 import no.nordicsemi.android.gls.main.viewmodel.BATTERY_LEVEL_CHARACTERISTIC_UUID
 import no.nordicsemi.android.gls.main.viewmodel.BATTERY_SERVICE_UUID
 import no.nordicsemi.android.gls.main.viewmodel.GLS_SERVICE_UUID
@@ -26,6 +22,7 @@ import no.nordicsemi.android.kotlin.ble.core.advertiser.BleAdvertisingData
 import no.nordicsemi.android.kotlin.ble.core.advertiser.BleAdvertisingSettings
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattPermission
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattProperty
+import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
 import no.nordicsemi.android.kotlin.ble.profile.gls.RecordAccessControlPointInputParser
 import no.nordicsemi.android.kotlin.ble.server.main.ServerBleGatt
 import no.nordicsemi.android.kotlin.ble.server.main.service.ServerBleGattCharacteristic
@@ -42,9 +39,6 @@ private const val STANDARD_DELAY = 1000L
 @Singleton
 class GLSServer @Inject constructor(
     private val scope: CoroutineScope,
-    @ApplicationContext
-    private val context: Context,
-    private val logger: BleLogger = DefaultConsoleLogger(context),
 ) {
 
     private lateinit var server: ServerBleGatt
@@ -197,7 +191,6 @@ class GLSServer @Inject constructor(
             config = arrayOf(serviceConfig, batteryService),
             mock = device,
             scope = scope,
-            logger = { _, log -> println(log) }
         )
 
         BleAdvertiser.create(context)

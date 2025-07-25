@@ -47,5 +47,7 @@ class NrfToolboxApplication : Application() {
         super.onCreate()
 
         analytics.logEvent(AppOpenEvent)
+
+        Timber.plant(Timber.DebugTree())
     }
 }

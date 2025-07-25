@@ -35,7 +35,7 @@ import android.os.Bundle
 
 sealed class FirebaseEvent(val eventName: String, val params: Bundle?)
 
-object AppOpenEvent : FirebaseEvent("APP_OPEN", null)
+data object AppOpenEvent : FirebaseEvent("APP_OPEN", null)
 
 class ProfileOpenEvent : FirebaseEvent {
 
