@@ -3,7 +3,6 @@ package no.nordicsemi.android.toolbox.profile.parser.rscs
 /**
  * Parses the RSCS Feature data from a byte array.
  *
- * @param data The byte array containing the RSCS Feature data.
  * @return An instance of [RSCFeatureData] if the data is valid, null otherwise.
  */
 object RSCSFeatureDataParser {

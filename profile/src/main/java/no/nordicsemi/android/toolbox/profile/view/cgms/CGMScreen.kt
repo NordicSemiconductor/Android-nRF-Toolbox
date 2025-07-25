@@ -139,7 +139,7 @@ private fun WorkingModeDialog(
     onWorkingModeSelected: (CGMSEvent) -> Unit,
 ) {
     val listState = rememberLazyListState()
-    val workingModeEntries = no.nordicsemi.android.toolbox.profile.parser.common.WorkingMode.entries.map { it }
+    val workingModeEntries = WorkingMode.entries.map { it }
     val selectedIndex = workingModeEntries.indexOf(cgmState.workingMode)
 
     LaunchedEffect(selectedIndex) {

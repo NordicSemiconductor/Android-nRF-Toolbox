@@ -21,10 +21,10 @@ data class BloodPressureMeasurementData(
 )
 
 data class IntermediateCuffPressureData(
-    @FloatRange(from = 0.0) val cuffPressure: Float,
+    @param:FloatRange(from = 0.0) val cuffPressure: Float,
     val unit: BloodPressureType,
-    @FloatRange(from = 0.0) val pulseRate: Float? = null,
-    @IntRange(from = 0, to = 255) val userID: Int? = null,
+    @param:FloatRange(from = 0.0) val pulseRate: Float? = null,
+    @param:IntRange(from = 0, to = 255) val userID: Int? = null,
     val status: BPMStatus? = null,
     val calendar: Calendar? = null
 )

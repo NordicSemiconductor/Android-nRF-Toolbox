@@ -16,7 +16,6 @@ object ThroughputDataParser {
         val totalBytesReceived = data.getInt(offset, IntFormat.UINT32, byteOrder).toLong()
             .also { offset += 4 }
         val throughput = data.getInt(offset, IntFormat.UINT32, byteOrder).toLong()
-            .also { offset += 4 }
 
         return ThroughputMetrics(
             gattWritesReceived = numberOfGattWrite,

@@ -116,6 +116,7 @@ internal class DFSManager : ServiceManager {
             try {
                 controlPointCharacteristic.write(data, WriteType.WITH_RESPONSE)
             } catch (e: Exception) {
+                Timber.e(e, "Failed to enable distance mode: $mode for device: $deviceId")
                 DFSRepository.updateNewRequestStatus(deviceId, RequestStatus.FAILED)
             } finally {
                 DFSRepository.updateNewRequestStatus(deviceId, RequestStatus.SUCCESS)
@@ -130,6 +131,7 @@ internal class DFSManager : ServiceManager {
                     writeType = WriteType.WITH_RESPONSE
                 )
             } catch (e: Exception) {
+                Timber.e(e, "Failed to check current distance mode for device: $deviceId")
                 DFSRepository.updateNewRequestStatus(deviceId, RequestStatus.FAILED)
             } finally {
                 DFSRepository.updateNewRequestStatus(deviceId, RequestStatus.SUCCESS)
