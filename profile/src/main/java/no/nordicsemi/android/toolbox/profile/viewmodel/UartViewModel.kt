@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -18,13 +19,13 @@ import no.nordicsemi.android.analytics.UARTMode
 import no.nordicsemi.android.analytics.UARTSendAnalyticsEvent
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
-import no.nordicsemi.android.toolbox.profile.manager.repository.UartRepository
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.profile.data.UARTServiceData
 import no.nordicsemi.android.toolbox.profile.data.uart.MacroEol
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTMacro
+import no.nordicsemi.android.toolbox.profile.manager.repository.UartRepository
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
 import no.nordicsemi.android.toolbox.profile.repository.uartXml.UartConfigurationRepository
 
@@ -86,7 +87,6 @@ internal class UartViewModel @Inject constructor(
 
     init {
         observeUartProfile()
-        observeConfigurations()
     }
 
     /**
@@ -119,23 +119,27 @@ internal class UartViewModel @Inject constructor(
                 _uartState.value = data
             }
             .launchIn(viewModelScope)
+        // Observe the UART configurations.
+        observeConfigurations()
     }
 
     /**
      * Observes the UART configurations from the repository.
      * It updates the selected configuration name and loads previous configurations.
      */
-    private fun observeConfigurations() {
+    private fun observeConfigurations() = with(uartConfigurationRepository) {
         // Get the last configuration name from the data store.
-        uartConfigurationRepository
-            .getLastConfigurationName().onEach { name ->
-                name?.let { UartRepository.updateSelectedConfigurationName(address, it) }
+        getLastConfigurationName()
+            .filterNotNull()
+            .onEach { name ->
+                UartRepository.updateSelectedConfigurationName(address, name)
             }.launchIn(viewModelScope)
 
         // Get all configurations for the device.
-        uartConfigurationRepository.getAllConfigurations().onEach { uartConfigurations ->
-            UartRepository.loadPreviousConfigurations(address, uartConfigurations)
-        }.launchIn(viewModelScope)
+        getAllConfigurations()
+            .onEach { uartConfigurations ->
+                UartRepository.loadPreviousConfigurations(address, uartConfigurations)
+            }.launchIn(viewModelScope)
     }
 
     // UART events.
