@@ -14,7 +14,7 @@ import no.nordicsemi.android.analytics.Link
 import no.nordicsemi.android.analytics.ProfileOpenEvent
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.nrftoolbox.ScannerDestinationId
-import no.nordicsemi.android.service.services.ServiceManager
+import no.nordicsemi.android.toolbox.profile.manager.ServiceManager
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
 import no.nordicsemi.kotlin.ble.client.android.Peripheral

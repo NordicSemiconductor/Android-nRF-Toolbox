@@ -12,7 +12,7 @@ import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
 import no.nordicsemi.android.lib.profile.csc.SpeedUnit
 import no.nordicsemi.android.lib.profile.csc.WheelSize
-import no.nordicsemi.android.service.repository.CSCRepository
+import no.nordicsemi.android.toolbox.profile.manager.repository.CSCRepository
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.profile.data.CSCServiceData

@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
 import no.nordicsemi.android.lib.profile.common.WorkingMode
-import no.nordicsemi.android.service.repository.GLSRepository
+import no.nordicsemi.android.toolbox.profile.manager.repository.GLSRepository
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.profile.data.GLSServiceData

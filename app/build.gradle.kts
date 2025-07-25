@@ -46,7 +46,7 @@ android {
 dependencies {
     implementation(project(":lib_analytics"))
     implementation(project(":lib_profile"))
-    implementation(project(":lib_service"))
+    implementation(project(":profile_manager"))
     implementation(project(":profile"))
     implementation(project(":profile_data"))
     implementation(project(":lib_ui"))

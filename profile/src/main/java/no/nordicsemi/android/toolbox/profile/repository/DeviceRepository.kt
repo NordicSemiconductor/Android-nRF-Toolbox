@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.analytics.AppAnalytics
 import no.nordicsemi.android.analytics.ProfileConnectedEvent
-import no.nordicsemi.android.service.services.ServiceManager
+import no.nordicsemi.android.toolbox.profile.manager.ServiceManager
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import javax.inject.Inject

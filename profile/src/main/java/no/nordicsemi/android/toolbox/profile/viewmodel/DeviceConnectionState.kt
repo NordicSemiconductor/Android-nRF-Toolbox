@@ -1,7 +1,7 @@
 package no.nordicsemi.android.toolbox.profile.viewmodel
 
 import no.nordicsemi.android.service.profile.DeviceDisconnectionReason
-import no.nordicsemi.android.service.services.ServiceManager
+import no.nordicsemi.android.toolbox.profile.manager.ServiceManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 
 internal data class DeviceData(

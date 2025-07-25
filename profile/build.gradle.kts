@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":lib_utils"))
     implementation(project(":lib_profile"))
     implementation(project(":lib_service"))
+    implementation(project(":profile_manager"))
     implementation(project(":lib_storage"))
     implementation(project(":permissions-ranging"))
 

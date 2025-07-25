@@ -66,5 +66,5 @@ include(":lib_ui")
 include(":lib_utils")
 include(":profile")
 include(":profile_data")
+include(":profile_manager")
 include(":permissions-ranging")
-

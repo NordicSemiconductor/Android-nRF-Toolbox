@@ -21,8 +21,9 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.NotificationService
 import no.nordicsemi.android.service.R
-import no.nordicsemi.android.service.services.ServiceManager
 import no.nordicsemi.android.toolbox.lib.utils.spec.CGMS_SERVICE_UUID
+import no.nordicsemi.android.toolbox.profile.manager.ServiceManager
+import no.nordicsemi.android.toolbox.profile.manager.ServiceManagerFactory
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.CentralManager.ConnectionOptions
@@ -123,7 +124,7 @@ internal class ProfileService : NotificationService() {
         override fun disconnect(deviceAddress: String) {
             lifecycleScope.launch {
                 try {
-                    centralManager.getPeripheralById(deviceAddress)
+                    getPeripheralById(deviceAddress)
                         ?.let { peripheral ->
                             if (peripheral.isConnected) peripheral.disconnect()
                             handleDisconnection(deviceAddress)

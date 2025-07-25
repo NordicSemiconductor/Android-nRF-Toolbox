@@ -18,7 +18,7 @@ import no.nordicsemi.android.analytics.UARTMode
 import no.nordicsemi.android.analytics.UARTSendAnalyticsEvent
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
-import no.nordicsemi.android.service.repository.UartRepository
+import no.nordicsemi.android.toolbox.profile.manager.repository.UartRepository
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.profile.data.UARTServiceData

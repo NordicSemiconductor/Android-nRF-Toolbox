@@ -12,7 +12,7 @@ import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
 import no.nordicsemi.android.lib.profile.directionFinder.PeripheralBluetoothAddress
 import no.nordicsemi.android.lib.profile.directionFinder.distance.DistanceMode
-import no.nordicsemi.android.service.repository.DFSRepository
+import no.nordicsemi.android.toolbox.profile.manager.repository.DFSRepository
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.profile.data.DFSServiceData

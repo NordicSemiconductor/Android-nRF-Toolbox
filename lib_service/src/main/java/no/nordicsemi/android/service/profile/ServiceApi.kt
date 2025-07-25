@@ -1,7 +1,7 @@
 package no.nordicsemi.android.service.profile
 
 import kotlinx.coroutines.flow.Flow
-import no.nordicsemi.android.service.services.ServiceManager
+import no.nordicsemi.android.toolbox.profile.manager.ServiceManager
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
