@@ -31,7 +31,6 @@
 
 plugins {
     alias(libs.plugins.nordic.feature)
-    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
