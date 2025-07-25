@@ -25,7 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 internal class ChannelSoundingViewModel @Inject constructor(
     private val deviceRepository: DeviceRepository,
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     navigator: Navigator,
     savedStateHandle: SavedStateHandle,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {

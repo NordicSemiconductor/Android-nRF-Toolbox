@@ -50,12 +50,12 @@ internal sealed interface ConnectionEvent {
 }
 
 @HiltViewModel
-internal class ConnectionViewModel @Inject constructor(
+internal class ProfileViewModel @Inject constructor(
     private val profileServiceManager: ProfileServiceManager,
     private val navigator: Navigator,
     private val deviceRepository: DeviceRepository,
     private val analytics: AppAnalytics,
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
     val address: String = parameterOf(ProfileDestinationId)
