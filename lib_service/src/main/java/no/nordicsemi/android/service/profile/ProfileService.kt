@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
@@ -137,35 +137,36 @@ internal class ProfileService : NotificationService() {
 
         override fun getConnectionState(address: String): Flow<ConnectionState>? {
             val peripheral = getPeripheralById(address) ?: return null
-            return peripheral.state.also { stateFlow ->
-                // Since the initial state is Gatt closed, drop the first state.
-                connectionJob?.cancel()
-                connectionJob = stateFlow.drop(1).onEach { state ->
-                    when (state) {
-                        ConnectionState.Connected -> {
-                            _isMissingServices.tryEmit(false)
-                            // Discover services if not already discovered
-                            if (_connectedDevices.value[address] == null) {
-                                discoverServices(peripheral)
-                            }
-                        }
-
-                        ConnectionState.Connecting -> _disconnectionReason.tryEmit(null)
-                        is ConnectionState.Disconnected -> {
-                            _disconnectionReason.tryEmit(StateReason(state.reason))
-                        }
-
-                        ConnectionState.Closed -> handleDisconnection(address)
-                        else -> { /* Handle other states if necessary. */
-                        }
-                    }
-                }.onCompletion {
+            return peripheral.state
+                .also { stateFlow ->
                     connectionJob?.cancel()
-                    connectionJob = null
-                }.launchIn(lifecycleScope)
-            }
-        }
+                    connectionJob = stateFlow
+                        .buffer(1)
+                        .onEach { state ->
+                            when (state) {
+                                ConnectionState.Connected -> {
+                                    _isMissingServices.tryEmit(false)
+                                    // Discover services if not already discovered
+                                    if (_connectedDevices.value[address] == null) {
+                                        discoverServices(peripheral)
+                                    }
+                                }
 
+                                ConnectionState.Connecting -> _disconnectionReason.tryEmit(null)
+                                is ConnectionState.Disconnected -> {
+                                    _disconnectionReason.tryEmit(StateReason(state.reason))
+                                    handleDisconnection(address)
+                                }
+
+                                ConnectionState.Closed -> return@onEach
+                                else -> { /* Handle other states if necessary. */
+                                }
+                            }
+                        }.onCompletion {
+                            connectionJob = null
+                        }.launchIn(lifecycleScope)
+                }
+        }
     }
 
     /**
