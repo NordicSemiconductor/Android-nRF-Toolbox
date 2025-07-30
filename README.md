@@ -16,6 +16,8 @@ It contains applications demonstrating standard Bluetooth LE profiles:
 * **Direction Finder**,
 * **Blinky (LBS) Service**
 
+**_NOTE:_** The Proximity profile is not included in this version of the app. If you need it, please download the previous version.
+
 ### How to import to Android Studio
 
 The production version of nRF Toolbox depends on
