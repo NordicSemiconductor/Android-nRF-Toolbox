@@ -31,36 +31,42 @@
 
 package no.nordicsemi.android.ui.view
 
+import android.annotation.SuppressLint
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import no.nordicsemi.android.ui.R
 
 @Composable
 fun SectionTitle(
     @DrawableRes resId: Int,
     title: String,
-    menu: @Composable (() -> Unit)? = null,
-    modifier: Modifier = Modifier.fillMaxWidth()
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    menu: @Composable (() -> Unit)? = null
 ) {
     Row(
         modifier = modifier,
@@ -70,24 +76,104 @@ fun SectionTitle(
         Image(
             painter = painterResource(id = resId),
             contentDescription = null,
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary),
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
             modifier = Modifier
-                .background(
-                    color = MaterialTheme.colorScheme.secondary,
-                    shape = CircleShape
-                )
-                .padding(8.dp)
+                .size(28.dp)
         )
         Spacer(modifier = Modifier.size(8.dp))
         Text(
             text = title,
             textAlign = TextAlign.Start,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.weight(1f)
         )
         menu?.invoke()
     }
+}
+
+@Composable
+fun SectionTitle(
+    icon: ImageVector,
+    title: String,
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    menu: @Composable (() -> Unit)? = null
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        Image(
+            imageVector = icon,
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
+            modifier = Modifier
+                .size(28.dp)
+        )
+        Spacer(modifier = Modifier.size(8.dp))
+        Text(
+            text = title,
+            textAlign = TextAlign.Start,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(1f)
+        )
+        menu?.invoke()
+    }
+}
+
+@Composable
+@SuppressLint("ModifierParameter")
+fun SectionTitle(
+    @DrawableRes resId: Int,
+    title: String,
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    rotateArrow: Float? = null,
+    iconBackground: Color = MaterialTheme.colorScheme.secondary
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        Image(
+            painter = painterResource(id = resId),
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
+            modifier = Modifier
+                .size(28.dp)
+
+        )
+        Spacer(modifier = Modifier.padding(8.dp))
+        Text(
+            text = title,
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleMedium,
+        )
+        rotateArrow?.let {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                Image(
+                    Icons.Default.ArrowDropDown,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .rotate(it)
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SectionTitle_Preview() {
+    SectionTitle(
+        resId = R.drawable.ic_records,
+        title = stringResource(id = R.string.back_screen),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { },
+        rotateArrow = 0f
+    )
 }
 
 @Composable
@@ -104,20 +190,15 @@ fun SectionTitle(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSecondary,
+            tint = MaterialTheme.colorScheme.secondary,
             modifier = Modifier
-                .background(
-                    color = MaterialTheme.colorScheme.secondary,
-                    shape = CircleShape
-                )
-                .padding(8.dp)
+                .size(28.dp)
         )
         Spacer(modifier = Modifier.size(8.dp))
         Text(
             text = title,
             textAlign = TextAlign.Center,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
+            style = MaterialTheme.typography.titleMedium,
         )
     }
 }

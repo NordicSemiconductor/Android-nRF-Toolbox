@@ -32,9 +32,6 @@
 package no.nordicsemi.android.ui.view.dialog
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.text.buildAnnotatedString
 
 @Composable
-fun String.toAnnotatedString() = buildAnnotatedString {
-    append(this@toAnnotatedString)
-}
+fun Boolean.toBooleanText(): String =  if (this) "YES" else "NO"

@@ -1,263 +1,344 @@
-/*
- * Copyright (c) 2022, Nordic Semiconductor
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification, are
- * permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this list of
- * conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice, this list
- * of conditions and the following disclaimer in the documentation and/or other materials
- * provided with the distribution.
- *
- * 3. Neither the name of the copyright holder nor the names of its contributors may be
- * used to endorse or promote products derived from this software without specific prior
- * written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
- * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
- * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
- * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 package no.nordicsemi.android.nrftoolbox.view
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.SocialDistance
+import androidx.compose.material.icons.filled.SyncAlt
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import no.nordicsemi.android.analytics.Link
-import no.nordicsemi.android.analytics.Profile
-import no.nordicsemi.android.analytics.ProfileOpenEvent
-import no.nordicsemi.android.nrftoolbox.BPSDestinationId
-import no.nordicsemi.android.nrftoolbox.BuildConfig
-import no.nordicsemi.android.nrftoolbox.CGMSDestinationId
-import no.nordicsemi.android.nrftoolbox.CSCDestinationId
-import no.nordicsemi.android.nrftoolbox.GLSDestinationId
-import no.nordicsemi.android.nrftoolbox.HRSDestinationId
-import no.nordicsemi.android.nrftoolbox.HTSDestinationId
-import no.nordicsemi.android.nrftoolbox.PRXDestinationId
+import no.nordicsemi.android.common.analytics.view.AnalyticsPermissionButton
+import no.nordicsemi.android.common.ui.view.NordicAppBar
 import no.nordicsemi.android.nrftoolbox.R
-import no.nordicsemi.android.nrftoolbox.RSCSDestinationId
-import no.nordicsemi.android.nrftoolbox.UARTDestinationId
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewModel
+import no.nordicsemi.android.nrftoolbox.viewmodel.UiEvent
+import no.nordicsemi.android.toolbox.lib.utils.Profile
 
-private const val DFU_PACKAGE_NAME = "no.nordicsemi.android.dfu"
-private const val DFU_LINK = "https://play.google.com/store/apps/details?id=no.nordicsemi.android.dfu"
-
-private const val LOGGER_PACKAGE_NAME = "no.nordicsemi.android.log"
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
-    val viewModel: HomeViewModel = hiltViewModel()
+internal fun HomeView() {
+    val viewModel = hiltViewModel<HomeViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val onEvent: (UiEvent) -> Unit = { viewModel.onClickEvent(it) }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            TitleAppBar(stringResource(id = R.string.app_name))
-        }
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(it)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp)
+            NordicAppBar(
+                title = { Text(stringResource(id = R.string.app_name)) },
+                showBackButton = false,
             ) {
-                Spacer(modifier = Modifier.height(16.dp))
+                AnalyticsPermissionButton()
+            }
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = { onEvent(UiEvent.OnConnectDeviceClick) },
+                modifier = Modifier.padding(top = 8.dp, bottom = 16.dp, end = 8.dp, start = 8.dp),
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add device from scanner"
+                    )
+                    Text(text = stringResource(R.string.connect_device))
+                }
+            }
+        }
+    ) { paddingValues ->
+        // Get notch padding for devices with a display cutout (notch)
+        val notchPadding = WindowInsets.displayCutout
+            .union(WindowInsets(left = 8.dp, right = 8.dp, top = 8.dp, bottom = 8.dp))
+            .only(WindowInsetsSides.Horizontal)
+            .asPaddingValues()
 
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .padding(paddingValues),
+            contentPadding = notchPadding,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            item {
+                // Show the title at the top
                 Text(
-                    text = stringResource(id = R.string.viewmodel_profiles),
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(R.string.connected_devices),
+                    modifier = Modifier
+                        .alpha(0.5f)
+                        .padding(start = 16.dp),
                 )
+                if (state.connectedDevices.isNotEmpty()) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        state.connectedDevices.values.forEach { (peripheral, services) ->
+                            // Skip if no services
+                            if (services.isEmpty()) return@forEach
+                            // Case 1: If only one service, show it directly like battery service
+                            if (services.size == 1 && services.first().profile == Profile.BATTERY) {
+                                FeatureButton(
+                                    iconId = R.drawable.ic_battery,
+                                    description = R.string.battery_module_full,
+                                    deviceName = peripheral.name,
+                                    deviceAddress = peripheral.address,
+                                    onClick = {
+                                        onEvent(
+                                            UiEvent.OnDeviceClick(
+                                                peripheral.address,
+                                                services.first().profile
+                                            )
+                                        )
+                                    },
+                                )
+                            }
+                            // Case 2: Show the first *non-Battery* profile.
+                            // This ensures only one service is shown per peripheral when multiple services are available.
+                            services.firstOrNull { it.profile != Profile.BATTERY }
+                                ?.let { serviceManager ->
+                                    when (serviceManager.profile) {
+                                        Profile.HRS -> FeatureButton(
+                                            iconId = R.drawable.ic_hrs,
+                                            description = R.string.hrs_module_full,
+                                            deviceName = peripheral.name,
+                                            profileNames = services.map { it.profile.toString() },
+                                            deviceAddress = peripheral.address,
+                                            onClick = {
+                                                onEvent(
+                                                    UiEvent.OnDeviceClick(
+                                                        peripheral.address,
+                                                        serviceManager.profile
+                                                    )
+                                                )
+                                            },
+                                        )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                                        Profile.HTS -> FeatureButton(
+                                            iconId = R.drawable.ic_hts,
+                                            description = R.string.hts_module_full,
+                                            deviceName = peripheral.name,
+                                            deviceAddress = peripheral.address,
+                                            profileNames = services.map { it.profile.toString() },
+                                            onClick = {
+                                                onEvent(
+                                                    UiEvent.OnDeviceClick(
+                                                        peripheral.address,
+                                                        serviceManager.profile
+                                                    )
+                                                )
+                                            },
+                                        )
 
-                FeatureButton(R.drawable.ic_gls, R.string.gls_module, R.string.gls_module_full) {
-                    viewModel.openProfile(GLSDestinationId)
-                    viewModel.logEvent(ProfileOpenEvent(Profile.GLS))
-                }
+                                        Profile.BPS -> FeatureButton(
+                                            iconId = R.drawable.ic_bps,
+                                            description = R.string.bps_module_full,
+                                            deviceName = peripheral.name,
+                                            deviceAddress = peripheral.address,
+                                            profileNames = services.map { it.profile.toString() },
+                                            onClick = {
+                                                onEvent(
+                                                    UiEvent.OnDeviceClick(
+                                                        peripheral.address,
+                                                        serviceManager.profile
+                                                    )
+                                                )
+                                            },
+                                        )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                                        Profile.GLS -> FeatureButton(
+                                            iconId = R.drawable.ic_gls,
+                                            description = R.string.gls_module_full,
+                                            deviceName = peripheral.name,
+                                            deviceAddress = peripheral.address,
+                                            profileNames = services.map { it.profile.toString() },
+                                            onClick = {
+                                                onEvent(
+                                                    UiEvent.OnDeviceClick(
+                                                        peripheral.address,
+                                                        serviceManager.profile
+                                                    )
+                                                )
+                                            },
+                                        )
 
-                FeatureButton(R.drawable.ic_bps, R.string.bps_module, R.string.bps_module_full) {
-                    viewModel.openProfile(BPSDestinationId)
-                    viewModel.logEvent(ProfileOpenEvent(Profile.BPS))
-                }
+                                        Profile.CGM -> FeatureButton(
+                                            iconId = R.drawable.ic_cgm,
+                                            description = R.string.cgm_module_full,
+                                            deviceName = peripheral.name,
+                                            deviceAddress = peripheral.address,
+                                            profileNames = services.map { it.profile.toString() },
+                                            onClick = {
+                                                onEvent(
+                                                    UiEvent.OnDeviceClick(
+                                                        peripheral.address,
+                                                        serviceManager.profile
+                                                    )
+                                                )
+                                            },
+                                        )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                                        Profile.RSCS -> FeatureButton(
+                                            iconId = R.drawable.ic_rscs,
+                                            description = R.string.rscs_module_full,
+                                            deviceName = peripheral.name,
+                                            deviceAddress = peripheral.address,
+                                            profileNames = services.map { it.profile.toString() },
+                                            onClick = {
+                                                onEvent(
+                                                    UiEvent.OnDeviceClick(
+                                                        peripheral.address,
+                                                        serviceManager.profile
+                                                    )
+                                                )
+                                            },
+                                        )
 
-                Text(
-                    text = stringResource(id = R.string.service_profiles),
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                                        Profile.DFS -> FeatureButton(
+                                            iconId = R.drawable.ic_distance,
+                                            description = R.string.direction_module_full,
+                                            deviceName = peripheral.name,
+                                            deviceAddress = peripheral.address,
+                                            profileNames = services.map { it.profile.toString() },
+                                            onClick = {
+                                                onEvent(
+                                                    UiEvent.OnDeviceClick(
+                                                        peripheral.address,
+                                                        serviceManager.profile
+                                                    )
+                                                )
+                                            },
+                                        )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                                        Profile.CSC -> FeatureButton(
+                                            iconId = R.drawable.ic_csc,
+                                            description = R.string.csc_module_full,
+                                            deviceName = peripheral.name,
+                                            deviceAddress = peripheral.address,
+                                            profileNames = services.map { it.profile.toString() },
+                                            onClick = {
+                                                onEvent(
+                                                    UiEvent.OnDeviceClick(
+                                                        peripheral.address,
+                                                        serviceManager.profile
+                                                    )
+                                                )
+                                            },
+                                        )
 
-                FeatureButton(
-                    R.drawable.ic_csc,
-                    R.string.csc_module,
-                    R.string.csc_module_full,
-                    state.isCSCModuleRunning
-                ) {
-                    viewModel.openProfile(CSCDestinationId)
-                    viewModel.logEvent(ProfileOpenEvent(Profile.CSC))
-                }
+                                        Profile.THROUGHPUT -> {
+                                            FeatureButton(
+                                                iconId = Icons.Default.SyncAlt,
+                                                description = R.string.throughput_module,
+                                                deviceName = peripheral.name,
+                                                deviceAddress = peripheral.address,
+                                                profileNames = services.map { it.profile.toString() },
+                                                onClick = {
+                                                    onEvent(
+                                                        UiEvent.OnDeviceClick(
+                                                            peripheral.address,
+                                                            serviceManager.profile
+                                                        )
+                                                    )
+                                                },
+                                            )
+                                        }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                                        Profile.UART -> {
+                                            FeatureButton(
+                                                iconId = R.drawable.ic_uart,
+                                                description = R.string.uart_module_full,
+                                                deviceName = peripheral.name,
+                                                deviceAddress = peripheral.address,
+                                                profileNames = services.map { it.profile.toString() },
+                                                onClick = {
+                                                    onEvent(
+                                                        UiEvent.OnDeviceClick(
+                                                            peripheral.address,
+                                                            serviceManager.profile
+                                                        )
+                                                    )
+                                                },
+                                            )
+                                        }
 
-                FeatureButton(
-                    R.drawable.ic_hrs,
-                    R.string.hrs_module,
-                    R.string.hrs_module_full,
-                    state.isHRSModuleRunning
-                ) {
-                    viewModel.openProfile(HRSDestinationId)
-                    viewModel.logEvent(ProfileOpenEvent(Profile.HRS))
-                }
+                                        Profile.CHANNEL_SOUNDING -> {
+                                            FeatureButton(
+                                                iconId = Icons.Default.SocialDistance,
+                                                description = R.string.channel_sounding_module,
+                                                deviceName = peripheral.name,
+                                                deviceAddress = peripheral.address,
+                                                profileNames = services.map { it.profile.toString() },
+                                                onClick = {
+                                                    onEvent(
+                                                        UiEvent.OnDeviceClick(
+                                                            peripheral.address,
+                                                            serviceManager.profile
+                                                        )
+                                                    )
+                                                },
+                                            )
+                                        }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                                        Profile.LBS -> {
+                                            FeatureButton(
+                                                iconId = Icons.Default.Lightbulb,
+                                                description = R.string.lbs_blinky_module,
+                                                deviceName = peripheral.name,
+                                                deviceAddress = peripheral.address,
+                                                profileNames = services.map { it.profile.toString() },
+                                                onClick = {
+                                                    onEvent(
+                                                        UiEvent.OnDeviceClick(
+                                                            peripheral.address,
+                                                            serviceManager.profile
+                                                        )
+                                                    )
+                                                },
+                                            )
+                                        }
 
-                FeatureButton(
-                    R.drawable.ic_hts,
-                    R.string.hts_module,
-                    R.string.hts_module_full,
-                    state.isHTSModuleRunning
-                ) {
-                    viewModel.openProfile(HTSDestinationId)
-                    viewModel.logEvent(ProfileOpenEvent(Profile.HTS))
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                FeatureButton(
-                    R.drawable.ic_rscs,
-                    R.string.rscs_module,
-                    R.string.rscs_module_full,
-                    state.isRSCSModuleRunning
-                ) {
-                    viewModel.openProfile(RSCSDestinationId)
-                    viewModel.logEvent(ProfileOpenEvent(Profile.RSCS))
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                FeatureButton(
-                    R.drawable.ic_cgm,
-                    R.string.cgm_module,
-                    R.string.cgm_module_full,
-                    state.isCGMModuleRunning
-                ) {
-                    viewModel.openProfile(CGMSDestinationId)
-                    viewModel.logEvent(ProfileOpenEvent(Profile.CGMS))
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                FeatureButton(
-                    R.drawable.ic_prx,
-                    R.string.prx_module,
-                    R.string.prx_module_full,
-                    state.isPRXModuleRunning
-                ) {
-                    viewModel.openProfile(PRXDestinationId)
-                    viewModel.logEvent(ProfileOpenEvent(Profile.PRX))
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = stringResource(id = R.string.utils_services),
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                FeatureButton(
-                    R.drawable.ic_uart,
-                    R.string.uart_module,
-                    R.string.uart_module_full,
-                    state.isUARTModuleRunning
-                ) {
-                    viewModel.openProfile(UARTDestinationId)
-                    viewModel.logEvent(ProfileOpenEvent(Profile.UART))
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                val uriHandler = LocalUriHandler.current
-                val context = LocalContext.current
-                val packageManger = context.packageManager
-
-                val description = packageManger.getLaunchIntentForPackage(DFU_PACKAGE_NAME)?.let {
-                    R.string.dfu_module_info
-                } ?: R.string.dfu_module_install
-
-                FeatureButton(R.drawable.ic_dfu, R.string.dfu_module, R.string.dfu_module_full, null, description) {
-                    val intent = packageManger.getLaunchIntentForPackage(DFU_PACKAGE_NAME)
-                    if (intent != null) {
-                        context.startActivity(intent)
-                    } else {
-                        uriHandler.openUri(DFU_LINK)
+                                        else -> {
+                                            // TODO: Add more profiles
+                                        }
+                                    }
+                                }
+                        }
                     }
-                    viewModel.logEvent(ProfileOpenEvent(Link.DFU))
+                } else {
+                    NoConnectedDeviceView()
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                val loggerDescription = packageManger.getLaunchIntentForPackage(LOGGER_PACKAGE_NAME)?.let {
-                    R.string.logger_module_info
-                } ?: R.string.dfu_module_install
-
-                FeatureButton(
-                    R.drawable.ic_logger,
-                    R.string.logger_module,
-                    R.string.logger_module_full,
-                    null,
-                    loggerDescription
-                ) {
-                    viewModel.openLogger()
-                    viewModel.logEvent(ProfileOpenEvent(Link.LOGGER))
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = BuildConfig.VERSION_NAME,
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
+            }
+            item {
+                Links { onEvent(it) }
             }
         }
     }

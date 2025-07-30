@@ -33,7 +33,6 @@
 <resources>
     <string name="app_name">nRF Toolbox</string>
 
-    <string name="dialog">Dialog</string>
     <string name="cancel">Cancel</string>
 
     <string name="go_up">Back</string>
@@ -44,4 +43,10 @@
 
     <string name="disconnect">Disconnect</string>
     <string name="field_battery">Battery</string>
+
+    <string name="discovering_services">Discovering services</string>
+    <string name="discovering_services_des">Please wait</string>
+
+    <string name="device_connecting">Connecting</string>
+    <string name="device_connecting_des">Please wait</string>
 </resources>

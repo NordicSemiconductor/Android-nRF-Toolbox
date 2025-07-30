@@ -11,10 +11,12 @@ It contains applications demonstrating standard Bluetooth LE profiles:
 * **Health Thermometer Monitor**,
 * **Glucose Monitor**,
 * **Continuous Glucose Monitor**,
-* **Proximity Monitor**
+* **Universal Asynchronous Receiver/Transmitter (UART)**,
+* **Throughput**,
+* **Direction Finder**,
+* **Blinky (LBS) Service**
 
-Since version 1.10.0 the *nRF Toolbox* also supports the **Nordic UART Service** which may be used
-for bidirectional text communication between devices.
+**_NOTE:_** The Proximity profile is not included in this version of the app. If you need it, please download the previous version.
 
 ### How to import to Android Studio
 

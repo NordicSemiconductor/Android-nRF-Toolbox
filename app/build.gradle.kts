@@ -31,9 +31,10 @@
 plugins {
     alias(libs.plugins.nordic.application.compose)
     alias(libs.plugins.nordic.hilt)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
-if (getGradle().getStartParameter().getTaskRequests().toString().contains("Release")) {
+if (getGradle().startParameter.taskRequests.toString().contains("Release")) {
     apply(plugin = "com.google.gms.google-services")
     apply(plugin = "com.google.firebase.crashlytics")
 }
@@ -43,44 +44,31 @@ android {
 }
 
 dependencies {
-    //Hilt requires to implement every module in the main app module
-    //https://github.com/google/dagger/issues/2123
-    implementation(project(":profile_bps"))
-    implementation(project(":profile_csc"))
-    implementation(project(":profile_cgms"))
-    implementation(project(":profile_gls"))
-    implementation(project(":profile_hrs"))
-    implementation(project(":profile_hts"))
-    implementation(project(":profile_prx"))
-    implementation(project(":profile_rscs"))
-
-    implementation(project(":profile_uart"))
-
     implementation(project(":lib_analytics"))
+    implementation(project(":profile-parsers"))
+    implementation(project(":profile_manager"))
+    implementation(project(":profile"))
+    implementation(project(":profile_data"))
     implementation(project(":lib_ui"))
     implementation(project(":lib_utils"))
-    implementation(project(":lib_service"))
-    implementation(project(":lib_scanner"))
 
-    implementation(libs.nordic.core)
-    implementation(libs.nordic.theme)
     implementation(libs.nordic.navigation)
-    implementation(libs.nordic.blek.uiscanner)
+    implementation(libs.nordic.theme)
     implementation(libs.nordic.logger)
-    implementation(libs.nordic.permissions.ble)
     implementation(libs.nordic.analytics)
-    
-    implementation(libs.nordic.blek.client)
+    implementation(libs.nordic.ui)
+    implementation(libs.nordic.core)
+    implementation(libs.nordic.scanner.ble)
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.compose.material.iconsExtended)
+    implementation(libs.androidx.compose.runtime)
 
     implementation(libs.androidx.hilt.navigation.compose)
 
     // Timber & SLF4J
     implementation (libs.slf4j.timber)
-    implementation(libs.nordic.log.timber)
+
+    implementation(libs.nordic.blek.client.android)
 }

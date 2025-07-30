@@ -31,21 +31,17 @@
 
 plugins {
     alias(libs.plugins.nordic.feature)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {
     namespace = "no.nordicsemi.android.ui"
-
-    testOptions {
-        unitTests.isIncludeAndroidResources = true
-    }
 }
 
 dependencies {
     implementation(libs.nordic.theme)
+    implementation(libs.nordic.ui)
     implementation(libs.nordic.logger)
-
-    implementation(libs.nordic.blek.client)
 
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.iconsExtended)

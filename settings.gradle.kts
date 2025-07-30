@@ -50,7 +50,7 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("libs") {
-            from("no.nordicsemi.android.gradle:version-catalog:2.4")
+            from("no.nordicsemi.android.gradle:version-catalog:2.9")
         }
     }
 }
@@ -58,22 +58,16 @@ dependencyResolutionManagement {
 rootProject.name = "Android-nRF-Toolbox"
 
 include(":app")
-
-include(":profile_bps")
-include(":profile_cgms")
-include(":profile_csc")
-include(":profile_gls")
-include(":profile_hrs")
-include(":profile_hts")
-include(":profile_prx")
-include(":profile_rscs")
-include(":profile_uart")
-
 include(":lib_analytics")
-include(":lib_scanner")
+include(":profile-parsers")
 include(":lib_service")
+include(":lib_storage")
 include(":lib_ui")
 include(":lib_utils")
+include(":profile")
+include(":profile_data")
+include(":profile_manager")
+include(":permissions-ranging")
 
 //if (file("../Android-Common-Libraries").exists()) {
 //    includeBuild("../Android-Common-Libraries")
