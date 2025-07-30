@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
@@ -53,8 +52,8 @@ internal class ProfileService : NotificationService() {
     private val _isMissingServices = MutableStateFlow(false)
     private val _disconnectionReason = MutableStateFlow<DeviceDisconnectionReason?>(null)
 
-    private var connectionJob: Job? = null
-    private var serviceHandlingJob: Job? = null
+    private val connectionJobs = mutableMapOf<String, Job>()
+    private val serviceHandlingJob = mutableMapOf<String, Job>()
 
     override fun onBind(intent: Intent): IBinder {
         super.onBind(intent)
@@ -138,9 +137,8 @@ internal class ProfileService : NotificationService() {
         override fun getConnectionState(address: String): Flow<ConnectionState>? {
             val peripheral = getPeripheralById(address) ?: return null
             return peripheral.state.also { stateFlow ->
-                // Since the initial state is Gatt closed, drop the first state.
-                connectionJob?.cancel()
-                connectionJob = stateFlow.drop(1).onEach { state ->
+                connectionJobs[address]?.cancel()
+                val job = stateFlow.onEach { state ->
                     when (state) {
                         ConnectionState.Connected -> {
                             _isMissingServices.tryEmit(false)
@@ -155,14 +153,18 @@ internal class ProfileService : NotificationService() {
                             _disconnectionReason.tryEmit(StateReason(state.reason))
                         }
 
-                        ConnectionState.Closed -> handleDisconnection(address)
-                        else -> { /* Handle other states if necessary. */
+                        ConnectionState.Closed -> return@onEach
+
+                        ConnectionState.Disconnecting -> {
+                            connectionJobs[address]?.cancel()
+                            handleDisconnection(address)
                         }
                     }
                 }.onCompletion {
-                    connectionJob?.cancel()
-                    connectionJob = null
+                    connectionJobs[address]?.cancel()
+                    connectionJobs.remove(address)
                 }.launchIn(lifecycleScope)
+                connectionJobs[address] = job
             }
         }
 
@@ -173,9 +175,7 @@ internal class ProfileService : NotificationService() {
      */
     private fun initiateConnection(deviceAddress: String) {
         centralManager.getPeripheralById(deviceAddress)?.let { peripheral ->
-            lifecycleScope.launch {
-                connectPeripheral(peripheral)
-            }
+            lifecycleScope.launch { connectPeripheral(peripheral) }
         }
     }
 
@@ -194,7 +194,8 @@ internal class ProfileService : NotificationService() {
     @OptIn(ExperimentalUuidApi::class)
     private fun discoverServices(peripheral: Peripheral) {
         val discoveredServices = mutableListOf<ServiceManager>()
-        serviceHandlingJob = peripheral.services().onEach { remoteServices ->
+        serviceHandlingJob[peripheral.address]?.cancel()
+        val job = peripheral.services().onEach { remoteServices ->
             remoteServices?.forEach { remoteService ->
                 val serviceManager = ServiceManagerFactory.createServiceManager(remoteService.uuid)
                 serviceManager?.let { manager ->
@@ -207,13 +208,9 @@ internal class ProfileService : NotificationService() {
 
                             if (requiresBonding) {
                                 peripheral.bondState
-                                    .onEach { state ->
-                                        if (state == BondState.NONE) {
-                                            peripheral.createBond()
-                                        }
-                                    }
+                                    .onEach { if (it == BondState.NONE) peripheral.createBond() }
                                     .filter { it == BondState.BONDED }
-                                    .first() // suspend until bonded
+                                    .first()
                             }
 
                             manager.observeServiceInteractions(
@@ -232,8 +229,8 @@ internal class ProfileService : NotificationService() {
                 discoveredServices.isEmpty() -> {
                     if (remoteServices?.isNotEmpty() == true) {
                         _isMissingServices.tryEmit(true)
-                        serviceHandlingJob?.cancel()
-                        serviceHandlingJob = null
+                        serviceHandlingJob[peripheral.address]?.cancel()
+                        serviceHandlingJob.remove(peripheral.address)
                     }
                 }
 
@@ -244,10 +241,11 @@ internal class ProfileService : NotificationService() {
             }
         }
             .onCompletion {
-                serviceHandlingJob?.cancel()
-                serviceHandlingJob = null
+                serviceHandlingJob[peripheral.address]?.cancel()
+                serviceHandlingJob.remove(peripheral.address)
             }
             .launchIn(lifecycleScope)
+        serviceHandlingJob[peripheral.address] = job
     }
 
     /**
@@ -268,7 +266,7 @@ internal class ProfileService : NotificationService() {
             currentDevices.remove(peripheral)
             _connectedDevices.tryEmit(currentDevices)
         }
-        clearJobs()
+        clearJobs(peripheral)
         clearFlags()
         stopServiceIfNoDevices()
     }
@@ -276,11 +274,13 @@ internal class ProfileService : NotificationService() {
     /**
      * Clear any active jobs for connection and service handling.
      */
-    private fun clearJobs() {
-        connectionJob?.cancel()
-        connectionJob = null
-        serviceHandlingJob?.cancel()
-        serviceHandlingJob = null
+    private fun clearJobs(peripheral: String) {
+        connectionJobs[peripheral]?.cancel()
+        connectionJobs.remove(peripheral)
+
+        serviceHandlingJob[peripheral]?.cancel()
+        serviceHandlingJob.remove(peripheral)
+
     }
 
     /**
@@ -288,8 +288,8 @@ internal class ProfileService : NotificationService() {
      */
     private fun stopServiceIfNoDevices() {
         if (_connectedDevices.value.isEmpty()) {
-            stopForegroundService() //// Remove notification from the foreground service
-            stopSelf() // Stop the service
+            stopForegroundService()
+            stopSelf()
         }
     }
 
