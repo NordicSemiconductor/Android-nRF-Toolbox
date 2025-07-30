@@ -1,9 +1,7 @@
 package no.nordicsemi.android.toolbox.profile.view.uart
 
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -18,18 +16,10 @@ internal fun UARTScreen(maxValueLength: Int?) {
     val uartViewModel = hiltViewModel<UartViewModel>()
     val state by uartViewModel.uartState.collectAsStateWithLifecycle()
     val onEvent: (UARTEvent) -> Unit = { uartViewModel.onEvent(it) }
-    val imeState = rememberImeState()
-    val scrollState = rememberScrollState()
 
     LaunchedEffect(key1 = maxValueLength != null) {
         if (maxValueLength != null)
             onEvent(UARTEvent.SetMaxValueLength(maxValueLength))
-    }
-
-    LaunchedEffect(key1 = imeState.value) {
-        if (imeState.value) {
-            scrollState.animateScrollTo(scrollState.maxValue, tween(300))
-        }
     }
 
     Column(
