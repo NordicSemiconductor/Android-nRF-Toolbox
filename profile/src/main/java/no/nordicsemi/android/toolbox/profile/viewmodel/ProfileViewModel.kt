@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -251,7 +252,7 @@ internal class ProfileViewModel @Inject constructor(
 
             is ConnectionEvent.OnRetryClicked -> reconnectDevice(event.device)
             ConnectionEvent.OpenLoggerEvent -> openLogger()
-            ConnectionEvent.RequestMaxValueLength -> viewModelScope.launch {
+            ConnectionEvent.RequestMaxValueLength -> viewModelScope.launch(Dispatchers.IO) {
                 // Request maximum MTU size if it is not already set.
                 val mtuSize = getServiceApi()?.getMaxWriteValue(address)
                 _deviceState.update { currentState ->
