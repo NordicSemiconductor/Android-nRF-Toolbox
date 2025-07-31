@@ -29,9 +29,15 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+<<<<<<<< HEAD:lib_profile/src/main/java/no/nordicsemi/android/lib/profile/hts/HTSDataParser.kt
+package no.nordicsemi.android.lib.profile.hts
+
+import no.nordicsemi.android.lib.profile.date.DateTimeParser
+========
 package no.nordicsemi.android.toolbox.profile.parser.hts
 
 import no.nordicsemi.android.toolbox.profile.parser.date.DateTimeParser
+>>>>>>>> main:profile-parsers/src/main/java/no/nordicsemi/android/toolbox/profile/parser/hts/HTSDataParser.kt
 import no.nordicsemi.kotlin.data.FloatFormat
 import no.nordicsemi.kotlin.data.IntFormat
 import no.nordicsemi.kotlin.data.getFloat

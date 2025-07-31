@@ -29,7 +29,11 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+<<<<<<<< HEAD:lib_profile/src/main/java/no/nordicsemi/android/lib/profile/battery/BatteryLevelParser.kt
+package no.nordicsemi.android.lib.profile.battery
+========
 package no.nordicsemi.android.toolbox.profile.parser.battery
+>>>>>>>> main:profile-parsers/src/main/java/no/nordicsemi/android/toolbox/profile/parser/battery/BatteryLevelParser.kt
 
 object BatteryLevelParser {
 
