@@ -1,7 +1,6 @@
 package no.nordicsemi.android.toolbox.profile.view.directionFinder
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,8 +8,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
@@ -28,6 +28,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -35,11 +36,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.lib.profile.directionFinder.PeripheralBluetoothAddress
-import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.PeripheralBluetoothAddress
 import no.nordicsemi.android.toolbox.profile.R
+import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
 import no.nordicsemi.android.toolbox.profile.viewmodel.DFSEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiEvent
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.internal.EmptyView
 
@@ -47,9 +47,10 @@ import no.nordicsemi.android.ui.view.internal.EmptyView
 internal fun SectionBluetoothDeviceComponent(
     data: DFSServiceData,
     selectedDevice: PeripheralBluetoothAddress?,
-    onEvent: (ProfileUiEvent) -> Unit
+    onEvent: (DFSEvent) -> Unit
 ) {
     val devices = data.data.keys.toList()
+        .filter { it.address.lowercase() != PeripheralBluetoothAddress.TEST.address.lowercase() } // ignore case with TEST address
 
     when {
         selectedDevice == null && devices.isNotEmpty() -> ScreenSection {
@@ -66,17 +67,17 @@ internal fun SectionBluetoothDeviceComponent(
         }
 
         else -> {
-            MeasuredDevices(selectedDevice, devices, onEvent)
+            SelectedDevices(selectedDevice, devices, onEvent)
         }
     }
 
 }
 
 @Composable
-private fun MeasuredDevices(
+private fun SelectedDevices(
     selectedDevice: PeripheralBluetoothAddress,
     devices: List<PeripheralBluetoothAddress>,
-    onEvent: (ProfileUiEvent) -> Unit
+    onEvent: (DFSEvent) -> Unit
 ) {
     var showDropdownMenu by rememberSaveable { mutableStateOf(false) }
     var width by rememberSaveable { mutableIntStateOf(0) }
@@ -84,6 +85,7 @@ private fun MeasuredDevices(
 
     OutlinedCard(
         modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
             .clickable { if (devices.size > 1) showDropdownMenu = true }
             .onSizeChanged { width = it.width }
     ) {
@@ -100,27 +102,38 @@ private fun MeasuredDevices(
                 Image(
                     painter = painterResource(id = R.drawable.ic_elevation),
                     contentDescription = null,
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary),
-                    modifier = Modifier
-                        .background(
-                            color = MaterialTheme.colorScheme.secondary,
-                            shape = CircleShape
-                        )
-                        .padding(8.dp)
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
+                    modifier = Modifier.size(28.dp)
                 )
 
-                Column {
+                Column(
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
                     Text(
-                        text = stringResource(id = R.string.measured_device),
-                        style = MaterialTheme.typography.titleMedium
+                        text = stringResource(id = R.string.selected_device),
                     )
-                    Text(text = selectedDevice.address, style = MaterialTheme.typography.bodyMedium)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(
+                            text = selectedDevice.address.uppercase(),
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Text(
+                            text = "(${selectedDevice.type.name})",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
                 }
 
-                Spacer(Modifier.weight(1f))
-                if (devices.size > 1) Icon(icon, contentDescription = "")
+                // Don't show icon if only one device is available
+                if (devices.size > 1) {
+                    Spacer(Modifier.weight(1f))
+                    Icon(icon, contentDescription = "")
+                }
             }
-
         }
 
         DropdownMenu(
@@ -158,7 +171,7 @@ private fun MeasuredDevices(
 @Preview(showBackground = true)
 @Composable
 private fun MeasuredDevicesPreview() {
-    MeasuredDevices(
+    SelectedDevices(
         PeripheralBluetoothAddress.TEST,
         devices = listOf(
             PeripheralBluetoothAddress.TEST,
@@ -182,16 +195,14 @@ internal fun NotSelectedView(
     onClick: (PeripheralBluetoothAddress) -> Unit
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
             text = stringResource(id = R.string.devices),
             style = MaterialTheme.typography.titleLarge
         )
 
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
+        Column {
             devices.forEach { address ->
                 BluetoothDeviceView(
                     device = address,
@@ -229,20 +240,19 @@ internal fun BluetoothDeviceView(
     onClick: (PeripheralBluetoothAddress) -> Unit
 ) {
     Row(
-        modifier = Modifier.clickable { onClick(device) },
+        modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
+            .clickable { onClick(device) }
+            .padding(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
             painter = painterResource(id = R.drawable.ic_elevation),
             contentDescription = null,
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary),
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
             modifier = Modifier
-                .background(
-                    color = MaterialTheme.colorScheme.secondary,
-                    shape = CircleShape
-                )
-                .padding(8.dp)
+                .size(28.dp)
         )
 
         Column(modifier) {

@@ -2,52 +2,33 @@ package no.nordicsemi.android.toolbox.profile.view.uart
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.toolbox.profile.data.UARTServiceData
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.toolbox.profile.viewmodel.UARTEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.UartViewModel
 
 @Composable
-internal fun UARTScreen(
-    state: UARTServiceData,
-    onEvent: (UARTEvent) -> Unit,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        MacroSection(state.uartViewState, onEvent)
+internal fun UARTScreen(maxValueLength: Int?) {
+    val uartViewModel = hiltViewModel<UartViewModel>()
+    val state by uartViewModel.uartState.collectAsStateWithLifecycle()
+    val onEvent: (UARTEvent) -> Unit = { uartViewModel.onEvent(it) }
 
-        Spacer(modifier = Modifier.weight(1f))
-
-        UARTContentView(state, onEvent)
+    LaunchedEffect(key1 = maxValueLength != null) {
+        if (maxValueLength != null)
+            onEvent(UARTEvent.SetMaxValueLength(maxValueLength))
     }
-}
 
-@Preview(showBackground = true)
-@Composable
-private fun UARTScreenPreview() {
-    UARTScreen(UARTServiceData()) {}
-}
-
-@Composable
-private fun UARTContentView(
-    state: UARTServiceData,
-    onEvent: (UARTEvent) -> Unit,
-) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        OutlinedCard {
-            InputSection(onEvent = onEvent)
-            HorizontalDivider()
-            OutputSection(state.messages) {
-                onEvent(it)
-            }
-        }
+        MacroSection(state.uartViewState, onEvent)
+        OutputSection(
+            records = state.messages,
+            onEvent = onEvent
+        )
     }
 }

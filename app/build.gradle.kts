@@ -45,12 +45,12 @@ android {
 
 dependencies {
     implementation(project(":lib_analytics"))
-    implementation(project(":lib_profile"))
-    implementation(project(":lib_service"))
-    implementation(project(":scanner"))
+    implementation(project(":profile-parsers"))
+    implementation(project(":profile_manager"))
     implementation(project(":profile"))
     implementation(project(":profile_data"))
     implementation(project(":lib_ui"))
+    implementation(project(":lib_utils"))
 
     implementation(libs.nordic.navigation)
     implementation(libs.nordic.theme)
@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.nordic.analytics)
     implementation(libs.nordic.ui)
     implementation(libs.nordic.core)
+    implementation(libs.nordic.scanner.ble)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

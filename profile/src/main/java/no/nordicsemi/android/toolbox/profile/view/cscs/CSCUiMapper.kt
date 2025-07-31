@@ -1,7 +1,7 @@
 package no.nordicsemi.android.toolbox.profile.view.cscs
 
-import no.nordicsemi.android.lib.profile.csc.CSCData
-import no.nordicsemi.android.lib.profile.csc.SpeedUnit
+import no.nordicsemi.android.toolbox.profile.parser.csc.CSCData
+import no.nordicsemi.android.toolbox.profile.parser.csc.SpeedUnit
 import java.util.Locale
 
 internal fun CSCData.speedWithSpeedUnit(speedUnit: SpeedUnit): Float {

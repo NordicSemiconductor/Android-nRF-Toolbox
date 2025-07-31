@@ -31,7 +31,6 @@
 
 plugins {
     alias(libs.plugins.nordic.feature)
-    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -39,15 +38,13 @@ android {
 }
 
 dependencies {
-    implementation(project(":profile_data"))
-    implementation(project(":lib_profile"))
     implementation(project(":lib_ui"))
     implementation(project(":lib_utils"))
+    implementation(project(":profile_manager"))
 
     implementation(libs.nordic.logger)
     implementation(libs.nordic.log.timber)
-
-    implementation("no.nordicsemi.kotlin.ble:client-android")
+    implementation(libs.nordic.blek.client.android)
 
     implementation(libs.androidx.lifecycle.service)
     implementation(libs.androidx.localbroadcastmanager)

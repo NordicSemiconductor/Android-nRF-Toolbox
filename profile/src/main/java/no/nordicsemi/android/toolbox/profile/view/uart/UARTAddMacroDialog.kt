@@ -1,5 +1,6 @@
 package no.nordicsemi.android.toolbox.profile.view.uart
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,6 +27,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -61,7 +63,10 @@ internal fun UARTAddMacroDialog(
         onDismissRequest = { onEvent(UARTEvent.OnEditFinished) },
         dismissButton = {
             TextButton(onClick = { onEvent(UARTEvent.OnDeleteMacro) }) {
-                Text(stringResource(id = R.string.uart_macro_dialog_delete))
+                Text(
+                    stringResource(id = R.string.uart_macro_dialog_delete),
+                    color = MaterialTheme.colorScheme.error
+                )
             }
         },
         confirmButton = {
@@ -85,7 +90,9 @@ internal fun UARTAddMacroDialog(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = stringResource(id = R.string.uart_macro_dialog_title),
+                    text = macro?.command
+                        ?.let { stringResource(id = R.string.uart_macro_dialog_title_edit) }
+                        ?: stringResource(id = R.string.uart_macro_dialog_title),
                     style = MaterialTheme.typography.headlineSmall
                 )
             }
@@ -175,7 +182,7 @@ private fun NewLineCharSection(checkedItem: MacroEol, onItemClick: (MacroEol) ->
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = "EOL",
+            text = "End of Line (EOL)",
             style = MaterialTheme.typography.labelLarge,
             modifier = Modifier.alpha(0.5f)
         )
@@ -207,17 +214,22 @@ private fun EolTab(
             MacroEol.entries.forEachIndexed { index, it ->
                 val selected = it == checkedItem
                 val clip = if (selected) RoundedCornerShape(8.dp) else RoundedCornerShape(0.dp)
-                val (color, textColor) = if (selected) {
-                    MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
+                val textColor = if (selected) {
+                    MaterialTheme.colorScheme.onPrimary
                 } else {
-                    MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.onSurface
+                    MaterialTheme.colorScheme.onSurface
                 }
+                val backgroundColor by animateColorAsState(
+                    if (selected) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.surface,
+                    label = "BackgroundAnimation"
+                )
 
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .clip(clip)
-                        .background(color = color)
+                        .background(color = backgroundColor)
                         .clickable { onItemClick(it) },
                     contentAlignment = Alignment.Center,
                 ) {

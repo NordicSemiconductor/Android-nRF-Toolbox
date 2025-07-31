@@ -10,6 +10,6 @@ fun toReason(reason:  Reason): String =
         Reason.TerminateLocalHost -> "Device disconnected by the local host."
         Reason.TerminatePeerUser -> "Device disconnected by the peer user."
         is Reason.Timeout -> "Connection attempt timed out with ${reason.duration}."
-        is Reason.Unknown -> "Device disconnected with unknown reason with status ${reason.status}."
+        is Reason.Unknown -> "Oops...! Connection went on a coffee break."
         Reason.UnsupportedAddress -> "Device disconnected due to unsupported address."
     }

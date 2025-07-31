@@ -8,32 +8,32 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.lib.profile.bps.BPMStatus
-import no.nordicsemi.android.lib.profile.bps.BloodPressureFeatureData
-import no.nordicsemi.android.lib.profile.bps.BloodPressureMeasurementData
-import no.nordicsemi.android.lib.profile.bps.BloodPressureType
-import no.nordicsemi.android.lib.profile.bps.IntermediateCuffPressureData
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import no.nordicsemi.android.toolbox.profile.parser.bps.BloodPressureFeatureData
+import no.nordicsemi.android.toolbox.profile.parser.bps.BloodPressureMeasurementData
+import no.nordicsemi.android.toolbox.profile.parser.bps.BloodPressureType
+import no.nordicsemi.android.toolbox.profile.parser.bps.IntermediateCuffPressureData
 import no.nordicsemi.android.toolbox.profile.R
-import no.nordicsemi.android.toolbox.profile.data.BPSServiceData
-import no.nordicsemi.android.toolbox.profile.data.Profile
+import no.nordicsemi.android.toolbox.profile.viewmodel.BPSViewModel
 import no.nordicsemi.android.ui.view.FeatureSupported
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionRow
 import no.nordicsemi.android.ui.view.SectionTitle
-import no.nordicsemi.android.ui.view.dialog.toBooleanText
-import java.util.Calendar
-
 
 @Composable
-internal fun BPSScreen(
-    serviceData: BPSServiceData
-) {
+internal fun BPSScreen() {
+    val bpsViewModel = hiltViewModel<BPSViewModel>()
+    val serviceData by bpsViewModel.bpsServiceState.collectAsStateWithLifecycle()
+
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
@@ -53,6 +53,7 @@ internal fun BPSScreen(
                     KeyValueColumn(
                         stringResource(id = R.string.bps_pulse),
                         it,
+                        verticalSpacing = 4.dp,
                         modifier = Modifier.padding(start = 16.dp)
                     )
                 }
@@ -60,6 +61,13 @@ internal fun BPSScreen(
 
             serviceData.bloodPressureFeature?.let {
                 HorizontalDivider()
+                Text(
+                    "Blood pressure features",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.secondary
+                )
                 BloodPressureFeatureView(it)
             }
 
@@ -67,17 +75,41 @@ internal fun BPSScreen(
                 serviceData.bloodPressureMeasurement == null &&
                 serviceData.bloodPressureFeature == null
             ) {
-                Text(
-                    stringResource(id = R.string.no_data_info),
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                WaitingForMeasurementView()
             }
         }
     }
 }
 
 @Composable
-private fun BloodPressureFeatureView(it: BloodPressureFeatureData) {
+internal fun WaitingForMeasurementView() {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+    ) {
+        Text(
+            text = stringResource(id = R.string.no_data_info_title),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = stringResource(id = R.string.no_data_info),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun WaitingForMeasurementViewPreview() {
+    WaitingForMeasurementView()
+}
+
+@Composable
+internal fun BloodPressureFeatureView(it: BloodPressureFeatureData) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.padding(start = 16.dp, end = 16.dp)
@@ -100,54 +132,8 @@ private fun BloodPressureFeatureView(it: BloodPressureFeatureData) {
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-private fun BPSScreenPreview() {
-    val sampleStatus = BPMStatus(
-        bodyMovementDetected = true,
-        cuffTooLose = false,
-        irregularPulseDetected = true,
-        pulseRateInRange = false,
-        pulseRateExceedsUpperLimit = true,
-        pulseRateIsLessThenLowerLimit = false,
-        improperMeasurementPosition = true
-    )
-
-    val sampleData = BloodPressureMeasurementData(
-        systolic = 12.0f,
-        diastolic = 15.0f,
-        meanArterialPressure = 10.0f,
-        unit = BloodPressureType.UNIT_MMHG,
-        pulseRate = 12.0f,
-        userID = 15,
-        status = sampleStatus,
-        calendar = Calendar.getInstance()
-    )
-    BPSScreen(
-        serviceData = BPSServiceData(
-            profile = Profile.BPS,
-            bloodPressureMeasurement = sampleData,
-            intermediateCuffPressure = IntermediateCuffPressureData(
-                unit = BloodPressureType.UNIT_MMHG,
-                pulseRate = 12.0f,
-                userID = 15,
-                status = sampleStatus,
-                calendar = Calendar.getInstance(),
-                cuffPressure = 25.5f
-            ),
-            bloodPressureFeature = BloodPressureFeatureData(
-                bodyMovementDetection = true,
-                cuffFitDetection = true,
-                irregularPulseDetection = true,
-                pulseRateRangeDetection = true,
-                measurementPositionDetection = true
-            )
-        )
-    )
-}
-
-@Composable
-private fun BloodPressureView(state: BloodPressureMeasurementData) {
+internal fun BloodPressureView(state: BloodPressureMeasurementData) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.padding(start = 16.dp, end = 16.dp)
@@ -178,7 +164,7 @@ private fun BloodPressureView(state: BloodPressureMeasurementData) {
                 stringResource(R.string.bps_timestamp, it)
             }?.let {
                 KeyValueColumn(
-                    "Date/Time",
+                    "Date & Time",
                     it
                 )
             }
@@ -186,53 +172,40 @@ private fun BloodPressureView(state: BloodPressureMeasurementData) {
     }
     state.status?.let {
         HorizontalDivider()
+        Text(
+            "BPM status",
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.secondary
+        )
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.padding(start = 16.dp, end = 16.dp)
         ) {
             if (it.bodyMovementDetected) {
-                KeyValueColumn(
-                    stringResource(id = R.string.body_movement_detected),
-                    it.bodyMovementDetected.toBooleanText()
-                )
+                FeatureSupported(stringResource(id = R.string.body_movement_detected))
+
             }
             if (it.irregularPulseDetected) {
-                KeyValueColumn(
-                    stringResource(id = R.string.irregular_heart_rate_detected),
-                    it.irregularPulseDetected.toBooleanText()
-                )
+                FeatureSupported(stringResource(id = R.string.irregular_heart_rate_detected))
             }
 
             if (it.cuffTooLose) {
-                KeyValueColumn(
-                    "Cuff Too Lose",
-                    it.cuffTooLose.toBooleanText()
-                )
+                FeatureSupported("Cuff Too Lose")
             }
             if (it.pulseRateExceedsUpperLimit) {
-                KeyValueColumn(
-                    stringResource(id = R.string.pulse_rate_higher_limit),
-                    it.pulseRateExceedsUpperLimit.toBooleanText()
-                )
+                FeatureSupported(stringResource(id = R.string.pulse_rate_higher_limit))
             }
             if (it.pulseRateInRange) {
-                KeyValueColumn(
-                    stringResource(id = R.string.pulse_rate_detected),
-                    it.pulseRateInRange.toBooleanText()
-                )
+                FeatureSupported(stringResource(id = R.string.pulse_rate_detected))
             }
             if (it.improperMeasurementPosition) {
-                KeyValueColumn(
-                    stringResource(id = R.string.improper_measurement_position),
-                    it.improperMeasurementPosition.toBooleanText()
-                )
+                FeatureSupported(stringResource(id = R.string.improper_measurement_position))
             }
 
             if (it.pulseRateIsLessThenLowerLimit) {
-                KeyValueColumn(
-                    stringResource(id = R.string.pulse_rate_lower_limit),
-                    it.pulseRateIsLessThenLowerLimit.toBooleanText()
-                )
+                FeatureSupported(stringResource(id = R.string.pulse_rate_lower_limit))
             }
         }
     }

@@ -25,16 +25,16 @@ internal fun DistanceView(value: Int, range: Range) {
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = String.format(Locale.US, "%ddm", range.from))
+            Text(text = String.format(Locale.US, "%d dm", range.from))
 
             val diff = range.to - range.from
             val part = (diff / 4)
             if (part > 0) {
-                Text(text = String.format(Locale.US, "%ddm", range.from + part))
-                Text(text = String.format(Locale.US, "%ddm", range.from + 2 * part))
+                Text(text = String.format(Locale.US, "% ddm", range.from + part))
+                Text(text = String.format(Locale.US, "%d dm", range.from + 2 * part))
             }
 
-            Text(text = String.format(Locale.US, "%ddm", range.to))
+            Text(text = String.format(Locale.US, "%d dm", range.to))
         }
     }
 }

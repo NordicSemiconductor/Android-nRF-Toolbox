@@ -9,14 +9,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -28,9 +26,10 @@ import no.nordicsemi.android.nrftoolbox.R
 @Composable
 internal fun FeatureButton(
     @DrawableRes iconId: Int,
-    @StringRes profileName: Int,
+    @StringRes description: Int,
+    profileNames: List<String> = listOf(stringResource(description)),
     deviceName: String?,
-    @StringRes description: Int? = null,
+    deviceAddress: String,
     onClick: () -> Unit
 ) {
     OutlinedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
@@ -43,38 +42,35 @@ internal fun FeatureButton(
         ) {
             Image(
                 painter = painterResource(iconId),
-                contentDescription = stringResource(id = profileName),
+                contentDescription = stringResource(id = description),
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                 modifier = Modifier
                     .size(40.dp)
-                    .clip(CircleShape)
             )
 
             Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(id = profileName),
+                    text = deviceName ?: stringResource(R.string.unknown_device),
                     style = MaterialTheme.typography.titleMedium,
                 )
-
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = deviceName ?: stringResource(R.string.unknown_device),
+                    text = profileNames.joinToString(", "),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                description?.let {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(id = it),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = deviceAddress,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
@@ -86,16 +82,19 @@ private fun FeatureButtonPreview() {
     FeatureButton(
         R.drawable.ic_csc,
         R.string.csc_module_full,
+        listOf("Cycling Speed and Cadence", "Cycling Speed Sensor"),
         "Testing peripheral",
+        deviceAddress = "AA:BB:CC:DD:EE:FF",
     ) { }
 }
 
 @Composable
 internal fun FeatureButton(
     iconId: ImageVector,
-    @StringRes profileName: Int,
+    @StringRes description: Int,
+    profileNames: List<String> = listOf(stringResource(description)),
     deviceName: String?,
-    description: String? = null,
+    deviceAddress: String,
     onClick: () -> Unit
 ) {
     OutlinedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
@@ -108,38 +107,35 @@ internal fun FeatureButton(
         ) {
             Image(
                 imageVector = iconId,
-                contentDescription = description,
+                contentDescription = deviceAddress,
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                 modifier = Modifier
                     .size(40.dp)
-                    .clip(CircleShape)
             )
 
             Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(id = profileName),
+                    text = deviceName ?: stringResource(R.string.unknown_device),
                     style = MaterialTheme.typography.titleMedium,
                 )
 
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = deviceName ?: stringResource(R.string.unknown_device),
+                    text = profileNames.joinToString(", "),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                description?.let {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = description,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = deviceAddress,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

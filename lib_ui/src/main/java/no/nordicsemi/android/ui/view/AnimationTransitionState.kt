@@ -87,7 +87,9 @@ fun createLinearTransition(
         inactiveColor = transition.animateColor(
             label = "In-active color",
             transitionSpec = { TweenSpec(duration, 0, LinearOutSlowInEasing) }
-        ) { if (it) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer },
+        ) {
+            if (it) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.onPrimary
+        },
     )
 }
 

@@ -7,10 +7,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.HighlightOff
+import androidx.compose.material.icons.filled.DeveloperBoardOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -20,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.common.ui.view.CircularIcon
 
 enum class DisconnectReason {
     USER, UNKNOWN, LINK_LOSS, MISSING_SERVICE, BLUETOOTH_OFF
@@ -34,9 +35,9 @@ fun DeviceDisconnectedView(
 ) {
     val disconnectedReason = when (reason) {
         DisconnectReason.USER -> "Device disconnected successfully."
-        DisconnectReason.UNKNOWN -> "Device disconnected with unknown reason."
+        DisconnectReason.UNKNOWN -> "Oops...! Connection went on a coffee break."
         DisconnectReason.LINK_LOSS -> "Device signal has been lost."
-        DisconnectReason.MISSING_SERVICE -> "Missing required service on the device."
+        DisconnectReason.MISSING_SERVICE -> "The peripheral has services that aren't supported in the nRF Toolbox."
         DisconnectReason.BLUETOOTH_OFF -> "Bluetooth adapter is turned off."
     }
 
@@ -72,7 +73,12 @@ fun DeviceDisconnectedView(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                CircularIcon(imageVector = Icons.Default.HighlightOff)
+                Icon(
+                    imageVector = Icons.Default.DeveloperBoardOff,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(48.dp)
+                )
 
                 Text(
                     text = if (isMissingService) "No supported services" else "Device disconnected",
@@ -96,7 +102,7 @@ fun DeviceDisconnectedView(
 private fun DeviceDisconnectedViewPreview() {
     MaterialTheme {
         DeviceDisconnectedView(
-            reason = DisconnectReason.LINK_LOSS,
+            reason = DisconnectReason.UNKNOWN,
             content = { padding ->
                 Button(
                     onClick = {},

@@ -28,12 +28,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import no.nordicsemi.android.lib.profile.rscs.RSCFeatureData
-import no.nordicsemi.android.lib.profile.rscs.RSCSData
-import no.nordicsemi.android.lib.profile.rscs.RSCSSettingsUnit
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import no.nordicsemi.android.toolbox.profile.parser.rscs.RSCSSettingsUnit
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.RSCSServiceData
 import no.nordicsemi.android.toolbox.profile.viewmodel.RSCSEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.RSCSViewModel
 import no.nordicsemi.android.ui.view.FeatureSupported
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
@@ -42,10 +43,11 @@ import no.nordicsemi.android.ui.view.SectionRow
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
-internal fun RSCSScreen(
-    serviceData: RSCSServiceData,
-    onClickEvent: (RSCSEvent) -> Unit,
-) {
+internal fun RSCSScreen() {
+    val rscsViewModel = hiltViewModel<RSCSViewModel>()
+    val serviceData by rscsViewModel.rscsState.collectAsStateWithLifecycle()
+    val onClickEvent: (RSCSEvent) -> Unit = { rscsViewModel.onEvent(it) }
+
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
@@ -129,29 +131,6 @@ internal fun RSCSScreen(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun RSCSScreenPreview() {
-    RSCSScreen(
-        RSCSServiceData(
-            data = RSCSData(
-                running = true,
-                instantaneousSpeed = 1.2f,
-                instantaneousCadence = 80,
-                strideLength = 2,
-                totalDistance = 10L,
-            ),
-            feature = RSCFeatureData(
-                instantaneousStrideLengthMeasurementSupported = true,
-                totalDistanceMeasurementSupported = true,
-                walkingOrRunningStatusSupported = true,
-                calibrationSupported = true,
-                multipleSensorLocationsSupported = true
-            ),
-        )
-    ) {}
-}
-
 @Composable
 private fun RSCSSettingsDropdown(
     state: RSCSServiceData,
@@ -205,6 +184,7 @@ private fun RSCSSettingsDialog(
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleMedium
                 )
+                HorizontalDivider()
                 Column {
                     RSCSSettingsUnit.entries.forEach { entry ->
                         Box(

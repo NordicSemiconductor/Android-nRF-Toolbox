@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -24,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -36,26 +36,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.lib.profile.common.WorkingMode
-import no.nordicsemi.android.lib.profile.gls.data.Carbohydrate
-import no.nordicsemi.android.lib.profile.gls.data.ConcentrationUnit
-import no.nordicsemi.android.lib.profile.gls.data.GLSMeasurementContext
-import no.nordicsemi.android.lib.profile.gls.data.GLSRecord
-import no.nordicsemi.android.lib.profile.gls.data.Health
-import no.nordicsemi.android.lib.profile.gls.data.Meal
-import no.nordicsemi.android.lib.profile.gls.data.Medication
-import no.nordicsemi.android.lib.profile.gls.data.MedicationUnit
-import no.nordicsemi.android.lib.profile.gls.data.RecordType
-import no.nordicsemi.android.lib.profile.gls.data.RequestStatus
-import no.nordicsemi.android.lib.profile.gls.data.Tester
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import no.nordicsemi.android.toolbox.profile.parser.common.WorkingMode
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.Carbohydrate
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.ConcentrationUnit
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.GLSMeasurementContext
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.GLSRecord
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.Health
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.Meal
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.Medication
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.MedicationUnit
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.RecordType
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.RequestStatus
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.Tester
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.GLSServiceData
-import no.nordicsemi.android.toolbox.profile.data.Profile
 import no.nordicsemi.android.toolbox.profile.view.gls.details.GLSDetails
 import no.nordicsemi.android.toolbox.profile.viewmodel.GLSEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.GLSEvent.OnWorkingModeSelected
+import no.nordicsemi.android.toolbox.profile.viewmodel.GLSViewModel
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
@@ -64,10 +69,10 @@ import no.nordicsemi.android.ui.view.SectionTitle
 import java.util.Calendar
 
 @Composable
-internal fun GLSScreen(
-    glsServiceData: GLSServiceData,
-    onClickEvent: (GLSEvent) -> Unit
-) {
+internal fun GLSScreen() {
+    val glsViewModel = hiltViewModel<GLSViewModel>()
+    val glsServiceData by glsViewModel.glsState.collectAsStateWithLifecycle()
+    val onClickEvent: (GLSEvent) -> Unit = { glsViewModel.onEvent(it) }
     var isWorkingModeClicked by rememberSaveable { mutableStateOf(false) }
 
     Column(
@@ -91,14 +96,6 @@ internal fun GLSScreen(
         }
         RecordsView(glsServiceData)
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun GLSScreenPreview() {
-    GLSScreen(
-        glsServiceData = GLSServiceData()
-    ) {}
 }
 
 @Composable
@@ -156,39 +153,63 @@ private fun WorkingModeDialog(
         }
     }
 
-    AlertDialog(
+    Dialog(
         onDismissRequest = { onDismiss() },
-        title = { Text(text = "Request record") },
-        text = {
-            LazyColumn(
-                state = listState
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
+        )
+    ) {
+        OutlinedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
             ) {
-                items(workingModeEntries.size) { index ->
-                    val entry = workingModeEntries[index]
-                    Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .clickable {
-                                onWorkingModeSelected(OnWorkingModeSelected(Profile.GLS, entry))
-                            }
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = entry.toDisplayString(),
-                            modifier = Modifier.fillMaxWidth(),
-                            style = MaterialTheme.typography.titleLarge,
-                            color = if ((glsState.workingMode == entry) && glsState.records.isNotEmpty()) {
-                                MaterialTheme.colorScheme.primary
-                            } else
-                                MaterialTheme.colorScheme.onBackground
-                        )
+                Text(
+                    text = "Request record",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                HorizontalDivider()
+                LazyColumn(
+                    state = listState
+                ) {
+                    items(workingModeEntries.size) { index ->
+                        val entry = workingModeEntries[index]
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(4.dp))
+                                .clickable {
+                                    onWorkingModeSelected(OnWorkingModeSelected(entry))
+                                }
+                                .padding(8.dp),
+                        ) {
+                            Text(
+                                text = entry.toDisplayString(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                style = MaterialTheme.typography.titleLarge,
+                                color = if ((glsState.workingMode == entry) && glsState.records.isNotEmpty()) {
+                                    MaterialTheme.colorScheme.primary
+                                } else
+                                    MaterialTheme.colorScheme.onBackground
+                            )
+                        }
                     }
                 }
             }
-        },
-        confirmButton = {}
-    )
+        }
+    }
 }
 
 @Preview(showBackground = true)
@@ -259,12 +280,13 @@ private fun RecordItem(
                 }?.let {
                     KeyValueColumn(
                         record.type.toDisplayString(),
-                        it
+                        it,
+                        keyStyle = MaterialTheme.typography.titleMedium
                     )
                 }
                 record.time?.let {
                     KeyValueColumnReverse(
-                        value = "Date/Time",
+                        value = stringResource(id = R.string.gls_details_date_and_time),
                         key = stringResource(R.string.gls_timestamp, it)
                     )
                 }
@@ -334,7 +356,7 @@ private fun RecordItemPreview() {
             exerciseIntensity = 1,
             medication = Medication.PRE_MIXED_INSULIN,
             medicationQuantity = .5f,
-            medicationUnit = MedicationUnit.UNIT_MG,
+            medicationUnit = MedicationUnit.UNIT_KG,
             HbA1c = 0.5f
         ),
     )

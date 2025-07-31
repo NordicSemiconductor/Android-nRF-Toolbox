@@ -13,10 +13,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EditOff
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,7 +47,6 @@ internal fun MacroSection(
 ) {
     var showAddDialog by rememberSaveable { mutableStateOf(false) }
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
-    var isExpanded by rememberSaveable { mutableStateOf(false) }
 
     // Dialogs
     MacroDialogs(
@@ -66,19 +66,12 @@ internal fun MacroSection(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 MacroSectionTitle(
-                    isEmptyConfiguration = viewState.configurations.isEmpty(),
-                    isExpanded = isExpanded,
-                    onAddClick = {
-                        showAddDialog = true
-                        isExpanded = true  // Expand when adding a new configuration
-                    },
-                    onExpand = { isExpanded = !isExpanded }
+                    onAddClick = { showAddDialog = true }
                 )
 
-                if (isExpanded && viewState.configurations.isNotEmpty()) {
+                if (viewState.configurations.isNotEmpty()) {
                     MacroConfigControls(
                         viewState = viewState,
-                        onAddClick = { showAddDialog = true },
                         onDeleteClick = { showDeleteDialog = true },
                         onEvent = onEvent
                     )
@@ -133,25 +126,13 @@ private fun MacroDialogs(
 
 @Composable
 private fun MacroSectionTitle(
-    isEmptyConfiguration: Boolean = false,
-    isExpanded: Boolean = false,
     onAddClick: () -> Unit,
-    onExpand: () -> Unit = {},
 ) {
     SectionTitle(
         resId = R.drawable.ic_macro,
         title = stringResource(id = R.string.uart_macros),
         menu = {
-            if (isEmptyConfiguration) {
-                CircleIcon(Icons.Default.Add, R.string.uart_configuration_add, onAddClick)
-            } else {
-                CircleIcon(
-                    imageVector = if (isExpanded)
-                        Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = R.string.macro_expand,
-                ) { onExpand() }
-            }
-
+            CircleIcon(Icons.Default.Add, R.string.uart_configuration_add) { onAddClick() }
         }
     )
 }
@@ -165,7 +146,6 @@ private fun MacroSectionTitlePreview() {
 @Composable
 private fun MacroConfigControls(
     viewState: UARTViewState,
-    onAddClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onEvent: (UARTEvent) -> Unit
 ) {
@@ -177,8 +157,6 @@ private fun MacroConfigControls(
             UARTConfigurationPicker(viewState, onEvent)
         }
 
-        CircleIcon(Icons.Default.Add, R.string.uart_configuration_add, onAddClick)
-
         viewState.selectedConfiguration?.let {
             val editIcon =
                 if (viewState.isConfigurationEdited) Icons.Default.EditOff else Icons.Default.Edit
@@ -188,7 +166,11 @@ private fun MacroConfigControls(
                 onEvent(UARTEvent.OnEditConfiguration)
             }
 
-            CircleIcon(Icons.Default.Delete, R.string.uart_configuration_delete, onDeleteClick)
+            CircleIcon(
+                Icons.Default.Delete,
+                R.string.uart_configuration_delete,
+                MaterialTheme.colorScheme.error
+            ) { onDeleteClick() }
         }
     }
 }
@@ -205,7 +187,6 @@ private fun MacroConfigControlsPreview() {
             selectedConfigurationName = "Config 1",
             isConfigurationEdited = false
         ),
-        onAddClick = {},
         onDeleteClick = {},
         onEvent = {}
     )
@@ -215,6 +196,7 @@ private fun MacroConfigControlsPreview() {
 private fun CircleIcon(
     imageVector: ImageVector,
     @StringRes contentDescription: Int,
+    tintColor: Color = LocalContentColor.current,
     onClick: () -> Unit
 ) {
     Icon(
@@ -223,7 +205,8 @@ private fun CircleIcon(
         modifier = Modifier
             .clip(CircleShape)
             .clickable(onClick = onClick)
-            .padding(8.dp)
+            .padding(8.dp),
+        tint = tintColor,
     )
 }
 
@@ -236,10 +219,20 @@ private fun DeleteConfigurationDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(
-                text = stringResource(id = R.string.uart_delete_dialog_title),
-                style = MaterialTheme.typography.headlineSmall
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
+                )
+                Text(
+                    text = stringResource(id = R.string.uart_delete_dialog_title),
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
         },
         text = {
             Text(text = stringResource(id = R.string.uart_delete_dialog_info))

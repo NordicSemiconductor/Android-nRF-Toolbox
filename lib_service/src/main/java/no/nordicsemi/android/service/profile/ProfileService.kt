@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
@@ -21,8 +20,9 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.NotificationService
 import no.nordicsemi.android.service.R
-import no.nordicsemi.android.service.services.ServiceManager
 import no.nordicsemi.android.toolbox.lib.utils.spec.CGMS_SERVICE_UUID
+import no.nordicsemi.android.toolbox.profile.manager.ServiceManager
+import no.nordicsemi.android.toolbox.profile.manager.ServiceManagerFactory
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.CentralManager.ConnectionOptions
@@ -52,8 +52,8 @@ internal class ProfileService : NotificationService() {
     private val _isMissingServices = MutableStateFlow(false)
     private val _disconnectionReason = MutableStateFlow<DeviceDisconnectionReason?>(null)
 
-    private var connectionJob: Job? = null
-    private var serviceHandlingJob: Job? = null
+    private val connectionJobs = mutableMapOf<String, Job>()
+    private val serviceHandlingJob = mutableMapOf<String, Job>()
 
     override fun onBind(intent: Intent): IBinder {
         super.onBind(intent)
@@ -90,19 +90,20 @@ internal class ProfileService : NotificationService() {
         override val disconnectionReason: Flow<DeviceDisconnectionReason?>
             get() = _disconnectionReason.asStateFlow()
 
-        override suspend fun getMaxWriteValue(address: String, writeType: WriteType): Int? =
-            getPeripheralById(address)?.let {
-                if (it.isConnected) {
-                    try {
-                        it.requestHighestValueLength()
-                        it.requestConnectionPriority(ConnectionPriority.HIGH)
-                        it.setPreferredPhy(Phy.PHY_LE_2M, Phy.PHY_LE_2M, PhyOption.S2)
-                    } catch (e: Exception) {
-                        Timber.e("Could not change mtu size $e")
-                    }
-                }
-                it.maximumWriteValueLength(writeType)
+        override suspend fun getMaxWriteValue(address: String, writeType: WriteType): Int? {
+            val peripheral = getPeripheralById(address) ?: return null
+            if (!peripheral.isConnected) return null
+
+            return try {
+                peripheral.requestHighestValueLength()
+                peripheral.requestConnectionPriority(ConnectionPriority.HIGH)
+                peripheral.setPreferredPhy(Phy.PHY_LE_2M, Phy.PHY_LE_2M, PhyOption.S2)
+                peripheral.maximumWriteValueLength(writeType)
+            } catch (e: Exception) {
+                Timber.e("Failed to configure $address for MTU change with reason: ${e.message}")
+                null
             }
+        }
 
         override suspend fun createBonding(address: String) {
             val peripheral = getPeripheralById(address)
@@ -122,7 +123,7 @@ internal class ProfileService : NotificationService() {
         override fun disconnect(deviceAddress: String) {
             lifecycleScope.launch {
                 try {
-                    centralManager.getPeripheralById(deviceAddress)
+                    getPeripheralById(deviceAddress)
                         ?.let { peripheral ->
                             if (peripheral.isConnected) peripheral.disconnect()
                             handleDisconnection(deviceAddress)
@@ -136,8 +137,8 @@ internal class ProfileService : NotificationService() {
         override fun getConnectionState(address: String): Flow<ConnectionState>? {
             val peripheral = getPeripheralById(address) ?: return null
             return peripheral.state.also { stateFlow ->
-                // Since the initial state is Gatt closed, drop the first state.
-                connectionJob = stateFlow.drop(1).onEach { state ->
+                connectionJobs[address]?.cancel()
+                val job = stateFlow.onEach { state ->
                     when (state) {
                         ConnectionState.Connected -> {
                             _isMissingServices.tryEmit(false)
@@ -152,11 +153,18 @@ internal class ProfileService : NotificationService() {
                             _disconnectionReason.tryEmit(StateReason(state.reason))
                         }
 
-                        ConnectionState.Closed -> handleDisconnection(address)
-                        else -> { /* Handle other states if necessary. */
+                        ConnectionState.Closed -> return@onEach
+
+                        ConnectionState.Disconnecting -> {
+                            connectionJobs[address]?.cancel()
+                            handleDisconnection(address)
                         }
                     }
-                }.onCompletion { connectionJob?.cancel() }.launchIn(lifecycleScope)
+                }.onCompletion {
+                    connectionJobs[address]?.cancel()
+                    connectionJobs.remove(address)
+                }.launchIn(lifecycleScope)
+                connectionJobs[address] = job
             }
         }
 
@@ -167,9 +175,7 @@ internal class ProfileService : NotificationService() {
      */
     private fun initiateConnection(deviceAddress: String) {
         centralManager.getPeripheralById(deviceAddress)?.let { peripheral ->
-            lifecycleScope.launch {
-                connectPeripheral(peripheral)
-            }
+            lifecycleScope.launch { connectPeripheral(peripheral) }
         }
     }
 
@@ -188,8 +194,9 @@ internal class ProfileService : NotificationService() {
     @OptIn(ExperimentalUuidApi::class)
     private fun discoverServices(peripheral: Peripheral) {
         val discoveredServices = mutableListOf<ServiceManager>()
-        serviceHandlingJob = peripheral.services().onEach { remoteServices ->
-            remoteServices.forEach { remoteService ->
+        serviceHandlingJob[peripheral.address]?.cancel()
+        val job = peripheral.services().onEach { remoteServices ->
+            remoteServices?.forEach { remoteService ->
                 val serviceManager = ServiceManagerFactory.createServiceManager(remoteService.uuid)
                 serviceManager?.let { manager ->
                     Timber.tag("DiscoverServices").i("${manager.profile}")
@@ -201,13 +208,9 @@ internal class ProfileService : NotificationService() {
 
                             if (requiresBonding) {
                                 peripheral.bondState
-                                    .onEach { state ->
-                                        if (state == BondState.NONE) {
-                                            peripheral.createBond()
-                                        }
-                                    }
+                                    .onEach { if (it == BondState.NONE) peripheral.createBond() }
                                     .filter { it == BondState.BONDED }
-                                    .first() // suspend until bonded
+                                    .first()
                             }
 
                             manager.observeServiceInteractions(
@@ -224,8 +227,11 @@ internal class ProfileService : NotificationService() {
             }
             when {
                 discoveredServices.isEmpty() -> {
-                    if (remoteServices.isNotEmpty())
+                    if (remoteServices?.isNotEmpty() == true) {
                         _isMissingServices.tryEmit(true)
+                        serviceHandlingJob[peripheral.address]?.cancel()
+                        serviceHandlingJob.remove(peripheral.address)
+                    }
                 }
 
                 peripheral.isConnected -> {
@@ -233,7 +239,13 @@ internal class ProfileService : NotificationService() {
                     updateConnectedDevices(peripheral, discoveredServices)
                 }
             }
-        }.onCompletion { serviceHandlingJob?.cancel() }.launchIn(lifecycleScope)
+        }
+            .onCompletion {
+                serviceHandlingJob[peripheral.address]?.cancel()
+                serviceHandlingJob.remove(peripheral.address)
+            }
+            .launchIn(lifecycleScope)
+        serviceHandlingJob[peripheral.address] = job
     }
 
     /**
@@ -254,7 +266,7 @@ internal class ProfileService : NotificationService() {
             currentDevices.remove(peripheral)
             _connectedDevices.tryEmit(currentDevices)
         }
-        clearJobs()
+        clearJobs(peripheral)
         clearFlags()
         stopServiceIfNoDevices()
     }
@@ -262,9 +274,13 @@ internal class ProfileService : NotificationService() {
     /**
      * Clear any active jobs for connection and service handling.
      */
-    private fun clearJobs() {
-        connectionJob?.cancel()
-        serviceHandlingJob?.cancel()
+    private fun clearJobs(peripheral: String) {
+        connectionJobs[peripheral]?.cancel()
+        connectionJobs.remove(peripheral)
+
+        serviceHandlingJob[peripheral]?.cancel()
+        serviceHandlingJob.remove(peripheral)
+
     }
 
     /**
@@ -272,8 +288,8 @@ internal class ProfileService : NotificationService() {
      */
     private fun stopServiceIfNoDevices() {
         if (_connectedDevices.value.isEmpty()) {
-            stopForegroundService() //// Remove notification from the foreground service
-            stopSelf() // Stop the service
+            stopForegroundService()
+            stopSelf()
         }
     }
 

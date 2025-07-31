@@ -2,14 +2,15 @@
 <resources>
     <string name="bps_title">Blood pressure</string>
 
-    <string name="no_data_info">No data available. If you are using nRF DK\'s press button 1 to see the result.</string>
+    <string name="no_data_info_title">Waiting for Blood Pressure sample…</string>
+    <string name="no_data_info">Click Button 1 on a DK to trigger one.</string>
 
     <string name="bps_systolic">Systolic pressure</string>
     <string name="bps_diastolic">Diastolic pressure</string>
     <string name="bps_mean">Mean arterial pressure (AP)</string>
     <string name="bps_pulse">Heart rate</string>
 
-    <string name="bps_blood_pressure">%.0f %s</string>
+    <string name="bps_blood_pressure">%.2f %s</string>
     <string name="bps_timestamp">%1$te %1$tb %1$tY at %1$tT</string>
 
     <string name="body_movement_detected">Body movement detected</string>

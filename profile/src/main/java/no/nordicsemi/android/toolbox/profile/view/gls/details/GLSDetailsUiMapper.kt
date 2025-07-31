@@ -2,13 +2,13 @@ package no.nordicsemi.android.toolbox.profile.view.gls.details
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import no.nordicsemi.android.lib.profile.gls.data.Carbohydrate
-import no.nordicsemi.android.lib.profile.gls.data.Health
-import no.nordicsemi.android.lib.profile.gls.data.Meal
-import no.nordicsemi.android.lib.profile.gls.data.Medication
-import no.nordicsemi.android.lib.profile.gls.data.MedicationUnit
-import no.nordicsemi.android.lib.profile.gls.data.SampleLocation
-import no.nordicsemi.android.lib.profile.gls.data.Tester
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.Carbohydrate
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.Health
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.Meal
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.Medication
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.MedicationUnit
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.SampleLocation
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.Tester
 import no.nordicsemi.android.toolbox.profile.R
 
 @Composable
@@ -25,8 +25,8 @@ internal fun SampleLocation.toDisplayString(): String {
 @Composable
 internal fun MedicationUnit.toDisplayString(): String {
     return when (this) {
-        MedicationUnit.UNIT_MG -> stringResource(id = R.string.gls_sample_location_kg)
-        MedicationUnit.UNIT_ML -> stringResource(id = R.string.gls_sample_location_l)
+        MedicationUnit.UNIT_KG -> stringResource(id = R.string.gls_sample_location_kg)
+        MedicationUnit.UNIT_LITER -> stringResource(id = R.string.gls_sample_location_l)
     }
 }
 
@@ -90,4 +90,23 @@ internal fun Meal.toDisplayString(): String {
         Meal.CASUAL -> stringResource(id = R.string.gls_meal_casual)
         Meal.BEDTIME -> stringResource(id = R.string.gls_meal_bedtime)
     }
+}
+
+internal fun getExerciseDuration(duration: Int): String {
+    // Given duration is in seconds. If duration is more than 60 seconds, convert it to minutes. If minutes is more than 60, convert it to hours, and so on.
+    val hours = duration / 3600
+    val minutes = (duration % 3600) / 60
+    val seconds = duration % 60
+
+    return when {
+        hours > 0 -> "$hours h ${minutes}m ${seconds}s"
+        minutes > 0 -> "${minutes}m ${seconds}s"
+        else -> "${seconds}s"
+    }
+}
+
+fun main() {
+    // This is just a placeholder main function to avoid compilation errors.
+    // The actual code does not require a main function as it is intended for use in a Compose UI context.
+    println("Exercise Duration Example: ${getExerciseDuration(4520)}") // Example usage // 1 hour, 15 minutes and 20 seconds
 }

@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.nordic.feature)
-    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {
@@ -8,5 +7,6 @@ android {
 }
 
 dependencies {
-    implementation(project(":lib_profile"))
+    implementation(project(":profile-parsers"))
+    implementation(project(":lib_utils"))
 }

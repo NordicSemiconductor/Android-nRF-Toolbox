@@ -1,6 +1,6 @@
 package no.nordicsemi.android.toolbox.profile.view.throughput
 
-import no.nordicsemi.android.lib.profile.throughput.ThroughputMetrics
+import no.nordicsemi.android.toolbox.profile.parser.throughput.ThroughputMetrics
 import no.nordicsemi.android.toolbox.profile.data.NumberOfBytes
 import no.nordicsemi.android.toolbox.profile.data.NumberOfSeconds
 import java.util.Locale

@@ -1,9 +1,9 @@
 package no.nordicsemi.android.toolbox.profile.view.uart
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenuItem
@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.UARTViewState
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
@@ -46,20 +47,19 @@ internal fun UARTConfigurationPicker(
             modifier = Modifier.menuAnchor(PrimaryNotEditable)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 val title =
                     state.selectedConfigurationName
                         ?: stringResource(id = R.string.uart_configuration_picker_hint)
-                Column {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
-
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                )
                 Icon(Icons.Default.ArrowDropDown, contentDescription = "")
             }
         }

@@ -1,6 +1,7 @@
 package no.nordicsemi.android.toolbox.profile.data
 
-import no.nordicsemi.android.lib.profile.hts.HTSData
+import no.nordicsemi.android.toolbox.profile.parser.hts.HTSData
+import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
 
 /**

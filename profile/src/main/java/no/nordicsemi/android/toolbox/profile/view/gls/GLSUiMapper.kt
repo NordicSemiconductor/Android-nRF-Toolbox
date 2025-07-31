@@ -3,9 +3,9 @@ package no.nordicsemi.android.toolbox.profile.view.gls
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import no.nordicsemi.android.lib.profile.common.WorkingMode
-import no.nordicsemi.android.lib.profile.gls.data.ConcentrationUnit
-import no.nordicsemi.android.lib.profile.gls.data.RecordType
+import no.nordicsemi.android.toolbox.profile.parser.common.WorkingMode
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.ConcentrationUnit
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.RecordType
 import no.nordicsemi.android.toolbox.profile.R
 
 @Composable
@@ -28,9 +28,8 @@ internal fun RecordType?.toDisplayString(): String {
 @Composable
 internal fun ConcentrationUnit.toDisplayString(): String {
     return when (this) {
-        //TODO("Check unit_kgpl --> mgpdl")
-        ConcentrationUnit.UNIT_KGPL -> stringResource(id = R.string.gls_unit_mgpdl)
-        ConcentrationUnit.UNIT_MOLPL -> stringResource(id = R.string.gls_unit_mmolpl)
+        ConcentrationUnit.UNIT_KGPL -> stringResource(id = R.string.gls_unit_kg_l)
+        ConcentrationUnit.UNIT_MOLPL -> stringResource(id = R.string.gls_unit_mol_dl)
     }
 }
 
@@ -46,9 +45,5 @@ internal fun WorkingMode.toDisplayString(): String {
 @SuppressLint("DefaultLocale")
 @Composable
 internal fun glucoseConcentrationDisplayValue(value: Float, unit: ConcentrationUnit): String {
-    val result = when (unit) {
-        ConcentrationUnit.UNIT_KGPL -> value * 100000.0f
-        ConcentrationUnit.UNIT_MOLPL -> value * 1000.0f
-    }
-    return String.format("%.2f %s", result, unit.toDisplayString())
+    return String.format("%.2f %s", value, unit.toDisplayString())
 }

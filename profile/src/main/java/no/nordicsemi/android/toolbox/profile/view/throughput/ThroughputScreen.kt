@@ -17,6 +17,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -28,12 +29,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.NumberOfBytes
 import no.nordicsemi.android.toolbox.profile.data.NumberOfSeconds
 import no.nordicsemi.android.toolbox.profile.data.ThroughputServiceData
 import no.nordicsemi.android.toolbox.profile.data.WritingStatus
 import no.nordicsemi.android.toolbox.profile.viewmodel.ThroughputEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.ThroughputViewModel
 import no.nordicsemi.android.ui.view.AnimatedThreeDots
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
@@ -44,6 +48,22 @@ import no.nordicsemi.android.ui.view.TextInputField
 
 @Composable
 internal fun ThroughputScreen(
+    maxWriteValueLength: Int?
+) {
+    val throughputViewModel = hiltViewModel<ThroughputViewModel>()
+    val serviceData by throughputViewModel.throughputState.collectAsStateWithLifecycle()
+    val onClickEvent: (ThroughputEvent) -> Unit = { throughputViewModel.onEvent(it) }
+
+    // Update the max write value length in the ViewModel.
+    LaunchedEffect(maxWriteValueLength != null) {
+        onClickEvent(ThroughputEvent.UpdateMaxWriteValueLength(maxWriteValueLength))
+    }
+
+    ThroughputContent(serviceData, onClickEvent)
+}
+
+@Composable
+private fun ThroughputContent(
     serviceData: ThroughputServiceData,
     onClickEvent: (ThroughputEvent) -> Unit
 ) {
@@ -250,5 +270,5 @@ private fun WriteDropdown(
 @Preview
 @Composable
 private fun ThroughputScreenPreview() {
-    ThroughputScreen(ThroughputServiceData()) {}
+    ThroughputContent(ThroughputServiceData()) {}
 }

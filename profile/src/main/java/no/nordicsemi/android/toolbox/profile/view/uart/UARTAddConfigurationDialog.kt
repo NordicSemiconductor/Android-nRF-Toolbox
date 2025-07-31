@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.UARTViewState
 import no.nordicsemi.android.toolbox.profile.viewmodel.UARTEvent
@@ -30,7 +31,7 @@ internal fun UARTAddConfigurationDialog(
             TextInputField(
                 input = name,
                 label = stringResource(id = R.string.uart_configuration_hint),
-                placeholder = "Enter configuration name",
+                placeholder = "Enter preset configuration name",
                 errorMessage = stringResource(id = R.string.uart_name_empty),
                 errorState = isError,
             ) {
@@ -55,6 +56,18 @@ internal fun UARTAddConfigurationDialog(
                 Text(stringResource(id = R.string.uart_macro_dialog_dismiss))
             }
         }
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun UARTAddConfigurationDialogPreview() {
+    UARTAddConfigurationDialog(
+        viewState = UARTViewState(
+            configurations = emptyList(),
+        ),
+        onEvent = {},
+        onDismiss = {}
     )
 }
 

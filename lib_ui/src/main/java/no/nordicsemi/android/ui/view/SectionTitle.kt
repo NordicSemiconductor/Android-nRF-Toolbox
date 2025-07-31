@@ -65,8 +65,8 @@ import no.nordicsemi.android.ui.R
 fun SectionTitle(
     @DrawableRes resId: Int,
     title: String,
-    menu: @Composable (() -> Unit)? = null,
-    modifier: Modifier = Modifier.fillMaxWidth()
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    menu: @Composable (() -> Unit)? = null
 ) {
     Row(
         modifier = modifier,
@@ -95,8 +95,8 @@ fun SectionTitle(
 fun SectionTitle(
     icon: ImageVector,
     title: String,
-    menu: @Composable (() -> Unit)? = null,
-    modifier: Modifier = Modifier.fillMaxWidth()
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    menu: @Composable (() -> Unit)? = null
 ) {
     Row(
         modifier = modifier,
