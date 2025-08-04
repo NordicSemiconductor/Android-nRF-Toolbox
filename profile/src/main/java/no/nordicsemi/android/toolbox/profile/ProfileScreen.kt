@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
@@ -47,9 +46,9 @@ import no.nordicsemi.android.toolbox.profile.view.rscs.RSCSScreen
 import no.nordicsemi.android.toolbox.profile.view.throughput.ThroughputScreen
 import no.nordicsemi.android.toolbox.profile.view.uart.UARTScreen
 import no.nordicsemi.android.toolbox.profile.viewmodel.ConnectionEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileViewModel
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionState
 import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceData
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileViewModel
 import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.android.ui.view.internal.LoadingView
@@ -65,6 +64,8 @@ internal fun ProfileScreen() {
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets.displayCutout
+            .only(WindowInsetsSides.Horizontal),
         topBar = {
             ProfileAppBar(
                 deviceName = when (val state = deviceDataState) {
@@ -83,11 +84,6 @@ internal fun ProfileScreen() {
             )
         },
     ) { paddingValues ->
-        // Get notch padding for devices with a display cutout (notch)
-        val notchPadding = WindowInsets.displayCutout
-            .only(WindowInsetsSides.Horizontal)
-            .asPaddingValues()
-
         RequireBluetooth {
             RequireLocation {
                 RequestNotificationPermission {
@@ -96,7 +92,6 @@ internal fun ProfileScreen() {
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues)
-                            .padding(notchPadding)
                             .verticalScroll(rememberScrollState())
                             .imePadding(),
                         horizontalAlignment = Alignment.CenterHorizontally,

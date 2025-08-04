@@ -5,13 +5,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -47,7 +45,8 @@ internal fun HomeView() {
     val onEvent: (UiEvent) -> Unit = { viewModel.onClickEvent(it) }
 
     Scaffold(
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = WindowInsets.displayCutout
+            .only(WindowInsetsSides.Horizontal),
         topBar = {
             NordicAppBar(
                 title = { Text(stringResource(id = R.string.app_name)) },
@@ -74,18 +73,11 @@ internal fun HomeView() {
             }
         }
     ) { paddingValues ->
-        // Get notch padding for devices with a display cutout (notch)
-        val notchPadding = WindowInsets.displayCutout
-            .union(WindowInsets(left = 8.dp, right = 8.dp, top = 8.dp, bottom = 8.dp))
-            .only(WindowInsetsSides.Horizontal)
-            .asPaddingValues()
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
                 .padding(paddingValues),
-            contentPadding = notchPadding,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item {
