@@ -12,4 +12,5 @@ fun toReason(reason:  Reason): String =
         is Reason.Timeout -> "Connection attempt timed out with ${reason.duration}."
         is Reason.Unknown -> "Oops...! Connection went on a coffee break."
         Reason.UnsupportedAddress -> "Device disconnected due to unsupported address."
+        Reason.InsufficientAuthentication -> "Device disconnected due to insufficient authentication."
     }
