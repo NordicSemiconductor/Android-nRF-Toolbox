@@ -5,7 +5,7 @@ on:
       - '*'
   workflow_dispatch:
 jobs:
-  restorePassword:
+  deployAabToGooglePlayInternal:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -13,8 +13,8 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-java@v4
         with:
-          distribution: 'corretto'
-          java-version: '17'
+          distribution: 'jetbrains'
+          java-version: '21'
       - shell: bash
         env:
           KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
@@ -22,11 +22,7 @@ jobs:
           KEYSTORE_PSWD: ${{ secrets.KEYSTORE_PSWD }}
           GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
           GPG_PASSWORD: ${{ secrets.GPG_PASSWORD }}
-          OSSR_USERNAME: ${{ secrets.OSSR_USERNAME }}
-          OSSR_PASSWORD: ${{ secrets.OSSR_PASSWORD }}
-          SONATYPE_STATING_PROFILE_ID: ${{ secrets.SONATYPE_STATING_PROFILE_ID }}
         run: |
-          pwd
           echo "${{ secrets.GOOGLE_SERVICES }}" | base64 --decode > app/google-services.json
           echo "${{ secrets.KEYSTORE_FILE }}" > keystore.asc
           gpg -d --passphrase "${{ secrets.KEYSTORE_FILE_PSWD }}" --batch keystore.asc > keystore
