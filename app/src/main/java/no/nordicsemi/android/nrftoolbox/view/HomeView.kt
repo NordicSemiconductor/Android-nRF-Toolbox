@@ -2,6 +2,7 @@ package no.nordicsemi.android.nrftoolbox.view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -30,8 +31,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import no.nordicsemi.android.common.analytics.view.AnalyticsPermissionButton
-import no.nordicsemi.android.common.ui.view.NordicAppBar
 import no.nordicsemi.android.nrftoolbox.R
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewModel
 import no.nordicsemi.android.nrftoolbox.viewmodel.UiEvent
@@ -45,20 +44,13 @@ internal fun HomeView() {
     val onEvent: (UiEvent) -> Unit = { viewModel.onClickEvent(it) }
 
     Scaffold(
+        topBar = { TitleAppBar(stringResource(id = R.string.app_name)) },
         contentWindowInsets = WindowInsets.displayCutout
             .only(WindowInsetsSides.Horizontal),
-        topBar = {
-            NordicAppBar(
-                title = { Text(stringResource(id = R.string.app_name)) },
-                showBackButton = false,
-            ) {
-                AnalyticsPermissionButton()
-            }
-        },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { onEvent(UiEvent.OnConnectDeviceClick) },
-                modifier = Modifier.padding(top = 8.dp, bottom = 16.dp, end = 8.dp, start = 8.dp),
+                modifier = Modifier.padding(8.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -76,8 +68,9 @@ internal fun HomeView() {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
-                .padding(paddingValues),
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item {
@@ -86,7 +79,7 @@ internal fun HomeView() {
                     text = stringResource(R.string.connected_devices),
                     modifier = Modifier
                         .alpha(0.5f)
-                        .padding(start = 16.dp),
+                        .padding(start = 16.dp, end = 16.dp, top = 16.dp),
                 )
                 if (state.connectedDevices.isNotEmpty()) {
                     Column(
