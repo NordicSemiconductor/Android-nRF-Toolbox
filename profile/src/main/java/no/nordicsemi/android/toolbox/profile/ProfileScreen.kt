@@ -196,7 +196,7 @@ internal fun DeviceConnectedView(
                                 .imePadding()
                         ) {
                             // Requires max value length to be set.
-                            val needsMaxValueLength = profile.profile == Profile.CHANNEL_SOUNDING ||
+                            val needsMaxValueLength = profile.profile == Profile.THROUGHPUT ||
                                     profile.profile == Profile.UART
                             if (needsMaxValueLength) {
                                 LaunchedEffect(key1 = true) {
