@@ -67,7 +67,6 @@ internal class UARTManager : ServiceManager {
             device: String,
             message: String,
             maxWriteLength: Int,
-            macroEolUnicodeMessage: String? = null,
         ) {
             val messageBytes = message.toByteArray()
             try {
@@ -82,7 +81,7 @@ internal class UARTManager : ServiceManager {
             } catch (e: Exception) {
                 Timber.tag("UARTService").e("Error ${e.message}")
             } finally {
-                UartRepository.onNewMessageSent(device, macroEolUnicodeMessage ?: message)
+                UartRepository.onNewMessageSent(device, message)
             }
         }
     }
