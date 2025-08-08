@@ -140,6 +140,7 @@ internal class ProfileViewModel @Inject constructor(
      * Update the service data, including connection state and peripheral data.
      * @param api the service API.
      * @param deviceAddress the address of the connected device.
+     * @param isAlreadyConnected true if the device is already connected, false otherwise.
      */
     private fun updateConnectionState(
         api: ServiceApi,

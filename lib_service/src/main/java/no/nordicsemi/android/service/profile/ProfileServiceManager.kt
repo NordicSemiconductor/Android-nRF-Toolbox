@@ -19,7 +19,7 @@ sealed interface ProfileServiceManager {
 }
 
 internal class ProfileServiceManagerImp @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) : ProfileServiceManager {
     private var serviceConnection: ServiceConnection? = null
     private var api: ServiceApi? = null
