@@ -141,7 +141,7 @@ private fun MessageItemInput(record: UARTRecord) {
             horizontalAlignment = Alignment.End
         ) {
             Text(
-                text = record.text,
+                text = record.text.visualizeNewlines(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
@@ -182,7 +182,7 @@ private fun MessageItemOutput(record: UARTRecord) {
             horizontalAlignment = Alignment.Start
         ) {
             Text(
-                text = record.text,
+                text = record.text.visualizeNewlines(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimary
             )
@@ -225,3 +225,17 @@ private val datFormatter = SimpleDateFormat("dd MMMM yyyy, HH:mm:ss", Locale.ENG
 private fun UARTRecord.timeToString(): String {
     return datFormatter.format(timestamp)
 }
+
+/**
+ * Visualizes newlines in a string by replacing them with Unicode characters.
+ * - `\n` is replaced with `␤` (U+240A)
+ * - `\r` is replaced with `␍` (U+240D)
+ * - `\r\n` is replaced with `␤␍` (U+240A U+240D)
+ */
+internal fun String.visualizeNewlines(): String {
+    return this
+        .replace("\r\n", "\u240A\u240D\r")
+        .replace(Regex("(?<!\r)\n"), "\u240A")
+        .replace(Regex("(?<!\u240D)\r(?!\n)"), "\u240D")
+}
+
