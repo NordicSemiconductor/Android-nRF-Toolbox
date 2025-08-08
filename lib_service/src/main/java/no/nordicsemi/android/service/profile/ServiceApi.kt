@@ -1,6 +1,7 @@
 package no.nordicsemi.android.service.profile
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import no.nordicsemi.android.toolbox.profile.manager.ServiceManager
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
@@ -44,14 +45,14 @@ interface ServiceApi {
      *
      * @return the connection state flow.
      */
-    fun getConnectionState(address: String): Flow<ConnectionState>?
+    fun getConnectionState(address: String): StateFlow<ConnectionState>?
 
     /**
      * Get the disconnection reason of the device with the given address.
      *
      * @return the disconnection reason flow.
      */
-    val disconnectionReason: Flow<DeviceDisconnectionReason?>
+    val disconnectionReason: StateFlow<DeviceDisconnectionReason?>
 
     /**
      * Request maximum write value length.

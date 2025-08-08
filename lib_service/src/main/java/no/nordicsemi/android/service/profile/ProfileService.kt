@@ -8,6 +8,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
@@ -87,7 +88,7 @@ internal class ProfileService : NotificationService() {
         override val isMissingServices: Flow<Boolean>
             get() = _isMissingServices.asStateFlow()
 
-        override val disconnectionReason: Flow<DeviceDisconnectionReason?>
+        override val disconnectionReason: StateFlow<DeviceDisconnectionReason?>
             get() = _disconnectionReason.asStateFlow()
 
         override suspend fun getMaxWriteValue(address: String, writeType: WriteType): Int? {
@@ -134,7 +135,7 @@ internal class ProfileService : NotificationService() {
             }
         }
 
-        override fun getConnectionState(address: String): Flow<ConnectionState>? {
+        override fun getConnectionState(address: String): StateFlow<ConnectionState>? {
             val peripheral = getPeripheralById(address) ?: return null
             return peripheral.state.also { stateFlow ->
                 connectionJobs[address]?.cancel()
