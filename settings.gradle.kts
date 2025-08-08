@@ -69,9 +69,9 @@ include(":profile_data")
 include(":profile_manager")
 include(":permissions-ranging")
 
-//if (file("../Android-Common-Libraries").exists()) {
-//    includeBuild("../Android-Common-Libraries")
-//}
+if (file("../Android-Common-Libraries").exists()) {
+    includeBuild("../Android-Common-Libraries")
+}
 //
 //if (file("../Kotlin-BLE-Library").exists()) {
 //    includeBuild("../Kotlin-BLE-Library")

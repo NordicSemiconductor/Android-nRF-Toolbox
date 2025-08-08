@@ -10,7 +10,6 @@ import no.nordicsemi.android.toolbox.profile.data.uart.MacroEol
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTMacro
 import no.nordicsemi.android.toolbox.profile.data.uart.parseWithNewLineChar
-import no.nordicsemi.android.toolbox.profile.data.uart.toMacroEolUnicodeCharDisplay
 import no.nordicsemi.android.toolbox.profile.manager.UARTManager
 
 object UartRepository {
@@ -60,7 +59,6 @@ object UartRepository {
                 deviceId,
                 macro.command!!.parseWithNewLineChar(macro.newLineChar),
                 getMaxWriteLength(deviceId),
-                macro.command!!.toMacroEolUnicodeCharDisplay(macro.newLineChar)
             )
         }
     }
@@ -130,7 +128,7 @@ object UartRepository {
                 // Save the new configuration and edited position.
                 val newConfiguration = it.uartViewState.configurations.map { config ->
                     if (config.id == selectedConfiguration.id) {
-                        newConfig!!
+                        newConfig
                     } else {
                         config
                     }

@@ -23,7 +23,7 @@ val ScannerDestination = defineDestination(ScannerDestinationId) {
         state = rememberFilterState(
             dynamicFilters = listOf(
                 OnlyNearby(),
-                OnlyWithNames(),
+                OnlyWithNames(isInitiallySelected = true),
             )
         ),
         onResultSelected = {

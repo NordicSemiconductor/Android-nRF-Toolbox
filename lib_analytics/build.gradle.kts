@@ -42,6 +42,8 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
+    // TODO: Use the Analytics library from common. This is a temporary solution to check view.
+    implementation("no.nordicsemi.android.common:analytics")
 
     implementation(libs.nordic.analytics)
 }
