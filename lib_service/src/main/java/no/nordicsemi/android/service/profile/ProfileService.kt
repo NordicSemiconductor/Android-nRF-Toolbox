@@ -181,10 +181,10 @@ internal class ProfileService : NotificationService() {
     }
 
     private suspend fun connectPeripheral(peripheral: Peripheral) {
-        runCatching {
+        try {
             centralManager.connect(peripheral, options = ConnectionOptions.Direct())
-        }.onFailure { exception ->
-            Timber.e(exception, "Could not connect to the ${peripheral.address}")
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to connect to the ${peripheral.address}")
             stopForegroundService() // Stop service if connection fails
         }
     }
