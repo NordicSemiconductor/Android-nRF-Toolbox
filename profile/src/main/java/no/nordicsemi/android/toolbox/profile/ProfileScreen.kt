@@ -1,5 +1,6 @@
 package no.nordicsemi.android.toolbox.profile
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -61,6 +62,10 @@ internal fun ProfileScreen() {
     val deviceDataState by profileViewModel.deviceState.collectAsStateWithLifecycle()
     val onClickEvent: (ConnectionEvent) -> Unit = { event ->
         profileViewModel.onConnectionEvent(event)
+    }
+    // Handle back press to navigate up.
+    BackHandler {
+        onClickEvent(ConnectionEvent.NavigateUp)
     }
 
     Scaffold(
