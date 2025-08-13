@@ -8,6 +8,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
@@ -87,7 +88,7 @@ internal class ProfileService : NotificationService() {
         override val isMissingServices: Flow<Boolean>
             get() = _isMissingServices.asStateFlow()
 
-        override val disconnectionReason: Flow<DeviceDisconnectionReason?>
+        override val disconnectionReason: StateFlow<DeviceDisconnectionReason?>
             get() = _disconnectionReason.asStateFlow()
 
         override suspend fun getMaxWriteValue(address: String, writeType: WriteType): Int? {
@@ -134,7 +135,7 @@ internal class ProfileService : NotificationService() {
             }
         }
 
-        override fun getConnectionState(address: String): Flow<ConnectionState>? {
+        override fun connectionState(address: String): StateFlow<ConnectionState>? {
             val peripheral = getPeripheralById(address) ?: return null
             return peripheral.state.also { stateFlow ->
                 connectionJobs[address]?.cancel()
@@ -148,14 +149,16 @@ internal class ProfileService : NotificationService() {
                             }
                         }
 
-                        ConnectionState.Connecting -> _disconnectionReason.tryEmit(null)
-                        is ConnectionState.Disconnected -> {
-                            _disconnectionReason.tryEmit(StateReason(state.reason))
+                        ConnectionState.Connecting, ConnectionState.Disconnecting -> {
+                            // No action needed, just observing the state
                         }
 
-                        ConnectionState.Closed -> return@onEach
-
-                        ConnectionState.Disconnecting -> {
+                        is ConnectionState.Disconnected -> {
+                            if (state.reason == null) {
+                                _disconnectionReason.tryEmit(null)
+                                return@onEach
+                            } else
+                                _disconnectionReason.tryEmit(StateReason(state.reason!!))
                             connectionJobs[address]?.cancel()
                             handleDisconnection(address)
                         }
@@ -180,11 +183,10 @@ internal class ProfileService : NotificationService() {
     }
 
     private suspend fun connectPeripheral(peripheral: Peripheral) {
-        runCatching {
+        try {
             centralManager.connect(peripheral, options = ConnectionOptions.Direct())
-        }.onFailure { exception ->
-            Timber.e(exception, "Could not connect to the ${peripheral.address}")
-            stopForegroundService() // Stop service if connection fails
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to connect to the ${peripheral.address}")
         }
     }
 
@@ -220,7 +222,6 @@ internal class ProfileService : NotificationService() {
                             )
                         } catch (e: Exception) {
                             Timber.tag("ObserveServices").e(e)
-                            handleDisconnection(peripheral.address)
                         }
                     }
                 }
@@ -260,13 +261,13 @@ internal class ProfileService : NotificationService() {
     /**
      * Handle disconnection and cleanup for the given peripheral.
      */
-    private fun handleDisconnection(peripheral: String) {
+    private fun handleDisconnection(device: String) {
         val currentDevices = _connectedDevices.value.toMutableMap()
-        currentDevices[peripheral]?.let {
-            currentDevices.remove(peripheral)
+        currentDevices[device]?.let {
+            currentDevices.remove(device)
             _connectedDevices.tryEmit(currentDevices)
         }
-        clearJobs(peripheral)
+        clearJobs(device)
         clearFlags()
         stopServiceIfNoDevices()
     }
