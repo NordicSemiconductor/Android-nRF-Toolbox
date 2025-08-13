@@ -135,7 +135,7 @@ internal class ProfileService : NotificationService() {
             }
         }
 
-        override fun getConnectionState(address: String): StateFlow<ConnectionState>? {
+        override fun connectionState(address: String): StateFlow<ConnectionState>? {
             val peripheral = getPeripheralById(address) ?: return null
             return peripheral.state.also { stateFlow ->
                 connectionJobs[address]?.cancel()
@@ -149,14 +149,16 @@ internal class ProfileService : NotificationService() {
                             }
                         }
 
-                        ConnectionState.Connecting -> _disconnectionReason.tryEmit(null)
-                        is ConnectionState.Disconnected -> {
-                            _disconnectionReason.tryEmit(StateReason(state.reason))
+                        ConnectionState.Connecting, ConnectionState.Disconnecting -> {
+                            // No action needed, just observing the state
                         }
 
-                        ConnectionState.Closed -> return@onEach
-
-                        ConnectionState.Disconnecting -> {
+                        is ConnectionState.Disconnected -> {
+                            if (state.reason == null) {
+                                _disconnectionReason.tryEmit(null)
+                                return@onEach
+                            } else
+                                _disconnectionReason.tryEmit(StateReason(state.reason!!))
                             connectionJobs[address]?.cancel()
                             handleDisconnection(address)
                         }
@@ -185,7 +187,6 @@ internal class ProfileService : NotificationService() {
             centralManager.connect(peripheral, options = ConnectionOptions.Direct())
         } catch (e: Exception) {
             Timber.e(e, "Failed to connect to the ${peripheral.address}")
-            stopForegroundService() // Stop service if connection fails
         }
     }
 
@@ -221,7 +222,6 @@ internal class ProfileService : NotificationService() {
                             )
                         } catch (e: Exception) {
                             Timber.tag("ObserveServices").e(e)
-                            handleDisconnection(peripheral.address)
                         }
                     }
                 }
@@ -261,13 +261,13 @@ internal class ProfileService : NotificationService() {
     /**
      * Handle disconnection and cleanup for the given peripheral.
      */
-    private fun handleDisconnection(peripheral: String) {
+    private fun handleDisconnection(device: String) {
         val currentDevices = _connectedDevices.value.toMutableMap()
-        currentDevices[peripheral]?.let {
-            currentDevices.remove(peripheral)
+        currentDevices[device]?.let {
+            currentDevices.remove(device)
             _connectedDevices.tryEmit(currentDevices)
         }
-        clearJobs(peripheral)
+        clearJobs(device)
         clearFlags()
         stopServiceIfNoDevices()
     }

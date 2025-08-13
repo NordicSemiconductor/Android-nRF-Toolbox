@@ -9,7 +9,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
@@ -23,14 +22,12 @@ import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
 import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.timber.nRFLoggerTree
-import no.nordicsemi.android.service.profile.CustomReason
 import no.nordicsemi.android.service.profile.ProfileServiceManager
 import no.nordicsemi.android.service.profile.ServiceApi
 import no.nordicsemi.android.service.profile.StateReason
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
-import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import timber.log.Timber
@@ -148,8 +145,7 @@ internal class ProfileViewModel @Inject constructor(
         isAlreadyConnected: Boolean
     ) {
         // Drop the first default state (Closed) before connection.
-        job = api.getConnectionState(deviceAddress)
-            ?.drop(if (isAlreadyConnected) 0 else 1)
+        job = api.connectionState(deviceAddress)
             ?.onEach { connectionState ->
                 if (peripheral == null) peripheral = api.getPeripheralById(address)
                 when (connectionState) {
@@ -167,34 +163,24 @@ internal class ProfileViewModel @Inject constructor(
                     }
 
                     is ConnectionState.Disconnected -> {
-                        _deviceState.update {
-                            DeviceConnectionState.Disconnected(
-                                peripheral,
-                                StateReason(connectionState.reason)
-                            )
-                        }.also {
-                            // Remove the analytics logged profiles for the disconnected device.
-                            deviceRepository.removeLoggedProfile(deviceAddress)
-                        }
-                    }
-
-                    ConnectionState.Closed -> {
-                        unbindService()
-                        api.disconnectionReason.onEach { reason ->
-                            if (reason != null) {
-                                _deviceState.update {
-                                    DeviceConnectionState.Disconnected(peripheral, reason)
-                                }
-                            } else {
-                                _deviceState.update {
-                                    DeviceConnectionState.Disconnected(
-                                        peripheral,
-                                        CustomReason(DisconnectReason.UNKNOWN)
-                                    )
-                                }
+                        // If disconnected reason is null, it means that the connection was never initiated.
+                        if (connectionState.reason == null) {
+                            _deviceState.update {
+                                DeviceConnectionState.Idle
                             }
-                        }.launchIn(viewModelScope)
-                        job?.cancel()
+                            return@onEach
+                        } else {
+                            _deviceState.update {
+                                DeviceConnectionState.Disconnected(
+                                    peripheral,
+                                    StateReason(connectionState.reason!!)
+                                )
+                            }.also {
+                                // Remove the analytics logged profiles for the disconnected device.
+                                deviceRepository.removeLoggedProfile(deviceAddress)
+                            }
+                            job?.cancel()
+                        }
                     }
 
                     ConnectionState.Connecting -> {

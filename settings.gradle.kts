@@ -50,7 +50,7 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("libs") {
-            from("no.nordicsemi.android.gradle:version-catalog:2.9-1")
+            from("no.nordicsemi.android.gradle:version-catalog:2.9-2")
         }
     }
 }
@@ -69,9 +69,9 @@ include(":profile_data")
 include(":profile_manager")
 include(":permissions-ranging")
 
-if (file("../Android-Common-Libraries").exists()) {
-    includeBuild("../Android-Common-Libraries")
-}
+//if (file("../Android-Common-Libraries").exists()) {
+//    includeBuild("../Android-Common-Libraries")
+//}
 //
 //if (file("../Kotlin-BLE-Library").exists()) {
 //    includeBuild("../Kotlin-BLE-Library")
