@@ -14,14 +14,14 @@ import no.nordicsemi.android.analytics.Link
 import no.nordicsemi.android.analytics.ProfileOpenEvent
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.nrftoolbox.ScannerDestinationId
-import no.nordicsemi.android.toolbox.profile.manager.ServiceManager
+import no.nordicsemi.android.service.profile.ServiceApi
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
-import no.nordicsemi.kotlin.ble.client.android.Peripheral
+import timber.log.Timber
 import javax.inject.Inject
 
 internal data class HomeViewState(
-    val connectedDevices: Map<String, Pair<Peripheral, List<ServiceManager>>> = emptyMap(),
+    val connectedDevices: Map<String, ServiceApi.DeviceData> = emptyMap(),
 )
 
 private const val GITHUB_REPO_URL = "https://github.com/NordicSemiconductor/Android-nRF-Toolbox.git"
@@ -39,6 +39,7 @@ internal class HomeViewModel @Inject constructor(
     init {
         // Observe connected devices from the repository
         deviceRepository.connectedDevices.onEach { devices ->
+            Timber.tag("AAA").d("Connected devices updated: ${devices.keys}")
             _state.update { currentState ->
                 currentState.copy(connectedDevices = devices)
             }

@@ -35,6 +35,7 @@ import no.nordicsemi.android.nrftoolbox.R
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewModel
 import no.nordicsemi.android.nrftoolbox.viewmodel.UiEvent
 import no.nordicsemi.android.toolbox.lib.utils.Profile
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,240 +83,250 @@ internal fun HomeView() {
                         .padding(start = 16.dp, end = 16.dp, top = 16.dp),
                 )
                 if (state.connectedDevices.isNotEmpty()) {
+                    Timber.tag("AAA").d("Connected devices: ${state.connectedDevices.keys}")
                     Column(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        state.connectedDevices.values.forEach { (peripheral, services) ->
-                            // Skip if no services
-                            if (services.isEmpty()) return@forEach
-                            // Case 1: If only one service, show it directly like battery service
-                            if (services.size == 1 && services.first().profile == Profile.BATTERY) {
-                                FeatureButton(
-                                    iconId = R.drawable.ic_battery,
-                                    description = R.string.battery_module_full,
-                                    deviceName = peripheral.name,
-                                    deviceAddress = peripheral.address,
-                                    onClick = {
-                                        onEvent(
-                                            UiEvent.OnDeviceClick(
-                                                peripheral.address,
-                                                services.first().profile
-                                            )
-                                        )
-                                    },
-                                )
-                            }
-                            // Case 2: Show the first *non-Battery* profile.
-                            // This ensures only one service is shown per peripheral when multiple services are available.
-                            services.firstOrNull { it.profile != Profile.BATTERY }
-                                ?.let { serviceManager ->
-                                    when (serviceManager.profile) {
-                                        Profile.HRS -> FeatureButton(
-                                            iconId = R.drawable.ic_hrs,
-                                            description = R.string.hrs_module_full,
-                                            deviceName = peripheral.name,
-                                            profileNames = services.map { it.profile.toString() },
-                                            deviceAddress = peripheral.address,
+                        state.connectedDevices.keys.forEach {
+                            state.connectedDevices[it]?.let { deviceData ->
+                                if (deviceData.connectionState.isConnected) {
+                                    // Skip if no services
+                                    if (deviceData.services.isEmpty()) return@forEach
+                                    // Case 1: If only one service, show it directly like battery service
+                                    if (deviceData.services.size == 1 && deviceData.services.first().profile == Profile.BATTERY) {
+                                        FeatureButton(
+                                            iconId = R.drawable.ic_battery,
+                                            description = R.string.battery_module_full,
+                                            deviceName = deviceData.peripheral.name,
+                                            deviceAddress = deviceData.peripheral.address,
                                             onClick = {
                                                 onEvent(
                                                     UiEvent.OnDeviceClick(
-                                                        peripheral.address,
-                                                        serviceManager.profile
+                                                        deviceData.peripheral.address,
+                                                        deviceData.services.first().profile
                                                     )
                                                 )
                                             },
                                         )
-
-                                        Profile.HTS -> FeatureButton(
-                                            iconId = R.drawable.ic_hts,
-                                            description = R.string.hts_module_full,
-                                            deviceName = peripheral.name,
-                                            deviceAddress = peripheral.address,
-                                            profileNames = services.map { it.profile.toString() },
-                                            onClick = {
-                                                onEvent(
-                                                    UiEvent.OnDeviceClick(
-                                                        peripheral.address,
-                                                        serviceManager.profile
-                                                    )
-                                                )
-                                            },
-                                        )
-
-                                        Profile.BPS -> FeatureButton(
-                                            iconId = R.drawable.ic_bps,
-                                            description = R.string.bps_module_full,
-                                            deviceName = peripheral.name,
-                                            deviceAddress = peripheral.address,
-                                            profileNames = services.map { it.profile.toString() },
-                                            onClick = {
-                                                onEvent(
-                                                    UiEvent.OnDeviceClick(
-                                                        peripheral.address,
-                                                        serviceManager.profile
-                                                    )
-                                                )
-                                            },
-                                        )
-
-                                        Profile.GLS -> FeatureButton(
-                                            iconId = R.drawable.ic_gls,
-                                            description = R.string.gls_module_full,
-                                            deviceName = peripheral.name,
-                                            deviceAddress = peripheral.address,
-                                            profileNames = services.map { it.profile.toString() },
-                                            onClick = {
-                                                onEvent(
-                                                    UiEvent.OnDeviceClick(
-                                                        peripheral.address,
-                                                        serviceManager.profile
-                                                    )
-                                                )
-                                            },
-                                        )
-
-                                        Profile.CGM -> FeatureButton(
-                                            iconId = R.drawable.ic_cgm,
-                                            description = R.string.cgm_module_full,
-                                            deviceName = peripheral.name,
-                                            deviceAddress = peripheral.address,
-                                            profileNames = services.map { it.profile.toString() },
-                                            onClick = {
-                                                onEvent(
-                                                    UiEvent.OnDeviceClick(
-                                                        peripheral.address,
-                                                        serviceManager.profile
-                                                    )
-                                                )
-                                            },
-                                        )
-
-                                        Profile.RSCS -> FeatureButton(
-                                            iconId = R.drawable.ic_rscs,
-                                            description = R.string.rscs_module_full,
-                                            deviceName = peripheral.name,
-                                            deviceAddress = peripheral.address,
-                                            profileNames = services.map { it.profile.toString() },
-                                            onClick = {
-                                                onEvent(
-                                                    UiEvent.OnDeviceClick(
-                                                        peripheral.address,
-                                                        serviceManager.profile
-                                                    )
-                                                )
-                                            },
-                                        )
-
-                                        Profile.DFS -> FeatureButton(
-                                            iconId = R.drawable.ic_distance,
-                                            description = R.string.direction_module_full,
-                                            deviceName = peripheral.name,
-                                            deviceAddress = peripheral.address,
-                                            profileNames = services.map { it.profile.toString() },
-                                            onClick = {
-                                                onEvent(
-                                                    UiEvent.OnDeviceClick(
-                                                        peripheral.address,
-                                                        serviceManager.profile
-                                                    )
-                                                )
-                                            },
-                                        )
-
-                                        Profile.CSC -> FeatureButton(
-                                            iconId = R.drawable.ic_csc,
-                                            description = R.string.csc_module_full,
-                                            deviceName = peripheral.name,
-                                            deviceAddress = peripheral.address,
-                                            profileNames = services.map { it.profile.toString() },
-                                            onClick = {
-                                                onEvent(
-                                                    UiEvent.OnDeviceClick(
-                                                        peripheral.address,
-                                                        serviceManager.profile
-                                                    )
-                                                )
-                                            },
-                                        )
-
-                                        Profile.THROUGHPUT -> {
-                                            FeatureButton(
-                                                iconId = Icons.Default.SyncAlt,
-                                                description = R.string.throughput_module,
-                                                deviceName = peripheral.name,
-                                                deviceAddress = peripheral.address,
-                                                profileNames = services.map { it.profile.toString() },
-                                                onClick = {
-                                                    onEvent(
-                                                        UiEvent.OnDeviceClick(
-                                                            peripheral.address,
-                                                            serviceManager.profile
-                                                        )
-                                                    )
-                                                },
-                                            )
-                                        }
-
-                                        Profile.UART -> {
-                                            FeatureButton(
-                                                iconId = R.drawable.ic_uart,
-                                                description = R.string.uart_module_full,
-                                                deviceName = peripheral.name,
-                                                deviceAddress = peripheral.address,
-                                                profileNames = services.map { it.profile.toString() },
-                                                onClick = {
-                                                    onEvent(
-                                                        UiEvent.OnDeviceClick(
-                                                            peripheral.address,
-                                                            serviceManager.profile
-                                                        )
-                                                    )
-                                                },
-                                            )
-                                        }
-
-                                        Profile.CHANNEL_SOUNDING -> {
-                                            FeatureButton(
-                                                iconId = Icons.Default.SocialDistance,
-                                                description = R.string.channel_sounding_module,
-                                                deviceName = peripheral.name,
-                                                deviceAddress = peripheral.address,
-                                                profileNames = services.map { it.profile.toString() },
-                                                onClick = {
-                                                    onEvent(
-                                                        UiEvent.OnDeviceClick(
-                                                            peripheral.address,
-                                                            serviceManager.profile
-                                                        )
-                                                    )
-                                                },
-                                            )
-                                        }
-
-                                        Profile.LBS -> {
-                                            FeatureButton(
-                                                iconId = Icons.Default.Lightbulb,
-                                                description = R.string.lbs_blinky_module,
-                                                deviceName = peripheral.name,
-                                                deviceAddress = peripheral.address,
-                                                profileNames = services.map { it.profile.toString() },
-                                                onClick = {
-                                                    onEvent(
-                                                        UiEvent.OnDeviceClick(
-                                                            peripheral.address,
-                                                            serviceManager.profile
-                                                        )
-                                                    )
-                                                },
-                                            )
-                                        }
-
-                                        else -> {
-                                            // TODO: Add more profiles
-                                        }
                                     }
+                                    // Case 2: Show the first *non-Battery* profile.
+                                    // This ensures only one service is shown per peripheral when multiple services are available.
+                                    deviceData.services.firstOrNull { it.profile != Profile.BATTERY }
+                                        ?.let { serviceManager ->
+                                            val peripheral = deviceData.peripheral
+                                            val services = deviceData.services
+                                            Timber.tag("AAA")
+                                                .d("Displaying device: ${peripheral.address} with services: ${services.map { it.profile }}")
+                                            when (serviceManager.profile) {
+                                                Profile.HRS -> FeatureButton(
+                                                    iconId = R.drawable.ic_hrs,
+                                                    description = R.string.hrs_module_full,
+                                                    deviceName = peripheral.name,
+                                                    profileNames = services.map { it.profile.toString() },
+                                                    deviceAddress = peripheral.address,
+                                                    onClick = {
+                                                        onEvent(
+                                                            UiEvent.OnDeviceClick(
+                                                                peripheral.address,
+                                                                serviceManager.profile
+                                                            )
+                                                        )
+                                                    },
+                                                )
+
+                                                Profile.HTS -> FeatureButton(
+                                                    iconId = R.drawable.ic_hts,
+                                                    description = R.string.hts_module_full,
+                                                    deviceName = peripheral.name,
+                                                    deviceAddress = peripheral.address,
+                                                    profileNames = services.map { it.profile.toString() },
+                                                    onClick = {
+                                                        onEvent(
+                                                            UiEvent.OnDeviceClick(
+                                                                peripheral.address,
+                                                                serviceManager.profile
+                                                            )
+                                                        )
+                                                    },
+                                                )
+
+                                                Profile.BPS -> FeatureButton(
+                                                    iconId = R.drawable.ic_bps,
+                                                    description = R.string.bps_module_full,
+                                                    deviceName = peripheral.name,
+                                                    deviceAddress = peripheral.address,
+                                                    profileNames = services.map { it.profile.toString() },
+                                                    onClick = {
+                                                        onEvent(
+                                                            UiEvent.OnDeviceClick(
+                                                                peripheral.address,
+                                                                serviceManager.profile
+                                                            )
+                                                        )
+                                                    },
+                                                )
+
+                                                Profile.GLS -> FeatureButton(
+                                                    iconId = R.drawable.ic_gls,
+                                                    description = R.string.gls_module_full,
+                                                    deviceName = peripheral.name,
+                                                    deviceAddress = peripheral.address,
+                                                    profileNames = services.map { it.profile.toString() },
+                                                    onClick = {
+                                                        onEvent(
+                                                            UiEvent.OnDeviceClick(
+                                                                peripheral.address,
+                                                                serviceManager.profile
+                                                            )
+                                                        )
+                                                    },
+                                                )
+
+                                                Profile.CGM -> FeatureButton(
+                                                    iconId = R.drawable.ic_cgm,
+                                                    description = R.string.cgm_module_full,
+                                                    deviceName = peripheral.name,
+                                                    deviceAddress = peripheral.address,
+                                                    profileNames = services.map { it.profile.toString() },
+                                                    onClick = {
+                                                        onEvent(
+                                                            UiEvent.OnDeviceClick(
+                                                                peripheral.address,
+                                                                serviceManager.profile
+                                                            )
+                                                        )
+                                                    },
+                                                )
+
+                                                Profile.RSCS -> FeatureButton(
+                                                    iconId = R.drawable.ic_rscs,
+                                                    description = R.string.rscs_module_full,
+                                                    deviceName = peripheral.name,
+                                                    deviceAddress = peripheral.address,
+                                                    profileNames = services.map { it.profile.toString() },
+                                                    onClick = {
+                                                        onEvent(
+                                                            UiEvent.OnDeviceClick(
+                                                                peripheral.address,
+                                                                serviceManager.profile
+                                                            )
+                                                        )
+                                                    },
+                                                )
+
+                                                Profile.DFS -> FeatureButton(
+                                                    iconId = R.drawable.ic_distance,
+                                                    description = R.string.direction_module_full,
+                                                    deviceName = peripheral.name,
+                                                    deviceAddress = peripheral.address,
+                                                    profileNames = services.map { it.profile.toString() },
+                                                    onClick = {
+                                                        onEvent(
+                                                            UiEvent.OnDeviceClick(
+                                                                peripheral.address,
+                                                                serviceManager.profile
+                                                            )
+                                                        )
+                                                    },
+                                                )
+
+                                                Profile.CSC -> FeatureButton(
+                                                    iconId = R.drawable.ic_csc,
+                                                    description = R.string.csc_module_full,
+                                                    deviceName = peripheral.name,
+                                                    deviceAddress = peripheral.address,
+                                                    profileNames = services.map { it.profile.toString() },
+                                                    onClick = {
+                                                        onEvent(
+                                                            UiEvent.OnDeviceClick(
+                                                                peripheral.address,
+                                                                serviceManager.profile
+                                                            )
+                                                        )
+                                                    },
+                                                )
+
+                                                Profile.THROUGHPUT -> {
+                                                    FeatureButton(
+                                                        iconId = Icons.Default.SyncAlt,
+                                                        description = R.string.throughput_module,
+                                                        deviceName = peripheral.name,
+                                                        deviceAddress = peripheral.address,
+                                                        profileNames = services.map { it.profile.toString() },
+                                                        onClick = {
+                                                            onEvent(
+                                                                UiEvent.OnDeviceClick(
+                                                                    peripheral.address,
+                                                                    serviceManager.profile
+                                                                )
+                                                            )
+                                                        },
+                                                    )
+                                                }
+
+                                                Profile.UART -> {
+                                                    FeatureButton(
+                                                        iconId = R.drawable.ic_uart,
+                                                        description = R.string.uart_module_full,
+                                                        deviceName = peripheral.name,
+                                                        deviceAddress = peripheral.address,
+                                                        profileNames = services.map { it.profile.toString() },
+                                                        onClick = {
+                                                            onEvent(
+                                                                UiEvent.OnDeviceClick(
+                                                                    peripheral.address,
+                                                                    serviceManager.profile
+                                                                )
+                                                            )
+                                                        },
+                                                    )
+                                                }
+
+                                                Profile.CHANNEL_SOUNDING -> {
+                                                    FeatureButton(
+                                                        iconId = Icons.Default.SocialDistance,
+                                                        description = R.string.channel_sounding_module,
+                                                        deviceName = peripheral.name,
+                                                        deviceAddress = peripheral.address,
+                                                        profileNames = services.map { it.profile.toString() },
+                                                        onClick = {
+                                                            onEvent(
+                                                                UiEvent.OnDeviceClick(
+                                                                    peripheral.address,
+                                                                    serviceManager.profile
+                                                                )
+                                                            )
+                                                        },
+                                                    )
+                                                }
+
+                                                Profile.LBS -> {
+                                                    FeatureButton(
+                                                        iconId = Icons.Default.Lightbulb,
+                                                        description = R.string.lbs_blinky_module,
+                                                        deviceName = peripheral.name,
+                                                        deviceAddress = peripheral.address,
+                                                        profileNames = services.map { it.profile.toString() },
+                                                        onClick = {
+                                                            onEvent(
+                                                                UiEvent.OnDeviceClick(
+                                                                    peripheral.address,
+                                                                    serviceManager.profile
+                                                                )
+                                                            )
+                                                        },
+                                                    )
+                                                }
+
+                                                else -> {
+                                                    // TODO: Add more profiles
+                                                }
+                                            }
+                                        }
                                 }
+
+                            }
                         }
                     }
                 } else {
