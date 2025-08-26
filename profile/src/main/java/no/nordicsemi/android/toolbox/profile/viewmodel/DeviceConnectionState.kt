@@ -1,23 +1,29 @@
 package no.nordicsemi.android.toolbox.profile.viewmodel
 
 import no.nordicsemi.android.service.profile.DeviceDisconnectionReason
-import no.nordicsemi.android.toolbox.profile.manager.ServiceManager
-import no.nordicsemi.kotlin.ble.client.android.Peripheral
+import no.nordicsemi.android.service.profile.ServiceApi
 
-internal data class DeviceData(
-    val peripheral: Peripheral? = null,
-    val peripheralProfileMap: Map<Peripheral, List<ServiceManager>> = emptyMap(),
-    val isMissingServices: Boolean = false,
-    val maxValueLength: Int? = null,
-)
+/**
+ * Events triggered by the user from the UI.
+ */
+internal sealed interface ConnectionEvent {
+    data object OnRetryClicked : ConnectionEvent
+    data object NavigateUp : ConnectionEvent
+    data object DisconnectEvent : ConnectionEvent
+    data object OpenLoggerEvent : ConnectionEvent
+    data object RequestMaxValueLength : ConnectionEvent
+}
 
-internal sealed class DeviceConnectionState {
-    data object Idle : DeviceConnectionState()
-    data object Connecting : DeviceConnectionState()
-    data object Disconnecting : DeviceConnectionState()
-    data class Connected(val data: DeviceData) : DeviceConnectionState()
-    data class Disconnected(
-        val device: Peripheral? = null,
-        val reason: DeviceDisconnectionReason?
-    ) : DeviceConnectionState()
+/**
+ * Represents the state of the UI for the profile screen.
+ */
+internal sealed interface ProfileUiState {
+    data object Loading : ProfileUiState
+    data class Disconnected(val reason: DeviceDisconnectionReason?) : ProfileUiState
+
+    data class Connected(
+        val deviceData: ServiceApi.DeviceData,
+        val isMissingServices: Boolean = false,
+        val maxValueLength: Int? = null,
+    ) : ProfileUiState
 }

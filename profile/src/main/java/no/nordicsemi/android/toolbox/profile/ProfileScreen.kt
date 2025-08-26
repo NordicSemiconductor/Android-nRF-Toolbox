@@ -27,11 +27,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.common.permissions.ble.RequireLocation
 import no.nordicsemi.android.common.permissions.notification.RequestNotificationPermission
-import no.nordicsemi.android.service.profile.CustomReason
-import no.nordicsemi.android.service.profile.DeviceDisconnectionReason
-import no.nordicsemi.android.service.profile.StateReason
 import no.nordicsemi.android.toolbox.lib.utils.Profile
-import no.nordicsemi.android.toolbox.profile.data.toReason
 import no.nordicsemi.android.toolbox.profile.view.battery.BatteryScreen
 import no.nordicsemi.android.toolbox.profile.view.bps.BPSScreen
 import no.nordicsemi.android.toolbox.profile.view.cgms.CGMScreen
@@ -47,45 +43,45 @@ import no.nordicsemi.android.toolbox.profile.view.rscs.RSCSScreen
 import no.nordicsemi.android.toolbox.profile.view.throughput.ThroughputScreen
 import no.nordicsemi.android.toolbox.profile.view.uart.UARTScreen
 import no.nordicsemi.android.toolbox.profile.viewmodel.ConnectionEvent
-import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceConnectionState
-import no.nordicsemi.android.toolbox.profile.viewmodel.DeviceData
+import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileUiState
 import no.nordicsemi.android.toolbox.profile.viewmodel.ProfileViewModel
 import no.nordicsemi.android.ui.view.internal.DeviceConnectingView
+import no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView
 import no.nordicsemi.android.ui.view.internal.DisconnectReason
-import no.nordicsemi.android.ui.view.internal.LoadingView
 import no.nordicsemi.android.ui.view.internal.ServiceDiscoveryView
 
 @Composable
 internal fun ProfileScreen() {
     val profileViewModel: ProfileViewModel = hiltViewModel()
+    val uiState by profileViewModel.uiState.collectAsStateWithLifecycle()
     val deviceAddress = profileViewModel.address
-    val deviceDataState by profileViewModel.deviceState.collectAsStateWithLifecycle()
-    val onClickEvent: (ConnectionEvent) -> Unit = { event ->
-        profileViewModel.onConnectionEvent(event)
+
+    // Event handler now sends simpler, context-free events.
+    val onEvent: (ConnectionEvent) -> Unit = { event ->
+        profileViewModel.onEvent(event)
     }
     // Handle back press to navigate up.
     BackHandler {
-        onClickEvent(ConnectionEvent.NavigateUp)
+        onEvent(ConnectionEvent.NavigateUp)
     }
 
     Scaffold(
         contentWindowInsets = WindowInsets.displayCutout
             .only(WindowInsetsSides.Horizontal),
         topBar = {
+            // The device name is derived directly from the current state.
+            val deviceName = (uiState as? ProfileUiState.Connected)
+                ?.deviceData?.peripheral?.name
+                ?: deviceAddress
+
             ProfileAppBar(
-                deviceName = when (val state = deviceDataState) {
-                    is DeviceConnectionState.Connected -> state.data.peripheral?.name
-                        ?: deviceAddress
-
-                    is DeviceConnectionState.Disconnected -> state.device?.name ?: deviceAddress
-
-                    else -> deviceAddress
-                },
+                deviceName = deviceName,
                 title = deviceAddress,
-                connectionState = deviceDataState,
-                navigateUp = { onClickEvent(ConnectionEvent.NavigateUp) },
-                disconnect = { onClickEvent(ConnectionEvent.DisconnectEvent(deviceAddress)) },
-                openLogger = { onClickEvent(ConnectionEvent.OpenLoggerEvent) }
+                // The AppBar needs to be updated to accept the new ProfileUiState
+                connectionState = uiState,
+                navigateUp = { onEvent(ConnectionEvent.NavigateUp) },
+                disconnect = { onEvent(ConnectionEvent.DisconnectEvent) },
+                openLogger = { onEvent(ConnectionEvent.OpenLoggerEvent) }
             )
         },
     ) { paddingValues ->
@@ -101,30 +97,31 @@ internal fun ProfileScreen() {
                             .imePadding(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        when (val state = deviceDataState) {
-                            is DeviceConnectionState.Connected -> {
-                                DeviceConnectedView(
-                                    state.data,
-                                    onClickEvent
-                                )
-                            }
-
-                            DeviceConnectionState.Connecting -> DeviceConnectingView(
-                                modifier = Modifier
-                                    .padding(16.dp)
+                        // The main content switches based on the UI state.
+                        when (val state = uiState) {
+                            is ProfileUiState.Connected -> DeviceConnectedView(
+                                state = state,
+                                onEvent = onEvent
                             )
 
-                            is DeviceConnectionState.Disconnected -> {
-                                state.reason?.let {
-                                    DeviceDisconnectedView(
-                                        it,
-                                        deviceAddress,
-                                        onClickEvent
-                                    )
+                            is ProfileUiState.Disconnected -> {
+                                DeviceDisconnectedView(
+                                    disconnectedReason = state.reason.toString(),
+                                    isMissingService = false,
+                                    modifier = Modifier.padding(16.dp),
+                                ) {
+                                    Button(
+                                        onClick = { onEvent(ConnectionEvent.OnRetryClicked) },
+
+                                        ) {
+                                        Text(text = stringResource(id = R.string.reconnect))
+                                    }
                                 }
                             }
 
-                            DeviceConnectionState.Idle, DeviceConnectionState.Disconnecting -> LoadingView()
+                            ProfileUiState.Loading -> DeviceConnectingView(
+                                modifier = Modifier.padding(16.dp)
+                            )
                         }
                     }
                 }
@@ -134,122 +131,67 @@ internal fun ProfileScreen() {
 }
 
 @Composable
-internal fun DeviceDisconnectedView(
-    reason: DeviceDisconnectionReason,
-    deviceAddress: String,
-    onClickEvent: (ConnectionEvent) -> Unit
-) {
-    when (reason) {
-        is CustomReason -> {
-            no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView(
-                reason = reason.reason,
-                modifier = Modifier
-                    .padding(16.dp)
-            ) {
-                Button(
-                    onClick = { onClickEvent(ConnectionEvent.OnRetryClicked(deviceAddress)) },
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(text = stringResource(id = R.string.reconnect))
-                }
-            }
-        }
-
-        is StateReason -> {
-            no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView(
-                disconnectedReason = toReason(reason.reason),
-                modifier = Modifier
-                    .padding(16.dp)
-            ) {
-                Button(
-                    onClick = { onClickEvent(ConnectionEvent.OnRetryClicked(deviceAddress)) },
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(text = stringResource(id = R.string.reconnect))
-                }
-            }
-        }
-    }
-}
-
-@Composable
 internal fun DeviceConnectedView(
-    deviceData: DeviceData,
-    onClickEvent: (ConnectionEvent) -> Unit,
+    state: ProfileUiState.Connected,
+    onEvent: (ConnectionEvent) -> Unit,
 ) {
-    // Is missing services?
-    deviceData.peripheral?.let { peripheral ->
-        when {
-            deviceData.isMissingServices -> {
-                no.nordicsemi.android.ui.view.internal.DeviceDisconnectedView(
-                    reason = DisconnectReason.MISSING_SERVICE,
-                    modifier = Modifier
-                        .padding(16.dp)
-                )
-            }
+    // Check for missing services directly from the state object.
+    if (state.isMissingServices) {
+        DeviceDisconnectedView(
+            reason = DisconnectReason.MISSING_SERVICE,
+            modifier = Modifier.padding(16.dp)
+        )
+        return
+    }
 
-            else -> {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .imePadding()
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier
+            .padding(16.dp)
+            .imePadding()
+    ) {
+        // Show service discovery view if services are not yet available.
+        if (state.deviceData.services.isEmpty()) {
+            ServiceDiscoveryView(modifier = Modifier) {
+                Button(
+                    onClick = { onEvent(ConnectionEvent.DisconnectEvent) },
+                    modifier = Modifier.padding(16.dp)
                 ) {
-                    deviceData.peripheralProfileMap[deviceData.peripheral]?.forEach { profile ->
-                        Column(
-                            modifier = Modifier
-                                .imePadding()
-                        ) {
-                            // Requires max value length to be set.
-                            val needsMaxValueLength = profile.profile == Profile.THROUGHPUT ||
-                                    profile.profile == Profile.UART
-                            if (needsMaxValueLength) {
-                                LaunchedEffect(key1 = true) {
-                                    if (deviceData.maxValueLength == null) {
-                                        onClickEvent(ConnectionEvent.RequestMaxValueLength)
-                                    }
-                                }
-                            }
-                            when (profile.profile) {
-                                Profile.HTS -> HTSScreen()
-                                Profile.CHANNEL_SOUNDING -> ChannelSoundingScreen()
-                                Profile.BPS -> BPSScreen()
-                                Profile.CSC -> CSCScreen()
-                                Profile.CGM -> CGMScreen()
-                                Profile.DFS -> DFSScreen()
-                                Profile.GLS -> GLSScreen()
-                                Profile.HRS -> HRSScreen()
-                                Profile.LBS -> BlinkyScreen()
-                                Profile.RSCS -> RSCSScreen()
-                                Profile.THROUGHPUT -> ThroughputScreen(deviceData.maxValueLength)
-                                Profile.UART -> UARTScreen(deviceData.maxValueLength)
+                    Text(text = stringResource(id = R.string.cancel))
+                }
+            }
+        } else {
+            // Iterate through the available service managers.
+            state.deviceData.services.forEach { serviceManager ->
+                Column(modifier = Modifier.imePadding()) {
+                    val needsMaxValueLength = serviceManager.profile in listOf(
+                        Profile.CHANNEL_SOUNDING, Profile.UART, Profile.THROUGHPUT
+                    )
 
-                                else -> {
-                                    // Do nothing.
-                                }
-                            }
-                            if (profile.profile == Profile.BATTERY) {
-                                // Battery level will be added at the end.
-                                BatteryScreen()
+                    // Request max value length if needed and not already set.
+                    if (needsMaxValueLength) {
+                        LaunchedEffect(Unit) {
+                            if (state.maxValueLength == null) {
+                                onEvent(ConnectionEvent.RequestMaxValueLength)
                             }
                         }
-                    } ?: run {
-                        ServiceDiscoveryView(
-                            modifier = Modifier
-                        ) {
-                            Button(
-                                onClick = {
-                                    onClickEvent(
-                                        ConnectionEvent.DisconnectEvent(
-                                            peripheral.address
-                                        )
-                                    )
-                                },
-                                modifier = Modifier.padding(16.dp)
-                            ) {
-                                Text(text = stringResource(id = R.string.cancel))
-                            }
-                        }
+                    }
+
+                    // Display the appropriate screen for each profile.
+                    when (serviceManager.profile) {
+                        Profile.HTS -> HTSScreen()
+                        Profile.CHANNEL_SOUNDING -> ChannelSoundingScreen()
+                        Profile.BPS -> BPSScreen()
+                        Profile.CSC -> CSCScreen()
+                        Profile.CGM -> CGMScreen()
+                        Profile.DFS -> DFSScreen()
+                        Profile.GLS -> GLSScreen()
+                        Profile.HRS -> HRSScreen()
+                        Profile.LBS -> BlinkyScreen()
+                        Profile.RSCS -> RSCSScreen()
+                        Profile.BATTERY -> BatteryScreen()
+                        Profile.THROUGHPUT -> ThroughputScreen(state.maxValueLength)
+                        Profile.UART -> UARTScreen(state.maxValueLength)
                     }
                 }
             }

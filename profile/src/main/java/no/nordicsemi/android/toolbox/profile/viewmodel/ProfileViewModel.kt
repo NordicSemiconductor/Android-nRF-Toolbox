@@ -5,12 +5,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -24,28 +24,11 @@ import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.profile.ProfileServiceManager
 import no.nordicsemi.android.service.profile.ServiceApi
-import no.nordicsemi.android.service.profile.StateReason
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
-import no.nordicsemi.kotlin.ble.client.android.Peripheral
-import no.nordicsemi.kotlin.ble.core.ConnectionState
 import timber.log.Timber
-import java.lang.ref.WeakReference
 import javax.inject.Inject
-
-internal sealed interface ConnectionEvent {
-
-    data class OnRetryClicked(val device: String) : ConnectionEvent
-
-    data object NavigateUp : ConnectionEvent
-
-    data class DisconnectEvent(val device: String) : ConnectionEvent
-
-    data object OpenLoggerEvent : ConnectionEvent
-
-    data object RequestMaxValueLength : ConnectionEvent
-}
 
 @HiltViewModel
 internal class ProfileViewModel @Inject constructor(
@@ -57,239 +40,132 @@ internal class ProfileViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
     val address: String = parameterOf(ProfileDestinationId)
-    private val _deviceState = MutableStateFlow<DeviceConnectionState>(DeviceConnectionState.Idle)
-    val deviceState = _deviceState.asStateFlow()
+    private var serviceApi: ServiceApi? = null
+    private val logger: nRFLoggerTree =
+        nRFLoggerTree(context, address, context.getString(R.string.app_name))
 
-    private var logger: nRFLoggerTree? = null
-    private var serviceApi: WeakReference<ServiceApi>? = null
-    private var peripheral: Peripheral? = null
-    private var job: Job? = null
+    private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
+    val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
     init {
-        connectToPeripheral(address)
+        Timber.tag("AAA PVM").d("Initializing ViewModel for device: $address")
+        connectToPeripheral()
         observeConnectedDevices()
-        initLogger()
+        Timber.plant(logger)
     }
 
-    private suspend fun getServiceApi(): ServiceApi? {
-        if (serviceApi == null) {
-            serviceApi = WeakReference(profileServiceManager.bindService())
-        }
-        return serviceApi?.get()
-    }
-
-    private fun initLogger() {
-        logger = nRFLoggerTree(context, address, context.getString(R.string.app_name)).also {
-            Timber.plant(it)
-        }
-    }
+    private suspend fun getServiceApi() =
+        profileServiceManager.bindService().also { serviceApi = it }
 
     private fun observeConnectedDevices() = viewModelScope.launch {
-        getServiceApi()?.let { api ->
-            peripheral = api.getPeripheralById(address)
+        // Bind the service and get the API
+        val api = getServiceApi()
 
-            api.connectedDevices
-                .onEach { peripheralProfileMap ->
-                    deviceRepository.updateConnectedDevices(peripheralProfileMap)
+        // Combine flows from the service to create a single UI state.
+        combine(
+            api.devices,
+            api.isMissingServices,
+            api.disconnectionEvent
+        ) { devices, missingServicesMap, disconnection ->
+            val deviceData = devices[address]
+            val isMissingServices = missingServicesMap[address] ?: false
+            Timber.tag("AAA PVM")
+                .d("DeviceData for $address: $deviceData, MissingServices: $isMissingServices, $deviceData")
 
-                    peripheralProfileMap[peripheral?.address]?.let { pair ->
-                        deviceRepository.updateProfilePeripheralPair(pair.first, pair.second)
-                        _deviceState.update {
-                            DeviceConnectionState.Connected(
-                                DeviceData(
-                                    peripheral = pair.first,
-                                    peripheralProfileMap = mapOf(pair.first to pair.second),
-                                )
-                            )
+            // Determine the UI state based on the service's state
+            if (deviceData != null) {
+                // Update connected device info in the repository
+                deviceRepository.updateProfilePeripheralPair(
+                    deviceData.peripheral,
+                    deviceData.services
+                )
+                deviceData.services.forEach {
+                    deviceRepository.updateAnalytics(
+                        address,
+                        it.profile
+                    )
+                }
+                deviceRepository.updateConnectedDevices(devices)
 
-                        }
-                    }
-
-                    // Send each profile handler to a shared flow that profile ViewModels can observe
-                    peripheralProfileMap[peripheral?.address]?.second?.forEach { handler ->
-                        deviceRepository.updateAnalytics(address, handler.profile)
-
-                    }
-                }.launchIn(viewModelScope)
-
-            updateConnectionState(api, address, peripheral?.isConnected == true)
+//                // Create the Connected state
+                val currentMaxVal =
+                    (_uiState.value as? ProfileUiState.Connected)?.maxValueLength
+                ProfileUiState.Connected(deviceData, isMissingServices, currentMaxVal)
+            } else {
+                // If the device is not in the map, it's disconnected.
+                // Check if there's a specific disconnection event for this device.
+                val reason =
+                    if (disconnection?.address == address) disconnection.reason else null
+                deviceRepository.removeLoggedProfile(address)
+                ProfileUiState.Disconnected(reason)
+            }
+        }.catch { e ->
+            Timber.e(e, "Error observing profile state")
+            // You could emit a generic error state here if needed
+        }.collect { state ->
+            _uiState.value = state
         }
     }
-
 
     /**
      * Connect to the peripheral with the given address. Before connecting, the service must be bound.
      * The service will be started if not already running.
-     * @param deviceAddress the address of the peripheral to connect to.
      */
-    private fun connectToPeripheral(deviceAddress: String) = viewModelScope.launch {
+    private fun connectToPeripheral() = viewModelScope.launch {
         // Connect to the peripheral
-        getServiceApi()?.let {
-            if (peripheral == null) peripheral = it.getPeripheralById(address)
-            if (peripheral?.isConnected != true) {
-                profileServiceManager.connectToPeripheral(deviceAddress)
-            }
-        }
-    }
-
-
-    /**
-     * Update the service data, including connection state and peripheral data.
-     * @param api the service API.
-     * @param deviceAddress the address of the connected device.
-     * @param isAlreadyConnected true if the device is already connected, false otherwise.
-     */
-    private fun updateConnectionState(
-        api: ServiceApi,
-        deviceAddress: String,
-        isAlreadyConnected: Boolean
-    ) {
-        // Drop the first default state (Closed) before connection.
-        job = api.connectionState(deviceAddress)
-            ?.onEach { connectionState ->
-                if (peripheral == null) peripheral = api.getPeripheralById(address)
-                when (connectionState) {
-                    ConnectionState.Connected -> {
-                        _deviceState.update { currentState ->
-                            val currentData =
-                                (currentState as? DeviceConnectionState.Connected)?.data
-                            DeviceConnectionState.Connected(
-                                currentData?.copy(
-                                    peripheral = peripheral
-                                ) ?: DeviceData(peripheral = peripheral)
-                            )
-
-                        }.apply { checkForMissingServices(api) }
-                    }
-
-                    is ConnectionState.Disconnected -> {
-                        // If disconnected reason is null, it means that the connection was never initiated.
-                        if (connectionState.reason == null) {
-                            _deviceState.update {
-                                DeviceConnectionState.Idle
-                            }
-                            return@onEach
-                        } else {
-                            _deviceState.update {
-                                DeviceConnectionState.Disconnected(
-                                    peripheral,
-                                    StateReason(connectionState.reason!!)
-                                )
-                            }.also {
-                                // Remove the analytics logged profiles for the disconnected device.
-                                deviceRepository.removeLoggedProfile(deviceAddress)
-                            }
-                            job?.cancel()
-                        }
-                    }
-
-                    ConnectionState.Connecting -> {
-                        _deviceState.update {
-                            DeviceConnectionState.Connecting
-                        }
-                    }
-
-                    ConnectionState.Disconnecting -> {
-                        // Update the state to disconnecting.
-                        _deviceState.update {
-                            DeviceConnectionState.Disconnecting
-                        }
-                    }
-                }
-            }
-            ?.onCompletion {
-                job?.cancel()
-                job = null
-            }?.launchIn(viewModelScope)
-    }
-
-    /**
-     * Check for missing services.
-     */
-    private fun checkForMissingServices(api: ServiceApi) =
-        api.isMissingServices.onEach { isMissing ->
-            (_deviceState.value as? DeviceConnectionState.Connected)?.let { connectedState ->
-                _deviceState.update {
-                    connectedState.copy(
-                        data = connectedState.data.copy(isMissingServices = isMissing)
-                    )
-                }
+        getServiceApi().devices.onEach {
+            if (it[address]?.connectionState?.isConnected != true) {
+                Timber.tag("AAA PVM").d("Not connected to $address, connecting...")
+                profileServiceManager.connectToPeripheral(address)
+                return@onEach
+            } else {
+                Timber.tag("AAA PVM").d("Already connected to $address")
             }
         }.launchIn(viewModelScope)
-
-
-    /**
-     * Unbind the service.
-     */
-    private fun unbindService() {
-        serviceApi?.let { profileServiceManager.unbindService() }
-        serviceApi = null
     }
 
-    fun onConnectionEvent(event: ConnectionEvent) {
+
+    fun onEvent(event: ConnectionEvent) {
         when (event) {
-            is ConnectionEvent.DisconnectEvent -> disconnect(event.device)
+            ConnectionEvent.DisconnectEvent -> {
+                serviceApi?.disconnect(address)
+            }
+
             ConnectionEvent.NavigateUp -> {
-                // If the device is connected and missing services, disconnect it before navigating up.
-                if ((_deviceState.value as? DeviceConnectionState.Connected)?.data?.isMissingServices == true) {
-                    disconnect(address)
+                // Disconnect only if services are missing, otherwise leave connected
+                if ((_uiState.value as? ProfileUiState.Connected)?.isMissingServices == true) {
+                    Timber.tag("BBB").d("Disconnecting due to missing services")
+                    serviceApi?.disconnect(address)
                 }
                 navigator.navigateUp()
             }
 
-            is ConnectionEvent.OnRetryClicked -> reconnectDevice(event.device)
-            ConnectionEvent.OpenLoggerEvent -> openLogger()
-            ConnectionEvent.RequestMaxValueLength -> viewModelScope.launch(Dispatchers.IO) {
-                // Request maximum MTU size if it is not already set.
-                val mtuSize = getServiceApi()?.getMaxWriteValue(address)
-                _deviceState.update { currentState ->
-                    val currentData =
-                        (currentState as? DeviceConnectionState.Connected)?.data
-                    if (currentData != null && currentData.maxValueLength == mtuSize) {
-                        // No need to update if the max value length is already set.
-                        return@update currentState
-                    }
-                    DeviceConnectionState.Connected(
-                        currentData?.copy(
-                            maxValueLength = mtuSize
-                        ) ?: DeviceData(
-                            peripheral = peripheral,
-                            maxValueLength = mtuSize
-                        )
-                    )
-                }
+            ConnectionEvent.OnRetryClicked -> {
+                _uiState.value = ProfileUiState.Loading
+                connectToPeripheral()
             }
+
+            ConnectionEvent.OpenLoggerEvent -> openLogger()
+            ConnectionEvent.RequestMaxValueLength -> requestMaxWriteValue()
         }
     }
 
-    /**
-     * Disconnect the device with the given address and navigate back.
-     * @param device the address of the device to disconnect.
-     */
-    private fun disconnect(device: String) = viewModelScope.launch {
-        getServiceApi()?.disconnect(device)
-        unbindService()
+    private fun requestMaxWriteValue() = viewModelScope.launch {
+        val mtu = serviceApi?.getMaxWriteValue(address)
+        _uiState.update {
+            (it as? ProfileUiState.Connected)?.copy(maxValueLength = mtu) ?: it
+        }
     }
 
-    /**
-     * Launch the logger activity.
-     */
     private fun openLogger() {
-        // Log the event in the analytics.
         analytics.logEvent(ProfileOpenEvent(Link.LOGGER))
-        LoggerLauncher.launch(context, logger?.session as? LogSession)
+        LoggerLauncher.launch(context, logger.session as? LogSession)
     }
 
-    /**
-     * Reconnect to the device with the given address.
-     *
-     * @param deviceAddress the address of the device to reconnect to.
-     */
-    private fun reconnectDevice(deviceAddress: String) = viewModelScope.launch {
-        getServiceApi()?.let {
-            connectToPeripheral(deviceAddress)
-            updateConnectionState(it, deviceAddress, false)
-        }
+    override fun onCleared() {
+        Timber.uproot(logger)
+        profileServiceManager.unbindService()
+        serviceApi = null
+        super.onCleared()
     }
-
 }
