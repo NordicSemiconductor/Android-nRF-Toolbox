@@ -10,8 +10,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.analytics.AppAnalytics
@@ -27,6 +25,7 @@ import no.nordicsemi.android.service.profile.ServiceApi
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
+import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -40,6 +39,7 @@ internal class ProfileViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
     val address: String = parameterOf(ProfileDestinationId)
+    var peripheral: Peripheral? = null
     private var serviceApi: ServiceApi? = null
     private val logger: nRFLoggerTree =
         nRFLoggerTree(context, address, context.getString(R.string.app_name))
@@ -55,10 +55,13 @@ internal class ProfileViewModel @Inject constructor(
     }
 
     private suspend fun getServiceApi() =
-        profileServiceManager.bindService().also { serviceApi = it }
+        profileServiceManager.bindService().also {
+            serviceApi = it
+            peripheral = it.getPeripheral(address)
+        }
 
     private fun observeConnectedDevices() = viewModelScope.launch {
-        // Bind the service and get the API
+        // Combine flows from the service to create a single UI state.
         val api = getServiceApi()
 
         // Combine flows from the service to create a single UI state.
@@ -113,15 +116,12 @@ internal class ProfileViewModel @Inject constructor(
      */
     private fun connectToPeripheral() = viewModelScope.launch {
         // Connect to the peripheral
-        getServiceApi().devices.onEach {
-            if (it[address]?.connectionState?.isConnected != true) {
-                Timber.tag("AAA PVM").d("Not connected to $address, connecting...")
+        getServiceApi().let {
+            if (it.getPeripheral(address) == null) peripheral = it.getPeripheral(address)
+            if (peripheral?.isConnected != true) {
                 profileServiceManager.connectToPeripheral(address)
-                return@onEach
-            } else {
-                Timber.tag("AAA PVM").d("Already connected to $address")
             }
-        }.launchIn(viewModelScope)
+        }
     }
 
 
