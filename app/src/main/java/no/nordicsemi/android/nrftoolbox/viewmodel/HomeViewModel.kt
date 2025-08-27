@@ -17,7 +17,6 @@ import no.nordicsemi.android.nrftoolbox.ScannerDestinationId
 import no.nordicsemi.android.service.profile.ServiceApi
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
-import timber.log.Timber
 import javax.inject.Inject
 
 internal data class HomeViewState(
@@ -39,7 +38,6 @@ internal class HomeViewModel @Inject constructor(
     init {
         // Observe connected devices from the repository
         deviceRepository.connectedDevices.onEach { devices ->
-            Timber.tag("AAA").d("Connected devices updated: ${devices.keys}")
             _state.update { currentState ->
                 currentState.copy(connectedDevices = devices)
             }
