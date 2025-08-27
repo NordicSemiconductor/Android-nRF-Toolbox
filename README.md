@@ -32,10 +32,30 @@ file.
 
 If you get ["Missing Feature Watch" error](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/issues/41#issuecomment-355291101), switch the configuration to 'app'.
 
-### BLE Connection
+### BLE Profile Service
 
-The BLE connection is maintained by running a service. The service starts to connect to a device and stops when the user decides to disconnect from it. When an activity is destroyed, it unbinds from the service; however, the service remains running, allowing incoming data to continue being handled. The service keeps all device-related data and may be obtained by an activity when it binds to it to be shown to the user. Instead of maintaining individual profile service, this structure will create one service for all connected devices.
-To add a new profile, create a subtype of _ServiceManager_, which provides logic for observing data interactions with Bluetooth devices.
+The ProfileService is responsible for managing Bluetooth Low Energy (BLE) connections in a centralized way.
+It runs as a foreground service, maintaining connections to multiple devices, handling lifecycle events, and exposing device data to bound components (e.g., activities or fragments).
+
+#### Overview
+The service establishes and maintains BLE connections via the CentralManager. Connections are kept alive independently of any activity or fragment lifecycle. When the UI component unbinds from the service, the connections remain active, ensuring uninterrupted data flow.
+All connected devices are tracked, and their states (connection, services, disconnections) are published using StateFlow.
+
+#### Key Features
+
+- Single Service for All Devices: 
+Instead of running a separate service per device, one ProfileService manages all active connections.
+
+- Connection Lifecycle: Starts a connection when onStartCommand is triggered with a device address. Cleans up and disconnects gracefully when no devices remain connected. Publishes disconnection events with reasons for UI handling.
+
+- Device State Management: 
+ Keeps a map of devices and their DeviceData (address, state, services). Tracks missing services and notifies observers if required services are unavailable.
+
+- Service Discovery & Management:
+Discovers services after connection. New profiles can be added by implementing a ServiceManager subclass.
+
+- Logging: 
+Integrates with nRFLogger to provide per-device logs. Each device connection initializes its own logger instance.
 
 ### Nordic UART Service
 
