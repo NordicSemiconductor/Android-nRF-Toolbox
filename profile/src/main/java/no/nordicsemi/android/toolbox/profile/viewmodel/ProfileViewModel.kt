@@ -69,6 +69,7 @@ internal class ProfileViewModel @Inject constructor(
             api.isMissingServices,
             api.disconnectionEvent
         ) { devices, missingServicesMap, disconnection ->
+            deviceRepository.updateConnectedDevices(devices)
             val deviceData = devices[address]
             val isMissingServices = missingServicesMap[address] ?: false
             // Determine the UI state based on the service's state
@@ -84,7 +85,6 @@ internal class ProfileViewModel @Inject constructor(
                         it.profile
                     )
                 }
-                deviceRepository.updateConnectedDevices(devices)
                 val currentMaxVal =
                     (_uiState.value as? ProfileUiState.Connected)?.maxValueLength
                 ProfileUiState.Connected(deviceData, isMissingServices, currentMaxVal)
