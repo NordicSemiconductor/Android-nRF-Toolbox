@@ -48,7 +48,6 @@ internal class ProfileViewModel @Inject constructor(
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
     init {
-        Timber.tag("AAA PVM").d("Initializing ViewModel for device: $address")
         connectToPeripheral()
         observeConnectedDevices()
         Timber.plant(logger)
@@ -72,9 +71,6 @@ internal class ProfileViewModel @Inject constructor(
         ) { devices, missingServicesMap, disconnection ->
             val deviceData = devices[address]
             val isMissingServices = missingServicesMap[address] ?: false
-            Timber.tag("AAA PVM")
-                .d("DeviceData for $address: $deviceData, MissingServices: $isMissingServices, $deviceData")
-
             // Determine the UI state based on the service's state
             if (deviceData != null) {
                 // Update connected device info in the repository
@@ -89,8 +85,6 @@ internal class ProfileViewModel @Inject constructor(
                     )
                 }
                 deviceRepository.updateConnectedDevices(devices)
-
-//                // Create the Connected state
                 val currentMaxVal =
                     (_uiState.value as? ProfileUiState.Connected)?.maxValueLength
                 ProfileUiState.Connected(deviceData, isMissingServices, currentMaxVal)
@@ -134,7 +128,6 @@ internal class ProfileViewModel @Inject constructor(
             ConnectionEvent.NavigateUp -> {
                 // Disconnect only if services are missing, otherwise leave connected
                 if ((_uiState.value as? ProfileUiState.Connected)?.isMissingServices == true) {
-                    Timber.tag("BBB").d("Disconnecting due to missing services")
                     serviceApi?.disconnect(address)
                 }
                 navigator.navigateUp()

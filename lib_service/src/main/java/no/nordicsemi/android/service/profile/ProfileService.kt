@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -94,13 +95,10 @@ internal class ProfileService : NotificationService() {
         }
 
         val job = lifecycleScope.launch {
-            // Launch the initial connection attempt.
-            launch {
-                try {
-                    centralManager.connect(peripheral, options = ConnectionOptions.Direct())
-                } catch (e: Exception) {
-                    Timber.e(e, "Failed to connect to $address")
-                }
+            try {
+                centralManager.connect(peripheral, options = ConnectionOptions.Direct())
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to connect to $address")
             }
 
             // Observe connection state changes and react accordingly.
@@ -108,12 +106,6 @@ internal class ProfileService : NotificationService() {
         }
 
         managedConnections[address] = job
-        job.invokeOnCompletion {
-            // Clean up when the management coroutine is cancelled.
-            handleDisconnection(address, "Job cancelled")
-            managedConnections.remove(address)
-            stopServiceIfNoDevices()
-        }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -136,7 +128,6 @@ internal class ProfileService : NotificationService() {
                     }
 
                     is ConnectionState.Disconnected -> {
-                        Timber.tag("AAAA").d("Disconnected State: ${peripheral.address}")
                         val reason = state.reason ?: DisconnectReason.UNKNOWN
                         _disconnectionEvent.value =
                             ServiceApi.DisconnectionEvent(
@@ -144,14 +135,17 @@ internal class ProfileService : NotificationService() {
                                 StateReason(reason as ConnectionState.Disconnected.Reason)
                             )
                         _devices.update { it - peripheral.address }
-                        Timber.tag("AAA").d("Devices after disconnection: ${_devices.value.keys}")
-                        handleDisconnection(peripheral.address, reason.toString())
                     }
 
                     else -> {
                         // Handle connecting/disconnecting states if needed
                     }
                 }
+            }.onCompletion {
+                handleDisconnection(peripheral.address)
+                managedConnections[peripheral.address]?.cancel()
+                managedConnections.remove(peripheral.address)
+                stopServiceIfNoDevices()
             }.launchIn(this)
     }
 
@@ -168,8 +162,6 @@ internal class ProfileService : NotificationService() {
                     ServiceManagerFactory
                         .createServiceManager(removeService.uuid)
                         ?.also { manager ->
-                            Timber.tag("AAA")
-                                .d("Found ServiceManager for service ${removeService.uuid}")
                             isMissing = false
                             _devices.update {
                                 it + (peripheral.address to it[peripheral.address]!!.copy(
@@ -178,20 +170,15 @@ internal class ProfileService : NotificationService() {
                                     ) ?: listOf(manager)
                                 ))
                             }
-//                            _isMissingServices.update { it - peripheral.address }
-                            scope.launch { // Launch observation for each service.
-                                observeService(peripheral, removeService, manager)
-                            }
+                            // Launch observation for each service.
+                            observeService(peripheral, removeService, manager)
                         }
                 }
                 if (isMissing != false) {
-                    Timber.tag("AAA").w("Peripheral ${peripheral.address} is missing services")
                     _isMissingServices.update { it + (peripheral.address to true) }
                 } else {
                     _isMissingServices.update { it - peripheral.address }
                     // If all required services are found, log it.
-                    Timber.tag("AAA")
-                        .d("Peripheral ${peripheral.address} has all required services")
                 }
             }.launchIn(scope)
 
@@ -218,19 +205,15 @@ internal class ProfileService : NotificationService() {
             lifecycleScope.launch {
                 try {
                     peripheral.disconnect()
-                    handleDisconnection(address, "Disconnected by user")
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to disconnect from $address")
                 }
             }
         }
-        managedConnections[address]?.cancel()
     }
 
-    private fun handleDisconnection(address: String, reason: String) {
-        Timber.d("Handling disconnection for $address, reason: $reason")
+    private fun handleDisconnection(address: String) {
         _devices.update { it - address }
-        Timber.tag("AAA").d("Devices after disconnection: ${_devices.value.keys}")
         _isMissingServices.update { it - address }
     }
 
