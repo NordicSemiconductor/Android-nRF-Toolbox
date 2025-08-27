@@ -35,7 +35,6 @@ import no.nordicsemi.android.nrftoolbox.R
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewModel
 import no.nordicsemi.android.nrftoolbox.viewmodel.UiEvent
 import no.nordicsemi.android.toolbox.lib.utils.Profile
-import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,7 +82,6 @@ internal fun HomeView() {
                         .padding(start = 16.dp, end = 16.dp, top = 16.dp),
                 )
                 if (state.connectedDevices.isNotEmpty()) {
-                    Timber.tag("AAA").d("Connected devices: ${state.connectedDevices.keys}")
                     Column(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxWidth()
@@ -116,8 +114,6 @@ internal fun HomeView() {
                                         ?.let { serviceManager ->
                                             val peripheral = deviceData.peripheral
                                             val services = deviceData.services
-                                            Timber.tag("AAA")
-                                                .d("Displaying device: ${peripheral.address} with services: ${services.map { it.profile }}")
                                             when (serviceManager.profile) {
                                                 Profile.HRS -> FeatureButton(
                                                     iconId = R.drawable.ic_hrs,
