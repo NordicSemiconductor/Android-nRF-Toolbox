@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -135,17 +134,13 @@ internal class ProfileService : NotificationService() {
                                 StateReason(reason as ConnectionState.Disconnected.Reason)
                             )
                         _devices.update { it - peripheral.address }
+                        handleDisconnection(peripheral.address)
                     }
 
                     else -> {
                         // Handle connecting/disconnecting states if needed
                     }
                 }
-            }.onCompletion {
-                handleDisconnection(peripheral.address)
-                managedConnections[peripheral.address]?.cancel()
-                managedConnections.remove(peripheral.address)
-                stopServiceIfNoDevices()
             }.launchIn(this)
     }
 
@@ -215,6 +210,9 @@ internal class ProfileService : NotificationService() {
     private fun handleDisconnection(address: String) {
         _devices.update { it - address }
         _isMissingServices.update { it - address }
+        managedConnections[address]?.cancel()
+        managedConnections.remove(address)
+        stopServiceIfNoDevices()
     }
 
     private fun stopServiceIfNoDevices() {
