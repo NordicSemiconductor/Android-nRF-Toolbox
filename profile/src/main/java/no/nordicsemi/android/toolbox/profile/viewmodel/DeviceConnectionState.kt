@@ -1,7 +1,7 @@
 package no.nordicsemi.android.toolbox.profile.viewmodel
 
-import no.nordicsemi.android.service.profile.DeviceDisconnectionReason
 import no.nordicsemi.android.service.profile.ServiceApi
+import no.nordicsemi.kotlin.ble.core.ConnectionState
 
 /**
  * Events triggered by the user from the UI.
@@ -19,7 +19,7 @@ internal sealed interface ConnectionEvent {
  */
 internal sealed interface ProfileUiState {
     data object Loading : ProfileUiState
-    data class Disconnected(val reason: DeviceDisconnectionReason?) : ProfileUiState
+    data class Disconnected(val reason: ConnectionState.Disconnected.Reason?) : ProfileUiState
 
     data class Connected(
         val deviceData: ServiceApi.DeviceData,

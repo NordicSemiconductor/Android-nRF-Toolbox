@@ -28,6 +28,7 @@ import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.common.permissions.ble.RequireLocation
 import no.nordicsemi.android.common.permissions.notification.RequestNotificationPermission
 import no.nordicsemi.android.toolbox.lib.utils.Profile
+import no.nordicsemi.android.toolbox.profile.data.displayMessage
 import no.nordicsemi.android.toolbox.profile.view.battery.BatteryScreen
 import no.nordicsemi.android.toolbox.profile.view.bps.BPSScreen
 import no.nordicsemi.android.toolbox.profile.view.cgms.CGMScreen
@@ -105,16 +106,25 @@ internal fun ProfileScreen() {
                             )
 
                             is ProfileUiState.Disconnected -> {
-                                DeviceDisconnectedView(
-                                    disconnectedReason = state.reason.toString(),
-                                    isMissingService = false,
-                                    modifier = Modifier.padding(16.dp),
-                                ) {
-                                    Button(
-                                        onClick = { onEvent(ConnectionEvent.OnRetryClicked) },
+                                if (state.reason == null) {
+                                    // This is the initial state before connection attempt
+                                    // show device connecting view instead.
+                                    DeviceConnectingView(
+                                        modifier = Modifier.padding(16.dp)
+                                    )
+                                } else {
+                                    DeviceDisconnectedView(
+                                        disconnectedReason = state.reason.displayMessage(),
+                                        isMissingService = false,
+                                        modifier = Modifier.padding(16.dp),
+                                    ) {
+                                        Button(
+                                            modifier = Modifier.padding(16.dp),
+                                            onClick = { onEvent(ConnectionEvent.OnRetryClicked) },
 
-                                        ) {
-                                        Text(text = stringResource(id = R.string.reconnect))
+                                            ) {
+                                            Text(text = stringResource(id = R.string.reconnect))
+                                        }
                                     }
                                 }
                             }

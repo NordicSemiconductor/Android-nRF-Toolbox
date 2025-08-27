@@ -19,7 +19,10 @@ interface ServiceApi {
     )
 
     /** A data class to represent a disconnection event. */
-    data class DisconnectionEvent(val address: String, val reason: DeviceDisconnectionReason)
+    data class DisconnectionEvent(
+        val address: String,
+        val reason: ConnectionState.Disconnected.Reason
+    )
 
     /**
      * A flow that emits the current state of all managed devices.
