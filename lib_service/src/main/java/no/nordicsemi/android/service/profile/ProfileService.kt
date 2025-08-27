@@ -28,7 +28,6 @@ import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.BondState
 import no.nordicsemi.kotlin.ble.core.ConnectionState
-import no.nordicsemi.kotlin.ble.core.Manager
 import no.nordicsemi.kotlin.ble.core.WriteType
 import timber.log.Timber
 import javax.inject.Inject
@@ -55,17 +54,6 @@ internal class ProfileService : NotificationService() {
 
     override fun onCreate() {
         super.onCreate()
-        // Observe the Bluetooth state to handle global disconnection reasons.
-        centralManager.state.onEach { state ->
-            if (state == Manager.State.POWERED_OFF) {
-                _disconnectionEvent.value = ServiceApi.DisconnectionEvent(
-                    "all_devices", // Generic address
-                    CustomReason(DisconnectReason.BLUETOOTH_OFF)
-                )
-                // Optionally disconnect all devices
-                _devices.value.keys.forEach { disconnect(it) }
-            }
-        }.launchIn(lifecycleScope)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -131,7 +119,7 @@ internal class ProfileService : NotificationService() {
                         _disconnectionEvent.value =
                             ServiceApi.DisconnectionEvent(
                                 peripheral.address,
-                                StateReason(reason as ConnectionState.Disconnected.Reason)
+                                reason as ConnectionState.Disconnected.Reason
                             )
                         _devices.update { it - peripheral.address }
                         handleDisconnection(peripheral.address)
