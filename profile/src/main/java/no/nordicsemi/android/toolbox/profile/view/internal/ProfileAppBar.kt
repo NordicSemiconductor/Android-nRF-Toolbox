@@ -18,7 +18,7 @@ internal fun ProfileAppBar(
     openLogger: () -> Unit
 ) {
     if (deviceName?.isNotBlank() == true) {
-        if (connectionState !is ProfileUiState.Disconnected) {
+        if (connectionState is ProfileUiState.Connected) {
             LoggerIconAppBar(deviceName, navigateUp, disconnect, openLogger)
         } else {
             LoggerBackIconAppBar(deviceName, navigateUp) { openLogger() }
