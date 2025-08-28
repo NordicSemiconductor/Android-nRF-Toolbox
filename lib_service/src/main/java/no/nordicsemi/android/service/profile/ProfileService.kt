@@ -11,6 +11,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -139,13 +140,14 @@ internal class ProfileService : NotificationService() {
     ) {
         peripheral
             .services()
+            .filterNotNull()
             .onEach { service ->
-                var isMissing: Boolean? = null
-                service?.map { removeService ->
+                var foundMatchingService = false
+                for (removeService in service) {
                     ServiceManagerFactory
                         .createServiceManager(removeService.uuid)
                         ?.also { manager ->
-                            isMissing = false
+                            foundMatchingService = true
                             _devices.update {
                                 it + (peripheral.address to it[peripheral.address]!!.copy(
                                     services = it[peripheral.address]?.services?.plus(
@@ -157,11 +159,10 @@ internal class ProfileService : NotificationService() {
                             observeService(peripheral, removeService, manager)
                         }
                 }
-                if (isMissing != false) {
-                    _isMissingServices.update { it + (peripheral.address to true) }
-                } else {
+                if (foundMatchingService) {
                     _isMissingServices.update { it - peripheral.address }
-                    // If all required services are found, log it.
+                } else {
+                    _isMissingServices.update { it + (peripheral.address to true) }
                 }
             }.launchIn(scope)
 
