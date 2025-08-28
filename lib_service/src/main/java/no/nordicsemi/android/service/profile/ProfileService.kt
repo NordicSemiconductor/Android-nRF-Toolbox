@@ -73,6 +73,9 @@ internal class ProfileService : NotificationService() {
         super.onDestroy()
     }
 
+    /**
+     * Initiates a connection to the peripheral with the given address.
+     */
     private fun connect(address: String) {
         // Return if already managed to avoid multiple connection jobs.
         if (managedConnections.containsKey(address)) return
@@ -91,13 +94,16 @@ internal class ProfileService : NotificationService() {
                 Timber.e(e, "Failed to connect to $address")
             }
 
-            // Observe connection state changes and react accordingly.
+            // Observe connection state changes.
             observeConnectionState(peripheral)
         }
 
         managedConnections[address] = job
     }
 
+    /**
+     * Observes the connection state of the given peripheral and updates the service state accordingly.
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun CoroutineScope.observeConnectionState(peripheral: Peripheral) {
         peripheral.state
@@ -135,6 +141,9 @@ internal class ProfileService : NotificationService() {
             }.launchIn(this)
     }
 
+    /**
+     * Discovers services on the peripheral and sets up observation for each recognized service.
+     */
     @OptIn(ExperimentalUuidApi::class)
     private fun discoverAndObserveServices(
         peripheral: Peripheral,
@@ -170,7 +179,10 @@ internal class ProfileService : NotificationService() {
 
     }
 
-
+    /**
+     * Observes interactions for a specific service on the peripheral.
+     */
+    @OptIn(ExperimentalUuidApi::class)
     private suspend fun observeService(
         peripheral: Peripheral,
         service: RemoteService,
@@ -185,6 +197,9 @@ internal class ProfileService : NotificationService() {
         }
     }
 
+    /**
+     * Disconnects from the peripheral with the given address.
+     */
     private fun disconnect(address: String) {
         centralManager.getPeripheralById(address)?.let { peripheral ->
             lifecycleScope.launch {
@@ -212,13 +227,17 @@ internal class ProfileService : NotificationService() {
         }
     }
 
-    // Logger and other helper functions remain largely the same.
+    /**
+     * Initializes the logger if not already initialized.
+     */
     private fun initLogger(deviceAddress: String) {
         if (logger != null) return
         logger = nRFLoggerTree(this, getString(R.string.app_name), deviceAddress)
             .also { Timber.plant(it) }
     }
-
+    /**
+     * Uproots and clears the logger.
+     */
     private fun uprootLogger() {
         logger?.let { Timber.uproot(it) }
         logger = null
