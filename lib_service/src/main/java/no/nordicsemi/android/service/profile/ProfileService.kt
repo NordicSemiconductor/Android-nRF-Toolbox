@@ -207,6 +207,7 @@ internal class ProfileService : NotificationService() {
                     peripheral.disconnect()
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to disconnect from $address")
+                    handleDisconnection(address)
                 }
             }
         }
@@ -261,7 +262,7 @@ internal class ProfileService : NotificationService() {
 
         override suspend fun getMaxWriteValue(address: String, writeType: WriteType): Int? {
             val peripheral = getPeripheral(address) ?: return null
-            if (peripheral.state.value != ConnectionState.Connected) return null
+            if (!peripheral.isConnected) return null
 
             return try {
                 peripheral.requestHighestValueLength() // Request highest possible MTU
