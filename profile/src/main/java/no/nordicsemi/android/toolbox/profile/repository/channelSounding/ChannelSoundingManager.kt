@@ -10,6 +10,7 @@ import android.ranging.RangingPreference.DEVICE_ROLE_RESPONDER
 import android.ranging.RangingSession
 import android.ranging.SensorFusionParams
 import android.ranging.SessionConfig
+import android.ranging.ble.cs.BleCsRangingCapabilities
 import android.ranging.ble.cs.BleCsRangingParams
 import android.ranging.raw.RawRangingDevice
 import android.ranging.raw.RawResponderRangingConfig
@@ -101,7 +102,10 @@ object ChannelSoundingManager {
         val rangingDevice = RangingDevice.Builder()
             .build()
 
-        val csRangingParams = BleCsRangingParams.Builder(device)
+        val csRangingParams = BleCsRangingParams
+            .Builder(device)
+            .setRangingUpdateRate(RawRangingDevice.UPDATE_RATE_NORMAL)
+            .setSecurityLevel(BleCsRangingCapabilities.CS_SECURITY_LEVEL_ONE)
             .build()
 
         val rawRangingDevice = RawRangingDevice.Builder()
@@ -123,7 +127,7 @@ object ChannelSoundingManager {
                     .setAngleOfArrivalNeeded(true)
                     .setSensorFusionParams(
                         SensorFusionParams.Builder()
-                            .setSensorFusionEnabled(false)
+                            .setSensorFusionEnabled(true)
                             .build()
                     )
                     .build()
