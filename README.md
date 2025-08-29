@@ -62,6 +62,7 @@ Integrates with nRFLogger to provide per-device logs. Each device connection ini
 The UART profile allows for fast prototyping of devices. The service itself is very simple, having
 just 2 characteristics, one for sending data and one for receiving. A UART preset configuration can be created as a separate profile.
 Each of them, when pressed, will send the stored command to the device. The UART profile is included in the profile list and is managed in the same way as other profiles.
+
 **_NOTE:_** The Device Firmware Update (DFU) feature has been removed from this application and is now offered as a standalone app.
 https://github.com/NordicSemiconductor/Android-DFU-Library
 
