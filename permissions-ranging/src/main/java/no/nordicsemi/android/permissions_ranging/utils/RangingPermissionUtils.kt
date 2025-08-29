@@ -30,7 +30,7 @@ internal class RangingPermissionUtils(
                 dataProvider.isRangingPermissionRequested &&  // Ranging permission was requested.
                 !isRangingPermissionGranted // Ranging permission is not granted
                 && !context.findActivity()
-            .shouldShowRequestPermissionRationale(Manifest.permission.RANGING)
+            ?.shouldShowRequestPermissionRationale(Manifest.permission.RANGING)!!
 
     }
 
@@ -42,12 +42,16 @@ internal class RangingPermissionUtils(
      * @throws IllegalStateException if no activity was found.
      * @return the activity.
      */
-    private fun Context.findActivity(): Activity {
-        var context = this
-        while (context is ContextWrapper) {
-            if (context is Activity) return context
-            context = context.baseContext
+    private fun Context.findActivity(): Activity? {
+        return try {
+            var context = this
+            while (context is ContextWrapper) {
+                if (context is Activity) return context
+                context = context.baseContext
+            }
+            null // no activity found
+        } catch (e: Exception) {
+            null
         }
-        throw IllegalStateException("no activity")
     }
 }
