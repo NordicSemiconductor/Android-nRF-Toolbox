@@ -8,17 +8,20 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
-import no.nordicsemi.android.toolbox.profile.manager.repository.ChannelSoundingRepository
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
+import no.nordicsemi.android.toolbox.profile.manager.repository.ChannelSoundingRepository
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
 import no.nordicsemi.android.toolbox.profile.repository.channelSounding.ChannelSoundingManager
+import no.nordicsemi.kotlin.ble.core.BondState
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -50,7 +53,13 @@ internal class ChannelSoundingViewModel @Inject constructor(
                     if (peripheral.address == address) {
                         profiles.filter { it.profile == Profile.CHANNEL_SOUNDING }
                             .forEach { _ ->
-                                startChannelSounding(peripheral.address)
+                                launch {
+                                    peripheral.bondState
+                                        .filter { it == BondState.BONDED }
+                                        .first()
+                                    // Wait until the device is bonded before starting channel sounding
+                                    startChannelSounding(peripheral.address)
+                                }
                             }
                     }
                 }
