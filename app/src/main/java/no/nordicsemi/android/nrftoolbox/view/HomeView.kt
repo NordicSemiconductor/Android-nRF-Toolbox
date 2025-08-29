@@ -86,8 +86,8 @@ internal fun HomeView() {
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        state.connectedDevices.keys.forEach {
-                            state.connectedDevices[it]?.let { deviceData ->
+                        state.connectedDevices.keys.forEach { device ->
+                            state.connectedDevices[device]?.let { deviceData ->
                                 if (deviceData.connectionState.isConnected) {
                                     // Skip if no services
                                     if (deviceData.services.isEmpty()) return@forEach
