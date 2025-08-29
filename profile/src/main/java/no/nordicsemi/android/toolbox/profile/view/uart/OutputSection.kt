@@ -182,7 +182,7 @@ private fun MessageItemOutput(record: UARTRecord) {
             horizontalAlignment = Alignment.Start
         ) {
             Text(
-                text = record.text.visualizeNewlines(),
+                text = record.text,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimary
             )
