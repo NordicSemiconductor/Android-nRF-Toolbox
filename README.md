@@ -60,9 +60,8 @@ Integrates with nRFLogger to provide per-device logs. Each device connection ini
 ### Nordic UART Service
 
 The UART profile allows for fast prototyping of devices. The service itself is very simple, having
-just 2 characteristics, one for sending data and one for receiving. UART preset configuration can be created as a separate profile.
-Each of them, when pressed, will send the stored command to the device.
-
+just 2 characteristics, one for sending data and one for receiving. A UART preset configuration can be created as a separate profile.
+Each of them, when pressed, will send the stored command to the device. The UART profile is included in the profile list and is managed in the same way as other profiles.
 **_NOTE:_** The Device Firmware Update (DFU) feature has been removed from this application and is now offered as a standalone app.
 https://github.com/NordicSemiconductor/Android-DFU-Library
 
@@ -77,6 +76,8 @@ https://github.com/NordicSemiconductor/nRF-Logger-API. The library is included i
 in *build.gradle* file. This library allows the app to create log entries in the
 [nRF Logger](https://play.google.com/store/apps/details?id=no.nordicsemi.android.log) application.
 Please, read the library documentation on GitHub for more information about the usage and permissions.
+
+The [Kotlin-Utils-Library](https://github.com/NordicSemiconductor/Kotlin-Util-Library.git) is used for different ByteArray operations during profile data parsing.
 
 The graph in the HRM profile is created using the [MPAndroidChart v3.1.0](https://github.com/PhilJay/MPAndroidChart)
 contribution based on the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0).
