@@ -23,7 +23,7 @@ private const val RANGING_PERMISSION_REQUEST_CODE = 1001
 
 @Singleton
 internal class RangingStateManager @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) {
     private val dataProvider = LocalDataProvider(context)
     private val utils = RangingPermissionUtils(context, dataProvider)
@@ -66,7 +66,11 @@ internal class RangingStateManager @Inject constructor(
     }
 
     fun isRangingPermissionDenied(): Boolean {
-        return utils.isRangingPermissionDenied()
+        return try {
+            utils.isRangingPermissionDenied()
+        } catch (_: Exception) {
+            false
+        }
     }
 
     private fun getRangingPermissionState(): RangingPermissionState {
