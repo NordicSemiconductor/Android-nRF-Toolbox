@@ -6,7 +6,7 @@ import android.ranging.RangingData
 import android.ranging.RangingDevice
 import android.ranging.RangingManager
 import android.ranging.RangingPreference
-import android.ranging.RangingPreference.DEVICE_ROLE_RESPONDER
+import android.ranging.RangingPreference.DEVICE_ROLE_INITIATOR
 import android.ranging.RangingSession
 import android.ranging.SensorFusionParams
 import android.ranging.SessionConfig
@@ -43,10 +43,11 @@ object ChannelSoundingManager {
             val measurement = data.distance?.measurement
             val confidence = data.distance?.confidence
             Timber.d("RangingTechnology: ${data.rangingTechnology}")
+            Timber.d("Distance: ${if (measurement != null) "$measurement m" else "null"}")
+            Timber.d("Confidence: ${if (confidence != null) "$confidence %" else "null"}")
             Timber.d(
-                "Azimuth: ${data.azimuth}\televation: " +
-                        "${data.elevation}\tpeer: ${peer.uuid} distance ${data.distance}\t" +
-                        " rssi: ${data.rssi} \tmeasurement: $measurement\tconfidence: $confidence"
+                "\nAzimuth: ${data.azimuth}\nelevation: " +
+                        "${data.elevation}\npeer: ${peer.uuid}"
             )
         }
 
@@ -74,7 +75,7 @@ object ChannelSoundingManager {
     ) {
         val rangingManager = try {
             context.getSystemService(RangingManager::class.java)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
         if (rangingManager == null) {
@@ -104,7 +105,7 @@ object ChannelSoundingManager {
 
         val csRangingParams = BleCsRangingParams
             .Builder(device)
-            .setRangingUpdateRate(RawRangingDevice.UPDATE_RATE_NORMAL)
+            .setRangingUpdateRate(RawRangingDevice.UPDATE_RATE_INFREQUENT)
             .setSecurityLevel(BleCsRangingCapabilities.CS_SECURITY_LEVEL_ONE)
             .build()
 
@@ -118,7 +119,7 @@ object ChannelSoundingManager {
             .build()
 
         val rangingPreference = RangingPreference.Builder(
-            DEVICE_ROLE_RESPONDER,
+            DEVICE_ROLE_INITIATOR,
             rawRangingDeviceConfig
         )
             .setSessionConfig(
