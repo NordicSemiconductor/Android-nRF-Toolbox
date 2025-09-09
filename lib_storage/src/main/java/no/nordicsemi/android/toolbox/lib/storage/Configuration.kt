@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "configurations")
-data class ConfigurationEntity(
+data class Configuration(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "_id") val _id: Int?,
     @ColumnInfo(name = "name") val name: String,

@@ -4,7 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import no.nordicsemi.android.toolbox.lib.storage.ConfigurationDatabase
+import no.nordicsemi.android.toolbox.lib.storage.ConfigurationsDatabase
 import no.nordicsemi.android.toolbox.lib.storage.ConfigurationsDao
 import javax.inject.Singleton
 
@@ -14,7 +14,7 @@ class DaoHiltModule {
 
     @Provides
     @Singleton
-    internal fun provideDeviceDao(db: ConfigurationDatabase): ConfigurationsDao {
+    internal fun provideDeviceDao(db: ConfigurationsDatabase): ConfigurationsDao {
         return db.configurationDao()
     }
 }

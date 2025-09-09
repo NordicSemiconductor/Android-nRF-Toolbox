@@ -2,7 +2,7 @@ package no.nordicsemi.android.toolbox.profile.repository.uartXml
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import no.nordicsemi.android.toolbox.lib.storage.ConfigurationEntity
+import no.nordicsemi.android.toolbox.lib.storage.Configuration
 import no.nordicsemi.android.toolbox.lib.storage.ConfigurationsDao
 import no.nordicsemi.android.toolbox.profile.data.uart.MacroIcon
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
@@ -29,7 +29,7 @@ internal class UartConfigurationRepository @Inject constructor(
             configurations.mapNotNull { it.toDomain() }
         }
 
-    private fun ConfigurationEntity.toDomain(): UARTConfiguration? {
+    private fun Configuration.toDomain(): UARTConfiguration? {
         return try {
             val xml: String = xml
             val format = Format(HyphenStyle())
@@ -67,7 +67,7 @@ internal class UartConfigurationRepository @Inject constructor(
         configurationDao.deleteConfiguration(configuration.name)
     }
 
-    private fun UARTConfiguration.toConfigurationEntity(): ConfigurationEntity? {
+    private fun UARTConfiguration.toConfigurationEntity(): Configuration? {
         return try {
             val format = Format(HyphenStyle())
             val strategy: Strategy = VisitorStrategy(CommentVisitor())
@@ -75,7 +75,7 @@ internal class UartConfigurationRepository @Inject constructor(
             val writer = StringWriter()
             serializer.write(this.toXmlConfiguration(), writer)
 
-            return ConfigurationEntity(
+            return Configuration(
                 _id = id,
                 name = name,
                 xml = writer.toString(),
