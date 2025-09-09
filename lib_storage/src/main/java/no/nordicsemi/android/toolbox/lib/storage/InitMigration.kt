@@ -8,9 +8,3 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         // Empty if no schema change
     }
 }
-
-val MIGRATION_2_3 = object : Migration(2, 3) {
-    override fun migrate(db: SupportSQLiteDatabase) {
-        // Empty if no schema change
-    }
-}
