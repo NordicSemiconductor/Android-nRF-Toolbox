@@ -8,6 +8,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import no.nordicsemi.android.toolbox.lib.storage.ConfigurationDatabase
+import no.nordicsemi.android.toolbox.lib.storage.MIGRATION_1_2
+import no.nordicsemi.android.toolbox.lib.storage.MIGRATION_2_3
 import javax.inject.Singleton
 
 @Module
@@ -21,6 +23,8 @@ class DbHiltModule {
             context,
             ConfigurationDatabase::class.java,
             "toolbox_uart.db"
-        ).build()
+        )
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            .build()
     }
 }
