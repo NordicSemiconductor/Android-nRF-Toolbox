@@ -79,6 +79,16 @@ internal class ChannelSoundingViewModel @Inject constructor(
             viewModelScope.launch {
                 try {
                     ChannelSoundingManager.addDeviceToRangingSession(context, address)
+                    ChannelSoundingManager.rangingData
+                        .filter { it != null }
+                        .onEach {
+                            it?.let { data ->
+                                _channelSoundingServiceState.value =
+                                    _channelSoundingServiceState.value.copy(
+                                        rangingData = data
+                                    )
+                            }
+                        }.launchIn(viewModelScope)
                 } catch (e: Exception) {
                     Timber.e(" ${e.message}")
                 }
