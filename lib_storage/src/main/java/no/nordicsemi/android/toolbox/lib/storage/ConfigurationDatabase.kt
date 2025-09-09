@@ -5,8 +5,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [ConfigurationEntity::class],
-    version = 1,
-    exportSchema = false
+    version = 3
 )
 internal abstract class ConfigurationDatabase : RoomDatabase() {
     abstract fun configurationDao(): ConfigurationsDao
