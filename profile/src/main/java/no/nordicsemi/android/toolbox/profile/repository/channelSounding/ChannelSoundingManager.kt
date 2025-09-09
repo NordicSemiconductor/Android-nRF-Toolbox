@@ -15,10 +15,14 @@ import android.ranging.ble.cs.BleCsRangingParams
 import android.ranging.raw.RawRangingDevice
 import android.ranging.raw.RawResponderRangingConfig
 import androidx.annotation.RequiresApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import no.nordicsemi.android.toolbox.profile.repository.channelSounding.RangingSessionStartTechnology.Companion.getTechnology
 import timber.log.Timber
 
 object ChannelSoundingManager {
+    private val _rangingData = MutableStateFlow<RangingData?>(null)
+    val rangingData = _rangingData.asStateFlow()
 
     private var rangingSession: RangingSession? = null
 
@@ -40,6 +44,7 @@ object ChannelSoundingManager {
             peer: RangingDevice,
             data: RangingData
         ) {
+            _rangingData.value = data
             val measurement = data.distance?.measurement
             val confidence = data.distance?.confidence
             Timber.d("RangingTechnology: ${data.rangingTechnology}")
@@ -105,7 +110,7 @@ object ChannelSoundingManager {
 
         val csRangingParams = BleCsRangingParams
             .Builder(device)
-            .setRangingUpdateRate(RawRangingDevice.UPDATE_RATE_INFREQUENT)
+            .setRangingUpdateRate(RawRangingDevice.UPDATE_RATE_NORMAL)
             .setSecurityLevel(BleCsRangingCapabilities.CS_SECURITY_LEVEL_ONE)
             .build()
 
