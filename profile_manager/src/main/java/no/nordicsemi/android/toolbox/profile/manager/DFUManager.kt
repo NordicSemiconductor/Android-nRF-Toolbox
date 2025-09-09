@@ -13,7 +13,7 @@ internal class DFUManager :ServiceManager{
         remoteService: RemoteService,
         scope: CoroutineScope
     ) {
-        TODO("Not yet implemented")
+        // No interactions to observe for DFU profile
     }
 
 }
