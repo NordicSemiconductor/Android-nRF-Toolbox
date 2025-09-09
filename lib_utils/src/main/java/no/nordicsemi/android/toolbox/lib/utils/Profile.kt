@@ -6,6 +6,7 @@ enum class Profile {
     CHANNEL_SOUNDING,
     CSC,
     DFS,
+    DFU,
     GLS,
     HRS,
     HTS,
@@ -32,6 +33,7 @@ enum class Profile {
             BATTERY -> "Battery Service"
             THROUGHPUT -> "Throughput Service"
             UART -> "UART Service"
+            DFU -> "Device Firmware Update"
         }
 
 }
