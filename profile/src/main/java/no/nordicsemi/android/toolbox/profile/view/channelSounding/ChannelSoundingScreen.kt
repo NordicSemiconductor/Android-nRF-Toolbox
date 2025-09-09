@@ -17,11 +17,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import no.nordicsemi.android.permissions_ranging.RequestRangingPermission
+import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingViewModel
 import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
 internal fun ChannelSoundingScreen() {
+    val channelSoundingViewModel = hiltViewModel<ChannelSoundingViewModel>()
     RequestRangingPermission {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
