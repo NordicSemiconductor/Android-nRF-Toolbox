@@ -22,9 +22,11 @@ import no.nordicsemi.android.log.LogSession
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.profile.ProfileServiceManager
 import no.nordicsemi.android.service.profile.ServiceApi
+import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
+import no.nordicsemi.android.toolbox.profile.repository.channelSounding.ChannelSoundingManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import timber.log.Timber
 import javax.inject.Inject
@@ -122,6 +124,19 @@ internal class ProfileViewModel @Inject constructor(
     fun onEvent(event: ConnectionEvent) {
         when (event) {
             ConnectionEvent.DisconnectEvent -> {
+                // if the profile is channel sounding then we need to stop the ranging session before disconnecting.
+                if (_uiState.value is ProfileUiState.Connected) {
+                    val state = _uiState.value as ProfileUiState.Connected
+                    if (state.deviceData.services.any { it.profile == Profile.CHANNEL_SOUNDING }) {
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.BAKLAVA) {
+                            try {
+                                ChannelSoundingManager.closeSession()
+                            } catch (e: Exception) {
+                                Timber.e(" ${e.message}")
+                            }
+                        }
+                    }
+                }
                 serviceApi?.disconnect(address)
             }
 
