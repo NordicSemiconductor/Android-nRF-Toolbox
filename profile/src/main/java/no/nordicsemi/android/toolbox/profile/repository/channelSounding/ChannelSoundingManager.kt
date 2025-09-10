@@ -6,18 +6,23 @@ import android.ranging.RangingData
 import android.ranging.RangingDevice
 import android.ranging.RangingManager
 import android.ranging.RangingPreference
-import android.ranging.RangingPreference.DEVICE_ROLE_RESPONDER
+import android.ranging.RangingPreference.DEVICE_ROLE_INITIATOR
 import android.ranging.RangingSession
 import android.ranging.SensorFusionParams
 import android.ranging.SessionConfig
+import android.ranging.ble.cs.BleCsRangingCapabilities
 import android.ranging.ble.cs.BleCsRangingParams
 import android.ranging.raw.RawRangingDevice
 import android.ranging.raw.RawResponderRangingConfig
 import androidx.annotation.RequiresApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import no.nordicsemi.android.toolbox.profile.repository.channelSounding.RangingSessionStartTechnology.Companion.getTechnology
 import timber.log.Timber
 
 object ChannelSoundingManager {
+    private val _rangingData = MutableStateFlow<RangingData?>(null)
+    val rangingData = _rangingData.asStateFlow()
 
     private var rangingSession: RangingSession? = null
 
@@ -39,13 +44,15 @@ object ChannelSoundingManager {
             peer: RangingDevice,
             data: RangingData
         ) {
+            _rangingData.value = data
             val measurement = data.distance?.measurement
             val confidence = data.distance?.confidence
             Timber.d("RangingTechnology: ${data.rangingTechnology}")
+            Timber.d("Distance: ${if (measurement != null) "$measurement m" else "null"}")
+            Timber.d("Confidence: ${if (confidence != null) "$confidence %" else "null"}")
             Timber.d(
-                "Azimuth: ${data.azimuth}\televation: " +
-                        "${data.elevation}\tpeer: ${peer.uuid} distance ${data.distance}\t" +
-                        " rssi: ${data.rssi} \tmeasurement: $measurement\tconfidence: $confidence"
+                "\nAzimuth: ${data.azimuth}\nelevation: " +
+                        "${data.elevation}\npeer: ${peer.uuid}"
             )
         }
 
@@ -73,7 +80,7 @@ object ChannelSoundingManager {
     ) {
         val rangingManager = try {
             context.getSystemService(RangingManager::class.java)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
         if (rangingManager == null) {
@@ -101,7 +108,10 @@ object ChannelSoundingManager {
         val rangingDevice = RangingDevice.Builder()
             .build()
 
-        val csRangingParams = BleCsRangingParams.Builder(device)
+        val csRangingParams = BleCsRangingParams
+            .Builder(device)
+            .setRangingUpdateRate(RawRangingDevice.UPDATE_RATE_NORMAL)
+            .setSecurityLevel(BleCsRangingCapabilities.CS_SECURITY_LEVEL_ONE)
             .build()
 
         val rawRangingDevice = RawRangingDevice.Builder()
@@ -114,7 +124,7 @@ object ChannelSoundingManager {
             .build()
 
         val rangingPreference = RangingPreference.Builder(
-            DEVICE_ROLE_RESPONDER,
+            DEVICE_ROLE_INITIATOR,
             rawRangingDeviceConfig
         )
             .setSessionConfig(
@@ -123,7 +133,7 @@ object ChannelSoundingManager {
                     .setAngleOfArrivalNeeded(true)
                     .setSensorFusionParams(
                         SensorFusionParams.Builder()
-                            .setSensorFusionEnabled(false)
+                            .setSensorFusionEnabled(true)
                             .build()
                     )
                     .build()
@@ -138,6 +148,17 @@ object ChannelSoundingManager {
             it.addDeviceToRangingSession(rawRangingDeviceConfig)
             it.start(rangingPreference)
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+    fun closeSession() {
+        rangingSession?.let {
+            Timber.tag("AAA").d("Closing the session")
+            it.stop()
+            it.close()
+            rangingSession = null
+        }
+        _rangingData.value = null
     }
 
 }
