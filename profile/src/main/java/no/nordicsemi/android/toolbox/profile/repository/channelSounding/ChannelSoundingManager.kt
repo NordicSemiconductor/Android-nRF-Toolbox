@@ -150,5 +150,16 @@ object ChannelSoundingManager {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+    fun closeSession() {
+        rangingSession?.let {
+            Timber.tag("AAA").d("Closing the session")
+            it.stop()
+            it.close()
+            rangingSession = null
+        }
+        _rangingData.value = null
+    }
+
 }
 
