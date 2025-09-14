@@ -22,7 +22,6 @@ import no.nordicsemi.android.service.R
 import no.nordicsemi.android.toolbox.lib.utils.spec.CGMS_SERVICE_UUID
 import no.nordicsemi.android.toolbox.profile.manager.ServiceManager
 import no.nordicsemi.android.toolbox.profile.manager.ServiceManagerFactory
-import no.nordicsemi.android.ui.view.internal.DisconnectReason
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.CentralManager.ConnectionOptions
@@ -124,12 +123,9 @@ internal class ProfileService : NotificationService() {
                     }
 
                     is ConnectionState.Disconnected -> {
-                        val reason = state.reason ?: DisconnectReason.UNKNOWN
+                        val reason = state.reason ?: ConnectionState.Disconnected.Reason.Success
                         _disconnectionEvent.value =
-                            ServiceApi.DisconnectionEvent(
-                                peripheral.address,
-                                reason as ConnectionState.Disconnected.Reason
-                            )
+                            ServiceApi.DisconnectionEvent(peripheral.address, reason)
                         _devices.update { it - peripheral.address }
                         handleDisconnection(peripheral.address)
                     }
@@ -236,6 +232,7 @@ internal class ProfileService : NotificationService() {
         logger = nRFLoggerTree(this, getString(R.string.app_name), deviceAddress)
             .also { Timber.plant(it) }
     }
+
     /**
      * Uproots and clears the logger.
      */
