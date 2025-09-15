@@ -110,7 +110,7 @@ object ChannelSoundingManager {
 
         val csRangingParams = BleCsRangingParams
             .Builder(device)
-            .setRangingUpdateRate(RawRangingDevice.UPDATE_RATE_NORMAL)
+            .setRangingUpdateRate(RawRangingDevice.UPDATE_RATE_INFREQUENT)
             .setSecurityLevel(BleCsRangingCapabilities.CS_SECURITY_LEVEL_ONE)
             .build()
 
@@ -153,7 +153,6 @@ object ChannelSoundingManager {
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun closeSession() {
         rangingSession?.let {
-            Timber.tag("AAA").d("Closing the session")
             it.stop()
             it.close()
             rangingSession = null
