@@ -23,7 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.permissions_ranging.RequestRangingPermission
 import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
-import no.nordicsemi.android.toolbox.profile.view.directionFinder.DistanceChartView
+import no.nordicsemi.android.toolbox.profile.view.directionFinder.RangingChartView
 import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingViewModel
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
@@ -103,6 +103,7 @@ private fun ChannelSoundingView(channelSoundingState: ChannelSoundingServiceData
                         }"
                     )
                     measurement?.let {
+                        val distance = String.format(Locale.US, "%.2f", it)
                         val rangeMax =
                             if (it < 5) 5
                             else if (it < 10) 10
@@ -114,7 +115,7 @@ private fun ChannelSoundingView(channelSoundingState: ChannelSoundingServiceData
                             else 1000
 
 
-                        DistanceChartView(value = it.toInt(), range = Range(0, rangeMax))
+                        RangingChartView(value = it.toFloat(), range = Range(0, rangeMax))
                         Spacer(modifier = Modifier.padding(4.dp))
 
                         Row(
@@ -142,7 +143,7 @@ private fun ChannelSoundingView(channelSoundingState: ChannelSoundingServiceData
                                 modifier = Modifier.padding(8.dp),
                                 color = MaterialTheme.colorScheme.primary
                             )
-                            val distance = String.format(Locale.US, "%.2f", measurement)
+
                             Text(
                                 text = " Distance $distance m",
                                 style = MaterialTheme.typography.titleLarge,
@@ -198,9 +199,9 @@ internal enum class ConfidenceLevel(val value: Int) {
 
     override fun toString(): String {
         return when (this) {
-            CONFIDENCE_HIGH -> "CConfidence High"
-            CONFIDENCE_MEDIUM -> "CConfidence Medium"
-            CONFIDENCE_LOW -> "CConfidence Low"
+            CONFIDENCE_HIGH -> "Confidence High"
+            CONFIDENCE_MEDIUM -> "Confidence Medium"
+            CONFIDENCE_LOW -> "Confidence Low"
         }
     }
 
