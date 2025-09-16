@@ -17,11 +17,11 @@ import android.ranging.raw.RawResponderRangingConfig
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import no.nordicsemi.android.toolbox.profile.repository.channelSounding.RangingSessionStartTechnology.Companion.getTechnology
+import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
 import timber.log.Timber
 
 object ChannelSoundingManager {
-    private val _rangingData = MutableStateFlow<RangingData?>(null)
+    private val _rangingData = MutableStateFlow<RangingSessionAction?>(null)
     val rangingData = _rangingData.asStateFlow()
 
     private var rangingSession: RangingSession? = null
@@ -29,47 +29,38 @@ object ChannelSoundingManager {
     private val rangingSessionCallback = @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     object : RangingSession.Callback {
         override fun onClosed(reason: Int) {
-            Timber.d("closed, reason: ${RangingSessionCloseReason.getReason(reason)}")
+            _rangingData.value =
+                RangingSessionAction.OnError(RangingSessionCloseReason.getReason(reason))
         }
 
         override fun onOpenFailed(reason: Int) {
-            Timber.d("Failed, reason: ${RangingSessionFailedReason.getReason(reason)}")
+            _rangingData.value =
+                RangingSessionAction.OnError(RangingSessionFailedReason.getReason(reason))
         }
 
         override fun onOpened() {
-            Timber.d("Opened successfully.")
+            _rangingData.value = RangingSessionAction.OnStart
         }
 
         override fun onResults(
             peer: RangingDevice,
             data: RangingData
         ) {
-            _rangingData.value = data
-            val measurement = data.distance?.measurement
-            val confidence = data.distance?.confidence
-            Timber.d("RangingTechnology: ${data.rangingTechnology}")
-            Timber.d("Distance: ${if (measurement != null) "$measurement m" else "null"}")
-            Timber.d("Confidence: ${if (confidence != null) "$confidence %" else "null"}")
-            Timber.d(
-                "\nAzimuth: ${data.azimuth}\nelevation: " +
-                        "${data.elevation}\npeer: ${peer.uuid}"
-            )
+            _rangingData.value = RangingSessionAction.OnResult(data)
         }
 
         override fun onStarted(
             peer: RangingDevice,
             technology: Int
         ) {
-            Timber.d(
-                "Session started with peer: ${peer.uuid}, \ntechnology: ${getTechnology(technology)}"
-            )
+            _rangingData.value = RangingSessionAction.OnStart
         }
 
         override fun onStopped(
             peer: RangingDevice,
             technology: Int
         ) {
-            Timber.d("Session stopped with peer: ${peer.uuid}")
+            _rangingData.value = RangingSessionAction.OnClosed
         }
     }
 
@@ -145,8 +136,14 @@ object ChannelSoundingManager {
             rangingSessionCallback
         )
         rangingSession?.let {
-            it.addDeviceToRangingSession(rawRangingDeviceConfig)
-            it.start(rangingPreference)
+            try {
+                it.addDeviceToRangingSession(rawRangingDeviceConfig)
+            } catch (e: Exception) {
+                Timber.e("Failed to add device to ranging session: ${e.message}")
+                _rangingData.value = RangingSessionAction.OnClosed
+            } finally {
+                it.start(rangingPreference)
+            }
         }
     }
 

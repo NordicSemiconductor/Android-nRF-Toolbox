@@ -1,6 +1,7 @@
 package no.nordicsemi.android.toolbox.profile.view.channelSounding
 
 import android.os.Build
+import android.ranging.RangingData
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.permissions_ranging.RequestRangingPermission
 import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
+import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
 import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingViewModel
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
@@ -31,6 +33,7 @@ import no.nordicsemi.android.ui.view.SectionRow
 import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.ui.view.TextWithAnimatedDots
 import no.nordicsemi.android.ui.view.animate.AnimatedDistance
+import no.nordicsemi.android.ui.view.internal.LoadingView
 import java.util.Locale
 
 @Composable
@@ -43,18 +46,27 @@ internal fun ChannelSoundingScreen() {
             ChannelSoundingView(channelSoundingState)
         }
     } else {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
-                Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
-                    SectionTitle(
-                        icon = Icons.Default.SocialDistance,
-                        title = "Channel Sounding",
-                    )
-                    Text("Channel Sounding is not supported on this Android version.")
-                }
+        ChannelSoundingNotSupportedView()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ChannelSoundingNotSupportedView() {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                SectionTitle(
+                    icon = Icons.Default.SocialDistance,
+                    title = "Channel Sounding",
+                )
+                Text("Channel Sounding is not supported on this Android version.")
             }
         }
     }
@@ -68,60 +80,98 @@ private fun ChannelSoundingView(channelSoundingState: ChannelSoundingServiceData
         modifier = Modifier.fillMaxWidth()
     ) {
         ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
-            Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
+            Column(modifier = Modifier.padding(16.dp)) {
                 SectionTitle(
                     icon = Icons.Default.SocialDistance,
                     title = "Channel Sounding",
                 )
             }
-            if (channelSoundingState.rangingData == null) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    TextWithAnimatedDots(
-                        text = "Initiating ranging",
+            when (val sessionData = channelSoundingState.rangingSessionAction) {
+                is RangingSessionAction.OnError -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        if (sessionData.reason.isNotEmpty()) {
+                            Text("Ranging session closed because of ${sessionData.reason}.")
+                        } else {
+                            Text("Ranging session closed.")
+                        }
+                    }
+                }
+
+                is RangingSessionAction.OnResult -> {
+                    RangingContent(sessionData.data)
+                }
+
+                RangingSessionAction.OnClosed -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text("Ranging stopped")
+                    }
+                }
+
+                RangingSessionAction.OnStart -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        TextWithAnimatedDots(
+                            text = "Initiating ranging",
+                        )
+                    }
+                }
+
+                null -> LoadingView()
+            }
+
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
+@Composable
+private fun RangingContent(rangingData: RangingData) {
+    val measurement = rangingData.distance?.measurement
+    val confidence = rangingData.distance?.confidence
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        measurement?.let {
+            val distance = String.format(Locale.US, "%.2f", it)
+            SectionRow {
+                KeyValueColumn(
+                    value = "Distance",
+                    key = "$distance m",
+                )
+                confidence?.let {
+                    KeyValueColumnReverse(
+                        value = "Signal strength",
+                        key = ConfidenceLevel.displayString(it),
                     )
                 }
             }
-            channelSoundingState.rangingData?.let { rangingData ->
-                val measurement = rangingData.distance?.measurement
-                val confidence = rangingData.distance?.confidence
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    measurement?.let {
-                        val distance = String.format(Locale.US, "%.2f", it)
-                        SectionRow {
-                            KeyValueColumn(
-                                value = "Distance",
-                                key = "$distance m",
-                            )
-                            confidence?.let {
-                                KeyValueColumnReverse(
-                                    value = "Signal Confidence",
-                                    key = ConfidenceLevel.displayString(it),
-                                )
-                            }
-                        }
-                    }
-                    SectionRow {
-                        KeyValueColumn(
-                            value = "RangingTechnology",
-                            key = RangingTechnology.displayString(rangingData.rangingTechnology),
-                        )
-                    }
+        }
+        SectionRow {
+            KeyValueColumn(
+                value = "Ranging Technology",
+                key = RangingTechnology.displayString(rangingData.rangingTechnology),
+            )
+        }
 
-                    measurement?.let {
-                        ShowRangingMeasurement(it)
-                    }
-                }
-            }
+        measurement?.let {
+            ShowRangingMeasurement(it)
         }
     }
 }
@@ -166,7 +216,7 @@ private fun ShowRangingMeasurementPreview() {
 @Composable
 private fun ChannelSoundingViewPreview() {
     val sampleData = ChannelSoundingServiceData(
-        rangingData = null
+        rangingSessionAction = RangingSessionAction.OnStart
     )
     ChannelSoundingView(sampleData)
 }
@@ -204,9 +254,9 @@ internal enum class ConfidenceLevel(val value: Int) {
 
     override fun toString(): String {
         return when (this) {
-            CONFIDENCE_HIGH -> "Confidence High"
-            CONFIDENCE_MEDIUM -> "Confidence Medium"
-            CONFIDENCE_LOW -> "Confidence Low"
+            CONFIDENCE_HIGH -> "High"
+            CONFIDENCE_MEDIUM -> "Medium"
+            CONFIDENCE_LOW -> "Low"
         }
     }
 
