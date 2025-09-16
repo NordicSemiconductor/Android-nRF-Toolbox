@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SocialDistance
@@ -22,10 +23,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.permissions_ranging.RequestRangingPermission
 import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
-import no.nordicsemi.android.toolbox.profile.view.directionFinder.RangingChartView
 import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingViewModel
+import no.nordicsemi.android.ui.view.KeyValueColumn
+import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
+import no.nordicsemi.android.ui.view.SectionRow
 import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.ui.view.TextWithAnimatedDots
 import no.nordicsemi.android.ui.view.animate.AnimatedDistance
@@ -73,12 +75,16 @@ private fun ChannelSoundingView(channelSoundingState: ChannelSoundingServiceData
                 )
             }
             if (channelSoundingState.rangingData == null) {
-                Spacer(modifier = Modifier.padding(bottom = 16.dp))
-                TextWithAnimatedDots(
-                    text = "Initiating ranging",
-                    modifier = Modifier.padding(16.dp)
-                )
-                Text("Please wait", modifier = Modifier.padding(16.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    TextWithAnimatedDots(
+                        text = "Initiating ranging",
+                    )
+                }
             }
             channelSoundingState.rangingData?.let { rangingData ->
                 val measurement = rangingData.distance?.measurement
@@ -87,73 +93,72 @@ private fun ChannelSoundingView(channelSoundingState: ChannelSoundingServiceData
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     measurement?.let {
                         val distance = String.format(Locale.US, "%.2f", it)
-                        Text("Distance: $distance m")
-                    }
-                    confidence?.let {
-                        Text("Confidence: ${ConfidenceLevel.displayString(it)}")
-                    }
-                    Text(
-                        "RangingTechnology: ${
-                            RangingTechnology.displayString(
-                                rangingData.rangingTechnology
+                        SectionRow {
+                            KeyValueColumn(
+                                value = "Distance",
+                                key = "$distance m",
                             )
-                        }"
-                    )
+                            confidence?.let {
+                                KeyValueColumnReverse(
+                                    value = "Signal Confidence",
+                                    key = ConfidenceLevel.displayString(it),
+                                )
+                            }
+                        }
+                    }
+                    SectionRow {
+                        KeyValueColumn(
+                            value = "RangingTechnology",
+                            key = RangingTechnology.displayString(rangingData.rangingTechnology),
+                        )
+                    }
+
                     measurement?.let {
-                        val distance = String.format(Locale.US, "%.2f", it)
-                        val rangeMax =
-                            if (it < 5) 5
-                            else if (it < 10) 10
-                            else if (it < 20) 20
-                            else if (it < 50) 50
-                            else if (it < 100) 100
-                            else if (it < 200) 200
-                            else if (it < 500) 500
-                            else 1000
-
-
-                        RangingChartView(value = it.toFloat(), range = Range(0, rangeMax))
-                        Spacer(modifier = Modifier.padding(4.dp))
-
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(text = String.format(Locale.US, "%d m", 0))
-
-                            val diff = rangeMax - 0
-                            val part = (diff / 4)
-                            Text(text = String.format(Locale.US, "%d m", 0 + part))
-                            Text(text = String.format(Locale.US, "%d m", 0 + 2 * part))
-
-                            Text(text = String.format(Locale.US, "%d m", rangeMax))
-                        }
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            AnimatedDistance(
-                                modifier = Modifier.padding(8.dp),
-                                color = MaterialTheme.colorScheme.primary
-                            )
-
-                            Text(
-                                text = " Distance $distance m",
-                                style = MaterialTheme.typography.titleLarge,
-                            )
-                        }
+                        ShowRangingMeasurement(it)
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun ShowRangingMeasurement(measurement: Double) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        val distance = String.format(Locale.US, "%.2f", measurement)
+
+        Spacer(modifier = Modifier.height(8.dp))
+        RangingChartView(measurement = measurement.toFloat())
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            AnimatedDistance(
+                modifier = Modifier.padding(8.dp),
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Text(
+                text = " Distance $distance m",
+                style = MaterialTheme.typography.titleLarge,
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ShowRangingMeasurementPreview() {
+    ShowRangingMeasurement(12.00)
 }
 
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
@@ -175,11 +180,11 @@ internal enum class RangingTechnology(val value: Int) {
 
     override fun toString(): String {
         return when (this) {
-            BLE_CS -> "BLE_CS"
-            BLE_RSSI -> "BLE_RSSI"
+            BLE_CS -> "Bluetooth LE Channel Sounding"
+            BLE_RSSI -> "Bluetooth LE RSSI"
             UWB -> "UWB"
-            WIFI_NAN_RTT -> "WIFI_NAN_RTT"
-            WIFI_STA_RTT -> "WIFI_STA_RTT"
+            WIFI_NAN_RTT -> "Wifi NAN RTT"
+            WIFI_STA_RTT -> "Wifi STA RTT"
         }
     }
 
