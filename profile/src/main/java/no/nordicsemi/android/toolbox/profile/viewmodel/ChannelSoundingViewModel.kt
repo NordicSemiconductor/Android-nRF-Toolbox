@@ -85,7 +85,7 @@ internal class ChannelSoundingViewModel @Inject constructor(
                             it?.let { data ->
                                 _channelSoundingServiceState.value =
                                     _channelSoundingServiceState.value.copy(
-                                        rangingData = data
+                                        rangingSessionAction = data,
                                     )
                             }
                         }.launchIn(viewModelScope)
