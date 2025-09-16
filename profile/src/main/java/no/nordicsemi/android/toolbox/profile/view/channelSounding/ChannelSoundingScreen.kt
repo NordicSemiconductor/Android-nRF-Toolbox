@@ -59,15 +59,14 @@ private fun ChannelSoundingNotSupportedView() {
     ) {
         ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
             ) {
                 SectionTitle(
                     icon = Icons.Default.SocialDistance,
                     title = "Channel Sounding",
                 )
-                Text("Channel Sounding is not supported on this Android version.")
             }
+            Text("Channel Sounding is not supported on this Android version.")
         }
     }
 }
@@ -80,7 +79,7 @@ private fun ChannelSoundingView(channelSoundingState: ChannelSoundingServiceData
         modifier = Modifier.fillMaxWidth()
     ) {
         ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
                 SectionTitle(
                     icon = Icons.Default.SocialDistance,
                     title = "Channel Sounding",
