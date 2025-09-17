@@ -3,7 +3,11 @@ package no.nordicsemi.android.toolbox.profile.view.channelSounding
 import android.os.Build
 import android.ranging.RangingData
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,20 +15,30 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SocialDistance
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.permissions_ranging.RequestRangingPermission
 import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
+import no.nordicsemi.android.toolbox.profile.data.ConfidenceLevel
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
+import no.nordicsemi.android.toolbox.profile.data.RangingTechnology
+import no.nordicsemi.android.toolbox.profile.data.UpdateRate
+import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingViewModel
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
@@ -40,17 +54,18 @@ import java.util.Locale
 internal fun ChannelSoundingScreen() {
     val channelSoundingViewModel = hiltViewModel<ChannelSoundingViewModel>()
     val channelSoundingState by channelSoundingViewModel.channelSoundingState.collectAsStateWithLifecycle()
+    val onClickEvent: (event: ChannelSoundingEvent) -> Unit =
+        { channelSoundingViewModel.onEvent(it) }
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
         RequestRangingPermission {
-            ChannelSoundingView(channelSoundingState)
+            ChannelSoundingView(channelSoundingState, onClickEvent)
         }
     } else {
         ChannelSoundingNotSupportedView()
     }
 }
 
-@Preview(showBackground = true)
 @Composable
 private fun ChannelSoundingNotSupportedView() {
     Column(
@@ -73,7 +88,10 @@ private fun ChannelSoundingNotSupportedView() {
 
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @Composable
-private fun ChannelSoundingView(channelSoundingState: ChannelSoundingServiceData) {
+private fun ChannelSoundingView(
+    channelSoundingState: ChannelSoundingServiceData,
+    onClickEvent: (ChannelSoundingEvent) -> Unit,
+) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
@@ -83,6 +101,18 @@ private fun ChannelSoundingView(channelSoundingState: ChannelSoundingServiceData
                 SectionTitle(
                     icon = Icons.Default.SocialDistance,
                     title = "Channel Sounding",
+                    menu = {
+                        RangingParamSetting(
+                            selectedItem = channelSoundingState.updateRate,
+                            onItemSelected = {
+                                onClickEvent(
+                                    ChannelSoundingEvent.RangingUpdateRate(
+                                        it
+                                    )
+                                )
+                            }
+                        )
+                    }
                 )
             }
             when (val sessionData = channelSoundingState.rangingSessionAction) {
@@ -94,9 +124,15 @@ private fun ChannelSoundingView(channelSoundingState: ChannelSoundingServiceData
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         if (sessionData.reason.isNotEmpty()) {
-                            Text("Ranging session closed because of ${sessionData.reason}.")
+                            Text(
+                                "Ranging session closed because of ${sessionData.reason}.",
+                                modifier = Modifier.padding(8.dp)
+                            )
                         } else {
-                            Text("Ranging session closed.")
+                            Text(
+                                "Ranging session closed.",
+                                modifier = Modifier.padding(8.dp)
+                            )
                         }
                     }
                 }
@@ -138,7 +174,9 @@ private fun ChannelSoundingView(channelSoundingState: ChannelSoundingServiceData
 
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @Composable
-private fun RangingContent(rangingData: RangingData) {
+private fun RangingContent(
+    rangingData: RangingData,
+) {
     val measurement = rangingData.distance?.measurement
     val confidence = rangingData.distance?.confidence
     Column(
@@ -147,8 +185,8 @@ private fun RangingContent(rangingData: RangingData) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        measurement?.let {
-            val distance = String.format(Locale.US, "%.2f", it)
+        measurement?.let { measurement ->
+            val distance = String.format(Locale.US, "%.2f", measurement)
             SectionRow {
                 KeyValueColumn(
                     value = "Distance",
@@ -164,11 +202,11 @@ private fun RangingContent(rangingData: RangingData) {
         }
         SectionRow {
             KeyValueColumn(
-                value = "Ranging Technology",
+                value = "Ranging technology",
                 key = RangingTechnology.displayString(rangingData.rangingTechnology),
             )
         }
-
+        Spacer(modifier = Modifier.height(8.dp))
         measurement?.let {
             ShowRangingMeasurement(it)
         }
@@ -204,68 +242,49 @@ private fun ShowRangingMeasurement(measurement: Double) {
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-private fun ShowRangingMeasurementPreview() {
-    ShowRangingMeasurement(12.00)
-}
+private fun RangingParamSetting(
+    items: List<UpdateRate> = UpdateRate.entries.toList(),
+    selectedItem: UpdateRate = UpdateRate.NORMAL,
+    onItemSelected: (UpdateRate) -> Unit = {},
+) {
+    var expanded by remember { mutableStateOf(false) }
 
-@RequiresApi(Build.VERSION_CODES.BAKLAVA)
-@Preview(showBackground = true)
-@Composable
-private fun ChannelSoundingViewPreview() {
-    val sampleData = ChannelSoundingServiceData(
-        rangingSessionAction = RangingSessionAction.OnStart
-    )
-    ChannelSoundingView(sampleData)
-}
 
-internal enum class RangingTechnology(val value: Int) {
-    BLE_CS(1),
-    BLE_RSSI(3),
-    UWB(0),
-    WIFI_NAN_RTT(2),
-    WIFI_STA_RTT(4), ;
+    Box {
+        Icon(
+            imageVector = Icons.Default.MoreVert,
+            contentDescription = if (expanded) "Collapse" else "Expand",
+            modifier = Modifier
+                .clickable { expanded = !expanded }
+        )
 
-    override fun toString(): String {
-        return when (this) {
-            BLE_CS -> "Bluetooth LE Channel Sounding"
-            BLE_RSSI -> "Bluetooth LE RSSI"
-            UWB -> "UWB"
-            WIFI_NAN_RTT -> "Wifi NAN RTT"
-            WIFI_STA_RTT -> "Wifi STA RTT"
-        }
-    }
-
-    companion object {
-        fun from(value: Int): RangingTechnology? = entries.find { it.value == value }
-
-        fun displayString(value: Int): String {
-            return from(value)?.toString() ?: "Unknown"
-        }
-    }
-}
-
-internal enum class ConfidenceLevel(val value: Int) {
-    CONFIDENCE_HIGH(2),
-    CONFIDENCE_MEDIUM(1),
-    CONFIDENCE_LOW(0);
-
-    override fun toString(): String {
-        return when (this) {
-            CONFIDENCE_HIGH -> "High"
-            CONFIDENCE_MEDIUM -> "Medium"
-            CONFIDENCE_LOW -> "Low"
-        }
-    }
-
-    companion object {
-        fun from(value: Int): ConfidenceLevel? = entries.find { it.value == value }
-
-        fun displayString(value: Int): String {
-            return from(value)?.toString() ?: "Unknown"
+        // Animated dropdown menu
+        AnimatedVisibility(visible = expanded) {
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                items.forEach {
+                    val textColor by animateColorAsState(
+                        if (it == selectedItem) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurface,
+                        label = "TextColorAnimation"
+                    )
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                it.toString(),
+                                color = textColor
+                            )
+                        },
+                        onClick = {
+                            expanded = false
+                            onItemSelected(it)
+                        },
+                    )
+                }
+            }
         }
     }
 }
-
-

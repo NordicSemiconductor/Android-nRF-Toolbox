@@ -130,7 +130,9 @@ internal class ProfileViewModel @Inject constructor(
                     if (state.deviceData.services.any { it.profile == Profile.CHANNEL_SOUNDING }) {
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.BAKLAVA) {
                             try {
-                                ChannelSoundingManager.closeSession()
+                                viewModelScope.launch {
+                                    ChannelSoundingManager.closeSession()
+                                }
                             } catch (e: Exception) {
                                 Timber.e(" ${e.message}")
                             }

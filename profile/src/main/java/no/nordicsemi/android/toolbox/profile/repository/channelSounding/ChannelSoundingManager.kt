@@ -15,9 +15,11 @@ import android.ranging.ble.cs.BleCsRangingParams
 import android.ranging.raw.RawRangingDevice
 import android.ranging.raw.RawResponderRangingConfig
 import androidx.annotation.RequiresApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
+import no.nordicsemi.android.toolbox.profile.data.UpdateRate
 import timber.log.Timber
 
 object ChannelSoundingManager {
@@ -67,7 +69,8 @@ object ChannelSoundingManager {
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun addDeviceToRangingSession(
         context: Context,
-        device: String
+        device: String,
+        updateRate: UpdateRate = UpdateRate.NORMAL
     ) {
         val rangingManager = try {
             context.getSystemService(RangingManager::class.java)
@@ -90,6 +93,11 @@ object ChannelSoundingManager {
             }
 
         }
+        val setRangingUpdateRate = when (updateRate) {
+            UpdateRate.FREQUENT -> RawRangingDevice.UPDATE_RATE_FREQUENT
+            UpdateRate.NORMAL -> RawRangingDevice.UPDATE_RATE_NORMAL
+            UpdateRate.INFREQUENT -> RawRangingDevice.UPDATE_RATE_INFREQUENT
+        }
 
         rangingManager.registerCapabilitiesCallback(
             context.mainExecutor,
@@ -101,7 +109,7 @@ object ChannelSoundingManager {
 
         val csRangingParams = BleCsRangingParams
             .Builder(device)
-            .setRangingUpdateRate(RawRangingDevice.UPDATE_RATE_INFREQUENT)
+            .setRangingUpdateRate(setRangingUpdateRate)
             .setSecurityLevel(BleCsRangingCapabilities.CS_SECURITY_LEVEL_ONE)
             .build()
 
@@ -148,13 +156,19 @@ object ChannelSoundingManager {
     }
 
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
-    fun closeSession() {
-        rangingSession?.let {
-            it.stop()
-            it.close()
+    suspend fun closeSession(onClosed: (() -> Unit)? = null) {
+        rangingSession?.let { session ->
+            session.stop()
+            session.close()
             rangingSession = null
+            _rangingData.value = null
+            onClosed?.let {
+                _rangingData.value = RangingSessionAction.OnStart
+                // Wait for a moment to ensure the session is properly closed before invoking the callback
+                delay(500)
+                it()
+            }
         }
-        _rangingData.value = null
     }
 
 }
