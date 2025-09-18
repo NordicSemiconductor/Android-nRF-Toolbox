@@ -15,9 +15,12 @@ import android.ranging.ble.cs.BleCsRangingParams
 import android.ranging.raw.RawRangingDevice
 import android.ranging.raw.RawResponderRangingConfig
 import androidx.annotation.RequiresApi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
 import no.nordicsemi.android.toolbox.profile.data.UpdateRate
 import timber.log.Timber
@@ -78,18 +81,26 @@ object ChannelSoundingManager {
             null
         }
         if (rangingManager == null) {
-            // RangingManager is not supported on this device
+            _rangingData.value = RangingSessionAction.OnError("RangingManager is not available")
             return
         }
+
+        var isCsRangingCapabilitiesSupported = false
         val rangingCapabilityCallback = RangingManager.RangingCapabilitiesCallback { capabilities ->
             if (capabilities.csCapabilities != null) {
-                capabilities.csCapabilities!!.supportedSecurityLevels
-                    .find { it == 1 }
-                    ?.let {
-                        Timber.d("Channel Sounding supported.")
-                    }
+                if (capabilities.csCapabilities!!.supportedSecurityLevels.contains(1)) {
+                    // Channel Sounding supported
+                    isCsRangingCapabilitiesSupported = true
+                    // Start the Channel Sounding session
+                } else {
+                    _rangingData.value =
+                        RangingSessionAction.OnError("Channel Sounding with required security level is not supported")
+                    closeSession()
+                }
             } else {
-                Timber.d("Channel Sounding Capabilities is not supported")
+                _rangingData.value =
+                    RangingSessionAction.OnError("Channel Sounding Capabilities is not supported")
+                closeSession()
             }
 
         }
@@ -138,36 +149,47 @@ object ChannelSoundingManager {
                     .build()
             )
             .build()
-
-        rangingSession = rangingManager.createRangingSession(
-            context.mainExecutor,
-            rangingSessionCallback
-        )
-        rangingSession?.let {
-            try {
-                it.addDeviceToRangingSession(rawRangingDeviceConfig)
-            } catch (e: Exception) {
-                Timber.e("Failed to add device to ranging session: ${e.message}")
-                _rangingData.value = RangingSessionAction.OnClosed
-            } finally {
-                it.start(rangingPreference)
+        if (isCsRangingCapabilitiesSupported) {
+            rangingSession = rangingManager.createRangingSession(
+                context.mainExecutor,
+                rangingSessionCallback
+            )
+            rangingSession?.let {
+                try {
+                    it.addDeviceToRangingSession(rawRangingDeviceConfig)
+                } catch (e: Exception) {
+                    Timber.e("Failed to add device to ranging session: ${e.message}")
+                    _rangingData.value = RangingSessionAction.OnClosed
+                } finally {
+                    it.start(rangingPreference)
+                }
             }
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
-    suspend fun closeSession(onClosed: (() -> Unit)? = null) {
-        rangingSession?.let { session ->
-            session.stop()
-            session.close()
-            rangingSession = null
-            _rangingData.value = null
-            onClosed?.let {
-                _rangingData.value = RangingSessionAction.OnStart
-                // Wait for a moment to ensure the session is properly closed before invoking the callback
-                delay(500)
-                it()
+    fun closeSession(onClosed: (suspend () -> Unit)? = null) {
+        try {
+            rangingSession?.let { session ->
+                session.stop()
+                session.close()
+                rangingSession = null
+                _rangingData.value = null
+                // unregister the callback
+
+                onClosed?.let {
+                    _rangingData.value = RangingSessionAction.OnStart
+                    // Wait for a moment to ensure the session is properly closed before invoking the callback
+                    // Launch a coroutine to delay and call onClosed
+                    CoroutineScope(Dispatchers.IO).launch {
+                        delay(500)
+                        it()
+                    }
+
+                }
             }
+        } catch (e: Exception) {
+            _rangingData.value = RangingSessionAction.OnError(e.message ?: "Unknown error")
         }
     }
 
