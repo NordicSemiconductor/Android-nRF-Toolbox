@@ -1,6 +1,7 @@
 package no.nordicsemi.android.toolbox.profile.repository.channelSounding
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import android.ranging.RangingData
 import android.ranging.RangingDevice
@@ -15,6 +16,7 @@ import android.ranging.ble.cs.BleCsRangingParams
 import android.ranging.raw.RawRangingDevice
 import android.ranging.raw.RawResponderRangingConfig
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -128,20 +130,25 @@ object ChannelSoundingManager {
             if (capabilities.csCapabilities != null) {
                 if (capabilities.csCapabilities!!.supportedSecurityLevels.contains(1)) {
                     // Channel Sounding supported
-                    // Start the Channel Sounding session
-                    rangingSession = rangingManager.createRangingSession(
-                        context.mainExecutor,
-                        rangingSessionCallback
-                    )
-                    rangingSession?.let {
-                        try {
-                            it.addDeviceToRangingSession(rawRangingDeviceConfig)
-                        } catch (e: Exception) {
-                            Timber.e("Failed to add device to ranging session: ${e.message}")
-                            _rangingData.value = RangingSessionAction.OnClosed
-                        } finally {
-                            it.start(rangingPreference)
+                    // Check if Ranging Permission is granted before starting the session
+                    if (hasRangingPermissions(context)){
+                        rangingSession = rangingManager.createRangingSession(
+                            context.mainExecutor,
+                            rangingSessionCallback
+                        )
+                        rangingSession?.let {
+                            try {
+                                it.addDeviceToRangingSession(rawRangingDeviceConfig)
+                            } catch (e: Exception) {
+                                Timber.e("Failed to add device to ranging session: ${e.message}")
+                                _rangingData.value = RangingSessionAction.OnClosed
+                            } finally {
+                                it.start(rangingPreference)
+                            }
                         }
+                    } else {
+                        _rangingData.value = RangingSessionAction.OnError("Missing Ranging permission")
+                        return@RangingCapabilitiesCallback
                     }
                 } else {
                     _rangingData.value =
@@ -185,6 +192,18 @@ object ChannelSoundingManager {
             }
         } catch (e: Exception) {
             _rangingData.value = RangingSessionAction.OnError(e.message ?: "Unknown error")
+        }
+    }
+
+    private fun hasRangingPermissions(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= 36) {
+            ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.RANGING
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            // On older APIs, ranging permission doesn't exist
+            true
         }
     }
 
