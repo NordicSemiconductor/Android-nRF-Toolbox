@@ -84,37 +84,11 @@ object ChannelSoundingManager {
             _rangingData.value = RangingSessionAction.OnError("RangingManager is not available")
             return
         }
-
-        var isCsRangingCapabilitiesSupported = false
-        val rangingCapabilityCallback = RangingManager.RangingCapabilitiesCallback { capabilities ->
-            if (capabilities.csCapabilities != null) {
-                if (capabilities.csCapabilities!!.supportedSecurityLevels.contains(1)) {
-                    // Channel Sounding supported
-                    isCsRangingCapabilitiesSupported = true
-                    // Start the Channel Sounding session
-                } else {
-                    _rangingData.value =
-                        RangingSessionAction.OnError("Channel Sounding with required security level is not supported")
-                    closeSession()
-                }
-            } else {
-                _rangingData.value =
-                    RangingSessionAction.OnError("Channel Sounding Capabilities is not supported")
-                closeSession()
-            }
-
-        }
         val setRangingUpdateRate = when (updateRate) {
             UpdateRate.FREQUENT -> RawRangingDevice.UPDATE_RATE_FREQUENT
             UpdateRate.NORMAL -> RawRangingDevice.UPDATE_RATE_NORMAL
             UpdateRate.INFREQUENT -> RawRangingDevice.UPDATE_RATE_INFREQUENT
         }
-
-        rangingManager.registerCapabilitiesCallback(
-            context.mainExecutor,
-            rangingCapabilityCallback
-        )
-
         val rangingDevice = RangingDevice.Builder()
             .build()
 
@@ -149,22 +123,43 @@ object ChannelSoundingManager {
                     .build()
             )
             .build()
-        if (isCsRangingCapabilitiesSupported) {
-            rangingSession = rangingManager.createRangingSession(
-                context.mainExecutor,
-                rangingSessionCallback
-            )
-            rangingSession?.let {
-                try {
-                    it.addDeviceToRangingSession(rawRangingDeviceConfig)
-                } catch (e: Exception) {
-                    Timber.e("Failed to add device to ranging session: ${e.message}")
-                    _rangingData.value = RangingSessionAction.OnClosed
-                } finally {
-                    it.start(rangingPreference)
+
+        val rangingCapabilityCallback = RangingManager.RangingCapabilitiesCallback { capabilities ->
+            if (capabilities.csCapabilities != null) {
+                if (capabilities.csCapabilities!!.supportedSecurityLevels.contains(1)) {
+                    // Channel Sounding supported
+                    // Start the Channel Sounding session
+                    rangingSession = rangingManager.createRangingSession(
+                        context.mainExecutor,
+                        rangingSessionCallback
+                    )
+                    rangingSession?.let {
+                        try {
+                            it.addDeviceToRangingSession(rawRangingDeviceConfig)
+                        } catch (e: Exception) {
+                            Timber.e("Failed to add device to ranging session: ${e.message}")
+                            _rangingData.value = RangingSessionAction.OnClosed
+                        } finally {
+                            it.start(rangingPreference)
+                        }
+                    }
+                } else {
+                    _rangingData.value =
+                        RangingSessionAction.OnError("Channel Sounding with required security level is not supported")
+                    closeSession()
                 }
+            } else {
+                _rangingData.value =
+                    RangingSessionAction.OnError("Channel Sounding Capabilities is not supported")
+                closeSession()
             }
+
         }
+
+        rangingManager.registerCapabilitiesCallback(
+            context.mainExecutor,
+            rangingCapabilityCallback
+        )
     }
 
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
