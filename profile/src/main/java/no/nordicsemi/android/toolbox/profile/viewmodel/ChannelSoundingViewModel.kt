@@ -83,26 +83,23 @@ internal class ChannelSoundingViewModel @Inject constructor(
             )
         }.launchIn(viewModelScope)
         if (Build.VERSION.SDK_INT >= 36) {
-            viewModelScope.launch {
-                try {
-                    ChannelSoundingManager.addDeviceToRangingSession(context, address, rate)
-                    ChannelSoundingManager.rangingData
-                        .filter { it != null }
-                        .onEach {
-                            it?.let { data ->
-                                _channelSoundingServiceState.value =
-                                    _channelSoundingServiceState.value.copy(
-                                        rangingSessionAction = data,
-                                    )
-                            }
-                        }.launchIn(viewModelScope)
-                } catch (e: Exception) {
-                    Timber.e(" ${e.message}")
-                }
+            try {
+                ChannelSoundingManager.addDeviceToRangingSession(context, address, rate)
+                ChannelSoundingManager.rangingData
+                    .filter { it != null }
+                    .onEach {
+                        it?.let { data ->
+                            _channelSoundingServiceState.value =
+                                _channelSoundingServiceState.value.copy(
+                                    rangingSessionAction = data,
+                                )
+                        }
+                    }.launchIn(viewModelScope)
+            } catch (e: Exception) {
+                Timber.e("${e.message}")
             }
         } else {
-            Timber.tag("Channel_Sounding")
-                .d("Channel Sounding is not available in this Android version.")
+            Timber.d("Channel Sounding is not available in this Android version.")
         }
     }
 
