@@ -3,11 +3,7 @@ package no.nordicsemi.android.toolbox.profile.view.channelSounding
 import android.os.Build
 import android.ranging.RangingData
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,18 +11,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SocialDistance
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -37,7 +26,6 @@ import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
 import no.nordicsemi.android.toolbox.profile.data.ConfidenceLevel
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
 import no.nordicsemi.android.toolbox.profile.data.RangingTechnology
-import no.nordicsemi.android.toolbox.profile.data.UpdateRate
 import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingViewModel
 import no.nordicsemi.android.ui.view.KeyValueColumn
@@ -102,13 +90,11 @@ private fun ChannelSoundingView(
                     icon = Icons.Default.SocialDistance,
                     title = "Channel Sounding",
                     menu = {
-                        RangingParamSetting(
+                        UpdateRateSettings(
                             selectedItem = channelSoundingState.updateRate,
                             onItemSelected = {
                                 onClickEvent(
-                                    ChannelSoundingEvent.RangingUpdateRate(
-                                        it
-                                    )
+                                    ChannelSoundingEvent.RangingUpdateRate(it)
                                 )
                             }
                         )
@@ -238,53 +224,6 @@ private fun ShowRangingMeasurement(measurement: Double) {
                 text = " Distance $distance m",
                 style = MaterialTheme.typography.titleLarge,
             )
-        }
-    }
-}
-
-@Composable
-private fun RangingParamSetting(
-    items: List<UpdateRate> = UpdateRate.entries.toList(),
-    selectedItem: UpdateRate = UpdateRate.NORMAL,
-    onItemSelected: (UpdateRate) -> Unit = {},
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-
-    Box {
-        Icon(
-            imageVector = Icons.Default.MoreVert,
-            contentDescription = if (expanded) "Collapse" else "Expand",
-            modifier = Modifier
-                .clickable { expanded = !expanded }
-        )
-
-        // Animated dropdown menu
-        AnimatedVisibility(visible = expanded) {
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-            ) {
-                items.forEach {
-                    val textColor by animateColorAsState(
-                        if (it == selectedItem) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.onSurface,
-                        label = "TextColorAnimation"
-                    )
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                it.toString(),
-                                color = textColor
-                            )
-                        },
-                        onClick = {
-                            expanded = false
-                            onItemSelected(it)
-                        },
-                    )
-                }
-            }
         }
     }
 }
