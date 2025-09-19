@@ -30,9 +30,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.UpdateRate
 
 @Composable
@@ -77,11 +79,11 @@ internal fun UpdateRateDialog(
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = "Change Update Rate",
+                    text = stringResource(R.string.change_update_rate),
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    "Select a new ranging update frequency.",
+                    stringResource(R.string.select_new_update_rate),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -109,11 +111,11 @@ internal fun UpdateRateDialog(
                             ) {
                                 Column {
                                     Text(
-                                        text = text.toString(),
+                                        text = stringResource(text.toUiString()),
                                         style = MaterialTheme.typography.bodyLarge,
                                     )
                                     Text(
-                                        text = UpdateRate.description(text),
+                                        text = stringResource(text.description()),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -137,7 +139,7 @@ internal fun UpdateRateDialog(
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.scrim
                     )
-                    Text(text = "Selecting a new rate will cancel the current session and start a new one.")
+                    Text(text = stringResource(R.string.update_rate_change_warning))
                 }
             }
 
@@ -155,7 +157,7 @@ internal fun UpdateRateDialog(
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
             ) {
-                Text("Confirm")
+                Text(stringResource(R.string.update_rate_confirm))
             }
         },
         dismissButton = {
@@ -166,7 +168,7 @@ internal fun UpdateRateDialog(
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 ),
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.update_rate_cancel))
             }
         }
     )

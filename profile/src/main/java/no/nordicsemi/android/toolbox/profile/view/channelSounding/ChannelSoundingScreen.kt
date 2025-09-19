@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -41,7 +42,6 @@ import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.ui.view.TextWithAnimatedDots
 import no.nordicsemi.android.ui.view.animate.AnimatedDistance
 import no.nordicsemi.android.ui.view.internal.LoadingView
-import java.util.Locale
 
 @Composable
 internal fun ChannelSoundingScreen() {
@@ -59,6 +59,7 @@ internal fun ChannelSoundingScreen() {
     }
 }
 
+@Preview(showBackground = true)
 @Composable
 private fun ChannelSoundingNotSupportedView() {
     Column(
@@ -67,14 +68,15 @@ private fun ChannelSoundingNotSupportedView() {
     ) {
         ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
             Column(
-                modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.padding(16.dp),
             ) {
                 SectionTitle(
                     icon = Icons.Default.SocialDistance,
-                    title = "Channel Sounding",
+                    title = stringResource(R.string.channel_sounding),
                 )
+                Text(stringResource(R.string.channel_sounding_not_supported))
             }
-            Text("Channel Sounding is not supported on this Android version.")
         }
     }
 }
@@ -93,7 +95,7 @@ private fun ChannelSoundingView(
             Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
                 SectionTitle(
                     icon = Icons.Default.SocialDistance,
-                    title = "Channel Sounding",
+                    title = stringResource(R.string.channel_sounding),
                     menu = {
                         UpdateRateSettings(
                             selectedItem = channelSoundingState.updateRate,
@@ -116,12 +118,15 @@ private fun ChannelSoundingView(
                     ) {
                         if (sessionData.reason.isNotEmpty()) {
                             Text(
-                                "Ranging session closed because of ${sessionData.reason}.",
+                                stringResource(
+                                    R.string.ranging_session_closed_with_reason,
+                                    sessionData.reason
+                                ),
                                 modifier = Modifier.padding(8.dp)
                             )
                         } else {
                             Text(
-                                "Ranging session closed.",
+                                stringResource(R.string.ranging_session_closed),
                                 modifier = Modifier.padding(8.dp)
                             )
                         }
@@ -139,7 +144,7 @@ private fun ChannelSoundingView(
                             .padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Text("Ranging stopped")
+                        Text(stringResource(R.string.ranging_session_stopped))
                     }
                 }
 
@@ -151,7 +156,7 @@ private fun ChannelSoundingView(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         TextWithAnimatedDots(
-                            text = "Initiating ranging",
+                            text = stringResource(R.string.initiating_ranging),
                         )
                     }
                 }
@@ -177,26 +182,27 @@ private fun RangingContent(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         measurement?.let { measurement ->
-            val distance = String.format(Locale.US, "%.2f", measurement)
             SectionRow {
                 KeyValueColumn(
-                    value = "Distance",
-                    key = "$distance m",
+                    value = stringResource(R.string.ranging_distance),
+                    key = stringResource(R.string.ranging_distance_m, measurement.toFloat()),
                 )
                 confidence?.let {
                     KeyValueColumnReverse(
-                        value = "Signal strength",
+                        value = stringResource(R.string.signal_strength),
 
                         ) {
-                        RangingSingleChart(ConfidenceLevel.from(it))
+                        SingalStrengthIcons(ConfidenceLevel.from(it))
                     }
                 }
             }
         }
         SectionRow {
             KeyValueColumn(
-                value = "Ranging technology",
-                key = RangingTechnology.displayString(rangingData.rangingTechnology),
+                value = stringResource(R.string.ranging_technology),
+                key = RangingTechnology.from(rangingData.rangingTechnology)?.let {
+                    stringResource(it.toUiString())
+                } ?: "Unknown",
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -211,8 +217,6 @@ private fun ShowRangingMeasurement(measurement: Double) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        val distance = String.format(Locale.US, "%.2f", measurement)
-
         Spacer(modifier = Modifier.height(8.dp))
         RangingChartView(measurement = measurement.toFloat())
         Row(
@@ -228,7 +232,10 @@ private fun ShowRangingMeasurement(measurement: Double) {
             )
 
             Text(
-                text = " Distance $distance m",
+                text = stringResource(R.string.ranging_distance) + " " + stringResource(
+                    R.string.ranging_distance_m,
+                    measurement.toFloat()
+                ),
                 style = MaterialTheme.typography.titleLarge,
             )
         }
@@ -236,7 +243,7 @@ private fun ShowRangingMeasurement(measurement: Double) {
 }
 
 @Composable
-internal fun RangingSingleChart(confidenceLevel: ConfidenceLevel?) {
+internal fun SingalStrengthIcons(confidenceLevel: ConfidenceLevel?) {
     Image(
         painter = painterResource(
             id = confidenceLevel?.getSignalStrengthImage()
@@ -258,5 +265,5 @@ private fun ConfidenceLevel.getSignalStrengthImage(): Int {
 @Preview(showBackground = true)
 @Composable
 private fun RangingSignalChartPreview() {
-    RangingSingleChart(ConfidenceLevel.CONFIDENCE_HIGH)
+    SingalStrengthIcons(ConfidenceLevel.CONFIDENCE_HIGH)
 }
