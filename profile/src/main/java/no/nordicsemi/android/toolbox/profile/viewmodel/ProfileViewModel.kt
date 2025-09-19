@@ -34,6 +34,7 @@ import javax.inject.Inject
 @HiltViewModel
 internal class ProfileViewModel @Inject constructor(
     private val profileServiceManager: ProfileServiceManager,
+    private val channelSoundingManager: ChannelSoundingManager,
     private val navigator: Navigator,
     private val deviceRepository: DeviceRepository,
     private val analytics: AppAnalytics,
@@ -130,9 +131,7 @@ internal class ProfileViewModel @Inject constructor(
                     if (state.deviceData.services.any { it.profile == Profile.CHANNEL_SOUNDING }) {
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.BAKLAVA) {
                             try {
-                                viewModelScope.launch {
-                                    ChannelSoundingManager.closeSession()
-                                }
+                                channelSoundingManager.closeSession()
                             } catch (e: Exception) {
                                 Timber.e(" ${e.message}")
                             }

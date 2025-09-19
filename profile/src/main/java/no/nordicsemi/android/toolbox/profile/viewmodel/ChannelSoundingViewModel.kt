@@ -1,11 +1,9 @@
 package no.nordicsemi.android.toolbox.profile.viewmodel
 
-import android.content.Context
 import android.os.Build
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
@@ -35,9 +33,9 @@ internal sealed interface ChannelSoundingEvent {
 @HiltViewModel
 internal class ChannelSoundingViewModel @Inject constructor(
     private val deviceRepository: DeviceRepository,
-    @param:ApplicationContext private val context: Context,
     navigator: Navigator,
     savedStateHandle: SavedStateHandle,
+    private val channelSoundingManager: ChannelSoundingManager,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
     // StateFlow to hold the selected temperature unit
     private val _channelSoundingServiceState = MutableStateFlow(ChannelSoundingServiceData())
@@ -84,8 +82,8 @@ internal class ChannelSoundingViewModel @Inject constructor(
         }.launchIn(viewModelScope)
         if (Build.VERSION.SDK_INT >= 36) {
             try {
-                ChannelSoundingManager.addDeviceToRangingSession(context, address, rate)
-                ChannelSoundingManager.rangingData
+                channelSoundingManager.addDeviceToRangingSession(address, rate)
+                channelSoundingManager.rangingData
                     .filter { it != null }
                     .onEach {
                         it?.let { data ->
@@ -114,9 +112,8 @@ internal class ChannelSoundingViewModel @Inject constructor(
                     try {
                         viewModelScope.launch {
                             if (_channelSoundingServiceState.value.updateRate != event.frequency) {
-                                ChannelSoundingManager.closeSession {
-                                    ChannelSoundingManager.addDeviceToRangingSession(
-                                        context,
+                                channelSoundingManager.closeSession {
+                                    channelSoundingManager.addDeviceToRangingSession(
                                         address,
                                         event.frequency
                                     )

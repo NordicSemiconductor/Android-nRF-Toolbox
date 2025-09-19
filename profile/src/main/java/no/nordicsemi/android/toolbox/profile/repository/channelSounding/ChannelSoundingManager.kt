@@ -1,5 +1,6 @@
 package no.nordicsemi.android.toolbox.profile.repository.channelSounding
 
+import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -17,6 +18,7 @@ import android.ranging.raw.RawRangingDevice
 import android.ranging.raw.RawResponderRangingConfig
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -26,8 +28,18 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
 import no.nordicsemi.android.toolbox.profile.data.UpdateRate
 import timber.log.Timber
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object ChannelSoundingManager {
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
+@Singleton
+class ChannelSoundingManager @Inject constructor(
+    @param:ApplicationContext private val context: Context,
+) {
+    private val rangingManager: RangingManager? =
+        context.getSystemService(RangingManager::class.java)
+    private lateinit var rangingCapabilityCallback: RangingManager.RangingCapabilitiesCallback
+
     private val _rangingData = MutableStateFlow<RangingSessionAction?>(null)
     val rangingData = _rangingData.asStateFlow()
 
@@ -38,6 +50,8 @@ object ChannelSoundingManager {
         override fun onClosed(reason: Int) {
             _rangingData.value =
                 RangingSessionAction.OnError(RangingSessionCloseReason.getReason(reason))
+            // Unregister the callback to avoid memory leaks
+            rangingManager?.unregisterCapabilitiesCallback(rangingCapabilityCallback)
         }
 
         override fun onOpenFailed(reason: Int) {
@@ -73,15 +87,9 @@ object ChannelSoundingManager {
 
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun addDeviceToRangingSession(
-        context: Context,
         device: String,
         updateRate: UpdateRate = UpdateRate.NORMAL
     ) {
-        val rangingManager = try {
-            context.getSystemService(RangingManager::class.java)
-        } catch (_: Exception) {
-            null
-        }
         if (rangingManager == null) {
             _rangingData.value = RangingSessionAction.OnError("RangingManager is not available")
             return
@@ -126,12 +134,12 @@ object ChannelSoundingManager {
             )
             .build()
 
-        val rangingCapabilityCallback = RangingManager.RangingCapabilitiesCallback { capabilities ->
+        rangingCapabilityCallback = RangingManager.RangingCapabilitiesCallback { capabilities ->
             if (capabilities.csCapabilities != null) {
                 if (capabilities.csCapabilities!!.supportedSecurityLevels.contains(1)) {
                     // Channel Sounding supported
                     // Check if Ranging Permission is granted before starting the session
-                    if (hasRangingPermissions(context)){
+                    if (hasRangingPermissions(context)) {
                         rangingSession = rangingManager.createRangingSession(
                             context.mainExecutor,
                             rangingSessionCallback
@@ -147,7 +155,8 @@ object ChannelSoundingManager {
                             }
                         }
                     } else {
-                        _rangingData.value = RangingSessionAction.OnError("Missing Ranging permission")
+                        _rangingData.value =
+                            RangingSessionAction.OnError("Missing Ranging permission")
                         return@RangingCapabilitiesCallback
                     }
                 } else {
@@ -196,15 +205,10 @@ object ChannelSoundingManager {
     }
 
     private fun hasRangingPermissions(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= 36) {
-            ContextCompat.checkSelfPermission(
-                context,
-                android.Manifest.permission.RANGING
-            ) == PackageManager.PERMISSION_GRANTED
-        } else {
-            // On older APIs, ranging permission doesn't exist
-            true
-        }
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.RANGING
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
 }
