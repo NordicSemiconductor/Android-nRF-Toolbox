@@ -2,7 +2,9 @@ package no.nordicsemi.android.toolbox.profile.view.channelSounding
 
 import android.os.Build
 import android.ranging.RangingData
+import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,10 +20,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.permissions_ranging.RequestRangingPermission
+import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
 import no.nordicsemi.android.toolbox.profile.data.ConfidenceLevel
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
@@ -181,8 +186,10 @@ private fun RangingContent(
                 confidence?.let {
                     KeyValueColumnReverse(
                         value = "Signal strength",
-                        key = ConfidenceLevel.displayString(it),
-                    )
+
+                        ) {
+                        RangingSingleChart(ConfidenceLevel.from(it))
+                    }
                 }
             }
         }
@@ -226,4 +233,30 @@ private fun ShowRangingMeasurement(measurement: Double) {
             )
         }
     }
+}
+
+@Composable
+internal fun RangingSingleChart(confidenceLevel: ConfidenceLevel?) {
+    Image(
+        painter = painterResource(
+            id = confidenceLevel?.getSignalStrengthImage()
+                ?: R.drawable.ic_signal_max
+        ),
+        contentDescription = null
+    )
+}
+
+@DrawableRes
+private fun ConfidenceLevel.getSignalStrengthImage(): Int {
+    return when (this) {
+        ConfidenceLevel.CONFIDENCE_HIGH -> R.drawable.ic_signal_max
+        ConfidenceLevel.CONFIDENCE_MEDIUM -> R.drawable.ic_signal_medium
+        ConfidenceLevel.CONFIDENCE_LOW -> R.drawable.ic_signal_min
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun RangingSignalChartPreview() {
+    RangingSingleChart(ConfidenceLevel.CONFIDENCE_HIGH)
 }

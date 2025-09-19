@@ -56,10 +56,6 @@ enum class ConfidenceLevel(val value: Int) {
 
     companion object {
         fun from(value: Int): ConfidenceLevel? = entries.find { it.value == value }
-
-        fun displayString(value: Int): String {
-            return from(value)?.toString() ?: "Unknown"
-        }
     }
 }
 
