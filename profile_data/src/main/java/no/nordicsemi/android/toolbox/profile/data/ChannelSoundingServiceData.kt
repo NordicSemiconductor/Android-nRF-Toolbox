@@ -62,7 +62,7 @@ enum class RangingTechnology(val value: Int) {
 
     override fun toString(): String {
         return when (this) {
-            BLE_CS -> "BLE Channel Sounding"
+            BLE_CS -> "Bluetooth LE Channel Sounding"
             BLE_RSSI -> "Bluetooth LE RSSI"
             UWB -> "UWB"
             WIFI_NAN_RTT -> "Wifi NAN RTT"
