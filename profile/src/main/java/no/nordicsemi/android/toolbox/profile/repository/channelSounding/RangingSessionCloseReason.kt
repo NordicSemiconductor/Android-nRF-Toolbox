@@ -9,14 +9,14 @@ enum class RangingSessionCloseReason(val reason: Int) {
     REASON_NO_PEERS_FOUND(5), ;
 
     override fun toString(): String {
-        return when (reason) {
-            REASON_UNKNOWN.reason -> "Unknown"
-            REASON_LOCAL_REQUEST.reason -> "Local request"
-            REASON_NO_PEERS_FOUND.reason -> "No peers found"
-            REASON_REMOTE_REQUEST.reason -> "Remote request"
-            REASON_SYSTEM_POLICY.reason -> "System policy"
-            REASON_UNSUPPORTED.reason -> "Unsupported"
-            else -> "Unknown reason"
+        return when (this) {
+            REASON_UNKNOWN -> ""
+            REASON_LOCAL_REQUEST -> "local request" // Indicates that the session was closed because AutoCloseable.close() or RangingSession.stop() was called.
+            REASON_REMOTE_REQUEST -> "request of a remote peer" // Indicates that the session was closed at the request of a remote peer.
+            REASON_UNSUPPORTED -> "provided session parameters were not supported"
+            REASON_SYSTEM_POLICY -> "local system policy forced the session to close" // Indicates that the local system policy forced the session to close, such as power management policy, airplane mode etc.
+            REASON_NO_PEERS_FOUND -> "none of the specified peers were found" // Indicates that the session was closed because none of the specified peers were found.
+
         }
     }
 
