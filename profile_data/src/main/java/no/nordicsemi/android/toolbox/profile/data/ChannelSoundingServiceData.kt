@@ -29,6 +29,16 @@ enum class UpdateRate {
             NORMAL -> "Normal"
         }
     }
+
+    companion object {
+        fun description(value: UpdateRate): String {
+            return when (value) {
+                FREQUENT -> "Updates every 100 milliseconds."
+                INFREQUENT -> "Updates every 5 seconds."
+                NORMAL -> "Updates every 200 milliseconds."
+            }
+        }
+    }
 }
 
 enum class ConfidenceLevel(val value: Int) {
