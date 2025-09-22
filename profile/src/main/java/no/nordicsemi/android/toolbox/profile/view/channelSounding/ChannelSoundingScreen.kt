@@ -191,7 +191,7 @@ private fun RangingContent(
                         value = stringResource(R.string.signal_strength),
 
                         ) {
-                        SingalStrengthIcons(ConfidenceLevel.from(it))
+                        SignalStrengthIcons(ConfidenceLevel.from(it))
                     }
                 }
             }
@@ -242,7 +242,7 @@ private fun ShowRangingMeasurement(measurement: Double) {
 }
 
 @Composable
-internal fun SingalStrengthIcons(confidenceLevel: ConfidenceLevel?) {
+internal fun SignalStrengthIcons(confidenceLevel: ConfidenceLevel?) {
     Image(
         painter = painterResource(
             id = confidenceLevel?.getSignalStrengthImage()
@@ -264,5 +264,5 @@ private fun ConfidenceLevel.getSignalStrengthImage(): Int {
 @Preview(showBackground = true)
 @Composable
 private fun RangingSignalChartPreview() {
-    SingalStrengthIcons(ConfidenceLevel.CONFIDENCE_HIGH)
+    SignalStrengthIcons(ConfidenceLevel.CONFIDENCE_HIGH)
 }
