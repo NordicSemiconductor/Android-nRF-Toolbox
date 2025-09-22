@@ -9,7 +9,7 @@
     <string name="ranging_session_stopped">Ranging session stopped</string>
 
     <string name="ranging_distance">Distance</string>
-    <string name="ranging_distance_m">%.2f m</string>
+    <string name="ranging_distance_m">%.3f m</string>
     <string name="signal_strength">Signal strength</string>
     <string name="ranging_technology">Ranging technology</string>
 
