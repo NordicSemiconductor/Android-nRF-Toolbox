@@ -13,6 +13,10 @@
     <string name="signal_strength">Signal strength</string>
     <string name="ranging_technology">Ranging technology</string>
 
+    <string name="ranging_azimuth_measurement">Azimuth angle</string>
+    <string name="ranging_azimuth_measurement_deg">%.2f°</string>
+    <string name="ranging_elevation_measurement">Elevation angle</string>
+
     <string name="update_rate_frequent">Frequent</string>
     <string name="update_rate_frequent_des">Updates every 100 milliseconds.</string>
     <string name="update_rate_normal">Normal</string>

@@ -207,6 +207,19 @@ private fun RangingContent(
         Spacer(modifier = Modifier.height(8.dp))
         measurement?.let {
             ShowRangingMeasurement(it)
+            // If the angle is available, show it.
+            rangingData.azimuth?.measurement?.let {
+                // Angle is in degrees.
+                SectionRow {
+                    KeyValueColumn(
+                        value = stringResource(R.string.ranging_azimuth_measurement),
+                        key = stringResource(
+                            R.string.ranging_azimuth_measurement_deg,
+                            it.toFloat()
+                        ),
+                    )
+                }
+            }
         }
     }
 }
