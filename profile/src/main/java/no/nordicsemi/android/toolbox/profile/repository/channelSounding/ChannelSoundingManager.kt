@@ -42,6 +42,7 @@ class ChannelSoundingManager @Inject constructor(
 
     private val _rangingData = MutableStateFlow<RangingSessionAction?>(null)
     val rangingData = _rangingData.asStateFlow()
+    private val _previousRangingDataList = MutableStateFlow<List<Float>>(emptyList())
 
     private var rangingSession: RangingSession? = null
 
@@ -52,11 +53,17 @@ class ChannelSoundingManager @Inject constructor(
                 RangingSessionAction.OnError(RangingSessionCloseReason.getReason(reason))
             // Unregister the callback to avoid memory leaks
             rangingManager?.unregisterCapabilitiesCallback(rangingCapabilityCallback)
+            // Cleanup previous data
+            _previousRangingDataList.value = emptyList()
         }
 
         override fun onOpenFailed(reason: Int) {
             _rangingData.value =
                 RangingSessionAction.OnError(RangingSessionFailedReason.getReason(reason))
+            // Unregister the callback to avoid memory leaks
+            rangingManager?.unregisterCapabilitiesCallback(rangingCapabilityCallback)
+            // Cleanup previous data
+            _previousRangingDataList.value = emptyList()
         }
 
         override fun onOpened() {
@@ -67,7 +74,15 @@ class ChannelSoundingManager @Inject constructor(
             peer: RangingDevice,
             data: RangingData
         ) {
-            _rangingData.value = RangingSessionAction.OnResult(data)
+            val updatedList = _previousRangingDataList.value.toMutableList()
+            data.distance?.measurement?.let {
+                updatedList.add(it.toFloat())
+            }
+            _previousRangingDataList.value = updatedList
+            _rangingData.value = RangingSessionAction.OnResult(
+                data = data,
+                previousData = _previousRangingDataList.value
+            )
         }
 
         override fun onStarted(
@@ -75,6 +90,8 @@ class ChannelSoundingManager @Inject constructor(
             technology: Int
         ) {
             _rangingData.value = RangingSessionAction.OnStart
+            // Cleanup previous data
+            _previousRangingDataList.value = emptyList()
         }
 
         override fun onStopped(
@@ -82,6 +99,8 @@ class ChannelSoundingManager @Inject constructor(
             technology: Int
         ) {
             _rangingData.value = RangingSessionAction.OnClosed
+            // Cleanup previous data
+            _previousRangingDataList.value = emptyList()
         }
     }
 

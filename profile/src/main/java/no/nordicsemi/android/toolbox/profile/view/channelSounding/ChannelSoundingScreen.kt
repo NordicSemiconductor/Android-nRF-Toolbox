@@ -221,6 +221,22 @@ private fun RangingContent(
                 }
             }
         }
+        HorizontalDivider()
+        Text(
+            text = stringResource(R.string.ranging_previous_measurement),
+            modifier = Modifier
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            LineChartView(
+                previousData = previousMeasurements
+            )
+        }
     }
 }
 

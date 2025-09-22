@@ -34,6 +34,8 @@
     <string name="select_new_update_rate">Select a new ranging update frequency.</string>
     <string name="update_rate_change_warning">Selecting a new rate will cancel the current session and start a new one.</string>
 
+    <string name="ranging_previous_measurement">Previous measurements</string>
+
     <string name="update_rate_confirm">Confirm</string>
     <string name="update_rate_cancel">Cancel</string>
 </resources>

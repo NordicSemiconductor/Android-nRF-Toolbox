@@ -12,7 +12,11 @@ data class ChannelSoundingServiceData(
 
 sealed interface RangingSessionAction {
     object OnStart : RangingSessionAction
-    data class OnResult(val data: RangingData) : RangingSessionAction
+    data class OnResult(
+        val data: RangingData,
+        val previousData: List<Float> = emptyList()
+    ) : RangingSessionAction
+
     data class OnError(val reason: String) : RangingSessionAction
     object OnClosed : RangingSessionAction
 }
