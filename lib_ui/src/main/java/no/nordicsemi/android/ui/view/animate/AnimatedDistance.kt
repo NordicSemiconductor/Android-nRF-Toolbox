@@ -27,7 +27,7 @@ fun AnimatedDistance(
     // Infinite transition for pulsing animation
     val infiniteTransition = rememberInfiniteTransition()
 
-    val scale by infiniteTransition.animateFloat(
+    val scaleX by infiniteTransition.animateFloat(
         initialValue = 1f,
         targetValue = 1.15f,
         animationSpec = infiniteRepeatable(
@@ -38,12 +38,13 @@ fun AnimatedDistance(
 
     Icon(
         imageVector = Icons.Filled.SocialDistance,
-        contentDescription = "heart icon",
+        contentDescription = "Distance icon",
         modifier = modifier
             .size(28.dp)
             .graphicsLayer(
-                scaleX = scale,
-                scaleY = scale
+                // Scale only horizontally
+                scaleX = scaleX,
+                scaleY = 1f,
             ),
         tint = color
     )
