@@ -26,7 +26,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import no.nordicsemi.android.permissions_ranging.RequestRangingPermission
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
 import no.nordicsemi.android.toolbox.profile.data.ConfidenceLevel
@@ -44,14 +43,14 @@ import no.nordicsemi.android.ui.view.animate.AnimatedDistance
 import no.nordicsemi.android.ui.view.internal.LoadingView
 
 @Composable
-internal fun ChannelSoundingScreen() {
-    val channelSoundingViewModel = hiltViewModel<ChannelSoundingViewModel>()
-    val channelSoundingState by channelSoundingViewModel.channelSoundingState.collectAsStateWithLifecycle()
-    val onClickEvent: (event: ChannelSoundingEvent) -> Unit =
-        { channelSoundingViewModel.onEvent(it) }
+internal fun ChannelSoundingScreen(isNotificationPermissionGranted: Boolean?) {
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA && isNotificationPermissionGranted != null) {
         RequestRangingPermission {
+            val channelSoundingViewModel = hiltViewModel<ChannelSoundingViewModel>()
+            val channelSoundingState by channelSoundingViewModel.channelSoundingState.collectAsStateWithLifecycle()
+            val onClickEvent: (event: ChannelSoundingEvent) -> Unit =
+                { channelSoundingViewModel.onEvent(it) }
             ChannelSoundingView(channelSoundingState, onClickEvent)
         }
     } else {
