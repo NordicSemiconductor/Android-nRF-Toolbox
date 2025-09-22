@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SocialDistance
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +32,7 @@ import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
 import no.nordicsemi.android.toolbox.profile.data.ConfidenceLevel
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
 import no.nordicsemi.android.toolbox.profile.data.RangingTechnology
+import no.nordicsemi.android.toolbox.profile.data.UpdateRate
 import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingViewModel
 import no.nordicsemi.android.ui.view.KeyValueColumn
@@ -90,79 +92,105 @@ private fun ChannelSoundingView(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
-            Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
-                SectionTitle(
-                    icon = Icons.Default.SocialDistance,
-                    title = stringResource(R.string.channel_sounding),
-                    menu = {
-                        UpdateRateSettings(
-                            selectedItem = channelSoundingState.updateRate,
-                            onItemSelected = {
-                                onClickEvent(
-                                    ChannelSoundingEvent.RangingUpdateRate(it)
-                                )
-                            }
-                        )
-                    }
+        when (val sessionData = channelSoundingState.rangingSessionAction) {
+            is RangingSessionAction.OnError -> {
+                SessionError(sessionData)
+            }
+
+            is RangingSessionAction.OnResult -> {
+                RangingContent(
+                    channelSoundingState.updateRate,
+                    sessionData.data,
+                    sessionData.previousData,
+                    onClickEvent
                 )
             }
-            when (val sessionData = channelSoundingState.rangingSessionAction) {
-                is RangingSessionAction.OnError -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        if (sessionData.reason.isNotEmpty()) {
-                            Text(
-                                stringResource(
-                                    R.string.ranging_session_closed_with_reason,
-                                    sessionData.reason
-                                ),
-                                modifier = Modifier.padding(8.dp)
-                            )
-                        } else {
-                            Text(
-                                stringResource(R.string.ranging_session_closed),
-                                modifier = Modifier.padding(8.dp)
-                            )
-                        }
-                    }
-                }
 
-                is RangingSessionAction.OnResult -> {
-                    RangingContent(sessionData.data)
-                }
-
-                RangingSessionAction.OnClosed -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Text(stringResource(R.string.ranging_session_stopped))
-                    }
-                }
-
-                RangingSessionAction.OnStart -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        TextWithAnimatedDots(
-                            text = stringResource(R.string.initiating_ranging),
-                        )
-                    }
-                }
-
-                null -> LoadingView()
+            RangingSessionAction.OnClosed -> {
+                SessionClosed()
             }
 
+            RangingSessionAction.OnStart -> {
+                InitiatingSession()
+            }
+
+            null -> LoadingView()
+        }
+
+    }
+}
+
+@Composable
+private fun InitiatingSession() {
+    ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
+        Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
+            SectionTitle(
+                icon = Icons.Default.SocialDistance,
+                title = stringResource(R.string.channel_sounding),
+            )
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            TextWithAnimatedDots(
+                text = stringResource(R.string.initiating_ranging),
+            )
+        }
+    }
+}
+
+@Composable
+private fun SessionClosed() {
+    ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
+        Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
+            SectionTitle(
+                icon = Icons.Default.SocialDistance,
+                title = stringResource(R.string.channel_sounding),
+            )
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(stringResource(R.string.ranging_session_stopped))
+        }
+    }
+}
+
+@Composable
+private fun SessionError(sessionData: RangingSessionAction.OnError) {
+    ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
+        Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
+            SectionTitle(
+                icon = Icons.Default.SocialDistance,
+                title = stringResource(R.string.channel_sounding),
+            )
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            if (sessionData.reason.isNotEmpty()) {
+                Text(
+                    stringResource(
+                        R.string.ranging_session_closed_with_reason,
+                        sessionData.reason
+                    ),
+                    modifier = Modifier.padding(8.dp)
+                )
+            } else {
+                Text(
+                    stringResource(R.string.ranging_session_closed),
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
         }
     }
 }
@@ -170,43 +198,64 @@ private fun ChannelSoundingView(
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @Composable
 private fun RangingContent(
+    updateRate: UpdateRate,
     rangingData: RangingData,
+    previousMeasurements: List<Float> = emptyList(),
+    onClickEvent: (ChannelSoundingEvent) -> Unit,
 ) {
-    val measurement = rangingData.distance?.measurement
-    val confidence = rangingData.distance?.confidence
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        measurement?.let { measurement ->
-            SectionRow {
-                KeyValueColumn(
-                    value = stringResource(R.string.ranging_distance),
-                    key = stringResource(R.string.ranging_distance_m, measurement.toFloat()),
-                )
-                confidence?.let {
-                    KeyValueColumnReverse(
-                        value = stringResource(R.string.signal_strength),
+    ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
+        Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
+            SectionTitle(
+                icon = Icons.Default.SocialDistance,
+                title = stringResource(R.string.channel_sounding),
+                menu = {
+                    UpdateRateSettings(
+                        selectedItem = updateRate,
+                        onItemSelected = {
+                            onClickEvent(
+                                ChannelSoundingEvent.RangingUpdateRate(it)
+                            )
+                        }
+                    )
+                }
+            )
+        }
+        val measurement = rangingData.distance?.measurement
+        val confidence = rangingData.distance?.confidence
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            measurement?.let { measurement ->
+                SectionRow {
+                    KeyValueColumn(
+                        value = stringResource(R.string.ranging_distance),
+                        key = stringResource(R.string.ranging_distance_m, measurement.toFloat()),
+                    )
+                    confidence?.let {
+                        KeyValueColumnReverse(
+                            value = stringResource(R.string.signal_strength),
 
-                        ) {
-                        SignalStrengthIcons(ConfidenceLevel.from(it))
+                            ) {
+                            SignalStrengthIcons(ConfidenceLevel.from(it))
+                        }
                     }
                 }
             }
-        }
-        SectionRow {
-            KeyValueColumn(
-                value = stringResource(R.string.ranging_technology),
-                key = RangingTechnology.from(rangingData.rangingTechnology)?.let {
-                    stringResource(it.toUiString())
-                } ?: "Unknown",
-            )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        measurement?.let {
-            ShowRangingMeasurement(it)
+            SectionRow {
+                KeyValueColumn(
+                    value = stringResource(R.string.ranging_technology),
+                    key = RangingTechnology.from(rangingData.rangingTechnology)?.let {
+                        stringResource(it.toUiString())
+                    } ?: "Unknown",
+                )
+            }
+            measurement?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                ShowRangingMeasurement(it)
+            }
             // If the angle is available, show it.
             rangingData.azimuth?.measurement?.let {
                 // Angle is in degrees.
