@@ -1,6 +1,8 @@
 package no.nordicsemi.android.toolbox.profile.repository.channelSounding
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import android.ranging.RangingData
 import android.ranging.RangingDevice
@@ -15,12 +17,29 @@ import android.ranging.ble.cs.BleCsRangingParams
 import android.ranging.raw.RawRangingDevice
 import android.ranging.raw.RawResponderRangingConfig
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
+import no.nordicsemi.android.toolbox.profile.data.UpdateRate
 import timber.log.Timber
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object ChannelSoundingManager {
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
+@Singleton
+class ChannelSoundingManager @Inject constructor(
+    @param:ApplicationContext private val context: Context,
+) {
+    private val rangingManager: RangingManager? =
+        context.getSystemService(RangingManager::class.java)
+    private lateinit var rangingCapabilityCallback: RangingManager.RangingCapabilitiesCallback
+
     private val _rangingData = MutableStateFlow<RangingSessionAction?>(null)
     val rangingData = _rangingData.asStateFlow()
 
@@ -31,6 +50,8 @@ object ChannelSoundingManager {
         override fun onClosed(reason: Int) {
             _rangingData.value =
                 RangingSessionAction.OnError(RangingSessionCloseReason.getReason(reason))
+            // Unregister the callback to avoid memory leaks
+            rangingManager?.unregisterCapabilitiesCallback(rangingCapabilityCallback)
         }
 
         override fun onOpenFailed(reason: Int) {
@@ -66,42 +87,24 @@ object ChannelSoundingManager {
 
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun addDeviceToRangingSession(
-        context: Context,
-        device: String
+        device: String,
+        updateRate: UpdateRate = UpdateRate.NORMAL
     ) {
-        val rangingManager = try {
-            context.getSystemService(RangingManager::class.java)
-        } catch (_: Exception) {
-            null
-        }
         if (rangingManager == null) {
-            // RangingManager is not supported on this device
+            _rangingData.value = RangingSessionAction.OnError("RangingManager is not available")
             return
         }
-        val rangingCapabilityCallback = RangingManager.RangingCapabilitiesCallback { capabilities ->
-            if (capabilities.csCapabilities != null) {
-                capabilities.csCapabilities!!.supportedSecurityLevels
-                    .find { it == 1 }
-                    ?.let {
-                        Timber.d("Channel Sounding supported.")
-                    }
-            } else {
-                Timber.d("Channel Sounding Capabilities is not supported")
-            }
-
+        val setRangingUpdateRate = when (updateRate) {
+            UpdateRate.FREQUENT -> RawRangingDevice.UPDATE_RATE_FREQUENT
+            UpdateRate.NORMAL -> RawRangingDevice.UPDATE_RATE_NORMAL
+            UpdateRate.INFREQUENT -> RawRangingDevice.UPDATE_RATE_INFREQUENT
         }
-
-        rangingManager.registerCapabilitiesCallback(
-            context.mainExecutor,
-            rangingCapabilityCallback
-        )
-
         val rangingDevice = RangingDevice.Builder()
             .build()
 
         val csRangingParams = BleCsRangingParams
             .Builder(device)
-            .setRangingUpdateRate(RawRangingDevice.UPDATE_RATE_INFREQUENT)
+            .setRangingUpdateRate(setRangingUpdateRate)
             .setSecurityLevel(BleCsRangingCapabilities.CS_SECURITY_LEVEL_ONE)
             .build()
 
@@ -131,30 +134,81 @@ object ChannelSoundingManager {
             )
             .build()
 
-        rangingSession = rangingManager.createRangingSession(
-            context.mainExecutor,
-            rangingSessionCallback
-        )
-        rangingSession?.let {
-            try {
-                it.addDeviceToRangingSession(rawRangingDeviceConfig)
-            } catch (e: Exception) {
-                Timber.e("Failed to add device to ranging session: ${e.message}")
-                _rangingData.value = RangingSessionAction.OnClosed
-            } finally {
-                it.start(rangingPreference)
+        rangingCapabilityCallback = RangingManager.RangingCapabilitiesCallback { capabilities ->
+            if (capabilities.csCapabilities != null) {
+                if (capabilities.csCapabilities!!.supportedSecurityLevels.contains(1)) {
+                    // Channel Sounding supported
+                    // Check if Ranging Permission is granted before starting the session
+                    if (hasRangingPermissions(context)) {
+                        rangingSession = rangingManager.createRangingSession(
+                            context.mainExecutor,
+                            rangingSessionCallback
+                        )
+                        rangingSession?.let {
+                            try {
+                                it.addDeviceToRangingSession(rawRangingDeviceConfig)
+                            } catch (e: Exception) {
+                                Timber.e("Failed to add device to ranging session: ${e.message}")
+                                _rangingData.value = RangingSessionAction.OnClosed
+                            } finally {
+                                it.start(rangingPreference)
+                            }
+                        }
+                    } else {
+                        _rangingData.value =
+                            RangingSessionAction.OnError("Missing Ranging permission")
+                        return@RangingCapabilitiesCallback
+                    }
+                } else {
+                    _rangingData.value =
+                        RangingSessionAction.OnError("Channel Sounding with required security level is not supported")
+                    closeSession()
+                }
+            } else {
+                _rangingData.value =
+                    RangingSessionAction.OnError("Channel Sounding Capabilities is not supported")
+                closeSession()
             }
+
         }
+
+        rangingManager.registerCapabilitiesCallback(
+            context.mainExecutor,
+            rangingCapabilityCallback
+        )
     }
 
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
-    fun closeSession() {
-        rangingSession?.let {
-            it.stop()
-            it.close()
-            rangingSession = null
+    fun closeSession(onClosed: (suspend () -> Unit)? = null) {
+        try {
+            rangingSession?.let { session ->
+                session.stop()
+                session.close()
+                rangingSession = null
+                _rangingData.value = null
+                // unregister the callback
+
+                onClosed?.let {
+                    _rangingData.value = RangingSessionAction.OnStart
+                    // Wait for a moment to ensure the session is properly closed before invoking the callback
+                    // Launch a coroutine to delay and call onClosed
+                    CoroutineScope(Dispatchers.IO).launch {
+                        delay(500)
+                        it()
+                    }
+
+                }
+            }
+        } catch (e: Exception) {
+            _rangingData.value = RangingSessionAction.OnError(e.message ?: "Unknown error")
         }
-        _rangingData.value = null
+    }
+
+    private fun hasRangingPermissions(context: Context): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.RANGING
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
 }
