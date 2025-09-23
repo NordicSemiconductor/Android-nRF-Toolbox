@@ -22,9 +22,9 @@ sealed interface RangingSessionAction {
 }
 
 enum class UpdateRate {
+    NORMAL,
     FREQUENT,
-    INFREQUENT,
-    NORMAL;
+    INFREQUENT;
 }
 
 enum class ConfidenceLevel(val value: Int) {
