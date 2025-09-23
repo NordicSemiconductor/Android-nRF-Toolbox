@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WarningAmber
@@ -30,6 +31,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,7 +50,9 @@ internal fun UpdateRateSettings(
         Icon(
             imageVector = Icons.Default.Settings,
             contentDescription = if (isExpanded) "Collapse" else "Expand",
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier
+                .clip(CircleShape)
                 .clickable { isExpanded = !isExpanded }
         )
         // Show AlertDialog when isExpanded is true
@@ -61,6 +65,12 @@ internal fun UpdateRateSettings(
             )
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun UpdateRateSettingsPreview() {
+    UpdateRateSettings(UpdateRate.NORMAL) { }
 }
 
 @Composable

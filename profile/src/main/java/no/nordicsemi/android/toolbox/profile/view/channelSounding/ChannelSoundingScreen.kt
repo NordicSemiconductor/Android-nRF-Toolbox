@@ -2,31 +2,45 @@ package no.nordicsemi.android.toolbox.profile.view.channelSounding
 
 import android.os.Build
 import android.ranging.RangingData
-import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SocialDistance
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import no.nordicsemi.android.common.theme.NordicTheme
+import no.nordicsemi.android.common.theme.nordicFall
+import no.nordicsemi.android.common.theme.nordicGreen
+import no.nordicsemi.android.common.theme.nordicRed
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
 import no.nordicsemi.android.toolbox.profile.data.ConfidenceLevel
@@ -35,13 +49,9 @@ import no.nordicsemi.android.toolbox.profile.data.RangingTechnology
 import no.nordicsemi.android.toolbox.profile.data.UpdateRate
 import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingViewModel
-import no.nordicsemi.android.ui.view.KeyValueColumn
-import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
-import no.nordicsemi.android.ui.view.SectionRow
 import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.ui.view.TextWithAnimatedDots
-import no.nordicsemi.android.ui.view.animate.AnimatedDistance
 import no.nordicsemi.android.ui.view.internal.LoadingView
 
 @Composable
@@ -195,6 +205,38 @@ private fun SessionError(sessionData: RangingSessionAction.OnError) {
     }
 }
 
+@Composable
+private fun DistanceDashboard(measurement: Double) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = stringResource(R.string.ranging_distance_m, measurement.toFloat()),
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.displayLarge
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.current_measurement),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun DDistanceDashboard_Preview() {
+    NordicTheme {
+        DistanceDashboard(2.5)
+    }
+}
+
 @RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @Composable
 private fun RangingContent(
@@ -203,144 +245,165 @@ private fun RangingContent(
     previousMeasurements: List<Float> = emptyList(),
     onClickEvent: (ChannelSoundingEvent) -> Unit,
 ) {
-    ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
-        Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
-            SectionTitle(
-                icon = Icons.Default.SocialDistance,
-                title = stringResource(R.string.channel_sounding),
-                menu = {
-                    UpdateRateSettings(
-                        selectedItem = updateRate,
-                        onItemSelected = {
-                            onClickEvent(
-                                ChannelSoundingEvent.RangingUpdateRate(it)
-                            )
-                        }
-                    )
-                }
-            )
-        }
-        val measurement = rangingData.distance?.measurement
-        val confidence = rangingData.distance?.confidence
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            measurement?.let { measurement ->
-                SectionRow {
-                    KeyValueColumn(
-                        value = stringResource(R.string.ranging_distance),
-                        key = stringResource(R.string.ranging_distance_m, measurement.toFloat()),
-                    )
-                    confidence?.let {
-                        KeyValueColumnReverse(
-                            value = stringResource(R.string.signal_strength),
+    val distanceMeasurement = rangingData.distance?.measurement
+    val confidence = rangingData.distance?.confidence
 
-                            ) {
-                            SignalStrengthIcons(ConfidenceLevel.from(it))
-                        }
-                    }
-                }
-            }
-            SectionRow {
-                KeyValueColumn(
-                    value = stringResource(R.string.ranging_technology),
-                    key = RangingTechnology.from(rangingData.rangingTechnology)?.let {
-                        stringResource(it.toUiString())
-                    } ?: "Unknown",
-                )
-            }
-            measurement?.let {
-                Spacer(modifier = Modifier.height(8.dp))
-                ShowRangingMeasurement(it)
-            }
-            // If the angle is available, show it.
-            rangingData.azimuth?.measurement?.let {
-                // Angle is in degrees.
-                SectionRow {
-                    KeyValueColumn(
-                        value = stringResource(R.string.ranging_azimuth_measurement),
-                        key = stringResource(
-                            R.string.ranging_azimuth_measurement_deg,
-                            it.toFloat()
-                        ),
-                    )
-                }
-            }
-        }
-        HorizontalDivider()
-        Text(
-            text = stringResource(R.string.ranging_previous_measurement),
-            modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-        )
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            LineChartView(
-                previousData = previousMeasurements
-            )
-        }
-    }
-}
-
-@Composable
-private fun ShowRangingMeasurement(measurement: Double) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
-        RangingChartView(measurement = measurement.toFloat())
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            AnimatedDistance(
-                modifier = Modifier.padding(8.dp),
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Text(
-                text = stringResource(R.string.ranging_distance) + " " + stringResource(
-                    R.string.ranging_distance_m,
-                    measurement.toFloat()
-                ),
-                style = MaterialTheme.typography.titleLarge,
-            )
+        distanceMeasurement?.let { measurement ->
+            DistanceDashboard(measurement)
         }
-    }
-}
 
-@Composable
-internal fun SignalStrengthIcons(confidenceLevel: ConfidenceLevel?) {
-    Image(
-        painter = painterResource(
-            id = confidenceLevel?.getSignalStrengthImage()
-                ?: R.drawable.ic_signal_max
-        ),
-        contentDescription = null
-    )
-}
+        DetailsCard(
+            updateRate = updateRate,
+            rangingTechnology = rangingData.rangingTechnology,
+            confidenceLevel = confidence
+        ) { onClickEvent(ChannelSoundingEvent.RangingUpdateRate(it)) }
 
-@DrawableRes
-private fun ConfidenceLevel.getSignalStrengthImage(): Int {
-    return when (this) {
-        ConfidenceLevel.CONFIDENCE_HIGH -> R.drawable.ic_signal_max
-        ConfidenceLevel.CONFIDENCE_MEDIUM -> R.drawable.ic_signal_medium
-        ConfidenceLevel.CONFIDENCE_LOW -> R.drawable.ic_signal_min
+        Spacer(modifier = Modifier.height(16.dp))
+        RecentMeasurementsChart(previousMeasurements)
+
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun RangingSignalChartPreview() {
-    SignalStrengthIcons(ConfidenceLevel.CONFIDENCE_HIGH)
+private fun DetailsCard(
+    updateRate: UpdateRate = UpdateRate.NORMAL,
+    rangingTechnology: Int = RangingTechnology.BLE_CS.value,
+    confidenceLevel: Int? = ConfidenceLevel.CONFIDENCE_HIGH.value,
+    onUpdateRateSelected: (UpdateRate) -> Unit = { }
+) {
+    // Details Section
+    Text(
+        text = "Details",
+        fontWeight = FontWeight.Medium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 16.dp)
+    )
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f)
+        )
+    ) {
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(stringResource(R.string.ranging_technology), fontSize = 14.sp)
+                Text(RangingTechnology.from(rangingTechnology)?.let {
+                    stringResource(it.toUiString())
+                } ?: "Unknown", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+            }
+
+            HorizontalDivider()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    stringResource(R.string.update_rate), fontSize = 14.sp,
+                )
+                Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+                UpdateRateSettings(updateRate) { onUpdateRateSelected(it) }
+                Spacer(modifier = Modifier.weight(1f))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        stringResource(updateRate.toUiString()),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+            HorizontalDivider()
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(stringResource(R.string.signal_strength), fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    val color = when (confidenceLevel) {
+                        ConfidenceLevel.CONFIDENCE_HIGH.value -> nordicGreen
+                        ConfidenceLevel.CONFIDENCE_MEDIUM.value -> nordicFall
+                        ConfidenceLevel.CONFIDENCE_LOW.value -> nordicRed
+                        else -> MaterialTheme.colorScheme.primary
+                    }
+                    val colorFraction = when (confidenceLevel) {
+                        ConfidenceLevel.CONFIDENCE_HIGH.value -> 1.0f
+                        ConfidenceLevel.CONFIDENCE_MEDIUM.value -> 0.66f
+                        ConfidenceLevel.CONFIDENCE_LOW.value -> 0.33f
+                        else -> 0.0f
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(colorFraction)
+                            .fillMaxHeight()
+                            .clip(RoundedCornerShape(50))
+                            .background(color)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecentMeasurementsChart(
+    previousMeasurements: List<Float>,
+) {
+    // Recent Measurements
+    Text(
+        text = stringResource(R.string.ranging_previous_measurement),
+        fontWeight = FontWeight.Medium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 16.dp)
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(250.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.20f))
+            .padding(8.dp)
+    ) {
+        RecentMeasurementChart(
+            previousData = previousMeasurements
+        )
+    }
 }
