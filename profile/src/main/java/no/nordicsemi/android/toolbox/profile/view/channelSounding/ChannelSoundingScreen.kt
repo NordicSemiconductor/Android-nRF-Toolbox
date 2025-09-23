@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SocialDistance
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -28,13 +27,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.theme.NordicTheme
@@ -280,16 +279,12 @@ private fun DetailsCard(
     // Details Section
     Text(
         text = "Details",
-        fontWeight = FontWeight.Medium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = 16.dp)
+        modifier = Modifier.padding(start = 16.dp).alpha(0.5f)
     )
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f)
-        )
     ) {
         Column {
             Row(
@@ -299,10 +294,15 @@ private fun DetailsCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(stringResource(R.string.ranging_technology), fontSize = 14.sp)
+                Text(
+                    stringResource(R.string.ranging_technology),
+                    style = MaterialTheme.typography.bodyMedium
+                )
                 Text(RangingTechnology.from(rangingTechnology)?.let {
                     stringResource(it.toUiString())
-                } ?: "Unknown", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                } ?: "Unknown",
+                    style = MaterialTheme.typography.titleSmall
+                )
             }
 
             HorizontalDivider()
@@ -313,7 +313,8 @@ private fun DetailsCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    stringResource(R.string.update_rate), fontSize = 14.sp,
+                    stringResource(R.string.update_rate),
+                    style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.padding(horizontal = 8.dp))
                 UpdateRateSettings(updateRate) { onUpdateRateSelected(it) }
@@ -334,8 +335,7 @@ private fun DetailsCard(
                     Spacer(Modifier.width(6.dp))
                     Text(
                         stringResource(updateRate.toUiString()),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.primary,
                         textAlign = TextAlign.Center
                     )
@@ -349,7 +349,10 @@ private fun DetailsCard(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Text(stringResource(R.string.signal_strength), fontSize = 14.sp)
+                Text(
+                    stringResource(R.string.signal_strength),
+                    style = MaterialTheme.typography.bodyMedium
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 Box(
                     modifier = Modifier
@@ -390,9 +393,8 @@ private fun RecentMeasurementsChart(
     // Recent Measurements
     Text(
         text = stringResource(R.string.ranging_previous_measurement),
-        fontWeight = FontWeight.Medium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = 16.dp)
+        modifier = Modifier.padding(start = 16.dp).alpha(0.5f)
     )
     Box(
         modifier = Modifier
