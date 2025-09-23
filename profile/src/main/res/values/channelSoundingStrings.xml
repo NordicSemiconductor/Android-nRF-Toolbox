@@ -37,6 +37,7 @@
     <string name="update_rate_change_warning">Selecting a new rate will cancel the current session and start a new one.</string>
 
     <string name="ranging_previous_measurement">Recent measurements</string>
+    <string name="ranging_details">Details</string>
 
     <string name="update_rate_confirm">Confirm</string>
     <string name="update_rate_cancel">Cancel</string>

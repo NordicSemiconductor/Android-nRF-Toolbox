@@ -274,7 +274,7 @@ private fun DetailsCard(
 ) {
     // Details Section
     Text(
-        text = "Details",
+        text = stringResource(R.string.ranging_details),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier
             .padding(start = 16.dp)
