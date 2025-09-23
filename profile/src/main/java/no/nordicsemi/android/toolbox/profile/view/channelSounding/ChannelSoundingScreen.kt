@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -37,9 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.theme.NordicTheme
-import no.nordicsemi.android.common.theme.nordicFall
-import no.nordicsemi.android.common.theme.nordicGreen
-import no.nordicsemi.android.common.theme.nordicRed
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
 import no.nordicsemi.android.toolbox.profile.data.ConfidenceLevel
@@ -280,7 +276,9 @@ private fun DetailsCard(
     Text(
         text = "Details",
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = 16.dp).alpha(0.5f)
+        modifier = Modifier
+            .padding(start = 16.dp)
+            .alpha(0.5f)
     )
     OutlinedCard(
         modifier = Modifier
@@ -354,33 +352,7 @@ private fun DetailsCard(
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    val color = when (confidenceLevel) {
-                        ConfidenceLevel.CONFIDENCE_HIGH.value -> nordicGreen
-                        ConfidenceLevel.CONFIDENCE_MEDIUM.value -> nordicFall
-                        ConfidenceLevel.CONFIDENCE_LOW.value -> nordicRed
-                        else -> MaterialTheme.colorScheme.primary
-                    }
-                    val colorFraction = when (confidenceLevel) {
-                        ConfidenceLevel.CONFIDENCE_HIGH.value -> 1.0f
-                        ConfidenceLevel.CONFIDENCE_MEDIUM.value -> 0.66f
-                        ConfidenceLevel.CONFIDENCE_LOW.value -> 0.33f
-                        else -> 0.0f
-                    }
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(colorFraction)
-                            .fillMaxHeight()
-                            .clip(RoundedCornerShape(50))
-                            .background(color)
-                    )
-                }
+                SignalStrengthBar(confidenceLevel)
             }
         }
     }
@@ -394,7 +366,9 @@ private fun RecentMeasurementsChart(
     Text(
         text = stringResource(R.string.ranging_previous_measurement),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = 16.dp).alpha(0.5f)
+        modifier = Modifier
+            .padding(start = 16.dp)
+            .alpha(0.5f)
     )
     Box(
         modifier = Modifier
