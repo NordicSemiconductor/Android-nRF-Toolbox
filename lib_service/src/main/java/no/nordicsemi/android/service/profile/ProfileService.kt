@@ -185,8 +185,9 @@ internal class ProfileService : NotificationService() {
         manager: ServiceManager
     ) {
         try {
-            if (service.uuid == CGMS_SERVICE_UUID.toKotlinUuid())
+            if (service.uuid == CGMS_SERVICE_UUID.toKotlinUuid()) {
                 peripheral.ensureBonded()
+            }
             manager.observeServiceInteractions(peripheral.address, service, lifecycleScope)
         } catch (e: Exception) {
             Timber.tag("ObserveServices").e(e)
