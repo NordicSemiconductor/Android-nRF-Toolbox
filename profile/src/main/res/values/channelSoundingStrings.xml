@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_sounding">Channel Sounding</string>
+
+    <string name="channel_sounding_not_supported">Channel Sounding is not supported on this Android version.</string>
+    <string name="initiating_ranging">Initiating ranging</string>
+    <string name="ranging_session_closed_with_reason"> Ranging session closed because of %s.</string>
+    <string name="ranging_session_closed">Ranging session closed.</string>
+    <string name="ranging_session_stopped">Ranging session stopped</string>
+
+    <string name="ranging_distance">Distance</string>
+    <string name="current_measurement">Current measurement</string>
+    <string name="ranging_distance_m">%.3f m</string>
+    <string name="signal_strength">Signal strength</string>
+    <string name="ranging_technology">Technology</string>
+
+    <string name="ranging_azimuth_measurement">Azimuth angle</string>
+    <string name="ranging_azimuth_measurement_deg">%.2f°</string>
+    <string name="ranging_elevation_measurement">Elevation angle</string>
+
+    <string name="update_rate">Update rate</string>
+    <string name="update_rate_frequent">Frequent</string>
+    <string name="update_rate_frequent_des">Updates every 100 milliseconds.</string>
+    <string name="update_rate_normal">Normal</string>
+    <string name="update_rate_normal_des">Updates every 200 milliseconds.</string>
+    <string name="update_rate_infrequent">Infrequent</string>
+    <string name="update_rate_infrequent_des">Updates every 5 seconds.</string>
+
+    <string name="ranging_tech_ble_cs">Bluetooth LE Channel Sounding</string>
+    <string name="ranging_tech_wifi_nan_rtt">Wi-Fi NAN RTT</string>
+    <string name="ranging_tech_wifi_sta_rtt">Wi-Fi STA RTT</string>
+    <string name="ranging_tech_uwb">UWB</string>
+    <string name="ranging_tech_ble_rssi">Bluetooth LE RSSI</string>
+
+    <string name="change_update_rate">Change Update Rate</string>
+    <string name="select_new_update_rate">Select a new ranging update frequency.</string>
+    <string name="update_rate_change_warning">Selecting a new rate will cancel the current session and start a new one.</string>
+
+    <string name="ranging_previous_measurement">Recent measurements</string>
+    <string name="ranging_details">Details</string>
+
+    <string name="update_rate_confirm">Confirm</string>
+    <string name="update_rate_cancel">Cancel</string>
+</resources>

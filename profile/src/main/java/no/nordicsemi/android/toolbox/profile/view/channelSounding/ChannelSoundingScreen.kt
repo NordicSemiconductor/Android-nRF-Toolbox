@@ -1,62 +1,385 @@
 package no.nordicsemi.android.toolbox.profile.view.channelSounding
 
-import android.content.pm.PackageManager
 import android.os.Build
+import android.ranging.RangingData
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SocialDistance
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import no.nordicsemi.android.permissions_ranging.RequestRangingPermission
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import no.nordicsemi.android.common.theme.NordicTheme
+import no.nordicsemi.android.toolbox.profile.R
+import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
+import no.nordicsemi.android.toolbox.profile.data.ConfidenceLevel
+import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
+import no.nordicsemi.android.toolbox.profile.data.RangingTechnology
+import no.nordicsemi.android.toolbox.profile.data.UpdateRate
+import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingEvent
+import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingViewModel
+import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
+import no.nordicsemi.android.ui.view.TextWithAnimatedDots
+import no.nordicsemi.android.ui.view.internal.LoadingView
 
 @Composable
-internal fun ChannelSoundingScreen() {
-    RequestRangingPermission {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
+internal fun ChannelSoundingScreen(isNotificationPermissionGranted: Boolean?) {
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA && isNotificationPermissionGranted != null) {
+        RequestRangingPermission {
+            val channelSoundingViewModel = hiltViewModel<ChannelSoundingViewModel>()
+            val channelSoundingState by channelSoundingViewModel.channelSoundingState.collectAsStateWithLifecycle()
+            val onClickEvent: (event: ChannelSoundingEvent) -> Unit =
+                { channelSoundingViewModel.onEvent(it) }
+            ChannelSoundingView(channelSoundingState, onClickEvent)
+        }
+    } else {
+        ChannelSoundingNotSupportedView()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ChannelSoundingNotSupportedView() {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.padding(16.dp),
+            ) {
+                SectionTitle(
+                    icon = Icons.Default.SocialDistance,
+                    title = stringResource(R.string.channel_sounding),
+                )
+                Text(stringResource(R.string.channel_sounding_not_supported))
+            }
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
+@Composable
+private fun ChannelSoundingView(
+    channelSoundingState: ChannelSoundingServiceData,
+    onClickEvent: (ChannelSoundingEvent) -> Unit,
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        when (val sessionData = channelSoundingState.rangingSessionAction) {
+            is RangingSessionAction.OnError -> {
+                SessionError(sessionData)
+            }
+
+            is RangingSessionAction.OnResult -> {
+                RangingContent(
+                    channelSoundingState.updateRate,
+                    sessionData.data,
+                    sessionData.previousData,
+                    onClickEvent
+                )
+            }
+
+            RangingSessionAction.OnClosed -> {
+                SessionClosed()
+            }
+
+            RangingSessionAction.OnStart -> {
+                InitiatingSession()
+            }
+
+            null -> LoadingView()
+        }
+
+    }
+}
+
+@Composable
+private fun InitiatingSession() {
+    ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
+        Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
             SectionTitle(
                 icon = Icons.Default.SocialDistance,
-                title = "Channel Sounding",
+                title = stringResource(R.string.channel_sounding),
             )
-            val context = LocalContext.current
-            val rangingPermissionStatusMessage =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
-                    if (ContextCompat.checkSelfPermission(
-                            context,
-                            "android.permission.RANGING"
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
-                        "Ranging permission is granted"
-                    } else {
-                        "Ranging permission is not granted"
-                    }
-                } else {
-                    "Channel Sounding Service is not available on this Android version."
-                }
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            TextWithAnimatedDots(
+                text = stringResource(R.string.initiating_ranging),
+            )
+        }
+    }
+}
 
-            Box(contentAlignment = Alignment.Center) {
+@Composable
+private fun SessionClosed() {
+    ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
+        Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
+            SectionTitle(
+                icon = Icons.Default.SocialDistance,
+                title = stringResource(R.string.channel_sounding),
+            )
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(stringResource(R.string.ranging_session_stopped))
+        }
+    }
+}
 
+@Composable
+private fun SessionError(sessionData: RangingSessionAction.OnError) {
+    ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
+        Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
+            SectionTitle(
+                icon = Icons.Default.SocialDistance,
+                title = stringResource(R.string.channel_sounding),
+            )
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            if (sessionData.reason.isNotEmpty()) {
                 Text(
-                    text = rangingPermissionStatusMessage
+                    stringResource(
+                        R.string.ranging_session_closed_with_reason,
+                        sessionData.reason
+                    ),
+                    modifier = Modifier.padding(8.dp)
+                )
+            } else {
+                Text(
+                    stringResource(R.string.ranging_session_closed),
+                    modifier = Modifier.padding(8.dp)
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun DistanceDashboard(measurement: Double) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = stringResource(R.string.ranging_distance_m, measurement.toFloat()),
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.displayLarge
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.current_measurement),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun DDistanceDashboard_Preview() {
+    NordicTheme {
+        DistanceDashboard(2.5)
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
+@Composable
+private fun RangingContent(
+    updateRate: UpdateRate,
+    rangingData: RangingData,
+    previousMeasurements: List<Float> = emptyList(),
+    onClickEvent: (ChannelSoundingEvent) -> Unit,
+) {
+    val distanceMeasurement = rangingData.distance?.measurement
+    val confidence = rangingData.distance?.confidence
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        distanceMeasurement?.let { measurement ->
+            DistanceDashboard(measurement)
+        }
+
+        DetailsCard(
+            updateRate = updateRate,
+            rangingTechnology = rangingData.rangingTechnology,
+            confidenceLevel = confidence
+        ) { onClickEvent(ChannelSoundingEvent.RangingUpdateRate(it)) }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        RecentMeasurementsChart(previousMeasurements)
+
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DetailsCard(
+    updateRate: UpdateRate = UpdateRate.NORMAL,
+    rangingTechnology: Int = RangingTechnology.BLE_CS.value,
+    confidenceLevel: Int? = ConfidenceLevel.CONFIDENCE_HIGH.value,
+    onUpdateRateSelected: (UpdateRate) -> Unit = { }
+) {
+    // Details Section
+    Text(
+        text = stringResource(R.string.ranging_details),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier
+            .padding(start = 16.dp)
+            .alpha(0.5f)
+    )
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth(),
+    ) {
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    stringResource(R.string.ranging_technology),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(RangingTechnology.from(rangingTechnology)?.let {
+                    stringResource(it.toUiString())
+                } ?: "Unknown",
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
+
+            HorizontalDivider()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    stringResource(R.string.update_rate),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+                UpdateRateSettings(updateRate) { onUpdateRateSelected(it) }
+                Spacer(modifier = Modifier.weight(1f))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        stringResource(updateRate.toUiString()),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+            HorizontalDivider()
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    stringResource(R.string.signal_strength),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                SignalStrengthBar(confidenceLevel)
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecentMeasurementsChart(
+    previousMeasurements: List<Float>,
+) {
+    // Recent Measurements
+    Text(
+        text = stringResource(R.string.ranging_previous_measurement),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier
+            .padding(start = 16.dp)
+            .alpha(0.5f)
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(250.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.20f))
+            .padding(8.dp)
+    ) {
+        RecentMeasurementChart(
+            previousData = previousMeasurements
+        )
     }
 }

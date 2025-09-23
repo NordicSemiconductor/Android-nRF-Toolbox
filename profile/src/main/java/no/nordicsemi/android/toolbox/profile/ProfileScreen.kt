@@ -88,7 +88,7 @@ internal fun ProfileScreen() {
     ) { paddingValues ->
         RequireBluetooth {
             RequireLocation {
-                RequestNotificationPermission {
+                RequestNotificationPermission { isNotificationPermissionGranted ->
                     Column(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier
@@ -102,6 +102,7 @@ internal fun ProfileScreen() {
                         when (val state = uiState) {
                             is ProfileUiState.Connected -> DeviceConnectedView(
                                 state = state,
+                                isNotificationPermissionGranted = isNotificationPermissionGranted,
                                 onEvent = onEvent
                             )
 
@@ -143,6 +144,7 @@ internal fun ProfileScreen() {
 @Composable
 internal fun DeviceConnectedView(
     state: ProfileUiState.Connected,
+    isNotificationPermissionGranted: Boolean?,
     onEvent: (ConnectionEvent) -> Unit,
 ) {
     // Check for missing services directly from the state object.
@@ -190,7 +192,7 @@ internal fun DeviceConnectedView(
                     // Display the appropriate screen for each profile.
                     when (serviceManager.profile) {
                         Profile.HTS -> HTSScreen()
-                        Profile.CHANNEL_SOUNDING -> ChannelSoundingScreen()
+                        Profile.CHANNEL_SOUNDING -> ChannelSoundingScreen(isNotificationPermissionGranted)
                         Profile.BPS -> BPSScreen()
                         Profile.CSC -> CSCScreen()
                         Profile.CGM -> CGMScreen()
