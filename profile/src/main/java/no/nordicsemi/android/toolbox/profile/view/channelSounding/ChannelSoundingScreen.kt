@@ -4,6 +4,7 @@ import android.os.Build
 import android.ranging.RangingData
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -375,7 +376,10 @@ private fun RecentMeasurementsChart(
             .fillMaxWidth()
             .height(250.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.20f))
+            .background(
+                if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary.copy(alpha = 0.20f)
+                else MaterialTheme.colorScheme.surface
+            )
             .padding(8.dp)
     ) {
         RecentMeasurementChart(
