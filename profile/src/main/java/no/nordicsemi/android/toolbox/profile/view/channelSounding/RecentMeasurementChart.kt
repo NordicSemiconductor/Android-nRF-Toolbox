@@ -23,6 +23,7 @@ import no.nordicsemi.android.common.theme.NordicTheme
 private const val X_AXIS_ELEMENTS_COUNT = 40.0f
 
 private val customBlue = "#00A9CE".toColorInt()
+private val backgroundColor = "#F5F5F5".toColorInt()
 
 @Composable
 internal fun RecentMeasurementChart(previousData: List<Float>) {
@@ -62,7 +63,7 @@ internal fun createLineChartView(
             axisLeft.gridColor = Color.WHITE
             axisLeft.textColor = Color.WHITE
         } else {
-            setBackgroundColor(Color.WHITE)
+            setBackgroundColor(backgroundColor)
             xAxis.gridColor = Color.BLACK
             xAxis.textColor = Color.BLACK
             axisLeft.gridColor = Color.BLACK
