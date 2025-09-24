@@ -62,7 +62,7 @@ internal fun OutputSection(
                 title = "Messages",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp),
+                    .padding(16.dp),
                 menu = { Menu(onEvent) }
             )
 
@@ -76,7 +76,7 @@ internal fun OutputSection(
             LazyColumn(
                 state = listState,
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(16.dp)
                     .heightIn(max = 500.dp), // Set a fixed height for the message area
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
