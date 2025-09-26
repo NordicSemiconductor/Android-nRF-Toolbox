@@ -135,7 +135,7 @@ class ChannelSoundingManager @Inject constructor(
             .build()
 
         val rawRangingDeviceConfig = RawInitiatorRangingConfig.Builder()
-            .addRawRangingDevices(listOf(rawRangingDevice))
+            .addRawRangingDevice(rawRangingDevice)
             .build()
 
         val rangingPreference = RangingPreference.Builder(
