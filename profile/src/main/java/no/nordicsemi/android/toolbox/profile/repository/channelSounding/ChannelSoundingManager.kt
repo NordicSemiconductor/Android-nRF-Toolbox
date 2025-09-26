@@ -14,8 +14,8 @@ import android.ranging.SensorFusionParams
 import android.ranging.SessionConfig
 import android.ranging.ble.cs.BleCsRangingCapabilities
 import android.ranging.ble.cs.BleCsRangingParams
+import android.ranging.raw.RawInitiatorRangingConfig
 import android.ranging.raw.RawRangingDevice
-import android.ranging.raw.RawResponderRangingConfig
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -28,6 +28,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
 import no.nordicsemi.android.toolbox.profile.data.UpdateRate
 import timber.log.Timber
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -119,6 +120,7 @@ class ChannelSoundingManager @Inject constructor(
             UpdateRate.INFREQUENT -> RawRangingDevice.UPDATE_RATE_INFREQUENT
         }
         val rangingDevice = RangingDevice.Builder()
+            .setUuid(UUID.nameUUIDFromBytes(device.toByteArray()))
             .build()
 
         val csRangingParams = BleCsRangingParams
@@ -132,8 +134,8 @@ class ChannelSoundingManager @Inject constructor(
             .setCsRangingParams(csRangingParams)
             .build()
 
-        val rawRangingDeviceConfig = RawResponderRangingConfig.Builder()
-            .setRawRangingDevice(rawRangingDevice)
+        val rawRangingDeviceConfig = RawInitiatorRangingConfig.Builder()
+            .addRawRangingDevices(listOf(rawRangingDevice))
             .build()
 
         val rangingPreference = RangingPreference.Builder(
