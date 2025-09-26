@@ -43,6 +43,7 @@ import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
 import no.nordicsemi.android.toolbox.profile.data.ConfidenceLevel
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
 import no.nordicsemi.android.toolbox.profile.data.RangingTechnology
+import no.nordicsemi.android.toolbox.profile.data.SessionClosedReason
 import no.nordicsemi.android.toolbox.profile.data.UpdateRate
 import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingViewModel
@@ -165,14 +166,11 @@ private fun SessionClosed(
                     title = stringResource(R.string.channel_sounding),
                 )
             }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(stringResource(R.string.ranging_session_stopped))
-            }
+            Text(
+                stringResource(R.string.ranging_session_stopped),
+                modifier = Modifier.padding(8.dp),
+                textAlign = TextAlign.Center,
+            )
         }
         Button(
             modifier = Modifier.padding(16.dp),
@@ -208,42 +206,21 @@ private fun SessionError(
                     title = stringResource(R.string.channel_sounding),
                 )
             }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+            Text(
+                text = stringResource(sessionData.reason.toUiString()),
+                modifier = Modifier.padding(8.dp),
+                textAlign = TextAlign.Center,
+            )
+        }
+        if (sessionData.reason != SessionClosedReason.NOT_SUPPORTED ||
+            sessionData.reason != SessionClosedReason.RANGING_NOT_AVAILABLE) {
+            Button(
+                modifier = Modifier.padding(16.dp),
+                onClick = { onClickEvent(ChannelSoundingEvent.RestartRangingSession) },
             ) {
-                if (sessionData.reason.isNotEmpty()) {
-                    Text(
-                        stringResource(
-                            R.string.ranging_session_closed_with_reason,
-                            sessionData.reason
-                        ),
-                        modifier = Modifier.padding(8.dp)
-                    )
-                } else {
-                    Text(
-                        stringResource(R.string.ranging_session_closed),
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
+                Text(text = stringResource(id = R.string.reconnect))
             }
         }
-        Button(
-            modifier = Modifier.padding(16.dp),
-            onClick = { onClickEvent(ChannelSoundingEvent.RestartRangingSession) },
-        ) {
-            Text(text = stringResource(id = R.string.reconnect))
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun SessionError_Preview() {
-    NordicTheme {
-        SessionError(RangingSessionAction.OnError("Sample Error"), onClickEvent = {})
     }
 }
 

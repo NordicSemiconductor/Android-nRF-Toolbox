@@ -26,6 +26,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
+import no.nordicsemi.android.toolbox.profile.data.RangingSessionFailedReason
+import no.nordicsemi.android.toolbox.profile.data.SessionClosedReason
 import no.nordicsemi.android.toolbox.profile.data.UpdateRate
 import timber.log.Timber
 import java.util.UUID
@@ -51,7 +53,7 @@ class ChannelSoundingManager @Inject constructor(
     object : RangingSession.Callback {
         override fun onClosed(reason: Int) {
             _rangingData.value =
-                RangingSessionAction.OnError(RangingSessionCloseReason.getReason(reason))
+                RangingSessionAction.OnError(RangingSessionFailedReason.getReason(reason))
             // Unregister the callback to avoid memory leaks
             rangingManager?.unregisterCapabilitiesCallback(rangingCapabilityCallback)
             // Cleanup previous data
@@ -111,7 +113,8 @@ class ChannelSoundingManager @Inject constructor(
         updateRate: UpdateRate = UpdateRate.NORMAL
     ) {
         if (rangingManager == null) {
-            _rangingData.value = RangingSessionAction.OnError("RangingManager is not available")
+            _rangingData.value =
+                RangingSessionAction.OnError(SessionClosedReason.RANGING_NOT_AVAILABLE)
             return
         }
         val setRangingUpdateRate = when (updateRate) {
@@ -177,17 +180,19 @@ class ChannelSoundingManager @Inject constructor(
                         }
                     } else {
                         _rangingData.value =
-                            RangingSessionAction.OnError("Missing Ranging permission")
+                            RangingSessionAction.OnError(
+                                SessionClosedReason.MISSING_PERMISSION
+                            )
                         return@RangingCapabilitiesCallback
                     }
                 } else {
                     _rangingData.value =
-                        RangingSessionAction.OnError("Channel Sounding with required security level is not supported")
+                        RangingSessionAction.OnError(SessionClosedReason.CS_SECURITY_NOT_AVAILABLE)
                     closeSession()
                 }
             } else {
                 _rangingData.value =
-                    RangingSessionAction.OnError("Channel Sounding Capabilities is not supported")
+                    RangingSessionAction.OnError(SessionClosedReason.NOT_SUPPORTED)
                 closeSession()
             }
 
@@ -221,7 +226,7 @@ class ChannelSoundingManager @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            _rangingData.value = RangingSessionAction.OnError(e.message ?: "Unknown error")
+            _rangingData.value = RangingSessionAction.OnError(SessionClosedReason.UNKNOWN)
         }
     }
 

@@ -17,7 +17,7 @@ sealed interface RangingSessionAction {
         val previousData: List<Float> = emptyList()
     ) : RangingSessionAction
 
-    data class OnError(val reason: String) : RangingSessionAction
+    data class OnError(val reason: SessionCloseReasonProvider) : RangingSessionAction
     object OnClosed : RangingSessionAction
 }
 
@@ -46,5 +46,30 @@ enum class RangingTechnology(val value: Int) {
 
     companion object {
         fun from(value: Int): RangingTechnology? = entries.find { it.value == value }
+    }
+}
+
+enum class SessionClosedReason : SessionCloseReasonProvider {
+    MISSING_PERMISSION,
+    NOT_SUPPORTED,
+    RANGING_NOT_AVAILABLE,
+    CS_SECURITY_NOT_AVAILABLE,
+    UNKNOWN;
+}
+
+sealed interface SessionCloseReasonProvider
+
+enum class RangingSessionFailedReason(val reason: Int):SessionCloseReasonProvider {
+    UNKNOWN(0),
+    LOCAL_REQUEST(1),
+    REMOTE_REQUEST(2),
+    UNSUPPORTED(3),
+    SYSTEM_POLICY(4),
+    NO_PEERS_FOUND(5), ;
+
+    companion object {
+        fun getReason(value: Int): RangingSessionFailedReason {
+            return entries.firstOrNull { it.reason == value } ?: UNKNOWN
+        }
     }
 }
