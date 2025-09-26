@@ -4,8 +4,6 @@
 
     <string name="channel_sounding_not_supported">Channel Sounding is not supported on this Android version.</string>
     <string name="initiating_ranging">Initiating ranging</string>
-    <string name="ranging_session_closed_with_reason"> Ranging session closed because of %s.</string>
-    <string name="ranging_session_closed">Ranging session closed.</string>
     <string name="ranging_session_stopped">Ranging session stopped</string>
 
     <string name="ranging_distance">Distance</string>
@@ -38,6 +36,17 @@
 
     <string name="ranging_previous_measurement">Recent measurements</string>
     <string name="ranging_details">Details</string>
+
+    <string name="cs_missing_permissions">Missing permissions.</string>
+    <string name="cs_ranging_not_available">Ranging service not available.</string>
+    <string name="cs_security_not_available">Channel Sounding with required security level is not supported. </string>
+    <string name="cs_error_unknown">Oops! Session just ghosted harder than your last Tinder date. Try reconnecting…</string>
+    <string name="cs_local_request">Session terminated by local request.</string>
+    <string name="cs_remote_request">Session terminated by remote peer.</string>
+    <string name="cs_peer_terminated">Peer terminated the session.</string>
+    <string name="cs_system_policy">Local system policy forced the session to close.</string>
+    <string name="cs_params_unsupported">Provided session parameters are not supported.</string>
+    <string name="cs_no_peers_found">No peers found.</string>
 
     <string name="update_rate_confirm">Confirm</string>
     <string name="update_rate_cancel">Cancel</string>

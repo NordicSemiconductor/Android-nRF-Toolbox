@@ -28,6 +28,7 @@ import javax.inject.Inject
 internal sealed interface ChannelSoundingEvent {
     data class RangingUpdateRate(val frequency: UpdateRate) : ChannelSoundingEvent
     data class UpdateInterval(val interval: Int) : ChannelSoundingEvent
+    data object RestartRangingSession : ChannelSoundingEvent
 }
 
 @HiltViewModel
@@ -136,6 +137,26 @@ internal class ChannelSoundingViewModel @Inject constructor(
                 _channelSoundingServiceState.value = _channelSoundingServiceState.value.copy(
                     interval = event.interval
                 )
+            }
+
+            ChannelSoundingEvent.RestartRangingSession -> {
+                // Restart the ranging session with the current update rate
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+                    try {
+                        viewModelScope.launch {
+                            channelSoundingManager.closeSession {
+                                channelSoundingManager.addDeviceToRangingSession(
+                                    address,
+                                    _channelSoundingServiceState.value.updateRate
+                                )
+                            }
+                        }
+
+                    } catch (e: Exception) {
+                        Timber.e("Error closing session: ${e.message}")
+                    }
+                }
+
             }
         }
     }
