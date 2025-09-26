@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SocialDistance
+import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -100,7 +101,7 @@ private fun ChannelSoundingView(
     ) {
         when (val sessionData = channelSoundingState.rangingSessionAction) {
             is RangingSessionAction.OnError -> {
-                SessionError(sessionData)
+                SessionError(sessionData) { onClickEvent(it) }
             }
 
             is RangingSessionAction.OnResult -> {
@@ -113,7 +114,7 @@ private fun ChannelSoundingView(
             }
 
             RangingSessionAction.OnClosed -> {
-                SessionClosed()
+                SessionClosed(onClickEvent)
             }
 
             RangingSessionAction.OnStart -> {
@@ -149,55 +150,100 @@ private fun InitiatingSession() {
 }
 
 @Composable
-private fun SessionClosed() {
-    ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
-        Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
-            SectionTitle(
-                icon = Icons.Default.SocialDistance,
-                title = stringResource(R.string.channel_sounding),
-            )
+private fun SessionClosed(
+    onClickEvent: (ChannelSoundingEvent) -> Unit,
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
+            Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
+                SectionTitle(
+                    icon = Icons.Default.SocialDistance,
+                    title = stringResource(R.string.channel_sounding),
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(stringResource(R.string.ranging_session_stopped))
+            }
         }
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Button(
+            modifier = Modifier.padding(16.dp),
+            onClick = { onClickEvent(ChannelSoundingEvent.RestartRangingSession) },
         ) {
-            Text(stringResource(R.string.ranging_session_stopped))
+            Text(text = stringResource(id = R.string.reconnect))
         }
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-private fun SessionError(sessionData: RangingSessionAction.OnError) {
-    ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
-        Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
-            SectionTitle(
-                icon = Icons.Default.SocialDistance,
-                title = stringResource(R.string.channel_sounding),
-            )
-        }
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            if (sessionData.reason.isNotEmpty()) {
-                Text(
-                    stringResource(
-                        R.string.ranging_session_closed_with_reason,
-                        sessionData.reason
-                    ),
-                    modifier = Modifier.padding(8.dp)
-                )
-            } else {
-                Text(
-                    stringResource(R.string.ranging_session_closed),
-                    modifier = Modifier.padding(8.dp)
+private fun SessionClosed_Preview() {
+    NordicTheme {
+        SessionClosed(onClickEvent = {})
+    }
+}
+
+@Composable
+private fun SessionError(
+    sessionData: RangingSessionAction.OnError,
+    onClickEvent: (ChannelSoundingEvent) -> Unit,
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
+            Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
+                SectionTitle(
+                    icon = Icons.Default.SocialDistance,
+                    title = stringResource(R.string.channel_sounding),
                 )
             }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                if (sessionData.reason.isNotEmpty()) {
+                    Text(
+                        stringResource(
+                            R.string.ranging_session_closed_with_reason,
+                            sessionData.reason
+                        ),
+                        modifier = Modifier.padding(8.dp)
+                    )
+                } else {
+                    Text(
+                        stringResource(R.string.ranging_session_closed),
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+            }
         }
+        Button(
+            modifier = Modifier.padding(16.dp),
+            onClick = { onClickEvent(ChannelSoundingEvent.RestartRangingSession) },
+        ) {
+            Text(text = stringResource(id = R.string.reconnect))
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SessionError_Preview() {
+    NordicTheme {
+        SessionError(RangingSessionAction.OnError("Sample Error"), onClickEvent = {})
     }
 }
 
