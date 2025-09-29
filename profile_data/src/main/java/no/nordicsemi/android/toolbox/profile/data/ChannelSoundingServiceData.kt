@@ -1,6 +1,5 @@
 package no.nordicsemi.android.toolbox.profile.data
 
-import android.ranging.RangingData
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 
 data class ChannelSoundingServiceData(
@@ -13,13 +12,28 @@ data class ChannelSoundingServiceData(
 sealed interface RangingSessionAction {
     object OnStart : RangingSessionAction
     data class OnResult(
-        val data: RangingData,
+        val data: CsRangingData,
         val previousData: List<Float> = emptyList()
     ) : RangingSessionAction
 
     data class OnError(val reason: SessionCloseReasonProvider) : RangingSessionAction
     object OnClosed : RangingSessionAction
 }
+
+data class CsRangingData(
+    val distance: CSRangingMeasurement? = null,
+    val azimuth: CSRangingMeasurement? = null,
+    val elevation: CSRangingMeasurement? = null,
+    val technology: RangingTechnology,
+    val timeStamp: Long,
+    val hasRssi: Boolean = false,
+    val rssi: Int? = null,
+)
+
+data class CSRangingMeasurement(
+    val measurement: Double,
+    val confidenceLevel: ConfidenceLevel,
+)
 
 enum class UpdateRate {
     NORMAL,
@@ -33,7 +47,7 @@ enum class ConfidenceLevel(val value: Int) {
     CONFIDENCE_LOW(0);
 
     companion object {
-        fun from(value: Int): ConfidenceLevel? = entries.find { it.value == value }
+        fun from(value: Int): ConfidenceLevel = entries.find { it.value == value } ?: CONFIDENCE_LOW
     }
 }
 
@@ -59,7 +73,7 @@ enum class SessionClosedReason : SessionCloseReasonProvider {
 
 sealed interface SessionCloseReasonProvider
 
-enum class RangingSessionFailedReason(val reason: Int):SessionCloseReasonProvider {
+enum class RangingSessionFailedReason(val reason: Int) : SessionCloseReasonProvider {
     UNKNOWN(0),
     LOCAL_REQUEST(1),
     REMOTE_REQUEST(2),

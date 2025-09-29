@@ -29,6 +29,7 @@ import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionFailedReason
 import no.nordicsemi.android.toolbox.profile.data.SessionClosedReason
 import no.nordicsemi.android.toolbox.profile.data.UpdateRate
+import no.nordicsemi.android.toolbox.profile.view.channelSounding.toCsRangingData
 import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
@@ -83,7 +84,7 @@ class ChannelSoundingManager @Inject constructor(
             }
             _previousRangingDataList.value = updatedList
             _rangingData.value = RangingSessionAction.OnResult(
-                data = data,
+                data = data.toCsRangingData(),
                 previousData = _previousRangingDataList.value
             )
         }
