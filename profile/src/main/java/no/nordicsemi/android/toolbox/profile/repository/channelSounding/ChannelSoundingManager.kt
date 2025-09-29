@@ -142,21 +142,22 @@ class ChannelSoundingManager @Inject constructor(
             .addRawRangingDevice(rawRangingDevice)
             .build()
 
+        val sensorFusionParams = SensorFusionParams.Builder()
+            .setSensorFusionEnabled(true)
+            .build()
+
+        val sessionConfig = SessionConfig.Builder()
+            .setRangingMeasurementsLimit(1000)
+            .setAngleOfArrivalNeeded(true)
+            .setSensorFusionParams(sensorFusionParams)
+            .build()
+
+
         val rangingPreference = RangingPreference.Builder(
             DEVICE_ROLE_INITIATOR,
             rawRangingDeviceConfig
         )
-            .setSessionConfig(
-                SessionConfig.Builder()
-                    .setRangingMeasurementsLimit(1000)
-                    .setAngleOfArrivalNeeded(true)
-                    .setSensorFusionParams(
-                        SensorFusionParams.Builder()
-                            .setSensorFusionEnabled(true)
-                            .build()
-                    )
-                    .build()
-            )
+            .setSessionConfig(sessionConfig)
             .build()
 
         rangingCapabilityCallback = RangingManager.RangingCapabilitiesCallback { capabilities ->
