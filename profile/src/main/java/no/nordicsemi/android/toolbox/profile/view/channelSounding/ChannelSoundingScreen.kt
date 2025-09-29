@@ -166,11 +166,17 @@ private fun SessionClosed(
                     title = stringResource(R.string.channel_sounding),
                 )
             }
-            Text(
-                stringResource(R.string.ranging_session_stopped),
-                modifier = Modifier.padding(8.dp),
-                textAlign = TextAlign.Center,
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    stringResource(R.string.ranging_session_stopped),
+                    modifier = Modifier.padding(8.dp),
+                    textAlign = TextAlign.Center,
+                )
+            }
         }
         Button(
             modifier = Modifier.padding(16.dp),
@@ -206,14 +212,21 @@ private fun SessionError(
                     title = stringResource(R.string.channel_sounding),
                 )
             }
-            Text(
-                text = stringResource(sessionData.reason.toUiString()),
-                modifier = Modifier.padding(8.dp),
-                textAlign = TextAlign.Center,
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(sessionData.reason.toUiString()),
+                    modifier = Modifier.padding(8.dp),
+                    textAlign = TextAlign.Center,
+                )
+            }
         }
         if (sessionData.reason != SessionClosedReason.NOT_SUPPORTED ||
-            sessionData.reason != SessionClosedReason.RANGING_NOT_AVAILABLE) {
+            sessionData.reason != SessionClosedReason.RANGING_NOT_AVAILABLE
+        ) {
             Button(
                 modifier = Modifier.padding(16.dp),
                 onClick = { onClickEvent(ChannelSoundingEvent.RestartRangingSession) },
@@ -221,38 +234,6 @@ private fun SessionError(
                 Text(text = stringResource(id = R.string.reconnect))
             }
         }
-    }
-}
-
-@Composable
-private fun DistanceDashboard(measurement: Double) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = stringResource(R.string.ranging_distance_m, measurement.toFloat()),
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.displayLarge
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = stringResource(R.string.current_measurement),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodySmall
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun DDistanceDashboard_Preview() {
-    NordicTheme {
-        DistanceDashboard(2.5)
     }
 }
 
@@ -285,6 +266,38 @@ private fun RangingContent(
         Spacer(modifier = Modifier.height(16.dp))
         RecentMeasurementsChart(previousMeasurements)
 
+    }
+}
+
+@Composable
+private fun DistanceDashboard(measurement: Double) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = stringResource(R.string.ranging_distance_m, measurement.toFloat()),
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.displayLarge
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.current_measurement),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun DDistanceDashboard_Preview() {
+    NordicTheme {
+        DistanceDashboard(2.5)
     }
 }
 
