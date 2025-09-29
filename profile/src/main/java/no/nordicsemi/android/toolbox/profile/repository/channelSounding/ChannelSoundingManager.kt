@@ -215,13 +215,14 @@ class ChannelSoundingManager @Inject constructor(
                 rangingSession = null
                 _rangingData.value = null
                 // unregister the callback
-
+                rangingManager?.unregisterCapabilitiesCallback(rangingCapabilityCallback)
+                // Invoke the onClosed callback after a short delay to ensure the session is closed
                 onClosed?.let {
                     _rangingData.value = RangingSessionAction.OnStart
                     // Wait for a moment to ensure the session is properly closed before invoking the callback
                     // Launch a coroutine to delay and call onClosed
                     CoroutineScope(Dispatchers.IO).launch {
-                        delay(500)
+                        delay(1000)
                         it()
                     }
 
