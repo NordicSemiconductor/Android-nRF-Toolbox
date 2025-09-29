@@ -1,7 +1,13 @@
 package no.nordicsemi.android.toolbox.profile.view.channelSounding
 
+import android.os.Build
+import android.ranging.RangingData
+import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import no.nordicsemi.android.toolbox.profile.R
+import no.nordicsemi.android.toolbox.profile.data.CSRangingMeasurement
+import no.nordicsemi.android.toolbox.profile.data.ConfidenceLevel
+import no.nordicsemi.android.toolbox.profile.data.CsRangingData
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionFailedReason
 import no.nordicsemi.android.toolbox.profile.data.RangingTechnology
 import no.nordicsemi.android.toolbox.profile.data.SessionCloseReasonProvider
@@ -56,5 +62,39 @@ internal fun SessionCloseReasonProvider.toUiString(): Int {
         RangingSessionFailedReason.NO_PEERS_FOUND -> R.string.cs_no_peers_found
         RangingSessionFailedReason.UNKNOWN -> R.string.cs_error_unknown
     }
+}
+
+// Mapper function which maps RangingData to CsRangingData
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
+internal fun RangingData.toCsRangingData(): CsRangingData {
+    return CsRangingData(
+        distance = this.distance?.let {
+            CSRangingMeasurement(
+                measurement = it.measurement,
+                confidenceLevel = ConfidenceLevel.from(it.confidence)
+            )
+        },
+        azimuth = this.azimuth?.let {
+            CSRangingMeasurement(
+                measurement = it.measurement,
+                confidenceLevel = ConfidenceLevel.from(it.confidence)
+            )
+        },
+        elevation = this.elevation?.let {
+            CSRangingMeasurement(
+                measurement = it.measurement,
+                confidenceLevel = ConfidenceLevel.from(it.confidence)
+            )
+        },
+        technology = RangingTechnology.from(this.rangingTechnology)
+            ?: throw IllegalArgumentException("Unknown ranging technology: ${this.rangingTechnology}"),
+        timeStamp = this.timestampMillis,
+        hasRssi = this.hasRssi(),
+        rssi = if (this.hasRssi()) {
+            this.rssi
+        } else {
+            null
+        }
+    )
 }
 

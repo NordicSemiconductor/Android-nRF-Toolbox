@@ -1,8 +1,6 @@
 package no.nordicsemi.android.toolbox.profile.view.channelSounding
 
 import android.os.Build
-import android.ranging.RangingData
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -41,6 +39,7 @@ import no.nordicsemi.android.common.theme.NordicTheme
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
 import no.nordicsemi.android.toolbox.profile.data.ConfidenceLevel
+import no.nordicsemi.android.toolbox.profile.data.CsRangingData
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
 import no.nordicsemi.android.toolbox.profile.data.RangingTechnology
 import no.nordicsemi.android.toolbox.profile.data.SessionClosedReason
@@ -90,7 +89,6 @@ private fun ChannelSoundingNotSupportedView() {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @Composable
 private fun ChannelSoundingView(
     channelSoundingState: ChannelSoundingServiceData,
@@ -237,16 +235,15 @@ private fun SessionError(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @Composable
 private fun RangingContent(
     updateRate: UpdateRate,
-    rangingData: RangingData,
+    rangingData: CsRangingData,
     previousMeasurements: List<Float> = emptyList(),
     onClickEvent: (ChannelSoundingEvent) -> Unit,
 ) {
     val distanceMeasurement = rangingData.distance?.measurement
-    val confidence = rangingData.distance?.confidence
+    val confidence = rangingData.distance?.confidenceLevel?.value
 
     Column(
         modifier = Modifier
@@ -259,7 +256,7 @@ private fun RangingContent(
 
         DetailsCard(
             updateRate = updateRate,
-            rangingTechnology = rangingData.rangingTechnology,
+            rangingTechnology = rangingData.technology.value,
             confidenceLevel = confidence
         ) { onClickEvent(ChannelSoundingEvent.RangingUpdateRate(it)) }
 
