@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.toolbox.profile.data.DFUServiceData
+import no.nordicsemi.android.toolbox.profile.data.DFUsAvailable
 
 object DFURepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<DFUServiceData>>()
@@ -12,7 +13,7 @@ object DFURepository {
         return _dataMap.getOrPut(deviceId) { MutableStateFlow(DFUServiceData()) }
     }
 
-    fun updateAppName(deviceId: String, appName: String) {
+    fun updateAppName(deviceId: String, appName: DFUsAvailable) {
         _dataMap[deviceId]?.update { it.copy(dfuAppName = appName) }
     }
 

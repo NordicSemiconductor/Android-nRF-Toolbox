@@ -4,5 +4,13 @@ import no.nordicsemi.android.toolbox.lib.utils.Profile
 
 data class DFUServiceData(
     override val profile: Profile = Profile.DFU,
-    val dfuAppName : String? = null,
+    val dfuAppName : DFUsAvailable? = null,
 ): ProfileServiceData()
+
+enum class DFUsAvailable {
+    DFU_SERVICE,
+    SMP_SERVICE,
+    MDS_SERVICE,
+    LEGACY_DFU_SERVICE,
+    EXPERIMENTAL_BUTTONLESS_DFU_SERVICE;
+}
