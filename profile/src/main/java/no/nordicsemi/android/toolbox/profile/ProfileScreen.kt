@@ -29,7 +29,7 @@ import no.nordicsemi.android.common.permissions.ble.RequireLocation
 import no.nordicsemi.android.common.permissions.notification.RequestNotificationPermission
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.data.displayMessage
-import no.nordicsemi.android.toolbox.profile.view.DFUScreen
+import no.nordicsemi.android.toolbox.profile.view.dfu.DFUScreen
 import no.nordicsemi.android.toolbox.profile.view.battery.BatteryScreen
 import no.nordicsemi.android.toolbox.profile.view.bps.BPSScreen
 import no.nordicsemi.android.toolbox.profile.view.cgms.CGMScreen
