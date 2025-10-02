@@ -80,7 +80,7 @@ enum class HTSMeasurementType(val value: Int) {
     MOUTH(6),
     RECTUM(7),
     TOE(8),
-    TYMPANIC(7);
+    TYMPANIC(9);
 
     override fun toString(): String =
         when (this) {
