@@ -47,6 +47,8 @@ object HTSDataParser {
         var offset = 0
         val flag: Int = byte.getInt(offset, IntFormat.UINT8, byteOrder)
 
+        if (flag > 7) return null
+
         val unit: TemperatureUnitData = TemperatureUnitData.create(flag and 0x01) ?: return null
 
         val timestampPresent = flag and 0x02 != 0

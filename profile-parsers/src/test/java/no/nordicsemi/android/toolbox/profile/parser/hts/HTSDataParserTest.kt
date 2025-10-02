@@ -23,14 +23,14 @@ class HTSDataParserTest {
             0x0A.toByte(),       // Hour: 10
             0x1E.toByte(),       // Minute: 30
             0x2D.toByte(),       // Second: 45
-            0x00.toByte(),       // Type 0: CELSIUS
-            0xFE.toByte()        // Reserved
+            0x01.toByte(),       // Type 1: Armpit
         )
 
         val result = HTSDataParser.parse(rawData)
 
         assertNotNull(result)
         result?.let {
+            assertEquals(HTSMeasurementType.ARMPIT, HTSMeasurementType.fromValue(it.type!!))
             assertEquals(36.97f, it.temperature, 0.01f)
             assertEquals(TemperatureUnitData.CELSIUS, it.unit)
             assertNotNull(it.timestamp)
@@ -60,7 +60,7 @@ class HTSDataParserTest {
     }
 
     @Test
-    fun `test parse with invalid float`() {
+    fun `test parse with infinity float`() {
         val byteArray = byteArrayOf(
             0x00.toByte(),            // Flags: Unit (Celsius), No Timestamp, No Temperature Type
             0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte(), 0x7F.toByte() // Temperature: +Infinity
@@ -68,7 +68,19 @@ class HTSDataParserTest {
 
         val result = HTSDataParser.parse(byteArray)
 
-        assertNull(result) // Invalid temperature should result in null
+        assertEquals(Float.POSITIVE_INFINITY, result!!.temperature, 0.01f)
+    }
+
+    @Test
+    fun `test parse with NaN float`() {
+        val byteArray = byteArrayOf(
+            0x00.toByte(),            // Flags: Unit (Celsius), No Timestamp, No Temperature Type
+            0xFF.toByte(), 0xFF.toByte(), 0x7F.toByte(), 0x00.toByte() // Temperature: NaN
+        )
+
+        val result = HTSDataParser.parse(byteArray)
+
+        assertEquals(Float.NaN, result!!.temperature, 0.01f)
     }
 
     @Test
@@ -85,7 +97,7 @@ class HTSDataParserTest {
     fun `test parse with invalid flag`() {
         val byteArray = byteArrayOf(
             0x08.toByte(),            // Invalid Flag
-            0xC4.toByte(), 0x09.toByte(), 0x80.toByte(), 0x3F.toByte() // Temperature: 25.0
+            0xC4.toByte(), 0x09.toByte(), 0x00.toByte(), 0xFE.toByte() // Temperature: 25.0
         )
 
         val result = HTSDataParser.parse(byteArray)
