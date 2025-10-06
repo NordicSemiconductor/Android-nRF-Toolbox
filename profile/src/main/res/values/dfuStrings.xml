@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dfu_description_open">Open %s</string>
+    <string name="dfu_description_download">Download from Play Store</string>
+    <string name="dfu_not_supported_title">%s is not supported</string>
+    <string name="dfu_not_supported_text">%1s service is not available in the current version of the app. Please use the %2s app from Nordic Semiconductor to update your device’s firmware.</string>
+
+</resources>

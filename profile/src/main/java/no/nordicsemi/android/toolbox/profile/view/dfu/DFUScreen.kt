@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -33,9 +34,17 @@ internal fun DFUScreen() {
     val dfuServiceState by dfuViewModel.dfuServiceState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
+
     dfuServiceState.dfuAppName?.let { dfuApp ->
         val intent = context.packageManager.getLaunchIntentForPackage(dfuApp.packageName)
-        val description = intent?.let { "Open ${dfuApp.appName}" } ?: "Download from Play Store"
+        val description =
+            intent?.let {
+                stringResource(
+                    R.string.dfu_description_open,
+                    stringResource(dfuApp.appName)
+                )
+            }
+                ?: stringResource(R.string.dfu_description_download)
 
         Column(
             modifier = Modifier
@@ -52,20 +61,26 @@ internal fun DFUScreen() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_dfu),
+                        painter = painterResource(dfuApp.appIcon),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(56.dp)
                     )
 
                     Text(
-                        text = "DFU is not supported",
+                        text = stringResource(
+                            R.string.dfu_not_supported_title,
+                            stringResource(dfuApp.appShortName)
+                        ),
                         style = MaterialTheme.typography.titleMedium
                     )
 
                     Text(
-                        text = "DFU service is not available in the current version of the app. " +
-                                "Please use the DFU app from Nordic Semiconductor to update your device’s firmware.",
+                        text = stringResource(
+                            R.string.dfu_not_supported_text,
+                            stringResource(dfuApp.appShortName),
+                            stringResource(dfuApp.appName)
+                        ),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -80,13 +95,12 @@ internal fun DFUScreen() {
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     val icon = intent?.let { dfuApp.appIcon } ?: R.drawable.google_play_2022_icon
-                    val size = if (intent != null) 56.dp else 28.dp
 
                     Icon(
                         painter = painterResource(icon),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(size)
+                            .size(40.dp)
                             .padding(end = 8.dp),
                         tint = if (intent == null) Color.Unspecified else MaterialTheme.colorScheme.onPrimary
                     )
