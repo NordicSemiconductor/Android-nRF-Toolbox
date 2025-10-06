@@ -45,17 +45,12 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
-        maven(url = "https://androidx.dev/storage/compose-compiler/repository/")
+        // This one is required for MPAndroidChart.
         maven(url = "https://jitpack.io")
-    }
-    versionCatalogs {
-        create("libs") {
-            from("no.nordicsemi.android.gradle:version-catalog:2.10")
-        }
     }
 }
 
-rootProject.name = "Android-nRF-Toolbox"
+rootProject.name = "Android nRF Toolbox"
 
 include(":app")
 include(":lib_analytics")

@@ -1,0 +1,118 @@
+[versions]
+androidGradlePlugin = "8.13.0"
+kotlin = "2.2.20" # When changes, update also kotlinAndroid.kt
+ksp = "2.2.20-2.0.3"
+androidxActivity = "1.11.0"
+androidxComposeBom = "2025.09.01" # https://developer.android.com/jetpack/compose/bom/bom-mapping
+androidxCore = "1.17.0"
+androidxDataStore = "1.1.7"
+#noinspection GradleDependency
+androidxHiltNavigationCompose = "1.2.0"
+androidxLifecycle = "2.9.4"
+androidxLocalbroadcastmanager = "1.1.0"
+coil = "2.7.0"
+#noinspection GradleDependency
+firebaseBom = "33.16.0" # https://firebase.google.com/support/release-notes/android#2025-07-21 minSdkVersion increased from 21 to 23
+hilt = "2.57.2"
+junit4 = "4.13.2"
+kotlinxCoroutines = "1.10.2"
+kotlinxDatetime = "0.7.1-0.6.x-compat"
+kotlinCompose = "1.9.0"
+#noinspection GradleDependency
+room = "2.7.2"
+chart = "v3.1.0"
+leakcanary = "2.14"
+truth = "1.4.5"
+slf4j-timber = "1.2"
+
+nordic-blek = "2.0.0-alpha08"
+nordic-dfu = "2.9.0"
+nordic-log = "2.5.0"
+nordic-data = "0.4.0"
+nordic-mcumgr = "2.7.2"
+nordic-common = "2.5.4"
+nordic-memfault = "2.0.2"
+
+nordicPlugins = "2.10"
+dokkaPlugin = "2.0.0"
+googleServicesPlugins = "4.4.3"
+firebaseCrashlyticsPlugins = "3.0.6"
+
+[libraries]
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
+androidx-compose-material-iconsExtended = { group = "androidx.compose.material", name = "material-icons-extended" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-core = { group = "androidx.core", name = "core", version.ref = "androidxCore" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
+androidx-dataStore-core = { group = "androidx.datastore", name = "datastore", version.ref = "androidxDataStore" }
+androidx-dataStore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "androidxDataStore" }
+androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidxHiltNavigationCompose" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidxLifecycle" }
+androidx-lifecycle-viewModel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidxLifecycle" }
+androidx-lifecycle-service = { group = "androidx.lifecycle", name = "lifecycle-service", version.ref = "androidxLifecycle" }
+androidx-localbroadcastmanager = { group = "androidx.localbroadcastmanager", name = "localbroadcastmanager", version.ref = "androidxLocalbroadcastmanager" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+junit4 = { group = "junit", name = "junit", version.ref = "junit4" }
+truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
+kotlin-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+chart = { group = "com.github.PhilJay", name = "MPAndroidChart", version.ref = "chart" }
+leakcanary = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakcanary" }
+slf4j-timber = { group = "uk.kulikov", name = "slf4j2-timber", version.ref = "slf4j-timber" }
+
+# Nordic
+nordic-dfu = { group = "no.nordicsemi.android", name = "dfu", version.ref = "nordic-dfu" }
+nordic-mcumgr-core = { group = "no.nordicsemi.android", name = "mcumgr-core", version.ref = "nordic-mcumgr" }
+nordic-mcumgr-ble = { group = "no.nordicsemi.android", name = "mcumgr-ble", version.ref = "nordic-mcumgr" }
+nordic-log = { group = "no.nordicsemi.android", name = "log", version.ref = "nordic-log" }
+nordic-log-timber = { group = "no.nordicsemi.android", name = "log-timber", version.ref = "nordic-log" }
+nordic-kotlin-data = { group = "no.nordicsemi.kotlin", name = "data", version.ref = "nordic-data" }
+nordic-core = { group = "no.nordicsemi.android.common", name = "core", version.ref = "nordic-common" }
+nordic-ui = { group = "no.nordicsemi.android.common", name = "ui", version.ref = "nordic-common" }
+nordic-theme = { group = "no.nordicsemi.android.common", name = "theme", version.ref = "nordic-common" }
+nordic-scanner-ble = { group = "no.nordicsemi.android.common", name = "scanner-ble", version.ref = "nordic-common" }
+nordic-analytics = { group = "no.nordicsemi.android.common", name = "analytics", version.ref = "nordic-common" }
+nordic-navigation = { group = "no.nordicsemi.android.common", name = "navigation", version.ref = "nordic-common" }
+nordic-logger = { group = "no.nordicsemi.android.common", name = "logger", version.ref = "nordic-common" }
+nordic-permissions-ble = { group = "no.nordicsemi.android.common", name = "permissions-ble", version.ref = "nordic-common" }
+nordic-permissions-notification = { group = "no.nordicsemi.android.common", name = "permissions-notification", version.ref = "nordic-common" }
+nordic-memfault = { group = "no.nordicsemi.android", name = "memfault", version.ref = "nordic-memfault" }
+
+# BleK
+nordic-blek-client-android = { group = "no.nordicsemi.kotlin.ble", name = "client-android", version.ref = "nordic-blek" }
+nordic-blek-client-android-mock = { group = "no.nordicsemi.kotlin.ble", name = "client-android-mock", version.ref = "nordic-blek" }
+
+[plugins]
+nordic-application = { id = "no.nordicsemi.android.plugin.application", version.ref = "nordicPlugins" }
+nordic-application-compose = { id = "no.nordicsemi.android.plugin.application.compose", version.ref = "nordicPlugins" }
+nordic-library = { id = "no.nordicsemi.android.plugin.library", version.ref = "nordicPlugins" }
+nordic-library-compose = { id = "no.nordicsemi.android.plugin.library.compose", version.ref = "nordicPlugins" }
+nordic-feature = { id = "no.nordicsemi.android.plugin.feature", version.ref = "nordicPlugins" }
+nordic-hilt = { id = "no.nordicsemi.android.plugin.hilt", version.ref = "nordicPlugins" }
+nordic-kotlin-android = { id = "no.nordicsemi.android.plugin.kotlin", version.ref = "nordicPlugins" }
+nordic-dokka = { id = "no.nordicsemi.plugin.dokka", version.ref = "nordicPlugins" }
+android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
+android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+kotlin-dokka = { id = "org.jetbrains.dokka", version.ref = "dokkaPlugin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.compose", version.ref = "kotlinCompose" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServicesPlugins" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugins" }
