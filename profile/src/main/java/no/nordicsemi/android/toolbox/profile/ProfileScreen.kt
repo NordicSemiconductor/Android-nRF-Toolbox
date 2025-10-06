@@ -208,7 +208,7 @@ internal fun DeviceConnectedView(
                         Profile.BATTERY -> BatteryScreen()
                         Profile.THROUGHPUT -> ThroughputScreen(state.maxValueLength)
                         Profile.UART -> UARTScreen(state.maxValueLength)
-                        Profile.DFU -> DFUScreen(modifier = Modifier.padding(16.dp))
+                        Profile.DFU -> DFUScreen()
                     }
                 }
             }
