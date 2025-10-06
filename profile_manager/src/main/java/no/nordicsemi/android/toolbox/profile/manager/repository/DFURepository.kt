@@ -9,12 +9,18 @@ import no.nordicsemi.android.toolbox.profile.data.DFUsAvailable
 object DFURepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<DFUServiceData>>()
 
-    fun getData(deviceId: String): Flow<DFUServiceData> {
-        return _dataMap.getOrPut(deviceId) { MutableStateFlow(DFUServiceData()) }
-    }
+    fun getData(deviceId: String): Flow<DFUServiceData> =
+        _dataMap.getOrPut(deviceId) { MutableStateFlow(DFUServiceData()) }
+
 
     fun updateAppName(deviceId: String, appName: DFUsAvailable) {
-        _dataMap[deviceId]?.update { it.copy(dfuAppName = appName) }
+        _dataMap[deviceId]?.let {
+            it.update { dFUServiceData ->
+                dFUServiceData.copy(dfuAppName = appName)
+            }
+        } ?: run {
+            _dataMap[deviceId] = MutableStateFlow(DFUServiceData(dfuAppName = appName))
+        }
     }
 
     fun clear(deviceId: String) {

@@ -23,17 +23,38 @@ internal class DFUManager : ServiceManager {
         remoteService: RemoteService,
         scope: CoroutineScope
     ) {
-        val appName = when (remoteService.uuid) {
-            DFU_SERVICE_UUID.toKotlinUuid() -> DFUsAvailable.DFU_SERVICE
-            SMP_SERVICE_UUID.toKotlinUuid() -> DFUsAvailable.SMP_SERVICE
-            LEGACY_DFU_SERVICE_UUID.toKotlinUuid() -> DFUsAvailable.LEGACY_DFU_SERVICE
-            EXPERIMENTAL_BUTTONLESS_DFU_SERVICE_UUID.toKotlinUuid() -> DFUsAvailable.EXPERIMENTAL_BUTTONLESS_DFU_SERVICE
-            MDS_SERVICE_UUID.toKotlinUuid() -> DFUsAvailable.MDS_SERVICE
+        try {
+            when (remoteService.uuid) {
+                DFU_SERVICE_UUID.toKotlinUuid() -> DFURepository.updateAppName(
+                    deviceId,
+                    DFUsAvailable.DFU_SERVICE
+                )
 
-            else -> null
+                SMP_SERVICE_UUID.toKotlinUuid() -> DFURepository.updateAppName(
+                    deviceId,
+                    DFUsAvailable.SMP_SERVICE
+                )
+
+                LEGACY_DFU_SERVICE_UUID.toKotlinUuid() -> DFURepository.updateAppName(
+                    deviceId,
+                    DFUsAvailable.LEGACY_DFU_SERVICE
+                )
+
+                EXPERIMENTAL_BUTTONLESS_DFU_SERVICE_UUID.toKotlinUuid() -> DFURepository.updateAppName(
+                    deviceId,
+                    DFUsAvailable.EXPERIMENTAL_BUTTONLESS_DFU_SERVICE
+                )
+
+                MDS_SERVICE_UUID.toKotlinUuid() -> DFURepository.updateAppName(
+                    deviceId,
+                    DFUsAvailable.MDS_SERVICE
+                )
+
+                else -> null
+            }
+        } catch (_: Exception) {
+            DFURepository.clear(deviceId)
         }
-        if (appName != null)
-            DFURepository.updateAppName(deviceId, appName)
     }
 
 }
