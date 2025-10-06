@@ -53,8 +53,9 @@ import no.nordicsemi.android.ui.view.internal.LoadingView
 
 @Composable
 internal fun ChannelSoundingScreen(isNotificationPermissionGranted: Boolean?) {
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA && isNotificationPermissionGranted != null) {
+    // Channel Sounding is available from Android 16 (API 36) onward, while better accuracy and
+    // performance are provided from Android 16 (API 36, minor version 1) and later.
+    if (Build.VERSION.SDK_INT_FULL >= Build.VERSION_CODES_FULL.BAKLAVA_1 && isNotificationPermissionGranted != null) {
         RequestRangingPermission {
             val channelSoundingViewModel = hiltViewModel<ChannelSoundingViewModel>()
             val channelSoundingState by channelSoundingViewModel.channelSoundingState.collectAsStateWithLifecycle()
