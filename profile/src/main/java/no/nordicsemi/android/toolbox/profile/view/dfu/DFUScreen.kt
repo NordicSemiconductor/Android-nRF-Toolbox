@@ -26,10 +26,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.toolbox.profile.R
+import no.nordicsemi.android.toolbox.profile.viewmodel.ConnectionEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.DFUViewModel
 
 @Composable
-internal fun DFUScreen() {
+internal fun DFUScreen(onRedirection: (ConnectionEvent.DisconnectEvent) -> Unit) {
     val dfuViewModel = hiltViewModel<DFUViewModel>()
     val dfuServiceState by dfuViewModel.dfuServiceState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -91,6 +92,8 @@ internal fun DFUScreen() {
                 onClick = {
                     intent?.let { context.startActivity(it) }
                         ?: uriHandler.openUri(dfuApp.appLink)
+                    // Also disconnect from the current device.
+                    onRedirection(ConnectionEvent.DisconnectEvent)
                 }
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {

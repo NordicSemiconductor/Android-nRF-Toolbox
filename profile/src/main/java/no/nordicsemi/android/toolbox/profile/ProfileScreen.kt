@@ -29,12 +29,12 @@ import no.nordicsemi.android.common.permissions.ble.RequireLocation
 import no.nordicsemi.android.common.permissions.notification.RequestNotificationPermission
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.data.displayMessage
-import no.nordicsemi.android.toolbox.profile.view.dfu.DFUScreen
 import no.nordicsemi.android.toolbox.profile.view.battery.BatteryScreen
 import no.nordicsemi.android.toolbox.profile.view.bps.BPSScreen
 import no.nordicsemi.android.toolbox.profile.view.cgms.CGMScreen
 import no.nordicsemi.android.toolbox.profile.view.channelSounding.ChannelSoundingScreen
 import no.nordicsemi.android.toolbox.profile.view.cscs.CSCScreen
+import no.nordicsemi.android.toolbox.profile.view.dfu.DFUScreen
 import no.nordicsemi.android.toolbox.profile.view.directionFinder.DFSScreen
 import no.nordicsemi.android.toolbox.profile.view.gls.GLSScreen
 import no.nordicsemi.android.toolbox.profile.view.hrs.HRSScreen
@@ -208,7 +208,7 @@ internal fun DeviceConnectedView(
                         Profile.BATTERY -> BatteryScreen()
                         Profile.THROUGHPUT -> ThroughputScreen(state.maxValueLength)
                         Profile.UART -> UARTScreen(state.maxValueLength)
-                        Profile.DFU -> DFUScreen()
+                        Profile.DFU -> DFUScreen { onEvent(ConnectionEvent.DisconnectEvent) }
                     }
                 }
             }
