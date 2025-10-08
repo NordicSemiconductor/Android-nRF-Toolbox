@@ -30,11 +30,12 @@ import no.nordicsemi.android.toolbox.profile.repository.channelSounding.ChannelS
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Provider
 
 @HiltViewModel
 internal class ProfileViewModel @Inject constructor(
     private val profileServiceManager: ProfileServiceManager,
-    private val channelSoundingManager: ChannelSoundingManager,
+    private val channelSoundingManager: Provider<ChannelSoundingManager>,
     private val navigator: Navigator,
     private val deviceRepository: DeviceRepository,
     private val analytics: AppAnalytics,
@@ -131,7 +132,7 @@ internal class ProfileViewModel @Inject constructor(
                     if (state.deviceData.services.any { it.profile == Profile.CHANNEL_SOUNDING }) {
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.BAKLAVA) {
                             try {
-                                channelSoundingManager.closeSession()
+                                channelSoundingManager.get().closeSession()
                             } catch (e: Exception) {
                                 Timber.e(" ${e.message}")
                             }
