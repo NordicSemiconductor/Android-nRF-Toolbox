@@ -8,7 +8,7 @@
 
     <string name="ranging_distance">Distance</string>
     <string name="current_measurement">Current measurement</string>
-    <string name="ranging_distance_m">%.3f m</string>
+    <string name="ranging_distance_m">%.2f m</string>
     <string name="signal_strength">Signal strength</string>
     <string name="ranging_technology">Technology</string>
 
