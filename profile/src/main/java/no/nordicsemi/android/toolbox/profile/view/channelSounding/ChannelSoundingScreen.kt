@@ -178,7 +178,7 @@ private fun SessionClosed(
             }
         }
         Button(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(8.dp),
             onClick = { onClickEvent(ChannelSoundingEvent.RestartRangingSession) },
         ) {
             Text(text = stringResource(id = R.string.reconnect))
@@ -227,7 +227,7 @@ private fun SessionError(
             sessionData.reason != SessionClosedReason.RANGING_NOT_AVAILABLE
         ) {
             Button(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(8.dp),
                 onClick = { onClickEvent(ChannelSoundingEvent.RestartRangingSession) },
             ) {
                 Text(text = stringResource(id = R.string.reconnect))
