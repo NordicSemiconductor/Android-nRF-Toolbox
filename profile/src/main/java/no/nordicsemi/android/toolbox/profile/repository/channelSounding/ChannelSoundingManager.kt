@@ -170,6 +170,13 @@ class ChannelSoundingManager @Inject constructor(
                             context.mainExecutor,
                             rangingSessionCallback
                         )
+                        if (rangingSession != null) {
+                            Timber.tag("AAA").d("Ranging session created")
+                        } else {
+                            _rangingData.value =
+                                RangingSessionAction.OnError(SessionClosedReason.UNKNOWN)
+                            return@RangingCapabilitiesCallback
+                        }
                         rangingSession?.let {
                             try {
                                 it.addDeviceToRangingSession(rawRangingDeviceConfig)
@@ -208,28 +215,27 @@ class ChannelSoundingManager @Inject constructor(
 
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun closeSession(onClosed: (suspend () -> Unit)? = null) {
-        try {
-            rangingSession?.let { session ->
-                session.stop()
-                session.close()
-                rangingSession = null
-                _rangingData.value = null
-                // unregister the callback
-                rangingManager?.unregisterCapabilitiesCallback(rangingCapabilityCallback)
-                // Invoke the onClosed callback after a short delay to ensure the session is closed
-                onClosed?.let {
+        rangingSession?.let { session ->
+            session.stop()
+            session.close()
+            rangingSession = null
+            _rangingData.value = null
+            // unregister the callback
+            rangingManager?.unregisterCapabilitiesCallback(rangingCapabilityCallback)
+        }
+        onClosed?.let {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    // Invoke the onClosed callback after a short delay to ensure the session is closed
                     _rangingData.value = RangingSessionAction.OnStart
                     // Wait for a moment to ensure the session is properly closed before invoking the callback
                     // Launch a coroutine to delay and call onClosed
-                    CoroutineScope(Dispatchers.IO).launch {
-                        delay(1000)
-                        it()
-                    }
-
+                    delay(2000)
+                    it()
+                } catch (e: Exception) {
+                    _rangingData.value = RangingSessionAction.OnError(SessionClosedReason.UNKNOWN)
                 }
             }
-        } catch (e: Exception) {
-            _rangingData.value = RangingSessionAction.OnError(SessionClosedReason.UNKNOWN)
         }
     }
 
