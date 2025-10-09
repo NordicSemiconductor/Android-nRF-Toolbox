@@ -25,6 +25,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionFailedReason
 import no.nordicsemi.android.toolbox.profile.data.SessionClosedReason
@@ -118,6 +119,11 @@ class ChannelSoundingManager @Inject constructor(
                 RangingSessionAction.OnError(SessionClosedReason.RANGING_NOT_AVAILABLE)
             return
         }
+        // If session is already active then continue the session, otherwise create a new one
+        if (rangingSession != null) {
+            Timber.w("Ranging session already active.")
+            return
+        }
         val setRangingUpdateRate = when (updateRate) {
             UpdateRate.FREQUENT -> RawRangingDevice.UPDATE_RATE_FREQUENT
             UpdateRate.NORMAL -> RawRangingDevice.UPDATE_RATE_NORMAL
@@ -170,13 +176,6 @@ class ChannelSoundingManager @Inject constructor(
                             context.mainExecutor,
                             rangingSessionCallback
                         )
-                        if (rangingSession != null) {
-                            Timber.tag("AAA").d("Ranging session created")
-                        } else {
-                            _rangingData.value =
-                                RangingSessionAction.OnError(SessionClosedReason.UNKNOWN)
-                            return@RangingCapabilitiesCallback
-                        }
                         rangingSession?.let {
                             try {
                                 it.addDeviceToRangingSession(rawRangingDeviceConfig)
@@ -186,6 +185,10 @@ class ChannelSoundingManager @Inject constructor(
                             } finally {
                                 it.start(rangingPreference)
                             }
+                        } ?: run {
+                            _rangingData.value =
+                                RangingSessionAction.OnError(SessionClosedReason.UNKNOWN)
+                            return@RangingCapabilitiesCallback
                         }
                     } else {
                         _rangingData.value =
@@ -215,26 +218,25 @@ class ChannelSoundingManager @Inject constructor(
 
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
     fun closeSession(onClosed: (suspend () -> Unit)? = null) {
-        rangingSession?.let { session ->
-            session.stop()
-            session.close()
-            rangingSession = null
-            _rangingData.value = null
-            // unregister the callback
-            rangingManager?.unregisterCapabilitiesCallback(rangingCapabilityCallback)
-        }
-        onClosed?.let {
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    // Invoke the onClosed callback after a short delay to ensure the session is closed
-                    _rangingData.value = RangingSessionAction.OnStart
-                    // Wait for a moment to ensure the session is properly closed before invoking the callback
-                    // Launch a coroutine to delay and call onClosed
-                    delay(2000)
-                    it()
-                } catch (e: Exception) {
-                    _rangingData.value = RangingSessionAction.OnError(SessionClosedReason.UNKNOWN)
+        val session = rangingSession ?: return
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                session.stop()
+                // Wait for onStopped() or onClosed() before closing
+                delay(1000) // Give the system time to propagate onStopped
+                withContext(Dispatchers.Main) {
+                    session.close()
+                    rangingSession = null
+                    rangingManager?.unregisterCapabilitiesCallback(rangingCapabilityCallback)
+                    _rangingData.value = null
+                    delay(1500)
+                    onClosed?.let {
+                        it()
+                    }
                 }
+            } catch (e: Exception) {
+                Timber.e(e, "Error closing ranging session")
+                _rangingData.value = RangingSessionAction.OnError(SessionClosedReason.UNKNOWN)
             }
         }
     }
