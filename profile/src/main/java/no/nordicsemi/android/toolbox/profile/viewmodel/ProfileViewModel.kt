@@ -1,6 +1,7 @@
 package no.nordicsemi.android.toolbox.profile.viewmodel
 
 import android.content.Context
+import android.os.Build
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -95,9 +96,13 @@ internal class ProfileViewModel @Inject constructor(
             } else {
                 // If the device is not in the map, it's disconnected.
                 // Check if there's a specific disconnection event for this device.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+                    channelSoundingManager.get()?.closeSession(address)
+                }
                 val reason =
                     if (disconnection?.address == address) disconnection.reason else null
                 deviceRepository.removeLoggedProfile(address)
+                // Close channel sounding session if active
                 ProfileUiState.Disconnected(reason)
             }
         }.catch { e ->
@@ -130,7 +135,7 @@ internal class ProfileViewModel @Inject constructor(
                 if (_uiState.value is ProfileUiState.Connected) {
                     val state = _uiState.value as ProfileUiState.Connected
                     if (state.deviceData.services.any { it.profile == Profile.CHANNEL_SOUNDING }) {
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.BAKLAVA) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
                             try {
                                 channelSoundingManager.get().closeSession(address)
                             } catch (e: Exception) {
