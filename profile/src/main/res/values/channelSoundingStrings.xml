@@ -4,7 +4,9 @@
 
     <string name="channel_sounding_not_supported">Channel Sounding is not supported on this Android version.</string>
     <string name="initiating_ranging">Initiating ranging</string>
+    <string name="ranging_session_restarting">Reconnecting session</string>
     <string name="ranging_session_stopped">Ranging session stopped</string>
+    <string name="ranging_session_reconnecting">Reconnecting…</string>
 
     <string name="ranging_distance">Distance</string>
     <string name="current_measurement">Current measurement</string>

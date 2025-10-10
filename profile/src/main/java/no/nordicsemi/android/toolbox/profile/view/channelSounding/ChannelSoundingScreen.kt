@@ -24,6 +24,9 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -41,6 +44,7 @@ import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
 import no.nordicsemi.android.toolbox.profile.data.ConfidenceLevel
 import no.nordicsemi.android.toolbox.profile.data.CsRangingData
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
+import no.nordicsemi.android.toolbox.profile.data.RangingSessionFailedReason
 import no.nordicsemi.android.toolbox.profile.data.RangingTechnology
 import no.nordicsemi.android.toolbox.profile.data.SessionClosedReason
 import no.nordicsemi.android.toolbox.profile.data.UpdateRate
@@ -95,13 +99,14 @@ private fun ChannelSoundingView(
     channelSoundingState: ChannelSoundingServiceData,
     onClickEvent: (ChannelSoundingEvent) -> Unit,
 ) {
+    var isRestartingSession by rememberSaveable { mutableStateOf(false) }
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
         when (val sessionData = channelSoundingState.rangingSessionAction) {
             is RangingSessionAction.OnError -> {
-                SessionError(sessionData) { onClickEvent(it) }
+                SessionError(sessionData, isRestartingSession) { onClickEvent(it) }
             }
 
             is RangingSessionAction.OnResult -> {
@@ -109,16 +114,24 @@ private fun ChannelSoundingView(
                     channelSoundingState.updateRate,
                     sessionData.data,
                     sessionData.previousData,
-                    onClickEvent
-                )
+                ) {
+                    isRestartingSession = true
+                    onClickEvent(it)
+                }
             }
 
             RangingSessionAction.OnClosed -> {
-                SessionClosed(onClickEvent)
+                SessionClosed(isRestartingSession, onClickEvent)
             }
 
             RangingSessionAction.OnStart -> {
+                isRestartingSession = false
                 InitiatingSession()
+            }
+
+            RangingSessionAction.OnRestarting -> {
+                isRestartingSession = true
+                RestartingSession()
             }
 
             null -> LoadingView()
@@ -150,7 +163,30 @@ private fun InitiatingSession() {
 }
 
 @Composable
+private fun RestartingSession() {
+    ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
+        Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
+            SectionTitle(
+                icon = Icons.Default.SocialDistance,
+                title = stringResource(R.string.channel_sounding),
+            )
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            TextWithAnimatedDots(
+                text = stringResource(R.string.ranging_session_restarting),
+            )
+        }
+    }
+}
+
+@Composable
 private fun SessionClosed(
+    isRestartingSession: Boolean,
     onClickEvent: (ChannelSoundingEvent) -> Unit,
 ) {
     Column(
@@ -177,10 +213,17 @@ private fun SessionClosed(
                 )
             }
         }
-        Button(
-            onClick = { onClickEvent(ChannelSoundingEvent.RestartRangingSession) },
-        ) {
-            Text(text = stringResource(id = R.string.reconnect))
+
+        if (isRestartingSession) {
+            Button(onClick = { /* No action */ }) {
+                Text(text = stringResource(id = R.string.ranging_session_reconnecting))
+            }
+        } else {
+            Button(
+                onClick = { onClickEvent(ChannelSoundingEvent.RestartRangingSession) },
+            ) {
+                Text(text = stringResource(id = R.string.reconnect))
+            }
         }
     }
 }
@@ -189,13 +232,14 @@ private fun SessionClosed(
 @Composable
 private fun SessionClosed_Preview() {
     NordicTheme {
-        SessionClosed(onClickEvent = {})
+        SessionClosed(false, onClickEvent = {})
     }
 }
 
 @Composable
 private fun SessionError(
     sessionData: RangingSessionAction.OnError,
+    isRestartingSession: Boolean,
     onClickEvent: (ChannelSoundingEvent) -> Unit,
 ) {
     Column(
@@ -222,7 +266,12 @@ private fun SessionError(
                 )
             }
         }
-        if (sessionData.reason != SessionClosedReason.NOT_SUPPORTED ||
+
+        if (isRestartingSession && sessionData.reason == RangingSessionFailedReason.LOCAL_REQUEST) {
+            Button(onClick = { /* No action */ }) {
+                Text(text = stringResource(id = R.string.ranging_session_reconnecting))
+            }
+        } else if (sessionData.reason != SessionClosedReason.NOT_SUPPORTED ||
             sessionData.reason != SessionClosedReason.RANGING_NOT_AVAILABLE
         ) {
             Button(
