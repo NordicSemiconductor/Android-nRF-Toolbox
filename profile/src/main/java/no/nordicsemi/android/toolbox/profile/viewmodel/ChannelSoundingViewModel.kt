@@ -83,7 +83,7 @@ internal class ChannelSoundingViewModel @Inject constructor(
         }.launchIn(viewModelScope)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
             try {
-                channelSoundingManager.addDeviceToRangingSession(address, rate)
+                channelSoundingManager.startRangingMeasurement(address, rate)
             } catch (e: Exception) {
                 Timber.e("${e.message}")
             }
@@ -104,7 +104,7 @@ internal class ChannelSoundingViewModel @Inject constructor(
                         viewModelScope.launch {
                             if (_channelSoundingServiceState.value.updateRate != event.frequency) {
                                 channelSoundingManager.closeSession(address) {
-                                    channelSoundingManager.addDeviceToRangingSession(
+                                    channelSoundingManager.startRangingMeasurement(
                                         address,
                                         event.frequency
                                     )
@@ -131,7 +131,7 @@ internal class ChannelSoundingViewModel @Inject constructor(
                     try {
                         viewModelScope.launch {
                             channelSoundingManager.closeSession(address) {
-                                channelSoundingManager.addDeviceToRangingSession(
+                                channelSoundingManager.startRangingMeasurement(
                                     address,
                                     _channelSoundingServiceState.value.updateRate
                                 )
