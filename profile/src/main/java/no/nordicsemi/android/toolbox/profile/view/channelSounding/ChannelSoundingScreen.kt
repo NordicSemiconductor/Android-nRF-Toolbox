@@ -50,6 +50,7 @@ import no.nordicsemi.android.toolbox.profile.data.SessionClosedReason
 import no.nordicsemi.android.toolbox.profile.data.UpdateRate
 import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingViewModel
+import no.nordicsemi.android.ui.view.AnimatedThreeDots
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.ui.view.TextWithAnimatedDots
@@ -323,12 +324,18 @@ private fun DistanceDashboard(measurement: Double) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Text(
-            text = stringResource(R.string.ranging_distance_m, measurement.toFloat()),
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.displayLarge
-        )
+        // get measurement in string with 2 decimal places
+        val data = "%.2f".format(measurement.toFloat())
+        if (data == "0.00") {
+            AnimatedThreeDots(dotSize = 16.dp)
+        } else {
+            Text(
+                text = stringResource(R.string.ranging_distance_m, measurement.toFloat()),
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.displayLarge
+            )
+        }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = stringResource(R.string.current_measurement),
@@ -342,7 +349,7 @@ private fun DistanceDashboard(measurement: Double) {
 @Composable
 private fun DDistanceDashboard_Preview() {
     NordicTheme {
-        DistanceDashboard(2.5)
+        DistanceDashboard(0.0)
     }
 }
 
