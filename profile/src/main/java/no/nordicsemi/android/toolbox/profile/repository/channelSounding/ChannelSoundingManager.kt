@@ -140,7 +140,7 @@ internal class ChannelSoundingManager @Inject constructor(
      * @param updateRate The desired update rate for ranging measurements. Default is [UpdateRate.NORMAL].
      */
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
-    fun addDeviceToRangingSession(
+    fun startRangingMeasurement(
         device: String,
         updateRate: UpdateRate = UpdateRate.NORMAL
     ) {
