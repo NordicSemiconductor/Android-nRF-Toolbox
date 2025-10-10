@@ -10,7 +10,7 @@ data class ChannelSoundingServiceData(
 ) : ProfileServiceData()
 
 sealed interface RangingSessionAction {
-    object OnStart : RangingSessionAction
+    data object OnStart : RangingSessionAction
     data class OnResult(
         val data: CsRangingData,
         val previousData: List<Float> = emptyList()
@@ -18,6 +18,7 @@ sealed interface RangingSessionAction {
 
     data class OnError(val reason: SessionCloseReasonProvider) : RangingSessionAction
     object OnClosed : RangingSessionAction
+    data object OnRestarting : RangingSessionAction
 }
 
 data class CsRangingData(
