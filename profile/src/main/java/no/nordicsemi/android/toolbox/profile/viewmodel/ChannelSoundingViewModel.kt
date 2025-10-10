@@ -17,7 +17,6 @@ import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
 import no.nordicsemi.android.toolbox.profile.data.UpdateRate
-import no.nordicsemi.android.toolbox.profile.manager.repository.ChannelSoundingRepository
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
 import no.nordicsemi.android.toolbox.profile.repository.channelSounding.ChannelSoundingManager
 import no.nordicsemi.kotlin.ble.core.BondState
@@ -38,7 +37,6 @@ internal class ChannelSoundingViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val channelSoundingManager: ChannelSoundingManager,
 ) : SimpleNavigationViewModel(navigator, savedStateHandle) {
-    // StateFlow to hold the selected temperature unit
     private val _channelSoundingServiceState = MutableStateFlow(ChannelSoundingServiceData())
     val channelSoundingState = _channelSoundingServiceState.asStateFlow()
 
@@ -76,24 +74,16 @@ internal class ChannelSoundingViewModel @Inject constructor(
      * Starts the Channel Sounding service and observes channel sounding profile data changes.
      */
     private fun startChannelSounding(address: String, rate: UpdateRate = UpdateRate.NORMAL) {
-        ChannelSoundingRepository.getData(address).onEach {
+        channelSoundingManager.getData(address).onEach {
             _channelSoundingServiceState.value = _channelSoundingServiceState.value.copy(
-                profile = it.profile
+                profile = it.profile,
+                updateRate = it.updateRate,
+                rangingSessionAction = it.rangingSessionAction,
             )
         }.launchIn(viewModelScope)
-        if (Build.VERSION.SDK_INT >= 36) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
             try {
                 channelSoundingManager.addDeviceToRangingSession(address, rate)
-                channelSoundingManager.rangingData
-                    .filter { it != null }
-                    .onEach {
-                        it?.let { data ->
-                            _channelSoundingServiceState.value =
-                                _channelSoundingServiceState.value.copy(
-                                    rangingSessionAction = data,
-                                )
-                        }
-                    }.launchIn(viewModelScope)
             } catch (e: Exception) {
                 Timber.e("${e.message}")
             }
@@ -113,7 +103,7 @@ internal class ChannelSoundingViewModel @Inject constructor(
                     try {
                         viewModelScope.launch {
                             if (_channelSoundingServiceState.value.updateRate != event.frequency) {
-                                channelSoundingManager.closeSession {
+                                channelSoundingManager.closeSession(address) {
                                     channelSoundingManager.addDeviceToRangingSession(
                                         address,
                                         event.frequency
@@ -127,16 +117,12 @@ internal class ChannelSoundingViewModel @Inject constructor(
                     }
                 }
                 // Update the update rate in the state
-                _channelSoundingServiceState.value = _channelSoundingServiceState.value.copy(
-                    updateRate = event.frequency
-                )
+                channelSoundingManager.updateRangingRate(address, event.frequency)
+
             }
 
             is ChannelSoundingEvent.UpdateInterval -> {
-                // Update the interval in the state
-                _channelSoundingServiceState.value = _channelSoundingServiceState.value.copy(
-                    interval = event.interval
-                )
+                channelSoundingManager.updateIntervalRate(address, event.interval)
             }
 
             ChannelSoundingEvent.RestartRangingSession -> {
@@ -144,7 +130,7 @@ internal class ChannelSoundingViewModel @Inject constructor(
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
                     try {
                         viewModelScope.launch {
-                            channelSoundingManager.closeSession {
+                            channelSoundingManager.closeSession(address) {
                                 channelSoundingManager.addDeviceToRangingSession(
                                     address,
                                     _channelSoundingServiceState.value.updateRate
