@@ -68,8 +68,37 @@ internal fun ChannelSoundingScreen(isNotificationPermissionGranted: Boolean?) {
                 { channelSoundingViewModel.onEvent(it) }
             ChannelSoundingView(channelSoundingState, onClickEvent)
         }
+    } else if (Build.VERSION.SDK_INT_FULL == Build.VERSION_CODES_FULL.BAKLAVA && isNotificationPermissionGranted != null) {
+        // It supports the Channel Sounding but we are intentionally not enabling it because of the accuracy and performance issues.
+        ChannelSoundingNotEnabledView()
     } else {
         ChannelSoundingNotSupportedView()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ChannelSoundingNotEnabledView() {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
+            Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
+                SectionTitle(
+                    icon = Icons.Default.SocialDistance,
+                    title = stringResource(R.string.channel_sounding),
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(stringResource(R.string.channel_sounding_not_enabled))
+            }
+        }
     }
 }
 
@@ -81,14 +110,18 @@ private fun ChannelSoundingNotSupportedView() {
         modifier = Modifier.fillMaxWidth()
     ) {
         ScreenSection(modifier = Modifier.padding(0.dp) /* No padding */) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.padding(16.dp),
-            ) {
+            Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
                 SectionTitle(
                     icon = Icons.Default.SocialDistance,
                     title = stringResource(R.string.channel_sounding),
                 )
+            }
+            Box(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
                 Text(stringResource(R.string.channel_sounding_not_supported))
             }
         }
