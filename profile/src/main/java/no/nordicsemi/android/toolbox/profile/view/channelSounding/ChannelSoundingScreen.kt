@@ -96,7 +96,10 @@ private fun ChannelSoundingNotEnabledView() {
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                Text(stringResource(R.string.channel_sounding_not_enabled))
+                Text(
+                    text = stringResource(R.string.channel_sounding_not_enabled),
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
@@ -122,7 +125,10 @@ private fun ChannelSoundingNotSupportedView() {
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                Text(stringResource(R.string.channel_sounding_not_supported))
+                Text(
+                    text = stringResource(R.string.channel_sounding_not_supported),
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
