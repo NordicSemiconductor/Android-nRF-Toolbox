@@ -7,9 +7,6 @@ import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewMod
 import no.nordicsemi.android.common.scanner.DeviceSelected
 import no.nordicsemi.android.common.scanner.ScannerScreen
 import no.nordicsemi.android.common.scanner.ScanningCancelled
-import no.nordicsemi.android.common.scanner.data.OnlyNearby
-import no.nordicsemi.android.common.scanner.data.OnlyWithNames
-import no.nordicsemi.android.common.scanner.rememberFilterState
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.kotlin.ble.client.android.ScanResult
 
@@ -20,12 +17,6 @@ val ScannerDestination = defineDestination(ScannerDestinationId) {
 
     ScannerScreen(
         cancellable = true,
-        state = rememberFilterState(
-            dynamicFilters = listOf(
-                OnlyNearby(),
-                OnlyWithNames(isInitiallySelected = true),
-            )
-        ),
         onResultSelected = {
             when (it) {
                 is DeviceSelected -> {
