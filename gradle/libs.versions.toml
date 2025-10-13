@@ -25,17 +25,17 @@ leakcanary = "2.14"
 truth = "1.4.5"
 slf4j-timber = "1.2"
 
-nordic-blek = "2.0.0-alpha08"
+nordic-blek = "2.0.0-alpha09"
 nordic-dfu = "2.9.0"
 nordic-log = "2.5.0"
 nordic-data = "0.4.0"
-nordic-mcumgr = "2.7.2"
-nordic-common = "2.5.4"
+nordic-mcumgr = "2.7.3"
+nordic-common = "2.6.0"
 nordic-memfault = "2.0.2"
 
 nordicPlugins = "2.10"
 dokkaPlugin = "2.0.0"
-googleServicesPlugins = "4.4.3"
+googleServicesPlugins = "4.4.4"
 firebaseCrashlyticsPlugins = "3.0.6"
 
 [libraries]
