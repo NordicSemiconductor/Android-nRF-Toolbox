@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -69,7 +71,9 @@ internal fun ProfileScreen() {
 
     Scaffold(
         contentWindowInsets = WindowInsets.displayCutout
-            .only(WindowInsetsSides.Horizontal),
+            .only(WindowInsetsSides.Horizontal)
+            .union(WindowInsets.navigationBars),
+//            .only(NavigationS),
         topBar = {
             // The device name is derived directly from the current state.
             val deviceName = (uiState as? ProfileUiState.Connected)
