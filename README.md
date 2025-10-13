@@ -14,8 +14,10 @@ It contains applications demonstrating standard Bluetooth LE profiles:
 * **Throughput**
 * **Direction Finder**
 * **Blinky (LBS) Service**
+* **Channel Sounding Service**
 
 **_NOTE:_** The Proximity profile is not included in this version of the app. If you need it, please download the previous [version](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/releases/tag/3.3.1).
+**_NOTE:_** The Channel Sounding Service profile is currently experimental, and additional information will be provided soon.
 
 ### How to import to Android Studio
 
