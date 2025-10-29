@@ -155,12 +155,15 @@ internal class ProfileService : NotificationService() {
                         .createServiceManager(removeService.uuid)
                         ?.also { manager ->
                             foundMatchingService = true
-                            _devices.update {
-                                it + (peripheral.address to it[peripheral.address]!!.copy(
-                                    services = it[peripheral.address]?.services?.plus(
-                                        manager
-                                    ) ?: listOf(manager)
-                                ))
+                            _devices.update { currentMap ->
+                                val existingData = currentMap[peripheral.address]
+                                if (existingData == null) {
+                                    currentMap
+                                } else {
+                                    currentMap + (peripheral.address to existingData.copy(
+                                        services = existingData.services.plus(manager)
+                                    ))
+                                }
                             }
                             // Launch observation for each service.
                             observeService(peripheral, removeService, manager)
