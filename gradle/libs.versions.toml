@@ -1,7 +1,7 @@
 [versions]
 androidGradlePlugin = "8.13.0"
-kotlin = "2.2.20" # When changes, update also kotlinAndroid.kt
-ksp = "2.2.20-2.0.3"
+kotlin = "2.2.21" # When changes, update also kotlinAndroid.kt
+ksp = "2.3.3"
 androidxActivity = "1.11.0"
 androidxComposeBom = "2025.09.01" # https://developer.android.com/jetpack/compose/bom/bom-mapping
 androidxCore = "1.17.0"
