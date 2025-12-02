@@ -52,23 +52,21 @@ dependencies {
     implementation(project(":lib_ui"))
     implementation(project(":lib_utils"))
 
-    implementation(libs.nordic.navigation)
-    implementation(libs.nordic.theme)
-    implementation(libs.nordic.logger)
-    implementation(libs.nordic.analytics)
-    implementation(libs.nordic.ui)
-    implementation(libs.nordic.core)
-    implementation(libs.nordic.scanner.ble)
+    implementation(nordic.navigation)
+    implementation(nordic.theme)
+    implementation(nordic.logger)
+    implementation(nordic.analytics)
+    implementation(nordic.ui)
+    implementation(nordic.core)
+    implementation(nordic.scanner.ble)
+    implementation(nordic.blek.client.android)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.compose.material.iconsExtended)
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.runtime)
-
     implementation(libs.androidx.hilt.navigation.compose)
 
     // Timber & SLF4J
     implementation (libs.slf4j.timber)
-
-    implementation(libs.nordic.blek.client.android)
 }

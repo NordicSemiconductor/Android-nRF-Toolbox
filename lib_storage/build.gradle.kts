@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.nordic.feature)
     alias(libs.plugins.ksp)
-
 }
 
 android {
