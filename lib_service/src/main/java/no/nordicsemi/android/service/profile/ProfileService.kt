@@ -25,7 +25,6 @@ import no.nordicsemi.android.toolbox.profile.manager.ServiceManagerFactory
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.CentralManager.ConnectionOptions
-import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.BondState
 import no.nordicsemi.kotlin.ble.core.ConnectionState
@@ -264,8 +263,6 @@ internal class ProfileService : NotificationService() {
 
             return try {
                 peripheral.requestHighestValueLength() // Request highest possible MTU
-                peripheral.requestConnectionPriority(ConnectionPriority.HIGH)
-                peripheral.readPhy()
                 peripheral.maximumWriteValueLength(writeType)
             } catch (e: Exception) {
                 Timber.e(e, "Failed to configure MTU for $address")
