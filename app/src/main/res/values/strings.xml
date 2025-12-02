@@ -91,8 +91,10 @@
     <string name="connect_device">Connect</string>
     <string name="connected_devices">Connected devices</string>
 
-    <string name="github_repo">Source code (GitHub)</string>
-    <string name="nordic_dev_zone">Help (Nordic DevZone)</string>
+    <string name="github_repo">Source code</string>
+    <string name="github_repo_subtitle">GitHub</string>
+    <string name="nordic_dev_zone">Help</string>
+    <string name="nordic_dev_zone_subtitle">Nordic DevZone</string>
 
     <string name="links">Links</string>
 

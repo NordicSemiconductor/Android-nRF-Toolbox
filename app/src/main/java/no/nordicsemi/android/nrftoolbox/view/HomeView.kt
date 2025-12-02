@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -28,11 +30,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import no.nordicsemi.android.common.analytics.view.AnalyticsPermissionButton
+import no.nordicsemi.android.common.ui.view.NordicAppBar
 import no.nordicsemi.android.nrftoolbox.R
 import no.nordicsemi.android.nrftoolbox.viewmodel.HomeViewModel
 import no.nordicsemi.android.nrftoolbox.viewmodel.UiEvent
@@ -46,14 +50,19 @@ internal fun HomeView() {
     val onEvent: (UiEvent) -> Unit = { viewModel.onClickEvent(it) }
 
     Scaffold(
-        topBar = { TitleAppBar(stringResource(id = R.string.app_name)) },
-        contentWindowInsets = WindowInsets.displayCutout
-            .only(WindowInsetsSides.Horizontal)
-            .union(WindowInsets.navigationBars),
+        topBar = {
+            NordicAppBar(
+                title = {
+                    Text(stringResource(id = R.string.app_name))
+                },
+                actions = {
+                    AnalyticsPermissionButton()
+                }
+            )
+         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { onEvent(UiEvent.OnConnectDeviceClick) },
-                modifier = Modifier.padding(16.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -61,7 +70,7 @@ internal fun HomeView() {
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Add device from scanner"
+                        contentDescription = "Connect to device",
                     )
                     Text(text = stringResource(R.string.connect_device))
                 }
@@ -71,23 +80,29 @@ internal fun HomeView() {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(bottom = 16.dp),
+                .padding(
+                    top = paddingValues.calculateTopPadding(),
+                    start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                    end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
+                )
+                .padding(horizontal = 16.dp)
+                .consumeWindowInsets(paddingValues),
+            contentPadding = PaddingValues(
+                top = 16.dp,
+                bottom = paddingValues.calculateBottomPadding() + 16.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item {
                 // Show the title at the top
-                Text(
-                    text = stringResource(R.string.connected_devices),
-                    modifier = Modifier
-                        .alpha(0.5f)
-                        .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                SectionTitle(
+                    title = stringResource(R.string.connected_devices)
                 )
+            }
+            item {
                 if (state.connectedDevices.isNotEmpty()) {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.fillMaxWidth()
                     ) {
                         state.connectedDevices.keys.forEach { device ->
                             state.connectedDevices[device]?.let { deviceData ->
@@ -349,6 +364,11 @@ internal fun HomeView() {
                 } else {
                     NoConnectedDeviceView()
                 }
+            }
+            item {
+                SectionTitle(
+                    title = stringResource(R.string.links)
+                )
             }
             item {
                 Links { onEvent(it) }
