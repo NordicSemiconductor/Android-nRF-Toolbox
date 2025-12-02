@@ -1,5 +1,6 @@
 package no.nordicsemi.android.service.profile
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
@@ -179,6 +180,7 @@ internal class ProfileService : NotificationService() {
     /**
      * Observes interactions for a specific service on the peripheral.
      */
+    @SuppressLint("TimberExceptionLogging")
     @OptIn(ExperimentalUuidApi::class)
     private suspend fun observeService(
         peripheral: Peripheral,
@@ -188,7 +190,7 @@ internal class ProfileService : NotificationService() {
         try {
             manager.observeServiceInteractions(peripheral.address, service, lifecycleScope)
         } catch (e: Exception) {
-            Timber.tag("ObserveServices").e(e)
+            Timber.e(e.message)
         }
     }
 
