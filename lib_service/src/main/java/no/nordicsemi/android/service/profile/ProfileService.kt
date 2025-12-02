@@ -19,7 +19,6 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.NotificationService
 import no.nordicsemi.android.service.R
-import no.nordicsemi.android.toolbox.lib.utils.spec.CGMS_SERVICE_UUID
 import no.nordicsemi.android.toolbox.profile.manager.ServiceManager
 import no.nordicsemi.android.toolbox.profile.manager.ServiceManagerFactory
 import no.nordicsemi.kotlin.ble.client.RemoteService
@@ -33,7 +32,6 @@ import no.nordicsemi.kotlin.ble.core.WriteType
 import timber.log.Timber
 import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.toKotlinUuid
 
 @AndroidEntryPoint
 internal class ProfileService : NotificationService() {
@@ -188,9 +186,6 @@ internal class ProfileService : NotificationService() {
         manager: ServiceManager
     ) {
         try {
-            if (service.uuid == CGMS_SERVICE_UUID.toKotlinUuid()) {
-                peripheral.ensureBonded()
-            }
             manager.observeServiceInteractions(peripheral.address, service, lifecycleScope)
         } catch (e: Exception) {
             Timber.tag("ObserveServices").e(e)
