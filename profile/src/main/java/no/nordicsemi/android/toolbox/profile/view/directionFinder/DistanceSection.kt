@@ -8,13 +8,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import no.nordicsemi.android.common.ui.view.SectionTitle
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
 import no.nordicsemi.android.toolbox.profile.viewmodel.DFSEvent
 import no.nordicsemi.android.ui.view.ScreenSection
-import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
 internal fun DistanceSection(
@@ -24,8 +25,8 @@ internal fun DistanceSection(
 ) {
     ScreenSection {
         SectionTitle(
-            R.drawable.ic_distance,
-            stringResource(id = R.string.distance_section)
+            painter = painterResource(R.drawable.ic_distance),
+            title = stringResource(id = R.string.distance_section)
         )
         DistanceView(value = distanceValue, range = range)
 

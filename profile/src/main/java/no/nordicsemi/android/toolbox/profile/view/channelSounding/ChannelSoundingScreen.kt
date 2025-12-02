@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.theme.NordicTheme
+import no.nordicsemi.android.common.ui.view.SectionTitle
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
 import no.nordicsemi.android.toolbox.profile.data.ConfidenceLevel
@@ -52,7 +53,6 @@ import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingViewModel
 import no.nordicsemi.android.ui.view.AnimatedThreeDots
 import no.nordicsemi.android.ui.view.ScreenSection
-import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.ui.view.TextWithAnimatedDots
 import no.nordicsemi.android.ui.view.internal.LoadingView
 

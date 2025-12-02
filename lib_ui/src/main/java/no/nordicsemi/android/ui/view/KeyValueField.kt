@@ -46,9 +46,6 @@ fun KeyValueField(key: String, value: String) {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(text = key)
-        Text(
-            color = MaterialTheme.colorScheme.onBackground,
-            text = value
-        )
+        Text(text = value)
     }
 }

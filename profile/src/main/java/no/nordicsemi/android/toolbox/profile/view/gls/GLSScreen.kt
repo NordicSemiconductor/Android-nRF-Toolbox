@@ -6,28 +6,27 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -35,28 +34,32 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import no.nordicsemi.android.common.ui.view.ActionOutlinedButton
+import no.nordicsemi.android.common.ui.view.SectionTitle
+import no.nordicsemi.android.toolbox.profile.R
+import no.nordicsemi.android.toolbox.profile.data.GLSServiceData
 import no.nordicsemi.android.toolbox.profile.parser.common.WorkingMode
 import no.nordicsemi.android.toolbox.profile.parser.gls.data.Carbohydrate
 import no.nordicsemi.android.toolbox.profile.parser.gls.data.ConcentrationUnit
 import no.nordicsemi.android.toolbox.profile.parser.gls.data.GLSMeasurementContext
 import no.nordicsemi.android.toolbox.profile.parser.gls.data.GLSRecord
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.GlucoseStatus
 import no.nordicsemi.android.toolbox.profile.parser.gls.data.Health
 import no.nordicsemi.android.toolbox.profile.parser.gls.data.Meal
 import no.nordicsemi.android.toolbox.profile.parser.gls.data.Medication
 import no.nordicsemi.android.toolbox.profile.parser.gls.data.MedicationUnit
 import no.nordicsemi.android.toolbox.profile.parser.gls.data.RecordType
 import no.nordicsemi.android.toolbox.profile.parser.gls.data.RequestStatus
+import no.nordicsemi.android.toolbox.profile.parser.gls.data.SampleLocation
 import no.nordicsemi.android.toolbox.profile.parser.gls.data.Tester
-import no.nordicsemi.android.toolbox.profile.R
-import no.nordicsemi.android.toolbox.profile.data.GLSServiceData
 import no.nordicsemi.android.toolbox.profile.view.gls.details.GLSDetails
 import no.nordicsemi.android.toolbox.profile.viewmodel.GLSEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.GLSEvent.OnWorkingModeSelected
@@ -65,7 +68,6 @@ import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionRow
-import no.nordicsemi.android.ui.view.SectionTitle
 import java.util.Calendar
 
 @Composable
@@ -73,161 +75,135 @@ internal fun GLSScreen() {
     val glsViewModel = hiltViewModel<GLSViewModel>()
     val glsServiceData by glsViewModel.glsState.collectAsStateWithLifecycle()
     val onClickEvent: (GLSEvent) -> Unit = { glsViewModel.onEvent(it) }
-    var isWorkingModeClicked by rememberSaveable { mutableStateOf(false) }
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        ScreenSection {
-            SectionTitle(
-                resId = R.drawable.ic_gls,
-                title = "Glucose level",
-                menu = {
-                    WorkingModeDropDown(
-                        glsState = glsServiceData,
-                        isWorkingModeSelected = isWorkingModeClicked,
-                        onExpand = { isWorkingModeClicked = true },
-                        onDismiss = { isWorkingModeClicked = false },
-                        onClickEvent = { onClickEvent(it) }
-                    )
-                }
-            )
-        }
-        RecordsView(glsServiceData)
+    GLSView(
+        data = glsServiceData,
+        onClickEvent = onClickEvent,
+    )
+}
+
+@Composable
+private fun GLSView(
+    data: GLSServiceData,
+    onClickEvent: (GLSEvent) -> Unit
+) {
+    ScreenSection {
+        SectionTitle(
+            painter = painterResource(R.drawable.ic_gls),
+            title = "Glucose",
+            menu = {
+                WorkingModeDropDown(
+                    data = data,
+                    onClickEvent = onClickEvent
+                )
+            }
+        )
+
+        RecordsView(data)
     }
 }
 
 @Composable
 private fun WorkingModeDropDown(
-    glsState: GLSServiceData,
-    isWorkingModeSelected: Boolean,
-    onExpand: () -> Unit,
-    onDismiss: () -> Unit,
+    data: GLSServiceData,
     onClickEvent: (GLSEvent) -> Unit
 ) {
-    if (glsState.requestStatus == RequestStatus.PENDING) {
-        CircularProgressIndicator()
-    } else {
-        Column {
-            OutlinedButton(onClick = { onExpand() }) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(text = if (glsState.workingMode != null) glsState.workingMode!!.toDisplayString() else "Request")
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = "")
-                }
-            }
-            if (isWorkingModeSelected)
-                WorkingModeDialog(
-                    glsState = glsState,
-                    onDismiss = onDismiss,
-                ) {
-                    onClickEvent(it)
-                    onDismiss()
-                }
-        }
+    var showDialog by rememberSaveable { mutableStateOf(false) }
+
+    ActionOutlinedButton(
+        text = "Request",
+        icon = Icons.Default.Download,
+        onClick = { showDialog = true },
+        isInProgress = data.requestStatus == RequestStatus.PENDING,
+    )
+    if (showDialog) {
+        WorkingModeDialog(
+            glsState = data,
+            onDismiss = { showDialog = false },
+            onWorkingModeSelected = onClickEvent
+        )
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun WorkingModeDropDownPreview() {
-    WorkingModeDropDown(GLSServiceData(), false, {}, {}, {})
-}
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun WorkingModeDialog(
     glsState: GLSServiceData,
     onDismiss: () -> Unit,
     onWorkingModeSelected: (GLSEvent) -> Unit,
 ) {
-    val listState = rememberLazyListState()
-    val workingModeEntries = WorkingMode.entries.map { it }
-    val selectedIndex = workingModeEntries.indexOf(glsState.workingMode)
+    val workingModeEntries = WorkingMode.entries.toList()
 
-    LaunchedEffect(selectedIndex) {
-        if (selectedIndex >= 0) {
-            listState.scrollToItem(selectedIndex)
-        }
-    }
-
-    Dialog(
-        onDismissRequest = { onDismiss() },
+    BasicAlertDialog(
+        onDismissRequest = onDismiss,
         properties = DialogProperties(
             dismissOnBackPress = true,
             dismissOnClickOutside = true
         )
     ) {
-        OutlinedCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+        ElevatedCard(
+            shape = RoundedCornerShape(24.dp),
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-            ) {
-                Text(
-                    text = "Request record",
+            Text(
+                text = "Request records",
+                modifier = Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp, bottom = 16.dp),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleLarge
+            )
+            workingModeEntries.forEach { entry ->
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                HorizontalDivider()
-                LazyColumn(
-                    state = listState
-                ) {
-                    items(workingModeEntries.size) { index ->
-                        val entry = workingModeEntries[index]
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(4.dp))
-                                .clickable {
-                                    onWorkingModeSelected(OnWorkingModeSelected(entry))
-                                }
-                                .padding(8.dp),
-                        ) {
-                            Text(
-                                text = entry.toDisplayString(),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                style = MaterialTheme.typography.titleLarge,
-                                color = if ((glsState.workingMode == entry) && glsState.records.isNotEmpty()) {
-                                    MaterialTheme.colorScheme.primary
-                                } else
-                                    MaterialTheme.colorScheme.onBackground
+                        .padding(horizontal = 8.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .clickable {
+                            onWorkingModeSelected(
+                                OnWorkingModeSelected(entry)
                             )
+                            onDismiss()
                         }
+                        .height(48.dp)
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    val color = when (glsState.workingMode) {
+                        entry -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.onBackground
                     }
+                    Text(
+                        text = entry.toString(),
+                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.weight(1f),
+                        color = color
+                    )
                 }
             }
+            // So that bottom padding is 24.dp.
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun WorkingModeDialogPreview() {
-    WorkingModeDialog(GLSServiceData(workingMode = WorkingMode.ALL), {}) {}
 }
 
 @Composable
 private fun RecordsView(
     state: GLSServiceData
 ) {
-    ScreenSection {
-        if (state.records.isEmpty()) {
-            RecordsViewWithoutData()
-        } else {
-            RecordsViewWithData(state)
-        }
+    if (state.records.isEmpty()) {
+        RecordsViewWithoutData()
+    } else {
+        RecordsViewWithData(state)
+    }
+}
+
+@Composable
+private fun RecordsViewWithoutData() {
+    Column {
+        Text(text = stringResource(id = R.string.gls_no_records_info))
+        Text(
+            text = stringResource(id = R.string.gls_no_records_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = LocalContentColor.current.copy(alpha = 0.6f),
+        )
     }
 }
 
@@ -235,12 +211,13 @@ private fun RecordsView(
 private fun RecordsViewWithData(
     state: GLSServiceData
 ) {
+    // Max height for the scrollable section, adjust as needed (e.g. 300.dp)
     Column(
+        modifier = Modifier
+            .heightIn(max = 500.dp)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth()
     ) {
-        SectionTitle(resId = R.drawable.ic_records, title = "Records")
-
         state.records.keys.forEachIndexed { i, it ->
             RecordItem(it, state.records[it])
 
@@ -257,45 +234,36 @@ private fun RecordItem(
     gleContext: GLSMeasurementContext?
 ) {
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+    SectionRow(
         modifier = Modifier
             .clip(RoundedCornerShape(10.dp))
-            .clickable {
-                showBottomSheet = true
-            }
+            .clickable { showBottomSheet = true }
             .padding(8.dp)
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
-            SectionRow {
-                record.glucoseConcentration?.let { glucoseConcentration ->
-                    record.unit?.let { unit ->
-                        glucoseConcentrationDisplayValue(glucoseConcentration, unit)
-                    }
-                }?.let {
-                    KeyValueColumn(
-                        record.type.toDisplayString(),
-                        it,
-                        keyStyle = MaterialTheme.typography.titleMedium
-                    )
-                }
-                record.time?.let {
-                    KeyValueColumnReverse(
-                        value = stringResource(id = R.string.gls_details_date_and_time),
-                        key = stringResource(R.string.gls_timestamp, it)
-                    )
-                }
+        record.glucoseConcentration?.let { glucoseConcentration ->
+            record.unit?.let { unit ->
+                glucoseConcentrationDisplayValue(glucoseConcentration, unit)
             }
+        }?.let {
+            KeyValueColumn(
+                key = record.type.toDisplayString(),
+                value = it,
+            )
+        }
+        record.time?.let {
+            KeyValueColumnReverse(
+                key = stringResource(id = R.string.gls_details_date_and_time),
+                value = stringResource(R.string.gls_timestamp, it)
+            )
         }
     }
 
     if (showBottomSheet) {
-        GLSDetailsBottomSheet(record, gleContext) { showBottomSheet = false }
+        GLSDetailsBottomSheet(
+            record = record,
+            context = gleContext,
+            onDismiss = { showBottomSheet = false },
+        )
     }
 }
 
@@ -308,9 +276,7 @@ private fun GLSDetailsBottomSheet(
 ) {
     val sheetState = rememberModalBottomSheetState()
     ModalBottomSheet(
-        onDismissRequest = {
-            onDismiss()
-        },
+        onDismissRequest = onDismiss,
         sheetState = sheetState,
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         containerColor = MaterialTheme.colorScheme.surface,
@@ -330,50 +296,66 @@ private fun GLSDetailsBottomSheet(
     }
 }
 
-
-@Preview(showBackground = true)
+@Preview
 @Composable
-private fun RecordItemPreview() {
-    RecordItem(
-        record = GLSRecord(
-            sequenceNumber = 1,
-            time = Calendar.getInstance(),
-            glucoseConcentration = 0.5f,
-            unit = ConcentrationUnit.UNIT_KGPL,
-            type = RecordType.VENOUS_PLASMA,
-            status = null,
-            sampleLocation = null,
-            contextInformationFollows = true
-        ),
-        gleContext = GLSMeasurementContext(
-            sequenceNumber = 20,
-            carbohydrate = Carbohydrate.LUNCH,
-            carbohydrateAmount = 12.5f,
-            meal = Meal.CASUAL,
-            tester = Tester.SELF,
-            health = Health.NO_HEALTH_ISSUES,
-            exerciseDuration = 2,
-            exerciseIntensity = 1,
-            medication = Medication.PRE_MIXED_INSULIN,
-            medicationQuantity = .5f,
-            medicationUnit = MedicationUnit.UNIT_KG,
-            HbA1c = 0.5f
-        ),
+private fun GLSViewPreview_empty() {
+    GLSView(
+        data = GLSServiceData(),
+        onClickEvent = {}
     )
 }
 
+@Preview
 @Composable
-private fun RecordsViewWithoutData() {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        SectionTitle(icon = Icons.Default.Search, title = "No items")
+private fun GLSViewPreview() {
+    GLSView(
+        data = GLSServiceData(
+            records = mapOf(
+                GLSRecord(
+                    sequenceNumber = 1,
+                    time = Calendar.getInstance(),
+                    glucoseConcentration = 0.5f,
+                    unit = ConcentrationUnit.UNIT_KGPL,
+                    type = RecordType.VENOUS_PLASMA,
+                    status = GlucoseStatus(0x03),
+                    sampleLocation = SampleLocation.FINGER,
+                    contextInformationFollows = true
+                ) to GLSMeasurementContext(
+                    sequenceNumber = 20,
+                    carbohydrate = Carbohydrate.LUNCH,
+                    carbohydrateAmount = 12.5f,
+                    meal = Meal.CASUAL,
+                    tester = Tester.SELF,
+                    health = Health.NO_HEALTH_ISSUES,
+                    exerciseDuration = 2,
+                    exerciseIntensity = 1,
+                    medication = Medication.PRE_MIXED_INSULIN,
+                    medicationQuantity = .5f,
+                    medicationUnit = MedicationUnit.UNIT_KG,
+                    HbA1c = 0.5f
+                ),
+                GLSRecord(
+                    sequenceNumber = 2,
+                    time = Calendar.getInstance(),
+                    glucoseConcentration = 0.6f,
+                    unit = ConcentrationUnit.UNIT_MOLPL,
+                    type = RecordType.ARTERIAL_PLASMA,
+                    status = null,
+                    sampleLocation = null,
+                    contextInformationFollows = false,
+                ) to null,
+            )
+        ),
+        onClickEvent = {}
+    )
+}
 
-        Text(
-            text = stringResource(id = R.string.gls_no_records_info),
-            style = MaterialTheme.typography.bodyMedium
-        )
-    }
+@Preview(showBackground = true)
+@Composable
+private fun WorkingModeDialogPreview() {
+    WorkingModeDialog(
+        glsState = GLSServiceData(workingMode = WorkingMode.ALL),
+        onDismiss = {},
+        onWorkingModeSelected = {}
+    )
 }

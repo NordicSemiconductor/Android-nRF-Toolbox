@@ -38,9 +38,9 @@ object IntermediateCuffPressureParser {
             return null
         }
 
-        // Following bytes - systolic, diastolic and mean arterial pressure
+        // Following bytes - current cuff pressure
         val cuffPressure: Float = data.getFloat(offset, FloatFormat.IEEE_11073_16_BIT, byteOrder)
-        offset += 6
+        offset += 2 + 4 // Skip diastolic and mean arterial pressure, which are set to NaN.
 
         // Parse timestamp if present
         var calendar: Calendar? = null

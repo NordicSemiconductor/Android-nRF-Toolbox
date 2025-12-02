@@ -78,12 +78,14 @@
     <string name="battery_module">BATTERY</string>
     <string name="battery_module_full">Battery</string>
 
-    <string name="channel_sounding_module"> CHANNEL SOUNDING</string>
+    <string name="channel_sounding_module">CHANNEL SOUNDING</string>
+    <string name="channel_sounding_module_full">Channel Sounding</string>
 
     <string name="throughput_module">Throughput</string>
     <string name="unknown_device">Unknown Device</string>
 
-    <string name="lbs_blinky_module">LBS/Blinky</string>
+    <string name="lbs_blinky_module">LBS</string>
+    <string name="lbs_blinky_module_full">LED Button</string>
 
     <string name="device_not_connected_title">NO DEVICES CONNECTED</string>
     <string name="device_not_connected_message">Tap Connect to begin.</string>

@@ -2,47 +2,53 @@ package no.nordicsemi.android.toolbox.profile.view.hts
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import no.nordicsemi.android.toolbox.profile.parser.hts.HTSMeasurementType
+import no.nordicsemi.android.common.ui.view.SectionTitle
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.HTSServiceData
 import no.nordicsemi.android.toolbox.profile.data.uiMapper.TemperatureUnit
+import no.nordicsemi.android.toolbox.profile.parser.hts.HTSData
+import no.nordicsemi.android.toolbox.profile.parser.hts.HTSMeasurementType
 import no.nordicsemi.android.toolbox.profile.viewmodel.HTSEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.HTSViewModel
 import no.nordicsemi.android.ui.view.KeyValueColumn
+import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionRow
-import no.nordicsemi.android.ui.view.SectionTitle
 import no.nordicsemi.android.ui.view.TextWithAnimatedDots
+import java.util.Calendar
 
 @Composable
 internal fun HTSScreen() {
@@ -58,49 +64,45 @@ private fun HTSContent(
     htsServiceData: HTSServiceData,
     onClickEvent: (HTSEvent) -> Unit
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        ScreenSection {
-            SectionTitle(
-                resId = R.drawable.ic_hts,
-                title = stringResource(id = R.string.hts_temperature),
-                menu = {
-                    TemperatureUnitSettings(
-                        state = htsServiceData,
-                        onClickEvent = { onClickEvent(it) },
-                    )
-                }
-            )
-            SectionRow {
-                htsServiceData.data?.temperature?.let { temperature ->
-                    KeyValueColumn(
-                        value = stringResource(id = R.string.temperature_title),
-                        key = htsServiceData.temperatureUnit.displayTemperature(temperature),
-                        keyStyle = MaterialTheme.typography.titleMedium
-                    )
-                } ?: run {
-                    TextWithAnimatedDots(text = stringResource(id = R.string.reading_temperature_placeholder))
-                }
+    ScreenSection {
+        SectionTitle(
+            painter = painterResource(R.drawable.ic_hts),
+            title = stringResource(id = R.string.hts_temperature),
+            menu = {
+                TemperatureUnitSettings(
+                    state = htsServiceData,
+                    onClickEvent = { onClickEvent(it) },
+                )
             }
-            if (htsServiceData.data?.type != null) {
-                SectionRow {
-                    KeyValueColumn(
-                        value = stringResource(id = R.string.temp_measurement_location),
-                        key = htsServiceData.data!!.type?.let {
-                            HTSMeasurementType.fromValue(it).toString()
-                        } ?: "Unknown",
-                        keyStyle = MaterialTheme.typography.titleMedium
+        )
+        SectionRow(
+            verticalAlignment = Alignment.Top,
+        ) {
+            htsServiceData.data?.temperature?.let { temperature ->
+                KeyValueColumn(
+                    key = stringResource(id = R.string.temperature_title),
+                    value = htsServiceData.temperatureUnit.displayTemperature(temperature),
+                    valueStyle = MaterialTheme.typography.displayMedium,
+                )
+            } ?: run {
+                TextWithAnimatedDots(text = stringResource(id = R.string.reading_temperature_placeholder))
+            }
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.End,
+            ) {
+                htsServiceData.data?.let { data ->
+                    KeyValueColumnReverse(
+                        key = stringResource(id = R.string.temp_measurement_location),
+                        value = data.type
+                            ?.let { HTSMeasurementType.fromValue(it).toString() }
+                            ?: "Unknown",
                     )
                 }
-            }
-            htsServiceData.data?.timestamp?.let {
-                SectionRow {
-                    KeyValueColumn(
-                        value = stringResource(R.string.temp_measurement_time),
-                        key = it.toFormattedString(),
-                        keyStyle = MaterialTheme.typography.titleMedium
+                htsServiceData.data?.timestamp?.let {
+                    KeyValueColumnReverse(
+                        key = stringResource(R.string.temp_measurement_time),
+                        value = it.toFormattedString(),
                     )
                 }
             }
@@ -115,91 +117,100 @@ private fun TemperatureUnitSettings(
 ) {
     var openSettingsDialog by rememberSaveable { mutableStateOf(false) }
 
-    Column {
-        Icon(
-            imageVector = Icons.Default.Settings,
-            contentDescription = stringResource(id = R.string.hts_temperature_unit_des),
-            modifier = Modifier
-                .clip(CircleShape)
-                .clickable { openSettingsDialog = true }
+    Icon(
+        imageVector = Icons.Outlined.Settings,
+        contentDescription = stringResource(id = R.string.hts_temperature_unit_des),
+        modifier = Modifier
+            .clip(CircleShape)
+            .clickable { openSettingsDialog = true }
+    )
+    if (openSettingsDialog) {
+        TemperatureUnitSettingsDialog(
+            state = state,
+            onDismiss = { openSettingsDialog = false },
+            onClickEvent = onClickEvent,
         )
-        if (openSettingsDialog) {
-            TemperatureUnitSettingsDialog(
-                state,
-                { openSettingsDialog = false }
-            ) { onClickEvent(it) }
-        }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TemperatureUnitSettingsDialog(
     state: HTSServiceData,
     onDismiss: () -> Unit,
     onClickEvent: (HTSEvent) -> Unit,
 ) {
-    val listState = rememberLazyListState()
-    val entries = TemperatureUnit.entries.map { it }
+    val entries = TemperatureUnit.entries.toList()
 
-    Dialog(
-        onDismissRequest = { onDismiss() },
+    BasicAlertDialog(
+        onDismissRequest = onDismiss,
         properties = DialogProperties(
             dismissOnBackPress = true,
             dismissOnClickOutside = true
         )
     ) {
-        OutlinedCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+        ElevatedCard(
+            shape = RoundedCornerShape(24.dp),
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-            ) {
-                Text(
-                    text = stringResource(id = R.string.hts_temperature_unit),
+            Text(
+                text = stringResource(R.string.hts_temperature_unit),
+                modifier = Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp, bottom = 16.dp),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleLarge
+            )
+            entries.forEach { entry ->
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                HorizontalDivider()
-                LazyColumn(
-                    state = listState
-                ) {
-                    items(entries.size) { index ->
-                        val entry = entries[index]
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(4.dp))
-                                .clickable {
-                                    onClickEvent(
-                                        HTSEvent.OnTemperatureUnitSelected(entry)
-                                    )
-                                    onDismiss()
-                                }
-                                .padding(8.dp),
-                        ) {
-                            Text(
-                                text = entry.toString(),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                style = MaterialTheme.typography.titleLarge,
-                                color = if (state.temperatureUnit == entry)
-                                    MaterialTheme.colorScheme.primary else
-                                    MaterialTheme.colorScheme.onBackground
+                        .clickable {
+                            onClickEvent(
+                                HTSEvent.OnTemperatureUnitSelected(entry)
                             )
+                            onDismiss()
+                        },
+                ) {
+                    Text(
+                        text = entry.toString(),
+                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+                        color = when (state.temperatureUnit) {
+                            entry -> MaterialTheme.colorScheme.primary
+                            else -> MaterialTheme.colorScheme.onBackground
                         }
-                    }
+                    )
                 }
             }
+            // So that bottom padding is 24.dp.
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
+}
+
+@Preview
+@Composable
+private fun HTSContentPreview_reading() {
+    HTSContent(
+        htsServiceData = HTSServiceData(
+            data = null,
+            temperatureUnit = TemperatureUnit.CELSIUS
+        ),
+        onClickEvent = {}
+    )
+}
+
+@Preview
+@Composable
+private fun HTSContentPreview() {
+    HTSContent(
+        htsServiceData = HTSServiceData(
+            data = HTSData(
+                temperature = 36.5f,
+                type = HTSMeasurementType.FINGER.value,
+                timestamp = Calendar.getInstance()
+            ),
+            temperatureUnit = TemperatureUnit.CELSIUS
+        ),
+        onClickEvent = {}
+    )
 }
 
 @Preview(showBackground = true)
