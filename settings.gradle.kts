@@ -38,6 +38,7 @@ pluginManagement {
     }
 }
 
+@Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -47,6 +48,16 @@ dependencyResolutionManagement {
         gradlePluginPortal()
         // This one is required for MPAndroidChart.
         maven(url = "https://jitpack.io")
+    }
+    versionCatalogs {
+        // Use Nordic Gradle Version Catalog with common external libraries versions.
+        create("libs") {
+            from("no.nordicsemi.android.gradle:version-catalog:2.11")
+        }
+        // Fixed versions for Nordic libraries.
+        create("nordic") {
+            from("no.nordicsemi.android:version-catalog:2025.11.02")
+        }
     }
 }
 

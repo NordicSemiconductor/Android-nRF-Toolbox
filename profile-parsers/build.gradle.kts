@@ -7,8 +7,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.nordic.blek.client.android)
-    implementation(libs.nordic.kotlin.data)
+    implementation(nordic.kotlin.data)
+    implementation(nordic.blek.client.core.android)
 
     // Unit test dependencies
     testImplementation(libs.junit4)

@@ -39,16 +39,12 @@ android {
 }
 
 dependencies {
-    implementation(libs.nordic.theme)
-    implementation(libs.nordic.ui)
-    implementation(libs.nordic.logger)
+    implementation(nordic.theme)
+    implementation(nordic.ui)
+    implementation(nordic.logger)
+    implementation(nordic.log.timber)
 
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material.iconsExtended)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.material.icons.extended)
 
-    // Timber & SLF4J
-    implementation (libs.slf4j.timber)
-    implementation(libs.nordic.log.timber)
+    implementation (libs.slf4j)
 }

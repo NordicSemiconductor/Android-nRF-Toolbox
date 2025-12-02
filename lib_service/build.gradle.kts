@@ -42,13 +42,12 @@ dependencies {
     implementation(project(":lib_utils"))
     implementation(project(":profile_manager"))
 
-    implementation(libs.nordic.logger)
-    implementation(libs.nordic.log.timber)
-    implementation(libs.nordic.blek.client.android)
+    implementation(nordic.logger)
+    implementation(nordic.log.timber)
+    implementation(nordic.blek.client.core.android)
 
-    implementation(libs.androidx.lifecycle.service)
-    implementation(libs.androidx.localbroadcastmanager)
     implementation(libs.androidx.core)
+    implementation(libs.androidx.lifecycle.service)
 
-    implementation(libs.slf4j.timber)
+    implementation(libs.slf4j)
 }

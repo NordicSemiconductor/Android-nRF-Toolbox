@@ -7,5 +7,5 @@ android {
 }
 
 dependencies {
-    implementation(libs.nordic.log.timber)
+    implementation(nordic.log.timber)
 }

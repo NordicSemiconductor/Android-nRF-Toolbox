@@ -39,8 +39,10 @@ android {
 
 dependencies {
     implementation(project(":lib_utils"))
+
+    implementation(nordic.analytics)
+
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
-    implementation(libs.nordic.analytics)
 }
