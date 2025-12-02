@@ -5,14 +5,15 @@
     <string name="rscs_activity">Activity</string>
     <string name="rscs_pace">Pace</string>
     <string name="rscs_cadence">Cadence</string>
+    <string name="rscs_speed">Speed</string>
+    <string name="rscs_distance">Total distance</string>
+    <string name="rscs_features">Supported features</string>
     <string name="rscs_number_of_steps">Number of steps</string>
 
     <string name="rscs_walking">Walking</string>
     <string name="rscs_running">Running</string>
-    <string name="rscs_speed">%.1f min/km</string>
     <string name="rscs_rpm">%d RPM</string>
-    <string name="rscs_steps">Number of Steps %d</string>
-    <string name="stride_length"> Stride Length</string>
+    <string name="stride_length"> Stride length</string>
 
     <string name="rscs_settings_unit_title">Select unit</string>
 

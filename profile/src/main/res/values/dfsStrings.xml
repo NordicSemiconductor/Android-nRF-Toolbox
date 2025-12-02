@@ -5,17 +5,14 @@
     <string name="value_smoothing_info">Because of interferences the last read value can be wrong. To minimize this effect the current value is taken as middle value from cached values. The details are available on the chart below.</string>
 
     <string name="control_panel">Control device</string>
-    <string name="distance_settings">Measurement details</string>
     <string name="azimuth_section">Azimuth</string>
-    <string name="distance_section">Distance in dm (decimeter)</string>
+    <string name="distance_section">Distance</string>
     <string name="elevation_section">Elevation</string>
     <string name="measurement_details_section">Measurement details</string>
 
-    <string name="device_no_devices">There is no device in range.</string>
-    <string name="device_no_devices_hint">Make sure the device is in range.</string>
     <string name="device_address">Address</string>
-    <string name="selected_device">Selected device</string>
-    <string name="devices">List of devices in range</string>
+    <string name="selected_device">Selected device:</string>
+    <string name="devices">Choose the device to measure distance to:</string>
     <string name="cancel">Cancel</string>
 
     <string name="check_distance_mode">Click button to check available distance modes.</string>
@@ -39,15 +36,15 @@
 
     <string name="dm_value">%d dm</string>
 
-    <string name="rtt_label">Round-Trip Time (RTT)</string>
-    <string name="ifft_label">ifft*</string>
-    <string name="phase_label">phase</string>
-    <string name="rssi_label">rssi</string>
-    <string name="best_label">best</string>
+    <string name="rtt_label">RTT</string>
+    <string name="ifft_label">IFFT*</string>
+    <string name="phase_label">Phase</string>
+    <string name="rssi_label">RSSI</string>
+    <string name="best_label">Best</string>
+    <string name="ifft_hint">IFFT - Inverse Fast Fourier Transform</string>
 
     <string name="from">From: </string>
     <string name="to">To: </string>
 
-    <string name="distance_range">Distance range</string>
-    <string name="measurement_details">Measurement details</string>
+    <string name="distance_range">Distance range settings</string>
 </resources>

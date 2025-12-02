@@ -31,11 +31,11 @@ fun createCircleTransition(
         circleColor = transition.animateColor(
             label = "Circle Color",
             transitionSpec = { tween(duration, easing = LinearOutSlowInEasing) }
-        ) { if (it) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer },
+        ) { if (it) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.surfaceVariant },
         dotColor = transition.animateColor(
             label = "Dot Color",
             transitionSpec = { tween(duration, easing = LinearOutSlowInEasing) }
-        ) { if (it) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary }
+        ) { if (it) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary }
     )
 }
 

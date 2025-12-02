@@ -5,27 +5,24 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
+import no.nordicsemi.android.toolbox.profile.data.SensorData
+import no.nordicsemi.android.toolbox.profile.data.SensorValue
+import no.nordicsemi.android.toolbox.profile.manager.DFSManager
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.PeripheralBluetoothAddress
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.azimuthal.AzimuthMeasurementData
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.controlPoint.ControlPointChangeModeError
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.controlPoint.ControlPointChangeModeSuccess
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.controlPoint.ControlPointCheckModeError
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.controlPoint.ControlPointCheckModeSuccess
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.controlPoint.ControlPointMode
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.controlPoint.ControlPointResult
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.ddf.DDFData
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance.DistanceMeasurementData
-import no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance.DistanceMode
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance.McpdMeasurementData
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance.RttMeasurementData
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.elevation.ElevationMeasurementData
-import no.nordicsemi.android.toolbox.profile.parser.directionFinder.toDistanceMode
 import no.nordicsemi.android.toolbox.profile.parser.gls.data.RequestStatus
-import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
-import no.nordicsemi.android.toolbox.profile.data.SensorData
-import no.nordicsemi.android.toolbox.profile.data.SensorValue
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.MeasurementSection
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
-import no.nordicsemi.android.toolbox.profile.manager.DFSManager
 
 object DFSRepository {
     private val _dataMap = mutableMapOf<String, MutableStateFlow<DFSServiceData>>()
@@ -55,8 +52,8 @@ object DFSRepository {
 
     fun addNewDistance(deviceId: String, distance: DistanceMeasurementData) {
         when (distance) {
-            is McpdMeasurementData -> addDistance(deviceId, distance, DistanceMode.MCPD)
-            is RttMeasurementData -> addDistance(deviceId, distance, DistanceMode.RTT)
+            is McpdMeasurementData -> addDistance(deviceId, distance)
+            is RttMeasurementData -> addDistance(deviceId, distance)
         }
     }
 
@@ -67,22 +64,19 @@ object DFSRepository {
     private fun addDistance(
         deviceId: String,
         distance: DistanceMeasurementData,
-        distanceMode: DistanceMode,
     ) {
         _dataMap[deviceId]?.update { current ->
             val key = distance.address
             val sensorData = current.data[key] ?: SensorData()
-            val newSensorData = when (distanceMode) {
-                DistanceMode.MCPD -> sensorData.copy(
+            val newSensorData = when (distance) {
+                is McpdMeasurementData -> sensorData.copy(
                     mcpdDistance = sensorData.mcpdDistance
-                        ?.copyWithNewValue(distance as McpdMeasurementData) ?: SensorValue(),
-                    distanceMode = distanceMode
+                        ?.copyWithNewValue(distance) ?: SensorValue(),
                 )
 
-                DistanceMode.RTT -> sensorData.copy(
+                is RttMeasurementData -> sensorData.copy(
                     rttDistance = sensorData.rttDistance
-                        ?.copyWithNewValue(distance as RttMeasurementData) ?: SensorValue(),
-                    distanceMode = distanceMode
+                        ?.copyWithNewValue(distance) ?: SensorValue(),
                 )
             }
             val newDevicesData = current.data.toMutableMap().apply {
@@ -113,23 +107,9 @@ object DFSRepository {
         _dataMap[deviceId]?.update { it.copy(requestStatus = requestStatus) }
     }
 
-    suspend fun enableDistanceMode(deviceId: String, distanceMode: DistanceMode) {
+    suspend fun enableDistanceMode(deviceId: String, distanceMode: ControlPointMode) {
         _dataMap[deviceId]?.update { it.copy(requestStatus = RequestStatus.PENDING) }
         DFSManager.enableDistanceMode(deviceId, distanceMode)
-    }
-
-    private fun setDistanceMode(deviceId: String, distanceMode: DistanceMode) {
-        _dataMap[deviceId]?.update { serviceData ->
-            serviceData.copy(
-                data = serviceData.data.mapValues { (key, sensorData) ->
-                    if (key == serviceData.selectedDevice) {
-                        sensorData.copy(distanceMode = distanceMode)
-                    } else {
-                        sensorData
-                    }
-                }
-            )
-        }
     }
 
     fun setAvailableDistanceModes(deviceId: String, ddfData: DDFData) {
@@ -160,7 +140,6 @@ object DFSRepository {
 
             is ControlPointChangeModeSuccess -> {
                 scope.launch {
-                    setDistanceMode(deviceId, data.mode.toDistanceMode())
                     updateNewRequestStatus(deviceId, RequestStatus.SUCCESS)
                 }
             }
@@ -174,7 +153,6 @@ object DFSRepository {
 
             is ControlPointCheckModeSuccess -> {
                 scope.launch {
-                    setDistanceMode(deviceId, data.mode.toDistanceMode())
                     updateNewRequestStatus(deviceId, RequestStatus.SUCCESS)
                 }
             }
@@ -187,26 +165,8 @@ object DFSRepository {
         DFSManager.checkForCurrentDistanceMode(deviceId)
     }
 
-
-    fun updateDistanceRange(deviceId: String, range: Range) {
+    fun updateDistanceRange(deviceId: String, range: IntRange) {
         _dataMap[deviceId]?.update { it.copy(distanceRange = range) }
-    }
-
-    /**
-     * Update section to the sensor data.
-     */
-    fun updateDetailsSection(deviceId: String, section: MeasurementSection) {
-        _dataMap[deviceId]?.update { serviceData ->
-            serviceData.copy(
-                data = serviceData.data.mapValues { (key, sensorData) ->
-                    if (key == serviceData.selectedDevice) {
-                        sensorData.copy(selectedMeasurementSection = section)
-                    } else {
-                        sensorData
-                    }
-                }
-            )
-        }
     }
 
     suspend fun checkAvailableFeatures(deviceId: String) {

@@ -22,7 +22,8 @@ object RSCSDataParser {
             .toFloat()
             .let {
                 it / 256f // [m/s]
-            }.also { offset += 2 }
+            }
+            .also { offset += 2 }
 
         // Cadence
         val cadence: Int = data.getInt(offset, IntFormat.UINT8)

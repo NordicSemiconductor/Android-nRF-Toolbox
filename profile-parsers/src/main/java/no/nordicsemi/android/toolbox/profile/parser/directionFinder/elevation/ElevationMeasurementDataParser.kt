@@ -2,7 +2,7 @@ package no.nordicsemi.android.toolbox.profile.parser.directionFinder.elevation
 
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.AddressType
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.PeripheralBluetoothAddress
-import no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance.QualityIndicator
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.QualityIndicator
 import no.nordicsemi.kotlin.data.IntFormat
 import no.nordicsemi.kotlin.data.getInt
 
@@ -11,29 +11,27 @@ class ElevationMeasurementDataParser {
     fun parse(data: ByteArray): ElevationMeasurementData? {
         if (data.size < 10) return null
 
-        var offset = 0
-        val flags = data[offset].also { offset++ }
+        var offset = 1 // Skip flags
 
-        val qualityIndicator = data.getInt(offset++, IntFormat.UINT8)
+        // Parse quality indicator.
+        val qualityIndicator = data.getInt(offset, IntFormat.UINT8)
+            .let { QualityIndicator.create(it) }
+            .also { offset += 1 }
 
-        val address = StringBuilder().apply {
-            for (i in 0..5) {
-                data.getInt(offset++, IntFormat.UINT8).let {
-                    insert(0, Integer.toHexString(it).padStart(2, '0'))
-                    if (i != 5) insert(0, ":")
-                }
-            }
-        }.toString()
+        // Parse the target Device Address.
+        val addressValue = data
+            .sliceArray(offset until offset + 6)
+            .reversed()
+            .joinToString(":") { "%02X".format(it.toInt() and 0xFF) }
+            .also { offset += 6 }
 
-        val addressType = data.getInt(offset++, IntFormat.UINT8)
+        val addressType = data.getInt(offset, IntFormat.UINT8)
+            .let { AddressType.create(it) }
+            .also { offset += 1 }
+        val address = PeripheralBluetoothAddress(addressType, addressValue)
 
-        val elevation = data.getInt(offset++, IntFormat.INT8)
+        val elevation = data.getInt(offset, IntFormat.INT8)
 
-        return ElevationMeasurementData(
-            flags,
-            QualityIndicator.create(qualityIndicator),
-            PeripheralBluetoothAddress(AddressType.create(addressType), address),
-            elevation
-        )
+        return ElevationMeasurementData(qualityIndicator, address, elevation)
     }
 }

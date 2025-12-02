@@ -18,65 +18,52 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.common.ui.view.SectionTitle
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.PeripheralBluetoothAddress
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.azimuthal.AzimuthMeasurementData
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.elevation.ElevationMeasurementData
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.SensorData
 import no.nordicsemi.android.toolbox.profile.data.SensorValue
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.displayAzimuth
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.elevationValue
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.QualityIndicator
 import no.nordicsemi.android.ui.view.ScreenSection
-import no.nordicsemi.android.ui.view.SectionTitle
+import no.nordicsemi.android.ui.view.SubsectionTitle
 
 @Composable
-internal fun AzimuthAndElevationSection(data: SensorData, range: Range) {
+internal fun AzimuthAndElevationSection(data: SensorData, range: IntRange) {
     ScreenSection {
-        SectionTitle(
-            R.drawable.ic_azimuth,
-            stringResource(id = R.string.azimuth_section)
-        )
-
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
+        data.displayAzimuth()?.let {
+            SectionTitle(
+                painter = painterResource(id = R.drawable.ic_azimuth),
+                title = stringResource(id = R.string.azimuth_section)
+            )
             Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                AzimuthView(data, range)
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.titleLarge,
+                )
+            }
+        }
+
+        data.elevationValue()?.let {
+            SectionTitle(
+                painter = painterResource(id = R.drawable.ic_elevation),
+                title = stringResource(id = R.string.elevation_section)
+            )
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Box {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_azimuth),
-                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.surface),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .background(
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                shape = CircleShape
-                            )
-                            .size(200.dp)
-                    )
-                    AzimuthView(data, range)
-                }
-                data.displayAzimuth()?.let {
-                    Text(
-                        text = "Direction relative to North: $it",
-                        style = MaterialTheme.typography.titleLarge,
-                    )
-                }
+                ElevationView(value = it)
             }
-
-            SectionTitle(
-                R.drawable.ic_elevation,
-                stringResource(id = R.string.elevation_section)
-            )
-            Box {
-                ElevationView(value = data.elevationValue()!!, data)
-            }
-
         }
     }
 }
@@ -88,19 +75,21 @@ private fun AzimuthAndElevationSectionPreview() {
         azimuth = SensorValue(
             values = listOf(
                 AzimuthMeasurementData(
+                    quality = QualityIndicator.POOR,
+                    address = PeripheralBluetoothAddress.TEST,
                     azimuth = 50,
-                    address = PeripheralBluetoothAddress.TEST
                 )
             )
         ),
         elevation = SensorValue(
             values = listOf(
                 ElevationMeasurementData(
+                    quality = QualityIndicator.GOOD,
                     address = PeripheralBluetoothAddress.TEST,
                     elevation = 30
                 )
             )
         )
     )
-    AzimuthAndElevationSection(sensorData, Range(0, 50))
+    AzimuthAndElevationSection(sensorData, 0..50)
 }

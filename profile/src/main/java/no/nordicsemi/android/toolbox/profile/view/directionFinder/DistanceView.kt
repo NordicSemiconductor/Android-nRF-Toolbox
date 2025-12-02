@@ -11,11 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
 import java.util.Locale
 
 @Composable
-internal fun DistanceView(value: Int, range: Range) {
+internal fun DistanceView(value: Int, range: IntRange) {
     Column {
         DistanceChartView(value = value, range = range)
 
@@ -25,22 +24,22 @@ internal fun DistanceView(value: Int, range: Range) {
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = String.format(Locale.US, "%d dm", range.from))
+            Text(text = String.format(Locale.US, "%d dm", range.first))
 
-            val diff = range.to - range.from
+            val diff = range.last - range.first
             val part = (diff / 4)
             if (part > 0) {
-                Text(text = String.format(Locale.US, "% ddm", range.from + part))
-                Text(text = String.format(Locale.US, "%d dm", range.from + 2 * part))
+                Text(text = String.format(Locale.US, "%d dm", range.first + part))
+                Text(text = String.format(Locale.US, "%d dm", range.first + 2 * part))
             }
 
-            Text(text = String.format(Locale.US, "%d dm", range.to))
+            Text(text = String.format(Locale.US, "%d dm", range.last))
         }
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun DistanceViewPreview() {
-    DistanceView(20, Range(0, 50))
+    DistanceView(20, 0.. 50)
 }

@@ -2,7 +2,7 @@ package no.nordicsemi.android.toolbox.profile.parser.directionFinder.azimuthal
 
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.AddressType
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.PeripheralBluetoothAddress
-import no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance.QualityIndicator
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.QualityIndicator
 import no.nordicsemi.kotlin.data.IntFormat
 import no.nordicsemi.kotlin.data.getInt
 import java.nio.ByteOrder
@@ -15,29 +15,28 @@ class AzimuthalMeasurementDataParser {
     ): AzimuthMeasurementData? {
         if (data.size < 10) return null
 
-        var offset = 0
-        val flags = data[offset].also { offset++ }
-        val qualityIndicator = data.getInt(offset++, IntFormat.UINT8)
+        var offset = 1 // Skip flags
 
-        val address = StringBuilder().apply {
-            for (i in 0..5) {
-                data.getInt(offset++, IntFormat.UINT8).let {
-                    insert(0, Integer.toHexString(it))
-                    if (i != 5) insert(0, ":")
-                }
-            }
-        }.toString()
+        // Parse quality indicator.
+        val qualityIndicator = data.getInt(offset, IntFormat.UINT8)
+            .let { QualityIndicator.create(it) }
+            .also { offset += 1 }
 
-        val addressType = data.getInt(offset++, IntFormat.UINT8)
+        // Parse the target Device Address.
+        val addressValue = data
+            .sliceArray(offset until offset + 6)
+            .reversed()
+            .joinToString(":") { "%02X".format(it.toInt() and 0xFF) }
+            .also { offset += 6 }
 
-        val azimuth = data.getInt(offset, IntFormat.UINT16, byteOrder).also { offset += 2 }
+        val addressType = data.getInt(offset, IntFormat.UINT8)
+            .let { AddressType.create(it) }
+            .also { offset += 1 }
+        val address = PeripheralBluetoothAddress(addressType, addressValue)
 
-        return AzimuthMeasurementData(
-            flags,
-            QualityIndicator.create(qualityIndicator),
-            PeripheralBluetoothAddress(AddressType.create(addressType), address),
-            azimuth
-        )
+        val azimuth = data.getInt(offset, IntFormat.UINT16, byteOrder)
+
+        return AzimuthMeasurementData(qualityIndicator, address, azimuth)
 
     }
 }

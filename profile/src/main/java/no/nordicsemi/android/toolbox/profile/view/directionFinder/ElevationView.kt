@@ -35,13 +35,13 @@ import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.SensorData
 import no.nordicsemi.android.toolbox.profile.data.SensorValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.displayElevation
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.QualityIndicator
 import no.nordicsemi.android.ui.view.CircleTransitionState
 import no.nordicsemi.android.ui.view.createCircleTransition
 
 @Composable
 internal fun ElevationView(
     value: Int,
-    data: SensorData
 ) {
     val duration = 1000
     val radius = 100.dp
@@ -60,26 +60,19 @@ internal fun ElevationView(
             ElevationLabels(Modifier.padding(8.dp))
             Box(
                 modifier = Modifier
-                    .size(radius * 2)
-                    .align(Alignment.Center) // force centering
+                    .size(radius * 2),
+                contentAlignment = Alignment.Center
             ) {
                 ElevationCanvas(
                     radius = radius,
-                    circleBorderColor = MaterialTheme.colorScheme.secondary,
+                    circleBorderColor = MaterialTheme.colorScheme.surfaceVariant,
                     transition = transition,
                     value = value
                 ) {
                     isInAccessibilityMode.value = !isInAccessibilityMode.value
                 }
-            }
-        }
-        data.displayElevation()?.let {
-            Box(
-                modifier = Modifier,
-                contentAlignment = Alignment.BottomCenter
-            ) {
                 Text(
-                    text = "Tilt Angle: $it",
+                    text = "$value°",
                     style = MaterialTheme.typography.titleLarge,
                 )
             }
@@ -90,18 +83,7 @@ internal fun ElevationView(
 @Preview(showBackground = true)
 @Composable
 private fun ElevationViewPreview() {
-    val value = 15 // Example elevation value
-    val sensorData = SensorData(
-        elevation = SensorValue(
-            values = listOf(
-                ElevationMeasurementData(
-                    address = PeripheralBluetoothAddress.TEST,
-                    elevation = 30
-                )
-            )
-        )
-    )
-    ElevationView(value = value, sensorData)
+    ElevationView(value = 30)
 }
 
 @Composable

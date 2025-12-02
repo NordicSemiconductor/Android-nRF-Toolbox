@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="csc_title">Cyclic and speed cadence</string>
+    <string name="csc_title">Cycling and speed cadence</string>
+    <string name="csc_cycling">Cycling</string>
 
     <string name="csc_dialog_title">Select wheel size</string>
 
@@ -13,5 +14,4 @@
     <string name="csc_field_wheel_size">Wheel size</string>
 
     <string name="csc_settings">Select unit</string>
-
 </resources>
