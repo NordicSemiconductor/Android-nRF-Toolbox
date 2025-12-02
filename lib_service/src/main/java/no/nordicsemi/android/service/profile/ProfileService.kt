@@ -132,7 +132,8 @@ internal class ProfileService : NotificationService() {
                         // Handle connecting/disconnecting states if needed
                     }
                 }
-            }.launchIn(this)
+            }
+            .launchIn(this)
     }
 
     /**

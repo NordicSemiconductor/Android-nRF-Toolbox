@@ -60,7 +60,8 @@ internal class CGMManager : ServiceManager {
             remoteService.characteristics
                 .firstOrNull { it.uuid == CGM_MEASUREMENT_UUID.toKotlinUuid() }
                 ?.subscribe()
-                ?.mapNotNull { CGMMeasurementParser.parse(it) }?.onEach { cgmRecords ->
+                ?.mapNotNull { CGMMeasurementParser.parse(it) }
+                ?.onEach { cgmRecords ->
                     if (sessionStartTime == 0L && !recordAccessRequestInProgress) {
                         val timeOffset = cgmRecords.minOf { it.timeOffset }
                         sessionStartTime = System.currentTimeMillis() - timeOffset * 60000L
@@ -72,7 +73,8 @@ internal class CGMManager : ServiceManager {
                     }.apply {
                         CGMRepository.onMeasurementDataReceived(deviceId, this)
                     }
-                }?.onCompletion { CGMRepository.clear(deviceId) }
+                }
+                ?.onCompletion { CGMRepository.clear(deviceId) }
                 ?.catch { it.logAndReport() }
                 ?.launchIn(scope)
 
