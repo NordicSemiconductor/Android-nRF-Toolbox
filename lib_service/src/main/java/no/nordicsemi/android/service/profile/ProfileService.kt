@@ -1,5 +1,6 @@
 package no.nordicsemi.android.service.profile
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
@@ -19,13 +20,11 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.log.timber.nRFLoggerTree
 import no.nordicsemi.android.service.NotificationService
 import no.nordicsemi.android.service.R
-import no.nordicsemi.android.toolbox.lib.utils.spec.CGMS_SERVICE_UUID
 import no.nordicsemi.android.toolbox.profile.manager.ServiceManager
 import no.nordicsemi.android.toolbox.profile.manager.ServiceManagerFactory
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.CentralManager.ConnectionOptions
-import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.BondState
 import no.nordicsemi.kotlin.ble.core.ConnectionState
@@ -33,7 +32,6 @@ import no.nordicsemi.kotlin.ble.core.WriteType
 import timber.log.Timber
 import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.toKotlinUuid
 
 @AndroidEntryPoint
 internal class ProfileService : NotificationService() {
@@ -134,7 +132,8 @@ internal class ProfileService : NotificationService() {
                         // Handle connecting/disconnecting states if needed
                     }
                 }
-            }.launchIn(this)
+            }
+            .launchIn(this)
     }
 
     /**
@@ -181,6 +180,7 @@ internal class ProfileService : NotificationService() {
     /**
      * Observes interactions for a specific service on the peripheral.
      */
+    @SuppressLint("TimberExceptionLogging")
     @OptIn(ExperimentalUuidApi::class)
     private suspend fun observeService(
         peripheral: Peripheral,
@@ -188,12 +188,9 @@ internal class ProfileService : NotificationService() {
         manager: ServiceManager
     ) {
         try {
-            if (service.uuid == CGMS_SERVICE_UUID.toKotlinUuid()) {
-                peripheral.ensureBonded()
-            }
             manager.observeServiceInteractions(peripheral.address, service, lifecycleScope)
         } catch (e: Exception) {
-            Timber.tag("ObserveServices").e(e)
+            Timber.e(e.message)
         }
     }
 
@@ -267,8 +264,6 @@ internal class ProfileService : NotificationService() {
 
             return try {
                 peripheral.requestHighestValueLength() // Request highest possible MTU
-                peripheral.requestConnectionPriority(ConnectionPriority.HIGH)
-                peripheral.readPhy()
                 peripheral.maximumWriteValueLength(writeType)
             } catch (e: Exception) {
                 Timber.e(e, "Failed to configure MTU for $address")
