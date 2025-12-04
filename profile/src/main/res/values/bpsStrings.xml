@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="bps_title">Blood pressure</string>
+    <string name="bps_intermediate_cuff_title">Intermediate cuff pressure</string>
 
     <string name="no_data_info_title">Waiting for Blood Pressure sample…</string>
     <string name="no_data_info">Click Button 1 on a DK to trigger one.</string>
 
+    <string name="bps_intermediate_cuff_pressure">Intermediate cuff pressure</string>
     <string name="bps_systolic">Systolic pressure</string>
     <string name="bps_diastolic">Diastolic pressure</string>
     <string name="bps_mean">Mean arterial pressure (AP)</string>
@@ -13,12 +15,22 @@
     <string name="bps_blood_pressure">%.2f %s</string>
     <string name="bps_timestamp">%1$te %1$tb %1$tY at %1$tT</string>
 
-    <string name="body_movement_detected">Body movement detected</string>
-    <string name="cuff_fit_detected">Cuff fit detected</string>
-    <string name="irregular_heart_rate_detected">Irregular heart rate detected</string>
-    <string name="pulse_rate_detected">Pulse rate in range </string>
-    <string name="measurement_position_detected">Measurement position detected</string>
-    <string name="improper_measurement_position">Improper measurement position</string>
-    <string name="pulse_rate_lower_limit">Pulse rate less than lower limit</string>
-    <string name="pulse_rate_higher_limit">Pulse rate exceeds upper limit</string>
+    <string name="bps_features_title">Supported features</string>
+    <string name="bps_feature_body_movement_detection">Body movement detection</string>
+    <string name="bps_feature_cuff_fit_detection">Cuff fit detection</string>
+    <string name="bps_feature_irregular_heart_rate_detection">Irregular heart rate detection</string>
+    <string name="bps_feature_pulse_rate_range_detection">Pulse rate range detection</string>
+    <string name="bps_feature_measurement_position_detection">Measurement position detection</string>
+    <string name="bps_feature_multiple_bonds">Multiple bonds</string>
+    <string name="bps_feature_e2e_crc">E2E CRC supported</string>
+    <string name="bps_feature_user_data">User data service supported</string>
+    <string name="bps_feature_user_facing_time">User facing time supported</string>
+
+    <string name="bps_status_title">Measurement status</string>
+    <string name="bps_status_body_movement_detected">Body movement detected</string>
+    <string name="bps_status_cuff_too_lose">Cuff too lose</string>
+    <string name="bps_status_irregular_heart_rate_detected">Irregular pulse detected</string>
+    <string name="bps_status_pulse_rate_lower_limit">Pulse rate less than lower limit</string>
+    <string name="bps_status_pulse_rate_higher_limit">Pulse rate exceeds upper limit</string>
+    <string name="bps_status_improper_measurement_position">Improper measurement position</string>
 </resources>

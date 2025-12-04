@@ -1,7 +1,6 @@
 package no.nordicsemi.android.toolbox.profile.parser.csc
 
 data class CSCData(
-    val scanDevices: Boolean = false,
     val speed: Float = 0f,
     val cadence: Float = 0f,
     val distance: Float = 0f,

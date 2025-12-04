@@ -1,22 +1,19 @@
 package no.nordicsemi.android.nrftoolbox.view
 
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,51 +22,44 @@ import no.nordicsemi.android.nrftoolbox.R
 
 @Composable
 internal fun FeatureButton(
-    @DrawableRes iconId: Int,
-    @StringRes description: Int,
-    profileNames: List<String> = listOf(stringResource(description)),
+    icon: Painter,
+    description: String,
+    profileNames: List<String> = listOf(description),
     deviceName: String?,
     deviceAddress: String,
     onClick: () -> Unit
 ) {
-    OutlinedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+    OutlinedCard(
+        onClick = onClick,
+    ) {
         Row(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Image(
-                painter = painterResource(iconId),
-                contentDescription = stringResource(id = description),
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
-                modifier = Modifier
-                    .size(40.dp)
+            Icon(
+                painter = icon,
+                contentDescription = deviceAddress,
+                tint = MaterialTheme.colorScheme.primary,
             )
 
             Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(
-                    modifier = Modifier.fillMaxWidth(),
                     text = deviceName ?: stringResource(R.string.unknown_device),
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
-                    modifier = Modifier.fillMaxWidth(),
                     text = profileNames.joinToString(", "),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = MaterialTheme.typography.bodyMedium,
                 )
-
-
                 Text(
-                    modifier = Modifier.fillMaxWidth(),
                     text = deviceAddress,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = LocalContentColor.current.copy(alpha = 0.6f),
                 )
             }
         }
@@ -80,63 +70,11 @@ internal fun FeatureButton(
 @Composable
 private fun FeatureButtonPreview() {
     FeatureButton(
-        R.drawable.ic_csc,
-        R.string.csc_module_full,
-        listOf("Cycling Speed and Cadence", "Cycling Speed Sensor"),
-        "Testing peripheral",
+        icon = painterResource(R.drawable.ic_csc),
+        description = stringResource(R.string.csc_module_full),
+        profileNames = listOf("Cycling Speed and Cadence", "Cycling Speed Sensor"),
+        deviceName = "Testing peripheral",
         deviceAddress = "AA:BB:CC:DD:EE:FF",
-    ) { }
-}
-
-@Composable
-internal fun FeatureButton(
-    iconId: ImageVector,
-    @StringRes description: Int,
-    profileNames: List<String> = listOf(stringResource(description)),
-    deviceName: String?,
-    deviceAddress: String,
-    onClick: () -> Unit
-) {
-    OutlinedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Image(
-                imageVector = iconId,
-                contentDescription = deviceAddress,
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
-                modifier = Modifier
-                    .size(40.dp)
-            )
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = deviceName ?: stringResource(R.string.unknown_device),
-                    style = MaterialTheme.typography.titleMedium,
-                )
-
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = profileNames.joinToString(", "),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = deviceAddress,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
+        onClick = {}
+    )
 }

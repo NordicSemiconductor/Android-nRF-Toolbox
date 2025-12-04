@@ -2,61 +2,49 @@ package no.nordicsemi.android.toolbox.profile.parser.csc
 
 data class WheelSize(
     val value: Int,
-    val name: String
-)
+    val name: String,
+    val description: String,
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as WheelSize
+        return value == other.value
+    }
+
+    override fun hashCode(): Int = value
+}
 
 object WheelSizes {
     val data = listOf(
-        WheelSize(2340, "60-622"),
-        WheelSize(2284, "50-622"),
-        WheelSize(2268, "47-622"),
-        WheelSize(2224, "44-622"),
-        WheelSize(2265, "40-635"),
-        WheelSize(2224, "40-622"),
-        WheelSize(2180, "38-622"),
-        WheelSize(2205, "37-622"),
-        WheelSize(2168, "35-622"),
-        WheelSize(2199, "32-630"),
-        WheelSize(2174, "32-622"),
-        WheelSize(2155, "32-622"),
-        WheelSize(2149, "28-622"),
-        WheelSize(2146, "60-559"),
-        WheelSize(2136, "28-622"),
-        WheelSize(2146, "25-622"),
-        WheelSize(2105, "25-622"),
-        WheelSize(2133, "23-622"),
-        WheelSize(2114, "20-622"),
-        WheelSize(2102, "18-622"),
-        WheelSize(2169, "35-630"),
-        WheelSize(2161, "32-630"),
-        WheelSize(2155, "28-630"),
-        WheelSize(2133, "57-559"),
-        WheelSize(2114, "54-559"),
-        WheelSize(2105, "37-590"),
-        WheelSize(2097, "23-622"),
-        WheelSize(2089, "50-559"),
-        WheelSize(2086, "20-622"),
-        WheelSize(2114, "54-559"),
-        WheelSize(2070, "47-559"),
-        WheelSize(2068, "35-590"),
-        WheelSize(2105, "37-590"),
-        WheelSize(2055, "47-559"),
-        WheelSize(2089, "50-559"),
-        WheelSize(2051, "44-559"),
-        WheelSize(2026, "40-559"),
-        WheelSize(1973, "23-571"),
-        WheelSize(1954, "20-571"),
-        WheelSize(1953, "32-559"),
-        WheelSize(1952, "25-571"),
-        WheelSize(1948, "34-540"),
-        WheelSize(1910, "50-507"),
-        WheelSize(1907, "47-507"),
-        WheelSize(1618, "28-451"),
-        WheelSize(1593, "50-406"),
-        WheelSize(1590, "47-406"),
-        WheelSize(1325, "28-369"),
-        WheelSize(1282, "35-349"),
-        WheelSize(1272, "47-305")
+        // Those were ChatGPT-generated. If incorrect, please update.
+        WheelSize(2201, "60-584", "27.5×2.35 / 650B"),
+        WheelSize(2166, "57-584", "27.5×2.25 / 650B"),
+        WheelSize(2132, "54-584", "27.5×2.1 / 650B"),
+        WheelSize(2089, "50-584", "27.5×2.0 / 650B"),
+        WheelSize(2055, "47-584", "27.5×1.75 / 650B"),
+
+        WheelSize(2071, "37-590", "27×1⅜ (Vintage Road)"),
+
+        WheelSize(2150, "60-559", "26×2.35 (26\" MTB)"),
+        WheelSize(2123, "57-559", "26×2.25 (26\" MTB)"),
+        WheelSize(2097, "54-559", "26×2.1 (26\" MTB)"),
+        WheelSize(2070, "50-559", "26×2.0 (26\" MTB)"),
+        WheelSize(2051, "47-559", "26×1.75 (26\" MTB)"),
+
+        WheelSize(2243, "45-622", "700×45c (Adventure/Gravel)"),
+        WheelSize(2192, "40-622", "700×40c (Gravel)"),
+        WheelSize(2169, "38-622", "700×38c (City/Gravel)"),
+        WheelSize(2139, "35-622", "700×35c (Hybrid/Gravel)"),
+        WheelSize(2108, "32-622", "700×32c (Commuter/Gravel)"),
+        WheelSize(2076, "28-622", "700×28c (All-Road)"),
+        WheelSize(2058, "25-622", "700×25c (Road Endurance)"),
+        WheelSize(2045, "23-622", "700×23c (Road Racing)"),
+
+        WheelSize(1888, "47-507", "24×1.75 (Kids/Junior MTB)"),
+
+        WheelSize(1634, "57-406", "20×2.125 (BMX/Folding)"),
+        WheelSize(1571, "47-406", "20×1.75 (BMX/Folding)"),
     )
     val default = data.first()
 

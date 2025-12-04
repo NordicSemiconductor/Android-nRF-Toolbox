@@ -67,8 +67,8 @@ internal fun NoConnectedDeviceView() {
             )
             Text(
                 text = stringResource(R.string.device_not_connected_message),
-                textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
             )
         }
     }

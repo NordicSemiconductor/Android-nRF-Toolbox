@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.common.ui.view.SectionTitle
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.PeripheralBluetoothAddress
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.elevation.ElevationMeasurementData
 import no.nordicsemi.android.toolbox.profile.R
@@ -16,13 +18,13 @@ import no.nordicsemi.android.toolbox.profile.data.SensorData
 import no.nordicsemi.android.toolbox.profile.data.SensorValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.medianValue
 import no.nordicsemi.android.ui.view.ScreenSection
-import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
 internal fun ElevationSection(data: SensorData) {
     ScreenSection {
         SectionTitle(
-            resId = R.drawable.ic_elevation, stringResource(id = R.string.elevation_section)
+            painter = painterResource(R.drawable.ic_elevation),
+            title = stringResource(id = R.string.elevation_section)
         )
 
         Row(

@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,11 +34,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.common.ui.view.SectionTitle
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.UARTRecord
 import no.nordicsemi.android.toolbox.profile.data.UARTRecordType
 import no.nordicsemi.android.toolbox.profile.viewmodel.UARTEvent
-import no.nordicsemi.android.ui.view.SectionTitle
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -46,85 +47,54 @@ internal fun OutputSection(
     records: List<UARTRecord>,
     onEvent: (UARTEvent) -> Unit
 ) {
-    Box(
+    // Scrollable message area
+    OutlinedCard(
         modifier = Modifier
-            .fillMaxSize()
-            .imePadding()
+            .imePadding(), // Set a fixed height for the message area
     ) {
-        // Scrollable message area
-        OutlinedCard(
+        SectionTitle(
+            icon = Icons.AutoMirrored.Filled.Chat,
+            title = "Messages",
+            modifier = Modifier.padding(16.dp),
+            menu = { Menu(onEvent) }
+        )
+
+        val listState = rememberLazyListState()
+        LaunchedEffect(records.size) {
+            listState.animateScrollToItem(records.lastIndex.coerceAtLeast(0))
+        }
+
+        LazyColumn(
+            state = listState,
             modifier = Modifier
-                .fillMaxSize()
-                .imePadding(), // Set a fixed height for the message area
+                .padding(horizontal = 16.dp)
+                .heightIn(max = 500.dp), // Set a fixed height for the message area
+            contentPadding = PaddingValues(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            SectionTitle(
-                icon = Icons.AutoMirrored.Filled.Chat,
-                title = "Messages",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                menu = { Menu(onEvent) }
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            val listState = rememberLazyListState()
-            LaunchedEffect(records.size) {
-                listState.animateScrollToItem(records.lastIndex.coerceAtLeast(0))
-            }
-
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .heightIn(max = 500.dp), // Set a fixed height for the message area
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                if (records.isEmpty()) {
-                    item {
-                        Text(
-                            text = stringResource(id = R.string.uart_output_placeholder),
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
-                } else {
-                    items(records) { record ->
-                        when (record.type) {
-                            UARTRecordType.INPUT -> MessageItemInput(record)
-                            UARTRecordType.OUTPUT -> MessageItemOutput(record)
-                        }
+            if (records.isEmpty()) {
+                item {
+                    Text(text = stringResource(id = R.string.uart_output_placeholder))
+                }
+            } else {
+                items(records) { record ->
+                    when (record.type) {
+                        UARTRecordType.INPUT -> MessageItemInput(record)
+                        UARTRecordType.OUTPUT -> MessageItemOutput(record)
                     }
                 }
             }
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surface)
-            ) {
-                Spacer(modifier = Modifier.weight(1f))
-                HorizontalDivider()
-                InputSection(
-                    onEvent = onEvent,
-                )
-            }
         }
+        HorizontalDivider()
+        InputSection(onEvent = onEvent)
     }
-}
 
-@Preview(showBackground = true)
-@Composable
-private fun OutputSectionPreview() {
-    OutputSection(
-        records = emptyList()
-    ) { }
 }
 
 @Composable
 private fun MessageItemInput(record: UARTRecord) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.End
     ) {
         Text(
@@ -133,12 +103,11 @@ private fun MessageItemInput(record: UARTRecord) {
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(4.dp))
-        Column(
+        Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp, bottomStart = 10.dp))
                 .background(MaterialTheme.colorScheme.primaryContainer)
                 .padding(8.dp),
-            horizontalAlignment = Alignment.End
         ) {
             Text(
                 text = record.text.visualizeNewlines(),
@@ -147,6 +116,73 @@ private fun MessageItemInput(record: UARTRecord) {
             )
         }
     }
+}
+
+@Composable
+private fun MessageItemOutput(record: UARTRecord) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            text = record.timeToString(),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp, bottomEnd = 10.dp))
+                .background(MaterialTheme.colorScheme.primary)
+                .padding(8.dp),
+        ) {
+            Text(
+                text = record.text,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+    }
+}
+
+@Composable
+private fun Menu(onEvent: (UARTEvent) -> Unit) {
+    Icon(
+        imageVector = Icons.Default.Delete,
+        contentDescription = stringResource(id = R.string.uart_clear_items),
+        modifier = Modifier
+            .clip(CircleShape)
+            .clickable { onEvent(UARTEvent.ClearOutputItems) }
+            .padding(8.dp),
+        tint = MaterialTheme.colorScheme.error,
+    )
+}
+
+@Preview
+@Composable
+private fun OutputSectionPreview_empty() {
+    OutputSection(
+        records = emptyList(),
+        onEvent = {},
+    )
+}
+
+@Preview
+@Composable
+private fun OutputSectionPreview() {
+    OutputSection(
+        records = listOf(
+            UARTRecord(
+                text = "Knock, knock!",
+                type = UARTRecordType.INPUT
+            ),
+            UARTRecord(
+                text = "Who's there?",
+                type = UARTRecordType.OUTPUT
+            ),
+        ),
+        onEvent = {},
+    )
 }
 
 @Preview(showBackground = true)
@@ -160,36 +196,6 @@ private fun MessageItemInputPreview() {
     )
 }
 
-@Composable
-private fun MessageItemOutput(record: UARTRecord) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        horizontalAlignment = Alignment.Start
-    ) {
-        Text(
-            text = record.timeToString(),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Column(
-            modifier = Modifier
-                .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp, bottomEnd = 10.dp))
-                .background(MaterialTheme.colorScheme.primary)
-                .padding(8.dp),
-            horizontalAlignment = Alignment.Start
-        ) {
-            Text(
-                text = record.text,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-        }
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun MessageItemOutputPreview() {
@@ -198,19 +204,6 @@ private fun MessageItemOutputPreview() {
             text = "Hello, World!",
             type = UARTRecordType.OUTPUT
         )
-    )
-}
-
-@Composable
-private fun Menu(onEvent: (UARTEvent) -> Unit) {
-    Icon(
-        Icons.Default.Delete,
-        contentDescription = stringResource(id = R.string.uart_clear_items),
-        modifier = Modifier
-            .clip(CircleShape)
-            .clickable { onEvent(UARTEvent.ClearOutputItems) }
-            .padding(8.dp),
-        tint = MaterialTheme.colorScheme.error,
     )
 }
 

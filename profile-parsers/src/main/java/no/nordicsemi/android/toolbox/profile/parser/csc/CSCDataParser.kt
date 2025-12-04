@@ -6,7 +6,6 @@ import java.nio.ByteOrder
 import kotlin.experimental.and
 
 object CSCDataParser {
-
     internal var previousData: CSCDataSnapshot = CSCDataSnapshot()
 
     internal var wheelRevolutions: Long = -1

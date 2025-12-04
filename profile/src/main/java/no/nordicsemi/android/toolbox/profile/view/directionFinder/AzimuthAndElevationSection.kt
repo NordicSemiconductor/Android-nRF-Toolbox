@@ -18,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.common.ui.view.SectionTitle
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.PeripheralBluetoothAddress
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.azimuthal.AzimuthMeasurementData
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.elevation.ElevationMeasurementData
@@ -28,14 +29,13 @@ import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.displayAzimuth
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.elevationValue
 import no.nordicsemi.android.ui.view.ScreenSection
-import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
 internal fun AzimuthAndElevationSection(data: SensorData, range: Range) {
     ScreenSection {
         SectionTitle(
-            R.drawable.ic_azimuth,
-            stringResource(id = R.string.azimuth_section)
+            painter = painterResource(id = R.drawable.ic_azimuth),
+            title = stringResource(id = R.string.azimuth_section)
         )
 
         Column(
@@ -70,13 +70,12 @@ internal fun AzimuthAndElevationSection(data: SensorData, range: Range) {
             }
 
             SectionTitle(
-                R.drawable.ic_elevation,
-                stringResource(id = R.string.elevation_section)
+                painter = painterResource(R.drawable.ic_elevation),
+                title = stringResource(id = R.string.elevation_section)
             )
             Box {
                 ElevationView(value = data.elevationValue()!!, data)
             }
-
         }
     }
 }

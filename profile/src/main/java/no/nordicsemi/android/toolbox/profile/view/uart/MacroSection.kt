@@ -31,14 +31,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.common.ui.view.SectionTitle
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.UARTViewState
 import no.nordicsemi.android.toolbox.profile.data.uart.UARTConfiguration
 import no.nordicsemi.android.toolbox.profile.viewmodel.UARTEvent
-import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
 internal fun MacroSection(
@@ -58,27 +59,25 @@ internal fun MacroSection(
         onEvent = onEvent
     )
 
-    Column {
-        OutlinedCard {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                MacroSectionTitle(
-                    onAddClick = { showAddDialog = true }
+    OutlinedCard {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            MacroSectionTitle(
+                onAddClick = { showAddDialog = true }
+            )
+
+            if (viewState.configurations.isNotEmpty()) {
+                MacroConfigControls(
+                    viewState = viewState,
+                    onDeleteClick = { showDeleteDialog = true },
+                    onEvent = onEvent
                 )
 
-                if (viewState.configurations.isNotEmpty()) {
-                    MacroConfigControls(
-                        viewState = viewState,
-                        onDeleteClick = { showDeleteDialog = true },
-                        onEvent = onEvent
-                    )
-
-                    viewState.selectedConfiguration?.let {
-                        UARTMacroView(it, viewState.isConfigurationEdited, onEvent)
-                    }
+                viewState.selectedConfiguration?.let {
+                    UARTMacroView(it, viewState.isConfigurationEdited, onEvent)
                 }
             }
         }
@@ -129,10 +128,13 @@ private fun MacroSectionTitle(
     onAddClick: () -> Unit,
 ) {
     SectionTitle(
-        resId = R.drawable.ic_macro,
+        painter = painterResource(R.drawable.ic_macro),
         title = stringResource(id = R.string.uart_macros),
         menu = {
-            CircleIcon(Icons.Default.Add, R.string.uart_configuration_add) { onAddClick() }
+            CircleIcon(
+                imageVector = Icons.Default.Add, R.string.uart_configuration_add,
+                onClick = onAddClick,
+            )
         }
     )
 }

@@ -6,7 +6,7 @@ import no.nordicsemi.android.toolbox.lib.utils.Profile
 data class ThroughputServiceData(
     override val profile: Profile = Profile.THROUGHPUT,
     val throughputData: ThroughputMetrics = ThroughputMetrics(),
-    val writingStatus: WritingStatus = WritingStatus.IDEAL,
+    val writingStatus: WritingStatus = WritingStatus.IDLE,
     val maxWriteValueLength: Int? = null
 ) : ProfileServiceData()
 
@@ -33,5 +33,5 @@ data class NumberOfSeconds(
 }
 
 enum class WritingStatus {
-    IDEAL, IN_PROGRESS, COMPLETED
+    IDLE, IN_PROGRESS, COMPLETED
 }

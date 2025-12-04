@@ -11,11 +11,11 @@ internal fun ThroughputMetrics.throughputDataReceived(): String {
 
     return when {
         megabytes >= 1 -> {
-            "${String.format(Locale.US, "%.2f", megabytes)} MB"
+            "${String.format(Locale.US, "%.2f", megabytes)} mB"
         }
 
         kilobytes > 0 -> {
-            "${String.format(Locale.US, "%.2f", kilobytes)} KB"
+            "${String.format(Locale.US, "%.2f", kilobytes)} kB"
         }
 
         else -> {
@@ -27,7 +27,7 @@ internal fun ThroughputMetrics.throughputDataReceived(): String {
 internal fun ThroughputMetrics.displayThroughput(): String {
     val kbps = (this.throughputBitsPerSecond / 8f) / 1024f
     return if (kbps > 0) {
-        "${String.format(Locale.US, "%.2f", kbps)} KBps"
+        "${String.format(Locale.US, "%.2f", kbps)} kBps"
     } else {
         "${this.throughputBitsPerSecond} bps"
     }
