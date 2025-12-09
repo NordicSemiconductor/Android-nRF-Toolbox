@@ -56,7 +56,7 @@ dependencyResolutionManagement {
         }
         // Fixed versions for Nordic libraries.
         create("nordic") {
-            from("no.nordicsemi.android:version-catalog:2025.11.02")
+            from("no.nordicsemi.android:version-catalog:2025.12.00")
         }
     }
 }
