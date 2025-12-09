@@ -31,47 +31,14 @@ platform :android do
     # You can also use other beta testing services here
   end
 
-  desc "Deploy a new version to the Google Play"
-  lane :deploy do
-    gradle(task: "clean assembleRelease")
-    gradle(task: "test")
-    upload_to_play_store
-  end
-
-  desc "Deploy build to Alpha channel."
-  lane :deployAlpha do
-    gradle(task: "clean bundleRelease")
-    gradle(task: "test")
-    upload_to_play_store(
-      track: 'alpha',
-      aab: 'app/build/outputs/bundle/release/app-release.aab'
-    )
-  end
-
-  desc "Deploy build to Beta channel."
-    lane :deployBeta do
-      gradle(task: "clean bundleRelease")
-      gradle(task: "test")
-      upload_to_play_store(
-        track: 'beta',
-        aab: 'app/build/outputs/bundle/release/app-release.aab'
-      )
-  end
-
   desc "Deploy build to internal channel."
     lane :deployInternal do
       gradle(task: "clean bundleRelease")
       upload_to_play_store(
         track: 'internal',
-        aab: 'app/build/outputs/bundle/release/app-release.aab'
+        aab: 'app/build/outputs/bundle/release/app-release.aab',
+        skip_upload_apk: true
       )
-  end
-
-  desc "Generate internal Play Store link to the apk"
-  lane :deployInternalLink do
-    gradle(task: "clean bundleRelease")
-    gradle(task: "test")
-    upload_to_play_store_internal_app_sharing(aab: 'sample/build/outputs/bundle/release/sample-release.aab')
   end
 
 end
