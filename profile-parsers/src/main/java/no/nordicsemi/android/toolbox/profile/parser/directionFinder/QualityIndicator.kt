@@ -1,4 +1,4 @@
-package no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance
+package no.nordicsemi.android.toolbox.profile.parser.directionFinder
 
 enum class QualityIndicator(val id: Int) {
     GOOD(0),

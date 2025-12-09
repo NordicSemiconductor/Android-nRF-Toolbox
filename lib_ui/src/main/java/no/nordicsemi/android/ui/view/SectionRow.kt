@@ -10,11 +10,13 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun SectionRow(
+    modifier: Modifier = Modifier,
+    verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
     content: @Composable RowScope.() -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = verticalAlignment,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         content()

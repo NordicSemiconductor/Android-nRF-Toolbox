@@ -31,7 +31,8 @@
   -->
 
 <resources>
-    <string name="gls_no_records_info">There is no data available. This peripheral downloads data only when requested. Please select what kind of data you want to download by clicking one from the working mode settings.</string>
+    <string name="gls_no_records_info">No records available.</string>
+    <string name="gls_no_records_hint">Tap Request button above to read records.</string>
 
     <string name="gls_timestamp">%1$te %1$tb %1$tY,%1$tT</string>
 
@@ -106,6 +107,7 @@
     <string name="gls_details_glucose_condensation_title">Glucose condensation </string>
     <string name="gls_details_glucose_condensation_field">%.2f %s</string>
 
+    <string name="gls_details_status_title">Measurement status</string>
     <string name="gls_details_battery_low">Battery low</string>
     <string name="gls_details_sensor_malfunction">Sensor malfunction</string>
     <string name="gls_details_insufficient_sample">Insufficient sample</string>

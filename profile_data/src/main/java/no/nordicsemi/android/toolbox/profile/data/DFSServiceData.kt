@@ -1,16 +1,13 @@
 package no.nordicsemi.android.toolbox.profile.data
 
+import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.PeripheralBluetoothAddress
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.azimuthal.AzimuthMeasurementData
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.ddf.DDFData
-import no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance.DistanceMode
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance.McpdMeasurementData
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance.RttMeasurementData
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.elevation.ElevationMeasurementData
 import no.nordicsemi.android.toolbox.profile.parser.gls.data.RequestStatus
-import no.nordicsemi.android.toolbox.lib.utils.Profile
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.MeasurementSection
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
 
 private const val MAX_STORED_ITEMS = 5
 
@@ -20,9 +17,8 @@ data class DFSServiceData(
     val data: Map<PeripheralBluetoothAddress, SensorData> = emptyMap(),
     val ddfFeature: DDFData? = null,
     val selectedDevice: PeripheralBluetoothAddress? = null,
-    val distanceRange: Range = Range(0, 50),
+    val distanceRange: IntRange = 0..50,
 ) : ProfileServiceData() {
-
     private val isMcpdAvailable = ddfFeature?.isMcpdAvailable
     private val isRttAvailable = ddfFeature?.isRttAvailable
 
@@ -44,8 +40,6 @@ data class SensorData(
     val elevation: SensorValue<ElevationMeasurementData>? = null,
     val mcpdDistance: SensorValue<McpdMeasurementData>? = null,
     val rttDistance: SensorValue<RttMeasurementData>? = null,
-    val distanceMode: DistanceMode? = null,
-    val selectedMeasurementSection: MeasurementSection? = null
 )
 
 data class SensorValue<T>(

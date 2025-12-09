@@ -31,8 +31,6 @@
 
 package no.nordicsemi.android.toolbox.profile.view.battery
 
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.outlined.Battery0Bar
@@ -49,83 +47,59 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import no.nordicsemi.android.common.theme.nordicGrass
 import no.nordicsemi.android.common.theme.nordicGreen
+import no.nordicsemi.android.common.theme.nordicSun
+import no.nordicsemi.android.common.ui.view.SectionTitle
 import no.nordicsemi.android.toolbox.profile.viewmodel.BatteryViewModel
 import no.nordicsemi.android.ui.R
 import no.nordicsemi.android.ui.view.ScreenSection
-import no.nordicsemi.android.ui.view.SectionTitle
 
 @Composable
 internal fun BatteryScreen() {
     val batteryViewModel = hiltViewModel<BatteryViewModel>()
     val batteryServiceData by batteryViewModel.batteryServiceState.collectAsStateWithLifecycle()
 
+    BatteryView(batteryServiceData.batteryLevel)
+}
+
+@Composable
+private fun BatteryView(batteryLevel: Int?) {
     ScreenSection {
         SectionTitle(
             icon = Icons.Default.BatteryChargingFull,
             title = stringResource(id = R.string.field_battery),
             menu = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(start = 8.dp)
-                ) {
-                    batteryServiceData.batteryLevel?.let { batteryLevel ->
-                        DynamicBatteryStatus(batteryLevel)
-                        Text(text = "$batteryLevel %")
-                    }
+                batteryLevel?.let { batteryLevel ->
+                    Text(text = "$batteryLevel%")
+                    DynamicBatteryStatus(batteryLevel)
                 }
             }
         )
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-internal fun DynamicBatteryStatus(batteryLevel: Int = 40) {
+private fun DynamicBatteryStatus(batteryLevel: Int) {
     val (batteryIcon: ImageVector, color: Color) = when {
-        batteryLevel > 95 -> {
-            Icons.Outlined.BatteryFull to nordicGreen
-        } // Full Battery
-        batteryLevel > 80 -> {
-            Icons.Outlined.Battery6Bar to nordicGreen
-        }
-
-        batteryLevel > 70 -> {
-            Icons.Outlined.Battery5Bar to nordicGreen
-        } // Moderate Battery
-        batteryLevel > 55 -> {
-            Icons.Outlined.Battery4Bar to nordicGreen
-        } // Moderate Battery
-
-        batteryLevel > 40 -> {
-            Icons.Outlined.Battery3Bar to nordicGreen
-        } // Moderate Battery
-
-        batteryLevel > 25 -> {
-            Icons.Outlined.Battery2Bar to nordicGrass
-        } // Low Battery
-
-        batteryLevel > 10 -> {
-            Icons.Outlined.Battery1Bar to MaterialTheme.colorScheme.error
-        }  // Low Battery
-
-        batteryLevel > 5 -> {
-            Icons.Outlined.Battery0Bar to MaterialTheme.colorScheme.error
-        } // Low Battery
-
-        else -> {
-            Icons.Outlined.BatteryAlert to MaterialTheme.colorScheme.error
-        } // Critically Low Battery
+        // Full Battery
+        batteryLevel > 95 -> Icons.Outlined.BatteryFull to nordicGreen
+        batteryLevel > 80 -> Icons.Outlined.Battery6Bar to nordicGreen
+        batteryLevel > 70 -> Icons.Outlined.Battery5Bar to nordicGreen
+        // Moderate Battery
+        batteryLevel > 55 -> Icons.Outlined.Battery4Bar to nordicSun
+        batteryLevel > 40 -> Icons.Outlined.Battery3Bar to nordicSun
+        batteryLevel > 25 -> Icons.Outlined.Battery2Bar to nordicSun
+        // Low Battery
+        batteryLevel > 10 -> Icons.Outlined.Battery1Bar to MaterialTheme.colorScheme.error
+        batteryLevel > 5 -> Icons.Outlined.Battery0Bar to MaterialTheme.colorScheme.error
+        // Critically Low Battery
+        else -> Icons.Outlined.BatteryAlert to MaterialTheme.colorScheme.error
     }
 
     Icon(
@@ -133,4 +107,34 @@ internal fun DynamicBatteryStatus(batteryLevel: Int = 40) {
         contentDescription = "Battery icon",
         tint = color,
     )
+}
+
+@Preview
+@Composable
+private fun BatteryPreview() {
+    BatteryView(100)
+}
+
+@Preview
+@Composable
+private fun BatteryPreview_50() {
+    BatteryView(50)
+}
+
+@Preview
+@Composable
+private fun BatteryPreview_20() {
+    BatteryView(20)
+}
+
+@Preview
+@Composable
+private fun BatteryPreview_0() {
+    BatteryView(0)
+}
+
+@Preview
+@Composable
+private fun BatteryPreview_unknown() {
+    BatteryView(null)
 }

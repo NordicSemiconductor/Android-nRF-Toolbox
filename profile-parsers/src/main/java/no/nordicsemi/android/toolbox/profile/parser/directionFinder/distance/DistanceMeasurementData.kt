@@ -1,26 +1,24 @@
 package no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance
 
 import no.nordicsemi.android.toolbox.profile.parser.directionFinder.PeripheralBluetoothAddress
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.QualityIndicator
 
-sealed interface DistanceMeasurementData {
-    val flags: Byte
-    val quality: QualityIndicator
-    val address: PeripheralBluetoothAddress
-}
+sealed class DistanceMeasurementData(
+    open val quality: QualityIndicator,
+    open val address: PeripheralBluetoothAddress
+)
 
 data class McpdMeasurementData(
-    override val flags: Byte = Byte.MAX_VALUE,
-    override val quality: QualityIndicator = QualityIndicator.GOOD,
+    override val quality: QualityIndicator,
     override val address: PeripheralBluetoothAddress,
-    val mcpd: MCPDEstimate = MCPDEstimate()
-) : DistanceMeasurementData
+    val mcpd: MCPDEstimate
+) : DistanceMeasurementData(quality, address)
 
 data class RttMeasurementData(
-    override val flags: Byte = Byte.MAX_VALUE,
-    override val quality: QualityIndicator = QualityIndicator.GOOD,
+    override val quality: QualityIndicator,
     override val address: PeripheralBluetoothAddress,
     val rtt: RTTEstimate = RTTEstimate()
-) : DistanceMeasurementData
+) : DistanceMeasurementData(quality, address)
 
 data class MCPDEstimate(
     val ifft: Int = 0,
@@ -28,25 +26,18 @@ data class MCPDEstimate(
     val rssi: Int = 0,
     val best: Int = 0
 ) {
-
-    operator fun plus(value: Int): MCPDEstimate {
-        return MCPDEstimate(
-            ifft + value,
-            phaseSlope + value,
-            rssi + value,
-            best + value
-        )
-    }
+    operator fun plus(value: Int): MCPDEstimate = MCPDEstimate(
+        ifft + value,
+        phaseSlope + value,
+        rssi + value,
+        best + value
+    )
 }
 
 data class RTTEstimate(
     val value: Int = 0
 ) {
-    operator fun inc(): RTTEstimate {
-        return RTTEstimate(value + 1)
-    }
+    operator fun inc(): RTTEstimate = RTTEstimate(value + 1)
 
-    operator fun plus(value: Int): RTTEstimate {
-        return RTTEstimate(this.value + value)
-    }
+    operator fun plus(value: Int): RTTEstimate = RTTEstimate(this.value + value)
 }

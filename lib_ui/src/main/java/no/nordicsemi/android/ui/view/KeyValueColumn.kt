@@ -1,9 +1,7 @@
 package no.nordicsemi.android.ui.view
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,37 +15,84 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun KeyValueColumn(
-    value: String,
     key: String,
     modifier: Modifier = Modifier,
-    verticalSpacing: Dp = 8.dp,
-    keyStyle: TextStyle?= null
+    verticalSpacing: Dp = 4.dp,
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start,
+    value: @Composable () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .padding(end = 8.dp)
+    Column(
+        verticalArrangement = Arrangement.spacedBy(verticalSpacing),
+        horizontalAlignment = horizontalAlignment,
+        modifier = modifier,
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(verticalSpacing),
-            horizontalAlignment = Alignment.Start,
-            modifier = modifier
-        ) {
+        Text(
+            text = key,
+            style = MaterialTheme.typography.labelMedium,
+            overflow = TextOverflow.Ellipsis,
+        )
+        value()
+    }
+}
+
+@Composable
+fun KeyValueColumn(
+    key: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    verticalSpacing: Dp = 4.dp,
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start,
+    valueStyle: TextStyle = MaterialTheme.typography.bodyLarge
+) {
+    KeyValueColumn(
+        key = key,
+        modifier = modifier,
+        verticalSpacing = verticalSpacing,
+        horizontalAlignment = horizontalAlignment,
+        value = {
             Text(
                 text = value,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = key,
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 2,
+                style = valueStyle,
                 overflow = TextOverflow.Ellipsis,
-                style = keyStyle ?: MaterialTheme.typography.bodyLarge
             )
         }
-    }
+    )
+}
+
+@Composable
+fun KeyValueColumnReverse(
+    key: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    verticalSpacing: Dp = 4.dp,
+    horizontalAlignment: Alignment.Horizontal = Alignment.End,
+    valueStyle: TextStyle = MaterialTheme.typography.bodyLarge
+) {
+    KeyValueColumn(
+        key = key,
+        value = value,
+        modifier = modifier,
+        verticalSpacing = verticalSpacing,
+        horizontalAlignment = horizontalAlignment,
+        valueStyle = valueStyle,
+    )
+}
+
+@Composable
+fun KeyValueColumnReverse(
+    key: String,
+    modifier: Modifier = Modifier,
+    verticalSpacing: Dp = 4.dp,
+    horizontalAlignment: Alignment.Horizontal = Alignment.End,
+    value: @Composable () -> Unit
+) {
+    KeyValueColumn(
+        key = key,
+        modifier = modifier,
+        verticalSpacing = verticalSpacing,
+        horizontalAlignment = horizontalAlignment,
+        value = value
+    )
 }
 
 @Preview(showBackground = true)
@@ -56,97 +101,5 @@ private fun KeyValueColumnPreview() {
     KeyValueColumn(
         value = "Sample Value",
         key = "Sample Key",
-//        keyStyle = MaterialTheme.typography.labelLarge
     )
-}
-
-@Composable
-fun KeyValueColumn(
-    value: String,
-    modifier: Modifier = Modifier,
-    key: @Composable (() -> Unit)
-) {
-    Box(
-        modifier = Modifier
-            .padding(end = 8.dp)
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.Start,
-            modifier = modifier
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-            key()
-        }
-    }
-}
-
-@Composable
-fun KeyValueColumnReverse(
-    value: String,
-    key: String,
-    modifier: Modifier = Modifier,
-    verticalSpacing: Dp = 8.dp,
-    keyStyle: TextStyle? = null,
-) {
-    Box(
-        modifier = Modifier
-            .padding(start = 8.dp),
-        contentAlignment = Alignment.TopEnd,
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(verticalSpacing),
-            horizontalAlignment = Alignment.End,
-            modifier = modifier
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = key,
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                style = keyStyle ?: MaterialTheme.typography.bodyLarge
-            )
-        }
-    }
-}
-
-@Composable
-fun KeyValueColumnReverse(
-    value: String,
-    modifier: Modifier = Modifier,
-    key: @Composable (() -> Unit)
-) {
-    Box(
-        modifier = Modifier
-            .padding(start = 8.dp),
-        contentAlignment = Alignment.TopEnd,
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.End,
-            modifier = modifier
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-            key()
-        }
-    }
 }

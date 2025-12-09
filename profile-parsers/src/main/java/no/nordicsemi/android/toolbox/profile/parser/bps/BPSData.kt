@@ -1,7 +1,5 @@
 package no.nordicsemi.android.toolbox.profile.parser.bps
 
-import androidx.annotation.FloatRange
-import androidx.annotation.IntRange
 import java.util.Calendar
 
 enum class BloodPressureType(internal val value: Int) {
@@ -21,10 +19,10 @@ data class BloodPressureMeasurementData(
 )
 
 data class IntermediateCuffPressureData(
-    @param:FloatRange(from = 0.0) val cuffPressure: Float,
+    val cuffPressure: Float,
     val unit: BloodPressureType,
-    @param:FloatRange(from = 0.0) val pulseRate: Float? = null,
-    @param:IntRange(from = 0, to = 255) val userID: Int? = null,
+    val pulseRate: Float? = null,
+    val userID: Int? = null,
     val status: BPMStatus? = null,
     val calendar: Calendar? = null
 )

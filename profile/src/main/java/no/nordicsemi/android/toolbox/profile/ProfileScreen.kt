@@ -8,10 +8,8 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -24,7 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.common.permissions.ble.RequireLocation
@@ -71,9 +69,7 @@ internal fun ProfileScreen() {
 
     Scaffold(
         contentWindowInsets = WindowInsets.displayCutout
-            .only(WindowInsetsSides.Horizontal)
-            .union(WindowInsets.navigationBars),
-//            .only(NavigationS),
+            .only(WindowInsetsSides.Horizontal),
         topBar = {
             // The device name is derived directly from the current state.
             val deviceName = (uiState as? ProfileUiState.Connected)
@@ -100,6 +96,9 @@ internal fun ProfileScreen() {
                             .fillMaxSize()
                             .padding(paddingValues)
                             .verticalScroll(rememberScrollState())
+                            .padding(all = 16.dp)
+                            // Additional bottom padding.
+                            .padding(bottom = 16.dp)
                             .imePadding(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
@@ -115,29 +114,23 @@ internal fun ProfileScreen() {
                                 if (state.reason == null) {
                                     // This is the initial state before connection attempt
                                     // show device connecting view instead.
-                                    DeviceConnectingView(
-                                        modifier = Modifier.padding(16.dp)
-                                    )
+                                    DeviceConnectingView()
                                 } else {
                                     DeviceDisconnectedView(
                                         disconnectedReason = state.reason.displayMessage(),
                                         isMissingService = false,
-                                        modifier = Modifier.padding(16.dp),
                                     ) {
                                         Button(
                                             modifier = Modifier.padding(16.dp),
                                             onClick = { onEvent(ConnectionEvent.OnRetryClicked) },
-
-                                            ) {
+                                        ) {
                                             Text(text = stringResource(id = R.string.reconnect))
                                         }
                                     }
                                 }
                             }
 
-                            ProfileUiState.Loading -> DeviceConnectingView(
-                                modifier = Modifier.padding(16.dp)
-                            )
+                            ProfileUiState.Loading -> DeviceConnectingView()
                         }
                     }
                 }
@@ -156,16 +149,12 @@ internal fun DeviceConnectedView(
     if (state.isMissingServices) {
         DeviceDisconnectedView(
             reason = DisconnectReason.MISSING_SERVICE,
-            modifier = Modifier.padding(16.dp)
         )
         return
     }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier
-            .padding(16.dp)
-            .imePadding()
     ) {
         // Show service discovery view if services are not yet available.
         if (state.deviceData.services.isEmpty()) {

@@ -9,10 +9,12 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,7 +43,6 @@ import no.nordicsemi.android.toolbox.profile.parser.directionFinder.azimuthal.Az
 import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.data.SensorData
 import no.nordicsemi.android.toolbox.profile.data.SensorValue
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.azimuthValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.distanceValue
 import no.nordicsemi.android.ui.view.CircleTransitionState
@@ -50,7 +51,7 @@ import no.nordicsemi.android.ui.view.createCircleTransition
 @Composable
 internal fun AzimuthView(
     sensorData: SensorData,
-    range: Range
+    range: IntRange
 ) {
     val azimuthValue = sensorData.azimuthValue() ?: return
     val distance = sensorData.distanceValue()
@@ -76,10 +77,22 @@ internal fun AzimuthView(
     }
 
     Box {
+        Image(
+            painter = painterResource(id = R.drawable.ic_azimuth),
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+            contentDescription = null,
+            modifier = Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                    shape = CircleShape
+                )
+                .size(200.dp)
+        )
+        
         // Render the main canvas
         RenderAzimuthCanvas(
             radius = radius,
-            circleBorderColor = MaterialTheme.colorScheme.secondary,
+            circleBorderColor = MaterialTheme.colorScheme.surfaceVariant,
             transition = transition,
             distance = distance,
             isClose = isClose(sensorData, range),
@@ -105,7 +118,7 @@ private fun RenderAzimuthCanvas(
     transition: CircleTransitionState,
     distance: Int?,
     isClose: Boolean,
-    range: Range,
+    range: IntRange,
     duration: Int,
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "InfiniteTransition")
@@ -219,12 +232,12 @@ private fun RenderArrow(azimuthValue: Int, dotColor: Color, modifier: Modifier) 
     )
 }
 
-private fun calculateProgressWidth(range: Range, distance: Int?): Float {
+private fun calculateProgressWidth(range: IntRange, distance: Int?): Float {
     return when {
         distance == null -> 0f
-        distance <= range.from -> 0f
-        distance >= range.to -> 1f
-        else -> (distance.toFloat() - range.from) / (range.to - range.from)
+        distance <= range.first -> 0f
+        distance >= range.last -> 1f
+        else -> (distance.toFloat() - range.first) / (range.last - range.first)
     }
 }
 
@@ -244,9 +257,9 @@ private fun InfiniteTransition.createInfiniteFloatAnimation(
     ).value
 }
 
-private fun isClose(sensorData: SensorData, range: Range): Boolean {
-    val validatedValue = sensorData.distanceValue()?.coerceIn(range.from, range.to) ?: 0
-    return validatedValue <= range.from || (validatedValue - range.from) < 10
+private fun isClose(sensorData: SensorData, range: IntRange): Boolean {
+    val validatedValue = sensorData.distanceValue()?.coerceIn(range) ?: 0
+    return validatedValue <= range.first || (validatedValue - range.first) < 10
 }
 
 @Preview(showBackground = true)
@@ -256,11 +269,11 @@ private fun AzimuthViewPreview() {
         azimuth = SensorValue(
             values = listOf(
                 AzimuthMeasurementData(
-                    azimuth = 20,
+                    azimuth = 7,
                     address = PeripheralBluetoothAddress.TEST
                 )
             )
         )
     )
-    AzimuthView(sensorData, Range(0, 50))
+    AzimuthView(sensorData, 0..50)
 }

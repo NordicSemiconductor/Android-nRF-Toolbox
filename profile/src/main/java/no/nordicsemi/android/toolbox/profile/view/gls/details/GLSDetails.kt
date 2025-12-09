@@ -1,5 +1,6 @@
 package no.nordicsemi.android.toolbox.profile.view.gls.details
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.parser.gls.data.Carbohydrate
 import no.nordicsemi.android.toolbox.profile.parser.gls.data.ConcentrationUnit
 import no.nordicsemi.android.toolbox.profile.parser.gls.data.GLSMeasurementContext
@@ -26,14 +28,13 @@ import no.nordicsemi.android.toolbox.profile.parser.gls.data.MedicationUnit
 import no.nordicsemi.android.toolbox.profile.parser.gls.data.RecordType
 import no.nordicsemi.android.toolbox.profile.parser.gls.data.SampleLocation
 import no.nordicsemi.android.toolbox.profile.parser.gls.data.Tester
-import no.nordicsemi.android.toolbox.profile.R
 import no.nordicsemi.android.toolbox.profile.view.gls.glucoseConcentrationDisplayValue
 import no.nordicsemi.android.toolbox.profile.view.gls.toDisplayString
 import no.nordicsemi.android.ui.view.KeyValueColumn
 import no.nordicsemi.android.ui.view.KeyValueColumnReverse
 import no.nordicsemi.android.ui.view.KeyValueField
-import no.nordicsemi.android.ui.view.ScreenSection
 import no.nordicsemi.android.ui.view.SectionRow
+import no.nordicsemi.android.ui.view.SubsectionTitle
 import no.nordicsemi.android.ui.view.dialog.toBooleanText
 import java.util.Calendar
 
@@ -43,238 +44,188 @@ internal fun GLSDetails(record: GLSRecord, context: GLSMeasurementContext?) {
         modifier = Modifier
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        ScreenSection {
-            Column {
-                SectionRow {
-                    KeyValueColumn(
-                        stringResource(id = R.string.gls_details_sequence_number),
-                        record.sequenceNumber.toString()
-                    )
-                    record.time?.let {
-                        KeyValueColumnReverse(
-                            stringResource(id = R.string.gls_details_date_and_time),
-                            stringResource(R.string.gls_timestamp, it)
-                        )
-                    }
-                }
-
-            }
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.padding(vertical = 8.dp)
+        SectionRow {
+            KeyValueColumn(
+                key = stringResource(id = R.string.gls_details_sequence_number),
+                value = record.sequenceNumber.toString()
             )
-
-            SectionRow {
-                record.type?.let {
-                    KeyValueColumn(
-                        stringResource(id = R.string.gls_details_type), it.toDisplayString()
-                    )
-                }
-                record.sampleLocation?.let {
-                    KeyValueColumnReverse(
-                        stringResource(id = R.string.gls_details_location),
-                        it.toDisplayString()
-                    )
-                }
-
-            }
-            SectionRow {
-                record.glucoseConcentration?.let { glucoseConcentration ->
-                    record.unit?.let { unit ->
-                        KeyValueColumn(
-                            stringResource(id = R.string.gls_details_glucose_condensation_title),
-                            glucoseConcentrationDisplayValue(glucoseConcentration, unit),
-                            keyStyle = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                }
-            }
-
-            record.status?.let {
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.padding(vertical = 8.dp)
+            record.time?.let {
+                KeyValueColumnReverse(
+                    key = stringResource(id = R.string.gls_details_date_and_time),
+                    value = stringResource(R.string.gls_timestamp, it)
                 )
-                Text(
-                    "Glucose status",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-
-                SectionRow {
-                    KeyValueColumn(
-                        stringResource(id = R.string.gls_details_battery_low),
-                        it.deviceBatteryLow.toBooleanText(),
-                        verticalSpacing = 4.dp
-                    )
-                    KeyValueColumnReverse(
-                        stringResource(id = R.string.gls_details_sensor_malfunction),
-                        it.sensorMalfunction.toBooleanText(),
-                        verticalSpacing = 4.dp
-                    )
-                }
-                SectionRow {
-                    KeyValueColumn(
-                        stringResource(id = R.string.gls_details_insufficient_sample),
-                        it.sampleSizeInsufficient.toBooleanText(),
-                        verticalSpacing = 4.dp
-                    )
-                    KeyValueColumnReverse(
-                        stringResource(id = R.string.gls_details_strip_insertion_error),
-                        it.stripInsertionError.toBooleanText(),
-                        verticalSpacing = 4.dp
-                    )
-                }
-                SectionRow {
-                    KeyValueColumn(
-                        stringResource(id = R.string.gls_details_strip_type_incorrect),
-                        it.stripTypeIncorrect.toBooleanText(),
-                        verticalSpacing = 4.dp
-                    )
-                    KeyValueColumnReverse(
-                        stringResource(id = R.string.gls_details_sensor_result_too_high),
-                        it.sensorResultHigherThenDeviceCanProcess.toBooleanText(),
-                        verticalSpacing = 4.dp
-                    )
-                }
-
-                SectionRow {
-                    KeyValueColumn(
-                        stringResource(id = R.string.gls_details_sensor_result_too_low),
-                        it.sensorResultLowerThenDeviceCanProcess.toBooleanText(),
-                        verticalSpacing = 4.dp
-                    )
-                    KeyValueColumnReverse(
-                        stringResource(id = R.string.gls_details_temperature_too_high),
-                        it.sensorTemperatureTooHigh.toBooleanText(),
-                        verticalSpacing = 4.dp
-                    )
-                }
-
-                SectionRow {
-                    KeyValueColumn(
-                        stringResource(id = R.string.gls_details_temperature_too_low),
-                        it.sensorTemperatureTooLow.toBooleanText(),
-                        verticalSpacing = 4.dp
-                    )
-                    KeyValueColumnReverse(
-                        stringResource(id = R.string.gls_details_strip_pulled_too_soon),
-                        it.sensorReadInterrupted.toBooleanText(),
-                        verticalSpacing = 4.dp
-                    )
-                }
-
-                SectionRow {
-                    KeyValueColumn(
-                        stringResource(id = R.string.gls_details_general_device_fault),
-                        it.generalDeviceFault.toBooleanText(),
-                        verticalSpacing = 4.dp
-                    )
-                    KeyValueColumnReverse(
-                        stringResource(id = R.string.gls_details_time_fault),
-                        it.timeFault.toBooleanText(),
-                        verticalSpacing = 4.dp
-                    )
-                }
             }
-
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            context?.let { glsMeasurementContext ->
-                Text(
-                    stringResource(id = R.string.gls_context_title),
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-                SectionRow {
-                    KeyValueColumn(
-                        stringResource(id = R.string.gls_details_sequence_number),
-                        glsMeasurementContext.sequenceNumber.toString(),
-                        verticalSpacing = 4.dp
-                    )
-                    glsMeasurementContext.carbohydrate?.let {
-                        val carbohydrateAmount = glsMeasurementContext.carbohydrateAmount
-                        KeyValueColumnReverse(
-                            stringResource(id = R.string.gls_context_carbohydrate),
-                            it.toDisplayString() + " ($carbohydrateAmount g)",
-                            verticalSpacing = 4.dp
-                        )
-                    }
-                }
-                SectionRow {
-                    glsMeasurementContext.meal?.let {
-                        KeyValueColumn(
-                            stringResource(id = R.string.gls_context_meal),
-                            it.toDisplayString(),
-                            verticalSpacing = 4.dp
-                        )
-                    }
-                    glsMeasurementContext.tester?.let {
-                        KeyValueColumnReverse(
-                            stringResource(id = R.string.gls_context_tester),
-                            it.toDisplayString(),
-                            verticalSpacing = 4.dp
-                        )
-                    }
-                }
-                SectionRow {
-                    glsMeasurementContext.health?.let {
-                        KeyValueColumn(
-                            stringResource(id = R.string.gls_context_health),
-                            it.toDisplayString(),
-                            verticalSpacing = 4.dp
-                        )
-                    }
-                    glsMeasurementContext.exerciseDuration?.let { duration ->
-                        glsMeasurementContext.exerciseIntensity?.let { exerciseIntensity ->
-                            KeyValueColumnReverse(
-                                stringResource(id = R.string.gls_context_exercise_title),
-                                stringResource(
-                                    id = R.string.gls_context_exercise_field,
-                                    getExerciseDuration(duration),
-                                    exerciseIntensity
-                                ),
-                                verticalSpacing = 4.dp
-                            )
-                        }
-                    }
-                }
-                SectionRow {
-                    glsMeasurementContext.medicationUnit?.let { medicationUnit ->
-                        val medicationField = String.format(
-                            stringResource(id = R.string.gls_context_medication_field),
-                            glsMeasurementContext.medication?.toDisplayString(),
-                            glsMeasurementContext.medicationQuantity,
-                            medicationUnit.toDisplayString()
-                        )
-                        KeyValueColumn(
-                            stringResource(id = R.string.gls_context_medication_title),
-                            medicationField,
-                            verticalSpacing = 4.dp
-                        )
-                    }
-
-                    glsMeasurementContext.HbA1c?.let { hbA1c ->
-                        KeyValueColumnReverse(
-                            stringResource(id = R.string.gls_context_hba1c_title),
-                            stringResource(id = R.string.gls_context_hba1c_field, hbA1c),
-                            verticalSpacing = 4.dp
-                        )
-                    }
-                }
-
-            } ?: KeyValueField(
-                stringResource(id = R.string.gls_context_title),
-                stringResource(id = R.string.gls_unavailable)
-            )
         }
+
+        SectionRow {
+            record.type?.let {
+                KeyValueColumn(
+                    key = stringResource(id = R.string.gls_details_type),
+                    value = it.toDisplayString()
+                )
+            }
+            record.sampleLocation?.let {
+                KeyValueColumnReverse(
+                    key = stringResource(id = R.string.gls_details_location),
+                    value = it.toDisplayString()
+                )
+            }
+        }
+        record.glucoseConcentration?.let { glucoseConcentration ->
+            record.unit?.let { unit ->
+                KeyValueColumn(
+                    key = stringResource(id = R.string.gls_details_glucose_condensation_title),
+                    value = glucoseConcentrationDisplayValue(glucoseConcentration, unit),
+                )
+            }
+        }
+
+        record.status?.let {
+            SubsectionTitle(
+                text = stringResource(R.string.gls_details_status_title)
+            )
+
+            SectionRow {
+                KeyValueColumn(
+                    key = stringResource(id = R.string.gls_details_battery_low),
+                    value = it.deviceBatteryLow.toBooleanText(),
+                )
+                KeyValueColumnReverse(
+                    key = stringResource(id = R.string.gls_details_sensor_malfunction),
+                    value = it.sensorMalfunction.toBooleanText(),
+                )
+            }
+            SectionRow {
+                KeyValueColumn(
+                    key = stringResource(id = R.string.gls_details_insufficient_sample),
+                    value = it.sampleSizeInsufficient.toBooleanText(),
+                )
+                KeyValueColumnReverse(
+                    key = stringResource(id = R.string.gls_details_strip_insertion_error),
+                    value = it.stripInsertionError.toBooleanText(),
+                )
+            }
+            SectionRow {
+                KeyValueColumn(
+                    key = stringResource(id = R.string.gls_details_strip_type_incorrect),
+                    value = it.stripTypeIncorrect.toBooleanText(),
+                )
+                KeyValueColumnReverse(
+                    key = stringResource(id = R.string.gls_details_sensor_result_too_high),
+                    value = it.sensorResultHigherThenDeviceCanProcess.toBooleanText(),
+                )
+            }
+            SectionRow {
+                KeyValueColumn(
+                    key = stringResource(id = R.string.gls_details_sensor_result_too_low),
+                    value = it.sensorResultLowerThenDeviceCanProcess.toBooleanText(),
+                )
+                KeyValueColumnReverse(
+                    key = stringResource(id = R.string.gls_details_temperature_too_high),
+                    value = it.sensorTemperatureTooHigh.toBooleanText(),
+                )
+            }
+            SectionRow {
+                KeyValueColumn(
+                    key = stringResource(id = R.string.gls_details_temperature_too_low),
+                    value = it.sensorTemperatureTooLow.toBooleanText(),
+                )
+                KeyValueColumnReverse(
+                    key = stringResource(id = R.string.gls_details_strip_pulled_too_soon),
+                    value = it.sensorReadInterrupted.toBooleanText(),
+                )
+            }
+            SectionRow {
+                KeyValueColumn(
+                    key = stringResource(id = R.string.gls_details_general_device_fault),
+                    value = it.generalDeviceFault.toBooleanText(),
+                )
+                KeyValueColumnReverse(
+                    key = stringResource(id = R.string.gls_details_time_fault),
+                    value = it.timeFault.toBooleanText(),
+                )
+            }
+        }
+
+        context?.let { glsMeasurementContext ->
+            SubsectionTitle(
+                text = stringResource(id = R.string.gls_context_title)
+            )
+
+            SectionRow {
+                KeyValueColumn(
+                    key = stringResource(id = R.string.gls_details_sequence_number),
+                    value = glsMeasurementContext.sequenceNumber.toString(),
+                )
+                glsMeasurementContext.carbohydrate?.let {
+                    val carbohydrateAmount = glsMeasurementContext.carbohydrateAmount
+                    KeyValueColumnReverse(
+                        key = stringResource(id = R.string.gls_context_carbohydrate),
+                        value = it.toDisplayString() + " ($carbohydrateAmount g)",
+                    )
+                }
+            }
+            SectionRow {
+                glsMeasurementContext.meal?.let {
+                    KeyValueColumn(
+                        key = stringResource(id = R.string.gls_context_meal),
+                        value = it.toDisplayString(),
+                    )
+                }
+                glsMeasurementContext.tester?.let {
+                    KeyValueColumnReverse(
+                        key = stringResource(id = R.string.gls_context_tester),
+                        value = it.toDisplayString(),
+                    )
+                }
+            }
+            SectionRow {
+                glsMeasurementContext.health?.let {
+                    KeyValueColumn(
+                        key = stringResource(id = R.string.gls_context_health),
+                        value = it.toDisplayString(),
+                    )
+                }
+                glsMeasurementContext.exerciseDuration?.let { duration ->
+                    glsMeasurementContext.exerciseIntensity?.let { exerciseIntensity ->
+                        KeyValueColumnReverse(
+                            key = stringResource(id = R.string.gls_context_exercise_title),
+                            value = stringResource(
+                                id = R.string.gls_context_exercise_field,
+                                getExerciseDuration(duration),
+                                exerciseIntensity
+                            ),
+                        )
+                    }
+                }
+            }
+            SectionRow {
+                glsMeasurementContext.medicationUnit?.let { medicationUnit ->
+                    val medicationField = String.format(
+                        stringResource(id = R.string.gls_context_medication_field),
+                        glsMeasurementContext.medication?.toDisplayString(),
+                        glsMeasurementContext.medicationQuantity,
+                        medicationUnit.toDisplayString()
+                    )
+                    KeyValueColumn(
+                        key = stringResource(id = R.string.gls_context_medication_title),
+                        value = medicationField,
+                    )
+                }
+
+                glsMeasurementContext.HbA1c?.let { hbA1c ->
+                    KeyValueColumnReverse(
+                        key = stringResource(id = R.string.gls_context_hba1c_title),
+                        value = stringResource(id = R.string.gls_context_hba1c_field, hbA1c),
+                    )
+                }
+            }
+        } ?: KeyValueField(
+            key = stringResource(id = R.string.gls_context_title),
+            value = stringResource(id = R.string.gls_unavailable)
+        )
     }
 }
 

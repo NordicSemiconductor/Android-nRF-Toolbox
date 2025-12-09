@@ -18,26 +18,40 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.profile.R
+import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
 import no.nordicsemi.android.toolbox.profile.data.SensorData
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
+import no.nordicsemi.android.toolbox.profile.data.SensorValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.bestEffortValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.ifftValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.isMcpdSectionAvailable
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.phaseSlopeValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.rssiValue
 import no.nordicsemi.android.toolbox.profile.data.directionFinder.rttValue
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.PeripheralBluetoothAddress
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.QualityIndicator
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.azimuthal.AzimuthMeasurementData
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance.MCPDEstimate
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance.McpdMeasurementData
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance.RTTEstimate
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance.RttMeasurementData
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.elevation.ElevationMeasurementData
 
 @Composable
 internal fun LinearDataView(
     data: SensorData,
-    range: Range
+    range: IntRange
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         data.rttValue()?.let {
             Text(stringResource(id = R.string.rtt),
                 style = MaterialTheme.typography.titleSmall)
 
-            LinearDataItemView(name = stringResource(id = R.string.rtt), range, it)
+            LinearDataItemView(
+                name = stringResource(id = R.string.rtt_label),
+                range = range,
+                item = it,
+                showLegend = true
+            )
         }
 
         if (data.isMcpdSectionAvailable()) {
@@ -45,34 +59,34 @@ internal fun LinearDataView(
                 stringResource(id = R.string.mcpd),
                 style = MaterialTheme.typography.titleSmall
             )
-        }
 
-        data.ifftValue()?.let {
-            LinearDataItemView(name = stringResource(id = R.string.ifft_label), range, it)
-        }
+            data.ifftValue()?.let {
+                LinearDataItemView(name = stringResource(id = R.string.ifft_label), range, it)
+            }
 
-        data.phaseSlopeValue()?.let {
-            LinearDataItemView(name = stringResource(id = R.string.phase_label), range, it)
-        }
+            data.phaseSlopeValue()?.let {
+                LinearDataItemView(name = stringResource(id = R.string.phase_label), range, it)
+            }
 
-        data.rssiValue()?.let {
-            LinearDataItemView(name = stringResource(id = R.string.rssi_label), range, it)
-        }
+            data.rssiValue()?.let {
+                LinearDataItemView(name = stringResource(id = R.string.rssi_label), range, it)
+            }
 
-        data.bestEffortValue()?.let {
-            LinearDataItemView(name = stringResource(id = R.string.best_label), range, it)
-        }
+            data.bestEffortValue()?.let {
+                LinearDataItemView(name = stringResource(id = R.string.best_label), range, it, showLegend = true)
+            }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        data.ifftValue()?.let {
-            IfftFullForm()
+            // Add legend if IFFT is present.
+            data.ifftValue()?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                IfftFullForm()
+            }
         }
     }
 }
 
 @Composable
-private fun LinearDataItemView(name: String, range: Range, item: Int) {
+private fun LinearDataItemView(name: String, range: IntRange, item: Int, showLegend: Boolean = false) {
     val labelWidth = 48.dp
 
     Column {
@@ -80,67 +94,122 @@ private fun LinearDataItemView(name: String, range: Range, item: Int) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Column {
+            Column(
+                modifier = Modifier.width(labelWidth),
+            ) {
                 Text(
-                    modifier = Modifier.width(labelWidth),
                     text = name,
                     style = MaterialTheme.typography.labelSmall
                 )
                 Text(
-                    text = "($item dm)",
-                    style = MaterialTheme.typography.labelMedium,
+                    text = stringResource(R.string.dm_value, item),
+                    style = MaterialTheme.typography.bodySmall,
                 )
             }
             DistanceChartView(value = item, range = range)
         }
 
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = labelWidth)
-        ) {
-            Text(
-                text = stringResource(R.string.dm_value, range.from),
-                style = MaterialTheme.typography.labelSmall
-            )
-
-            val diff = range.to - range.from
-            val part = (diff / 4)
-            if (part > 0) {
+        if (showLegend) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = labelWidth)
+            ) {
                 Text(
-                    text = stringResource(R.string.dm_value, range.from + part),
+                    text = stringResource(R.string.dm_value, range.first),
                     style = MaterialTheme.typography.labelSmall
                 )
+
+                val diff = range.last - range.first
+                val part = (diff / 4)
+                if (part > 0) {
+                    Text(
+                        text = stringResource(R.string.dm_value, range.first + part),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                    Text(
+                        text = stringResource(R.string.dm_value, range.first + 2 * part),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+
                 Text(
-                    text = stringResource(R.string.dm_value, range.from + 2 * part),
+                    text = stringResource(R.string.dm_value, range.last),
                     style = MaterialTheme.typography.labelSmall
                 )
             }
-
-            Text(
-                text = stringResource(R.string.dm_value, range.to),
-                style = MaterialTheme.typography.labelSmall
-            )
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun LinearDataItemViewPreview() {
-    LinearDataItemView(
-        name = "RSSI",
-        range = Range(0, 50),
-        item = 49
+private fun LinearDataViewPreview() {
+    LinearDataView(
+        data = SensorData(
+            azimuth = SensorValue(
+                values = listOf(
+                    AzimuthMeasurementData(
+                        quality = QualityIndicator.POOR,
+                        address = PeripheralBluetoothAddress.TEST,
+                        azimuth = 50,
+                    ),
+                )
+            ),
+            elevation = SensorValue(
+                values = listOf(
+                    ElevationMeasurementData(
+                        quality = QualityIndicator.GOOD,
+                        address = PeripheralBluetoothAddress.TEST,
+                        elevation = 30,
+                    )
+                )
+            ),
+            rttDistance = SensorValue(
+                values = listOf(
+                    RttMeasurementData(
+                        quality = QualityIndicator.POOR,
+                        address = PeripheralBluetoothAddress.TEST,
+                        rtt = RTTEstimate(10),
+                    )
+                )
+            ),
+            mcpdDistance = SensorValue(
+                values = listOf(
+                    McpdMeasurementData(
+                        quality = QualityIndicator.POOR,
+                        address = PeripheralBluetoothAddress.TEST,
+                        mcpd = MCPDEstimate(
+                            ifft = 10,
+                            phaseSlope = 15,
+                            rssi = 30,
+                            best = 25,
+                        )
+                    )
+                )
+            )
+        ),
+        range = 0..50,
     )
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun IfftFullForm(){
+private fun LinearDataItemViewPreview() {
+    LinearDataItemView(
+        name = stringResource(R.string.rssi_label),
+        range = 0..50,
+        item = 40,
+        showLegend = true,
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun IfftFullForm() {
     Text(
-        text = "ifft - Inverse Fast Fourier Transform",
+        text = stringResource(R.string.ifft_hint),
         style = MaterialTheme.typography.bodySmall,
         modifier = Modifier.fillMaxWidth().alpha(0.5f)
     )

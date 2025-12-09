@@ -10,23 +10,20 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.navigation.Navigator
 import no.nordicsemi.android.common.navigation.viewmodel.SimpleNavigationViewModel
-import no.nordicsemi.android.toolbox.profile.parser.directionFinder.PeripheralBluetoothAddress
-import no.nordicsemi.android.toolbox.profile.parser.directionFinder.distance.DistanceMode
-import no.nordicsemi.android.toolbox.profile.manager.repository.DFSRepository
 import no.nordicsemi.android.toolbox.lib.utils.Profile
 import no.nordicsemi.android.toolbox.profile.ProfileDestinationId
 import no.nordicsemi.android.toolbox.profile.data.DFSServiceData
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.MeasurementSection
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
+import no.nordicsemi.android.toolbox.profile.manager.repository.DFSRepository
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.PeripheralBluetoothAddress
+import no.nordicsemi.android.toolbox.profile.parser.directionFinder.controlPoint.ControlPointMode
 import no.nordicsemi.android.toolbox.profile.repository.DeviceRepository
 import javax.inject.Inject
 
 internal sealed interface DFSEvent {
     data object OnAvailableDistanceModeRequest : DFSEvent
     data object OnCheckDistanceModeRequest : DFSEvent
-    data class OnRangeChangedEvent(val range: Range) : DFSEvent
-    data class OnDistanceModeSelected(val mode: DistanceMode) : DFSEvent
-    data class OnDetailsSectionParamsSelected(val section: MeasurementSection) : DFSEvent
+    data class OnRangeChangedEvent(val range: IntRange) : DFSEvent
+    data class OnDistanceModeSelected(val mode: ControlPointMode) : DFSEvent
     data class OnBluetoothDeviceSelected(val device: PeripheralBluetoothAddress) : DFSEvent
 }
 
@@ -95,10 +92,6 @@ internal class DirectionFinderViewModel @Inject constructor(
                 viewModelScope.launch {
                     DFSRepository.enableDistanceMode(address, event.mode)
                 }
-            }
-
-            is DFSEvent.OnDetailsSectionParamsSelected -> {
-                DFSRepository.updateDetailsSection(address, event.section)
             }
 
             is DFSEvent.OnBluetoothDeviceSelected -> DFSRepository.updateSelectedDevice(

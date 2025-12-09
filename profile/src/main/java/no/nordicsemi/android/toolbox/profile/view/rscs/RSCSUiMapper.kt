@@ -13,10 +13,6 @@ fun RSCSServiceData.displayActivity(): String =
     stringResource(id = if (data.running) R.string.rscs_running else R.string.rscs_walking)
 
 @Composable
-fun RSCSServiceData.displayCadence(): String =
-    stringResource(id = R.string.rscs_speed, data.instantaneousSpeed)
-
-@Composable
 fun RSCSServiceData.displayPace(): String =
     stringResource(id = R.string.rscs_rpm, data.instantaneousCadence)
 
@@ -32,20 +28,16 @@ fun RSCSServiceData.displayNumberOfSteps(): String? {
 
 internal fun RSCSData.speedWithSpeedUnit(speedUnit: RSCSSettingsUnit): Float {
     return when (speedUnit) {
-        RSCSSettingsUnit.UNIT_M -> instantaneousSpeed
-        RSCSSettingsUnit.UNIT_KM -> instantaneousSpeed * 3.6f
-        RSCSSettingsUnit.UNIT_MPH -> instantaneousSpeed * 2.2369f
-        RSCSSettingsUnit.UNIT_CM -> instantaneousSpeed * 100
+        RSCSSettingsUnit.UNIT_METRIC -> instantaneousSpeed
+        RSCSSettingsUnit.UNIT_IMPERIAL -> instantaneousSpeed * 2.2369f
     }
 }
 
 internal fun RSCSServiceData.displaySpeed(): String? {
     val speedWithUnit = unit?.let { data.speedWithSpeedUnit(it) }
     return when (unit) {
-        RSCSSettingsUnit.UNIT_M -> String.format(Locale.US, "%.1f m/s", speedWithUnit)
-        RSCSSettingsUnit.UNIT_KM -> String.format(Locale.US, "%.1f km/h", speedWithUnit)
-        RSCSSettingsUnit.UNIT_MPH -> String.format(Locale.US, "%.1f mph", speedWithUnit)
-        RSCSSettingsUnit.UNIT_CM -> String.format(Locale.US, "%.1f cm/s", speedWithUnit)
+        RSCSSettingsUnit.UNIT_METRIC -> String.format(Locale.US, "%.1f m/s", speedWithUnit)
+        RSCSSettingsUnit.UNIT_IMPERIAL -> String.format(Locale.US, "%.1f mph", speedWithUnit)
         null -> null
     }
 }
@@ -59,68 +51,38 @@ internal fun RSCSServiceData.displaySpeed(): String? {
 internal fun RSCSData.displayDistance(speedUnit: RSCSSettingsUnit): String {
     if (totalDistance == null) return ""
     return when (speedUnit) {
-        RSCSSettingsUnit.UNIT_M -> String.format(
+        RSCSSettingsUnit.UNIT_METRIC -> String.format(
             Locale.US,
             "%.0f m",
             totalDistance!!.toFloat()
         )
 
-        RSCSSettingsUnit.UNIT_KM -> String.format(
-            Locale.US,
-            "%.0f m",
-            totalDistance!!.toFloat().toKilometers()
-        )
-
-        RSCSSettingsUnit.UNIT_MPH -> String.format(
+        RSCSSettingsUnit.UNIT_IMPERIAL -> String.format(
             Locale.US,
             "%.2f mile",
             totalDistance!!.toFloat().toMiles()
         )
-
-        RSCSSettingsUnit.UNIT_CM -> String.format(
-            Locale.US,
-            "%.2f cm",
-            totalDistance!!.toFloat().toCentimeter()
-        )
     }
 }
-
-private fun Float.toCentimeter(): Float = this * 100
 
 @Composable
 internal fun RSCSServiceData.displayStrideLength(): String? {
     if (data.strideLength == null) return null
     return when (unit) {
-        RSCSSettingsUnit.UNIT_M -> String.format(
+        RSCSSettingsUnit.UNIT_METRIC -> String.format(
             Locale.US,
             "%.2f m",
             data.strideLength!! / 100.0f
         )
 
-        RSCSSettingsUnit.UNIT_KM -> String.format(
+        RSCSSettingsUnit.UNIT_IMPERIAL -> String.format(
             Locale.US,
-            "%.4f km",
-            data.strideLength!! / 100000.0f
-        )
-
-        RSCSSettingsUnit.UNIT_MPH -> String.format(
-            Locale.US,
-            "%.4f mile",
-            data.strideLength!! / 160931.23f
-        )
-
-        RSCSSettingsUnit.UNIT_CM -> String.format(
-            Locale.US,
-            "%.1f cm",
-            data.strideLength!!.toFloat()
+            "%.2f ft",
+            (data.strideLength!!.toFloat() / 100) * 3.28084f
         )
 
         null -> null
     }
-}
-
-private fun Float.toKilometers(): Float {
-    return this / 1000f
 }
 
 private fun Float.toMiles(): Float {

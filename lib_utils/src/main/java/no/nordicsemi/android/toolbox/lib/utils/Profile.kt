@@ -13,7 +13,7 @@ enum class Profile {
     LBS,
     RSCS,
 
-    //    PRX, TODO: PRX is not implemented yet, it will be added in the future.
+    //    PRX, TODO: Proximity is not implemented yet, it will be added in the future.
     BATTERY,
     THROUGHPUT,
     UART;
@@ -21,18 +21,18 @@ enum class Profile {
     override fun toString(): String =
         when (this) {
             BPS -> "Blood Pressure"
-            CGM -> "Continuous Glucose Monitoring"
+            CGM -> "Continuous Glucose"
             CHANNEL_SOUNDING -> "Channel Sounding"
             CSC -> "Cycling Speed and Cadence"
-            DFS -> "Direction Finder Service"
+            DFS -> "Distance Measurement"
             GLS -> "Glucose"
-            HRS -> "Heart Rate Sensor"
+            HRS -> "Heart Rate"
             HTS -> "Health Thermometer"
-            LBS -> "Blinky/LED Button Service"
-            RSCS -> "Running Speed and Cadence Sensor"
-            BATTERY -> "Battery Service"
+            LBS -> "LED Button"
+            RSCS -> "Running Speed and Cadence"
+            BATTERY -> "Battery"
             THROUGHPUT -> "Throughput Service"
-            UART -> "UART Service"
+            UART -> "UART"
             DFU -> "Device Firmware Update"
         }
 

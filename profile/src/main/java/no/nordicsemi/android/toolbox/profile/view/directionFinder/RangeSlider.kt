@@ -1,9 +1,10 @@
 package no.nordicsemi.android.toolbox.profile.view.directionFinder
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Text
@@ -14,44 +15,45 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import no.nordicsemi.android.toolbox.profile.R
-import no.nordicsemi.android.toolbox.profile.data.directionFinder.Range
 import java.util.Locale
 
 @Composable
-internal fun RangeSlider(range: Range, onChange: (Range) -> Unit) {
+internal fun RangeSlider(range: IntRange, onChange: (IntRange) -> Unit) {
     Column {
         RangeSliderView(range, onChange)
         Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = stringResource(R.string.from),
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Text(
-                    text = String.format(Locale.US, "%d", range.from),
-                    style = MaterialTheme.typography.titleSmall
-                )
-            }
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = stringResource(R.string.to), style = MaterialTheme.typography.bodySmall)
-                Text(
-                    text = String.format(Locale.US, "%d", range.to),
-                    style = MaterialTheme.typography.titleSmall
-                )
-            }
+            Text(
+                text = stringResource(R.string.from),
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                text = "${range.first}",
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.padding(start = 8.dp),
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = stringResource(R.string.to),
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                text = "${range.last}",
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.padding(start = 8.dp),
+            )
         }
     }
 }
 
 @Composable
 fun RangeSliderView(
-    range: Range,
-    onChange: (Range) -> Unit,
+    range: IntRange,
+    onChange: (IntRange) -> Unit,
     valueRange: ClosedFloatingPointRange<Float> = 0f..500f,
     step: Int = 1
 ) {
@@ -63,7 +65,7 @@ fun RangeSliderView(
         value = sliderValues,
         onValueChange = { newValues ->
             currentOnChange.value(
-                Range(newValues.start.toInt(), newValues.endInclusive.toInt())
+                IntRange(newValues.start.toInt(), newValues.endInclusive.toInt())
             )
         },
         valueRange = valueRange,
@@ -71,11 +73,14 @@ fun RangeSliderView(
     )
 }
 
-private fun Range.toFloatRange(): ClosedFloatingPointRange<Float> =
-    from.toFloat()..to.toFloat()
+private fun IntRange.toFloatRange(): ClosedFloatingPointRange<Float> =
+    start.toFloat()..endInclusive.toFloat()
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun RangeSliderViewPreview() {
-    RangeSlider(Range(0, 50)) {}
+    RangeSlider(
+        range = 0..50,
+        onChange = {},
+    )
 }
