@@ -12,12 +12,13 @@ It contains applications demonstrating standard Bluetooth LE profiles:
 * **Continuous Glucose Monitor**
 * **Universal Asynchronous Receiver/Transmitter (UART)**
 * **Throughput**
-* **Direction Finder**
+* [**nRF Distance Measurement**](https://docs.nordicsemi.com/bundle/ncs-latest/page/nrfxlib/nrf_dm/README.html)
 * **Blinky (LBS) Service**
 * **Channel Sounding Service**
 
-**_NOTE:_** The Proximity profile is not included in this version of the app. If you need it, please download the previous [version](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/releases/tag/3.3.1).
-**_NOTE:_** The Channel Sounding Service profile is currently experimental, and additional information will be provided soon.
+> [!Note]
+> The Proximity profile is not included in this version of the app.
+> If you need it, please download the previous [version](https://github.com/NordicSemiconductor/Android-nRF-Toolbox/releases/tag/3.3.1).
 
 ### How to import to Android Studio
 
@@ -86,8 +87,8 @@ The graph in the HRM profile is created using the [MPAndroidChart v3.1.0](https:
 contribution based on the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0).
 
 ### Note
-- Android 5.0 or newer is required.
+- Android 6.0 or newer is required. Android 5.0 was supported until version 4.1.4.
 - Compatible with nRF5 devices running samples from the Nordic SDK and other devices implementing
   standard profiles.
 - Development kits: https://www.nordicsemi.com/Software-and-tools/Development-Kits.
-- The nRF5 SDK and SoftDevices are available online at http://developer.nordicsemi.com.
+- The nRF Connect SDK documentation is available at https://docs.nordicsemi.com/bundle/ncs-latest/page/nrf/index.html.
