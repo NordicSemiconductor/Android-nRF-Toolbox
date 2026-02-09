@@ -85,8 +85,8 @@ internal fun createLineChartView(
         }
         axisRight.isEnabled = false
 
-        val entries = points.mapIndexed { i, v ->
-            Entry(-i.toFloat(), v)
+        val entries = points.mapIndexedNotNull { i, v ->
+            if (v == 0.0f) null else Entry(-i.toFloat(), v)
         }.reversed()
 
         legend.apply {
@@ -148,15 +148,21 @@ internal fun createLineChartView(
 }
 
 private fun updateData(points: List<Float>, chart: LineChart) {
-    val entries = points.mapIndexed { i, v ->
-        Entry(-i.toFloat(), v)
+    // We map to entries ONLY if the value is not 0.0f
+    // and use -i.toFloat() to maintain the reverse-chronological X-axis logic.
+    val entries = points.mapIndexedNotNull { i, v ->
+        if (v == 0.0f) null else Entry(-i.toFloat(), v)
     }.reversed()
 
     with(chart) {
-
         if (data != null && data.dataSetCount > 0) {
             val set1 = data!!.getDataSetByIndex(0) as LineDataSet
             set1.values = entries
+
+            // This tells the chart NOT to draw a line between the gaps
+            // (Standard behavior for missing entries, but good to be explicit)
+            set1.isVisible = true
+
             set1.notifyDataSetChanged()
             data!!.notifyDataChanged()
             notifyDataSetChanged()
@@ -177,13 +183,19 @@ private fun LineChartView_Preview() {
                 5.0f,
                 3.6f,
                 4.1f,
+                0.0f,
+                0.0f,
+                0.0f,
                 3.9f,
                 4.8f,
                 2.5f,
                 3.3f,
                 4.0f,
                 3.7f,
+                0.0f,
+                0.0f,
                 4.2f,
+                0.0f,
                 3.0f
             )
         )
