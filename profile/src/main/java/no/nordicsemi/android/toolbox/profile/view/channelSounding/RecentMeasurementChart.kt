@@ -13,6 +13,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.graphics.toColorInt
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.Legend
+import com.github.mikephil.charting.components.LegendEntry
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
@@ -85,16 +86,30 @@ internal fun createLineChartView(
         }
         axisRight.isEnabled = false
 
-        val entries = points.mapIndexedNotNull { i, v ->
+        val entries = points.mapIndexed { i, v ->
             if (v == 0.0f) null else Entry(-i.toFloat(), v)
         }.reversed()
 
+        // Legends
+        val legendEntry = LegendEntry().apply {
+            label = "Recent Measurements"
+            form = Legend.LegendForm.LINE
+            formColor = customBlue
+            formLineWidth = 2f
+            formSize = 15f
+        }
         legend.apply {
             isEnabled = true
             textColor = customBlue
             form = Legend.LegendForm.LINE
             horizontalAlignment = Legend.LegendHorizontalAlignment.CENTER
             verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
+            orientation = Legend.LegendOrientation.HORIZONTAL
+            setDrawInside(false)
+
+            // Tell the legend to ignore the dataset colors
+            // and use this specific entry instead.
+            setCustom(listOf(legendEntry))
         }
 
         // create a dataset and give it a type
@@ -105,7 +120,7 @@ internal fun createLineChartView(
             data!!.notifyDataChanged()
             notifyDataSetChanged()
         } else {
-            val set1 = LineDataSet(entries, "Recent Measurements")
+            val set1 = LineDataSet(entries, legendEntry.label)
 
             set1.setDrawIcons(false)
             set1.setDrawValues(false)
@@ -148,10 +163,8 @@ internal fun createLineChartView(
 }
 
 private fun updateData(points: List<Float>, chart: LineChart) {
-    // We map to entries ONLY if the value is not 0.0f
-    // and use -i.toFloat() to maintain the reverse-chronological X-axis logic.
-    val entries = points.mapIndexedNotNull { i, v ->
-        if (v == 0.0f) null else Entry(-i.toFloat(), v)
+    val entries = points.mapIndexed { i, v ->
+        Entry(-i.toFloat(), v)
     }.reversed()
 
     with(chart) {
@@ -159,9 +172,25 @@ private fun updateData(points: List<Float>, chart: LineChart) {
             val set1 = data!!.getDataSetByIndex(0) as LineDataSet
             set1.values = entries
 
-            // This tells the chart NOT to draw a line between the gaps
-            // (Standard behavior for missing entries, but good to be explicit)
-            set1.isVisible = true
+            // Generate the segment colors
+            val segmentColors = mutableListOf<Int>()
+
+            // We look at the original 'points' list to decide segment colors
+            // A segment exists between points[i] and points[i+1]
+            for (i in 0 until points.size - 1) {
+                val startValue = points[i]
+                val endValue = points[i + 1]
+
+                // If either end of the segment is 0.0f, the line should be invisible
+                if (startValue == 0.0f || endValue == 0.0f) {
+                    segmentColors.add(Color.TRANSPARENT)
+                } else {
+                    segmentColors.add(customBlue)
+                }
+            }
+
+            // Apply colors
+            set1.colors = segmentColors.reversed()
 
             set1.notifyDataSetChanged()
             data!!.notifyDataChanged()
@@ -196,7 +225,21 @@ private fun LineChartView_Preview() {
                 0.0f,
                 4.2f,
                 0.0f,
-                3.0f
+                0.0f,
+                0.0f,
+                3.0f,
+                3.3f,
+                4.0f,
+                3.7f,
+                0.0f,
+                0.0f,
+                0.0f,
+                3.2f,
+                4.5f,
+                2.8f,
+                5.0f,
+                3.6f,
+                4.1f,
             )
         )
     }
