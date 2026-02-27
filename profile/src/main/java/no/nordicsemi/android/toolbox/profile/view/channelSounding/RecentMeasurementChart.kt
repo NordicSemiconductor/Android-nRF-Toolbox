@@ -24,6 +24,7 @@ private const val X_AXIS_ELEMENTS_COUNT = 40.0f
 
 private val customBlue = "#00A9CE".toColorInt()
 private val backgroundColor = "#F5F5F5".toColorInt()
+private val signalLostColor = "#00A9CE".toColorInt()
 
 @Composable
 internal fun RecentMeasurementChart(previousData: List<Float>) {
@@ -41,24 +42,52 @@ internal fun RecentMeasurementChart(previousData: List<Float>) {
 /**
  * Processes raw data into Chart Entries and Segment Colors.
  * This ensures the logic is identical for both initial load and updates.
+ * @return Pair<LineDataSet, LineDataSet>: one for solid segments, one for dashed bridges.
  */
-private fun prepareChartData(points: List<Float>): Triple<List<Entry>, List<Int>, List<Int>> {
-    val entries = points.mapIndexed { i, v -> Entry(-i.toFloat(), v) }.reversed()
+private fun prepareTwoDataSets(points: List<Float>): Pair<LineDataSet, LineDataSet> {
+    val adjustedPoints = mutableListOf<Float>()
+    var lastValidValue = points.firstOrNull { it != 0.0f } ?: 0.0f
 
-    val segmentColors = mutableListOf<Int>()
-    for (i in 0 until points.size - 1) {
-        if (points[i] == 0.0f || points[i + 1] == 0.0f) {
-            segmentColors.add(Color.TRANSPARENT)
-        } else {
-            segmentColors.add(customBlue)
+    points.forEach { value ->
+        if (value == 0.0f) adjustedPoints.add(lastValidValue)
+        else {
+            adjustedPoints.add(value)
+            lastValidValue = value
         }
     }
 
-    val circleColors = points.map {
-        if (it == 0.0f) Color.TRANSPARENT else customBlue
-    }.reversed()
+    val entries = adjustedPoints.mapIndexed { i, v -> Entry(-i.toFloat(), v) }.reversed()
 
-    return Triple(entries, segmentColors.reversed(), circleColors)
+    // SOLID BLUE DATASET
+    val solidColors = mutableListOf<Int>()
+    for (i in 0 until points.size - 1) {
+        if (points[i] != 0.0f && points[i + 1] != 0.0f) solidColors.add(customBlue)
+        else solidColors.add(Color.TRANSPARENT)
+    }
+
+    val solidSet = LineDataSet(entries, "Valid Data").apply {
+        lineWidth = 3f
+        setDrawValues(false)
+        setDrawCircles(false)
+        colors = solidColors.reversed()
+    }
+
+    // DASHED DATASET
+    val dashedColors = mutableListOf<Int>()
+    for (i in 0 until points.size - 1) {
+        if (points[i] == 0.0f || points[i + 1] == 0.0f) dashedColors.add(signalLostColor)
+        else dashedColors.add(Color.TRANSPARENT)
+    }
+
+    val dashedSet = LineDataSet(entries, "Gaps").apply {
+        lineWidth = 2f
+        setDrawValues(false)
+        setDrawCircles(false)
+        colors = dashedColors.reversed()
+        enableDashedLine(10f, 10f, 0f) // Only this set is dashed
+    }
+
+    return Pair(solidSet, dashedSet)
 }
 
 internal fun createLineChartView(
@@ -67,7 +96,7 @@ internal fun createLineChartView(
     points: List<Float>
 ): LineChart {
     return LineChart(context).apply {
-        // 1. General Configuration
+        // General Setup
         description.isEnabled = false
         setTouchEnabled(false)
         setDrawGridBackground(false)
@@ -75,7 +104,7 @@ internal fun createLineChartView(
         setScaleEnabled(false)
         setPinchZoom(false)
 
-        // 2. Theme Styling
+        // Theme Styling
         val contentColor = if (isDarkTheme) Color.WHITE else Color.BLACK
         setBackgroundColor(if (isDarkTheme) Color.TRANSPARENT else backgroundColor)
 
@@ -83,14 +112,11 @@ internal fun createLineChartView(
             enableGridDashedLine(10f, 10f, 0f)
             axisMinimum = -X_AXIS_ELEMENTS_COUNT
             axisMaximum = 0f
-            setAvoidFirstLastClipping(true)
             position = XAxis.XAxisPosition.BOTTOM
             setDrawLabels(false)
             setDrawGridLines(false)
             gridColor = contentColor
-            textColor = contentColor
         }
-
         axisLeft.apply {
             enableGridDashedLine(10f, 10f, 0f)
             gridColor = contentColor
@@ -98,53 +124,73 @@ internal fun createLineChartView(
         }
         axisRight.isEnabled = false
 
-        // 3. Custom Legend (Fixed to prevent multiple dashed lines)
+        // Custom Legend
+        // We manually define one entry so the user doesn't see "Gaps" in the legend.
         legend.apply {
             isEnabled = true
-            textColor = customBlue
+            textColor = contentColor // Matches theme text color
             horizontalAlignment = Legend.LegendHorizontalAlignment.CENTER
             verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
-            setCustom(
-                listOf(
-                LegendEntry().apply {
-                    label = "Recent Measurements"
-                    form = Legend.LegendForm.LINE
-                    formColor = customBlue
-                    formLineWidth = 2f
-                    formSize = 15f
-                }
-            ))
+            orientation = Legend.LegendOrientation.HORIZONTAL
+            setDrawInside(false)
+            xEntrySpace = 20f // Add some space between the two legend items
+
+            val validEntry = LegendEntry().apply {
+                label = "Recent Measurements"
+                form = Legend.LegendForm.LINE
+                formColor = customBlue
+                formLineWidth = 2f
+                formSize = 15f
+            }
+            // Adding two small segment lines to have the effect of dashed lines.
+            val dashPart1 = LegendEntry().apply {
+                label = null // Leave label null so it sits next to the next part
+                form = Legend.LegendForm.LINE
+                formColor = signalLostColor
+                formLineWidth = 2f
+                formSize = 4f // Small segment
+            }
+
+            val dashPart2 = LegendEntry().apply {
+                label = "No Signal"
+                form = Legend.LegendForm.LINE
+                formColor = signalLostColor
+                formLineWidth = 2f
+                formSize = 4f // Small segment
+            }
+
+            setCustom(listOf(validEntry, dashPart1, dashPart2))
         }
 
-        // 4. Initial Data Binding
-        val (entries, colors) = prepareChartData(points)
-        val set1 = LineDataSet(entries, "Recent Measurements").apply {
-            setDrawIcons(false)
-            setDrawValues(false)
-            setDrawCircles(false)
-            this.colors = colors // Apply segment colors
-            lineWidth = 3f
-            valueTextSize = 9f
-        }
+        // Data Processing & Binding
+        val (solidSet, dashedSet) = prepareTwoDataSets(points)
 
-        data = LineData(set1)
+        // Add both sets to LineData.
+        // Make sure to the order: the last one added is drawn on top.
+        data = LineData(dashedSet, solidSet)
     }
 }
 
 private fun updateData(points: List<Float>, chart: LineChart) {
-    val (entries, colors) = prepareChartData(points)
+    val (newSolid, newDashed) = prepareTwoDataSets(points)
 
     chart.data?.let { lineData ->
-        if (lineData.dataSetCount > 0) {
-            val set1 = lineData.getDataSetByIndex(0) as LineDataSet
-            set1.values = entries
-            set1.colors = colors // Update segments
+        // We assume index 0 is dashed and index 1 is solid based on creation order
+        val dashedSet = lineData.getDataSetByIndex(0) as? LineDataSet
+        val solidSet = lineData.getDataSetByIndex(1) as? LineDataSet
 
-            set1.notifyDataSetChanged()
-            lineData.notifyDataChanged()
-            chart.notifyDataSetChanged()
-            chart.invalidate()
+        dashedSet?.apply {
+            values = newDashed.values
+            colors = newDashed.colors
         }
+        solidSet?.apply {
+            values = newSolid.values
+            colors = newSolid.colors
+        }
+
+        lineData.notifyDataChanged()
+        chart.notifyDataSetChanged()
+        chart.invalidate()
     }
 }
 
