@@ -34,8 +34,12 @@ internal fun RecentMeasurementChart(previousData: List<Float>) {
         modifier = Modifier
             .fillMaxWidth()
             .height(300.dp),
-        factory = { createLineChartView(isSystemInDarkTheme, it, items) },
-        update = { updateData(items, it) }
+        factory = { context ->
+            createLineChartView(isSystemInDarkTheme, context)
+        },
+        update = { chart ->
+            updateData(items, chart)
+        }
     )
 }
 
@@ -44,7 +48,9 @@ internal fun RecentMeasurementChart(previousData: List<Float>) {
  * This ensures the logic is identical for both initial load and updates.
  * @return Pair<LineDataSet, LineDataSet>: one for solid segments, one for dashed bridges.
  */
-private fun prepareTwoDataSets(points: List<Float>): Pair<LineDataSet, LineDataSet> {
+private fun prepareTwoDataSets(points: List<Float>): Pair<LineDataSet, LineDataSet>? {
+    if (points.isEmpty()) return null
+
     val adjustedPoints = mutableListOf<Float>()
     var lastValidValue = points.firstOrNull { it != 0.0f } ?: 0.0f
 
@@ -58,42 +64,42 @@ private fun prepareTwoDataSets(points: List<Float>): Pair<LineDataSet, LineDataS
 
     val entries = adjustedPoints.mapIndexed { i, v -> Entry(-i.toFloat(), v) }.reversed()
 
-    // SOLID BLUE DATASET
-    val solidColors = mutableListOf<Int>()
-    for (i in 0 until points.size - 1) {
-        if (points[i] != 0.0f && points[i + 1] != 0.0f) solidColors.add(customBlue)
-        else solidColors.add(Color.TRANSPARENT)
+    // Helper to build colors and guarantee size matches entries
+    fun getColors(isSolid: Boolean): List<Int> {
+        val colorList = mutableListOf<Int>()
+        for (i in 0 until points.size - 1) {
+            val isMatch = if (isSolid) (points[i] != 0.0f && points[i + 1] != 0.0f)
+            else (points[i] == 0.0f || points[i + 1] == 0.0f)
+            colorList.add(if (isMatch) (if (isSolid) customBlue else signalLostColor) else Color.TRANSPARENT)
+        }
+
+        while (colorList.size < entries.size) {
+            colorList.add(Color.TRANSPARENT)
+        }
+        return colorList.reversed()
     }
 
     val solidSet = LineDataSet(entries, "Valid Data").apply {
         lineWidth = 3f
         setDrawValues(false)
         setDrawCircles(false)
-        colors = solidColors.reversed()
-    }
-
-    // DASHED DATASET
-    val dashedColors = mutableListOf<Int>()
-    for (i in 0 until points.size - 1) {
-        if (points[i] == 0.0f || points[i + 1] == 0.0f) dashedColors.add(signalLostColor)
-        else dashedColors.add(Color.TRANSPARENT)
+        colors = getColors(true)
     }
 
     val dashedSet = LineDataSet(entries, "Gaps").apply {
         lineWidth = 2f
         setDrawValues(false)
         setDrawCircles(false)
-        colors = dashedColors.reversed()
-        enableDashedLine(10f, 10f, 0f) // Only this set is dashed
+        colors = getColors(false)
+        enableDashedLine(10f, 10f, 0f)
     }
 
     return Pair(solidSet, dashedSet)
 }
 
-internal fun createLineChartView(
+private fun createLineChartView(
     isDarkTheme: Boolean,
     context: Context,
-    points: List<Float>
 ): LineChart {
     return LineChart(context).apply {
         // General Setup
@@ -161,37 +167,21 @@ internal fun createLineChartView(
 
             setCustom(listOf(validEntry, dashPart1, dashPart2))
         }
-
-        // Data Processing & Binding
-        val (solidSet, dashedSet) = prepareTwoDataSets(points)
-
-        // Add both sets to LineData.
-        // Make sure to the order: the last one added is drawn on top.
-        data = LineData(dashedSet, solidSet)
     }
 }
 
 private fun updateData(points: List<Float>, chart: LineChart) {
-    val (newSolid, newDashed) = prepareTwoDataSets(points)
+    val result = prepareTwoDataSets(points)
 
-    chart.data?.let { lineData ->
-        // We assume index 0 is dashed and index 1 is solid based on creation order
-        val dashedSet = lineData.getDataSetByIndex(0) as? LineDataSet
-        val solidSet = lineData.getDataSetByIndex(1) as? LineDataSet
-
-        dashedSet?.apply {
-            values = newDashed.values
-            colors = newDashed.colors
-        }
-        solidSet?.apply {
-            values = newSolid.values
-            colors = newSolid.colors
-        }
-
-        lineData.notifyDataChanged()
-        chart.notifyDataSetChanged()
-        chart.invalidate()
+    if (result == null) {
+        chart.data = null // Clears the chart when no data
+    } else {
+        val (newSolid, newDashed) = result
+        chart.data = LineData(newDashed, newSolid)
     }
+
+    chart.notifyDataSetChanged()
+    chart.invalidate()
 }
 
 @Preview(showBackground = true)
