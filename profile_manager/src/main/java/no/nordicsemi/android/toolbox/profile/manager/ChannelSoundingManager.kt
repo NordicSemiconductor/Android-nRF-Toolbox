@@ -4,7 +4,11 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import android.net.wifi.ScanResult
 import android.os.Build
+import android.ranging.DataNotificationConfig
+import android.ranging.RangingCapabilities
+import android.ranging.RangingConfig
 import android.ranging.RangingData
 import android.ranging.RangingDevice
 import android.ranging.RangingManager
@@ -15,8 +19,11 @@ import android.ranging.SensorFusionParams
 import android.ranging.SessionConfig
 import android.ranging.ble.cs.BleCsRangingCapabilities
 import android.ranging.ble.cs.BleCsRangingParams
+import android.ranging.ble.rssi.BleRssiRangingParams
 import android.ranging.raw.RawInitiatorRangingConfig
 import android.ranging.raw.RawRangingDevice
+import android.ranging.wifi.pd.WifiPdRangingCapabilities
+import android.ranging.wifi.rtt.RttRangingCapabilities
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
@@ -234,7 +241,7 @@ class ChannelSoundingManager(
         callback = RangingManager.RangingCapabilitiesCallback { capabilities ->
             callback?.let { rangingManager.unregisterCapabilitiesCallback(it) }
             if (activeSession != null) return@RangingCapabilitiesCallback
-            Timber.tag(tag).log(Log.Level.APPLICATION, "Ranging capabilities: $capabilities")
+            Timber.tag(tag).log(Log.Level.APPLICATION, "Ranging capabilities:\n${RangingCapabilitiesPrinter.parse(capabilities)}")
             val csCapabilities = capabilities.csCapabilities
             when {
                 csCapabilities == null -> {
@@ -274,7 +281,7 @@ class ChannelSoundingManager(
             return
         }
         activeSession = session
-        Timber.tag(tag).log(Log.Level.APPLICATION, "Starting session with preference: $rangingPreference")
+        Timber.tag(tag).log(Log.Level.APPLICATION, "Starting session using:\n${RangingPreferencesPrinter.parse(rangingPreference)}")
         session.start(rangingPreference)
     }
 
@@ -293,7 +300,7 @@ class ChannelSoundingManager(
         }
 
         override fun onStarted(peer: RangingDevice, technology: Int) {
-            Timber.tag(tag).log(Log.Level.APPLICATION, "Ranging session started with peer: $peer, technology: $technology")
+            Timber.tag(tag).log(Log.Level.APPLICATION, "Ranging session started with peer: ${peer.uuid} (technology: ${TechnologyParser.parseTechnology(technology)})")
             previousRangingData.clear()
             repository.updateSessionAction(RangingSessionAction.OnStart)
         }
@@ -387,7 +394,7 @@ class ChannelSoundingManager(
         }.removeSuffix(", ").ifEmpty { "None" }
     }
 
-    object RasFeatureParser {
+    private object RasFeatureParser {
         fun parse(data: ByteArray): RasFeature {
             require(data.size == 4) { "RAS Features characteristic must be 4 bytes." }
             val bits = (data[0].toInt() and 0xFF) or
@@ -400,6 +407,312 @@ class ChannelSoundingManager(
                 abortOperation = bits and (1 shl 2) != 0,
                 filterRangingData = bits and (1 shl 3) != 0,
             )
+        }
+    }
+
+    private object TechnologyParser {
+
+        fun parseTechnology(technology: Int) = when (technology) {
+            RangingManager.UWB -> "Ultra-Wideband (UWB)"
+            RangingManager.BLE_CS -> "Channel Sounding (CS)"
+            RangingManager.WIFI_NAN_RTT -> "Wi-Fi NAN RTT" // Neighborhood Aware Networking
+            RangingManager.BLE_RSSI -> "RSSI"
+            RangingManager.WIFI_STA_RTT -> "Wi-Fi STA-AP RTT" // Stationary - Access Point
+            RangingManager.WIFI_PD -> "Wi-Fi Proximity Detection (PD)" // Proximity Detection
+            else -> "Unknown ($technology)"
+        }
+    }
+
+    private object RangingCapabilitiesPrinter {
+
+        @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+        fun parse(capabilities: RangingCapabilities) = buildString {
+            appendLine("● Available technologies:")
+            capabilities.technologyAvailability.forEach { (technology, isAvailable) ->
+                appendLine("  - ${TechnologyParser.parseTechnology(technology)}: ${parseAvailability(isAvailable)}")
+            }
+            capabilities.uwbCapabilities?.let {
+                appendLine("● Ultra-Wideband (UWB)")
+                append("  - Distance Measurement Supported: ")
+                appendLine(it.isDistanceMeasurementSupported)
+                append("  - Azimuthal Angle Supported: ")
+                appendLine(it.isAzimuthalAngleSupported)
+                append("  - Elevation Angle Supported: ")
+                appendLine(it.isElevationAngleSupported)
+                append("  - Ranging Interval Reconfigure Supported: ")
+                appendLine(it.isRangingIntervalReconfigurationSupported)
+                append("  - Min Ranging Interval: ")
+                appendLine(it.minimumRangingInterval)
+                append("  - Supported Channels: ")
+                appendLine(it.supportedChannels.joinToString())
+                append("  - Supported Notification Configurations: ")
+                appendLine(it.supportedNotificationConfigurations.joinToString())
+                append("  - Supported Config IDs: ")
+                appendLine(it.supportedConfigIds.joinToString())
+                append("  - Supported Slot Durations: ")
+                appendLine(it.supportedSlotDurations.joinToString())
+                append("  - Supported Ranging Update Rates: ")
+                appendLine(it.supportedRangingUpdateRates.joinToString())
+                append("  - Supported Preamble Indexes: ")
+                appendLine(it.supportedPreambleIndexes.joinToString())
+                append("  - Background Ranging Supported: ")
+                appendLine(it.isBackgroundRangingSupported)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) {
+                    append("  - DL-TDOA Supported: ")
+                    appendLine(it.isDlTdoaSupported)
+                    append("  - Supported Antenna Modes: ")
+                    appendLine(it.supportedAntennaModes.joinToString())
+                }
+                appendLine()
+            }
+            capabilities.csCapabilities?.let { csCapabilities ->
+                appendLine("● Channel Sounding")
+                append("  - Security Levels: ")
+                appendLine(csCapabilities.supportedSecurityLevels.joinToString())
+            }
+            capabilities.rttRangingCapabilities?.let { rttRangingCapabilities ->
+                appendLine("● Round Trip Time (RTT)")
+                append("  - Periodic Ranging Hardware Feature: ")
+                appendLine(rttRangingCapabilities.hasPeriodicRangingHardwareFeature())
+                rttRangingCapabilities.maxSupportedBandwidthCompat?.let { maxSupportedBandwidth ->
+                    append("  - Max Supported Bandwidth: ")
+                    appendLine(maxSupportedBandwidth)
+                }
+                rttRangingCapabilities.maxSupportedRxChainCompat?.let { maxSupportedRxChain ->
+                    append("  - Max Supported RX Chain: ")
+                    appendLine(maxSupportedRxChain)
+                }
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) {
+                capabilities.wifiPdRangingCapabilities?.let {
+                    appendLine("● Wi-Fi Proximity Detection (PD)")
+                    append("  - Supported PASN Modes: ")
+                    appendLine(it.supportedPasnModes.joinToString { mode -> parsePasnMode(mode) })
+                    append("  - Proximity Detection MAC Address: ")
+                    appendLine(it.proximityDetectionMacAddress.toString())
+                    append("  - Wi-Fi RTT Supported: ")
+                    appendLine(it.is80211mcSupported)
+                    append("  - 802.11az NTB (Next Generation Trigger-Based) Supported: ")
+                    appendLine(it.is80211azNtbSupported)
+                    append("  - Max Channel Width: ")
+                    appendLine(parseChannelWidth(it.maxChannelWidth))
+                    append("  - Max Preamble: ")
+                    appendLine(parsePreamble(it.maxPreamble))
+                    append("  - Supported Discovery Channel Frequencies (MHz): ")
+                    appendLine(it.supportedDiscoveryChannelFrequenciesMhz.joinToString { freq ->"$freq MHz" })
+                    append("  - 802.11mc Min Ranging Interval: ")
+                    appendLine(it.get80211mcMinRangingInterval())
+                    append("  - 802.11az NTB Min Ranging Interval: ")
+                    appendLine(it.get80211azNtbMinRangingInterval())
+                }
+            }
+        }.removeSuffix("\n")
+
+        private fun parseAvailability(availability: Int) = when (availability) {
+            RangingCapabilities.NOT_SUPPORTED -> "Not Supported"
+            RangingCapabilities.DISABLED_USER -> "Disabled (User)"
+            RangingCapabilities.DISABLED_REGULATORY -> "Disabled (Regulatory)"
+            RangingCapabilities.ENABLED -> "Enabled"
+            RangingCapabilities.DISABLED_USER_RESTRICTIONS -> "Disabled (User Restrictions)"
+            else -> "Unknown ($availability)"
+        }
+
+        private fun parsePasnMode(mode: Int) = when (mode) {
+            WifiPdRangingCapabilities.UNAUTHENTICATED_PASN_MODE -> "Unauthenticated"
+            WifiPdRangingCapabilities.AUTHENTICATED_PASN_MODE -> "Authenticated"
+            else -> "Unknown ($mode)"
+        }
+
+        private fun parseChannelWidth(channelWidth: Int) = when (channelWidth) {
+            ScanResult.CHANNEL_WIDTH_20MHZ -> "20 MHz"
+            ScanResult.CHANNEL_WIDTH_40MHZ -> "40 MHz"
+            ScanResult.CHANNEL_WIDTH_80MHZ -> "80 MHz"
+            ScanResult.CHANNEL_WIDTH_160MHZ -> "160 MHz"
+            ScanResult.CHANNEL_WIDTH_80MHZ_PLUS_MHZ -> "80 MHz + 80 MHz"
+            ScanResult.CHANNEL_WIDTH_320MHZ -> "320 MHz"
+            else -> "Unknown ($channelWidth)"
+        }
+
+        private fun parsePreamble(preamble: Int) = when (preamble) {
+            ScanResult.PREAMBLE_LEGACY -> "Legacy"
+            ScanResult.PREAMBLE_HT -> "HT"
+            ScanResult.PREAMBLE_VHT -> "VHT"
+            ScanResult.PREAMBLE_HE -> "HE"
+            ScanResult.PREAMBLE_EHT -> "EHT"
+            else -> "Unknown ($preamble)"
+        }
+
+        /**
+         * Extension property to access the hidden `maxSupportedBandwidth` field in [RttRangingCapabilities].
+         */
+        val RttRangingCapabilities.maxSupportedBandwidthCompat: Int?
+            @SuppressLint("PrivateApi") @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+            get() = try {
+                val method = RttRangingCapabilities::class.java.getDeclaredMethod("getMaxSupportedBandwidth")
+                method.isAccessible = true
+                method.invoke(this) as Int
+            } catch (_: Exception) {
+                null // Default to null if not accessible
+            }
+
+        /**
+         * Extension property to access the hidden `maxSupportedRxChain` field in [RttRangingCapabilities].
+         */
+        val RttRangingCapabilities.maxSupportedRxChainCompat: Int?
+            @SuppressLint("PrivateApi") @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+            get() = try {
+                val method = RttRangingCapabilities::class.java.getDeclaredMethod("getMaxSupportedRxChain")
+                method.isAccessible = true
+                method.invoke(this) as Int
+            } catch (_: Exception) {
+                null // Default to null if not accessible
+            }
+    }
+
+    private object RangingPreferencesPrinter {
+
+        @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+        fun parse(preferences: RangingPreference) = buildString {
+            append("● Device Role: ")
+            appendLine(parseDeviceRole(preferences.deviceRole))
+            preferences.rangingParams?.let { config ->
+                appendLine("● Ranging Parameters:")
+                append("  - Type: ")
+                appendLine(parseRangingSessionType(config.rangingSessionType))
+
+                (config as? RawInitiatorRangingConfig)?.let { initiatorConfig ->
+                    appendLine("  - Devices: ")
+                    appendLine(initiatorConfig.rawRangingDevices.joinToString { device -> RawRandingDevicePrinter.parse(device) })
+                }
+            }
+            preferences.sessionConfig.let { session ->
+                appendLine("● Session Configuration:")
+                append("  - Angle of Arrival Needed: ")
+                appendLine(session.isAngleOfArrivalNeeded)
+                append("  - Ranging Measurements Limit: ")
+                appendLine(session.rangingMeasurementsLimit)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) {
+                    append("  - Antenna Mode: ")
+                    appendLine(parseAntennaMode(session.antennaMode))
+                }
+                session.sensorFusionParams.let { params ->
+                    append("  - Sensor Fusion Enabled: ")
+                    appendLine(params.isSensorFusionEnabled)
+                }
+                session.dataNotificationConfig.let { config ->
+                    append("  - Data Notifications: ")
+                    appendLine(parseNotificationType(config.notificationConfigType))
+                    append("  - Proximity Near: ")
+                    append(config.proximityNearCm).appendLine(" cm")
+                    append("  - Proximity Far: ")
+                    append(config.proximityFarCm).appendLine(" cm")
+                }
+            }
+        }.removeSuffix("\n")
+
+        private fun parseDeviceRole(role: Int) = when (role) {
+            /* RangingPreference.DEVICE_ROLE_RESPONDER */ 0 -> "Responder"
+            /* RangingPreference.DEVICE_ROLE_INITIATOR */ 1 -> "Initiator"
+            /* RangingPreference.DEVICE_ROLE_DT_TAG */ 2 -> "DT Tag"
+            else -> "Unknown ($role)"
+        }
+
+        private fun parseRangingSessionType(type: Int) = when (type) {
+            RangingConfig.RANGING_SESSION_RAW -> "RAW"
+            RangingConfig.RANGING_SESSION_OOB -> "OOB"
+            else -> "Unknown ($type)"
+        }
+
+        @RequiresApi(Build.VERSION_CODES.CINNAMON_BUN)
+        private fun parseAntennaMode(mode: Int) = when (mode) {
+            SessionConfig.ANTENNA_MODE_OMNI -> "Omni"
+            SessionConfig.ANTENNA_MODE_DIRECTIONAL -> "Directional"
+            /* SessionConfig.ANTENNA_MODE_UNSET */ 2 -> "Unset"
+            else -> "Unknown ($mode)"
+        }
+
+        private fun parseNotificationType(type: Int) = when (type) {
+            // Range data notification will be disabled.
+            DataNotificationConfig.NOTIFICATION_CONFIG_DISABLE -> "Disabled"
+            // Range data notification will be enabled (default).
+            DataNotificationConfig.NOTIFICATION_CONFIG_ENABLE -> "Enabled"
+            // Range data notification is enabled when peer device is in the configured range - [near, far].
+            DataNotificationConfig.NOTIFICATION_CONFIG_PROXIMITY_LEVEL -> "Proximity Level"
+            // Range data notification is enabled when peer device enters or exits the configured range - [near, far].
+            DataNotificationConfig.NOTIFICATION_CONFIG_PROXIMITY_EDGE -> "Proximity Edge"
+            else -> "Unknown ($type)"
+        }
+    }
+
+    private object RawRandingDevicePrinter {
+
+        @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+        fun parse(device: RawRangingDevice) = buildString {
+            var addressPrinted = false
+            append("    ○ ID: ")
+            appendLine(device.rangingDevice.uuid)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) {
+                device.rangingDevice.dlTdoaUwbAddress?.let {
+                    append("       DL-TDOA UWB Address: ")
+                    appendLine(it)
+                }
+            }
+            device.csRangingParams?.let { csParams ->
+                append("       Address: ")
+                appendLine(csParams.peerBluetoothAddress)
+                addressPrinted = true
+                append("       Security Level: ")
+                appendLine(csParams.securityLevel)
+                append("       Location: ")
+                appendLine(parseLocationType(csParams.locationType))
+                append("       Sight Type: ")
+                appendLine(parseSightType(csParams.sightType))
+                append("       CS Ranging Update Rate: ")
+                appendLine(parseRangingRate(csParams.rangingUpdateRate))
+            }
+            device.bleRssiRangingParams?.let { rssiParams ->
+                if (!addressPrinted) {
+                    append("       Address: ")
+                    appendLine(rssiParams.peerBluetoothAddress)
+                    addressPrinted = true
+                }
+                append("       RSSI Ranging Update Rate: ")
+                appendLine(parseRangingRate(rssiParams.rangingUpdateRate))
+            }
+            device.rttRangingParams?.let { rtt ->
+                append("       Service Name: ")
+                appendLine(rtt.serviceName)
+                rtt.matchFilter?.let {
+                    append("       Match Filter: 0x")
+                    appendLine(it.toHexString())
+                }
+                append("       RTT Ranging Update Rate: ")
+                appendLine(parseRangingRate(rtt.rangingUpdateRate))
+                append("       Periodic Ranging HW Feature Enabled: ")
+                appendLine(rtt.isPeriodicRangingHwFeatureEnabled)
+            }
+            // TODO Add other technologies
+        }.removeSuffix("\n")
+
+        private fun parseLocationType(type: Int) = when (type) {
+            BleCsRangingParams.LOCATION_TYPE_UNKNOWN -> "Unknown"
+            BleCsRangingParams.LOCATION_TYPE_INDOOR -> "Indoor"
+            BleCsRangingParams.LOCATION_TYPE_OUTDOOR -> "Outdoor"
+            else -> "Unknown ($type)"
+        }
+
+        private fun parseSightType(type: Int) = when (type) {
+            BleCsRangingParams.SIGHT_TYPE_UNKNOWN -> "Unknown"
+            BleCsRangingParams.SIGHT_TYPE_LINE_OF_SIGHT -> "Line of Sight"
+            BleCsRangingParams.SIGHT_TYPE_NON_LINE_OF_SIGHT -> "Non-Line of Sight"
+            else -> "Unknown ($type)"
+        }
+
+        private fun parseRangingRate(rate: Int) = when (rate) {
+            RawRangingDevice.UPDATE_RATE_NORMAL -> "Normal"
+            RawRangingDevice.UPDATE_RATE_INFREQUENT -> "Infrequent"
+            RawRangingDevice.UPDATE_RATE_FREQUENT -> "Frequent"
+            else -> "Unknown ($rate)"
         }
     }
 }
