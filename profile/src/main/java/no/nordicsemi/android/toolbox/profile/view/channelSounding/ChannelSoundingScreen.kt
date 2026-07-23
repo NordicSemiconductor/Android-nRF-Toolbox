@@ -83,7 +83,7 @@ internal fun ChannelSoundingScreen(
         }
     } else {
         SessionError(
-            reason = SessionClosedReason.NOT_SUPPORTED,
+            reason = SessionClosedReason.TOO_OLD,
             isRestartingSession = false,
             onClickEvent = {},
         )
@@ -228,6 +228,7 @@ private fun SessionError(
                 Text(text = stringResource(id = R.string.ranging_session_reconnecting))
             }
         } else if (
+            reason != SessionClosedReason.TOO_OLD &&
             reason != SessionClosedReason.NOT_SUPPORTED &&
             reason != SessionClosedReason.RANGING_NOT_AVAILABLE
         ) {

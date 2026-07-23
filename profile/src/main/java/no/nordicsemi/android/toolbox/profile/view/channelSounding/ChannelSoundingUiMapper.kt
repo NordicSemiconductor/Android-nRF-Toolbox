@@ -45,6 +45,7 @@ internal fun RangingTechnology.toUiString(): Int {
 internal fun SessionCloseReasonProvider.toUiString(): Int {
     return when (this) {
         SessionClosedReason.MISSING_PERMISSION -> R.string.cs_missing_permissions
+        SessionClosedReason.TOO_OLD -> R.string.channel_sounding_not_supported_too_old
         SessionClosedReason.NOT_SUPPORTED -> R.string.channel_sounding_not_supported
         SessionClosedReason.RANGING_NOT_AVAILABLE -> R.string.cs_ranging_not_available
         SessionClosedReason.CS_SECURITY_NOT_AVAILABLE -> R.string.cs_security_not_available

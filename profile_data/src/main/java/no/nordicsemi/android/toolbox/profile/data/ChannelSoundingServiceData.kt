@@ -66,6 +66,7 @@ enum class RangingTechnology(val value: Int) {
 
 enum class SessionClosedReason : SessionCloseReasonProvider {
     MISSING_PERMISSION,
+    TOO_OLD,
     NOT_SUPPORTED,
     RANGING_NOT_AVAILABLE,
     CS_SECURITY_NOT_AVAILABLE,
