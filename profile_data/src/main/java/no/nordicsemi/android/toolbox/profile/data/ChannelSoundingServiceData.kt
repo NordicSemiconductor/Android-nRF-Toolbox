@@ -64,6 +64,8 @@ enum class RangingTechnology(val value: Int) {
     }
 }
 
+sealed interface SessionCloseReasonProvider
+
 enum class SessionClosedReason : SessionCloseReasonProvider {
     MISSING_PERMISSION,
     TOO_OLD,
@@ -72,8 +74,6 @@ enum class SessionClosedReason : SessionCloseReasonProvider {
     CS_SECURITY_NOT_AVAILABLE,
     UNKNOWN;
 }
-
-sealed interface SessionCloseReasonProvider
 
 enum class RangingSessionFailedReason(val reason: Int) : SessionCloseReasonProvider {
     UNKNOWN(0),
