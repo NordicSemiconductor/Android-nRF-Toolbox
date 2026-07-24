@@ -27,13 +27,14 @@ private val backgroundColor = "#F5F5F5".toColorInt()
 private val signalLostColor = "#00A9CE".toColorInt()
 
 @Composable
-internal fun RecentMeasurementChart(previousData: List<Float>) {
+internal fun RecentMeasurementChart(
+    modifier: Modifier = Modifier,
+    previousData: List<Float>
+) {
     val items = previousData.takeLast(X_AXIS_ELEMENTS_COUNT.toInt()).reversed()
     val isSystemInDarkTheme = isSystemInDarkTheme()
     AndroidView(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(300.dp),
+        modifier = modifier,
         factory = { context ->
             createLineChartView(isSystemInDarkTheme, context)
         },
@@ -189,41 +190,13 @@ private fun updateData(points: List<Float>, chart: LineChart) {
 private fun LineChartView_Preview() {
     NordicTheme {
         RecentMeasurementChart(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp),
             previousData = listOf(
-                3.2f,
-                4.5f,
-                2.8f,
-                5.0f,
-                3.6f,
-                4.1f,
-                0.0f,
-                0.0f,
-                0.0f,
-                3.9f,
-                4.8f,
-                2.5f,
-                3.3f,
-                4.0f,
-                3.7f,
-                0.0f,
-                0.0f,
-                4.2f,
-                0.0f,
-                0.0f,
-                0.0f,
-                3.0f,
-                3.3f,
-                4.0f,
-                3.7f,
-                0.0f,
-                0.0f,
-                0.0f,
-                3.2f,
-                4.5f,
-                2.8f,
-                5.0f,
-                3.6f,
-                4.1f,
+                3.2f, 4.5f, 2.8f, 5.0f, 3.6f, 4.1f, 0.0f, 0.0f, 0.0f, 3.9f, 4.8f, 2.5f, 3.3f,
+                4.0f, 3.7f, 0.0f, 0.0f, 4.2f, 0.0f, 0.0f, 0.0f, 3.0f, 3.3f, 4.0f, 3.7f, 0.0f,
+                0.0f, 0.0f, 3.2f, 4.5f, 2.8f, 5.0f, 3.6f, 4.1f,
             )
         )
     }

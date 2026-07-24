@@ -3,7 +3,6 @@ package no.nordicsemi.android.toolbox.profile.view.channelSounding
 import android.os.Build
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,10 +16,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SocialDistance
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Button
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -31,7 +30,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.stringResource
@@ -250,6 +248,7 @@ private fun RangingContent(
 ) {
     val distanceMeasurement = rangingData.distance?.measurement
     val confidence = rangingData.distance?.confidenceLevel?.value
+    val rssi = rangingData.rssi
 
     Column(
         modifier = Modifier
@@ -259,16 +258,14 @@ private fun RangingContent(
         distanceMeasurement?.let { measurement ->
             DistanceDashboard(measurement)
         }
-
         DetailsCard(
             updateRate = updateRate,
             rangingTechnology = rangingData.technology.value,
-            confidenceLevel = confidence
-        ) { onClickEvent(ChannelSoundingEvent.RangingUpdateRate(it)) }
-
-        Spacer(modifier = Modifier.height(16.dp))
+            confidenceLevel = confidence,
+            rssi = rssi,
+            onUpdateRateSelected = { onClickEvent(ChannelSoundingEvent.RangingUpdateRate(it)) }
+        )
         RecentMeasurementsChart(previousMeasurements)
-
     }
 }
 
@@ -303,28 +300,25 @@ private fun DistanceDashboard(measurement: Double) {
 
 @Composable
 private fun DetailsCard(
-    updateRate: UpdateRate = UpdateRate.NORMAL,
-    rangingTechnology: Int = RangingTechnology.BLE_CS.value,
-    confidenceLevel: Int? = ConfidenceLevel.CONFIDENCE_HIGH.value,
-    onUpdateRateSelected: (UpdateRate) -> Unit = { }
+    updateRate: UpdateRate,
+    rangingTechnology: Int,
+    confidenceLevel: Int?,
+    rssi: Int?,
+    onUpdateRateSelected: (UpdateRate) -> Unit,
 ) {
-    // Details Section
-    Text(
-        text = stringResource(R.string.ranging_details),
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier
-            .padding(start = 16.dp)
-            .alpha(0.5f)
-    )
     OutlinedCard(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        Column {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            SectionTitle(
+                icon = Icons.Default.Settings,
+                title = stringResource(R.string.ranging_details),
+            )
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -332,27 +326,21 @@ private fun DetailsCard(
                     stringResource(R.string.ranging_technology),
                     style = MaterialTheme.typography.bodyMedium
                 )
-                Text(RangingTechnology.from(rangingTechnology)?.let {
-                    stringResource(it.toUiString())
-                } ?: "Unknown",
+                Text(
+                    text = RangingTechnology.from(rangingTechnology)
+                        ?.let { stringResource(it.toUiString()) } ?: "Unknown",
                     style = MaterialTheme.typography.titleSmall
                 )
             }
 
-            HorizontalDivider()
-
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     stringResource(R.string.update_rate),
                     style = MaterialTheme.typography.bodyMedium
                 )
-                Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-                UpdateRateSettings(updateRate) { onUpdateRateSelected(it) }
                 Spacer(modifier = Modifier.weight(1f))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -375,19 +363,29 @@ private fun DetailsCard(
                         textAlign = TextAlign.Center
                     )
                 }
+                Spacer(modifier = Modifier.width(16.dp))
+                UpdateRateSettings(
+                    selectedItem = updateRate,
+                    onItemSelected = { onUpdateRateSelected(it) }
+                )
             }
 
-            HorizontalDivider()
-
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+                modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(
-                    stringResource(R.string.signal_strength),
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Row {
+                    Text(
+                        stringResource(R.string.signal_strength),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    rssi?.let { rssi ->
+                        Text(
+                            text = "$rssi dBm",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(8.dp))
                 SignalStrengthBar(confidenceLevel)
             }
@@ -399,26 +397,17 @@ private fun DetailsCard(
 private fun RecentMeasurementsChart(
     previousMeasurements: List<Float>,
 ) {
-    // Recent Measurements
-    Text(
-        text = stringResource(R.string.ranging_previous_measurement),
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier
-            .padding(start = 16.dp)
-            .alpha(0.5f)
-    )
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(250.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(
-                if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary.copy(alpha = 0.20f)
-                else MaterialTheme.colorScheme.surface
-            )
-            .padding(8.dp)
-    ) {
+    OutlinedCard {
+        SectionTitle(
+            icon = Icons.Default.SocialDistance,
+            title = stringResource(R.string.ranging_previous_measurement),
+            modifier = Modifier.padding(16.dp)
+        )
         RecentMeasurementChart(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp)
+                .padding(horizontal = 16.dp),
             previousData = previousMeasurements
         )
     }
@@ -445,7 +434,13 @@ private fun Restarting_Preview() {
 @Preview
 @Composable
 private fun DetailsCard_Preview() {
-    DetailsCard()
+    DetailsCard(
+        updateRate = UpdateRate.NORMAL,
+        rangingTechnology = RangingTechnology.BLE_CS.value,
+        confidenceLevel = ConfidenceLevel.CONFIDENCE_HIGH.value,
+        rssi = -50,
+        onUpdateRateSelected = {}
+    )
 }
 
 @Preview

@@ -9,11 +9,10 @@
     <string name="ranging_session_stopped">Ranging session stopped.</string>
     <string name="ranging_session_reconnecting">Reconnecting…</string>
 
-    <string name="ranging_distance">Distance</string>
     <string name="current_measurement">Current measurement</string>
     <string name="ranging_distance_m">%.2f m</string>
-    <string name="signal_strength">Signal strength</string>
     <string name="ranging_technology">Technology</string>
+    <string name="signal_strength">Confidence</string>
 
     <string name="ranging_azimuth_measurement">Azimuth angle</string>
     <string name="ranging_azimuth_measurement_deg">%.2f°</string>
@@ -37,12 +36,12 @@
     <string name="select_new_update_rate">Select a new ranging update frequency.</string>
     <string name="update_rate_change_warning">Selecting a new rate will cancel the current session and start a new one.</string>
 
-    <string name="ranging_previous_measurement">Recent measurements</string>
+    <string name="ranging_previous_measurement">Recent Measurements</string>
     <string name="ranging_details">Details</string>
 
     <string name="cs_missing_permissions">Missing permissions.</string>
     <string name="cs_ranging_not_available">Ranging service not available.</string>
-    <string name="cs_security_not_available">Channel Sounding with required security level is not supported. </string>
+    <string name="cs_security_not_available">Channel Sounding with Security Level 1 is not supported.</string>
     <string name="cs_error_unknown">Oops! \nSession disappeared. Try reconnecting…</string>
     <string name="cs_local_request">Session terminated by local request.</string>
     <string name="cs_remote_request">Session terminated by remote peer.</string>
