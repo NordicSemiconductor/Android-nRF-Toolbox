@@ -280,13 +280,19 @@ private fun DistanceDashboard(measurement: Double) {
     ) {
         // get measurement in string with 2 decimal places
         if (measurement < 0.01) {
-            AnimatedThreeDots(dotSize = 16.dp)
+            AnimatedThreeDots(
+                modifier = Modifier
+                    .height(58.dp),
+                dotSize = 16.dp,
+                color = MaterialTheme.colorScheme.primary,
+            )
         } else {
             Text(
                 text = stringResource(R.string.ranging_distance_m, measurement.toFloat()),
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.displayLarge
+                style = MaterialTheme.typography.displayLarge,
+                modifier = Modifier.height(58.dp),
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
