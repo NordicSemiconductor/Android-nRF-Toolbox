@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -23,8 +24,7 @@ import no.nordicsemi.android.common.theme.NordicTheme
 private const val X_AXIS_ELEMENTS_COUNT = 40.0f
 
 private val customBlue = "#00A9CE".toColorInt()
-private val backgroundColor = "#F5F5F5".toColorInt()
-private val signalLostColor = "#00A9CE".toColorInt()
+private val signalLostColor = "#88888888".toColorInt()
 
 @Composable
 internal fun RecentMeasurementChart(
@@ -113,7 +113,7 @@ private fun createLineChartView(
 
         // Theme Styling
         val contentColor = if (isDarkTheme) Color.WHITE else Color.BLACK
-        setBackgroundColor(if (isDarkTheme) Color.TRANSPARENT else backgroundColor)
+        setBackgroundColor(Color.TRANSPARENT)
 
         xAxis.apply {
             enableGridDashedLine(10f, 10f, 0f)
@@ -185,7 +185,7 @@ private fun updateData(points: List<Float>, chart: LineChart) {
     chart.invalidate()
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 private fun LineChartView_Preview() {
     NordicTheme {
