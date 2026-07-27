@@ -2,17 +2,33 @@
 <resources>
     <string name="channel_sounding">Channel Sounding</string>
 
-    <string name="channel_sounding_not_supported">Channel Sounding is supported on Android 16 QPR2 or later. Update your device to required version to use this feature.</string>
+    <string name="channel_sounding_not_supported_too_old">Channel Sounding is supported on newer devices with Android 16 QPR2 or later.\nUpdate your device to required version and try again.</string>
+    <string name="channel_sounding_not_supported">This feature isn\'t supported on this device.</string>
     <string name="initiating_ranging">Initiating ranging</string>
     <string name="ranging_session_restarting">Reconnecting session</string>
     <string name="ranging_session_stopped">Ranging session stopped.</string>
     <string name="ranging_session_reconnecting">Reconnecting…</string>
 
-    <string name="ranging_distance">Distance</string>
-    <string name="current_measurement">Current measurement</string>
     <string name="ranging_distance_m">%.2f m</string>
-    <string name="signal_strength">Signal strength</string>
+    <string name="ranging_velocity_mps">%.2f m/s</string>
+    <string name="ranging_rssi_dbm">%d dBm</string>
+    <string name="ranging_attack_level_unknown">Unknown</string>
     <string name="ranging_technology">Technology</string>
+    <string name="signal_strength">Confidence</string>
+    <string name="standard_deviation">Standard Deviation</string>
+    <string name="delay_spread">Delay Spread</string>
+    <string name="velocity">Velocity</string>
+    <string name="detected_attack_level">Detected Attack Level</string>
+    <string-array name="ranging_attack_level">
+        <item>Extremely Unlikely</item>
+        <item>Very Unlikely</item>
+        <item>Unlikely</item>
+        <item>Possible</item>
+        <item>Likely</item>
+        <item>Very Likely</item>
+        <item>Extremely Likely</item>
+    </string-array>
+    <string name="remote_power_level">Remote Power Level</string>
 
     <string name="ranging_azimuth_measurement">Azimuth angle</string>
     <string name="ranging_azimuth_measurement_deg">%.2f°</string>
@@ -26,23 +42,28 @@
     <string name="update_rate_infrequent">Infrequent</string>
     <string name="update_rate_infrequent_des">Updates every 5 seconds.</string>
 
-    <string name="ranging_tech_ble_cs">Bluetooth LE Channel Sounding</string>
+    <string name="ranging_tech_ble_cs">Bluetooth LE Channel Sounding (CS)</string>
     <string name="ranging_tech_wifi_nan_rtt">Wi-Fi NAN RTT</string>
-    <string name="ranging_tech_wifi_sta_rtt">Wi-Fi STA RTT</string>
-    <string name="ranging_tech_uwb">UWB</string>
+    <string name="ranging_tech_wifi_nan_rtt_extra">Neighborhood Aware Networking</string>
+    <string name="ranging_tech_wifi_sta_ap_rtt">Wi-Fi STA-AP RTT</string>
+    <string name="ranging_tech_wifi_sta_ap_rtt_extra">Station-Access Point</string>
+    <string name="ranging_tech_wifi_pd">Wi-Fi PD</string>
+    <string name="ranging_tech_wifi_pd_extra">Proximity Detection</string>
+    <string name="ranging_tech_uwb">Ultra Wideband (UWB)</string>
     <string name="ranging_tech_ble_rssi">Bluetooth LE RSSI</string>
+    <string name="ranging_tech_unknown">Unknown (%1$d)</string>
 
     <string name="change_update_rate">Change Update Rate</string>
     <string name="select_new_update_rate">Select a new ranging update frequency.</string>
     <string name="update_rate_change_warning">Selecting a new rate will cancel the current session and start a new one.</string>
 
-    <string name="ranging_previous_measurement">Recent measurements</string>
-    <string name="ranging_details">Details</string>
+    <string name="ranging_measurement">Measurement</string>
+    <string name="ranging_previous_measurement">Recent Measurements</string>
 
     <string name="cs_missing_permissions">Missing permissions.</string>
     <string name="cs_ranging_not_available">Ranging service not available.</string>
-    <string name="cs_security_not_available">Channel Sounding with required security level is not supported. </string>
-    <string name="cs_error_unknown">Oops! \nSession disappeared. Try reconnecting…</string>
+    <string name="cs_security_not_available">Channel Sounding with Security Level 1 is not supported.</string>
+    <string name="cs_error_unknown">Session closed due to an unknown error.\nTry reconnecting…</string>
     <string name="cs_local_request">Session terminated by local request.</string>
     <string name="cs_remote_request">Session terminated by remote peer.</string>
     <string name="cs_peer_terminated">Peer terminated the session.</string>
@@ -52,4 +73,36 @@
 
     <string name="update_rate_confirm">Confirm</string>
     <string name="update_rate_cancel">Cancel</string>
+
+    <!-- Ranging options -->
+    <string name="ranging_configuration">Ranging</string>
+    <string name="action_start">Start</string>
+    <string name="action_stop">Stop</string>
+
+    <string name="sight_type">Sight type</string>
+    <string name="sight_type_unknown">Unspecified</string>
+    <string name="sight_type_line_of_sight">Line of sight</string>
+    <string name="sight_type_non_line_of_sight">Non-line of sight</string>
+
+    <string name="location_type">Location type</string>
+    <string name="location_type_unknown">Unspecified</string>
+    <string name="location_type_indoor">Indoor</string>
+    <string name="location_type_outdoor">Outdoor</string>
+
+    <string name="sensor_fusion">Sensor fusion</string>
+
+    <string name="antenna_mode">Antenna mode</string>
+    <string name="antenna_mode_unset">Unspecified</string>
+    <string name="antenna_mode_omni">Omni</string>
+    <string name="antenna_mode_directional">Directional</string>
+
+    <!-- Host capabilities card -->
+    <string name="host_capabilities">Host Ranging Capabilities</string>
+    <string name="cs_security_levels">Channel Sounding security levels</string>
+    <string name="capability_enabled">Enabled</string>
+    <string name="capability_not_supported">Not supported</string>
+    <string name="capability_disabled_user">Disabled (user)</string>
+    <string name="capability_disabled_regulatory">Disabled (regulatory)</string>
+    <string name="capability_disabled_user_restrictions">Disabled (user restrictions)</string>
+    <string name="capability_unknown">Unknown</string>
 </resources>

@@ -30,7 +30,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun AnimatedThreeDots(
     modifier: Modifier = Modifier,
-    dotSize: Dp = 8.dp
+    dotSize: Dp = 8.dp,
+    color: Color = MaterialTheme.colorScheme.onSurface,
 ) {
     val dotCount = 3
     val infiniteTransition = rememberInfiniteTransition()
@@ -52,6 +53,7 @@ fun AnimatedThreeDots(
 
     Row(
         modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
         dotAlphas.forEach { alpha ->
@@ -60,7 +62,7 @@ fun AnimatedThreeDots(
                     .padding(1.dp)
                     .size(dotSize)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = alpha.value))
+                    .background(color.copy(alpha = alpha.value))
             )
         }
     }
@@ -85,7 +87,8 @@ fun TextWithAnimatedDots(
         Spacer(modifier = Modifier.width(2.dp))
         AnimatedThreeDots(
             modifier = modifier.padding(bottom = 4.dp),
-            dotSize = dotSize
+            dotSize = dotSize,
+            color = textStyle.color
         )
     }
 }
