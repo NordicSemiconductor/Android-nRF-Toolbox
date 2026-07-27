@@ -26,9 +26,8 @@ import no.nordicsemi.android.common.theme.nordicGreen
 import no.nordicsemi.android.common.theme.nordicRed
 import no.nordicsemi.android.toolbox.profile.data.ConfidenceLevel
 
-@Preview(showBackground = true)
 @Composable
-internal fun SignalStrengthBar(confidenceLevel: Int? = ConfidenceLevel.CONFIDENCE_HIGH.value) {
+internal fun SignalStrengthBar(confidenceLevel: Int?) {
     val (signalColor, strengthFraction) = when (confidenceLevel) {
         ConfidenceLevel.CONFIDENCE_HIGH.value -> Pair(nordicGreen, 1.0f)
         ConfidenceLevel.CONFIDENCE_MEDIUM.value -> Pair(nordicFall, 0.66f)

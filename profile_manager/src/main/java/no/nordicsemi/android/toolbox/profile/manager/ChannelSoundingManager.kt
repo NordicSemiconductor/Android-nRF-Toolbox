@@ -30,13 +30,20 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.log.LogContract.Log
 import no.nordicsemi.android.toolbox.lib.utils.spec.RANGING_SERVICE_UUID
+import no.nordicsemi.android.toolbox.profile.data.AntennaMode
 import no.nordicsemi.android.toolbox.profile.data.CSRangingMeasurement
+import no.nordicsemi.android.toolbox.profile.data.CapabilityStatus
 import no.nordicsemi.android.toolbox.profile.data.ConfidenceLevel
 import no.nordicsemi.android.toolbox.profile.data.CsRangingData
+import no.nordicsemi.android.toolbox.profile.data.HostCapabilities
+import no.nordicsemi.android.toolbox.profile.data.LocationType
+import no.nordicsemi.android.toolbox.profile.data.RangingOptions
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionFailedReason
 import no.nordicsemi.android.toolbox.profile.data.RangingTechnology
 import no.nordicsemi.android.toolbox.profile.data.SessionClosedReason
+import no.nordicsemi.android.toolbox.profile.data.SightType
+import no.nordicsemi.android.toolbox.profile.data.TechnologyAvailability
 import no.nordicsemi.android.toolbox.profile.data.UpdateRate
 import no.nordicsemi.android.toolbox.profile.manager.repository.ChannelSoundingRepository
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
@@ -47,6 +54,10 @@ import timber.log.Timber
 import java.util.UUID
 import kotlin.uuid.Uuid
 import no.nordicsemi.android.toolbox.lib.utils.Profile as ServiceType
+
+// This flag is to test Ranging on phones without Channel Sounding.
+// A RSSI measurement will be done instead if set.
+private const val DEBUG_ALLOW_RSSI_RANGING = false
 
 private val RAS_FEATURES = Uuid.parse("00002C14-0000-1000-8000-00805F9B34FB")
 
@@ -60,6 +71,7 @@ private val RAS_FEATURES = Uuid.parse("00002C14-0000-1000-8000-00805F9B34FB")
  * requests a stop/close and returns immediately; the resulting state update (and any deferred
  * restart) happens once the system actually reports the session as stopped/closed.
  */
+@Suppress("SimplifyBooleanWithConstants")
 class ChannelSoundingManager(
     private val context: Context,
     deviceId: String,
@@ -84,8 +96,8 @@ class ChannelSoundingManager(
     private var activeSession: RangingSession? = null
     private val previousRangingData = mutableListOf<Float>()
 
-    /** Rate the currently active (or last started) session was configured with. */
-    private var currentRate: UpdateRate = UpdateRate.NORMAL
+    /** Guards [requestHostCapabilitiesOnce] so host capabilities are fetched only once per connection. */
+    private var capabilitiesRequested = false
 
     /** True while the session is open, i.e. between `onOpened` and `onStopped`/`onClosed`. */
     private var isSessionOpen = false
@@ -95,6 +107,9 @@ class ChannelSoundingManager(
 
     /** Action to run once the pending close (requested via [closeSession]) completes. */
     private var pendingRestart: (() -> Unit)? = null
+
+    /** A flag set when accessing hidden Android API fails. No more attempts will be made. */
+    private var hiddenApiBlocked = false
 
     override fun prepare(service: RemoteService) {
         peripheral = requireNotNull(service.owner as? Peripheral)
@@ -120,29 +135,9 @@ class ChannelSoundingManager(
             launch {
                 // Channel Sounding requires the devices to be bonded before ranging can start.
                 peripheral.bondState.first { it == BondState.BONDED }
-                startRangingMeasurement()
+                requestHostCapabilitiesOnce()
             }
         }
-    }
-
-    /**
-     * Changes the ranging update rate. The UI reflects the new rate immediately; if a session is
-     * currently running with a different rate, it is closed and restarted with the new rate once
-     * the close completes.
-     */
-    fun changeUpdateRate(rate: UpdateRate) {
-        repository.updateRate(rate)
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA || rate == currentRate) return
-        Timber.tag(tag).log(Log.Level.APPLICATION, "Update rate changed to: $rate")
-        closeSession { startRangingMeasurement(rate) }
-    }
-
-    /** Closes and restarts the ranging session using the currently selected update rate. */
-    fun restartRangingSession() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA) return
-        val rate = repository.data.value.updateRate
-        Timber.tag(tag).log(Log.Level.APPLICATION, "Session restarted")
-        closeSession { startRangingMeasurement(rate) }
     }
 
     /**
@@ -182,11 +177,42 @@ class ChannelSoundingManager(
     }
 
     /**
-     * Starts a ranging session for this device with the requested update rate. If a session is
-     * already active, this is a no-op - call [closeSession] first to change its rate.
+     * Requests the host's ranging capabilities exactly once per connection and publishes them to
+     * the UI. This does not start a session - it only populates the capabilities card. If Channel
+     * Sounding is not supported at all, an error state is surfaced instead.
      */
     @RequiresApi(Build.VERSION_CODES.BAKLAVA)
-    fun startRangingMeasurement(updateRate: UpdateRate = UpdateRate.NORMAL) {
+    private fun requestHostCapabilitiesOnce() {
+        if (capabilitiesRequested) return
+        val rangingManager = rangingManager ?: run {
+            repository.updateSessionAction(RangingSessionAction.OnError(SessionClosedReason.RANGING_NOT_AVAILABLE))
+            return
+        }
+        capabilitiesRequested = true
+
+        var callback: RangingManager.RangingCapabilitiesCallback? = null
+        callback = RangingManager.RangingCapabilitiesCallback { capabilities ->
+            callback?.let { rangingManager.unregisterCapabilitiesCallback(it) }
+            Timber.tag(tag).log(Log.Level.APPLICATION, "Ranging capabilities:\n${RangingCapabilitiesPrinter.parse(capabilities)}")
+            val host = capabilities.toHostCapabilities()
+            repository.updateCapabilities(host)
+            if (!host.channelSoundingSupported && !DEBUG_ALLOW_RSSI_RANGING) {
+                Timber.tag(tag).w("Channel Sounding not supported by host")
+                repository.updateSessionAction(RangingSessionAction.OnError(SessionClosedReason.NOT_SUPPORTED))
+            }
+        }.also {
+            Timber.tag(tag).v("Requesting host capabilities...")
+            rangingManager.registerCapabilitiesCallback(context.mainExecutor, it)
+        }
+    }
+
+    /**
+     * Starts a ranging session using the currently selected [RangingOptions]. If a session is
+     * already active, this is a no-op. The configuration is validated against the previously
+     * fetched host capabilities and the RANGING permission before the session is opened.
+     */
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+    fun startRanging() {
         val rangingManager = rangingManager ?: run {
             repository.updateSessionAction(RangingSessionAction.OnError(SessionClosedReason.RANGING_NOT_AVAILABLE))
             return
@@ -195,10 +221,39 @@ class ChannelSoundingManager(
             Timber.tag(tag).w("Ranging session already active")
             return
         }
-        currentRate = updateRate
-        repository.updateRate(updateRate)
+        val capabilities = repository.data.value.capabilities ?: run {
+            Timber.tag(tag).w("Host capabilities not available yet")
+            return
+        }
+        when {
+            !DEBUG_ALLOW_RSSI_RANGING && !capabilities.channelSoundingSupported ->
+                repository.updateSessionAction(RangingSessionAction.OnError(SessionClosedReason.NOT_SUPPORTED))
 
-        val setRangingUpdateRate = when (updateRate) {
+            !DEBUG_ALLOW_RSSI_RANGING && BleCsRangingCapabilities.CS_SECURITY_LEVEL_ONE !in capabilities.supportedSecurityLevels -> {
+                Timber.tag(tag).w("Security Level 1 not supported")
+                repository.updateSessionAction(RangingSessionAction.OnError(SessionClosedReason.CS_SECURITY_NOT_AVAILABLE))
+            }
+
+            !hasRangingPermission() -> {
+                Timber.tag(tag).w("Missing RANGING permission")
+                repository.updateSessionAction(RangingSessionAction.OnError(SessionClosedReason.MISSING_PERMISSION))
+            }
+
+            else -> openRangingSession(rangingManager, buildRangingPreference(repository.data.value.config))
+        }
+    }
+
+    /** Stops the active ranging session, if any, returning the UI to the idle (stopped) state. */
+    fun stopRanging() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA) return
+        Timber.tag(tag).log(Log.Level.APPLICATION, "Session stopped by user")
+        closeSession()
+    }
+
+    /** Builds the [RangingPreference] for a Channel Sounding session from the given [config]. */
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+    private fun buildRangingPreference(config: RangingOptions): RangingPreference {
+        val setRangingUpdateRate = when (config.updateRate) {
             UpdateRate.FREQUENT -> RawRangingDevice.UPDATE_RATE_FREQUENT
             UpdateRate.NORMAL -> RawRangingDevice.UPDATE_RATE_NORMAL
             UpdateRate.INFREQUENT -> RawRangingDevice.UPDATE_RATE_INFREQUENT
@@ -211,12 +266,19 @@ class ChannelSoundingManager(
         val csRangingParams = BleCsRangingParams
             .Builder(deviceId)
             .setRangingUpdateRate(setRangingUpdateRate)
+            .setSightType(config.sightType.toAndroidSightType())
+            .setLocationType(config.locationType.toAndroidLocationType())
             .setSecurityLevel(BleCsRangingCapabilities.CS_SECURITY_LEVEL_ONE)
             .build()
 
         val rawRangingDevice = RawRangingDevice.Builder()
             .setRangingDevice(rangingDevice)
             .setCsRangingParams(csRangingParams)
+            .apply {
+                if (DEBUG_ALLOW_RSSI_RANGING) {
+                    setBleRssiRangingParams(BleRssiRangingParams.Builder(deviceId).build())
+                }
+            }
             .build()
 
         val rawRangingDeviceConfig = RawInitiatorRangingConfig.Builder()
@@ -224,46 +286,75 @@ class ChannelSoundingManager(
             .build()
 
         val sensorFusionParams = SensorFusionParams.Builder()
-            .setSensorFusionEnabled(true)
+            .setSensorFusionEnabled(config.sensorFusionEnabled)
             .build()
 
         val sessionConfig = SessionConfig.Builder()
-            .setRangingMeasurementsLimit(1000)
-            .setAngleOfArrivalNeeded(true)
+            .setRangingMeasurementsLimit(0)
+            .setAngleOfArrivalNeeded(false)
+            .apply {
+                // Antenna mode is only configurable from Android 17; UNSET leaves the system default.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN &&
+                    config.antennaMode != AntennaMode.UNSET
+                ) {
+                    setAntennaMode(config.antennaMode.toAndroidAntennaMode())
+                }
+            }
             .setSensorFusionParams(sensorFusionParams)
             .build()
 
-        val rangingPreference = RangingPreference.Builder(DEVICE_ROLE_INITIATOR, rawRangingDeviceConfig)
+        return RangingPreference
+            .Builder(DEVICE_ROLE_INITIATOR, rawRangingDeviceConfig)
             .setSessionConfig(sessionConfig)
             .build()
+    }
 
-        var callback: RangingManager.RangingCapabilitiesCallback? = null
-        callback = RangingManager.RangingCapabilitiesCallback { capabilities ->
-            callback?.let { rangingManager.unregisterCapabilitiesCallback(it) }
-            if (activeSession != null) return@RangingCapabilitiesCallback
-            Timber.tag(tag).log(Log.Level.APPLICATION, "Ranging capabilities:\n${RangingCapabilitiesPrinter.parse(capabilities)}")
-            val csCapabilities = capabilities.csCapabilities
-            when {
-                csCapabilities == null -> {
-                    repository.updateSessionAction(RangingSessionAction.OnError(SessionClosedReason.NOT_SUPPORTED))
-                }
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+    private fun SightType.toAndroidSightType(): Int = when (this) {
+        SightType.UNKNOWN -> BleCsRangingParams.SIGHT_TYPE_UNKNOWN
+        SightType.LINE_OF_SIGHT -> BleCsRangingParams.SIGHT_TYPE_LINE_OF_SIGHT
+        SightType.NON_LINE_OF_SIGHT -> BleCsRangingParams.SIGHT_TYPE_NON_LINE_OF_SIGHT
+    }
 
-                BleCsRangingCapabilities.CS_SECURITY_LEVEL_ONE !in csCapabilities.supportedSecurityLevels -> {
-                    Timber.tag(tag).w("Security level 1 not supported")
-                    repository.updateSessionAction(RangingSessionAction.OnError(SessionClosedReason.CS_SECURITY_NOT_AVAILABLE))
-                }
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+    private fun LocationType.toAndroidLocationType(): Int = when (this) {
+        LocationType.UNKNOWN -> BleCsRangingParams.LOCATION_TYPE_UNKNOWN
+        LocationType.INDOOR -> BleCsRangingParams.LOCATION_TYPE_INDOOR
+        LocationType.OUTDOOR -> BleCsRangingParams.LOCATION_TYPE_OUTDOOR
+    }
 
-                !hasRangingPermission() -> {
-                    Timber.tag(tag).w("Missing RANGING permission")
-                    repository.updateSessionAction(RangingSessionAction.OnError(SessionClosedReason.MISSING_PERMISSION))
-                }
+    @RequiresApi(Build.VERSION_CODES.CINNAMON_BUN)
+    private fun AntennaMode.toAndroidAntennaMode(): Int = when (this) {
+        AntennaMode.OMNI -> SessionConfig.ANTENNA_MODE_OMNI
+        AntennaMode.DIRECTIONAL -> SessionConfig.ANTENNA_MODE_DIRECTIONAL
+        AntennaMode.UNSET -> SessionConfig.ANTENNA_MODE_OMNI // Never reached; UNSET is not applied.
+    }
 
-                else -> openRangingSession(rangingManager, rangingPreference)
-            }
-        }.also { callback ->
-            Timber.tag(tag).v("Requesting host capabilities...")
-            rangingManager.registerCapabilitiesCallback(context.mainExecutor, callback)
+    /** Maps the system [RangingCapabilities] into the UI-facing [HostCapabilities] snapshot. */
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+    private fun RangingCapabilities.toHostCapabilities(): HostCapabilities {
+        val technologies = technologyAvailability.map { (technology, availability) ->
+            TechnologyAvailability(
+                technology = RangingTechnology.from(technology),
+                rawValue = technology,
+                status = availability.toCapabilityStatus(),
+            )
         }
+        return HostCapabilities(
+            technologies = technologies,
+            channelSoundingSupported = csCapabilities != null,
+            supportedSecurityLevels = csCapabilities?.supportedSecurityLevels?.toList() ?: emptyList(),
+        )
+    }
+
+    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+    private fun Int.toCapabilityStatus(): CapabilityStatus = when (this) {
+        RangingCapabilities.ENABLED -> CapabilityStatus.ENABLED
+        RangingCapabilities.NOT_SUPPORTED -> CapabilityStatus.NOT_SUPPORTED
+        RangingCapabilities.DISABLED_USER -> CapabilityStatus.DISABLED_USER
+        RangingCapabilities.DISABLED_REGULATORY -> CapabilityStatus.DISABLED_REGULATORY
+        RangingCapabilities.DISABLED_USER_RESTRICTIONS -> CapabilityStatus.DISABLED_USER_RESTRICTIONS
+        else -> CapabilityStatus.UNKNOWN
     }
 
     /** Creates and starts the [RangingSession]. Permission was just verified by the caller. */
@@ -289,12 +380,14 @@ class ChannelSoundingManager(
     private fun createRangingSessionCallback() = object : RangingSession.Callback {
         override fun onOpened() {
             isSessionOpen = true
+            repository.setRunning(true)
             Timber.tag(tag).log(Log.Level.APPLICATION, "Ranging session opened")
             repository.updateSessionAction(RangingSessionAction.OnStart)
         }
 
         override fun onOpenFailed(reason: Int) {
             activeSession = null
+            repository.setRunning(false)
             Timber.tag(tag).e("Opening ranging session failed: $reason")
             repository.updateSessionAction(RangingSessionAction.OnError(RangingSessionFailedReason.getReason(reason)))
         }
@@ -318,6 +411,7 @@ class ChannelSoundingManager(
         @SuppressLint("MissingPermission") // Permission was already verified when the session was opened.
         override fun onStopped(peer: RangingDevice, technology: Int) {
             isSessionOpen = false
+            repository.setRunning(false)
             Timber.tag(tag).log(Log.Level.APPLICATION, "Ranging session stopped")
             previousRangingData.clear()
             if (closing) {
@@ -334,6 +428,7 @@ class ChannelSoundingManager(
             activeSession = null
             closing = false
             isSessionOpen = false
+            repository.setRunning(false)
             if (reason == RangingSessionFailedReason.LOCAL_REQUEST.reason) {
                 Timber.tag(tag).log(Log.Level.APPLICATION, "Ranging session closed (local request)")
             } else {
@@ -376,9 +471,67 @@ class ChannelSoundingManager(
         technology = RangingTechnology.from(rangingTechnology)
             ?: throw IllegalArgumentException("Unknown ranging technology: $rangingTechnology"),
         timeStamp = timestampMillis,
-        hasRssi = hasRssi(),
-        rssi = if (hasRssi()) rssi else null,
+        rssi = if (hasRssi() && rssi != 127 /* DistanceMeasurementResult.INVALID_RSSI_DBM */) rssi else null,
+        distanceStdDevMeters = if (Build.VERSION.SDK_INT_FULL >= Build.VERSION_CODES_FULL.BAKLAVA_1 && hasDistanceStandardDeviation()) {
+            distanceStandardDeviationMeters
+        } else null,
+        delaySpreadMeters = if (Build.VERSION.SDK_INT_FULL >= Build.VERSION_CODES_FULL.BAKLAVA_1) {
+            val fromExtras = if (Build.VERSION.SDK_INT_FULL >= Build.VERSION_CODES_FULL.CINNAMON_BUN) {
+                rangingDataExtras?.bleSpecificData?.delaySpreadMeters
+            } else null
+            fromExtras ?: if (hiddenApiBlocked) null
+            else try { delaySpreadMetersCompat } catch (_: NoSuchMethodException) { hiddenApiBlocked = true; null }
+        } else null,
+        velocityMetersPerSec = if (Build.VERSION.SDK_INT_FULL >= Build.VERSION_CODES_FULL.BAKLAVA_1 && !hiddenApiBlocked) {
+            try { velocityMetersPerSecCompat } catch (_: NoSuchMethodException) { hiddenApiBlocked = true; null }
+        } else null,
+        detectedAttackLevelPercent = if (Build.VERSION.SDK_INT_FULL >= Build.VERSION_CODES_FULL.BAKLAVA_1 && !hiddenApiBlocked) {
+            try { detectedAttackLevelCompat } catch (_: NoSuchMethodException) { hiddenApiBlocked = true; null }
+        } else null,
+        remoteTxPowerDbm = if (Build.VERSION.SDK_INT_FULL >= Build.VERSION_CODES_FULL.CINNAMON_BUN) {
+            val power = rangingDataExtras?.bleSpecificData?.remoteTxPowerDbm
+            if (power == 127 /* DistanceMeasurementResult.INVALID_RSSI_DBM */) null else power
+        } else null,
     )
+
+    val RangingData.delaySpreadMetersCompat: Double?
+        @SuppressLint("PrivateApi") @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+        get() = try {
+            val method = RangingData::class.java.getDeclaredMethod("getDelaySpreadMeters")
+            method.isAccessible = true
+            val delaySpread = method.invoke(this) as Double
+            if (delaySpread.isNaN()) null else delaySpread
+        } catch (e: NoSuchMethodException) {
+            throw e
+        } catch (_: Exception) {
+            null // Default to null if not accessible
+        }
+
+    val RangingData.velocityMetersPerSecCompat: Double?
+        @SuppressLint("PrivateApi") @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+        get() = try {
+            val method = RangingData::class.java.getDeclaredMethod("getVelocityMetersPerSec")
+            method.isAccessible = true
+            val velocity = method.invoke(this) as Double
+            if (velocity.isNaN()) null else velocity
+        } catch (e: NoSuchMethodException) {
+            throw e
+        } catch (_: Exception) {
+            null // Default to null if not accessible
+        }
+
+    val RangingData.detectedAttackLevelCompat: Int?
+        @SuppressLint("PrivateApi") @RequiresApi(Build.VERSION_CODES.BAKLAVA)
+        get() = try {
+            val method = RangingData::class.java.getDeclaredMethod("getDetectedAttackLevel")
+            method.isAccessible = true
+            val attack = method.invoke(this) as Byte
+            if (attack == 0xFF.toByte()) null else attack.toInt()
+        } catch (e: NoSuchMethodException) {
+            throw e
+        } catch (_: Exception) {
+            null // Default to null if not accessible
+        }
 
     data class RasFeature(
         val realTimeRangingData: Boolean,
@@ -424,6 +577,8 @@ class ChannelSoundingManager(
     }
 
     private object RangingCapabilitiesPrinter {
+        /** A flag set when accessing hidden Android API fails. No more attempts will be made. */
+        private var hiddenApiBlocked = false
 
         @RequiresApi(Build.VERSION_CODES.BAKLAVA)
         fun parse(capabilities: RangingCapabilities) = buildString {
@@ -474,13 +629,18 @@ class ChannelSoundingManager(
                 appendLine("● Round Trip Time (RTT)")
                 append("  - Periodic Ranging Hardware Feature: ")
                 appendLine(rttRangingCapabilities.hasPeriodicRangingHardwareFeature())
-                rttRangingCapabilities.maxSupportedBandwidthCompat?.let { maxSupportedBandwidth ->
-                    append("  - Max Supported Bandwidth: ")
-                    appendLine(maxSupportedBandwidth)
-                }
-                rttRangingCapabilities.maxSupportedRxChainCompat?.let { maxSupportedRxChain ->
-                    append("  - Max Supported RX Chain: ")
-                    appendLine(maxSupportedRxChain)
+                try {
+                    if (hiddenApiBlocked) return@let
+                    rttRangingCapabilities.maxSupportedBandwidthCompat?.let { maxSupportedBandwidth ->
+                        append("  - Max Supported Bandwidth: ")
+                        appendLine(maxSupportedBandwidth)
+                    }
+                    rttRangingCapabilities.maxSupportedRxChainCompat?.let { maxSupportedRxChain ->
+                        append("  - Max Supported RX Chain: ")
+                        appendLine(maxSupportedRxChain)
+                    }
+                } catch (_: NoSuchMethodException) {
+                    hiddenApiBlocked = true
                 }
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) {
@@ -548,9 +708,13 @@ class ChannelSoundingManager(
         val RttRangingCapabilities.maxSupportedBandwidthCompat: Int?
             @SuppressLint("PrivateApi") @RequiresApi(Build.VERSION_CODES.BAKLAVA)
             get() = try {
-                val method = RttRangingCapabilities::class.java.getDeclaredMethod("getMaxSupportedBandwidth")
+                val method =
+                    RttRangingCapabilities::class.java.getDeclaredMethod("getMaxSupportedBandwidth")
                 method.isAccessible = true
-                method.invoke(this) as Int
+                val bandwidth = method.invoke(this) as Int
+                if (bandwidth == -1) null else bandwidth
+            } catch (e: NoSuchMethodException) {
+                throw e
             } catch (_: Exception) {
                 null // Default to null if not accessible
             }
@@ -564,6 +728,8 @@ class ChannelSoundingManager(
                 val method = RttRangingCapabilities::class.java.getDeclaredMethod("getMaxSupportedRxChain")
                 method.isAccessible = true
                 method.invoke(this) as Int
+            } catch (e: NoSuchMethodException) {
+                throw e
             } catch (_: Exception) {
                 null // Default to null if not accessible
             }

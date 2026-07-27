@@ -1,8 +1,10 @@
 package no.nordicsemi.android.toolbox.profile.view.channelSounding
 
 import android.os.Build
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,25 +15,40 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.automirrored.filled.ShowChart
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SocialDistance
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -39,23 +56,30 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import no.nordicsemi.android.common.theme.nordicGreen
 import no.nordicsemi.android.common.ui.view.SectionTitle
 import no.nordicsemi.android.toolbox.profile.R
+import no.nordicsemi.android.toolbox.profile.data.AntennaMode
+import no.nordicsemi.android.toolbox.profile.data.CSRangingMeasurement
+import no.nordicsemi.android.toolbox.profile.data.CapabilityStatus
 import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
 import no.nordicsemi.android.toolbox.profile.data.ConfidenceLevel
 import no.nordicsemi.android.toolbox.profile.data.CsRangingData
+import no.nordicsemi.android.toolbox.profile.data.HostCapabilities
+import no.nordicsemi.android.toolbox.profile.data.LocationType
+import no.nordicsemi.android.toolbox.profile.data.RangingOptions
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
-import no.nordicsemi.android.toolbox.profile.data.RangingSessionFailedReason
 import no.nordicsemi.android.toolbox.profile.data.RangingTechnology
 import no.nordicsemi.android.toolbox.profile.data.SessionCloseReasonProvider
 import no.nordicsemi.android.toolbox.profile.data.SessionClosedReason
+import no.nordicsemi.android.toolbox.profile.data.SightType
+import no.nordicsemi.android.toolbox.profile.data.TechnologyAvailability
 import no.nordicsemi.android.toolbox.profile.data.UpdateRate
 import no.nordicsemi.android.toolbox.profile.manager.ChannelSoundingManager
 import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingEvent
 import no.nordicsemi.android.toolbox.profile.viewmodel.ChannelSoundingViewModel
 import no.nordicsemi.android.ui.view.AnimatedThreeDots
 import no.nordicsemi.android.ui.view.ScreenSection
-import no.nordicsemi.android.ui.view.TextWithAnimatedDots
 import no.nordicsemi.android.ui.view.internal.LoadingView
 
 @Composable
@@ -80,11 +104,7 @@ internal fun ChannelSoundingScreen(
             ChannelSoundingView(channelSoundingState, onClickEvent)
         }
     } else {
-        SessionError(
-            reason = SessionClosedReason.TOO_OLD,
-            isRestartingSession = false,
-            onClickEvent = {},
-        )
+        SessionError(reason = SessionClosedReason.TOO_OLD)
     }
 }
 
@@ -93,196 +113,314 @@ private fun ChannelSoundingView(
     channelSoundingState: ChannelSoundingServiceData,
     onClickEvent: (ChannelSoundingEvent) -> Unit,
 ) {
-    var isRestartingSession by rememberSaveable { mutableStateOf(false) }
-    when (val sessionData = channelSoundingState.rangingSessionAction) {
-        is RangingSessionAction.OnError -> {
-            SessionError(sessionData.reason, isRestartingSession) { onClickEvent(it) }
+    val action = channelSoundingState.rangingSessionAction
+
+    // Fatal errors replace the whole screen - the user cannot recover by starting a session.
+    val fatalReason = (action as? RangingSessionAction.OnError)?.reason?.takeIf { it.isFatal() }
+    if (fatalReason != null) {
+        SessionError(reason = fatalReason)
+        return
+    }
+
+    // Host capabilities are fetched once right after connecting; until then there is nothing to show.
+    val capabilities = channelSoundingState.capabilities
+    if (capabilities == null) {
+        LoadingView()
+        return
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        ConfigCard(
+            config = channelSoundingState.config,
+            isRunning = channelSoundingState.isRunning,
+            onClickEvent = onClickEvent,
+        )
+
+        (action as? RangingSessionAction.OnError)?.let { InlineError(it.reason) }
+
+        (action as? RangingSessionAction.OnResult)?.let { action ->
+            LiveReadoutsCard(action.data)
+            RecentMeasurementsChart(action.previousData)
         }
 
-        is RangingSessionAction.OnResult -> {
-            RangingContent(
-                channelSoundingState.updateRate,
-                sessionData.data,
-                sessionData.previousData,
-            ) {
-                isRestartingSession = true
-                onClickEvent(it)
-            }
-        }
-
-        RangingSessionAction.OnClosed -> {
-            SessionClosed(isRestartingSession, onClickEvent)
-        }
-
-        RangingSessionAction.OnStart -> {
-            isRestartingSession = false
-            InitiatingSession()
-        }
-
-        RangingSessionAction.OnRestarting -> {
-            isRestartingSession = true
-            RestartingSession()
-        }
-
-        null -> LoadingView()
+        var expanded by rememberSaveable { mutableStateOf(false) }
+        CapabilitiesCard(
+            capabilities = capabilities,
+            expanded = expanded,
+            onExpandedChange = { expanded = it },
+        )
     }
 }
 
 @Composable
-private fun InitiatingSession() {
+private fun CapabilitiesCard(
+    capabilities: HostCapabilities,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+) {
+    ScreenSection(
+        modifier = Modifier.clickable { onExpandedChange(!expanded) },
+    ) {
+        SectionTitle(
+            icon = Icons.Default.VerifiedUser,
+            title = stringResource(R.string.host_capabilities),
+            menu = {
+                Icon(
+                    imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = null,
+                )
+            }
+        )
+
+        AnimatedVisibility(expanded) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                capabilities.technologies.forEach { availability ->
+                    LabeledRow(
+                        label = technologyLabel(availability),
+                        value = stringResource(availability.status.toUiString()),
+                        extra = technologyExtra(availability),
+                        valueColor = when (availability.status) {
+                            CapabilityStatus.ENABLED -> nordicGreen
+                            else -> MaterialTheme.colorScheme.error
+                        }
+                    )
+                }
+
+                if (capabilities.supportedSecurityLevels.isNotEmpty()) {
+                    HorizontalDivider()
+                    LabeledRow(
+                        label = stringResource(R.string.cs_security_levels),
+                        value = capabilities.supportedSecurityLevels.joinToString(),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ConfigCard(
+    config: RangingOptions,
+    isRunning: Boolean,
+    onClickEvent: (ChannelSoundingEvent) -> Unit,
+) {
     ScreenSection {
         SectionTitle(
             icon = Icons.Default.SocialDistance,
             title = stringResource(R.string.channel_sounding),
         )
-        TextWithAnimatedDots(
-            text = stringResource(R.string.initiating_ranging),
-        )
-    }
-}
 
-@Composable
-private fun RestartingSession() {
-    ScreenSection {
-        SectionTitle(
-            icon = Icons.Default.SocialDistance,
-            title = stringResource(R.string.channel_sounding),
+        LabeledRow(
+            label = stringResource(R.string.ranging_technology),
+            value = stringResource(RangingTechnology.BLE_CS.toUiString()),
         )
-        TextWithAnimatedDots(
-            text = stringResource(R.string.ranging_session_restarting),
-        )
-    }
-}
 
-@Composable
-private fun SessionClosed(
-    isRestartingSession: Boolean,
-    onClickEvent: (ChannelSoundingEvent) -> Unit,
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        ScreenSection {
-            SectionTitle(
-                icon = Icons.Default.SocialDistance,
-                title = stringResource(R.string.channel_sounding),
-            )
-            Text(
-                stringResource(R.string.ranging_session_stopped),
-                style = MaterialTheme.typography.bodyLarge,
+        DropdownOptionRow(
+            title = stringResource(R.string.update_rate),
+            options = UpdateRate.entries,
+            selected = config.updateRate,
+            labelOf = { stringResource(it.toUiString()) },
+            enabled = !isRunning,
+            onSelected = { onClickEvent(ChannelSoundingEvent.SetUpdateRate(it)) },
+        )
+
+        DropdownOptionRow(
+            title = stringResource(R.string.sight_type),
+            options = SightType.entries,
+            selected = config.sightType,
+            labelOf = { stringResource(it.toUiString()) },
+            enabled = !isRunning,
+            onSelected = { onClickEvent(ChannelSoundingEvent.SetSightType(it)) },
+        )
+
+        DropdownOptionRow(
+            title = stringResource(R.string.location_type),
+            options = LocationType.entries,
+            selected = config.locationType,
+            labelOf = { stringResource(it.toUiString()) },
+            enabled = !isRunning,
+            onSelected = { onClickEvent(ChannelSoundingEvent.SetLocationType(it)) },
+        )
+
+        // Antenna mode is only configurable from Android 17 (CINNAMON_BUN) onward.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) {
+            DropdownOptionRow(
+                title = stringResource(R.string.antenna_mode),
+                options = AntennaMode.entries,
+                selected = config.antennaMode,
+                labelOf = { stringResource(it.toUiString()) },
+                enabled = !isRunning,
+                onSelected = { onClickEvent(ChannelSoundingEvent.SetAntennaMode(it)) },
             )
         }
 
-        if (isRestartingSession) {
-            Button(onClick = { /* No action */ }) {
-                Text(text = stringResource(id = R.string.ranging_session_reconnecting))
-            }
-        } else {
-            Button(
-                onClick = { onClickEvent(ChannelSoundingEvent.RestartRangingSession) },
-            ) {
-                Text(text = stringResource(id = R.string.action_reconnect))
-            }
-        }
-    }
-}
-
-@Composable
-private fun SessionError(
-    reason: SessionCloseReasonProvider,
-    isRestartingSession: Boolean,
-    onClickEvent: (ChannelSoundingEvent) -> Unit,
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        ScreenSection(
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            SectionTitle(
-                icon = Icons.Default.SocialDistance,
-                title = stringResource(R.string.channel_sounding),
-                tint = MaterialTheme.colorScheme.error,
+            Text(
+                stringResource(R.string.sensor_fusion),
+                style = MaterialTheme.typography.bodyMedium,
             )
-            Image(
-                imageVector = Icons.Rounded.Warning,
+            Switch(
+                checked = config.sensorFusionEnabled,
+                enabled = !isRunning,
+                onCheckedChange = { onClickEvent(ChannelSoundingEvent.SetSensorFusion(it)) },
+            )
+        }
+
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = {
+                onClickEvent(
+                    if (isRunning) ChannelSoundingEvent.StopRanging
+                    else ChannelSoundingEvent.StartRanging
+                )
+            },
+        ) {
+            Icon(
+                imageVector = if (isRunning) Icons.Default.Stop else Icons.Default.PlayArrow,
                 contentDescription = null,
-                modifier = Modifier.size(72.dp),
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
             )
+            Spacer(Modifier.width(8.dp))
             Text(
-                text = stringResource(reason.toUiString()),
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center,
+                text = stringResource(
+                    if (isRunning) R.string.action_stop else R.string.action_start
+                )
             )
         }
-
-        if (isRestartingSession && reason == RangingSessionFailedReason.LOCAL_REQUEST) {
-            Button(onClick = { /* No action */ }) {
-                Text(text = stringResource(id = R.string.ranging_session_reconnecting))
-            }
-        } else if (
-            reason != SessionClosedReason.TOO_OLD &&
-            reason != SessionClosedReason.NOT_SUPPORTED &&
-            reason != SessionClosedReason.RANGING_NOT_AVAILABLE
-        ) {
-            Button(
-                onClick = { onClickEvent(ChannelSoundingEvent.RestartRangingSession) },
-            ) {
-                Text(text = stringResource(id = R.string.action_reconnect))
-            }
-        }
     }
 }
 
 @Composable
-private fun RangingContent(
-    updateRate: UpdateRate,
-    rangingData: CsRangingData,
-    previousMeasurements: List<Float> = emptyList(),
-    onClickEvent: (ChannelSoundingEvent) -> Unit,
+private fun <T> DropdownOptionRow(
+    title: String,
+    options: List<T>,
+    selected: T,
+    labelOf: @Composable (T) -> String,
+    enabled: Boolean,
+    onSelected: (T) -> Unit,
 ) {
-    val distanceMeasurement = rangingData.distance?.measurement
-    val confidence = rangingData.distance?.confidenceLevel?.value
-    val rssi = rangingData.rssi
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+    var expanded by remember { mutableStateOf(false) }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        distanceMeasurement?.let { measurement ->
-            DistanceDashboard(measurement)
+        Text(text = title, style = MaterialTheme.typography.bodyMedium)
+        Box {
+            val contentColor =
+                if (enabled) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurfaceVariant
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(contentColor.copy(alpha = 0.1f))
+                    .clickable(enabled = enabled) { expanded = true }
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+            ) {
+                Text(
+                    text = labelOf(selected),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = contentColor,
+                )
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = null,
+                    tint = contentColor,
+                )
+            }
+            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                options.forEach { option ->
+                    DropdownMenuItem(
+                        text = { Text(labelOf(option)) },
+                        onClick = {
+                            onSelected(option)
+                            expanded = false
+                        },
+                        trailingIcon = {
+                            if (option == selected) {
+                                Icon(Icons.Default.Check, contentDescription = null)
+                            }
+                        },
+                    )
+                }
+            }
         }
-        DetailsCard(
-            updateRate = updateRate,
-            rangingTechnology = rangingData.technology.value,
-            confidenceLevel = confidence,
-            rssi = rssi,
-            onUpdateRateSelected = { onClickEvent(ChannelSoundingEvent.RangingUpdateRate(it)) }
-        )
-        RecentMeasurementsChart(previousMeasurements)
     }
 }
 
 @Composable
-private fun DistanceDashboard(measurement: Double) {
+private fun LiveReadoutsCard(rangingData: CsRangingData) {
+    ScreenSection {
+        SectionTitle(
+            icon = Icons.Default.Info,
+            title = stringResource(R.string.ranging_measurement),
+        )
+        DistanceDashboard(rangingData.distance?.measurement)
+        rangingData.distanceStdDevMeters?.let {
+            LabeledRow(
+                label = stringResource(R.string.standard_deviation),
+                value = stringResource(R.string.ranging_distance_m, it.toFloat()),
+            )
+        }
+        rangingData.delaySpreadMeters?.let {
+            LabeledRow(
+                label = stringResource(R.string.delay_spread),
+                value = stringResource(R.string.ranging_distance_m, it.toFloat()),
+            )
+        }
+        rangingData.velocityMetersPerSec?.let {
+            LabeledRow(
+                label = stringResource(R.string.velocity),
+                value = stringResource(R.string.ranging_velocity_mps, it.toFloat()),
+            )
+        }
+        rangingData.detectedAttackLevelPercent?.let {
+            LabeledRow(
+                label = stringResource(R.string.detected_attack_level),
+                value = stringArrayResource(R.array.ranging_attack_level).getOrElse(it) { stringResource(R.string.ranging_attack_level_unknown) },
+            )
+        }
+        rangingData.remoteTxPowerDbm?.let {
+            LabeledRow(
+                label = stringResource(R.string.remote_power_level),
+                value = stringResource(R.string.ranging_rssi_dbm, it),
+            )
+        }
+        rangingData.rssi?.let {
+            LabeledRow(
+                label = stringResource(R.string.rssi_label),
+                value = stringResource(R.string.ranging_rssi_dbm, it),
+            )
+        }
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                stringResource(R.string.signal_strength),
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            SignalStrengthBar(rangingData.distance?.confidenceLevel?.value)
+        }
+    }
+}
+
+@Composable
+private fun DistanceDashboard(measurement: Double?) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
         // get measurement in string with 2 decimal places
-        if (measurement < 0.01) {
+        if (measurement == null || measurement < 0.01) {
             AnimatedThreeDots(
-                modifier = Modifier
-                    .height(58.dp),
+                modifier = Modifier.height(58.dp),
                 dotSize = 16.dp,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -295,117 +433,103 @@ private fun DistanceDashboard(measurement: Double) {
                 modifier = Modifier.height(58.dp),
             )
         }
-        Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+@Composable
+private fun LabeledRow(
+    label: String,
+    extra: String? = null,
+    value: String,
+    valueColor: Color = Color.Unspecified
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(
+            modifier = Modifier.weight(1f),
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            extra?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = stringResource(R.string.current_measurement),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodySmall
+            text = value,
+            style = MaterialTheme.typography.titleSmall,
+            textAlign = TextAlign.End,
+            color = valueColor,
         )
     }
 }
 
 @Composable
-private fun DetailsCard(
-    updateRate: UpdateRate,
-    rangingTechnology: Int,
-    confidenceLevel: Int?,
-    rssi: Int?,
-    onUpdateRateSelected: (UpdateRate) -> Unit,
-) {
-    OutlinedCard(
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(
+private fun technologyLabel(availability: TechnologyAvailability): String =
+    availability.technology?.let { stringResource(it.toUiString()) }
+        ?: stringResource(R.string.ranging_tech_unknown, availability.rawValue)
+
+@Composable
+private fun technologyExtra(availability: TechnologyAvailability): String? =
+    availability.technology?.toUiExtraString()?.let { stringResource(it) }
+
+@Composable
+private fun InlineError(reason: SessionCloseReasonProvider) {
+    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            SectionTitle(
-                icon = Icons.Default.Settings,
-                title = stringResource(R.string.ranging_details),
+            Icon(
+                imageVector = Icons.Rounded.Warning,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
             )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    stringResource(R.string.ranging_technology),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    text = RangingTechnology.from(rangingTechnology)
-                        ?.let { stringResource(it.toUiString()) } ?: "Unknown",
-                    style = MaterialTheme.typography.titleSmall
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    stringResource(R.string.update_rate),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(50))
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(6.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary)
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Text(
-                        stringResource(updateRate.toUiString()),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.Center
-                    )
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                UpdateRateSettings(
-                    selectedItem = updateRate,
-                    onItemSelected = { onUpdateRateSelected(it) }
-                )
-            }
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Row {
-                    Text(
-                        stringResource(R.string.signal_strength),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    rssi?.let { rssi ->
-                        Text(
-                            text = "$rssi dBm",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                SignalStrengthBar(confidenceLevel)
-            }
+            Text(
+                text = stringResource(reason.toUiString()),
+                style = MaterialTheme.typography.bodyMedium,
+            )
         }
     }
 }
 
 @Composable
-private fun RecentMeasurementsChart(
-    previousMeasurements: List<Float>,
-) {
-    OutlinedCard {
+private fun SessionError(reason: SessionCloseReasonProvider) {
+    ScreenSection(horizontalAlignment = Alignment.CenterHorizontally) {
         SectionTitle(
             icon = Icons.Default.SocialDistance,
+            title = stringResource(R.string.channel_sounding),
+            tint = MaterialTheme.colorScheme.error,
+        )
+        Image(
+            imageVector = Icons.Rounded.Warning,
+            contentDescription = null,
+            modifier = Modifier.size(72.dp),
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
+        )
+        Text(
+            text = stringResource(reason.toUiString()),
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Composable
+private fun RecentMeasurementsChart(previousMeasurements: List<Float>) {
+    OutlinedCard {
+        SectionTitle(
+            icon = Icons.AutoMirrored.Filled.ShowChart,
             title = stringResource(R.string.ranging_previous_measurement),
             modifier = Modifier.padding(16.dp)
         )
@@ -419,51 +543,74 @@ private fun RecentMeasurementsChart(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun DistanceDashboard_Preview() {
-    DistanceDashboard(10.0)
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun DistanceDashboardLoading_Preview() {
-    DistanceDashboard(0.0)
-}
+/**
+ * Fatal reasons take over the whole screen because the user cannot recover from them by simply
+ * starting a session with different options.
+ */
+private fun SessionCloseReasonProvider.isFatal(): Boolean = this == SessionClosedReason.TOO_OLD ||
+        this == SessionClosedReason.NOT_SUPPORTED ||
+        this == SessionClosedReason.RANGING_NOT_AVAILABLE ||
+        this == SessionClosedReason.CS_SECURITY_NOT_AVAILABLE
 
 @Preview
 @Composable
-private fun Restarting_Preview() {
-    RestartingSession()
-}
-
-@Preview
-@Composable
-private fun DetailsCard_Preview() {
-    DetailsCard(
-        updateRate = UpdateRate.NORMAL,
-        rangingTechnology = RangingTechnology.BLE_CS.value,
-        confidenceLevel = ConfidenceLevel.CONFIDENCE_HIGH.value,
-        rssi = -50,
-        onUpdateRateSelected = {}
+private fun ConfigCard_Preview() {
+    ConfigCard(
+        config = RangingOptions(),
+        isRunning = false,
+        onClickEvent = {},
     )
 }
 
 @Preview
 @Composable
-private fun SessionClosed_Preview() {
-    SessionClosed(
-        isRestartingSession = false,
-        onClickEvent = {}
+private fun ConfigCardRunning_Preview() {
+    ConfigCard(
+        config = RangingOptions(),
+        isRunning = true,
+        onClickEvent = {},
+    )
+}
+
+@Preview
+@Composable
+private fun CapabilitiesCard_Preview() {
+    var expanded by rememberSaveable { mutableStateOf(true) }
+    CapabilitiesCard(
+        HostCapabilities(
+            technologies = listOf(
+                TechnologyAvailability(RangingTechnology.BLE_CS, 1, CapabilityStatus.ENABLED),
+                TechnologyAvailability(RangingTechnology.UWB, 0, CapabilityStatus.NOT_SUPPORTED),
+                TechnologyAvailability(RangingTechnology.WIFI_NAN_RTT, 0, CapabilityStatus.DISABLED_REGULATORY),
+            ),
+            channelSoundingSupported = true,
+            supportedSecurityLevels = listOf(1),
+        ),
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LiveReadoutsCard_Preview() {
+    LiveReadoutsCard(
+        CsRangingData(
+            technology = RangingTechnology.BLE_CS,
+            timeStamp = 0L,
+            rssi = -50,
+            distance = CSRangingMeasurement(10.0, confidenceLevel = ConfidenceLevel.CONFIDENCE_MEDIUM),
+            distanceStdDevMeters = 2.1,
+            delaySpreadMeters = 0.1,
+            velocityMetersPerSec = 1.1,
+            detectedAttackLevelPercent = 4,
+            remoteTxPowerDbm = -3, // dBm
+        )
     )
 }
 
 @Preview
 @Composable
 private fun SessionError_Preview() {
-    SessionError(
-        reason = SessionClosedReason.NOT_SUPPORTED,
-        isRestartingSession = false,
-        onClickEvent = {}
-    )
+    SessionError(reason = SessionClosedReason.NOT_SUPPORTED)
 }

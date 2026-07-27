@@ -5,8 +5,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.toolbox.profile.data.ChannelSoundingServiceData
+import no.nordicsemi.android.toolbox.profile.data.HostCapabilities
+import no.nordicsemi.android.toolbox.profile.data.RangingOptions
 import no.nordicsemi.android.toolbox.profile.data.RangingSessionAction
-import no.nordicsemi.android.toolbox.profile.data.UpdateRate
 
 class ChannelSoundingRepository {
     private val _data = MutableStateFlow(ChannelSoundingServiceData())
@@ -16,12 +17,17 @@ class ChannelSoundingRepository {
         _data.update { it.copy(rangingSessionAction = action) }
     }
 
-    fun updateRate(rate: UpdateRate) {
-        _data.update { it.copy(updateRate = rate) }
+    /** Applies a change to the ranging configuration (only meaningful while no session runs). */
+    fun updateConfig(transform: (RangingOptions) -> RangingOptions) {
+        _data.update { it.copy(config = transform(it.config)) }
     }
 
-    fun updateInterval(interval: Int) {
-        _data.update { it.copy(interval = interval) }
+    fun updateCapabilities(capabilities: HostCapabilities) {
+        _data.update { it.copy(capabilities = capabilities) }
+    }
+
+    fun setRunning(running: Boolean) {
+        _data.update { it.copy(isRunning = running) }
     }
 
     fun clear() {
